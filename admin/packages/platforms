@@ -1,0 +1,9 @@
+
+[Global]
+Buildorder=1000
+Version=1
+Lock=asim-platforms
+Description=Description of platforms
+Name=platforms
+Tag=HEAD
+CSN=CSN-platforms-0
