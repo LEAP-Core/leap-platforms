@@ -1,0 +1,7 @@
+
+%name Graphical Front Panel
+%desc Graphical Front Panel
+
+%provides front_panel
+
+%public GraphicalFP.bsv

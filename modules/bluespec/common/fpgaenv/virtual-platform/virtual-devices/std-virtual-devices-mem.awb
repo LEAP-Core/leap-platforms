@@ -1,0 +1,8 @@
+
+%name Standard Virtual Devices with Memory
+%desc Standard Virtual Devices with Memory
+
+%provides virtual_devices
+
+%requires front_panel console memory
+

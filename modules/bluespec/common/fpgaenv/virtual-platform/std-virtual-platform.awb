@@ -1,0 +1,7 @@
+
+%name Standard Virtual Platform
+%desc Standard Virtual Platform
+
+%provides virtual_platform
+
+%requires virtual_devices channelio

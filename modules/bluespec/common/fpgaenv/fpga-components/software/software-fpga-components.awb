@@ -1,0 +1,21 @@
+#/********************************************************************
+# *
+# * Awb module specification
+# *
+# *******************************************************************/
+
+#/*
+# %AWB_START
+#
+# %name Software FPGA Components
+# %desc Software FPGA Components
+#
+# %provides fpga_components
+#
+# %attributes hasim
+#
+# %public BRAM_Bluesim.bsv BRAM1.bsv BRAM2.bsv BRAM3.bsv
+#
+# %AWB_END
+# */
+

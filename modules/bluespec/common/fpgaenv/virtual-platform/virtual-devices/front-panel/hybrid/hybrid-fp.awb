@@ -1,0 +1,8 @@
+
+%name Hybrid Front Panel
+%desc Hybrid Front Panel
+
+%provides front_panel
+
+%sources -t BSV -v PUBLIC HybridFP.bsv
+%sources -t CPP -v PRIVATE hybrid-fp-sw.c

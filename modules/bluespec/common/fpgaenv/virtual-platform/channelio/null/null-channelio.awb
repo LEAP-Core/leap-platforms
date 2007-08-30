@@ -1,0 +1,6 @@
+
+%name Null Channel IO Module
+%desc Null Channel IO Module
+
+%provides channelio
+

@@ -1,0 +1,8 @@
+
+%name Hasim/FAST Virtual Platform
+%desc Hasim/FAST Virtual Platform
+%attributes fast hasim
+
+%provides virtual_platform
+
+%requires virtual_devices channelio fast_channelio

@@ -1,0 +1,58 @@
+
+[Global]
+SaveParameters=0
+Description=Bluespec FPGA Environment for XUP Board
+File=hasim-fpgaenv-xup
+Version=2.1
+Type=HAsim
+Name=Bluespec FPGA Environment for XUP Board
+Class=Asim::Model
+
+[Model]
+DefaultAttributes=bluespec xup
+model=FPGA Environment
+
+[FPGA Environment/Requires]
+virtual_platform=Standard Virtual Platform
+toplevel_wires=XUP TopLevel Wires
+fpga_components=Hardware FPGA Components
+
+[Null Serial Console]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/console/null-serial/null-serial.awb
+Packagehint=hasim
+
+[Standard Virtual Platform]
+File=modules/bluespec/common/fpgaenv/virtual-platform/std-virtual-platform.awb
+Packagehint=hasim
+
+[Standard Virtual Platform/Requires]
+virtual_devices=Standard Virtual Devices
+channelio=Null Channel IO Module
+
+[FPGA Environment]
+File=modules/bluespec/common/fpgaenv/fpga-environment.awb
+Packagehint=hasim
+
+[Standard Virtual Devices]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/std-virtual-devices.awb
+Packagehint=hasim
+
+[Hardware FPGA Components]
+File=modules/bluespec/common/fpgaenv/fpga-components/hardware/hardware-fpga-components.awb
+Packagehint=hasim
+
+[XUP TopLevel Wires]
+File=modules/bluespec/common/fpgaenv/toplevel-wires/xup/xup-toplevel-wires.awb
+Packagehint=hasim
+
+[Standard Virtual Devices/Requires]
+console=Null Serial Console
+front_panel=Physical XUP Front Panel
+
+[Physical XUP Front Panel]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/xup/xup-fp.awb
+Packagehint=hasim
+
+[Null Channel IO Module]
+File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/null/null-channelio.awb
+Packagehint=hasim

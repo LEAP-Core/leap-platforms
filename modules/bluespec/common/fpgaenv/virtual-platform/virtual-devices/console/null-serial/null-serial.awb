@@ -1,0 +1,6 @@
+
+%name Null Serial Console
+%desc Null Serial Console
+
+%provides console
+

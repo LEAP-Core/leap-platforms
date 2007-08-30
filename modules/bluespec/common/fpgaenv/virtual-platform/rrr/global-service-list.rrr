@@ -1,0 +1,2 @@
+ADD_SERVICE(front_panel)
+ADD_SERVICE(memory)

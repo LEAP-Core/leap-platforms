@@ -1,0 +1,61 @@
+
+[Global]
+SaveParameters=0
+Description=Bluespec FPGA Environment for FSB AFU
+File=hasim-fpgaenv-fsb-afu
+Version=2.1
+Type=HAsim
+Name=Bluespec FPGA Environment for FSB AFU
+Class=Asim::Model
+
+[Model]
+DefaultAttributes=bluiespec fsb afu
+model=FPGA Environment
+
+
+[Null Serial Console]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/console/null-serial/null-serial.awb
+Packagehint=hasim
+
+[Standard Virtual Platform]
+File=modules/bluespec/common/fpgaenv/virtual-platform/std-virtual-platform.awb
+Packagehint=hasim
+
+[Standard Virtual Platform/Requires]
+virtual_devices=Standard Virtual Devices
+channelio=Null Channel IO Module
+
+
+[Standard Virtual Devices]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/std-virtual-devices.awb
+Packagehint=hasim
+
+[Hardware FPGA Components]
+File=modules/bluespec/common/fpgaenv/fpga-components/hardware/hardware-fpga-components.awb
+Packagehint=hasim
+
+[Standard Virtual Devices/Requires]
+console=Null Serial Console
+front_panel=Physical FSB AFU Front Panel
+
+[Null Channel IO Module]
+File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/null/null-channelio.awb
+Packagehint=hasim
+
+[FSB AFU TopLevel Wires]
+File=modules/bluespec/common/fpgaenv/toplevel-wires/fsb_afu/fsb-afu-toplevel-wires.awb
+Packagehint=hasim
+
+
+[Physical FSB AFU Front Panel]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/fsb_afu/fsb-afu-fp.awb
+Packagehint=hasim
+
+[FPGA Environment]
+File=modules/bluespec/common/fpgaenv/fpga-environment.awb
+Packagehint=hasim
+
+[FPGA Environment/Requires]
+virtual_platform=Standard Virtual Platform
+toplevel_wires=FSB AFU TopLevel Wires
+fpga_components=Hardware FPGA Components

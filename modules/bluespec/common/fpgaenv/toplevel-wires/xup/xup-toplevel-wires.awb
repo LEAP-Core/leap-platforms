@@ -1,0 +1,20 @@
+#/********************************************************************
+# *
+# * Awb module specification
+# *
+# *******************************************************************/
+
+#/*
+# %AWB_START
+#
+# %name XUP TopLevel Wires
+# %desc XUP TopLevel Wires
+#
+# %provides toplevel_wires
+#
+# %public XUPTopLevelWires.bsv
+# %private xup.ucf xup.ut xup.xst xup.download
+#
+# %AWB_END
+# */
+

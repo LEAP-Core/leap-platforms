@@ -1,0 +1,8 @@
+
+%name Hybrid Memory
+%desc Hybrid Memory
+
+%provides memory
+
+%sources -t BSV -v PUBLIC HybridMemory.bsv
+%sources -t CPP -v PRIVATE hybrid-memory-sw.c
