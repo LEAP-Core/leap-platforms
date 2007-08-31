@@ -282,3 +282,33 @@ implement their functionality.
 This commit only updates the AWB hierarchy to reflect the
 new organization. The directory structure is slightly
 inconsistent, and will be fixed in a future commit.
+----------
+mpellaue    Date: Fri Aug 31 16:43:56 EDT 2007  CSN: CSN-platforms-4
+                  Fri Aug 31 20:43:56 UTC 2007
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ hasim-fpgaenv-null.apm    Locally Modified            3 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/console
+ NullFP.bsv                Locally Modified            3 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-memory.awb         Locally Modified            3 
+ HybridMemory.bsv          Locally Modified            3 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory
+ simulation/               Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/simulation
+ simulation-memory.awb     Locally Added               0 
+ BRAMMemory.bsv            Locally Added               0 
+
+
+Added support for "Simulation only" memory virtual device which uses BRAM and
+never issues invalidates. This can serve as a template for the Hybrid Memory BSV
+side.
+
+Michael P.
+
+

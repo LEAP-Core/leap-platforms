@@ -1,4 +1,5 @@
 import toplevel_wires::*;
+import low_level_platform_interface::*;
 
 interface FrontPanel;
     method Bit#(4)  readSwitches();
@@ -6,7 +7,7 @@ interface FrontPanel;
     method Action   writeLEDs(Bit#(4) data);
 endinterface
 
-module mkFrontPanel#(TopLevelWiresDriver wires) (FrontPanel);
+module mkFrontPanel#(LowLevelPlatformInterface pint) (FrontPanel);
 
     method Bit#(4) readSwitches();
         return 0;
