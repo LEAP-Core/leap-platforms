@@ -12,7 +12,7 @@
 #
 # %provides fpgaenv
 #
-# %requires virtual_platform fpga_components toplevel_wires
+# %requires virtual_platform fpga_components
 #
 # %attributes hasim
 #

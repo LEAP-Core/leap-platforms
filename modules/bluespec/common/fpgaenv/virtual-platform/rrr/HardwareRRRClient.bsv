@@ -1,5 +1,4 @@
 import channelio::*;
-import toplevel_wires::*;
 
 interface RPCClient;
     method Action                   sendReq(Bit#(32) serviceID, Bit#(32) param0, Bit#(32) param1, Bit#(32) param2);
@@ -16,9 +15,8 @@ endinterface
 // 04   : waiting for response
 // 05   : response ready, waiting to be read
 
-module mkRPCClient(RPCClient);
+module mkRPCClient#(ChannelIO channel) (RPCClient);
 
-    ChannelIO       channel         <- mkChannelIO();
     Reg#(Bit#(4))   state           <- mkReg(0);
     Reg#(Bit#(32))  param0Buffer    <- mkReg(0);
     Reg#(Bit#(32))  param1Buffer    <- mkReg(0);

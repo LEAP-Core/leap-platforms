@@ -1,0 +1,6 @@
+%name Null RRR Module
+%desc Null RRR Module
+
+%provides rrr
+
+%sources -t BSV -v PUBLIC NullRRR.bsv

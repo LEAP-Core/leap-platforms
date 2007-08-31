@@ -4,4 +4,4 @@
 
 %provides virtual_platform
 
-%requires virtual_devices channelio
+%requires virtual_devices low_level_platform_interface

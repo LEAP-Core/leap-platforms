@@ -219,3 +219,66 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform
  fast-virtual-platform.awb Locally Added               0 
 
 Moved fpga environment from hasim to here.
+
+----------
+aparasha    Date: Fri Aug 31 14:15:28 EDT 2007  CSN: CSN-platforms-3
+                  Fri Aug 31 18:15:28 UTC 2007
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ hasim-fpgaenv-fsb-afu.apm Locally Modified            2 
+ hasim-fpgaenv-null.apm    Locally Modified            2 
+ hasim-fpgaenv-software.apm Locally Modified            2 
+ hasim-fpgaenv-rrr-sim.apm Locally Modified            2 
+ hasim-fpgaenv-xup.apm     Locally Modified            2 
+ hasim-fpgaenv-fsb-dme.apm Locally Modified            2 
+
+Directory modules/bluespec/common/fpgaenv
+ fpga-environment.awb      Locally Modified            2 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/null
+ null-channelio.awb        Locally Modified            2 
+ NullChannelIO.bsv         Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform
+ rrr-virtual-platform.awb  Locally Removed             2 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr
+ null-rrr.awb              Locally Added               0 
+ NullRRR.bsv               Locally Added               0 
+ HardwareRRRClient.bsv     Locally Modified            2 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid
+ HybridFP.bsv              Locally Modified            2 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/graphical
+ GraphicalFP.bsv           Locally Modified            2 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/xup
+ XUPFP.bsv                 Locally Modified            2 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ HybridMemory.bsv          Locally Modified            2 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform
+ low-level-platform-interface/ Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface
+ LowLevelPlatformInterface.bsv Locally Added               0 
+ low-level-platform-interface.awb Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform
+ std-virtual-platform.awb  Locally Modified            2 
+
+
+FPGAenv Reorganization: A new module called
+low-level-platform-interface (LLPI) now encapsulates RRR,
+Channel I/O, and Top Level Wires. The higher level HAsim
+Platform Interface instantiates the LLPI and passes it down
+to all the virtual devices, which can choose to use any
+of the three mechanisms (RRR, ChannelIO, TopLevelWires) to
+implement their functionality.
+
+This commit only updates the AWB hierarchy to reflect the
+new organization. The directory structure is slightly
+inconsistent, and will be fixed in a future commit.

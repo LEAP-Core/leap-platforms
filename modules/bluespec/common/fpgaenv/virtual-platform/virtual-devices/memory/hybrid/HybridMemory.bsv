@@ -1,8 +1,7 @@
-import rrr::*;
-import toplevel_wires::*;
+import low_level_platform_interface::*;
 
 interface Memory;
 endinterface
 
-module mkMemory#(RPCClient rpcClient, TopLevelWiresDriver wires) (Memory);
+module mkMemory#(LowLevelPlatformInterface llpint) (Memory);
 endmodule

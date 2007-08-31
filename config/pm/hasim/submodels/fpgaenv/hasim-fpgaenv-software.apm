@@ -14,38 +14,35 @@ model=FPGA Environment
 
 [Graphical Front Panel]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/graphical/graphical-fp.awb
-Packagehint=hasim
-
+Packagehint=platforms
 
 [Null Serial Console]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/console/null-serial/null-serial.awb
-Packagehint=hasim
+Packagehint=platforms
 
 [Standard Virtual Platform]
 File=modules/bluespec/common/fpgaenv/virtual-platform/std-virtual-platform.awb
-Packagehint=hasim
-
+Packagehint=platforms
 
 [Standard Virtual Platform/Requires]
 virtual_devices=Standard Virtual Devices
-channelio=Channel IO to/from a UNIX Process
-
+low_level_platform_interface=Low Level Platform Interface
 
 [Channel IO to/from a UNIX Process]
 File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/unix/unix-channelio.awb
-Packagehint=hasim
+Packagehint=platforms
 
 [Software FPGA Components]
 File=modules/bluespec/common/fpgaenv/fpga-components/software/software-fpga-components.awb
-Packagehint=hasim
+Packagehint=platforms
 
 [Null TopLevel Wires]
 File=modules/bluespec/common/fpgaenv/toplevel-wires/null/null-toplevel-wires.awb
-Packagehint=hasim
+Packagehint=platforms
 
 [Standard Virtual Devices]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/std-virtual-devices.awb
-Packagehint=hasim
+Packagehint=platforms
 
 [Standard Virtual Devices/Requires]
 console=Null Serial Console
@@ -53,9 +50,21 @@ front_panel=Graphical Front Panel
 
 [FPGA Environment]
 File=modules/bluespec/common/fpgaenv/fpga-environment.awb
-Packagehint=hasim
+Packagehint=platforms
 
 [FPGA Environment/Requires]
 virtual_platform=Standard Virtual Platform
-toplevel_wires=Null TopLevel Wires
 fpga_components=Software FPGA Components
+
+[Null RRR Module]
+File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/null-rrr.awb
+Packagehint=platforms
+
+[Low Level Platform Interface/Requires]
+rrr=Null RRR Module
+channelio=Channel IO to/from a UNIX Process
+toplevel_wires=Null TopLevel Wires
+
+[Low Level Platform Interface]
+File=modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface/low-level-platform-interface.awb
+Packagehint=platforms

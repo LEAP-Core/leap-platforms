@@ -1,5 +1,5 @@
+import low_level_platform_interface::*;
 import channelio::*;
-import toplevel_wires::*;
 
 interface FrontPanel;
     method Bit#(4)  readSwitches();
@@ -7,15 +7,10 @@ interface FrontPanel;
     method Action   writeLEDs(Bit#(4) data);
 endinterface
 
-module mkFrontPanel#(TopLevelWiresDriver wires) (FrontPanel);
+module mkFrontPanel#(LowLevelPlatformInterface llpi) (FrontPanel);
     // maintain input and output caches
     Reg#(Bit#(32))  inputCache  <- mkReg(0);
     Reg#(Bit#(32))  outputCache <- mkReg(0);
-
-    // we assume that the model has been properly configured
-    // and we have a channel io to a UNIX process
-    // open a channel to a hasim-front-panel process (ID = 0)
-    ChannelIO       channel     <- mkChannelIO();
 
     // we want readSwitches() to be a pure value method (to provide
     // the illusion of a wire coming from a physical switch.
@@ -23,14 +18,14 @@ module mkFrontPanel#(TopLevelWiresDriver wires) (FrontPanel);
     // internal cache in this method; we do this in a separate
     // rule
     rule updateInputCache (True);
-        Maybe#(Bit#(32)) data <- channel.read();
+        Maybe#(Bit#(32)) data <- llpi.channelIO.read();
         inputCache <= fromMaybe(inputCache, data);
     endrule
 
     // check if our UNIX channel was forcibly closed, and if so,
     // terminate simulation
     rule detectTermination (True);
-        Bool wire_out <- channel.isDestroyed();
+        Bool wire_out <- llpi.channelIO.isDestroyed();
         if (wire_out == True)
             $finish(0);
     endrule
@@ -52,7 +47,7 @@ module mkFrontPanel#(TopLevelWiresDriver wires) (FrontPanel);
         if (ext != outputCache)
         begin
             outputCache <= ext;
-            channel.write(ext);
+            llpi.channelIO.write(ext);
         end
     endmethod
 

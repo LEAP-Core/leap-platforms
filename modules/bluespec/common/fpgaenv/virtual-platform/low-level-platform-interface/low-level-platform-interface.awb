@@ -1,0 +1,8 @@
+%name Low Level Platform Interface
+%desc Low Level Platform Interface
+
+%provides low_level_platform_interface
+
+%requires rrr channelio toplevel_wires
+
+%sources -t BSV -v PUBLIC LowLevelPlatformInterface.bsv

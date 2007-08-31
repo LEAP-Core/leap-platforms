@@ -12,61 +12,64 @@ Class=Asim::Model
 DefaultAttributes=bluespec
 model=FPGA Environment
 
-
-
 [Software FPGA Components]
 File=modules/bluespec/common/fpgaenv/fpga-components/software/software-fpga-components.awb
-Packagehint=hasim
-
-[Null TopLevel Wires]
-File=modules/bluespec/common/fpgaenv/toplevel-wires/null/null-toplevel-wires.awb
-Packagehint=hasim
-
-[RRR-Based Virtual Platform]
-File=modules/bluespec/common/fpgaenv/virtual-platform/rrr-virtual-platform.awb
-Packagehint=hasim
-
-[RRR-Based Virtual Platform/Requires]
-virtual_devices=Standard Virtual Devices with Memory
-channelio=ChannelIO Module for Simulation
-rrr=RRR Clients and Servers
-
-[Hybrid Front Panel]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid/hybrid-fp.awb
-Packagehint=hasim
-
-[Null Serial Console]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/console/null-serial/null-serial.awb
-Packagehint=hasim
-
-[Hybrid Memory]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid/hybrid-memory.awb
-Packagehint=hasim
-
-
-
-[Standard Virtual Devices with Memory/Requires]
-memory=Hybrid Memory
-console=Null Serial Console
-front_panel=Hybrid Front Panel
-
-[Standard Virtual Devices with Memory]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/std-virtual-devices-mem.awb
-Packagehint=hasim
-
-[ChannelIO Module for Simulation]
-File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/sim/sim-channelio.awb
-Packagehint=hasim
+Packagehint=platforms
 
 [FPGA Environment]
 File=modules/bluespec/common/fpgaenv/fpga-environment.awb
-Packagehint=hasim
+Packagehint=platforms
+
+[FPGA Environment/Requires]
+virtual_platform=Standard Virtual Platform
+fpga_components=Software FPGA Components
+
+[Standard Virtual Platform]
+File=modules/bluespec/common/fpgaenv/virtual-platform/std-virtual-platform.awb
+Packagehint=platforms
+
+[Standard Virtual Platform/Requires]
+virtual_devices=Standard Virtual Devices with Memory
+low_level_platform_interface=Low Level Platform Interface
+
+[Standard Virtual Devices with Memory]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/std-virtual-devices-mem.awb
+Packagehint=platforms
+
+[Standard Virtual Devices with Memory/Requires]
+front_panel=Hybrid Front Panel
+console=Null Serial Console
+memory=Hybrid Memory
+
+[Hybrid Front Panel]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid/hybrid-fp.awb
+Packagehint=platforms
+
+[Null Serial Console]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/console/null-serial/null-serial.awb
+Packagehint=platforms
+
+[Hybrid Memory]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid/hybrid-memory.awb
+Packagehint=platforms
+
+[Low Level Platform Interface]
+File=modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface/low-level-platform-interface.awb
+Packagehint=platforms
+
+[Low Level Platform Interface/Requires]
+channelio=ChannelIO Module for Simulation
+rrr=RRR Clients and Servers
+toplevel_wires=Null TopLevel Wires
+
+[ChannelIO Module for Simulation]
+File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/sim/sim-channelio.awb
+Packagehint=platforms
 
 [RRR Clients and Servers]
 File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/rrr.awb
-Packagehint=hasim
+Packagehint=platforms
 
-[FPGA Environment/Requires]
-virtual_platform=RRR-Based Virtual Platform
-toplevel_wires=Null TopLevel Wires
-fpga_components=Software FPGA Components
+[Null TopLevel Wires]
+File=modules/bluespec/common/fpgaenv/toplevel-wires/null/null-toplevel-wires.awb
+Packagehint=platforms

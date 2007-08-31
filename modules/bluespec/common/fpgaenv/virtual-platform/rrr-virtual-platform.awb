@@ -1,7 +1,0 @@
-
-%name RRR-Based Virtual Platform
-%desc RRR-Based Virtual Platform
-
-%provides virtual_platform
-
-%requires virtual_devices channelio rrr

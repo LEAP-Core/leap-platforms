@@ -4,3 +4,4 @@
 
 %provides channelio
 
+%sources -t BSV -v PUBLIC NullChannelIO.bsv

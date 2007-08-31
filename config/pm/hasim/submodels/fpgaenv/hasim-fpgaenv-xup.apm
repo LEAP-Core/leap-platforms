@@ -14,36 +14,35 @@ model=FPGA Environment
 
 [FPGA Environment/Requires]
 virtual_platform=Standard Virtual Platform
-toplevel_wires=XUP TopLevel Wires
 fpga_components=Hardware FPGA Components
 
 [Null Serial Console]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/console/null-serial/null-serial.awb
-Packagehint=hasim
+Packagehint=platforms
 
 [Standard Virtual Platform]
 File=modules/bluespec/common/fpgaenv/virtual-platform/std-virtual-platform.awb
-Packagehint=hasim
+Packagehint=platforms
 
 [Standard Virtual Platform/Requires]
 virtual_devices=Standard Virtual Devices
-channelio=Null Channel IO Module
+low_level_platform_interface=Low Level Platform Interface
 
 [FPGA Environment]
 File=modules/bluespec/common/fpgaenv/fpga-environment.awb
-Packagehint=hasim
+Packagehint=platforms
 
 [Standard Virtual Devices]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/std-virtual-devices.awb
-Packagehint=hasim
+Packagehint=platforms
 
 [Hardware FPGA Components]
 File=modules/bluespec/common/fpgaenv/fpga-components/hardware/hardware-fpga-components.awb
-Packagehint=hasim
+Packagehint=platforms
 
 [XUP TopLevel Wires]
 File=modules/bluespec/common/fpgaenv/toplevel-wires/xup/xup-toplevel-wires.awb
-Packagehint=hasim
+Packagehint=platforms
 
 [Standard Virtual Devices/Requires]
 console=Null Serial Console
@@ -51,8 +50,21 @@ front_panel=Physical XUP Front Panel
 
 [Physical XUP Front Panel]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/xup/xup-fp.awb
-Packagehint=hasim
+Packagehint=platforms
 
 [Null Channel IO Module]
 File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/null/null-channelio.awb
-Packagehint=hasim
+Packagehint=platforms
+
+[Null RRR Module]
+File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/null-rrr.awb
+Packagehint=platforms
+
+[Low Level Platform Interface/Requires]
+rrr=Null RRR Module
+channelio=Null Channel IO Module
+toplevel_wires=XUP TopLevel Wires
+
+[Low Level Platform Interface]
+File=modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface/low-level-platform-interface.awb
+Packagehint=platforms

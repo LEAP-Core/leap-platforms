@@ -1,5 +1,5 @@
+import low_level_platform_interface::*;
 import rrr::*;
-import toplevel_wires::*;
 
 interface FrontPanel;
     method Bit#(4)  readSwitches();
@@ -7,7 +7,7 @@ interface FrontPanel;
     method Action   writeLEDs(Bit#(4) data);
 endinterface
 
-module mkFrontPanel#(RPCClient rpcClient, TopLevelWiresDriver wires) (FrontPanel);
+module mkFrontPanel#(LowLevelPlatformInterface llpint) (FrontPanel);
     // maintain input and output caches
     Reg#(Bit#(32))  inputCache  <- mkReg(0);
     Reg#(Bit#(32))  outputCache <- mkReg(0);
@@ -19,14 +19,14 @@ module mkFrontPanel#(RPCClient rpcClient, TopLevelWiresDriver wires) (FrontPanel
         Bit#(32) param0    = outputCache;
         Bit#(32) param1    = 0;
         Bit#(32) param2    = 0;
-        rpcClient.sendReq(serviceID, param0, param1, param2);
+        llpint.rpcClient.sendReq(serviceID, param0, param1, param2);
     endrule
 
     // read RPC response and update input cache... note that
     // we do not need any internal state machine to determine
     // when we can perform a valid read
     rule readRPCResponse (True);
-        Bit#(32) data <- rpcClient.getResp();
+        Bit#(32) data <- llpint.rpcClient.getResp();
         inputCache <= data;
     endrule
 
