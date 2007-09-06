@@ -1,0 +1,5 @@
+install_drivers script - Revision 1035
+1033 - 	Cd to the install_drivers directory.
+1035 - 	Add check for write permission to the install_drivers directory.
+     -  Updated windrvr6 to version 9.00.
+	 -  Used modprobe in loading the xpc4drvr 2.6 driver.

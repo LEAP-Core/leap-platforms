@@ -1,0 +1,16 @@
+This directory holds drivers and programs required to use the Xilinx
+USB Platform Cable on Linux.  There are packages here collected from
+different places:
+
+1.  windriver is a modified version of Xilinx's USB driver
+    (ftp://ftp.xilinx.com/pub/utilities/fpga/install_drivers.tar.gz).
+    The base version of the driver as shipped from Xilinx was checked in
+    first.  Modifications to get it running on SuSE 9.3 were checked in
+    later.
+
+2.  fxload is from http://linux-hotplug.sourceforge.net.  It is used
+    to upload firmware to the microcontroller on the USB cable.
+
+3.  We do not currently use usb-driver.  It is stored here in case we need
+    it later.  usb-driver emulates the behavior of windriver, but in
+    user space.  It communicates with the raw USB device.

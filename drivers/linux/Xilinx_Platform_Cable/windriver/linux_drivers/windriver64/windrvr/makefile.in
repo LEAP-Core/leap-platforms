@@ -1,0 +1,62 @@
+# Copyright (c) 2007 Jungo Ltd. http://www.jungo.com
+# Template file for configure script
+
+CSRCS = @CSRCS@ 
+OD = @OD@
+MODDIR = @MODDIR@
+LINK_OBJ = @LINK_OBJ@
+MODULE_NAME = @MODULE_NAME@
+TARGET = @TARGET@
+CFLAGS = @CFLAGS@
+LDFLAGS = @LDFLAGS@
+ROOT_DIR = @ROOT_DIR@
+SHARED_OBJECT = @SHARED_OBJECT@
+
+ifeq ($(DEBUG),1)
+	CFLAGS += -g -DDEBUG
+endif
+
+COBJS = $(patsubst %.c,$(OD)/%.o,$(CSRCS))
+
+all: @ALL_DEPS@
+
+$(OD):
+	@OD_RULE@ 
+
+$(COBJS): $(OD)/%.o : %.c 
+	@COBJS_RULE@
+
+$(TARGET): @TARGET_DEPS@
+	@TARGET_RULE@
+
+__temp_link:
+	@TEMP_RULE@
+
+modpost:
+	@MODPOST_RULE@
+	@MODPOST_CC_RULE@
+	
+clean:
+	@CLEAN_RULE@
+
+install: all
+	./setup_inst_dir
+	@LINK_LIB@
+	-@ echo
+	-@ echo "Installing the WinDriver kernel module"
+	-@ echo "--------------------"
+	-@ echo "WinDriver's kernel module ($(MODULE_NAME).o / $(MODULE_NAME).ko) can be reloaded upon every boot."
+	-@ echo "The kernel module will be loaded after running the wdreg script upon boot"
+	-@ echo "in the following manner:"
+	-@ echo "    <path to the wdreg script>/wdreg $(MODULE_NAME) auto"
+	-@ echo "Alternatively you can manually load the kernel module as explained"
+	-@ echo "in WinDriver's User's Manual."
+	-@ echo "It is recommended to add this call in your rc.local file."
+	-@ echo "NOTE: Due to security reasons, by default, /dev/$(MODULE_NAME) is created with"
+	-@ echo "permissions only for the root user. To enable other user access,"
+	-@ echo @DEV_CHANGE_PERMISSION_MSG@ 
+	
+	-@ echo 
+	mkdir -p $(MODDIR)
+	cp $(TARGET) $(MODDIR)
+	./wdreg $(MODULE_NAME) @USE_UDEV@ 

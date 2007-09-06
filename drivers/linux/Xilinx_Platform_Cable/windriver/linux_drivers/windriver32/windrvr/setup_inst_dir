@@ -1,0 +1,19 @@
+#!/bin/sh
+
+ROOTDIR=`cd .. && pwd`
+PRODUCT=`basename $ROOTDIR`
+
+if [ KernelDriver = $PRODUCT ]
+then
+    touch /etc/.kerneldriver.rc
+    echo $ROOTDIR"/" > /etc/.kerneldriver.rc
+else
+    if [ GoHotSwap = $PRODUCT ]
+    then
+	touch /etc/.gohotswap.rc
+	echo $ROOTDIR"/" > /etc/.gohotswap.rc
+    fi
+    touch /etc/.windriver.rc
+    echo $ROOTDIR"/" > /etc/.windriver.rc
+fi
+

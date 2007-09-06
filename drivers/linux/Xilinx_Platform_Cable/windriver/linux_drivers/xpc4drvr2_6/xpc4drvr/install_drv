@@ -1,0 +1,44 @@
+#!/bin/sh
+# Copyright (c) 2005 Xilinx, Inc.  All rights reserved. 
+# 
+# Xilinx, Inc. 
+# XILINX IS PROVIDING THIS DESIGN, CODE, OR INFORMATION "AS IS" AS A 
+# COURTESY TO YOU.  BY PROVIDING THIS DESIGN, CODE, OR INFORMATION AS 
+# ONE POSSIBLE   IMPLEMENTATION OF THIS FEATURE, APPLICATION OR 
+# STANDARD, XILINX IS MAKING NO REPRESENTATION THAT THIS IMPLEMENTATION 
+# IS FREE FROM ANY CLAIMS OF INFRINGEMENT, AND YOU ARE RESPONSIBLE 
+# FOR OBTAINING ANY RIGHTS YOU MAY REQUIRE FOR YOUR IMPLEMENTATION. 
+# XILINX EXPRESSLY DISCLAIMS ANY WARRANTY WHATSOEVER WITH RESPECT TO 
+# THE ADEQUACY OF THE IMPLEMENTATION, INCLUDING BUT NOT LIMITED TO 
+# ANY WARRANTIES OR REPRESENTATIONS THAT THIS IMPLEMENTATION IS FREE 
+# FROM CLAIMS OF INFRINGEMENT, IMPLIED WARRANTIES OF MERCHANTABILITY 
+# AND FITNESS FOR A PARTICULAR PURPOSE. 
+#
+module="xpc4drvr"
+device="xpc4_"
+mode="666"
+
+install_dir=/lib/modules/`uname -r`/kernel/drivers/misc
+echo Loading $install_dir/$module.ko
+
+# Unload driver
+/sbin/rmmod $module
+
+# Load driver
+#/sbin/insmod $install_dir/$module.ko 
+/sbin/depmod
+/sbin/modprobe $module
+
+major=`cat /proc/devices | awk "\\$2==\"$module\" {print \\$1}"`
+
+# Remove stale nodes and replace them, then give gid and perms
+
+rm -f /dev/${device}[0-3]
+mknod /dev/${device}0 c $major 0
+mknod /dev/${device}1 c $major 1
+mknod /dev/${device}2 c $major 2
+mknod /dev/${device}3 c $major 3
+ln -sf ${device}0 /dev/${device}
+chmod $mode  /dev/${device}[0-3]
+
+# End of file.

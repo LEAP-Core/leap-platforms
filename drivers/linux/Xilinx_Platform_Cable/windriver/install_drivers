@@ -1,0 +1,492 @@
+#!/bin/sh
+# Copyright (c) 2005 Xilinx, Inc.  All rights reserved. 
+# Xilinx, Inc. 
+# XILINX IS PROVIDING THIS DESIGN, CODE, OR INFORMATION "AS IS" AS A 
+# COURTESY TO YOU.  BY PROVIDING THIS DESIGN, CODE, OR INFORMATION AS 
+# ONE POSSIBLE   IMPLEMENTATION OF THIS FEATURE, APPLICATION OR 
+# STANDARD, XILINX IS MAKING NO REPRESENTATION THAT THIS IMPLEMENTATION 
+# IS FREE FROM ANY CLAIMS OF INFRINGEMENT, AND YOU ARE RESPONSIBLE 
+# FOR OBTAINING ANY RIGHTS YOU MAY REQUIRE FOR YOUR IMPLEMENTATION. 
+# XILINX EXPRESSLY DISCLAIMS ANY WARRANTY WHATSOEVER WITH RESPECT TO 
+# THE ADEQUACY OF THE IMPLEMENTATION, INCLUDING BUT NOT LIMITED TO 
+# ANY WARRANTIES OR REPRESENTATIONS THAT THIS IMPLEMENTATION IS FREE 
+# FROM CLAIMS OF INFRINGEMENT, IMPLIED WARRANTIES OF MERCHANTABILITY 
+# AND FITNESS FOR A PARTICULAR PURPOSE. 
+#
+
+TP_INSTALLER_VERSION="1035"
+TP_WINDRVR_VERSION="900"
+TP_XPC4DRVR_VERSION="1041"
+echo "--Driver versions in this package: windrvr=$TP_WINDRVR_VERSION, xpc4drvr=$TP_XPC4DRVR_VERSION"
+echo "--Script name = "$0
+TP_CURRENT_WORKING_DIR=`pwd`
+echo "--Current working dir = "$TP_CURRENT_WORKING_DIR
+TP_SCRIPT_DIR=`dirname $0`
+echo "--Script location = "`pwd`
+if [ -w $TP_SCRIPT_DIR ]
+then
+	cd $TP_SCRIPT_DIR
+else
+	echo "--User does not have write permission to the driver directory."
+	echo "--Please untar the install_drivers.tar.gz file to a local drive."
+	exit 11
+fi;
+
+tp_is_root ()
+{
+	if [ `id -u` = "0" ]
+	then
+		return 1
+	else
+		return 0
+	fi;
+}
+
+is_suse_9 ()
+{
+	TP_IS_SUSE=`grep -c -i "SUSE" /proc/version`
+	if [ $TP_IS_SUSE = "1" ]
+	then
+		SUSE_9=`cat /etc/SuSE-release | grep -c "VERSION = 9"` 
+		if [ $SUSE_9 = "1" ]
+		then
+			return 1
+		else
+			return 0
+		fi;
+	else
+		return 0
+	fi;
+}
+
+tp_is_module_running ()
+{
+	TP_IS_RUNNING=`grep -c "^$1" /proc/modules`
+	if [ $TP_IS_RUNNING = "1" ]
+	then
+		echo "--Module $1 is running."
+		return 1
+	else
+		echo "--Module $1 is not running."
+		return 0
+	fi;
+}
+
+file_exists () 
+{
+	if [ -f $1 ]
+	then
+		echo "--File $1 exists."
+		return 1
+	else
+		echo "--File $1 does not exist."
+		return 0
+	fi;
+}
+
+# arg1 = file, arg2 = version string
+get_driver_file_version ()
+{
+	TP_DRIVER_VER="0000"
+	file_exists $1
+	if [ $? = "1" ]
+	then 
+		TP_VER_STR_LINE=`strings $1 | grep -i "^$2"`
+		#TP_STRING_LENGTH=${#2}  #test
+		TP_STRING_LENGTH=${#STR_VER_LINE}  #test
+		if [ ${#TP_VER_STR_LINE} = 0 ]
+		then
+			echo "--File $1 does not contain any version info."
+		else
+			#TP_FILE_STRING=`expr substr "$TP_VER_STR_LINE" 1 ${#2}`
+			TP_FILE_STRING=${TP_VER_STR_LINE:0:${#2}}
+			if [ "$TP_FILE_STRING" = "$2" ]
+			then
+				if [ "$2" = "Xpc4drvr v" ]
+				then
+					#TP_DRIVER_VER=`expr substr "$TP_VER_STR_LINE" 11 4`
+					TP_DRIVER_VER=${TP_VER_STR_LINE:10:4}
+				else
+					#TP_DRIVER_MAJ_VER=`expr substr "$TP_VER_STR_LINE" 12 1`
+					#TP_DRIVER_MIN_VER=`expr substr "$TP_VER_STR_LINE" 14 2`
+					TP_DRIVER_MAJ_VER=${TP_VER_STR_LINE:11:1}
+					TP_DRIVER_MIN_VER=${TP_VER_STR_LINE:13:2}
+					TP_DRIVER_VER=$TP_DRIVER_MAJ_VER$TP_DRIVER_MIN_VER
+				fi;
+			fi;
+		fi;
+		echo "--File $1 version = "$TP_DRIVER_VER
+		return 1
+	else
+		return 0
+	fi;
+}
+
+get_hex_file_version ()
+{
+	TP_DRIVER_VER="0000"
+	file_exists $1
+	if [ $? = "1" ]
+	then 
+		TP_VERSION_STRING=`grep ":0219B900" $1`
+		#TP_HEX_VERSION=`expr substr $TP_VERSION_STRING 10 4`
+		TP_HEX_VERSION=${TP_VERSION_STRING:9:4}
+		TP_DRIVER_VER=`printf "%d" 0x$TP_HEX_VERSION` 
+		echo "--File $1 version = "$TP_DRIVER_VER
+		return 1
+	else
+		return 0
+	fi;
+}
+
+modify_boot_file ()
+{
+	TP_BOOT_FILE="/etc/rc.local"
+	TP_IS_SUSE=`grep -c -i "SUSE" /proc/version`
+	if [ $TP_IS_SUSE = "1" ]
+	then
+		TP_BOOT_FILE="/etc/init.d/boot.local"
+	fi;
+	TP_MODIFY_BOOT_FILE="0"
+	TP_RCLOCAL_ENTRY=`grep -c "$TP_DRV_DEST_PATH/$1" $TP_BOOT_FILE`
+	if [ $TP_RCLOCAL_ENTRY = "0" ]
+	then
+		TP_MODIFY_BOOT_FILE="1"
+	fi;
+
+	# check if there is old entry
+	TP_RCLOCAL_ENTRY=`grep -c "/lib/modules/misc/$1" $TP_BOOT_FILE`
+	if [ $TP_RCLOCAL_ENTRY = "0" ]
+	then
+		echo "--No old entry in $TP_BOOT_FILE"
+	else
+		TP_CLEAN_OLD_DRIVERS="1"
+	fi;
+
+	if [ $TP_MODIFY_BOOT_FILE = "1" ]
+	then
+		if [ "$1" = "install_windrvr6" ]
+		then
+			cp -p $TP_BOOT_FILE $TP_BOOT_FILE.save.w
+			echo "$TP_DRV_DEST_PATH/install_windrvr6 windrvr6 no" >> $TP_BOOT_FILE
+		else
+			cp -p $TP_BOOT_FILE $TP_BOOT_FILE.save.x
+			echo "$TP_DRV_DEST_PATH/install_xpc4drvr" >> $TP_BOOT_FILE
+		fi;
+		echo "--Adding $1 script to $TP_BOOT_FILE."
+	else
+		echo "--Did not add $1 script to $TP_BOOT_FILE."
+	fi;
+}
+
+install_windrvr6 ()
+{
+	echo "--Installing windrvr6---------------------------------------------"
+	if [ $TP_ARCH_64 = "0" ]
+	then
+		cd linux_drivers/windriver32/windrvr
+	else
+		cd linux_drivers/windriver64/windrvr
+	fi;
+
+		echo "--Checking version."
+		TP_VERSION_STRING="WinDriver v"
+		TP_DRIVER_FILE=$TP_DRV_DEST_PATH/$TP_WIN_DRIVER
+		get_driver_file_version $TP_DRIVER_FILE "$TP_VERSION_STRING"
+		TP_DEST_VERSION=$TP_DRIVER_VER
+
+		TP_CPU=`uname -m | sed "s/i.86/i386/"`
+		TP_DRIVER_FILE="LINUX.`uname -r`.$TP_CPU"/$TP_WIN_DRIVER
+		get_driver_file_version $TP_DRIVER_FILE "$TP_VERSION_STRING"
+		TP_SRC_VERSION=$TP_DRIVER_VER
+
+		if [ $TP_SRC_VERSION = "0000" ] # no source file, set version in this package
+		then
+			TP_SRC_VERSION=$TP_WINDRVR_VERSION
+			echo "--Setting source version to $TP_WINDRVR_VERSION."
+		fi;
+		if [ $TP_DEST_VERSION = "0000" ]
+		then
+			TP_SRC_VERSION="0001"
+		fi;
+		if [ $TP_DEST_VERSION -lt $TP_SRC_VERSION ]
+		then
+			echo "--File $TP_DRIVER_FILE is newer than the destination file."
+			./configure
+			make clean
+			make
+			#TP_RC=$?
+			#echo "--make windrvr rc = "$TP_RC
+			make install
+			TP_RC=$?
+			echo "--make windrvr install rc= "$TP_RC
+			cp wdreg $TP_DRV_DEST_PATH/install_windrvr6 
+		else
+			echo "--File $TP_DRIVER_FILE is already updated."
+			tp_is_module_running windrvr6
+			if [ $? = "0" ]
+			then
+				echo "--Restarting module."
+				$TP_DRV_DEST_PATH/install_windrvr6 windrvr6 no
+			fi;
+			TP_RC="0"
+		fi;
+
+	cd ../../..
+
+	if [ $TP_RC = "0" ]
+	then
+		modify_boot_file install_windrvr6
+	fi;
+	return $TP_RC
+}
+
+install_xpc4drvr ()
+{
+	echo "--Installing xpc4drvr---------------------------------------------"
+	if [ $TP_VERSION_2_4 = "1" ]
+	then
+		cd linux_drivers/xpc4drvr2_4/xpc4drvr
+	else
+		cd linux_drivers/xpc4drvr2_6/xpc4drvr
+		./configure
+	fi;
+
+		echo "--Checking version."
+		TP_VERSION_STRING="Xpc4drvr v"
+		TP_DRIVER_FILE=$TP_DRV_DEST_PATH/$TP_XPC4_DRIVER
+		get_driver_file_version $TP_DRIVER_FILE "$TP_VERSION_STRING"
+		TP_DEST_VERSION=$TP_DRIVER_VER
+
+		TP_CPU=`uname -m | sed "s/i.86/i386/"`
+		if [ $TP_VERSION_2_4 = "1" ]
+		then
+			TP_DRIVER_FILE="LINUX.`uname -r`"/$TP_XPC4_DRIVER
+		else
+			TP_DRIVER_FILE=$TP_XPC4_DRIVER
+		fi;
+		get_driver_file_version $TP_DRIVER_FILE "$TP_VERSION_STRING"
+		TP_SRC_VERSION=$TP_DRIVER_VER
+
+		if [ $TP_SRC_VERSION = "0000" ] # no source file, set version in this package
+		then
+			TP_SRC_VERSION=$TP_XPC4DRVR_VERSION
+			echo "--Setting source version to $TP_XPC4DRVR_VERSION."
+		fi;
+		if [ $TP_DEST_VERSION = "0000" ]
+		then
+			TP_SRC_VERSION="0001"
+		fi;
+		if [ $TP_DEST_VERSION -lt $TP_SRC_VERSION ]
+		then
+			echo "--File $TP_DRIVER_FILE is newer than the destination file."
+			make clean
+			make
+			#TP_RC=$?
+			#echo "--make xpc4drvr rc = "$TP_RC
+			make install
+			TP_RC=$?
+			echo "--make xpc4drvr install rc= "$TP_RC
+		else
+			echo "--File $TP_DRIVER_FILE is already updated."
+			tp_is_module_running xpc4drvr
+			if [ $? = "0" ]
+			then
+				echo "--Restarting module."
+				$TP_DRV_DEST_PATH/install_xpc4drvr
+			fi;
+			TP_RC="0"
+		fi;
+
+	cd ../../..
+
+	if [ $TP_RC = "0" ]
+	then
+		modify_boot_file install_xpc4drvr
+	fi;
+	return $TP_RC
+}
+
+install_pcusb ()
+{
+	echo "--Installing USB drivers------------------------------------------"
+	# check if udev is running on version 2.6.13* and later
+	TP_MAJOR_VERSION=`echo $TP_KERNEL_VERSION | cut -f 1 -d "."`
+	TP_MINOR_VERSION=`echo $TP_KERNEL_VERSION | cut -f 2 -d "."`
+	TP_MINOR_SUBVERSION=`echo $TP_KERNEL_VERSION | cut -f 3 -d "." | cut -f 1 -d "-"`
+
+	TP_USE_UDEV="0"
+	TP_UDEV_ENABLED=`ps -e | grep -c udevd`
+	if [ $TP_MAJOR_VERSION = "2" ]
+	then
+		if [ $TP_MINOR_VERSION = "6" ]
+		then
+			test $TP_MINOR_SUBVERSION -ge "13"
+			if [ $? = "0" ]
+			then
+				if [ $TP_UDEV_ENABLED = "1" ]
+				then
+					TP_USE_UDEV="1"
+				fi;
+			fi;
+		fi;
+	fi;	
+
+	cd linux_drivers/pcusb
+
+	if [ $TP_USE_UDEV = "1" ]
+	then
+		./setup_pcusb $TP_USE_UDEV
+	else
+		./setup_pcusb
+	fi;
+	
+	cd ../..
+
+	# juntest, always check this at the end
+	TP_DRIVER_FILE="/sbin/fxload"
+	file_exists $TP_DRIVER_FILE
+	if [ $? = "0" ]
+	then	
+		echo ""
+		echo "--The fxload package is not installed. The package has to be installed to be able to use the Xilinx USB Cable."
+		echo ""
+		return 0
+	else
+		return 0
+	fi;
+}
+
+clean_old_files ()
+{
+	file_exists $TP_OLD_DEST_PATH/install_windrvr6
+	if [ $? = "1" ]
+	then
+		echo "--Cleaning outdated files."
+		rm -f $TP_OLD_DEST_PATH/windrvr6.*
+		rm -f $TP_OLD_DEST_PATH/xpc4drvr.*
+		rm -f $TP_OLD_DEST_PATH/install_windrvr6
+		rm -f $TP_OLD_DEST_PATH/install_xpc4drvr
+		/sbin/rmmod windrvr6
+		/sbin/rmmod xpc4drvr
+		rm -f /dev/windrvr6
+		rm -f /dev/xpc4*
+	fi;
+}
+
+TP_KERNEL_VERSION=`uname -r`
+echo "--Kernel version = "$TP_KERNEL_VERSION.
+echo "--Arch = `arch`".
+echo "--Installer version = "$TP_INSTALLER_VERSION
+TP_ARCH_64=`arch | grep -c "64"`
+TP_VERSION_2_4=`uname -r | grep -c "2.4"`
+TP_PCUSB_HEX_FILE="xusbdfwu.hex"
+TP_OLD_DEST_PATH="/lib/modules/misc"
+TP_DRV_DEST_PATH="/lib/modules/`uname -r`/kernel/drivers/misc"
+TP_CLEAN_OLD_DRIVERS="0"
+if [ $TP_VERSION_2_4 = "1" ]
+then
+	TP_WIN_DRIVER="windrvr6.o"
+	TP_XPC4_DRIVER="xpc4drvr.o"
+else
+	TP_WIN_DRIVER="windrvr6.ko"
+	TP_XPC4_DRIVER="xpc4drvr.ko"
+fi;	
+
+is_suse_9
+if [ $? = "1" ]
+then
+	echo "SuSE 9 is currently not supported."
+	exit 10 
+fi;
+
+# check if user has root access
+tp_is_root
+TP_RC=$?
+if [ $TP_RC = "1" ]
+then
+	if [ ${#1} = "0" ]
+	then
+		echo "--User has root permission."
+	else
+		if [ $1 = "clean" ]
+		then
+			echo "Removing cable drivers."
+			TP_DEST_PATH="/lib/modules/`uname -r`/kernel/drivers/misc"
+			rm -f $TP_DEST_PATH/windrvr6.*
+			rm -f $TP_DEST_PATH/xpc4drvr.*
+			rm -f $TP_DEST_PATH/install_windrvr6
+			rm -f $TP_DEST_PATH/install_xpc4drvr
+			rm -f $TP_OLD_DEST_PATH/windrvr6.*
+			rm -f $TP_OLD_DEST_PATH/xpc4drvr.*
+			rm -f $TP_OLD_DEST_PATH/install_windrvr6
+			rm -f $TP_OLD_DEST_PATH/install_xpc4drvr
+			/sbin/rmmod windrvr6
+			/sbin/rmmod xpc4drvr
+			rm -f /dev/windrvr6
+			rm -f /dev/xpc4*
+			rm -f /etc/hotplug/usb/xusbdfwu.fw/xusbdfwu.hex
+			rm -f /etc/hotplug/usb/xusbdfwu.fw/xusb_emb.hex
+			rm -f /etc/hotplug/usb/xusbdfwu.fw/xusb_xlp.hex
+			rm -f /etc/hotplug/usb/xusbdfwu.fw/xusb_xup.hex
+			rm -f /etc/hotplug/usb/xusbdfwu.fw/xusb_xpr.hex
+			rm -f /etc/hotplug/usb/xusbdfwu
+			rm -f /etc/hotplug/usb/xusb_emb
+			rm -f /etc/hotplug/usb/xusb_xlp
+			rm -f /etc/hotplug/usb/xusb_xup
+			rm -f /etc/hotplug/usb/xusb_xpr
+			echo "Please remove xusbdfwu entries in /etc/hotplug/usb.usermap."
+			rm -f /etc/udev/rules.d/xusbdfwu.rules
+			rm -f /usr/share/xusbdfwu.hex
+			rm -f /usr/share/xusb_emb.hex
+			rm -f /usr/share/xusb_xlp.hex
+			rm -f /usr/share/xusb_xup.hex
+			rm -f /usr/share/xusb_xpr.hex
+			echo "Please remove install entries in /etc/rc.local or /etc/init.d/boot.local for SUSE."
+			echo "Please disconnect the USB cable."
+			exit 0
+		fi;
+	fi;
+
+	clean_old_files
+
+	install_pcusb
+
+	install_windrvr6
+	TP_RC=$?
+	echo "--install_windrvr6 rc = "$TP_RC
+	if [ $TP_RC = "0" ]
+	then
+		install_xpc4drvr
+		TP_RC=$?
+		echo "--install_xpc4drvr rc = "$TP_RC
+	fi;
+else
+	echo "--User does not have root privileges."
+	TP_RC="2"
+fi;		
+
+tp_is_module_running windrvr6
+tp_is_module_running xpc4drvr
+if [ $TP_CLEAN_OLD_DRIVERS = "1" ]
+then
+	echo ""
+	echo "--Please edit $TP_BOOT_FILE and remove the following entries:"
+	echo "    source /lib/modules/misc/install_windrvr6 windrvr6"		
+	echo "    source /lib/modules/misc/install_xpc4drvr"		
+	echo "--These entries are obsolete and must be removed to be able to"
+	echo "  automatically reload the drivers when the computer is rebooted."
+	echo ""
+fi;
+echo "--Note: By default, the file permission of /dev/windrvr6 is enabled for the root user only"
+echo "  and must be changed to allow access to other users."
+	echo ""
+
+# Restore the original cwd
+cd $TP_CURRENT_WORKING_DIR
+
+echo "--Return code = "$TP_RC
+
+exit $TP_RC	
+
+# End of file.

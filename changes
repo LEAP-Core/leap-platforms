@@ -312,3 +312,165 @@ side.
 Michael P.
 
 
+
+----------
+mcadler     Date: Thu Sep  6 15:39:26 EDT 2007  CSN: CSN-platforms-5
+                  Thu Sep  6 19:39:26 UTC 2007
+
+
+Directory drivers
+ linux/                    Locally Added               0 
+
+Directory drivers/linux
+ Xilinx_Platform_Cable/    Locally Added               0 
+
+Directory drivers/linux/Xilinx_Platform_Cable
+ usb-driver/               Locally Added               0 
+
+Directory drivers/linux/Xilinx_Platform_Cable/usb-driver
+ jtagkey.c                 Locally Added               0 
+ jtagmon.c                 Locally Added               0 
+ usb-driver.c              Locally Added               0 
+ jtagkey.h                 Locally Added               0 
+ jtagmon.h                 Locally Added               0 
+ config.c                  Locally Added               0 
+ parport.c                 Locally Added               0 
+ usb-driver.h              Locally Added               0 
+ index.html                Locally Added               0 
+ config.h                  Locally Added               0 
+ Makefile                  Locally Added               0 
+ README                    Locally Added               0 
+ parport.h                 Locally Added               0 
+ libusb-driverrc           Locally Added               0 
+
+Directory drivers/linux/Xilinx_Platform_Cable
+ windriver/                Locally Added               0 
+
+Directory drivers/linux/Xilinx_Platform_Cable/windriver
+ install_drivers           Locally Added               0 
+ release_notes             Locally Added               0 
+ linux_drivers/            Locally Added               0 
+
+Directory drivers/linux/Xilinx_Platform_Cable/windriver/linux_drivers
+ xpc4drvr2_4/              Locally Added               0 
+
+Directory drivers/linux/Xilinx_Platform_Cable/windriver/linux_drivers/xpc4drvr2_4
+ xpc4drvr/                 Locally Added               0 
+
+Directory drivers/linux/Xilinx_Platform_Cable/windriver/linux_drivers/xpc4drvr2_4/xpc4drvr
+ xpc4.c                    Locally Added               0 
+ install_drv               Locally Added               0 
+ ioctl_3_64.a              Locally Added               0 
+ xpc4.h                    Locally Added               0 
+ ioctl_2.a                 Locally Added               0 
+ ioctl_3.a                 Locally Added               0 
+ Makefile                  Locally Added               0 
+
+Directory drivers/linux/Xilinx_Platform_Cable/windriver/linux_drivers
+ windriver64/              Locally Added               0 
+
+Directory drivers/linux/Xilinx_Platform_Cable/windriver/linux_drivers/windriver64
+ include/                  Locally Added               0 
+
+Directory drivers/linux/Xilinx_Platform_Cable/windriver/linux_drivers/windriver64/include
+ windrvr.h                 Locally Added               0 
+ wd_ver.h                  Locally Added               0 
+
+Directory drivers/linux/Xilinx_Platform_Cable/windriver/linux_drivers/windriver64
+ windrvr/                  Locally Added               0 
+
+Directory drivers/linux/Xilinx_Platform_Cable/windriver/linux_drivers/windriver64/windrvr
+ configure                 Locally Added               0 
+ makefile.in               Locally Added               0 
+ linux_wrappers.c          Locally Added               0 
+ wdusb_linux.c             Locally Added               0 
+ linux_wrappers.h          Locally Added               0 
+ wdreg                     Locally Added               0 
+ wdusb_interface.h         Locally Added               0 
+ setup_inst_dir            Locally Added               0 
+ windrvr_gcc_v3_regparm.a  Locally Added               0 
+ linux_common.h            Locally Added               0 
+ windrvr_gcc_v3.a          Locally Added               0 
+
+Directory drivers/linux/Xilinx_Platform_Cable/windriver/linux_drivers
+ xpc4drvr2_6/              Locally Added               0 
+
+Directory drivers/linux/Xilinx_Platform_Cable/windriver/linux_drivers/xpc4drvr2_6
+ xpc4drvr/                 Locally Added               0 
+
+Directory drivers/linux/Xilinx_Platform_Cable/windriver/linux_drivers/xpc4drvr2_6/xpc4drvr
+ xpc4.c                    Locally Added               0 
+ ioctl_3_regparm_64.a      Locally Added               0 
+ install_drv               Locally Added               0 
+ configure                 Locally Added               0 
+ ioctl_3_64.a              Locally Added               0 
+ xpc4.h                    Locally Added               0 
+ Mkfile.tmp                Locally Added               0 
+ ioctl_3_regparm.a         Locally Added               0 
+ ioctl_3.a                 Locally Added               0 
+ Makefile                  Locally Added               0 
+
+Directory drivers/linux/Xilinx_Platform_Cable/windriver/linux_drivers
+ pcusb/                    Locally Added               0 
+
+Directory drivers/linux/Xilinx_Platform_Cable/windriver/linux_drivers/pcusb
+ xusbdfwu.rules            Locally Added               0 
+ xusb_xup.hex              Locally Added               0 
+ xusbdfwu.usermap          Locally Added               0 
+ xusb_xlp                  Locally Added               0 
+ xusb_emb                  Locally Added               0 
+ xusb_xlp.hex              Locally Added               0 
+ xusbdfwu                  Locally Added               0 
+ xusb_emb.hex              Locally Added               0 
+ xusb_xpr                  Locally Added               0 
+ xusbdfwu.hex              Locally Added               0 
+ setup_pcusb               Locally Added               0 
+ xusb_xpr.hex              Locally Added               0 
+ xusb_xup                  Locally Added               0 
+
+Directory drivers/linux/Xilinx_Platform_Cable/windriver/linux_drivers
+ windriver32/              Locally Added               0 
+
+Directory drivers/linux/Xilinx_Platform_Cable/windriver/linux_drivers/windriver32
+ include/                  Locally Added               0 
+
+Directory drivers/linux/Xilinx_Platform_Cable/windriver/linux_drivers/windriver32/include
+ windrvr.h                 Locally Added               0 
+ wd_ver.h                  Locally Added               0 
+
+Directory drivers/linux/Xilinx_Platform_Cable/windriver/linux_drivers/windriver32
+ windrvr/                  Locally Added               0 
+
+Directory drivers/linux/Xilinx_Platform_Cable/windriver/linux_drivers/windriver32/windrvr
+ configure                 Locally Added               0 
+ makefile.in               Locally Added               0 
+ linux_wrappers.c          Locally Added               0 
+ wdusb_linux.c             Locally Added               0 
+ linux_wrappers.h          Locally Added               0 
+ wdreg                     Locally Added               0 
+ wdusb_interface.h         Locally Added               0 
+ setup_inst_dir            Locally Added               0 
+ windrvr_gcc_v3_regparm.a  Locally Added               0 
+ windrvr_gcc_v2.a          Locally Added               0 
+ linux_common.h            Locally Added               0 
+ windrvr_gcc_v3.a          Locally Added               0 
+
+Directory drivers/linux/Xilinx_Platform_Cable
+ README                    Locally Added               0 
+ fxload/                   Locally Added               0 
+
+Directory drivers/linux/Xilinx_Platform_Cable/fxload
+ fxload.8                  Locally Added               0 
+ main.c                    Locally Added               0 
+ a3load.hex                Locally Added               0 
+ COPYING                   Locally Added               0 
+ ezusb.c                   Locally Added               0 
+ README.txt                Locally Added               0 
+ Makefile                  Locally Added               0 
+ ezusb.h                   Locally Added               0 
+
+Directory .
+ drivers/                  Locally Added               0 
+
+These are the drivers needed to connect the Xilinx USB Programming Cable.
+This check-in is the unmodified drivers as downloaded from a few web sites.
