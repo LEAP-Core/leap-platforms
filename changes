@@ -492,3 +492,13 @@ Directory drivers/linux/Xilinx_Platform_Cable
  README                    Locally Modified            5 
 
 Local changes to support 64 bit SuSE 9.3.
+
+----------
+mcadler     Date: Thu Sep  6 16:27:30 EDT 2007  CSN: CSN-platforms-7
+                  Thu Sep  6 20:27:30 UTC 2007
+
+
+Directory drivers/linux/Xilinx_Platform_Cable
+ README                    Locally Modified            6 
+
+Add note on working around a failure.

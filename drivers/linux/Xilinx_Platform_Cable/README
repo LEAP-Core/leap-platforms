@@ -23,6 +23,9 @@ Installation instructions:
 1.  Make sure xilinx-ise tools are in your path.
 
 2.  In directory "windriver" run the "install_drivers" script.
+    *** This may fail to install windriver.ko for reasons not yet
+        debugged.  On errors, cd to linux_drivers/windriver64/windrvr
+        and type "make install". ***
 
 3.  In directory "fxload" run "make install".
 
