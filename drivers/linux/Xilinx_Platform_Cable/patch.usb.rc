@@ -1,0 +1,29 @@
+*** usb.rc.orig	2006-03-24 08:12:53.000000000 -0500
+--- usb.rc	2007-09-04 18:19:41.000000000 -0400
+***************
+*** 120,127 ****
+  			TYPE="$bDeviceClass/$bDeviceSubClass/$bDeviceProtocol"
+  			fi
+  			DEVPATH="`cd $i ; /bin/pwd | sed -e 's@^/sys@@'`"
+  			echo -n "*"
+! 			$ENV sh -c "cd / ; DEVPATH=$DEVPATH ACTION=add INTERFACE=$INTERFACE PRODUCT=$PRODUCT TYPE=$TYPE /sbin/hotplug usb > /dev/null 2>&1 &" 
+  			;;
+  			*)
+  			# this is a device
+--- 120,135 ----
+  			TYPE="$bDeviceClass/$bDeviceSubClass/$bDeviceProtocol"
+  			fi
+  			DEVPATH="`cd $i ; /bin/pwd | sed -e 's@^/sys@@'`"
++ 
++ 			DEVICE=""
++ 			if test -f "$MYDEVICE/devnum" ; then
++ 			devBus="`echo $MYDEVICE | sed 's@-.*@@'`"
++ 			read devNum < $MYDEVICE/devnum
++ 			DEVICE="`printf /proc/bus/usb/%03d/%03d $devBus $devNum`"
++ 			fi
++ 
+  			echo -n "*"
+! 			$ENV sh -c "cd / ; DEVPATH=$DEVPATH ACTION=add INTERFACE=$INTERFACE PRODUCT=$PRODUCT TYPE=$TYPE DEVICE=$DEVICE /sbin/hotplug usb > /dev/null 2>&1 &" 
+  			;;
+  			*)
+  			# this is a device

@@ -14,3 +14,25 @@ different places:
 3.  We do not currently use usb-driver.  It is stored here in case we need
     it later.  usb-driver emulates the behavior of windriver, but in
     user space.  It communicates with the raw USB device.
+
+
+Installation instructions:
+
+*** All as root ***
+
+1.  Make sure xilinx-ise tools are in your path.
+
+2.  In directory "windriver" run the "install_drivers" script.
+
+3.  In directory "fxload" run "make install".
+
+4.  On SuSE 9.3 the following are also needed:
+
+    a.  Add "ehci_hcd" and "uhci_hcd" to MODULES_LOADED_ON_BOOT in
+        /etc/sysconfig/kernel.  E.g.:
+
+           MODULES_LOADED_ON_BOOT="ehci_hcd uhci_hcd"
+
+    b.  Apply patch.usb.rc in this directory to /etc/hotplug/usb.rc:
+
+           patch -d /etc/hotplug < patch.usb.rc

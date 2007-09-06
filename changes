@@ -474,3 +474,21 @@ Directory .
 
 These are the drivers needed to connect the Xilinx USB Programming Cable.
 This check-in is the unmodified drivers as downloaded from a few web sites.
+
+----------
+mcadler     Date: Thu Sep  6 15:58:15 EDT 2007  CSN: CSN-platforms-6
+                  Thu Sep  6 19:58:15 UTC 2007
+
+
+Directory drivers/linux/Xilinx_Platform_Cable/windriver
+ install_drivers           Locally Modified            5 
+
+Directory drivers/linux/Xilinx_Platform_Cable/windriver/linux_drivers/windriver64/windrvr
+ configure                 Locally Modified            5 
+ wdreg                     Locally Modified            5 
+
+Directory drivers/linux/Xilinx_Platform_Cable
+ patch.usb.rc              Locally Added               0 
+ README                    Locally Modified            5 
+
+Local changes to support 64 bit SuSE 9.3.

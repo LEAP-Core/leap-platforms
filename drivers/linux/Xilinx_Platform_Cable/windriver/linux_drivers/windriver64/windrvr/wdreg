@@ -50,5 +50,6 @@ fi
 if [ $use_udev == "no" ] ; then 
 	major=`grep -w $module_base_name /proc/devices | cut -f1 -d" "`
 	mknod /dev/$module_base_name c $major 0 
+        chmod a+rw /dev/$module_base_name
 fi
 

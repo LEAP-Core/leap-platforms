@@ -1534,7 +1534,7 @@ echo "${ECHO_T}$regparm_opt" >&6
 		CFLAGS="$CFLAGS -Wstrict-prototypes -Wno-trigraphs \
 		-fno-common -fomit-frame-pointer -pipe"
 
-		add_gcc_flag "-Wdeclaration-after-statement"
+#		add_gcc_flag "-Wdeclaration-after-statement"
                 add_gcc_flag "-funit-at-a-time"
 
 		CFLAGS="$CFLAGS -march=k8 -mno-red-zone -mcmodel=kernel -fno-reorder-blocks \

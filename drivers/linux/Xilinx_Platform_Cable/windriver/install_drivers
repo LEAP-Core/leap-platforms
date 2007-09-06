@@ -374,6 +374,12 @@ clean_old_files ()
 	fi;
 }
 
+# Make sure we get gcc from /usr/bin.  Also make sure no spurious environment
+# variables are set.
+export -n ARCH
+PATH=/usr/bin:$PATH
+
+
 TP_KERNEL_VERSION=`uname -r`
 echo "--Kernel version = "$TP_KERNEL_VERSION.
 echo "--Arch = `arch`".
@@ -394,11 +400,11 @@ else
 fi;	
 
 is_suse_9
-if [ $? = "1" ]
-then
-	echo "SuSE 9 is currently not supported."
-	exit 10 
-fi;
+#if [ $? = "1" ]
+#then
+#	echo "SuSE 9 is currently not supported."
+#	exit 10 
+#fi;
 
 # check if user has root access
 tp_is_root
