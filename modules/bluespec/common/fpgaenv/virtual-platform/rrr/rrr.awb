@@ -5,5 +5,5 @@
 
 %sources -t BSV -v PUBLIC HardwareRRRClient.bsv
 %sources -t CPP -v PUBLIC software-rrr-server.h
-%sources -t CPP -v PRIVATE software-rrr-server.c
+%sources -t CPP -v PRIVATE software-rrr-server.cpp
 %sources -t RRR -v PRIVATE global-service-list.rrr

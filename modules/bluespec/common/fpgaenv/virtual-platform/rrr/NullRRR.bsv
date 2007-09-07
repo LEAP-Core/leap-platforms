@@ -1,7 +1,7 @@
 import channelio::*;
 
-interface RPCClient;
+interface RRRClient;
 endinterface
 
-module mkRPCClient#(ChannelIO channel) (RPCClient);
+module mkRRRClient#(ChannelIO channel) (RRRClient);
 endmodule

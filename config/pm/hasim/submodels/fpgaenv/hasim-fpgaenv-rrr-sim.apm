@@ -39,7 +39,7 @@ Packagehint=platforms
 [Standard Virtual Devices with Memory/Requires]
 front_panel=Hybrid Front Panel
 console=Null Serial Console
-memory=Hybrid Memory
+memory=Simulation only Memory no RRR
 
 [Hybrid Front Panel]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid/hybrid-fp.awb
@@ -49,9 +49,6 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/console/null-serial/null-serial.awb
 Packagehint=platforms
 
-[Hybrid Memory]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid/hybrid-memory.awb
-Packagehint=platforms
 
 [Low Level Platform Interface]
 File=modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface/low-level-platform-interface.awb
@@ -72,4 +69,8 @@ Packagehint=platforms
 
 [Null TopLevel Wires]
 File=modules/bluespec/common/fpgaenv/toplevel-wires/null/null-toplevel-wires.awb
+Packagehint=platforms
+
+[Simulation only Memory no RRR]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/simulation/simulation-memory.awb
 Packagehint=platforms

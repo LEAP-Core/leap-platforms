@@ -24,7 +24,7 @@ static void init()
 #define ADD_SERVICE(name)                                   \
     {                                                       \
         /* first generate function prototypes */            \
-        void    name##_init();                              \
+        void    name##_init(char *);                        \
         UINT32  name##_request(UINT32, UINT32, UINT32);     \
                                                             \
         /* now fill in service table */                     \
@@ -124,7 +124,12 @@ int main()
         for (i = 0; i < argc; i++)
         {
             nbytes = read(STDIN, buf, CHANNELIO_PACKET_SIZE);
-            assert(nbytes == CHANNELIO_PACKET_SIZE);  /* ugh... TODO */
+            if (nbytes != CHANNELIO_PACKET_SIZE)
+            {
+                fprintf(stderr, "software server: read too few bytes from parameter: %u", nbytes);
+                fprintf(stderr, ", parameter = %u\n", pack(buf));
+                exit(0);
+            }
             argv[i] = pack(buf);
         }
 

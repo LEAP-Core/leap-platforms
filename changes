@@ -502,3 +502,42 @@ Directory drivers/linux/Xilinx_Platform_Cable
  README                    Locally Modified            6 
 
 Add note on working around a failure.
+
+----------
+aparasha    Date: Fri Sep  7 17:41:16 EDT 2007  CSN: CSN-platforms-8
+                  Fri Sep  7 21:41:16 UTC 2007
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ hasim-fpgaenv-software.apm Locally Modified            7 
+ hasim-fpgaenv-rrr-sim.apm Locally Modified            7 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr
+ software-rrr-server.c     Locally Removed             7 
+ software-rrr-server.cpp   Locally Added               0 
+ NullRRR.bsv               Locally Modified            7 
+ HardwareRRRClient.bsv     Locally Modified            7 
+ global-service-list.rrr   Locally Modified            7 
+ rrr.awb                   Locally Modified            7 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid
+ HybridFP.bsv              Locally Modified            7 
+ hybrid-fp-sw.c            Locally Removed             7 
+ hybrid-fp.awb             Locally Modified            7 
+ hybrid-fp-sw.cpp          Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-memory-sw.c        Locally Removed             7 
+ hybrid-memory.awb         Locally Modified            7 
+ hybrid-memory-sw.cpp      Locally Added               - 
+ HybridMemory.bsv          Locally Modified            7 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface
+ LowLevelPlatformInterface.bsv Locally Modified            7 
+
+
+- Interim Checkin: added partial support for virtual memory device.
+  Memory is not yet operational, but existing models should work
+  as before.
+
+- moved all sofware-partition source files from .c to .cpp

@@ -5,7 +5,7 @@
 %provides memory
 
 %sources -t BSV -v PUBLIC HybridMemory.bsv
-%sources -t CPP -v PRIVATE hybrid-memory-sw.c
+%sources -t CPP -v PRIVATE hybrid-memory-sw.cpp
 
 %param MEMORY_ADDR_SIZE 32 "Number of bits to address memory."
 %param MEMORY_VALUE_SIZE 32 "Number of bits to read from and write to memory."

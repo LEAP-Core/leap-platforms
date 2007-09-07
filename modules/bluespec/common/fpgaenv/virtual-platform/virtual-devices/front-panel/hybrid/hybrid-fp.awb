@@ -5,4 +5,4 @@
 %provides front_panel
 
 %sources -t BSV -v PUBLIC HybridFP.bsv
-%sources -t CPP -v PRIVATE hybrid-fp-sw.c
+%sources -t CPP -v PRIVATE hybrid-fp-sw.cpp

@@ -4,7 +4,7 @@ import toplevel_wires::*;
 
 interface LowLevelPlatformInterface;
     interface ChannelIO             channelIO;
-    interface RPCClient             rpcClient;
+    interface RRRClient             rrrClient;
     interface TopLevelWiresDriver   topLevelWires;
 endinterface
 
@@ -13,11 +13,11 @@ module mkLowLevelPlatformInterface(LowLevelPlatformInterface);
     // instantiate submodules
     TopLevelWiresDriver     wires   <- mkTopLevelWiresDriver();
     ChannelIO               cio     <- mkChannelIO();
-    RPCClient               rpcc    <- mkRPCClient(cio);
+    RRRClient               rrrc    <- mkRRRClient(cio);
 
     // plumb interfaces
     interface               channelIO       = cio;
-    interface               rpcClient       = rpcc;
+    interface               rrrClient       = rrrc;
     interface               topLevelWires   = wires;
 
 endmodule

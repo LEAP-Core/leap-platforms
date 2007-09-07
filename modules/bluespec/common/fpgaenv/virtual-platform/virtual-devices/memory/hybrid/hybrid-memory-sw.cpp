@@ -3,6 +3,7 @@
 #include <strings.h>
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
 
 /* our memory, for now, is a UINT32 aligned array */
 
@@ -24,6 +25,9 @@ void memory_init(char *stringID)
 
     /* set string ID */
     sprintf(stringID, "%s", MY_STRING_ID);
+
+    /* optionally load data into memory array */
+    memcpy(M, "H   e   l   l   o   ,       W   o   r   l   d   !", 49);
 }
 
 /* main exported interface method */
