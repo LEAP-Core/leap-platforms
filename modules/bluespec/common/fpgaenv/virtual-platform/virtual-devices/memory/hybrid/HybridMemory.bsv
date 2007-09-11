@@ -37,7 +37,6 @@ module mkMemory#(LowLevelPlatformInterface llpint) (Memory);
                                  addr,              /* address */
                                  0                  /* don't care */
                                  );
-
       end
       tagged MEM_Store .stinfo:
       begin

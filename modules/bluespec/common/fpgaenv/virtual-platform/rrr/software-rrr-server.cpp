@@ -81,7 +81,7 @@ int main()
 {
     unsigned char   buf[CHANNELIO_PACKET_SIZE];
     int             nbytes;
-    UINT32          command;
+    UINT32          serviceID;
 
     /* the server side is fully serialized and has no
      * notion of virtual channels. It simply picks up
@@ -92,7 +92,7 @@ int main()
      * it chooses to */
     init();
 
-    /* go into an infinite loop, scanning stdin for commands */
+    /* go into an infinite loop, scanning stdin for requests */
     while ((nbytes = read(STDIN, buf, CHANNELIO_PACKET_SIZE)) != 0)
     {
         int argc;
@@ -100,24 +100,24 @@ int main()
         UINT32 argv[MAX_ARGS];
         UINT32 result;
 
-        /* make sure we've read the full command... for now, we'll
+        /* make sure we've read the full serviceID... for now, we'll
          * just crash, but later add a loop to complete the read TODO */
         if (nbytes != CHANNELIO_PACKET_SIZE)
         {
-            fprintf(stderr, "software server: incomplete command\n");
+            fprintf(stderr, "software server: incomplete serviceID\n");
             exit(1);
         }
 
-        /* decode command */
-        command = pack(buf);
-        if (command >= MAX_SERVICES)
+        /* decode serviceID */
+        serviceID = pack(buf);
+        if (serviceID >= n_services)
         {
-            fprintf(stderr, "software server: invalid command: %u\n", command);
+            fprintf(stderr, "software server: invalid serviceID: %u\n", serviceID);
             exit(1);
         }
 
         /* figure out the expected number of arguments */
-        // argc = ServiceMap[command].params;
+        // argc = ServiceMap[serviceID].params;
         argc = 3;
 
         /* read args from pipe and place into args array */
@@ -126,16 +126,19 @@ int main()
             nbytes = read(STDIN, buf, CHANNELIO_PACKET_SIZE);
             if (nbytes != CHANNELIO_PACKET_SIZE)
             {
-                fprintf(stderr, "software server: read too few bytes from parameter: %u", nbytes);
-                fprintf(stderr, ", parameter = %u\n", pack(buf));
+                fprintf(stderr, "software server: read too few bytes from parameter:\n");
+                fprintf(stderr, "                 serviceID  = %u\n", serviceID);
+                fprintf(stderr, "                 param no.  = %u\n", i);
+                fprintf(stderr, "                 bytes read = %u\n", nbytes);
+                fprintf(stderr, "                 parameter  = %u\n", pack(buf));
                 exit(0);
             }
             argv[i] = pack(buf);
         }
 
         /* invoke local service method to obtain result */
-        // result = ServiceMap[command].request(argc, argv);
-        result = ServiceMap[command].request(argv[0], argv[1], argv[2]);
+        // result = ServiceMap[serviceID].request(argc, argv);
+        result = ServiceMap[serviceID].request(argv[0], argv[1], argv[2]);
 
         /* send result to ChannelIO */
         unpack(result, buf);

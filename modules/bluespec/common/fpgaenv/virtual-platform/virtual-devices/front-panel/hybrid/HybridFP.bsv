@@ -14,14 +14,21 @@ module mkFrontPanel#(LowLevelPlatformInterface llpint) (FrontPanel);
     Reg#(Bit#(32))  inputCache  <- mkReg(0);
     Reg#(Bit#(32))  outputCache <- mkReg(0);
 
+    Reg#(Bit#(4))   pollCounter <- mkReg(0);
+
     // ugly: constantly keep sending RRR requests to sync up
     // state of both inputs and outputs
-    rule sendRRRRequest (True);
+    rule sendRRRRequest (pollCounter == 15);
         Bit#(32) serviceID = `FP_SERVICE_ID;
         Bit#(32) param0    = outputCache;
         Bit#(32) param1    = 0;
         Bit#(32) param2    = 0;
         llpint.rrrClient.sendReq(serviceID, param0, param1, param2);
+        pollCounter <= 0;
+    endrule
+
+    rule cyclePollCounter (pollCounter != 15);
+        pollCounter <= pollCounter + 1;
     endrule
 
     // read RRR response and update input cache... note that

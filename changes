@@ -541,3 +541,30 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-in
   as before.
 
 - moved all sofware-partition source files from .c to .cpp
+
+----------
+aparasha    Date: Tue Sep 11 14:42:46 EDT 2007  CSN: CSN-platforms-9
+                  Tue Sep 11 18:42:46 UTC 2007
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ hasim-fpgaenv-rrr-sim.apm Locally Modified            8 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr
+ software-rrr-server.cpp   Locally Modified            8 
+ global-service-list.rrr   Locally Modified            8 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid
+ HybridFP.bsv              Locally Modified            8 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ HybridMemory.bsv          Locally Modified            8 
+
+
+- updated Hybrid Memory. Some basic functionalities now work.
+  Please see MemTest.bsv for an example on how to use it.
+
+- modified Hybrid Front Panel to poll RRR every few cycles
+  instead of every cycle. This gives other RRR clients a chance
+  to win during rule scheduling (currently, RRR arbitration is
+  solely through implicit Bluespec rule-scheduling).
