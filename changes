@@ -600,3 +600,27 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memor
 - Added a hasim-fpgaenv-software-no-gui temporarily to avoid loading the
   GUI console.  We'll get rid of this after the GUI console has the option
   of not opening the GUI.
+
+----------
+aparasha    Date: Tue Sep 11 17:10:13 EDT 2007  CSN: CSN-platforms-11
+                  Tue Sep 11 21:10:13 UTC 2007
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr
+ software-rrr-server.cpp   Locally Modified           10 
+ global-service-list.rrr   Locally Removed            10 
+ rrr.awb                   Locally Modified           10 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid
+ hybrid-fp-services.rrr    Locally Added               0 
+ hybrid-fp.awb             Locally Modified           10 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-memory.awb         Locally Modified           10 
+ hybrid-memory-services.rrr Locally Added               0 
+
+
+- removed global service list from Software Server module.
+
+- added local service lists to Hybrid Front Panel and
+  Hybrid Memory modules.

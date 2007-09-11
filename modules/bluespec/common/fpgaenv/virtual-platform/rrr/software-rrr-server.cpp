@@ -38,7 +38,7 @@ static void init()
         n_services++;                                       \
     }
 
-#include "global-service-list.rrr"
+#include "master-service-list.rrr"
 
 #undef ADD_SERVICE
 
