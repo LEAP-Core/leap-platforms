@@ -47,6 +47,7 @@ Packagehint=platforms
 [Standard Virtual Devices/Requires]
 console=Null Serial Console
 front_panel=Physical XUP Front Panel
+memory=Null Platform Memory
 
 [Physical XUP Front Panel]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/xup/xup-fp.awb
@@ -67,4 +68,8 @@ toplevel_wires=XUP TopLevel Wires
 
 [Low Level Platform Interface]
 File=modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface/low-level-platform-interface.awb
+Packagehint=platforms
+
+[Null Platform Memory]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/null/null-memory.awb
 Packagehint=platforms

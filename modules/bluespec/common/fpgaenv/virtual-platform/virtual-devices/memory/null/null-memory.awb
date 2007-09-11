@@ -1,0 +1,7 @@
+
+%name Null Platform Memory
+%desc Null Platform Memory
+
+%provides memory
+
+%sources -t BSV -v PUBLIC NullMemory.bsv

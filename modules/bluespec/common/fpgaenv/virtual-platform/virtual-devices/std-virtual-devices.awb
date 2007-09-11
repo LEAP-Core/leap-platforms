@@ -4,5 +4,5 @@
 
 %provides virtual_devices
 
-%requires front_panel console
+%requires front_panel console memory
 

@@ -21,9 +21,8 @@ File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-pane
 Packagehint=platforms
 
 [Standard Virtual Platform/Requires]
-virtual_devices=Standard Virtual Devices with Memory
+virtual_devices=Standard Virtual Devices
 low_level_platform_interface=Low Level Platform Interface
-
 
 [Null Serial Console]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/console/null-serial/null-serial.awb
@@ -36,7 +35,6 @@ Packagehint=platforms
 [Null TopLevel Wires]
 File=modules/bluespec/common/fpgaenv/toplevel-wires/null/null-toplevel-wires.awb
 Packagehint=platforms
-
 
 [Null Channel IO Module]
 File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/null/null-channelio.awb
@@ -63,15 +61,15 @@ toplevel_wires=Null TopLevel Wires
 File=modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface/low-level-platform-interface.awb
 Packagehint=platforms
 
-[Standard Virtual Devices with Memory/Requires]
-memory=Simulation only Memory no RRR
+[Standard Virtual Devices]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/std-virtual-devices.awb
+Packagehint=platforms
+
+[Standard Virtual Devices/Requires]
+memory=Null Platform Memory
 console=Null Serial Console
 front_panel=Console Front Panel
 
-[Simulation only Memory no RRR]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/simulation/simulation-memory.awb
-Packagehint=platforms
-
-[Standard Virtual Devices with Memory]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/std-virtual-devices-mem.awb
+[Null Platform Memory]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/null/null-memory.awb
 Packagehint=platforms

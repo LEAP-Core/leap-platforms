@@ -33,7 +33,7 @@ virtual_devices=Standard Virtual Devices with Memory
 low_level_platform_interface=Low Level Platform Interface
 
 [Standard Virtual Devices with Memory]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/std-virtual-devices-mem.awb
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/std-virtual-devices.awb
 Packagehint=platforms
 
 [Standard Virtual Devices with Memory/Requires]

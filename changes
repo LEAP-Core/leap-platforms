@@ -568,3 +568,35 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memor
   instead of every cycle. This gives other RRR clients a chance
   to win during rule scheduling (currently, RRR arbitration is
   solely through implicit Bluespec rule-scheduling).
+
+----------
+mcadler     Date: Tue Sep 11 16:11:55 EDT 2007  CSN: CSN-platforms-10
+                  Tue Sep 11 20:11:55 UTC 2007
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ hasim-fpgaenv-fsb-afu.apm Locally Modified            9 
+ hasim-fpgaenv-software-no-gui.apm Locally Added               0 
+ hasim-fpgaenv-null.apm    Locally Modified            9 
+ hasim-fpgaenv-software.apm Locally Modified            9 
+ hasim-fpgaenv-rrr-sim.apm Locally Modified            9 
+ hasim-fpgaenv-xup.apm     Locally Modified            9 
+ hasim-fpgaenv-fsb-dme.apm Locally Modified            9 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices
+ std-virtual-devices-mem.awb Locally Removed             9 
+ std-virtual-devices.awb   Locally Modified            9 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory
+ null/                     Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/null
+ null-memory.awb           Locally Added               0 
+ NullMemory.bsv            Locally Added               0 
+
+- Remove std-virtual-devices-mem since memory is required by all models.
+  Just use std-virtual-devices.
+- Added a null memory implementation.
+- Added a hasim-fpgaenv-software-no-gui temporarily to avoid loading the
+  GUI console.  We'll get rid of this after the GUI console has the option
+  of not opening the GUI.

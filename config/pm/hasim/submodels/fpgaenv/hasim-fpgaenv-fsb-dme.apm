@@ -35,6 +35,7 @@ Packagehint=platforms
 [Standard Virtual Devices/Requires]
 console=Null Serial Console
 front_panel=Physical FSB DME Front Panel
+memory=Hybrid Memory
 
 [Null Channel IO Module]
 File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/null/null-channelio.awb
@@ -67,4 +68,8 @@ toplevel_wires=FSB DME TopLevel Wires
 
 [Low Level Platform Interface]
 File=modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface/low-level-platform-interface.awb
+Packagehint=platforms
+
+[Hybrid Memory]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid/hybrid-memory.awb
 Packagehint=platforms
