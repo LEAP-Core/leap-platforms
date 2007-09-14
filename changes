@@ -624,3 +624,22 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memor
 
 - added local service lists to Hybrid Front Panel and
   Hybrid Memory modules.
+----------
+aparasha    Date: Fri Sep 14 12:52:13 EDT 2007  CSN: CSN-platforms-12
+                  Fri Sep 14 16:52:13 UTC 2007
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr
+ HardwareRRRClient.bsv     Locally Modified           11 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid
+ HybridFP.bsv              Locally Modified           11 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ HybridMemory.bsv          Locally Modified           11 
+
+
+- removed hard-coded serviceIDs from Hybrid Front Panel and
+  Hybrid Memory.
+
+- further reduced front panel's poll rate.

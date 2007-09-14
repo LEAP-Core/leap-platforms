@@ -1,6 +1,6 @@
 import channelio::*;
 
-`define NULL_SERVICE 9999
+`define NULL_SERVICE    1000
 
 interface RRRClient;
     method Action                   sendReq(Bit#(32) serviceID, Bit#(32) param0, Bit#(32) param1, Bit#(32) param2);
