@@ -1,14 +1,12 @@
 interface ChannelIO;
     method ActionValue#(Maybe#(Bit#(32)))   read();
     method Action                           write(Bit#(32) data);
-    method ActionValue#(Bool)               isDestroyed();
 endinterface
 
 import "BDPI" function Action                 cio_init();
 import "BDPI" function ActionValue#(Bit#(8))  cio_open(Bit#(8) programID);
 import "BDPI" function ActionValue#(Bit#(32)) cio_read(Bit#(8) handle);
 import "BDPI" function Action   cio_write(Bit#(8) handle, Bit#(32) data);
-import "BDPI" function ActionValue#(Bit#(8))  cio_isdestroyed(Bit#(8) handle);
 
 module mkChannelIO(ChannelIO);
 
@@ -42,14 +40,6 @@ module mkChannelIO(ChannelIO);
 
     method Action write(Bit#(32) data) if (ready == 1);
         cio_write(handle, data);
-    endmethod
-
-    method ActionValue#(Bool) isDestroyed() if (ready == 1);
-        Bit#(8) term <- cio_isdestroyed(handle);
-        if (term == 0)
-            return False;
-        else
-            return True;
     endmethod
 
 endmodule

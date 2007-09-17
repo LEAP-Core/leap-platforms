@@ -11,15 +11,14 @@
 #define SELECT_TIMEOUT      1000
 #define CIO_NULL            0xFFFFFFFF
 #define MAX_OPEN_CHANNELS   32
-#define MAX_SERVICES        32
+
+#define STDIN               0
+#define STDOUT              1
 
 typedef struct _Channel
 {
     int     open;
-    int     terminated;
-    int     inPipe[2], outPipe[2];
     fd_set  readfds;
-    int     childpid;
     int     tableIndex;
 
     /* input buffer */
@@ -32,21 +31,9 @@ typedef struct _Channel
 
 } Channel;
 
-#define PARENT_READ     inPipe[0]
-#define CHILD_WRITE     inPipe[1]
-#define CHILD_READ      outPipe[0]
-#define PARENT_WRITE    outPipe[1]
-
 /* interface methods */
 unsigned char cio_open(unsigned char programID);
 unsigned int cio_read(unsigned char handle);
 void cio_write(unsigned char handle, unsigned int data);
-unsigned char cio_isdestroyed(unsigned char handle);
-
-/* service method stubs */
-void FrontPanel();
-void Memory();
-
-typedef void (*ServiceFunction) (void);
 
 #endif

@@ -55,16 +55,6 @@ module mkRRRClient#(ChannelIO channel) (RRRClient);
         end
     endrule
 
-    // ----- WE NEED TO MOVE THIS SOMEWHERE ELSE -----
-    // check if our UNIX channel was forcibly closed, and if so,
-    // terminate simulation
-    rule detectTermination (True);
-        Bool wire_out <- channel.isDestroyed();
-        if (wire_out == True)
-            $finish(0);
-    endrule
-    // -----------------------------------------------
-
     method Action sendReq(Bit#(32) serviceID, Bit#(32) param0, Bit#(32) param1, Bit#(32) param2) if (state == 0);
         // send command down channel, buffer params locally
         channel.write(serviceID);

@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "software-rrr-server.h"
+
 /* our memory, for now, is a UINT32 aligned array */
 
 #define MEM_SIZE    256 /* 256 * 4 = 1KB memory size */
@@ -15,11 +17,16 @@
 
 typedef unsigned int UINT32;
 
+static int serviceID;
+
 static UINT32   M[MEM_SIZE];
 
 /* internal methods */
-void memory_init(char *stringID)
+void memory_init(int ID, char *stringID)
 {
+    /* set service ID */
+    serviceID = ID;
+
     /* zero out memory */
     bzero(M, MEM_SIZE * sizeof(UINT32));
 
@@ -46,8 +53,13 @@ UINT32 memory_request(UINT32 arg0, UINT32 arg1, UINT32 arg2)
     else
     {
         fprintf(stderr, "memory: invalid command\n");
-        exit(1);
+        server_callback_exit(serviceID, 1);
     }
 
     return 0;
+}
+
+/* uninit */
+void memory_uninit()
+{
 }

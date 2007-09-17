@@ -3,6 +3,10 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <sys/select.h>
+#include <sys/types.h>
+#include <signal.h>
+
+#include "software-rrr-server.h"
 
 #define SELECT_TIMEOUT      1000
 #define DIALOG_PACKET_SIZE  4
@@ -12,6 +16,8 @@
 #define MY_STRING_ID        "FRONT_PANEL"
 
 typedef unsigned int UINT32;
+
+static int serviceID;
 
 static int dialogpid;
 static int child_to_parent[2], parent_to_child[2];
@@ -44,7 +50,7 @@ void sync_inputs()
         if (data_available == -1)
         {
             perror("select");
-            exit(1);
+            server_callback_exit(serviceID, 1);
         }
 
         if (data_available != 0)
@@ -57,7 +63,7 @@ void sync_inputs()
             if (data_available > 1)
             {
                 fprintf(stderr, "activity detected on too many descriptors\n");
-                exit(1);
+                server_callback_exit(serviceID, 1);
             }
 
             if (FD_ISSET(read_from_dialog, &readfds))
@@ -72,9 +78,8 @@ void sync_inputs()
                 nbytes = read(read_from_dialog, asciibuf, DIALOG_PACKET_SIZE * 8);
                 if (nbytes == 0)
                 {
-                    /* uh-oh... EOF... we should find a way to make sure all
-                     * processes exit cleanly */
-                    exit(0);
+                    /* EOF => Exit button was pressed */
+                    server_callback_exit(serviceID, 0);
                 }
                 
                 assert(nbytes == DIALOG_PACKET_SIZE * 8);
@@ -96,7 +101,7 @@ void sync_inputs()
             else
             {
                 fprintf(stderr, "activity detected on unknown descriptor\n");
-                exit(1);
+                server_callback_exit(serviceID, 1);
             }
         }
     }
@@ -128,8 +133,11 @@ void sync_outputs()
 }
 
 /* init */
-void front_panel_init(char *stringID)
+void front_panel_init(int ID, char *stringID)
 {
+    /* set service ID */
+    serviceID = ID;
+
     /* unfortunately, Perl doesn't play nice with binary
      * data, so we cannot simply instantiate a Perl front panel and
      * be done with it; we have to translate the incoming data into
@@ -138,7 +146,7 @@ void front_panel_init(char *stringID)
      * the dialog box */
     if (pipe(child_to_parent) < 0 || pipe(parent_to_child) < 0)
     {
-        exit(1);
+        server_callback_exit(serviceID, 1);
     }
 
     dialogpid = fork();
@@ -164,7 +172,7 @@ void front_panel_init(char *stringID)
         outputCache = 0;
     }
 
-    /* set string ID */
+    /* return-via-copy string ID */
     sprintf(stringID, "%s", MY_STRING_ID);
 }
 
@@ -183,4 +191,11 @@ UINT32 front_panel_request(UINT32 arg0, UINT32 arg1, UINT32 arg2)
 
     /* return state from input cache */
     return inputCache;
+}
+
+/* uninit */
+void front_panel_uninit()
+{
+    /* kill dialog box */
+    kill(dialogpid, SIGTERM);
 }

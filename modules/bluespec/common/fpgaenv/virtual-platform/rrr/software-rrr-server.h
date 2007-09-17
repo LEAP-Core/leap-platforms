@@ -1,5 +1,5 @@
-#ifndef __SOFTWARE_RPC_SERVER__
-#define __SOFTWARE_RPC_SERVER__
+#ifndef __SOFTWARE_RRR_SERVER__
+#define __SOFTWARE_RRR_SERVER__
 
 #define CHANNELIO_PACKET_SIZE   4
 #define STDIN                   0
@@ -8,9 +8,10 @@
 #define MAX_ARGS                3
 
 typedef unsigned int UINT32;
-typedef void   (*InitFunction)    (char *stringID);
+typedef void   (*InitFunction)    (int ID, char *stringID);
 typedef void   (*MainFunction)    (void);
 typedef UINT32 (*ServiceFunction) (UINT32, UINT32, UINT32);
+typedef void   (*UninitFunction)  (void);
 
 typedef struct _Service
 {
@@ -20,6 +21,9 @@ typedef struct _Service
     InitFunction        init;           /* init function */
     MainFunction        main;           /* main function */
     ServiceFunction     request;        /* service function */
+    UninitFunction      uninit;         /* uninit */
 } Service;
+
+void server_callback_exit(int serviceID, int exitcode);
 
 #endif

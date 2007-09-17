@@ -8,4 +8,4 @@
 %sources -t BDPI_C -v PUBLIC sim-channelio.h
 %sources -t BDPI_C -v PRIVATE sim-channelio.c
 
-%param BDPI_NAMES "cio_init cio_open cio_read cio_write cio_isdestroyed" "list of BDPI-exported names"
+%param BDPI_NAMES "cio_init cio_open cio_read cio_write" "list of BDPI-exported names"

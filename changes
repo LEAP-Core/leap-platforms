@@ -643,3 +643,41 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memor
   Hybrid Memory.
 
 - further reduced front panel's poll rate.
+----------
+aparasha    Date: Mon Sep 17 13:56:42 EDT 2007  CSN: CSN-platforms-13
+                  Mon Sep 17 17:56:42 UTC 2007
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/sim
+ SimChannelIO.bsv          Locally Modified           12 
+ sim-channelio.c           Locally Modified           12 
+ sim-channelio.h           Locally Modified           12 
+ sim-channelio.awb         Locally Modified           12 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr
+ software-rrr-server.cpp   Locally Modified           12 
+ software-rrr-server.h     Locally Modified           12 
+ HardwareRRRClient.bsv     Locally Modified           12 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid
+ hybrid-fp-sw.cpp          Locally Modified           12 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-memory-sw.cpp      Locally Modified           12 
+
+- changed the method used to launch a hybrid model. The software
+  executable needs to be invoked by the user, which will in turn
+  launch the hardware part of the simulation (this will be later
+  extended to enable the software executable to download the bitfile
+  onto the FPGA for a "real" hybrid execution).
+
+- cleaned up the BSV-side of the sim-channelio module significantly;
+  some of the functionality has now been transferred to the software
+  side.
+
+- updated the way in which software services handle exceptions:
+  instead of exiting immediately, they send a message to the server
+  so that it can perform some cleanup operations (terminating all
+  other services and the hardware simulation) before exiting.
+  This method is also used to terminate simulation if the user
+  clicks on the Exit button on the front panel.
