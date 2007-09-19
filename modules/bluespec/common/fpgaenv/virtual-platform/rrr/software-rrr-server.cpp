@@ -6,10 +6,14 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <signal.h>
+#include <string.h>
 
 #include "software-rrr-server.h"
 
-/* this is the main HAsim software server */
+/*** this is the main HAsim software server ***/
+
+/* globally visible variables */
+GlobalArgs globalArgs;
 
 /* service map */
 static Service ServiceMap[MAX_SERVICES];
@@ -27,6 +31,8 @@ static int initialized = 0;
 #define CHILD_WRITE     inpipe[1]
 #define CHILD_READ      outpipe[0]
 #define PARENT_WRITE    outpipe[1]
+
+static void uninit();
 
 /* set up hardware partition */
 static void init_hardware()
@@ -54,8 +60,8 @@ static void init_hardware()
         close(PARENT_READ);
         close(PARENT_WRITE);
 
-        dup2(CHILD_READ, 0);
-        dup2(CHILD_WRITE, 1);
+        dup2(CHILD_READ, CHANNELIO_HOST_2_FPGA);
+        dup2(CHILD_WRITE, CHANNELIO_FPGA_2_HOST);
 
         /* launch hardware executable/download bitfile */
         sprintf(hardware_exe, "./%s_hw.exe", APM_NAME);
@@ -73,6 +79,31 @@ static void init_hardware()
 
         /* flags */
         terminated = 0;
+
+        /* make sure channel is working by exchanging
+         * message with FPGA */
+        char buf[32] = "NULL";
+        
+        if (write(PARENT_WRITE, "SYN", 4) == -1)
+        {
+            perror("host/init/write");
+            uninit();
+            exit(1);
+        }
+
+        if (read(PARENT_READ, buf, 4) == -1)
+        {
+            perror("host/init/read");
+            uninit();
+            exit(1);
+        }
+
+        if (strcmp(buf, "ACK") != 0)
+        {
+            fprintf(stderr, "host: incorrect ack message from FPGA: %s\n", buf);
+            uninit();
+            exit(1);
+        }
     }
 }
 
@@ -91,23 +122,23 @@ static void init()
     /* initialize service table by defining a
      * macro and including the service definition
      * file */
-#define ADD_SERVICE(name)                                   \
-    {                                                       \
-        /* first generate function prototypes */            \
-        void    name##_init(int, char *);                   \
-        UINT32  name##_request(UINT32, UINT32, UINT32);     \
-        void    name##_uninit(void);                        \
-                                                            \
-        /* now fill in service table */                     \
-        ServiceMap[n_services].ID       =   n_services;     \
-        ServiceMap[n_services].params   =   3;              \
-        ServiceMap[n_services].init     =   name##_init;    \
-        ServiceMap[n_services].main     =   NULL;           \
-        ServiceMap[n_services].request  =   name##_request; \
-        ServiceMap[n_services].uninit   =   name##_uninit;  \
-                                                            \
-        /* update service count */                          \
-        n_services++;                                       \
+#define ADD_SERVICE(name)                                           \
+    {                                                               \
+        /* first generate function prototypes */                    \
+        void    name##_init(int, char *);                           \
+        bool    name##_request(UINT32, UINT32, UINT32, UINT32 *);   \
+        void    name##_uninit(void);                                \
+                                                                    \
+        /* now fill in service table */                             \
+        ServiceMap[n_services].ID       =   n_services;             \
+        ServiceMap[n_services].params   =   3;                      \
+        ServiceMap[n_services].init     =   name##_init;            \
+        ServiceMap[n_services].main     =   NULL;                   \
+        ServiceMap[n_services].request  =   name##_request;         \
+        ServiceMap[n_services].uninit   =   name##_uninit;          \
+                                                                    \
+        /* update service count */                                  \
+        n_services++;                                               \
     }
 
 #include "master-service-list.rrr"
@@ -172,11 +203,21 @@ static UINT32 pack(unsigned char dst[])
 }
 
 /* main */
-int main()
+int main(int argc, char *argv[])
 {
     unsigned char   buf[CHANNELIO_PACKET_SIZE];
     int             nbytes;
     UINT32          serviceID;
+
+    /* parse args and place in global array */
+    if (argc == 2)
+    {
+        strcpy(globalArgs.benchmark, argv[1]);
+    }
+    else
+    {
+        strcpy(globalArgs.benchmark, "program.vmh");
+    }
 
     /* the server side is fully serialized and has no
      * notion of virtual channels. It simply picks up
@@ -194,6 +235,7 @@ int main()
         int i;
         UINT32 argv[MAX_ARGS];
         UINT32 result;
+        bool send_result;
 
         /* trap errors */
         if (nbytes == -1)
@@ -240,12 +282,15 @@ int main()
 
         /* invoke local service method to obtain result */
         // result = ServiceMap[serviceID].request(argc, argv);
-        result = ServiceMap[serviceID].request(argv[0], argv[1], argv[2]);
+        send_result = ServiceMap[serviceID].request(argv[0], argv[1], argv[2], &result);
 
-        /* send result to pipe */
-        unpack(result, buf);
-        nbytes = write(PARENT_WRITE, buf, CHANNELIO_PACKET_SIZE);
-        assert(nbytes == CHANNELIO_PACKET_SIZE);    /* ugh */
+        /* send result to pipe? */
+        if (send_result)
+        {
+            unpack(result, buf);
+            nbytes = write(PARENT_WRITE, buf, CHANNELIO_PACKET_SIZE);
+            assert(nbytes == CHANNELIO_PACKET_SIZE);    /* ugh */
+        }
     }
 
     /* pipe read returned 0 => process has terminated.

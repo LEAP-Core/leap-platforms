@@ -681,3 +681,56 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memor
   other services and the hardware simulation) before exiting.
   This method is also used to terminate simulation if the user
   clicks on the Exit button on the front panel.
+----------
+aparasha    Date: Wed Sep 19 13:24:21 EDT 2007  CSN: CSN-platforms-14
+                  Wed Sep 19 17:24:21 UTC 2007
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/sim
+ sim-channelio.c           Locally Modified           13 
+ sim-channelio.h           Locally Modified           13 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr
+ software-rrr-server.cpp   Locally Modified           13 
+ software-rrr-server.h     Locally Modified           13 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid
+ hybrid-fp-sw.cpp          Locally Modified           13 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-memory.awb         Locally Modified           13 
+ hybrid-memory-sw.cpp      Locally Modified           13 
+ vmh-utils.cpp             Locally Added               0 
+ vmh-utils.h               Locally Added               0 
+
+- added support for loading a VMH image into the hybrid
+  memory module's software partition. Hybrid SMIPS models
+  are now able to run VMH benchmarks by streaming them in
+  from the software partition.
+
+  This was tested using a hybrid version of the SMPIS
+  5-stage pipeline coupled with the V2 functional partition
+  on the microbenchmarks. All 5 microbenchmarks complete
+  successfully.
+
+  However, there are some timing discrepancies between the
+  event logs of the hybrid and pure simulations, although
+  the sequence of events appears to be the same. I will
+  examine these more thoroughly.
+
+- added support for specifying a VMH file as a command-line
+  parameter to the host software executable. If no
+  parameter is provided, "program.vmh" is assumed to be
+  the VMH image to be loaded, and should be present in the
+  current directory. Since the benchmark setup script has
+  not been updated to support hybrid models, as of now the
+  VMH benchmark name needs to be explicitly provided for
+  launching hybrid simulations.
+
+- fixed a major bug in the software RRR server and memory
+  service: void service methods were not being handled
+  properly and were returning a 0 result on channelio.
+
+- sim-channelio now uses a unique set of well-known
+  descriptors (100 and 101) to communicate, freeing up
+  STDIN and STDOUT for use by $display etc.

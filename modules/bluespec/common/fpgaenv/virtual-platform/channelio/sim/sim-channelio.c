@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 #include "sim-channelio.h"
 
@@ -23,6 +25,7 @@ void cleanup()
 void cio_init(void)
 {
     int i;
+    char buf[32];
 
     assert(initialized == 0);
     assert(MAX_OPEN_CHANNELS >= 2);
@@ -45,6 +48,26 @@ void cio_init(void)
 
     /* flags */
     initialized = 1;
+
+    /* make sure channel is working by exchanging
+     * message with software */
+    if (read(CHANNELIO_HOST_2_FPGA, buf, 4) == -1)
+    {
+        perror("FPGA/cio_init/read");
+        exit(1);
+    }
+
+    if (strcmp(buf, "SYN") != 0)
+    {
+        fprintf(stderr, "FPGA: incorrect sync message from host: %s\n", buf);
+        exit(1);
+    }
+
+    if (write(CHANNELIO_FPGA_2_HOST, "ACK", 4) == -1)
+    {
+        perror("FPGA/cio_init/write");
+        exit(1);
+    }
 }
 
 /* create process and initialize data structures */
@@ -120,12 +143,12 @@ unsigned int cio_read(unsigned char handle)
         fd_set  readfds;
 
         FD_ZERO(&readfds);
-        FD_SET(STDIN, &readfds);
+        FD_SET(CHANNELIO_HOST_2_FPGA, &readfds);
 
         timeout.tv_sec  = 0;
         timeout.tv_usec = SELECT_TIMEOUT;
 
-        data_available = select(STDIN + 1, &readfds,
+        data_available = select(CHANNELIO_HOST_2_FPGA + 1, &readfds,
                                 NULL, NULL, &timeout);
 
         if (data_available == -1)
@@ -141,7 +164,7 @@ unsigned int cio_read(unsigned char handle)
             int bytes_read;
 
             /* sanity check */
-            if (data_available != 1 || FD_ISSET(STDIN, &readfds) == 0)
+            if (data_available != 1 || FD_ISSET(CHANNELIO_HOST_2_FPGA, &readfds) == 0)
             {
                 fprintf(stderr, "activity detected on unknown descriptor\n");
                 exit(1);
@@ -150,7 +173,7 @@ unsigned int cio_read(unsigned char handle)
             /* read in data, keep it aligned */
             bytes_requested = BLOCK_SIZE - channel->ibTail;
 
-            bytes_read = read(STDIN,
+            bytes_read = read(CHANNELIO_HOST_2_FPGA,
                               &channel->inputBuffer[channel->ibTail],
                               bytes_requested);
 
@@ -219,10 +242,10 @@ void cio_write(unsigned char handle, unsigned int data)
     }
 
     /* send message on pipe */
-    bytes_written = write(STDOUT, databuf, PACKET_SIZE);
+    bytes_written = write(CHANNELIO_FPGA_2_HOST, databuf, PACKET_SIZE);
     if (bytes_written == -1)
     {
-        perror("write");
+        perror("FPGA/cio_write/write");
         cleanup();
         exit(1);
     }

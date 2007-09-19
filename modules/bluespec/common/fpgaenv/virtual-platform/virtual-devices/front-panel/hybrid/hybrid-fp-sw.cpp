@@ -177,7 +177,12 @@ void front_panel_init(int ID, char *stringID)
 }
 
 /* service method */
-UINT32 front_panel_request(UINT32 arg0, UINT32 arg1, UINT32 arg2)
+bool
+front_panel_request(
+    UINT32 arg0,
+    UINT32 arg1,
+    UINT32 arg2,
+    UINT32 *result)
 {
     /* sync outputs */
     if (outputCache != arg0)
@@ -190,7 +195,8 @@ UINT32 front_panel_request(UINT32 arg0, UINT32 arg1, UINT32 arg2)
     sync_inputs();
 
     /* return state from input cache */
-    return inputCache;
+    *result = inputCache;
+    return true;
 }
 
 /* uninit */

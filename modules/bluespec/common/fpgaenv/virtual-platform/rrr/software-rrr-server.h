@@ -7,10 +7,13 @@
 #define MAX_SERVICES            128
 #define MAX_ARGS                3
 
+#define CHANNELIO_HOST_2_FPGA   100
+#define CHANNELIO_FPGA_2_HOST   101
+
 typedef unsigned int UINT32;
 typedef void   (*InitFunction)    (int ID, char *stringID);
 typedef void   (*MainFunction)    (void);
-typedef UINT32 (*ServiceFunction) (UINT32, UINT32, UINT32);
+typedef bool   (*ServiceFunction) (UINT32, UINT32, UINT32, UINT32 *);
 typedef void   (*UninitFunction)  (void);
 
 typedef struct _Service
@@ -23,6 +26,13 @@ typedef struct _Service
     ServiceFunction     request;        /* service function */
     UninitFunction      uninit;         /* uninit */
 } Service;
+
+typedef struct _GlobalArgs
+{
+    char    benchmark[256];
+} GlobalArgs;
+
+extern GlobalArgs   globalArgs;
 
 void server_callback_exit(int serviceID, int exitcode);
 

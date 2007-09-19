@@ -12,8 +12,10 @@
 #define CIO_NULL            0xFFFFFFFF
 #define MAX_OPEN_CHANNELS   32
 
-#define STDIN               0
-#define STDOUT              1
+#define STDIN                   0
+#define STDOUT                  1
+#define CHANNELIO_HOST_2_FPGA   100
+#define CHANNELIO_FPGA_2_HOST   101
 
 typedef struct _Channel
 {
