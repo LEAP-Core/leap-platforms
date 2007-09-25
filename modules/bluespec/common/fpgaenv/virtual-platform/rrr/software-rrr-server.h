@@ -11,29 +11,25 @@
 #define CHANNELIO_FPGA_2_HOST   101
 
 typedef unsigned int UINT32;
-typedef void   (*InitFunction)    (int ID, char *stringID);
-typedef void   (*MainFunction)    (void);
-typedef bool   (*ServiceFunction) (UINT32, UINT32, UINT32, UINT32 *);
-typedef void   (*UninitFunction)  (void);
 
-typedef struct _Service
+typedef class RRR_SERVICE_CLASS* RRR_SERVICE;
+class RRR_SERVICE_CLASS
 {
-    int                 ID;             /* unique service ID */
-    char                stringID[256];  /* unique string ID */
-    int                 params;         /* number of UINT32 parameters */
-    InitFunction        init;           /* init function */
-    MainFunction        main;           /* main function */
-    ServiceFunction     request;        /* service function */
-    UninitFunction      uninit;         /* uninit */
-} Service;
+    protected:
+        int     serviceID;      /* unique service ID */
+        char    stringID[256];  /* unique string ID */
+        int     params;         /* number of UINT32 parameters */
 
-typedef struct _GlobalArgs
-{
-    char    benchmark[256];
-} GlobalArgs;
+    public:
+        virtual void    Init(int ID)                                = 0;
+        virtual void    Uninit()                                    = 0;
+        virtual bool    Request(UINT32, UINT32, UINT32, UINT32 *)   = 0;
+        virtual void    Clock(void)                                 = 0;
+};
 
-extern GlobalArgs   globalArgs;
-
+void rrr_server_init();
+void rrr_server_uninit();
+void rrr_server_clock();
 void server_callback_exit(int serviceID, int exitcode);
 
 #endif

@@ -5,49 +5,77 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "software-controller.h"
 #include "software-rrr-server.h"
 #include "vmh-utils.h"
+#include "hybrid-memory-sw.h"
 
-/* our memory, for now, is a UINT32 aligned array */
+// object instantiations
+MEMORY_CLASS        memoryInstance;
+RRR_SERVICE_CLASS  *MEMORY_service = &memoryInstance;
 
-#define MEM_SIZE    262144 /* 256K * 4 = 1MB memory size */
-#define CMD_LOAD    0
-#define CMD_STORE   1
-
-#define MY_STRING_ID    "MEMORY"
-
-typedef unsigned int UINT32;
-
-static int serviceID;
-
-static UINT32   M[MEM_SIZE];
-
-/* internal methods */
-void memory_init(int ID, char *stringID)
+// constructor
+MEMORY_CLASS::MEMORY_CLASS()
 {
-    /* set service ID */
-    serviceID = ID;
-
-    /* zero out memory */
-    bzero(M, MEM_SIZE * sizeof(UINT32));
-
-    /* set string ID */
-    sprintf(stringID, "%s", MY_STRING_ID);
-
-    /* load memory image */
-    vmh_load_image(globalArgs.benchmark, M, MEM_SIZE);
 }
 
-/* main exported interface method */
+// destructor
+MEMORY_CLASS::~MEMORY_CLASS()
+{
+    Uninit();
+}
+
+// init
+void
+MEMORY_CLASS::Init(
+    int ID)
+{
+    // set service ID
+    serviceID = ID;
+
+    // allocate and zero out memory
+    M = new UINT32[MEM_SIZE];
+    bzero(M, MEM_SIZE * sizeof(UINT32));
+
+    // don't load memory image now; load it
+    // only when we actually receive a request
+    vmhLoaded = false;
+}
+
+// uninit
+void
+MEMORY_CLASS::Uninit()
+{
+    if (M)
+    {
+        delete [] M;
+        M = NULL;
+    }
+}
+
+// clock
+void
+MEMORY_CLASS::Clock()
+{
+    // do nothing
+}
+
+// request
 bool
-memory_request(
+MEMORY_CLASS::Request(
     UINT32 arg0,
     UINT32 arg1,
     UINT32 arg2,
     UINT32 *result)
 {
-    /* only word-aligned accesses are allowed in our
-     * current implementation */
+    // check to see if our image is ready
+    if (vmhLoaded == false)
+    {
+        vmh_load_image(globalArgs.benchmark, M, MEM_SIZE);
+        vmhLoaded = true;
+    }
+
+    // only word-aligned accesses are allowed in our current implementation
     UINT32 addr = arg1 >> 2;
     if (addr >= MEM_SIZE)
     {
@@ -55,7 +83,7 @@ memory_request(
         server_callback_exit(serviceID, 1);
     }
 
-    /* decode command */
+    // decode command
     if (arg0 == CMD_LOAD)
     {
         *result = M[addr];
@@ -73,9 +101,4 @@ memory_request(
     }
 
     return false;
-}
-
-/* uninit */
-void memory_uninit()
-{
 }

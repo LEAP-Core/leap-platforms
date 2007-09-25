@@ -12,12 +12,14 @@
 
 /*** this is the main HAsim software server ***/
 
-/* globally visible variables */
-GlobalArgs globalArgs;
+// service map
+static RRR_SERVICE  ServiceMap[MAX_SERVICES];
+static int          n_services;
 
-/* service map */
-static Service ServiceMap[MAX_SERVICES];
-static int     n_services;
+// extern pointers to RRR service instances
+#define ADD_SERVICE(NAME) extern RRR_SERVICE_CLASS* NAME##_service;
+#include "master-service-list.rrr"
+#undef ADD_SERVICE
 
 /* process/pipe state: this should go into a lower-level
  * simulation-specific module, it has nothing to
@@ -31,8 +33,6 @@ static int initialized = 0;
 #define CHILD_WRITE     inpipe[1]
 #define CHILD_READ      outpipe[0]
 #define PARENT_WRITE    outpipe[1]
-
-static void uninit();
 
 /* set up hardware partition */
 static void init_hardware()
@@ -87,21 +87,21 @@ static void init_hardware()
         if (write(PARENT_WRITE, "SYN", 4) == -1)
         {
             perror("host/init/write");
-            uninit();
+            rrr_server_uninit();
             exit(1);
         }
 
         if (read(PARENT_READ, buf, 4) == -1)
         {
             perror("host/init/read");
-            uninit();
+            rrr_server_uninit();
             exit(1);
         }
 
         if (strcmp(buf, "ACK") != 0)
         {
             fprintf(stderr, "host: incorrect ack message from FPGA: %s\n", buf);
-            uninit();
+            rrr_server_uninit();
             exit(1);
         }
     }
@@ -114,28 +114,23 @@ static void uninit_hardware()
 }
 
 /* init */
-static void init()
+void rrr_server_init()
 {
-    int i;
+    /* initialize servive map table */
+    for (int i = 0; i < MAX_SERVICES; i++)
+    {
+        ServiceMap[i] = NULL;
+    }
     n_services = 0;
 
-    /* initialize service table by defining a
+    /* populate service map table by defining a
      * macro and including the service definition
      * file */
-#define ADD_SERVICE(name)                                           \
+#define ADD_SERVICE(NAME)                                           \
     {                                                               \
-        /* first generate function prototypes */                    \
-        void    name##_init(int, char *);                           \
-        bool    name##_request(UINT32, UINT32, UINT32, UINT32 *);   \
-        void    name##_uninit(void);                                \
-                                                                    \
-        /* now fill in service table */                             \
-        ServiceMap[n_services].ID       =   n_services;             \
-        ServiceMap[n_services].params   =   3;                      \
-        ServiceMap[n_services].init     =   name##_init;            \
-        ServiceMap[n_services].main     =   NULL;                   \
-        ServiceMap[n_services].request  =   name##_request;         \
-        ServiceMap[n_services].uninit   =   name##_uninit;          \
+        /* instantiate service */                                   \
+        ServiceMap[n_services] = NAME##_service;                    \
+        ServiceMap[n_services]->Init(n_services);                   \
                                                                     \
         /* update service count */                                  \
         n_services++;                                               \
@@ -145,16 +140,6 @@ static void init()
 
 #undef ADD_SERVICE
 
-    /* initialize individual services */
-    for (i = 0; i < n_services; i++)
-    {
-        ServiceMap[i].init(ServiceMap[i].ID, ServiceMap[i].stringID);
-#ifdef __DEBUG__
-        fprintf(stderr, "RRR server: registered service: %s\n",
-                ServiceMap[i].stringID);
-#endif
-    }
-
     /* launch hardware */
     init_hardware();
 
@@ -163,14 +148,16 @@ static void init()
 }
 
 /* uninit */
-static void uninit()
+void rrr_server_uninit()
 {
-    /* call uninit function for all services */
-    int i;
-
-    for (i = 0; i < n_services; i++)
+    /* reset service map */
+    for (int i = 0; i < n_services; i++)
     {
-        ServiceMap[i].uninit();
+        if (ServiceMap[i])
+        {
+            ServiceMap[i]->Uninit();
+            ServiceMap[i] = NULL;
+        }
     }
 
     /* terminate hardware process */
@@ -202,22 +189,12 @@ static UINT32 pack(unsigned char dst[])
     return retval;
 }
 
-/* main */
-int main(int argc, char *argv[])
+/* clock */
+void rrr_server_clock()
 {
     unsigned char   buf[CHANNELIO_PACKET_SIZE];
     int             nbytes;
     UINT32          serviceID;
-
-    /* parse args and place in global array */
-    if (argc == 2)
-    {
-        strcpy(globalArgs.benchmark, argv[1]);
-    }
-    else
-    {
-        strcpy(globalArgs.benchmark, "program.vmh");
-    }
 
     /* the server side is fully serialized and has no
      * notion of virtual channels. It simply picks up
@@ -226,10 +203,9 @@ int main(int argc, char *argv[])
      * to complete, and returns the result to STDOUT.
      * The client side can perform whatever virtualization
      * it chooses to */
-    init();
 
-    /* go into an infinite loop, scanning input pipe for requests */
-    while ((nbytes = read(PARENT_READ, buf, CHANNELIO_PACKET_SIZE)) != 0)
+    /* block-read input pipe */
+    if ((nbytes = read(PARENT_READ, buf, CHANNELIO_PACKET_SIZE)) != 0)
     {
         int argc;
         int i;
@@ -261,7 +237,6 @@ int main(int argc, char *argv[])
         }
 
         /* figure out the expected number of arguments */
-        // argc = ServiceMap[serviceID].params;
         argc = 3;
 
         /* read args from pipe and place into args array */
@@ -281,8 +256,7 @@ int main(int argc, char *argv[])
         }
 
         /* invoke local service method to obtain result */
-        // result = ServiceMap[serviceID].request(argc, argv);
-        send_result = ServiceMap[serviceID].request(argv[0], argv[1], argv[2], &result);
+        send_result = ServiceMap[serviceID]->Request(argv[0], argv[1], argv[2], &result);
 
         /* send result to pipe? */
         if (send_result)
@@ -292,12 +266,18 @@ int main(int argc, char *argv[])
             assert(nbytes == CHANNELIO_PACKET_SIZE);    /* ugh */
         }
     }
+    else
+    {
+        /* pipe read returned 0 => process has terminated, so exit */
+        rrr_server_uninit();
+        exit(0);
+    }
 
-    /* pipe read returned 0 => process has terminated.
-     * cleanup and exit */
-    uninit();
-
-    return 0;
+    /* clock each service module */
+    for (int i = 0; i < n_services; i++)
+    {
+        ServiceMap[i]->Clock();
+    }
 }
 
 /* internal function: check if child process has quit
@@ -305,8 +285,7 @@ int main(int argc, char *argv[])
  * the child process exits, the read() call in main()
  * will return a 0, causing the program to terminate,
  * which is exactly the behavior we want right now. In
- * future, though, this function could prove useful.
- */
+ * future, though, this function could prove useful. */
 static int termCheck()
 {
     /* sanity check */
@@ -346,6 +325,6 @@ static int termCheck()
    (e.g., Exit button-press on Front Panel) */
 void server_callback_exit(int serviceID, int exitcode)
 {
-    uninit();
+    rrr_server_uninit();
     exit(exitcode);
 }

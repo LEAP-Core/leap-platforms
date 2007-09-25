@@ -19,7 +19,7 @@ module mkFrontPanel#(LowLevelPlatformInterface llpint) (FrontPanel);
     // ugly: constantly keep sending RRR requests to sync up
     // state of both inputs and outputs
     rule sendRRRRequest (pollCounter == 0);
-        Bit#(32) serviceID = `SID_front_panel;
+        Bit#(32) serviceID = `SID_FRONT_PANEL;
         Bit#(32) param0    = outputCache;
         Bit#(32) param1    = 0;
         Bit#(32) param2    = 0;
@@ -36,7 +36,7 @@ module mkFrontPanel#(LowLevelPlatformInterface llpint) (FrontPanel);
     // read RRR response and update input cache... note that
     // we do not need any internal state machine to determine
     // when we can perform a valid read
-    rule readRRRResponse (llpint.rrrClient.isRespAvailable(`SID_front_panel));
+    rule readRRRResponse (llpint.rrrClient.isRespAvailable(`SID_FRONT_PANEL));
         Bit#(32) data <- llpint.rrrClient.getResp();
         inputCache <= data;
     endrule

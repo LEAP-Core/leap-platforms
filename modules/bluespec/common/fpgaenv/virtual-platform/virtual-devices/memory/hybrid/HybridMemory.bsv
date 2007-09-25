@@ -30,7 +30,7 @@ module mkMemory#(LowLevelPlatformInterface llpint) (Memory);
 
         // send request via RRR
         // LOAD has commandID = 0, STORE has commandID = 1
-        llpint.rrrClient.sendReq(`SID_memory,       /* memory */
+        llpint.rrrClient.sendReq(`SID_MEMORY,       /* memory */
                                  0,                 /* load */
                                  addr,              /* address */
                                  0                  /* don't care */
@@ -41,7 +41,7 @@ module mkMemory#(LowLevelPlatformInterface llpint) (Memory);
 
         // send request via RRR
         // LOAD has commandID = 0, STORE has commandID = 1
-        llpint.rrrClient.sendVoidReq(`SID_memory,       /* memory */
+        llpint.rrrClient.sendVoidReq(`SID_MEMORY,       /* memory */
                                      1,                 /* store */
                                      stinfo.addr,       /* address */
                                      stinfo.val         /* data */
@@ -52,7 +52,7 @@ module mkMemory#(LowLevelPlatformInterface llpint) (Memory);
     
   endmethod
   
-  method ActionValue#(Bit#(32)) getMemResponse() if (llpint.rrrClient.isRespAvailable(`SID_memory));
+  method ActionValue#(Bit#(32)) getMemResponse() if (llpint.rrrClient.isRespAvailable(`SID_MEMORY));
     MEM_Value v <- llpint.rrrClient.getResp();
     return v;
   endmethod

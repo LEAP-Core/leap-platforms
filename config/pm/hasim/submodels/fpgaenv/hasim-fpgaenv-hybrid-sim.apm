@@ -1,11 +1,11 @@
 
 [Global]
 SaveParameters=0
-Description=Bluespec RRR-Based FPGA Environment for Simulation
-File=hasim-fpgaenv-rrr-sim
+Description=Bluespec Hybrid FPGA Environment for Simulation
+File=hasim-fpgaenv-hybrid-sim
 Version=2.1
 Type=HAsim
-Name=Bluespec RRR-Based FPGA Environment for Simulation
+Name=Bluespec Hybrid FPGA Environment for Simulation
 Class=Asim::Model
 
 [Model]
@@ -29,17 +29,10 @@ File=modules/bluespec/common/fpgaenv/virtual-platform/std-virtual-platform.awb
 Packagehint=platforms
 
 [Standard Virtual Platform/Requires]
-virtual_devices=Standard Virtual Devices with Memory
+virtual_devices=Standard Virtual Devices
 low_level_platform_interface=Low Level Platform Interface
 
-[Standard Virtual Devices with Memory]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/std-virtual-devices.awb
-Packagehint=platforms
 
-[Standard Virtual Devices with Memory/Requires]
-front_panel=Hybrid Front Panel
-console=Null Serial Console
-memory=Hybrid Memory
 
 [Hybrid Front Panel]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid/hybrid-fp.awb
@@ -70,7 +63,15 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/toplevel-wires/null/null-toplevel-wires.awb
 Packagehint=platforms
 
-
 [Hybrid Memory]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid/hybrid-memory.awb
 Packagehint=platforms
+
+[Standard Virtual Devices]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/std-virtual-devices.awb
+Packagehint=platforms
+
+[Standard Virtual Devices/Requires]
+memory=Hybrid Memory
+console=Null Serial Console
+front_panel=Hybrid Front Panel

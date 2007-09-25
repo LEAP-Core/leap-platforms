@@ -734,3 +734,48 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memor
 - sim-channelio now uses a unique set of well-known
   descriptors (100 and 101) to communicate, freeing up
   STDIN and STDOUT for use by $display etc.
+
+----------
+aparasha    Date: Tue Sep 25 13:05:57 EDT 2007  CSN: CSN-platforms-15
+                  Tue Sep 25 17:05:57 UTC 2007
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ hasim-fpgaenv-hybrid-sim.apm Locally Added               - 
+ hasim-fpgaenv-rrr-sim.apm Locally Removed            14 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr
+ software-rrr-server.cpp   Locally Modified           14 
+ software-rrr-server.h     Locally Modified           14 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid
+ HybridFP.bsv              Locally Modified           14 
+ hybrid-fp-sw.h            Locally Added               0 
+ hybrid-fp-services.rrr    Locally Modified           14 
+ hybrid-fp.awb             Locally Modified           14 
+ hybrid-fp-sw.cpp          Locally Modified           14 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-memory.awb         Locally Modified           14 
+ hybrid-memory-sw.cpp      Locally Modified           14 
+ HybridMemory.bsv          Locally Modified           14 
+ hybrid-memory-sw.h        Locally Added               0 
+ hybrid-memory-services.rrr Locally Modified           14 
+
+- changed programming style of RRR services from procedural to
+  to a more ASIM-like object-oriented style. However, the RRR
+  service objects are currently not dynamically instantiated by
+  the server; they are statically instantiated as global variables
+  within the modules themselves, and the server accesses them
+  via extern pointers.
+
+- all RRR services now have a Clock() method that is called by
+  the software RRR server's clock() method.
+
+- hybrid Front Panel's Clock() synchronizes its cached state
+  with the Perl dialog box, while the Request() method simply
+  returns/updates the local cached state.
+
+- the server's main() has been removed, and the functionality
+  has been moved to its clock method() which is called by the
+  software controller in an infinite loop.
