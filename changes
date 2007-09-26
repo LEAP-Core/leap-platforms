@@ -807,3 +807,22 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/sim
 - encapsulated RRR server functions in a RRR server class.
 
 - renamed Clock() to Poll() in RRR server and services.
+----------
+aparasha    Date: Wed Sep 26 19:38:18 EDT 2007  CSN: CSN-platforms-17
+                  Wed Sep 26 23:38:20 UTC 2007
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr
+ HardwareRRRClient.bsv     Locally Modified           16 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid
+ HybridFP.bsv              Locally Modified           16 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ HybridMemory.bsv          Locally Modified           16 
+
+- merged the sendReq and sendVoidReq methods in hardware RRR
+  client into a single method makeRequest, with a bool paramter
+  which specifies whether a response is expected or not.
+
+- cleaned up some of the hardware RRR code.

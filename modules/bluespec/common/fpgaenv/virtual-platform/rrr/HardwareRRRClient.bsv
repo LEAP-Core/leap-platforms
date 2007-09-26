@@ -1,12 +1,21 @@
 import channelio::*;
 
-`define NULL_SERVICE    1000
+typedef Bit#(32) RRR_ServiceID;
+typedef Bit#(32) RRR_Param;
+typedef Bit#(32) RRR_Response;
+
+typedef struct
+{
+    RRR_ServiceID   serviceID;
+    RRR_Param       param0;
+    RRR_Param       param1;
+    RRR_Param       param2;
+    Bool            needResponse;
+} RRR_Request   deriving (Eq, Bits);
 
 interface RRRClient;
-    method Action                   sendReq(Bit#(32) serviceID, Bit#(32) param0, Bit#(32) param1, Bit#(32) param2);
-    method Bool                     isRespAvailable(Bit#(32) serviceID);
-    method ActionValue#(Bit#(32))   getResp();
-    method Action                   sendVoidReq(Bit#(32) serviceID, Bit#(32) param0, Bit#(32) param1, Bit#(32) param2);
+    method Action                       makeRequest(RRR_Request request);
+    method ActionValue#(RRR_Response)   getResponse();
 endinterface
 
 // state encodings
@@ -21,7 +30,6 @@ endinterface
 module mkRRRClient#(ChannelIO channel) (RRRClient);
 
     Reg#(Bit#(4))   state           <- mkReg(0);
-    Reg#(Bit#(32))  inFlightServiceID <- mkReg(`NULL_SERVICE);
     Reg#(Bit#(32))  param0Buffer    <- mkReg(0);
     Reg#(Bit#(32))  param1Buffer    <- mkReg(0);
     Reg#(Bit#(32))  param2Buffer    <- mkReg(0);
@@ -55,36 +63,21 @@ module mkRRRClient#(ChannelIO channel) (RRRClient);
         end
     endrule
 
-    method Action sendReq(Bit#(32) serviceID, Bit#(32) param0, Bit#(32) param1, Bit#(32) param2) if (state == 0);
+    method Action makeRequest(RRR_Request request) if (state == 0);
         // send command down channel, buffer params locally
-        channel.write(serviceID);
-        param0Buffer <= param0;
-        param1Buffer <= param1;
-        param2Buffer <= param2;
-        state <= 1;
-        inFlightServiceID <= serviceID;
-    endmethod
-
-    method Bool isRespAvailable(Bit#(32) serviceID) if (state == 5);
-        if (serviceID == inFlightServiceID)
-            return True;
+        channel.write(request.serviceID);
+        param0Buffer <= request.param0;
+        param1Buffer <= request.param1;
+        param2Buffer <= request.param2;
+        if (request.needResponse == True)
+            state <= 1;
         else
-            return False;
+            state <= 9;
     endmethod
 
-    method ActionValue#(Bit#(32)) getResp() if (state == 5);
+    method ActionValue#(RRR_Response) getResponse() if (state == 5);
         state <= 0;
-        inFlightServiceID <= `NULL_SERVICE;
         return responseBuffer;
-    endmethod
-
-    method Action sendVoidReq(Bit#(32) serviceID, Bit#(32) param0, Bit#(32) param1, Bit#(32) param2) if (state == 0);
-        // send command down channel, buffer params locally
-        channel.write(serviceID);
-        param0Buffer <= param0;
-        param1Buffer <= param1;
-        param2Buffer <= param2;
-        state <= 9;
     endmethod
 
 endmodule

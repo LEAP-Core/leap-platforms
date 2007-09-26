@@ -13,17 +13,20 @@ module mkFrontPanel#(LowLevelPlatformInterface llpint) (FrontPanel);
     // maintain input and output caches
     Reg#(Bit#(32))  inputCache  <- mkReg(0);
     Reg#(Bit#(32))  outputCache <- mkReg(0);
-
-    Reg#(Bit#(16))   pollCounter <- mkReg(0);
+    Reg#(Bit#(8))   state       <- mkReg(0);
+    Reg#(Bit#(16))  pollCounter <- mkReg(0);
 
     // ugly: constantly keep sending RRR requests to sync up
     // state of both inputs and outputs
-    rule sendRRRRequest (pollCounter == 0);
-        Bit#(32) serviceID = `SID_FRONT_PANEL;
-        Bit#(32) param0    = outputCache;
-        Bit#(32) param1    = 0;
-        Bit#(32) param2    = 0;
-        llpint.rrrClient.sendReq(serviceID, param0, param1, param2);
+    rule sendRRRRequest (state == 0 && pollCounter == 0);
+        RRR_Request req;
+        req.serviceID       = `SID_FRONT_PANEL;
+        req.param0          = outputCache;
+        req.param1          = 0;
+        req.param2          = 0;
+        req.needResponse    = True;
+        llpint.rrrClient.makeRequest(req);
+        state <= 1;
     endrule
 
     rule cyclePollCounter (True);
@@ -36,9 +39,10 @@ module mkFrontPanel#(LowLevelPlatformInterface llpint) (FrontPanel);
     // read RRR response and update input cache... note that
     // we do not need any internal state machine to determine
     // when we can perform a valid read
-    rule readRRRResponse (llpint.rrrClient.isRespAvailable(`SID_FRONT_PANEL));
-        Bit#(32) data <- llpint.rrrClient.getResp();
+    rule readRRRResponse (state == 1);
+        Bit#(32) data <- llpint.rrrClient.getResponse();
         inputCache <= data;
+        state <= 0;
     endrule
 
     // return switch state from input cache

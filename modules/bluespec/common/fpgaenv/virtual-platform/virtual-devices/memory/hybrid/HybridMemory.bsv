@@ -23,37 +23,49 @@ endinterface
 
 module mkMemory#(LowLevelPlatformInterface llpint) (Memory);
 
-  method Action makeMemRequest(MEM_Request req);
+  Reg#(Bit#(8)) state   <- mkReg(0);
+
+  method Action makeMemRequest(MEM_Request req) if (state == 0);
     case (req) matches
       tagged MEM_Load .addr:
       begin
 
         // send request via RRR
-        // LOAD has commandID = 0, STORE has commandID = 1
-        llpint.rrrClient.sendReq(`SID_MEMORY,       /* memory */
-                                 0,                 /* load */
-                                 addr,              /* address */
-                                 0                  /* don't care */
-                                 );
+        RRR_Request request;
+        request.serviceID       = `SID_MEMORY;  /* memory */
+        request.param0          = 0;            /* load */
+        request.param1          = addr;         /* address */
+        request.param2          = 0;            /* don't care */
+        request.needResponse    = True;         /* need response */
+
+        llpint.rrrClient.makeRequest(request);
+
+        state <= 1;
+
       end
       tagged MEM_Store .stinfo:
       begin
 
         // send request via RRR
-        // LOAD has commandID = 0, STORE has commandID = 1
-        llpint.rrrClient.sendVoidReq(`SID_MEMORY,       /* memory */
-                                     1,                 /* store */
-                                     stinfo.addr,       /* address */
-                                     stinfo.val         /* data */
-                                     );
+        RRR_Request request;
+        request.serviceID       = `SID_MEMORY;  /* memory */
+        request.param0          = 1;            /* store */
+        request.param1          = stinfo.addr;  /* address */
+        request.param2          = stinfo.val;   /* data */
+        request.needResponse    = False;        /* no response */
+
+        llpint.rrrClient.makeRequest(request);
+
+        state <= 0;
 
       end
     endcase
-    
+
   endmethod
   
-  method ActionValue#(Bit#(32)) getMemResponse() if (llpint.rrrClient.isRespAvailable(`SID_MEMORY));
-    MEM_Value v <- llpint.rrrClient.getResp();
+  method ActionValue#(Bit#(32)) getMemResponse() if (state == 1);
+    MEM_Value v <- llpint.rrrClient.getResponse();
+    state <= 0;
     return v;
   endmethod
   
