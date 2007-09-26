@@ -8,22 +8,20 @@
 #define CMD_LOAD    0
 #define CMD_STORE   1
 
-static int serviceID;
-
-class MEMORY_CLASS: public RRR_SERVICE_CLASS
+class MEMORY_CLASS: public RRR_SERVICE_CLASS,
+                    public HASIM_SW_MODULE_CLASS
 {
     private:
         UINT32* M;
-
         bool    vmhLoaded;
 
     public:
         MEMORY_CLASS();
         ~MEMORY_CLASS();
-        void    Init(int);
+        void    Init(HASIM_SW_MODULE, int);
         void    Uninit();
         bool    Request(UINT32, UINT32, UINT32, UINT32 *);
-        void    Clock();
+        void    Poll();
 };
 
 #endif

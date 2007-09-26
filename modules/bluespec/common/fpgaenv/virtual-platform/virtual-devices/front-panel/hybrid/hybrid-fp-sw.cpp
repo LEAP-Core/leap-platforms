@@ -26,10 +26,12 @@ FRONT_PANEL_CLASS::~FRONT_PANEL_CLASS()
 // init
 void
 FRONT_PANEL_CLASS::Init(
-    int ID)
+    HASIM_SW_MODULE     p,
+    int                 ID)
 {
-    // set service ID
+    // set service ID and parent pointer
     serviceID = ID;
+    parent = p;
 
     /* unfortunately, Perl doesn't play nice with binary
      * data, so we cannot simply instantiate a Perl front panel and
@@ -39,7 +41,7 @@ FRONT_PANEL_CLASS::Init(
      * the dialog box */
     if (pipe(child_to_parent) < 0 || pipe(parent_to_child) < 0)
     {
-        server_callback_exit(serviceID, 1);
+        parent->CallbackExit(1);
     }
 
     dialogpid = fork();
@@ -102,9 +104,9 @@ FRONT_PANEL_CLASS::Request(
     return true;
 }
 
-// clock
+// poll
 void
-FRONT_PANEL_CLASS::Clock()
+FRONT_PANEL_CLASS::Poll()
 {
     if (outputDirty)
     {
@@ -140,7 +142,7 @@ FRONT_PANEL_CLASS::syncInputs()
         if (data_available == -1)
         {
             perror("select");
-            server_callback_exit(serviceID, 1);
+            parent->CallbackExit(1);
         }
 
         if (data_available != 0)
@@ -153,7 +155,7 @@ FRONT_PANEL_CLASS::syncInputs()
             if (data_available > 1)
             {
                 fprintf(stderr, "activity detected on too many descriptors\n");
-                server_callback_exit(serviceID, 1);
+                parent->CallbackExit(1);
             }
 
             if (FD_ISSET(read_from_dialog, &readfds))
@@ -169,7 +171,7 @@ FRONT_PANEL_CLASS::syncInputs()
                 if (nbytes == 0)
                 {
                     // EOF => Exit button was pressed
-                    server_callback_exit(serviceID, 0);
+                    parent->CallbackExit(0);
                 }
                 
                 assert(nbytes == DIALOG_PACKET_SIZE * 8);
@@ -191,7 +193,7 @@ FRONT_PANEL_CLASS::syncInputs()
             else
             {
                 fprintf(stderr, "activity detected on unknown descriptor\n");
-                server_callback_exit(serviceID, 1);
+                parent->CallbackExit(1);
             }
         }
     }
@@ -222,4 +224,3 @@ FRONT_PANEL_CLASS::syncOutputs()
     nbytes = write(write_to_dialog, asciibuf, DIALOG_PACKET_SIZE * 8);
     assert(nbytes == DIALOG_PACKET_SIZE * 8);
 }
-

@@ -4,8 +4,10 @@
 
 %provides channelio
 
-%sources -t BSV -v PUBLIC SimChannelIO.bsv
-%sources -t BDPI_C -v PUBLIC sim-channelio.h
-%sources -t BDPI_C -v PRIVATE sim-channelio.c
+%sources -t BSV     -v PUBLIC   SimChannelIO.bsv
+%sources -t BDPI_C  -v PUBLIC   sim-channelio.h
+%sources -t BDPI_C  -v PRIVATE  sim-channelio.c
+%sources -t CPP     -v PRIVATE  sim-channelio-sw.cpp
+%sources -t CPP     -v PUBLIC   sim-channelio-sw.h
 
 %param BDPI_NAMES "cio_init cio_open cio_read cio_write" "list of BDPI-exported names"

@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "main.h"
 #include "software-controller.h"
 #include "software-rrr-server.h"
 #include "vmh-utils.h"
@@ -28,10 +29,12 @@ MEMORY_CLASS::~MEMORY_CLASS()
 // init
 void
 MEMORY_CLASS::Init(
-    int ID)
+    HASIM_SW_MODULE     p,
+    int                 ID)
 {
-    // set service ID
+    // set service ID and parent pointer
     serviceID = ID;
+    parent = p;
 
     // allocate and zero out memory
     M = new UINT32[MEM_SIZE];
@@ -53,9 +56,9 @@ MEMORY_CLASS::Uninit()
     }
 }
 
-// clock
+// poll
 void
-MEMORY_CLASS::Clock()
+MEMORY_CLASS::Poll()
 {
     // do nothing
 }
@@ -80,7 +83,7 @@ MEMORY_CLASS::Request(
     if (addr >= MEM_SIZE)
     {
         fprintf(stderr, "memory: address out of bounds: 0x%8x\n", arg1);
-        server_callback_exit(serviceID, 1);
+        parent->CallbackExit(1);
     }
 
     // decode command
@@ -97,7 +100,7 @@ MEMORY_CLASS::Request(
     else
     {
         fprintf(stderr, "memory: invalid command\n");
-        server_callback_exit(serviceID, 1);
+        parent->CallbackExit(1);
     }
 
     return false;

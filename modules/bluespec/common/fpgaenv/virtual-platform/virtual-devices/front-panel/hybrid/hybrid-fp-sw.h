@@ -8,7 +8,8 @@
 #define STDIN               0
 #define STDOUT              1
 
-class FRONT_PANEL_CLASS: public RRR_SERVICE_CLASS
+class FRONT_PANEL_CLASS:    public RRR_SERVICE_CLASS,
+                            public HASIM_SW_MODULE_CLASS
 {
     private:
         int     dialogpid;
@@ -28,10 +29,10 @@ class FRONT_PANEL_CLASS: public RRR_SERVICE_CLASS
     public:
         FRONT_PANEL_CLASS();
         ~FRONT_PANEL_CLASS();
-        void    Init(int);
+        void    Init(HASIM_SW_MODULE, int);
         void    Uninit();
         bool    Request(UINT32, UINT32, UINT32, UINT32 *);
-        void    Clock();
+        void    Poll();
 };
 
 #endif

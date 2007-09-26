@@ -779,3 +779,31 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memor
 - the server's main() has been removed, and the functionality
   has been moved to its clock method() which is called by the
   software controller in an infinite loop.
+----------
+aparasha    Date: Wed Sep 26 00:29:19 EDT 2007  CSN: CSN-platforms-16
+                  Wed Sep 26 04:29:19 UTC 2007
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr
+ software-rrr-server.cpp   Locally Modified           15 
+ software-rrr-server.h     Locally Modified           15 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid
+ hybrid-fp-sw.cpp          Locally Modified           15 
+ hybrid-fp-sw.h            Locally Modified           15 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-memory-sw.h        Locally Modified           15 
+ hybrid-memory-sw.cpp      Locally Modified           15 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/sim
+ sim-channelio-sw.h        Locally Added               0 
+ sim-channelio.awb         Locally Modified           14 
+ sim-channelio-sw.cpp      Locally Added               0 
+
+- moved software channelio functionality from RRR server to channelio
+  module. All RRR code is now physical-platform-independent.
+
+- encapsulated RRR server functions in a RRR server class.
+
+- renamed Clock() to Poll() in RRR server and services.

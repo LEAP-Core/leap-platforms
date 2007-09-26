@@ -1,35 +1,51 @@
 #ifndef __SOFTWARE_RRR_SERVER__
 #define __SOFTWARE_RRR_SERVER__
 
-#define CHANNELIO_PACKET_SIZE   4
-#define STDIN                   0
-#define STDOUT                  1
+#include "main.h"
+#include "sim-channelio-sw.h"
+
 #define MAX_SERVICES            128
 #define MAX_ARGS                3
 
-#define CHANNELIO_HOST_2_FPGA   100
-#define CHANNELIO_FPGA_2_HOST   101
+// forward definition of RRR server class pointer
+typedef class RRR_SERVER_CLASS* RRR_SERVER;
 
-typedef unsigned int UINT32;
-
+// *************** RRR service base class ***************
 typedef class RRR_SERVICE_CLASS* RRR_SERVICE;
 class RRR_SERVICE_CLASS
 {
     protected:
-        int     serviceID;      /* unique service ID */
-        char    stringID[256];  /* unique string ID */
-        int     params;         /* number of UINT32 parameters */
+        int             serviceID;  // unique service ID
 
     public:
-        virtual void    Init(int ID)                                = 0;
+        virtual void    Init(HASIM_SW_MODULE, int)                  = 0;
         virtual void    Uninit()                                    = 0;
         virtual bool    Request(UINT32, UINT32, UINT32, UINT32 *)   = 0;
-        virtual void    Clock(void)                                 = 0;
+        virtual void    Poll(void)                                  = 0;
 };
 
-void rrr_server_init();
-void rrr_server_uninit();
-void rrr_server_clock();
-void server_callback_exit(int serviceID, int exitcode);
+
+// ***************** software RRR server *****************
+
+// main server class
+// typedef class RRR_SERVER_CLASS* RRR_SERVER;
+class RRR_SERVER_CLASS: public HASIM_SW_MODULE_CLASS
+{
+    private:
+        RRR_SERVICE     ServiceMap[MAX_SERVICES];
+        int             n_services;
+        CHANNELIO       channelio;
+
+        // internal methods
+        void    unpack(UINT32, unsigned char[]);
+        UINT32  pack(unsigned char[]);
+
+    public:
+        RRR_SERVER_CLASS(HASIM_SW_MODULE, CHANNELIO);
+        ~RRR_SERVER_CLASS();
+        void    Init();
+        void    Uninit();
+        void    Poll();
+};
 
 #endif
