@@ -826,3 +826,14 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memor
   which specifies whether a response is expected or not.
 
 - cleaned up some of the hardware RRR code.
+
+----------
+aparasha    Date: Mon Oct  8 14:25:29 EDT 2007  CSN: CSN-platforms-18
+                  Mon Oct  8 18:25:29 UTC 2007
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr
+ NullRRR.bsv               Locally Modified           17 
+
+updated NullRRR.bsv to have the same interface as the
+functional RRR module.
