@@ -837,3 +837,14 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr
 
 updated NullRRR.bsv to have the same interface as the
 functional RRR module.
+
+----------
+mcadler     Date: Wed Oct 17 14:26:32 EDT 2007  CSN: CSN-platforms-19
+                  Wed Oct 17 18:26:32 UTC 2007
+
+
+Directory modules/bluespec/common/fpgaenv/toplevel-wires/xup
+ xup.download              Locally Modified           18 
+ xup.xst                   Locally Modified           18 
+
+Bit image now built in .xilinx directory.
