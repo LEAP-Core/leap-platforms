@@ -1,0 +1,19 @@
+********************************************************************
+*
+* Awb module specification
+*
+*******************************************************************/
+
+%AWB_START
+
+%name XUP TopLevel Wires
+%desc XUP TopLevel Wires
+
+%provides toplevel_wires
+
+%public XUPTopLevelWires.bsv
+%private xup.ucf xup.ut xup.xst xup.download
+
+%param FPGA_PART "xc2vp30-7-ff896" "FPGA Part ID"
+
+%AWB_END

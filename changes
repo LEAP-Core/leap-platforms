@@ -848,3 +848,22 @@ Directory modules/bluespec/common/fpgaenv/toplevel-wires/xup
  xup.xst                   Locally Modified           18 
 
 Bit image now built in .xilinx directory.
+
+----------
+mcadler     Date: Mon Oct 22 10:38:12 EDT 2007  CSN: CSN-platforms-20
+                  Mon Oct 22 14:38:12 UTC 2007
+
+
+Directory modules/bluespec/common/fpgaenv/toplevel-wires/xup
+ xup.download              Locally Removed            19 
+ xup-toplevel-wires.awb    Locally Removed            19 
+ xup.ut                    Locally Removed            19 
+ xup.ucf                   Locally Removed            19 
+ xup.xst                   Locally Removed            19 
+ XUPTopLevelWires.bsv      Locally Removed            19 
+
+Directory modules/bluespec/common/fpgaenv/toplevel-wires
+ xup/                      Locally Removed            19 
+
+First step in making a unified xilinx top level description.
+I really renamed xup xilinx.  Hopefully svn is doing the right thing.
