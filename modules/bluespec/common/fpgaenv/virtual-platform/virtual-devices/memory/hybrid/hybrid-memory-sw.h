@@ -12,13 +12,16 @@ class MEMORY_CLASS: public RRR_SERVICE_CLASS,
                     public HASIM_SW_MODULE_CLASS
 {
     private:
+        // self-instantiation
+        static MEMORY_CLASS instance;
+
         UINT32* M;
         bool    vmhLoaded;
 
     public:
         MEMORY_CLASS();
         ~MEMORY_CLASS();
-        void    Init(HASIM_SW_MODULE, int);
+        void    Init(HASIM_SW_MODULE);
         void    Uninit();
         bool    Request(UINT32, UINT32, UINT32, UINT32 *);
         void    Poll();

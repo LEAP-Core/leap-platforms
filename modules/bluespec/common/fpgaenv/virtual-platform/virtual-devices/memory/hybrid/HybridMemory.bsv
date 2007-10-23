@@ -1,6 +1,8 @@
 import low_level_platform_interface::*;
 import rrr::*;
 
+`include "rrr_services.bsv"
+
 typedef Bit#(`MEMORY_ADDR_SIZE) MEM_Addr;
 typedef Bit#(`MEMORY_VALUE_SIZE) MEM_Value;
 
@@ -32,7 +34,7 @@ module mkMemory#(LowLevelPlatformInterface llpint) (Memory);
 
         // send request via RRR
         RRR_Request request;
-        request.serviceID       = `SID_MEMORY;  /* memory */
+        request.serviceID       = `MEMORY_SERVICE_ID;  /* memory */
         request.param0          = 0;            /* load */
         request.param1          = addr;         /* address */
         request.param2          = 0;            /* don't care */
@@ -48,7 +50,7 @@ module mkMemory#(LowLevelPlatformInterface llpint) (Memory);
 
         // send request via RRR
         RRR_Request request;
-        request.serviceID       = `SID_MEMORY;  /* memory */
+        request.serviceID       = `MEMORY_SERVICE_ID;  /* memory */
         request.param0          = 1;            /* store */
         request.param1          = stinfo.addr;  /* address */
         request.param2          = stinfo.val;   /* data */

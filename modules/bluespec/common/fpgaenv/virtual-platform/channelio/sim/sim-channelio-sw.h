@@ -11,6 +11,7 @@
 
 // general typedefs
 typedef unsigned int UINT32;
+typedef unsigned long long UINT64;
 
 // *************** Channel I/O ****************
 

@@ -12,6 +12,10 @@ class FRONT_PANEL_CLASS:    public RRR_SERVICE_CLASS,
                             public HASIM_SW_MODULE_CLASS
 {
     private:
+        // self-instantiation
+        static FRONT_PANEL_CLASS    instance;
+
+        // other data
         int     dialogpid;
         int     child_to_parent[2];
         int     parent_to_child[2];
@@ -29,7 +33,7 @@ class FRONT_PANEL_CLASS:    public RRR_SERVICE_CLASS,
     public:
         FRONT_PANEL_CLASS();
         ~FRONT_PANEL_CLASS();
-        void    Init(HASIM_SW_MODULE, int);
+        void    Init(HASIM_SW_MODULE);
         void    Uninit();
         bool    Request(UINT32, UINT32, UINT32, UINT32 *);
         void    Poll();

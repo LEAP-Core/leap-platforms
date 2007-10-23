@@ -10,14 +10,18 @@
 #include "software-rrr-server.h"
 #include "vmh-utils.h"
 #include "hybrid-memory-sw.h"
+#include "rrr_services.h"
 
-// object instantiations
-MEMORY_CLASS        memoryInstance;
-RRR_SERVICE_CLASS  *MEMORY_service = &memoryInstance;
+#define SERVICE_ID  MEMORY_SERVICE_ID
+
+// service instantiations
+MEMORY_CLASS        MEMORY_CLASS::instance;
 
 // constructor
 MEMORY_CLASS::MEMORY_CLASS()
 {
+    // register with server's map table
+    RRR_SERVER_CLASS::RegisterService(SERVICE_ID, &instance);
 }
 
 // destructor
@@ -29,11 +33,9 @@ MEMORY_CLASS::~MEMORY_CLASS()
 // init
 void
 MEMORY_CLASS::Init(
-    HASIM_SW_MODULE     p,
-    int                 ID)
+    HASIM_SW_MODULE     p)
 {
-    // set service ID and parent pointer
-    serviceID = ID;
+    // set parent pointer
     parent = p;
 
     // allocate and zero out memory

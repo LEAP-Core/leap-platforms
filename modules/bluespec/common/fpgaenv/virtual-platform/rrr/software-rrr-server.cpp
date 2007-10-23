@@ -10,10 +10,61 @@
 
 #include "software-rrr-server.h"
 
-// extern pointers to RRR service instances
-#define ADD_SERVICE(NAME) extern RRR_SERVICE_CLASS* NAME##_service;
-#include "master-service-list.rrr"
-#undef ADD_SERVICE
+// instantiate global service table; this table will be
+// populated by the individual services (also statically
+// instantiated) before main().
+RRR_SERVICE RRR_SERVER_CLASS::ServiceMap[MAX_SERVICES];
+UINT64      RRR_SERVER_CLASS::ServiceValidMask = 0;
+
+//****************************
+//***    static methods    ***
+//****************************
+
+// register a service
+void
+RRR_SERVER_CLASS::RegisterService(
+    int         serviceid,
+    RRR_SERVICE service)
+{
+    if (isServiceValid(serviceid))
+    {
+        fprintf(stderr,
+            "software server: duplicate serviceID registration: %d\n");
+        exit(1);
+    }
+
+    // set link in map table
+    ServiceMap[serviceid] = service;
+    setServiceValid(serviceid);
+}
+
+bool
+RRR_SERVER_CLASS::isServiceValid(
+    int serviceid)
+{
+    UINT64 mask = UINT64(0x01) << serviceid;
+    return ((ServiceValidMask & mask) > 0 ? true : false);
+}
+
+void
+RRR_SERVER_CLASS::setServiceValid(
+    int serviceid)
+{
+    UINT64 mask = UINT64(0x01) << serviceid;
+    ServiceValidMask |= mask;
+}
+
+void
+RRR_SERVER_CLASS::unsetServiceValid(
+    int serviceid)
+{
+    UINT64 mask = UINT64(0x01) << serviceid;
+    ServiceValidMask &= (~mask);
+}
+
+//****************************
+//***   regular methods    ***
+//****************************
 
 // constructor
 RRR_SERVER_CLASS::RRR_SERVER_CLASS(
@@ -35,28 +86,14 @@ RRR_SERVER_CLASS::~RRR_SERVER_CLASS()
 void
 RRR_SERVER_CLASS::Init()
 {
-    // initialize servive map table
+    // initialize services
     for (int i = 0; i < MAX_SERVICES; i++)
     {
-        ServiceMap[i] = NULL;
+        if (isServiceValid(i))
+        {
+            ServiceMap[i]->Init(this);
+        }
     }
-    n_services = 0;
-
-    // populate service map table by defining a macro and
-    // including the service definition file
-#define ADD_SERVICE(NAME)                                           \
-    {                                                               \
-        /* instantiate service */                                   \
-        ServiceMap[n_services] = NAME##_service;                    \
-        ServiceMap[n_services]->Init(this, n_services);             \
-                                                                    \
-        /* update service count */                                  \
-        n_services++;                                               \
-    }
-
-#include "master-service-list.rrr"
-
-#undef ADD_SERVICE
 }
 
 // uninit
@@ -64,14 +101,15 @@ void
 RRR_SERVER_CLASS::Uninit()
 {
     // reset service map
-    for (int i = 0; i < n_services; i++)
+    for (int i = 0; i < MAX_SERVICES; i++)
     {
-        if (ServiceMap[i])
+        if (isServiceValid(i))
         {
             ServiceMap[i]->Uninit();
             ServiceMap[i] = NULL;
         }
     }
+    ServiceValidMask = 0;
 }
 
 // unpack
@@ -118,7 +156,7 @@ RRR_SERVER_CLASS::Poll()
 
     // decode serviceID
     int serviceID = pack(buf);
-    if (serviceID >= n_services)
+    if (isServiceValid(serviceID) == false)
     {
         fprintf(stderr, "software server: invalid serviceID: %u\n", serviceID);
         parent->CallbackExit(1);
@@ -145,9 +183,12 @@ RRR_SERVER_CLASS::Poll()
     }
 
     // poll each service module
-    for (int i = 0; i < n_services; i++)
+    for (int i = 0; i < MAX_SERVICES; i++)
     {
-        ServiceMap[i]->Poll();
+        if (isServiceValid(i))
+        {
+            ServiceMap[i]->Poll();
+        }
     }
 }
 

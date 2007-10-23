@@ -1,6 +1,8 @@
 import low_level_platform_interface::*;
 import rrr::*;
 
+`include "rrr_services.bsv"
+
 `define FP_POLL_INTERVAL    1000
 
 interface FrontPanel;
@@ -20,7 +22,7 @@ module mkFrontPanel#(LowLevelPlatformInterface llpint) (FrontPanel);
     // state of both inputs and outputs
     rule sendRRRRequest (state == 0 && pollCounter == 0);
         RRR_Request req;
-        req.serviceID       = `SID_FRONT_PANEL;
+        req.serviceID       = `FRONT_PANEL_SERVICE_ID;
         req.param0          = outputCache;
         req.param1          = 0;
         req.param2          = 0;

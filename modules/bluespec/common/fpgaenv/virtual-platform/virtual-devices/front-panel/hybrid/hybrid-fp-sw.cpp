@@ -7,14 +7,19 @@
 #include <signal.h>
 
 #include "hybrid-fp-sw.h"
+#include "rrr_services.h"
+#include "main.h"
+
+#define SERVICE_ID  FRONT_PANEL_SERVICE_ID
 
 // service instantiation
-FRONT_PANEL_CLASS   frontPanelInstance;
-RRR_SERVICE_CLASS  *FRONT_PANEL_service = &frontPanelInstance;
+FRONT_PANEL_CLASS   FRONT_PANEL_CLASS::instance;
 
 // constructor
 FRONT_PANEL_CLASS::FRONT_PANEL_CLASS()
 {
+    // register with server's map table
+    RRR_SERVER_CLASS::RegisterService(SERVICE_ID, &instance);
 }
 
 // destructor
@@ -26,12 +31,16 @@ FRONT_PANEL_CLASS::~FRONT_PANEL_CLASS()
 // init
 void
 FRONT_PANEL_CLASS::Init(
-    HASIM_SW_MODULE     p,
-    int                 ID)
+    HASIM_SW_MODULE     p)
 {
-    // set service ID and parent pointer
-    serviceID = ID;
+    // set parent pointer
     parent = p;
+
+    // see if we should pop up the dialog box
+    if (globalArgs.showFrontPanel == false)
+    {
+        return;
+    }
 
     /* unfortunately, Perl doesn't play nice with binary
      * data, so we cannot simply instantiate a Perl front panel and
@@ -90,8 +99,6 @@ FRONT_PANEL_CLASS::Request(
     UINT32 arg2,
     UINT32 *result)
 {
-    // we *could* sync state, but shouldn't be necessary
-
     // update cache and set dirty bit
     if (outputCache != arg0)
     {
@@ -108,6 +115,12 @@ FRONT_PANEL_CLASS::Request(
 void
 FRONT_PANEL_CLASS::Poll()
 {
+    // if dialog is disabled, don't do anything
+    if (globalArgs.showFrontPanel == false)
+    {
+        return;
+    }
+
     if (outputDirty)
     {
         syncOutputs();
