@@ -1,15 +1,15 @@
 
 [Global]
 SaveParameters=0
-Description=Bluespec FPGA Environment for XUP Board
-File=hasim-fpgaenv-xup
+Description=Bluespec FPGA Environment for HTG-v5-PCIe Board
+File=hasim-fpgaenv-htg-v5-pcie
 Version=2.1
 Type=HAsim
-Name=Bluespec FPGA Environment for XUP Board
+Name=Bluespec FPGA Environment for HTG-v5-PCIe Board
 Class=Asim::Model
 
 [Model]
-DefaultAttributes=bluespec xup
+DefaultAttributes=bluespec htg-v5-pcie
 model=FPGA Environment
 
 [FPGA Environment/Requires]
@@ -40,18 +40,10 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/fpga-components/hardware/hardware-fpga-components.awb
 Packagehint=platforms
 
-[XUP TopLevel Wires]
-File=modules/bluespec/common/fpgaenv/toplevel-wires/xilinx/xup-toplevel-wires.awb
-Packagehint=platforms
-
 [Standard Virtual Devices/Requires]
 console=Null Serial Console
-front_panel=Physical XUP Front Panel
+front_panel=Physical HTG-v5-PCIe Front Panel
 memory=Null Platform Memory
-
-[Physical XUP Front Panel]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/xup/xup-fp.awb
-Packagehint=platforms
 
 [Null Channel IO Module]
 File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/null/null-channelio.awb
@@ -64,7 +56,7 @@ Packagehint=platforms
 [Low Level Platform Interface/Requires]
 rrr=Null RRR Module
 channelio=Null Channel IO Module
-toplevel_wires=XUP TopLevel Wires
+toplevel_wires=HTG-v5-PCIe TopLevel Wires
 
 [Low Level Platform Interface]
 File=modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface/low-level-platform-interface.awb
@@ -72,4 +64,12 @@ Packagehint=platforms
 
 [Null Platform Memory]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/null/null-memory.awb
+Packagehint=platforms
+
+[HTG-v5-PCIe TopLevel Wires]
+File=modules/bluespec/common/fpgaenv/toplevel-wires/xilinx/htg-v5-pcie-toplevel-wires.awb
+Packagehint=platforms
+
+[Physical HTG-v5-PCIe Front Panel]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/htg_v5_pcie/htg-v5-pcie-fp.awb
 Packagehint=platforms

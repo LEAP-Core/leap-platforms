@@ -867,3 +867,29 @@ Directory modules/bluespec/common/fpgaenv/toplevel-wires
 
 First step in making a unified xilinx top level description.
 I really renamed xup xilinx.  Hopefully svn is doing the right thing.
+
+----------
+mcadler     Date: Tue Oct 23 14:07:56 EDT 2007  CSN: CSN-platforms-21
+                  Tue Oct 23 18:07:56 UTC 2007
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ hasim-fpgaenv-htg-v5-pcie.apm Locally Added               0 
+ hasim-fpgaenv-xup.apm     Locally Modified           20 
+
+Directory modules/bluespec/common/fpgaenv/toplevel-wires/xilinx
+ htg-v5-pcie-toplevel-wires.awb Locally Added               0 
+ xilinx.download           Locally Added               - 
+ xup.download              Locally Removed            20 
+ xilinx.ut                 Locally Added               - 
+ xup-toplevel-wires.awb    Locally Modified           20 
+ xup.ut                    Locally Removed            20 
+ htg-v5-pcie-TopLevelWires.bsv Locally Added               0 
+ htg-v5-pcie.ucf           Locally Added               0 
+ xup-TopLevelWires.bsv     Locally Added               - 
+ xilinx.xst                Locally Added               - 
+ xup.xst                   Locally Removed            20 
+ XUPTopLevelWires.bsv      Locally Removed            20 
+
+Add support for HiTech Global v5 PCIe board.  Currently configured for a
+Virtex-5 LX50T.  Will change to an LX110T when we get the right card.

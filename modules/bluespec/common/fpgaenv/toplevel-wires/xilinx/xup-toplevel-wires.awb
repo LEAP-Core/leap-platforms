@@ -11,9 +11,10 @@
 
 %provides toplevel_wires
 
-%public XUPTopLevelWires.bsv
-%private xup.ucf xup.ut xup.xst xup.download
+%public xup-TopLevelWires.bsv
+%private xup.ucf xilinx.ut xilinx.xst xilinx.download
 
-%param FPGA_PART "xc2vp30-7-ff896" "FPGA Part ID"
+%param FPGA_PART     "xc2vp30-7-ff896" "FPGA Part ID"
+%param FPGA_POSITION 3                 "FPGA Position (in Xilinx iMPACT)"
 
 %AWB_END
