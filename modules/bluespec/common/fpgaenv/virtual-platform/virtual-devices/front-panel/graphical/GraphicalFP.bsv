@@ -1,10 +1,19 @@
 import low_level_platform_interface::*;
 import channelio::*;
 
+typedef Bit#(4) FRONTP_LEDS;
+typedef SizeOf#(FRONTP_LEDS) FRONTP_NUM_LEDS;
+
+typedef Bit#(4) FRONTP_SWITCHES;
+typedef SizeOf#(FRONTP_SWITCHES) FRONTP_NUM_SWITCHES;
+
+typedef Bit#(5) FRONTP_BUTTONS;
+typedef SizeOf#(FRONTP_BUTTONS) FRONTP_NUM_BUTTONS;
+
 interface FrontPanel;
-    method Bit#(4)  readSwitches();
-    method Bit#(5)  readButtons();
-    method Action   writeLEDs(Bit#(4) data);
+    method FRONTP_SWITCHES readSwitches();
+    method FRONTP_BUTTONS  readButtons();
+    method Action          writeLEDs(FRONTP_LEDS data);
 endinterface
 
 module mkFrontPanel#(LowLevelPlatformInterface llpi) (FrontPanel);
@@ -31,17 +40,17 @@ module mkFrontPanel#(LowLevelPlatformInterface llpi) (FrontPanel);
     endrule
 
     // return switch state from input cache
-    method Bit#(4) readSwitches();
+    method FRONTP_SWITCHES readSwitches();
         return inputCache[3:0];
     endmethod
 
     // return switch state from input cache
-    method Bit#(5) readButtons();
+    method FRONTP_BUTTONS readButtons();
         return inputCache[8:4];
     endmethod
 
     // write to output cache
-    method Action writeLEDs(Bit#(4) data);
+    method Action writeLEDs(FRONTP_LEDS data);
         // write to channel only if state has changed
         Bit#(32) ext = zeroExtend(data);
         if (ext != outputCache)

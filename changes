@@ -932,3 +932,36 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memor
 
 - hybrid front panel checks a global parameter to
   decide whether to pop up a dialog box.
+
+----------
+mcadler     Date: Mon Oct 29 17:13:22 EDT 2007  CSN: CSN-platforms-23
+                  Mon Oct 29 21:13:22 UTC 2007
+
+
+Directory modules/bluespec/common/fpgaenv/toplevel-wires/null
+ NullTopLevelWires.bsv     Locally Modified           22 
+
+Directory modules/bluespec/common/fpgaenv/toplevel-wires/xilinx
+ htg-v5-pcie-TopLevelWires.bsv Locally Modified           22 
+ htg-v5-pcie.ucf           Locally Modified           22 
+ xup-TopLevelWires.bsv     Locally Modified           22 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid
+ HybridFP.bsv              Locally Modified           22 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/console
+ NullFP.bsv                Locally Modified           22 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/graphical
+ GraphicalFP.bsv           Locally Modified           22 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/xup
+ XUPFP.bsv                 Locally Modified           22 
+
+- Front panel now defines 6 types for communicating the number of
+  LEDs, buttons and switches.  Three are Bit vectors for holding the state
+  (FRONTP_LEDS, FRONTP_SWITCHES and FRONTP_BUTTONS).  Three are sizes
+  (FRONTP_NUM_LEDS...).
+- Toplevel wires communicates the number of LEDS and SWITCHES with similar
+  types.
+- Change HiTech Global board config to 8 LEDs and switches.

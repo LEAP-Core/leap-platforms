@@ -1,3 +1,5 @@
+typedef Bit#(4) TOPWIRES_LEDS;
+typedef Bit#(4) TOPWIRES_SWITCHES;
 
 interface TopLevelWires;
 endinterface

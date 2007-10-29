@@ -1,14 +1,24 @@
-import low_level_platform_interface::*;
-import rrr::*;
+`include "low_level_platform_interface.bsh"
+`include "rrr.bsh"
+`include "toplevel_wires.bsh"
 
 `include "rrr_services.bsv"
 
 `define FP_POLL_INTERVAL    1000
 
+typedef TOPWIRES_LEDS FRONTP_LEDS;
+typedef SizeOf#(FRONTP_LEDS) FRONTP_NUM_LEDS;
+
+typedef TOPWIRES_SWITCHES FRONTP_SWITCHES;
+typedef SizeOf#(FRONTP_SWITCHES) FRONTP_NUM_SWITCHES;
+
+typedef Bit#(5) FRONTP_BUTTONS;
+typedef SizeOf#(FRONTP_BUTTONS) FRONTP_NUM_BUTTONS;
+
 interface FrontPanel;
-    method Bit#(4)  readSwitches();
-    method Bit#(5)  readButtons();
-    method Action   writeLEDs(Bit#(4) data);
+    method FRONTP_SWITCHES readSwitches();
+    method FRONTP_BUTTONS  readButtons();
+    method Action          writeLEDs(FRONTP_LEDS data);
 endinterface
 
 module mkFrontPanel#(LowLevelPlatformInterface llpint) (FrontPanel);
@@ -48,17 +58,17 @@ module mkFrontPanel#(LowLevelPlatformInterface llpint) (FrontPanel);
     endrule
 
     // return switch state from input cache
-    method Bit#(4) readSwitches();
+    method FRONTP_SWITCHES readSwitches();
         return inputCache[3:0];
     endmethod
 
     // return switch state from input cache
-    method Bit#(5) readButtons();
+    method FRONTP_BUTTONS readButtons();
         return inputCache[8:4];
     endmethod
 
     // write to output cache
-    method Action writeLEDs(Bit#(4) data);
+    method Action writeLEDs(FRONTP_LEDS data);
         // simply update local cached state
         Bit#(32) ext = zeroExtend(data);
         outputCache <= ext;
