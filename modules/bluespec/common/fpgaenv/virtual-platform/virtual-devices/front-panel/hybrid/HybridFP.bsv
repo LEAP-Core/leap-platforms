@@ -9,6 +9,17 @@
 typedef TOPWIRES_LEDS FRONTP_LEDS;
 typedef SizeOf#(FRONTP_LEDS) FRONTP_NUM_LEDS;
 
+//
+// Data structure for updating specific LEDs and leaving others unchanged.
+//
+typedef struct
+{
+    FRONTP_LEDS state;
+    FRONTP_LEDS mask;
+}
+FRONTP_MASKED_LEDS deriving (Eq, Bits);
+
+
 typedef TOPWIRES_SWITCHES FRONTP_SWITCHES;
 typedef SizeOf#(FRONTP_SWITCHES) FRONTP_NUM_SWITCHES;
 
@@ -18,22 +29,22 @@ typedef SizeOf#(FRONTP_BUTTONS) FRONTP_NUM_BUTTONS;
 interface FrontPanel;
     method FRONTP_SWITCHES readSwitches();
     method FRONTP_BUTTONS  readButtons();
-    method Action          writeLEDs(FRONTP_LEDS data);
+    method Action          writeLEDs(FRONTP_MASKED_LEDS data);
 endinterface
 
 module mkFrontPanel#(LowLevelPlatformInterface llpint) (FrontPanel);
     // maintain input and output caches
     Reg#(Bit#(32))  inputCache  <- mkReg(0);
-    Reg#(Bit#(32))  outputCache <- mkReg(0);
     Reg#(Bit#(8))   state       <- mkReg(0);
     Reg#(Bit#(16))  pollCounter <- mkReg(0);
+    Reg#(FRONTP_LEDS) led_state <- mkReg(0);
 
     // ugly: constantly keep sending RRR requests to sync up
     // state of both inputs and outputs
     rule sendRRRRequest (state == 0 && pollCounter == 0);
         RRR_Request req;
         req.serviceID       = `FRONT_PANEL_SERVICE_ID;
-        req.param0          = outputCache;
+        req.param0          = zeroExtend(led_state);
         req.param1          = 0;
         req.param2          = 0;
         req.needResponse    = True;
@@ -67,11 +78,9 @@ module mkFrontPanel#(LowLevelPlatformInterface llpint) (FrontPanel);
         return inputCache[8:4];
     endmethod
 
-    // write to output cache
-    method Action writeLEDs(FRONTP_LEDS data);
-        // simply update local cached state
-        Bit#(32) ext = zeroExtend(data);
-        outputCache <= ext;
+    // write to LEDs
+    method Action writeLEDs(FRONTP_MASKED_LEDS data);
+        led_state <= (led_state & ~data.mask) | (data.state & data.mask);
     endmethod
 
 endmodule

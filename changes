@@ -965,3 +965,27 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front
 - Toplevel wires communicates the number of LEDS and SWITCHES with similar
   types.
 - Change HiTech Global board config to 8 LEDs and switches.
+
+----------
+mcadler     Date: Thu Nov  1 14:59:03 EDT 2007  CSN: CSN-platforms-24
+                  Thu Nov  1 18:59:03 UTC 2007
+
+
+Directory modules/bluespec/common/fpgaenv/toplevel-wires/xilinx
+ htg-v5-pcie-TopLevelWires.bsv Locally Modified           23 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid
+ HybridFP.bsv              Locally Modified           23 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/console
+ NullFP.bsv                Locally Modified           23 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/graphical
+ GraphicalFP.bsv           Locally Modified           23 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/xup
+ XUPFP.bsv                 Locally Modified           23 
+
+- Add mask to data passed to writeLEDs so individual lights can be updated.
+- Enable all 8 LEDs on HTG board and 8 on the software front panel.
+- HTG LEDs are active high.

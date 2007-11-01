@@ -1,8 +1,18 @@
 import low_level_platform_interface::*;
 import channelio::*;
 
-typedef Bit#(4) FRONTP_LEDS;
+typedef Bit#(8) FRONTP_LEDS;
 typedef SizeOf#(FRONTP_LEDS) FRONTP_NUM_LEDS;
+
+//
+// Data structure for updating specific LEDs and leaving others unchanged.
+//
+typedef struct
+{
+    FRONTP_LEDS state;
+    FRONTP_LEDS mask;
+}
+FRONTP_MASKED_LEDS deriving (Eq, Bits);
 
 typedef Bit#(4) FRONTP_SWITCHES;
 typedef SizeOf#(FRONTP_SWITCHES) FRONTP_NUM_SWITCHES;
@@ -13,13 +23,13 @@ typedef SizeOf#(FRONTP_BUTTONS) FRONTP_NUM_BUTTONS;
 interface FrontPanel;
     method FRONTP_SWITCHES readSwitches();
     method FRONTP_BUTTONS  readButtons();
-    method Action          writeLEDs(FRONTP_LEDS data);
+    method Action          writeLEDs(FRONTP_MASKED_LEDS data);
 endinterface
 
 module mkFrontPanel#(LowLevelPlatformInterface llpi) (FrontPanel);
     // maintain input and output caches
-    Reg#(Bit#(32))  inputCache  <- mkReg(0);
-    Reg#(Bit#(32))  outputCache <- mkReg(0);
+    Reg#(Bit#(32)) inputCache  <- mkReg(0);
+    Reg#(FRONTP_LEDS) led_state <- mkReg(0);
 
     // we want readSwitches() to be a pure value method (to provide
     // the illusion of a wire coming from a physical switch.
@@ -49,13 +59,14 @@ module mkFrontPanel#(LowLevelPlatformInterface llpi) (FrontPanel);
         return inputCache[8:4];
     endmethod
 
-    // write to output cache
-    method Action writeLEDs(FRONTP_LEDS data);
+    // write to LEDs
+    method Action writeLEDs(FRONTP_MASKED_LEDS data);
         // write to channel only if state has changed
-        Bit#(32) ext = zeroExtend(data);
-        if (ext != outputCache)
+        FRONTP_LEDS s = (led_state & ~data.mask) | (data.state & data.mask);
+        if (s != led_state)
         begin
-            outputCache <= ext;
+            led_state <= s;
+            Bit#(32) ext = zeroExtend(s);
             llpi.channelIO.write(ext);
         end
     endmethod

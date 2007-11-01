@@ -26,9 +26,8 @@ endinterface
 
 module mkTopLevelWiresDriver (TopLevelWiresDriver);
 
-    // all board signals are active low -- *** NOT VERIFIED ***
-    Reg#(TOPWIRES_LEDS) led_reg <- mkReg(-1);
-    Reg#(TOPWIRES_SWITCHES) switch_reg <- mkReg(-1);
+    Reg#(TOPWIRES_LEDS) led_reg <- mkReg(0);
+    Reg#(TOPWIRES_SWITCHES) switch_reg <- mkReg(0);
   
     interface TopLevelWires wires_out;
 
@@ -37,7 +36,7 @@ module mkTopLevelWiresDriver (TopLevelWiresDriver);
         endmethod
 
         method Action switches(TOPWIRES_SWITCHES sw);
-            switch_reg <= ~sw;
+            switch_reg <= sw;
         endmethod
   
     endinterface
@@ -45,7 +44,7 @@ module mkTopLevelWiresDriver (TopLevelWiresDriver);
 
     // interfaces to FPGA model
     method  Action setLEDs(TOPWIRES_LEDS leds_in);
-        led_reg <= ~leds_in;
+        led_reg <= leds_in;
     endmethod
 
     method  TOPWIRES_SWITCHES getSwitches();
