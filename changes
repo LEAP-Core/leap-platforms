@@ -989,3 +989,23 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front
 - Add mask to data passed to writeLEDs so individual lights can be updated.
 - Enable all 8 LEDs on HTG board and 8 on the software front panel.
 - HTG LEDs are active high.
+
+----------
+pellauer    Date: Wed Nov 14 17:45:10 EST 2007  CSN: CSN-platforms-25
+                  Wed Nov 14 22:45:10 UTC 2007
+
+
+Directory modules/bluespec/common/fpgaenv
+ hardware-platform/        Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/hardware-platform
+ pcie/                     Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/hardware-platform/pcie
+ PCIe.bsv                  Locally Added               0 
+ pcie_hardware_platform.awb Locally Added               0 
+
+
+Added the first version of the PCIe hardware platform import into Bluespec.
+
+Michael P.
