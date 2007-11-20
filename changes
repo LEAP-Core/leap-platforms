@@ -1009,3 +1009,14 @@ Directory modules/bluespec/common/fpgaenv/hardware-platform/pcie
 Added the first version of the PCIe hardware platform import into Bluespec.
 
 Michael P.
+
+----------
+aparasha    Date: Tue Nov 20 09:51:18 EST 2007  CSN: CSN-platforms-26
+                  Tue Nov 20 14:51:18 UTC 2007
+
+
+Directory modules/bluespec/common/fpgaenv/hardware-platform/pcie
+ PCIe.bsv                  Locally Modified           25 
+
+updated Bluespec wrapper around VHDL HardwareChannels module based
+on HardwareChannels v0.8 spec.

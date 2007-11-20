@@ -40,20 +40,16 @@ interface PCIE_Platform;
   method Action csr_write(PCIE_CSR_Index idx, PCIE_CSR_Data data);
 
   // CSR 0 is special in that we can always access it.
-  method PCIE_CSR_Data csr_read0();
-  method Action  csr_write0(PCIE_CSR_Data data);
+  method PCIE_CSR_Data csr_h2f_reg0_read();
+  method Action  csr_f2h_reg0_write(PCIE_CSR_Data data);
 
   // Misc.
 
-  method Action pause_dma_read();
   method Action interrupt_host();
 
 endinterface
 
 // Importing the VHDL into Bluespec is mostly straightforward.
-
-// The only remaining concern is the use of csr_in_index twice. 
-// If this is a problem we may have to split it into csr_in_rd_index and csr_in_wr_index.
 
 // XXX how does this interact with toplevel wires?
 
@@ -68,29 +64,29 @@ import "BVI" VHDL_NAME_GOES_HERE = module mkPCIE
 
   // Import the wires as Bluespec methods
 
-  method csr_read_req(csr_in_index)
-                      ready(csr_out_rd_ready) // Need Tao to make this
-                      enable(csr_in_rd_en); // Need Tao to make this
+  method csr_read_req(csr_in_rd_index)
+                      ready(csr_out_rd_ready)
+                      enable(csr_in_rd_en);
 
   method csr_out_data csr_read_resp()
-                                      ready(csr_out_cmd_done) // This could also get changed to csr_out_rd_done
-                                      enable(csr_in_read_ack);
+                                      ready(csr_out_rd_done)
+                                      enable(csr_in_rd_ack);
 
-  method csr_write(csr_in_index, csr_in_data)
-                   ready(csr_out_wr_ready) // Need Tao to make this
-                   enable(csr_in_wr_en); // Need Tao to make this
+  method csr_write(csr_in_wr_index, csr_in_wr_data)
+                   ready(csr_out_wr_ready)
+                   enable(csr_in_wr_en);
 
-  method csr_out_reg0 csr_read0();
+  method csr_out_h2f_reg0 csr_h2f_reg0_read();
 
-  method csr_write0(csr_in_reg0)
-                    enable(csr_in_reg0_en); // Does this line actually exist?
+  method csr_f2h_reg0_write(csr_in_f2h_reg0)
+                    enable(csr_in_f2h_reg0_wr_en);
 
   method start_dma_write(dma_in_f2h_paddr, dma_in_f2h_len)
                          ready(dma_out_f2h_ready) 
                          enable(dma_in_f2h_en);
   
   method  dma_write_data(dma_in_f2h_fifo_data) 
-                         ready(!dma_out_f2h_fifo_full) 
+                         ready(dma_out_f2h_fifo_ready) 
                          enable(dma_in_f2h_data_valid);
 
   method  start_dma_read(dma_in_h2f_paddr, dma_in_h2f_len)
@@ -98,11 +94,8 @@ import "BVI" VHDL_NAME_GOES_HERE = module mkPCIE
                          enable(dma_in_h2f_en);
 
   method  dma_out_h2f_fifo_data dma_read_data()
-                         ready(!dma_out_h2f_fifo_empty) 
-                         enable(dma_in_h2f_ack);
-
-  method  pause_dma_read()
-                           enable(dma_in_h2f_fifo_pause);
+                         ready(dma_out_h2f_fifo_ready) 
+                         enable(dma_in_h2f_fifo_ack);
 
   method  interrupt_host()
                            ready(int_out_ready)
@@ -113,12 +106,12 @@ import "BVI" VHDL_NAME_GOES_HERE = module mkPCIE
   // csr_read_req
   // CF with everything (except itself).
 
-  schedule csr_read_req CF (csr_read_resp, csr_write, csr_out_reg0, csr_write0, start_dma_write, dma_write_data, start_dma_read, dma_read_data, pause_dma_read, interrupt_host);
+  schedule csr_read_req CF (csr_read_resp, csr_write, csr_h2f_reg0_read, csr_f2h_reg0_write, start_dma_write, dma_write_data, start_dma_read, dma_read_data, interrupt_host);
 
   // csr_read_resp
   // CF with everything (except itself).
 
-  schedule csr_read_resp CF (csr_read_req, csr_write, csr_out_reg0, csr_write0, start_dma_write, dma_write_data, start_dma_read, dma_read_data, pause_dma_read, interrupt_host);
+  schedule csr_read_resp CF (csr_read_req, csr_write, csr_h2f_reg0_read, csr_f2h_reg0_write, start_dma_write, dma_write_data, start_dma_read, dma_read_data, interrupt_host);
 
   // csr_write
   // C with csr_read_req/csr_read_resp (For now. Change this if the line is split).
@@ -126,48 +119,43 @@ import "BVI" VHDL_NAME_GOES_HERE = module mkPCIE
   // CF with everything else.
   schedule csr_write C (csr_read_req, csr_read_resp);
   schedule csr_write SB (csr_write);
-  schedule csr_write CF (csr_read0, csr_write0, start_dma_write, dma_write_data, start_dma_read, dma_read_data, pause_dma_read, interrupt_host);
+  schedule csr_write CF (csr_h2f_reg0_read, csr_f2h_reg0_write, start_dma_write, dma_write_data, start_dma_read, dma_read_data, interrupt_host);
   
-  // csr_read0
+  // csr_h2f_reg0_read
   // CF with everything (EXPLICITLY including itself).
 
-  schedule csr_read0 CF (csr_read_req, csr_read_resp, csr_write, csr_read0, csr_write0, start_dma_write, dma_write_data, start_dma_read, dma_read_data, pause_dma_read, interrupt_host);
+  schedule csr_h2f_reg0_read CF (csr_read_req, csr_read_resp, csr_write, csr_h2f_reg0_read, csr_f2h_reg0_write, start_dma_write, dma_write_data, start_dma_read, dma_read_data, interrupt_host);
 
-  // csr_write0
+  // csr_f2h_reg0_write
   // SB with itself (A time-honored Bluespec convention)
   // CF with everything else.
 
-  schedule csr_write0 SB csr_write0
-  schedule csr_write0 CF (csr_read_req, csr_read_resp, csr_write, csr_read0, start_dma_write, dma_write_data, start_dma_read, dma_read_data, pause_dma_read, interrupt_host);
+  schedule csr_f2h_reg0_write SB csr_f2h_reg0_write
+  schedule csr_f2h_reg0_write CF (csr_read_req, csr_read_resp, csr_write, csr_h2f_reg0_read, start_dma_write, dma_write_data, start_dma_read, dma_read_data, interrupt_host);
 
   // start_dma_write
   // CF with everything (except itself).
 
-  schedule start_dma_write CF (csr_read_req, csr_read_resp, csr_write, csr_read0, csr_write0, dma_write_data, start_dma_read, dma_read_data, pause_dma_read, interrupt_host);
+  schedule start_dma_write CF (csr_read_req, csr_read_resp, csr_write, csr_h2f_reg0_read, csr_f2h_reg0_write, dma_write_data, start_dma_read, dma_read_data, interrupt_host);
   
   // dma_write_data
   // CF with everything (except itself)
   
-  schedule dma_write_data CF (csr_read_req, csr_read_resp, csr_write, csr_read0, csr_write0, start_dma_write, start_dma_read, dma_read_data, pause_dma_read, interrupt_host);
+  schedule dma_write_data CF (csr_read_req, csr_read_resp, csr_write, csr_h2f_reg0_read, csr_f2h_reg0_write, start_dma_write, start_dma_read, dma_read_data, interrupt_host);
 
   // start_dma_read
   // CF with everything (except itself)
 
-  schedule start_dma_read CF (csr_read_req, csr_read_resp, csr_write, csr_read0, csr_write0, start_dma_write, dma_write_data, dma_read_data, pause_dma_read, interrupt_host);
+  schedule start_dma_read CF (csr_read_req, csr_read_resp, csr_write, csr_h2f_reg0_read, csr_f2h_reg0_write, start_dma_write, dma_write_data, dma_read_data, interrupt_host);
 
   // dma_read_data
   // CF with everything (except itself)
   
-  schedule dma_read_data CF (csr_read_req, csr_read_resp, csr_write, csr_read0, csr_write0, start_dma_write, dma_write_data, start_dma_read, pause_dma_read, interrupt_host);
-  
-  // pause_dma_read
-  // CF with everyting (except itself)
-  
-  schedule pause_dma_read CF (csr_read_req, csr_read_resp, csr_write, csr_read0, csr_write0, start_dma_write, dma_write_data, start_dma_read, dma_read_data, interrupt_host);
+  schedule dma_read_data CF (csr_read_req, csr_read_resp, csr_write, csr_h2f_reg0_read, csr_f2h_reg0_write, start_dma_write, dma_write_data, start_dma_read, interrupt_host);
   
   // interrupt_host
   // CF with everyting (except itself)
   
-  schedule interrupt_host CF (csr_read_req, csr_read_resp, csr_write, csr_read0, csr_write0, start_dma_write, dma_write_data, start_dma_read, dma_read_data, pause_dma_read);
+  schedule interrupt_host CF (csr_read_req, csr_read_resp, csr_write, csr_h2f_reg0_read, csr_f2h_reg0_write, start_dma_write, dma_write_data, start_dma_read, dma_read_data);
   
 endmodule
