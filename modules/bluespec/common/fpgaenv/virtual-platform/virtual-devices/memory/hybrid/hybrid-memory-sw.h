@@ -1,7 +1,7 @@
 #ifndef __HYBRID_MEMORY__
 #define __HYBRID_MEMORY__
 
-#include "software-rrr-server.h"
+#include "software-server.h"
 
 /* our memory, for now, is a UINT32 aligned array */
 #define MEM_SIZE    262144 /* 256K * 4 = 1MB memory size */

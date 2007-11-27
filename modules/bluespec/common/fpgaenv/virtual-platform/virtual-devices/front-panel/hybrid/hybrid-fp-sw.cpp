@@ -7,7 +7,7 @@
 #include <signal.h>
 
 #include "hybrid-fp-sw.h"
-#include "rrr_services.h"
+#include "rrr_service_ids.h"
 #include "main.h"
 
 #define SERVICE_ID  FRONT_PANEL_SERVICE_ID

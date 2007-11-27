@@ -1,0 +1,64 @@
+`ifndef _SERVICE_STUB_MEMORY_
+`define _SERVICE_STUB_MEMORY_
+
+`include "rrr.bsh"
+`include "rrr_service_ids.bsh"
+
+`define MID_INVAL       0
+`define MID_FLUSHRANGE  1
+
+`define STATE_IDLE              0
+`define STATE_PROCESSING        1
+`define STATE_AWAITING_RESPONSE 2
+
+typedef Bit#(32) MEM_Flush_Type; // debug
+
+interface ServiceStub_MEMORY;
+    method ActionValue#(MEM_Addr) acceptRequest_Invalidate();
+    method Action sendResponse_Invalidate();
+    method ActionValue#(MEM_Flush_Type) acceptRequest_FlushRange();
+    method Action sendResponse_FlushRange();
+endinterface
+
+module mkServiceStub_MEMORY#(RRRServer server) (ServiceStub_MEMORY);
+
+    DeMarshaller#(32, 32, 1)    dem <- mkDeMarshaller();
+    Reg#(RRR_MethodID)          mid <- mkReg(0);
+    Reg#(Bit#(8))               state <- mkReg(`STATE_IDLE);
+
+    rule probe_dispatcher_for_mid (state == `STATE_IDLE);
+        RRR_Chunk chunk <- server.getNextChunk(`MEMORY_SERVICE_ID);
+        mid <= chunk[27:24];
+        state <= `STATE_PROCESSING;
+    endrule
+
+    rule probe_dispatcher_for_chunks (state == `STATE_PROCESSING);
+        RRR_Chunk chunk <- server.getNextChunk(`MEMORY_SERVICE_ID);
+        dem.enq(chunk);
+    endrule
+
+    method ActionValue#(MEM_Addr) acceptRequest_Invalidate() if (mid == `MID_INVAL);
+        Bit#(32) a <- dem.deq();
+        MEM_Addr retval = unpack(a);
+        state <= `STATE_AWAITING_RESPONSE;
+        return retval;
+    endmethod
+
+    method Action sendResponse_Invalidate() if (state == `STATE_AWAITING_RESPONSE);
+        state <= `STATE_IDLE;
+    endmethod
+
+    method ActionValue#(MEM_Flush_Type) acceptRequest_FlushRange() if (mid == `MID_FLUSHRANGE);
+        Bit#(32) a <- dem.deq();
+        MEM_Flush_Type ft = unpack(a);
+        state <= `STATE_AWAITING_RESPONSE;
+        return ft;
+    endmethod
+
+    method Action sendResponse_FlushRange() if (state == `STATE_AWAITING_RESPONSE);
+        state <= `STATE_IDLE;
+    endmethod
+
+endmodule
+
+`endif

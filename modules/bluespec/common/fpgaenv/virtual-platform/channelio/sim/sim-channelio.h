@@ -8,8 +8,8 @@
  * and writes at the granularity of "blocks" */
 #define PACKET_SIZE         4
 #define BLOCK_SIZE          4
-#define SELECT_TIMEOUT      1000
-#define CIO_NULL            0xFFFFFFFF
+#define SELECT_TIMEOUT      100
+#define CIO_NULL            0xFFFFFFFF00000000
 #define MAX_OPEN_CHANNELS   32
 
 #define STDIN                   0
@@ -35,7 +35,7 @@ typedef struct _Channel
 
 /* interface methods */
 unsigned char cio_open(unsigned char programID);
-unsigned int cio_read(unsigned char handle);
+unsigned long long cio_read(unsigned char handle);
 void cio_write(unsigned char handle, unsigned int data);
 
 #endif

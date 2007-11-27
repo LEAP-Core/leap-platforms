@@ -1,7 +1,7 @@
 #ifndef __HYBRID_FRONT_PANEL__
 #define __HYBRID_FRONT_PANEL__
 
-#include "software-rrr-server.h"
+#include "software-server.h"
 
 #define SELECT_TIMEOUT      1000
 #define DIALOG_PACKET_SIZE  4

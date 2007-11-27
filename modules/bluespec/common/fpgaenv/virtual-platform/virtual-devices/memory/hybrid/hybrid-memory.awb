@@ -4,7 +4,7 @@
 
 %provides memory
 
-%sources -t BSV -v PUBLIC   HybridMemory.bsv
+%sources -t BSV -v PUBLIC   HybridMemory.bsv hybrid-memory-fpga-service-stub.bsh
 %sources -t CPP -v PRIVATE  hybrid-memory-sw.cpp vmh-utils.cpp vmh-utils.h
 %sources -t CPP -v PUBLIC   hybrid-memory-sw.h
 %sources -t RRR -v PRIVATE  hybrid-memory-services.rrr

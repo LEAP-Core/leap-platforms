@@ -117,10 +117,9 @@ unsigned char cio_open(unsigned char serviceID)
 }
 
 /* read one packet of data */
-unsigned int cio_read(unsigned char handle)
+unsigned long long cio_read(unsigned char handle)
 {
     struct timeval timeout;
-    unsigned int retval;
     int done;
     Channel *channel;
 
@@ -186,7 +185,7 @@ unsigned int cio_read(unsigned char handle)
     {
         /* pack packet into a UINT32 */
         int i;
-        unsigned int retval = 0;
+        unsigned long long retval = 0;
 
         /* the following code is endian-agnostic */
         for (i = 0; i < PACKET_SIZE; i++)

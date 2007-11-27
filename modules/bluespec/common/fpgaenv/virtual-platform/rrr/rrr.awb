@@ -3,6 +3,6 @@
 
 %provides rrr
 
-%sources -t BSV -v PUBLIC HardwareRRRClient.bsv
-%sources -t CPP -v PUBLIC software-rrr-server.h
-%sources -t CPP -v PRIVATE software-rrr-server.cpp
+%sources -t BSV -v PUBLIC HardwareClient.bsv HardwareServer.bsv rrr_common.bsh
+%sources -t CPP -v PUBLIC software-server.h
+%sources -t CPP -v PRIVATE software-server.cpp

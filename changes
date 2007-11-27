@@ -1020,3 +1020,67 @@ Directory modules/bluespec/common/fpgaenv/hardware-platform/pcie
 
 updated Bluespec wrapper around VHDL HardwareChannels module based
 on HardwareChannels v0.8 spec.
+----------
+aparasha    Date: Tue Nov 27 17:57:18 EST 2007  CSN: CSN-platforms-27
+                  Tue Nov 27 22:57:18 UTC 2007
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/sim
+ SimChannelIO.bsv          Locally Modified           26 
+ sim-channelio.c           Locally Modified           26 
+ sim-channelio.h           Locally Modified           26 
+ sim-channelio.awb         Locally Modified           26 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr
+ software-server.cpp       Locally Added               0 
+ software-rrr-server.cpp   Locally Removed            26 
+ software-server.h         Locally Added               0 
+ HardwareClient.bsv        Locally Added               0 
+ software-rrr-server.h     Locally Removed            26 
+ rrr_common.bsh            Locally Added               0 
+ HardwareRRRClient.bsv     Locally Removed            26 
+ rrr.awb                   Locally Modified           26 
+ HardwareServer.bsv        Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid
+ HybridFP.bsv              Locally Modified           26 
+ hybrid-fp-sw.h            Locally Modified           26 
+ hybrid-fp-services.rrr    Locally Modified           26 
+ hybrid-fp-sw.cpp          Locally Modified           26 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-memory.awb         Locally Modified           26 
+ hybrid-memory-sw.cpp      Locally Modified           26 
+ HybridMemory.bsv          Locally Modified           26 
+ hybrid-memory-sw.h        Locally Modified           26 
+ hybrid-memory-fpga-service-stub.bsh Locally Added               0 
+ vmh-utils.cpp             Locally Modified           26 
+ hybrid-memory-services.rrr Locally Modified           26 
+ vmh-utils.h               Locally Modified           26 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface
+ LowLevelPlatformInterface.bsv Locally Modified           26 
+
+Partial support for a hardware RRR server, variable-length
+RRR parameters, and a richer RRR specification language:
+significant changes have been made to RRR and ChannelIO
+modules, but functionally all models should behave exactly
+as they did before this commit (except for a noticeable
+slowdown).
+
+- altered ChannelIO interface to use vectors of read and
+  write ports, to support multiple full-duplex virtual channels.
+
+- added partial support to ChannelIO for variable-length
+  parameters (currently commented out).
+
+- added support for a hardware RRR server (incomplete).
+
+- added a temporary placeholder stub for the hybrid Memory
+  service which acts as an interface between the Service itself
+  and the hardware RRR server.
+
+- updated .rrr specification files for hybrid memory and front
+  panel virtual devices according to new spec language.
+
+- renamed some files in the RRR module.

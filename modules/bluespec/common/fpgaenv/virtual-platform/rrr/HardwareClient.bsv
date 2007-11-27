@@ -1,17 +1,7 @@
-import channelio::*;
+`include "channelio.bsh"
+`include "rrr_common.bsh"
 
-typedef Bit#(32) RRR_ServiceID;
-typedef Bit#(32) RRR_Param;
-typedef Bit#(32) RRR_Response;
-
-typedef struct
-{
-    RRR_ServiceID   serviceID;
-    RRR_Param       param0;
-    RRR_Param       param1;
-    RRR_Param       param2;
-    Bool            needResponse;
-} RRR_Request   deriving (Eq, Bits);
+`define CLIENT_CHANNEL_ID 0
 
 interface RRRClient;
     method Action                       makeRequest(RRR_Request request);
@@ -36,18 +26,18 @@ module mkRRRClient#(ChannelIO channel) (RRRClient);
     Reg#(Bit#(32))  responseBuffer  <- mkReg(0);
 
     rule sendParam0(state == 1 || state == 9);
-        channel.write(param0Buffer);
+        channel.writePorts[`CLIENT_CHANNEL_ID].write(param0Buffer);
         state <= state + 1;
     endrule
 
     rule sendParam1(state == 2 || state == 10);
-        channel.write(param1Buffer);
+        channel.writePorts[`CLIENT_CHANNEL_ID].write(param1Buffer);
         state <= state + 1;
     endrule
 
     rule sendParam2(state == 3 || state == 11);
         Bit#(4) s = state;
-        channel.write(param2Buffer);
+        channel.writePorts[`CLIENT_CHANNEL_ID].write(param2Buffer);
         if (s == 3)
             state <= 4;
         else
@@ -55,17 +45,14 @@ module mkRRRClient#(ChannelIO channel) (RRRClient);
     endrule
 
     rule waitForResponse(state == 4);
-        Maybe#(Bit#(32)) data <- channel.read();
-        if (isValid(data))
-        begin
-            responseBuffer <= fromMaybe(0, data);
-            state <= 5;
-        end
+        CIO_Chunk response <- channel.readPorts[`CLIENT_CHANNEL_ID].read();
+        responseBuffer <= pack(response);
+        state <= 5;
     endrule
 
     method Action makeRequest(RRR_Request request) if (state == 0);
         // send command down channel, buffer params locally
-        channel.write(request.serviceID);
+        channel.writePorts[`CLIENT_CHANNEL_ID].write(zeroExtend(request.serviceID));
         param0Buffer <= request.param0;
         param1Buffer <= request.param1;
         param2Buffer <= request.param2;

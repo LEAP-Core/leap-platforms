@@ -1,1 +1,3 @@
-ADD_SERVICE(FRONT_PANEL)
+rrrclass FRONT_PANEL
+{
+};

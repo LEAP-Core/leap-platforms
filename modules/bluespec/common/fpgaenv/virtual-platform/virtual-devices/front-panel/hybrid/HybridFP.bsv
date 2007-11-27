@@ -2,7 +2,7 @@
 `include "rrr.bsh"
 `include "toplevel_wires.bsh"
 
-`include "rrr_services.bsv"
+`include "rrr_service_ids.bsh"
 
 `define FP_POLL_INTERVAL    1000
 

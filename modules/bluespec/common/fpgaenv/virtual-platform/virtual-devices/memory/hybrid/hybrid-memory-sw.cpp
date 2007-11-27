@@ -7,10 +7,9 @@
 
 #include "main.h"
 #include "software-controller.h"
-#include "software-rrr-server.h"
 #include "vmh-utils.h"
 #include "hybrid-memory-sw.h"
-#include "rrr_services.h"
+#include "rrr_service_ids.h"
 
 #define SERVICE_ID  MEMORY_SERVICE_ID
 

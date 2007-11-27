@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "software-rrr-server.h"
 #include "vmh-utils.h"
 
 /* load image into memory */

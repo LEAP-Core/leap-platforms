@@ -1,7 +1,7 @@
-import low_level_platform_interface::*;
-import rrr::*;
-
-`include "rrr_services.bsv"
+`include "low_level_platform_interface.bsh"
+`include "rrr.bsh"
+`include "rrr_service_ids.bsh"
+`include "hybrid-memory-fpga-service-stub.bsh"
 
 typedef Bit#(`MEMORY_ADDR_SIZE) MEM_Addr;
 typedef Bit#(`MEMORY_VALUE_SIZE) MEM_Value;
@@ -18,7 +18,7 @@ typedef union tagged
 interface Memory;
 
   method Action makeMemRequest(MEM_Request req);
-  method ActionValue#(MEM_Value) getMemResponse(); //Data is assumed to come back inorder
+  method ActionValue#(MEM_Value) getMemResponse(); // data is assumed to come back inorder
   method ActionValue#(MEM_Addr) getInvalidateRequest();
 
 endinterface
@@ -26,7 +26,10 @@ endinterface
 module mkMemory#(LowLevelPlatformInterface llpint) (Memory);
 
   Reg#(Bit#(8)) state   <- mkReg(0);
+  ServiceStub_MEMORY stub <- mkServiceStub_MEMORY(llpint.rrrServer);
 
+
+  /* --- client methods --- */
   method Action makeMemRequest(MEM_Request req) if (state == 0);
     case (req) matches
       tagged MEM_Load .addr:
@@ -66,14 +69,22 @@ module mkMemory#(LowLevelPlatformInterface llpint) (Memory);
   endmethod
   
   method ActionValue#(Bit#(32)) getMemResponse() if (state == 1);
+
     MEM_Value v <- llpint.rrrClient.getResponse();
     state <= 0;
     return v;
+
   endmethod
   
-  method ActionValue#(Bit#(32)) getInvalidateRequest() if (False); //Never invalidate. Remove the "if" to enable invalidates.
-    noAction;
-    return 0; //Fill this in
+
+  /* --- service methods --- */
+
+  method ActionValue#(MEM_Addr) getInvalidateRequest();
+
+    MEM_Addr inval_addr <- stub.acceptRequest_Invalidate();
+    $display("received invalidate request: inval_addr");
+    return inval_addr;
+
   endmethod
 
 endmodule

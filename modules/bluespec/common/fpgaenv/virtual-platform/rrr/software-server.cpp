@@ -8,7 +8,7 @@
 #include <signal.h>
 #include <string.h>
 
-#include "software-rrr-server.h"
+#include "software-server.h"
 
 // instantiate global service table; this table will be
 // populated by the individual services (also statically

@@ -1,1 +1,7 @@
-ADD_SERVICE(MEMORY)
+rrrclass MEMORY
+{
+    partition FPGA
+    {
+        method Invalidate(request 8, response 0);
+    };
+};

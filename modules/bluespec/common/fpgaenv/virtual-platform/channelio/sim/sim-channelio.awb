@@ -10,4 +10,5 @@
 %sources -t CPP     -v PRIVATE  sim-channelio-sw.cpp
 %sources -t CPP     -v PUBLIC   sim-channelio-sw.h
 
+%param CIO_CHUNK_SIZE 32 "ChannelIO chunk size in bits"
 %param BDPI_NAMES "cio_init cio_open cio_read cio_write" "list of BDPI-exported names"
