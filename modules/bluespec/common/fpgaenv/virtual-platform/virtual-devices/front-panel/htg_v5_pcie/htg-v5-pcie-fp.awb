@@ -1,0 +1,7 @@
+
+%name Physical HTG-v5-PCIe Front Panel
+%desc Physical HTG-v5-PCIe Front Panel
+
+%provides front_panel
+
+%public HTGv5PCIeFP.bsv
