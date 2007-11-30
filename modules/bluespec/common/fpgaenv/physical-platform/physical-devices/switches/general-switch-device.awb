@@ -1,0 +1,7 @@
+
+%name General Switch Device
+%desc General Switch Device for any bit width
+
+%provides switch-device
+
+%public general-switch-device.bsv

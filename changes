@@ -1098,3 +1098,112 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front
  HTGv5PCIeFP.bsv           Locally Added               0 
 
 Add Hitech Global front panel.
+
+----------
+pellauer    Date: Fri Nov 30 17:12:29 EST 2007  CSN: CSN-platforms-29
+                  Fri Nov 30 22:12:29 UTC 2007
+
+
+Directory modules/bluespec/common/fpgaenv/toplevel-wires/xilinx
+ htg-v5-pcie-TopLevelWires.bsv Locally Modified           28 
+ htg-v5-pcie.ucf           Locally Modified           28 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/null
+ NullChannelIO.bsv         Locally Modified           28 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr
+ NullRRR.bsv               Locally Modified           28 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/htg_v5_pcie
+ HTGv5PCIeFP.bsv           Locally Modified           28 
+
+Directory modules/bluespec/common/fpgaenv
+ physical-platform/        Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform
+ xilinx_xup/               Locally Added               0 
+ htg_virtex5/              Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5
+ pcie-disabled/            Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-disabled
+ htg-v5-pcie-disabled.awb  Locally Added               0 
+ htg-v5-pcie-disabled.bsv  Locally Added               0 
+ htg-v5-pcie-disabled.ucf  Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5
+ pcie-enabled/             Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled
+ htg-v5-pcie-enabled.awb   Locally Added               0 
+ htg-v5-pcie-enabled.bsv   Locally Added               0 
+ htg-v5-pcie-enabled.ucf   Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform
+ physical-devices/         Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices
+ pci-express/              Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express
+ pci_exp_64b_app.vhd       Locally Added               0 
+ BMD.vhd                   Locally Added               0 
+ BMD_EP_MEM_ACCESS.vhd     Locally Added               0 
+ xilinx_pci_exp_ep.vhd     Locally Added               0 
+ BMD_64_RX_ENGINE.vhd      Locally Added               0 
+ BMD_64_TX_ENGINE.vhd      Locally Added               0 
+ pcieblkplus.vhd           Locally Added               0 
+ pci-express-vhdl-import.bsv Locally Added               0 
+ ram.vhd                   Locally Added               0 
+ BMD_INTR_CTRL.vhd         Locally Added               0 
+ BMD_EP_MEM.vhd            Locally Added               0 
+ BMD_EP.vhd                Locally Added               0 
+ PIO_EP_MEM_ACCESS.vhd     Locally Added               0 
+ bmd_pak.vhd               Locally Added               0 
+ pci-express-vhdl-import.awb Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices
+ leds/                     Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/leds
+ general-led-device.awb    Locally Added               0 
+ general-led-device.bsv    Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices
+ switches/                 Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/switches
+ general-switch-device.awb Locally Added               0 
+ general-switch-device.bsv Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices
+ buttons/                  Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/buttons
+ general-button-device.awb Locally Added               0 
+ general-button-device.bsv Locally Added               0 
+
+
+The beginning of "productizing" the PCIE controller.
+
+In this checkin the existing structure and modules are not modified, but new
+things are added so that we can build them up to the organization that we want
+while existing models continue to function.
+
+Includes:
+ * Extremely preliminary version of the PCIE VHDL.
+ * Initial import of PCIE VHDL into BSV
+ * Initial set of Physical Devices:
+    * LEDs
+    * Switches
+    * Buttons
+ * Initial Physical Platforms
+    * HTG PCI Enabled
+    * HTG PCI Disabled
+
+Open question: Who instantiates the physical platform and maps the virtual
+devices onto it?
+
+Michael P.
+

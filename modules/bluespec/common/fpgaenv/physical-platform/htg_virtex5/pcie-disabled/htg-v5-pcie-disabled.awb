@@ -1,0 +1,8 @@
+
+%name HTG Virtex 5 PCIE Disabled
+%desc HTG Virtex 5 PCIE Disabled (Independent Mode)
+
+%provides physical-platform
+
+%public  htg-v5-pcie-disabled.bsv
+%private htg-v5-pcie-disabled.ucf

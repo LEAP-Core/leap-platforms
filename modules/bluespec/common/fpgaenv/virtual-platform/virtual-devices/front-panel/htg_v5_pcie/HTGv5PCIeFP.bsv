@@ -33,7 +33,7 @@ module mkFrontPanel#(LowLevelPlatformInterface llpi) (FrontPanel);
 
     method FRONTP_SWITCHES readSwitches();
         // read from toplevel wires
-        return (llpi.topLevelWires.getSwitches());
+        return (llpi.switchesDriver.getSwitches());
     endmethod
 
     method FRONTP_BUTTONS readButtons();
@@ -46,7 +46,7 @@ module mkFrontPanel#(LowLevelPlatformInterface llpi) (FrontPanel);
     method Action writeLEDs(FRONTP_MASKED_LEDS data);
         FRONTP_LEDS s = (led_state & ~data.mask) | (data.state & data.mask);
         led_state <= s;
-        llpi.topLevelWires.setLEDs(s);
+        llpi.ledsDriver.setLEDs(s);
     endmethod
 
 endmodule

@@ -1,0 +1,7 @@
+
+%name General LED Device
+%desc General LED Device for any bit width
+
+%provides led-device
+
+%public general-led-device.bsv

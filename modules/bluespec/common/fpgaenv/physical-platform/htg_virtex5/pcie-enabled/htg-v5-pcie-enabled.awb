@@ -1,0 +1,8 @@
+
+%name HTG Virtex 5 PCIE Enabled
+%desc HTG Virtex 5 PCIE Enabled
+
+%provides physical-platform
+
+%public  htg-v5-pcie-enabled.bsv
+%private htg-v5-pcie-enabled.ucf
