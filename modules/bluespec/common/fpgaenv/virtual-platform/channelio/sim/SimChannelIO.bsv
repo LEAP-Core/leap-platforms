@@ -12,7 +12,7 @@ import Vector::*;
 `define CIO_CHUNK_SIZE              4
 `define CIO_LOG_CHUNK_SIZE          2
 
-`define POLL_INTERVAL   0
+`define POLL_INTERVAL   32
 
 typedef Bit#(16) CIO_MsgLength;
 typedef Bit#(4)  CIO_ChannelID;

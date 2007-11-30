@@ -1207,3 +1207,26 @@ devices onto it?
 
 Michael P.
 
+
+----------
+aparasha    Date: Fri Nov 30 18:02:21 EST 2007  CSN: CSN-platforms-30
+                  Fri Nov 30 23:02:21 UTC 2007
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/unix
+ UNIXChannelIO.bsv         Locally Modified           29 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/sim
+ SimChannelIO.bsv          Locally Modified           29 
+ sim-channelio.h           Locally Modified           29 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/null
+ NullChannelIO.bsv         Locally Modified           29 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr
+ NullRRR.bsv               Locally Modified           29 
+
+- fixed a compatibility bug in UNIX channelio module
+- simplified a compatibility bugfix in Null channelio module
+- reduced the poll interval in Sim channelio module. Models
+  simulate significantly faster now.

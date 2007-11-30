@@ -1,4 +1,4 @@
-import channelio::*;
+`include "channelio.bsh"
 
 typedef Bit#(32) RRR_ServiceID;
 typedef Bit#(32) RRR_Param;
