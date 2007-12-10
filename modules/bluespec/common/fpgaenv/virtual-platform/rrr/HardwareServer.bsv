@@ -37,12 +37,12 @@ module mkRRRServer#(ChannelIO channel) (RRRServer);
     // scan channel for incoming requests
     rule scan_requests (chunksRemaining == 0);
 
-        CIO_Chunk data <- channel.readPorts[`SERVER_CHANNEL_ID].read();
+        UMF_PACKET data <- channel.readPorts[`SERVER_CHANNEL_ID].read();
         $display("hardware server: impossible! request arrived from channelio!");
         $finish(0);
 
         // new request is available, decode serviceID
-        RRR_Chunk chunk = unpack(data);
+        RRR_Chunk chunk = 0; // unpack(data);
         RRR_ServiceID   sid = `DECODE_SID(chunk);
 
         // find out number of chunks in parameter list
@@ -66,8 +66,8 @@ module mkRRRServer#(ChannelIO channel) (RRRServer);
 
         // grab a chunk from channelio (we know that this is a param
         // chunk) and place it into the active request queue
-        CIO_Chunk data <- channel.readPorts[`SERVER_CHANNEL_ID].read();
-        RRR_Chunk chunk = unpack(data);
+        UMF_PACKET data <- channel.readPorts[`SERVER_CHANNEL_ID].read();
+        RRR_Chunk chunk = 0; // unpack(data);
         serviceQueues[activeQueueIndex].enq(chunk);
 
         // one chunk processed

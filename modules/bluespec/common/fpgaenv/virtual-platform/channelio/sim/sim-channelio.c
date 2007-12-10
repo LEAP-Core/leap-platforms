@@ -116,7 +116,7 @@ unsigned char cio_open(unsigned char serviceID)
     return channel->tableIndex;
 }
 
-/* read one packet of data */
+/* read one chunk of data */
 unsigned long long cio_read(unsigned char handle)
 {
     struct timeval timeout;
@@ -180,15 +180,15 @@ unsigned long long cio_read(unsigned char handle)
         }
     }
 
-    /* see if we have sufficient data to complete a packet */
-    if ((channel->ibTail - channel->ibHead) >= PACKET_SIZE)
+    /* see if we have sufficient data to complete a chunk */
+    if ((channel->ibTail - channel->ibHead) >= CIO_CHUNK_BYTES)
     {
-        /* pack packet into a UINT32 */
+        /* pack chunk into a UINT32 */
         int i;
         unsigned long long retval = 0;
 
         /* the following code is endian-agnostic */
-        for (i = 0; i < PACKET_SIZE; i++)
+        for (i = 0; i < CIO_CHUNK_BYTES; i++)
         {
             unsigned int byte = (unsigned int)channel->inputBuffer[channel->ibHead];
             retval |= (byte << (i * 8));
@@ -199,7 +199,7 @@ unsigned long long cio_read(unsigned char handle)
         assert(channel->ibHead <= channel->ibTail);
         assert(retval != CIO_NULL);
 
-        /* now that we have a full packet, see if head and tail are
+        /* now that we have a full chunk, see if head and tail are
          * aligned, and if so, reset both pointers */
         if (channel->ibHead == channel->ibTail)
         {
@@ -207,7 +207,7 @@ unsigned long long cio_read(unsigned char handle)
             channel->ibTail = 0;
         }
 
-        /* packet ready, return */
+        /* chunk ready, return */
         return retval;
     }
 
@@ -215,11 +215,11 @@ unsigned long long cio_read(unsigned char handle)
     return CIO_NULL;
 }
 
-/* write one packet of data */
+/* write one chunk of data */
 void cio_write(unsigned char handle, unsigned int data)
 {   
     int bytes_written;
-    unsigned char databuf[PACKET_SIZE];
+    unsigned char databuf[CIO_CHUNK_BYTES];
     unsigned int mask;
     int i;
     Channel *channel;
@@ -233,7 +233,7 @@ void cio_write(unsigned char handle, unsigned int data)
 
     /* unpack UINT32 into byte sequence */
     mask = 0xFF;
-    for (i = 0; i < PACKET_SIZE; i++)
+    for (i = 0; i < CIO_CHUNK_BYTES; i++)
     {
         unsigned char byte = (mask & data) >> (i * 8);
         databuf[i] = (unsigned char)byte;
@@ -241,16 +241,16 @@ void cio_write(unsigned char handle, unsigned int data)
     }
 
     /* send message on pipe */
-    bytes_written = write(CHANNELIO_FPGA_2_HOST, databuf, PACKET_SIZE);
+    bytes_written = write(CHANNELIO_FPGA_2_HOST, databuf, CIO_CHUNK_BYTES);
     if (bytes_written == -1)
     {
         perror("FPGA/cio_write/write");
         cleanup();
         exit(1);
     }
-    else if (bytes_written < PACKET_SIZE)
+    else if (bytes_written < CIO_CHUNK_BYTES)
     {
-        fprintf(stderr, "could not write complete packet.\n");
+        fprintf(stderr, "could not write complete chunk.\n");
         cleanup();
         exit(1);
     }

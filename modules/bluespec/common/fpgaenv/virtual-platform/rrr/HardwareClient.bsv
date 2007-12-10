@@ -8,62 +8,75 @@ interface RRRClient;
     method ActionValue#(RRR_Response)   getResponse();
 endinterface
 
-// state encodings
-// ---------------
-// 00   : accepting requests
-// 01/09: RRR request sent, sending param0
-// 02/10: sending param1
-// 03/11: sending param2
-// 04   : waiting for response
-// 05   : response ready, waiting to be read
+typedef enum
+{
+    CLIENT_STATE_ready,
+    CLIENT_STATE_sendParam1,
+    CLIENT_STATE_sendParam2,
+    CLIENT_STATE_readResponseHeader,
+    CLIENT_STATE_readResponseData,
+    CLIENT_STATE_responseReady
+}
+CLIENT_STATE
+    deriving (Bits, Eq);
 
 module mkRRRClient#(ChannelIO channel) (RRRClient);
 
-    Reg#(Bit#(4))   state           <- mkReg(0);
-    Reg#(Bit#(32))  param0Buffer    <- mkReg(0);
-    Reg#(Bit#(32))  param1Buffer    <- mkReg(0);
-    Reg#(Bit#(32))  param2Buffer    <- mkReg(0);
-    Reg#(Bit#(32))  responseBuffer  <- mkReg(0);
+    Reg#(CLIENT_STATE)  state           <- mkReg(CLIENT_STATE_ready);
+    Reg#(Bit#(32))      param1Buffer    <- mkReg(0);
+    Reg#(Bit#(32))      param2Buffer    <- mkReg(0);
+    Reg#(Bit#(32))      responseBuffer  <- mkReg(0);
+    Reg#(Bool)          needResponse    <- mkReg(False);
 
-    rule sendParam0(state == 1 || state == 9);
-        channel.writePorts[`CLIENT_CHANNEL_ID].write(param0Buffer);
-        state <= state + 1;
+    rule send_param1(state == CLIENT_STATE_sendParam1);
+        UMF_PACKET packet = tagged UMF_PACKET_dataChunk param1Buffer;
+        channel.writePorts[`CLIENT_CHANNEL_ID].write(packet);
+        state <= CLIENT_STATE_sendParam2;
     endrule
 
-    rule sendParam1(state == 2 || state == 10);
-        channel.writePorts[`CLIENT_CHANNEL_ID].write(param1Buffer);
-        state <= state + 1;
-    endrule
-
-    rule sendParam2(state == 3 || state == 11);
-        Bit#(4) s = state;
-        channel.writePorts[`CLIENT_CHANNEL_ID].write(param2Buffer);
-        if (s == 3)
-            state <= 4;
+    rule send_param2(state == CLIENT_STATE_sendParam2);
+        UMF_PACKET packet = tagged UMF_PACKET_dataChunk param2Buffer;
+        channel.writePorts[`CLIENT_CHANNEL_ID].write(packet);
+        if (needResponse)
+            state <= CLIENT_STATE_readResponseHeader;
         else
-            state <= 0;
+            state <= CLIENT_STATE_ready;
     endrule
 
-    rule waitForResponse(state == 4);
-        CIO_Chunk response <- channel.readPorts[`CLIENT_CHANNEL_ID].read();
-        responseBuffer <= pack(response);
-        state <= 5;
+    rule read_response_header(state == CLIENT_STATE_readResponseHeader);
+        UMF_PACKET response <- channel.readPorts[`CLIENT_CHANNEL_ID].read();
+        // ignore header
+        state <= CLIENT_STATE_readResponseData;
     endrule
 
-    method Action makeRequest(RRR_Request request) if (state == 0);
-        // send command down channel, buffer params locally
-        channel.writePorts[`CLIENT_CHANNEL_ID].write(zeroExtend(request.serviceID));
-        param0Buffer <= request.param0;
+    rule read_response_data(state == CLIENT_STATE_readResponseData);
+        UMF_PACKET response <- channel.readPorts[`CLIENT_CHANNEL_ID].read();
+        responseBuffer <= pack(response.UMF_PACKET_dataChunk);
+        state <= CLIENT_STATE_responseReady;
+    endrule
+
+    method Action makeRequest(RRR_Request request) if (state == CLIENT_STATE_ready);
+        // generate header and send to channelio
+        UMF_PACKET hdrpacket =  tagged UMF_PACKET_header
+                                {
+                                    channelID: `CLIENT_CHANNEL_ID,
+                                    serviceID: request.serviceID,
+                                    methodID : truncate(pack(request.param0)),
+                                    length   : 8
+                                };
+                                    
+        channel.writePorts[`CLIENT_CHANNEL_ID].write(hdrpacket);
+
+        // buffer params
         param1Buffer <= request.param1;
         param2Buffer <= request.param2;
-        if (request.needResponse == True)
-            state <= 1;
-        else
-            state <= 9;
+        needResponse <= request.needResponse;
+
+        state <= CLIENT_STATE_sendParam1;
     endmethod
 
-    method ActionValue#(RRR_Response) getResponse() if (state == 5);
-        state <= 0;
+    method ActionValue#(RRR_Response) getResponse() if (state == CLIENT_STATE_responseReady);
+        state <= CLIENT_STATE_ready;
         return responseBuffer;
     endmethod
 

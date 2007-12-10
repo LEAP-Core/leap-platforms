@@ -1230,3 +1230,41 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr
 - simplified a compatibility bugfix in Null channelio module
 - reduced the poll interval in Sim channelio module. Models
   simulate significantly faster now.
+
+----------
+aparasha    Date: Mon Dec 10 17:36:53 EST 2007  CSN: CSN-platforms-31
+                  Mon Dec 10 22:36:53 UTC 2007
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/sim
+ SimChannelIO.bsv          Locally Modified           30 
+ sim-channelio-sw.h        Locally Modified           30 
+ sim-channelio.c           Locally Modified           30 
+ sim-channelio.h           Locally Modified           30 
+ sim-channelio.awb         Locally Modified           30 
+ sim-channelio-sw.cpp      Locally Modified           30 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr
+ software-server.cpp       Locally Modified           30 
+ HardwareClient.bsv        Locally Modified           30 
+ HardwareServer.bsv        Locally Modified           30 
+
+Updated ChannelIO (sim):
+
+- variable-length messages are now supported for all channels in
+  both directions.
+
+- created a Unified Message Format (UMF) which is used by multiple
+  layers in the RRR stack. A UMF message contains a pre-decoded
+  header with IDs and data-lengths for multiple stack layers.
+
+- added an explicit priority arbiter to arbitrate between multiple
+  virtual write channels on the hardware side.
+
+- modified hardware RRR client and software server modules to use
+  the new ChannelIO, but no changes have been made to their existing
+  fixed-size parameter usage. These modules need to be cleaned up
+  and generalized.
+
+These changes should be completely invisible outside channelio
+and RRR.

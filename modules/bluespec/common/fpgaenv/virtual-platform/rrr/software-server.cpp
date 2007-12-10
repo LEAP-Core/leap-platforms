@@ -10,15 +10,17 @@
 
 #include "software-server.h"
 
+#define CHANNEL_ID  0
+
 // instantiate global service table; this table will be
 // populated by the individual services (also statically
 // instantiated) before main().
 RRR_SERVICE RRR_SERVER_CLASS::ServiceMap[MAX_SERVICES];
 UINT64      RRR_SERVER_CLASS::ServiceValidMask = 0;
 
-//****************************
-//***    static methods    ***
-//****************************
+// ===========================
+//       static methods    
+// ===========================
 
 // register a service
 void
@@ -62,9 +64,9 @@ RRR_SERVER_CLASS::unsetServiceValid(
     ServiceValidMask &= (~mask);
 }
 
-//****************************
-//***   regular methods    ***
-//****************************
+// ===========================
+//       regular methods
+// ===========================
 
 // constructor
 RRR_SERVER_CLASS::RRR_SERVER_CLASS(
@@ -121,7 +123,7 @@ RRR_SERVER_CLASS::unpack(
     // unpack UINT32 into byte sequence
     unsigned int mask = 0xFF;
     int i;
-    for (i = 0; i < CHANNELIO_PACKET_SIZE; i++)
+    for (i = 0; i < sizeof(UINT32); i++)
     {
         unsigned char byte = (mask & src) >> (i * 8);
         dst[i] = (unsigned char)byte;
@@ -136,7 +138,7 @@ RRR_SERVER_CLASS::pack(
 {
     UINT32 retval = 0;
     int i;
-    for (i = 0; i < CHANNELIO_PACKET_SIZE; i++)
+    for (i = 0; i < sizeof(UINT32); i++)
     {
         unsigned int byte = (unsigned int)dst[i];
         retval |= (byte << (i * 8));
@@ -148,38 +150,56 @@ RRR_SERVER_CLASS::pack(
 void
 RRR_SERVER_CLASS::Poll()
 {
-    unsigned char   buf[CHANNELIO_PACKET_SIZE];
+    // read new message from channelio
+    UMF_MESSAGE message = channelio->Read(CHANNEL_ID);
 
-    // currently, we only have 1 virtual channel to channelio,
-    // and we can only perform blocking reads
-    channelio->Read(buf);
-
-    // decode serviceID
-    int serviceID = pack(buf);
-    if (isServiceValid(serviceID) == false)
+    if (message != NULL)
     {
-        fprintf(stderr, "software server: invalid serviceID: %u\n", serviceID);
-        parent->CallbackExit(1);
-    }
+        int serviceID = message->GetServiceID();
 
-    // read args from channelio and place into args array
-    int argc = 3;
-    UINT32 argv[MAX_ARGS];
-    for (int i = 0; i < argc; i++)
-    {
-        channelio->Read(buf);
-        argv[i] = pack(buf);
-    }
+        // validate serviceID
+        if (isServiceValid(serviceID) == false)
+        {
+            fprintf(stderr, "software server: invalid serviceID: %u\n", serviceID);
+            parent->CallbackExit(1);
+        }
 
-    // invoke service method to obtain result
-    UINT32 result;
-    bool send_result = ServiceMap[serviceID]->Request(argv[0], argv[1], argv[2], &result);
+        // read args from channelio and place into args array
+        int argc = 3;
+        UINT32 argv[MAX_ARGS];
+        argv[0] = message->GetMethodID();
+        for (int i = 1; i < argc; i++)
+        {
+            unsigned char buf[4];
+            message->Extract(4, buf);
+            argv[i] = pack(buf);
+        }
 
-    // send result to channelio if this is a value method
-    if (send_result)
-    {
-        unpack(result, buf);
-        channelio->Write(buf);
+        // we have extracted everything we need from the message,
+        // so we can de-allocate it now. TODO: in future, services
+        // will be passed the entire message, and they will
+        // de-allocate it themselves.
+        delete message;
+
+        // invoke service method to obtain result
+        UINT32 result;
+        bool send_result = ServiceMap[serviceID]->Request(argv[0], argv[1], argv[2], &result);
+
+        // send result to channelio if this is a value method
+        if (send_result)
+        {
+            unsigned char buf[4];
+            unpack(result, buf);
+
+            // create a new channelio message
+            UMF_MESSAGE message = new UMF_MESSAGE_CLASS(CHANNEL_ID, // channelID,
+                                                        serviceID,  // serviceID,
+                                                        0,          // methodID, don't care
+                                                        4           // length of payload
+                                                       );
+            message->Append(4, buf);
+            channelio->Write(CHANNEL_ID, message);
+        }
     }
 
     // poll each service module
