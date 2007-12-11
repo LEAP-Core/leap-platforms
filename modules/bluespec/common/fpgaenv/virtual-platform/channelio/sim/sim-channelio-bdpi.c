@@ -9,7 +9,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#include "sim-channelio.h"
+#include "sim-channelio-bdpi.h"
 
 /* global table of open channel handles */
 Channel OCHT[MAX_OPEN_CHANNELS];
@@ -181,14 +181,14 @@ unsigned long long cio_read(unsigned char handle)
     }
 
     /* see if we have sufficient data to complete a chunk */
-    if ((channel->ibTail - channel->ibHead) >= CIO_CHUNK_BYTES)
+    if ((channel->ibTail - channel->ibHead) >= BDPI_CHUNK_BYTES)
     {
         /* pack chunk into a UINT32 */
         int i;
         unsigned long long retval = 0;
 
         /* the following code is endian-agnostic */
-        for (i = 0; i < CIO_CHUNK_BYTES; i++)
+        for (i = 0; i < BDPI_CHUNK_BYTES; i++)
         {
             unsigned int byte = (unsigned int)channel->inputBuffer[channel->ibHead];
             retval |= (byte << (i * 8));
@@ -219,7 +219,7 @@ unsigned long long cio_read(unsigned char handle)
 void cio_write(unsigned char handle, unsigned int data)
 {   
     int bytes_written;
-    unsigned char databuf[CIO_CHUNK_BYTES];
+    unsigned char databuf[BDPI_CHUNK_BYTES];
     unsigned int mask;
     int i;
     Channel *channel;
@@ -233,7 +233,7 @@ void cio_write(unsigned char handle, unsigned int data)
 
     /* unpack UINT32 into byte sequence */
     mask = 0xFF;
-    for (i = 0; i < CIO_CHUNK_BYTES; i++)
+    for (i = 0; i < BDPI_CHUNK_BYTES; i++)
     {
         unsigned char byte = (mask & data) >> (i * 8);
         databuf[i] = (unsigned char)byte;
@@ -241,14 +241,14 @@ void cio_write(unsigned char handle, unsigned int data)
     }
 
     /* send message on pipe */
-    bytes_written = write(CHANNELIO_FPGA_2_HOST, databuf, CIO_CHUNK_BYTES);
+    bytes_written = write(CHANNELIO_FPGA_2_HOST, databuf, BDPI_CHUNK_BYTES);
     if (bytes_written == -1)
     {
         perror("FPGA/cio_write/write");
         cleanup();
         exit(1);
     }
-    else if (bytes_written < CIO_CHUNK_BYTES)
+    else if (bytes_written < BDPI_CHUNK_BYTES)
     {
         fprintf(stderr, "could not write complete chunk.\n");
         cleanup();

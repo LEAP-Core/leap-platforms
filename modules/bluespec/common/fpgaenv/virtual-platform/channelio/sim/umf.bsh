@@ -1,0 +1,36 @@
+`ifndef _UMF_
+`define _UMF_
+
+`define UMF_CHUNK_BITS      32
+`define UMF_CHUNK_BYTES     4
+`define UMF_CHUNK_LOG_BYTES 2
+
+`define UMF_CHANNEL_ID_BITS 4
+`define UMF_SERVICE_ID_BITS 8
+`define UMF_METHOD_ID_BITS  4
+`define UMF_MSG_LENGTH_BITS 16
+
+typedef Bit#(`UMF_CHUNK_BITS)       UMF_CHUNK;
+
+typedef Bit#(`UMF_CHANNEL_ID_BITS)  UMF_CHANNEL_ID;
+typedef Bit#(`UMF_SERVICE_ID_BITS)  UMF_SERVICE_ID;
+typedef Bit#(`UMF_METHOD_ID_BITS)   UMF_METHOD_ID;
+typedef Bit#(`UMF_MSG_LENGTH_BITS)  UMF_MSG_LENGTH;
+
+typedef union tagged
+{
+    struct
+    {
+        UMF_CHANNEL_ID  channelID;
+        UMF_SERVICE_ID  serviceID;
+        UMF_METHOD_ID   methodID;
+        UMF_MSG_LENGTH  length;
+    }
+    UMF_PACKET_header;
+
+    UMF_CHUNK   UMF_PACKET_dataChunk;
+
+} UMF_PACKET
+    deriving (Bits);
+
+`endif

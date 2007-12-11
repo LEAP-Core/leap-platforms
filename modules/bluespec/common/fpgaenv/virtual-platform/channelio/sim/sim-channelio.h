@@ -1,42 +1,64 @@
-#ifndef __CHANNELIO__
-#define __CHANNELIO__
+#ifndef __SIM_CHANNELIO__
+#define __SIM_CHANNELIO__
 
-#include <sys/select.h>
+#include <queue>
+#include "main.h"
+#include "umf.h"
 
-/* virtualized I/O happens at the granularity of "chunks",
- * but to reduce overheads we physically do selects, reads
- * and writes at the granularity of "blocks" */
-#define CIO_CHUNK_BYTES     4
-
-#define BLOCK_SIZE          4
-#define SELECT_TIMEOUT      1000
-#define CIO_NULL            0xFFFFFFFF00000000
-#define MAX_OPEN_CHANNELS   32
+using namespace std;
 
 #define STDIN                   0
 #define STDOUT                  1
 #define CHANNELIO_HOST_2_FPGA   100
 #define CHANNELIO_FPGA_2_HOST   101
 
-typedef struct _Channel
+#define BLOCK_SIZE      4
+#define MSG_BUFFER_SIZE 4
+
+#define SELECT_TIMEOUT  1000
+
+#define CIO_NUM_CHANNELS    2
+
+// general typedefs
+typedef unsigned int UINT32;
+typedef unsigned long long UINT64;
+
+// =============== Channel I/O ================
+
+typedef class CHANNELIO_CLASS* CHANNELIO;
+class CHANNELIO_CLASS:  public HASIM_SW_MODULE_CLASS
 {
-    int     open;
-    fd_set  readfds;
-    int     tableIndex;
+    private:
+        // process/pipe state (physical channel)
+        int inpipe[2], outpipe[2];
+        int childpid;
 
-    /* input buffer */
-    unsigned char   inputBuffer[BLOCK_SIZE];
-    int     ibHead;
-    int     ibTail;
+        #define PARENT_READ     inpipe[0]
+        #define CHILD_WRITE     inpipe[1]
+        #define CHILD_READ      outpipe[0]
+        #define PARENT_WRITE    outpipe[1]
 
-    struct _Channel *prev;
-    struct _Channel *next;
+        // buffers
+        queue<UMF_MESSAGE>      readBuffer[CIO_NUM_CHANNELS];
+        queue<UMF_MESSAGE>      writeBuffer[CIO_NUM_CHANNELS];
 
-} Channel;
+        // other state
+        UMF_MESSAGE    currentMessage;
 
-/* interface methods */
-unsigned char cio_open(unsigned char programID);
-unsigned long long cio_read(unsigned char handle);
-void cio_write(unsigned char handle, unsigned int data);
+        // internal methods
+        void    initHardware();
+        void    uninitHardware();
+        void    syncReadBuffers();
+        void    flushWriteBuffer(int channel);
+
+    public:
+        CHANNELIO_CLASS(HASIM_SW_MODULE);
+        ~CHANNELIO_CLASS();
+        void        Init();
+        void        Uninit();
+        UMF_MESSAGE Read(int channel);
+        void        Write(int channel, UMF_MESSAGE message);
+        void        Poll();
+};
 
 #endif

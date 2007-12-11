@@ -1268,3 +1268,28 @@ Updated ChannelIO (sim):
 
 These changes should be completely invisible outside channelio
 and RRR.
+
+----------
+aparasha    Date: Tue Dec 11 12:15:22 EST 2007  CSN: CSN-platforms-32
+                  Tue Dec 11 17:15:22 UTC 2007
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/sim
+ sim-channelio.c           Locally Removed            31 
+ sim-channelio.cpp         Locally Added               0 
+ umf.cpp                   Locally Added               0 
+ sim-channelio-bdpi.h      Locally Added               0 
+ sim-channelio.h           Locally Modified           31 
+ umf.h                     Locally Added               0 
+ sim-channelio.awb         Locally Modified           31 
+ sim-channelio-sw.cpp      Locally Removed            31 
+ sim-channelio.bsv         Locally Added               0 
+ SimChannelIO.bsv          Locally Removed            31 
+ umf.bsh                   Locally Added               0 
+ sim-channelio-sw.h        Locally Removed            31 
+ sim-channelio-bdpi.c      Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr
+ software-server.h         Locally Modified           30 
+
+Slight cleanup and of sim-channelio.

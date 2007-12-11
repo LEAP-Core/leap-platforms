@@ -2,41 +2,10 @@ import FIFOF::*;
 import Vector::*;
 
 `include "toplevel_wires.bsh"
+`include "umf.bsh"
 
 `define CIO_NULL        'hFFFFFFFF00000000
 `define POLL_INTERVAL   32
-
-`define UMF_CHUNK_BITS      32
-`define UMF_CHUNK_BYTES     4
-`define UMF_CHUNK_LOG_BYTES 2
-
-`define UMF_CHANNEL_ID_BITS 4
-`define UMF_SERVICE_ID_BITS 8
-`define UMF_METHOD_ID_BITS  4
-`define UMF_MSG_LENGTH_BITS 16
-
-typedef Bit#(`UMF_CHUNK_BITS)       UMF_CHUNK;
-
-typedef Bit#(`UMF_CHANNEL_ID_BITS)  UMF_CHANNEL_ID;
-typedef Bit#(`UMF_SERVICE_ID_BITS)  UMF_SERVICE_ID;
-typedef Bit#(`UMF_METHOD_ID_BITS)   UMF_METHOD_ID;
-typedef Bit#(`UMF_MSG_LENGTH_BITS)  UMF_MSG_LENGTH;
-
-typedef union tagged
-{
-    struct
-    {
-        UMF_CHANNEL_ID  channelID;
-        UMF_SERVICE_ID  serviceID;
-        UMF_METHOD_ID   methodID;
-        UMF_MSG_LENGTH  length;
-    }
-    UMF_PACKET_header;
-
-    UMF_CHUNK   UMF_PACKET_dataChunk;
-
-} UMF_PACKET
-    deriving (Bits);
 
 // BDPI imports
 import "BDPI" function Action                 cio_init();
@@ -72,9 +41,14 @@ module mkChannelIO#(TopLevelWiresDriver wires) (ChannelIO);
     Reg#(Bit#(8)) currentReadChannel  <- mkReg(0);
     Reg#(Bit#(8)) currentWriteChannel <- mkReg(0);
 
+    // ==============================================================
+    //                        Ports and Buffers
+    // ==============================================================
+
     // create read/write buffers and link them to ports
     FIFOF#(UMF_PACKET)                       readBuffers[`CIO_NUM_CHANNELS];
     Vector#(`CIO_NUM_CHANNELS, CIOReadPort)  rports = newVector();
+
     FIFOF#(UMF_PACKET)                       writeBuffers[`CIO_NUM_CHANNELS];
     Vector#(`CIO_NUM_CHANNELS, CIOWritePort) wports = newVector();
 
@@ -143,35 +117,23 @@ module mkChannelIO#(TopLevelWiresDriver wires) (ChannelIO);
         // CIO_NULL implies "no data"
         if (data != `CIO_NULL)
         begin
-
-            // header format is hardcoded, TODO: generalize
-            UMF_CHANNEL_ID  cid = data[31:28];
-            UMF_SERVICE_ID  sid = data[27:20];
-            UMF_METHOD_ID   mid = data[19:16];
-            UMF_MSG_LENGTH  len = data[15:0];
+            UMF_CHUNK chunk = truncate(data);
 
             // create new header packet
-            UMF_PACKET packet = tagged UMF_PACKET_header
-                                {
-                                    channelID: cid,
-                                    serviceID: sid,
-                                    methodID : mid,
-                                    length   : len
-                                };
+            UMF_PACKET packet = tagged UMF_PACKET_header unpack(chunk);
 
             // enqueue the new header into the channel's FIFO
-            readBuffers[cid].enq(packet);
+            readBuffers[packet.UMF_PACKET_header.channelID].enq(packet);
 
             // setup channel for remaining chunks
-            UMF_MSG_LENGTH totalchunks = len >> `UMF_CHUNK_LOG_BYTES;
+            UMF_MSG_LENGTH totalchunks = packet.UMF_PACKET_header.length >> `UMF_CHUNK_LOG_BYTES;
 
             if ((totalchunks & (`UMF_CHUNK_BITS - 1)) != 0)
                 readChunksRemaining <= totalchunks;
             else
                 readChunksRemaining <= totalchunks - 1;
 
-            currentReadChannel <= zeroExtend(cid);
-
+            currentReadChannel <= zeroExtend(packet.UMF_PACKET_header.channelID);
         end
 
     endrule
@@ -213,7 +175,7 @@ module mkChannelIO#(TopLevelWiresDriver wires) (ChannelIO);
 
         // compute priority for this channel (static request/grant)
         // current algorithm involves a chain OR, which is fine for
-        // small number of channels
+        // a small number of channels
 
         request[i] = (writeChunksRemaining == 0) && (writeBuffers[i].notEmpty());
 
@@ -235,23 +197,11 @@ module mkChannelIO#(TopLevelWiresDriver wires) (ChannelIO);
             UMF_PACKET packet = writeBuffers[i].first();
             writeBuffers[i].deq();
 
-            // create and encode header chunk, TODO: generalize
-            UMF_CHUNK headerChunk = 0;
-
-            case (packet) matches
-
-                tagged UMF_PACKET_header .h:
-                begin
-                    headerChunk[31:28] = fromInteger(i);
-                    headerChunk[27:20] = truncate(h.serviceID);
-                    headerChunk[19:16] = truncate(h.methodID);
-                    headerChunk[15:0]  = truncate(h.length);
-                end
-
-                default:
-                    noAction; // shouldn't happen
-
-            endcase
+            // create and encode header chunk
+            //   TODO: ideally, we should explicitly set channelID here. For
+            //   now, assume upper layer is setting it correctly (upper layer
+            //   has to know its virtual channelID anyway
+            UMF_CHUNK headerChunk = pack(packet.UMF_PACKET_header);
 
             // send the header chunk to the physical channel
             cio_write(handle, pack(headerChunk));
@@ -277,14 +227,8 @@ module mkChannelIO#(TopLevelWiresDriver wires) (ChannelIO);
         UMF_PACKET packet = writeBuffers[currentWriteChannel].first();
         writeBuffers[currentWriteChannel].deq();
 
-        // extract chunk
-        UMF_CHUNK chunk = case (packet) matches
-                              tagged UMF_PACKET_dataChunk .d: d;
-                              default                       : ?; // shouldn't happen
-                          endcase;
-
         // send the data chunk to the physical channel
-        cio_write(handle, pack(chunk));
+        cio_write(handle, pack(packet.UMF_PACKET_dataChunk));
 
         // one more chunk processed
         writeChunksRemaining <= writeChunksRemaining - 1;
@@ -292,7 +236,7 @@ module mkChannelIO#(TopLevelWiresDriver wires) (ChannelIO);
     endrule
 
     // ==============================================================
-    //                          Interfaces
+    //                        Set Interfaces
     // ==============================================================
 
     interface readPorts = rports;
