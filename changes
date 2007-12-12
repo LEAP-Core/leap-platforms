@@ -1400,3 +1400,13 @@ Simulation platforms should still work too.
 TBD: Remove obsolete files. Rename "physical-devices" and other things to their final names.
 
 Michael P.
+
+----------
+mcadler     Date: Wed Dec 12 18:29:47 EST 2007  CSN: CSN-platforms-34
+                  Wed Dec 12 23:29:47 UTC 2007
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/unix
+ unix-channelio.awb        Locally Modified           33 
+
+Explicit tagging of BDPI_C.
