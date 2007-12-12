@@ -6,23 +6,23 @@
 // *************************************
 
 
-// SWITCH_DRIVER
+// SWITCHES_DRIVER
 
 // The interface the rest of the FPGA uses to read the switches
 
-interface SWITCH_DRIVER#(parameter numeric type n);
+interface SWITCHES_DRIVER#(parameter numeric type n);
 
     method Bit#(n) getSwitches();
 
 endinterface
 
-// SWITCH_WIRES
+// SWITCHES_WIRES
 
 // This interface is not used by the rest of the FPGA.
 // Rather this represents wires which are passed to the top level and tied
 // to the physical switch pins by the UCF file.
 
-interface SWITCH_WIRES#(parameter numeric type n);
+interface SWITCHES_WIRES#(parameter numeric type n);
 
     (* always_ready, always_enabled *)
     (* prefix = "" *)
@@ -44,12 +44,12 @@ interface SWITCHES_DEVICE#(parameter numeric type n);
 endinterface
 
 
-// mkGeneralSwitchDevice
+// mkSwitchesDevice
 
 // A switch device generalized to any bit width.
 // Uses a Wire to return the current value of the switches.
 
-module mkGeneralSwitchDevice
+module mkSwitchesDevice
     // interface:
                  (SWITCHES_DEVICE#(number_switches_T));
 
@@ -59,7 +59,7 @@ module mkGeneralSwitchDevice
   
     // The interface used by the rest of the FPGA
   
-    interface SWITCHES_DRIVER#(number_switches_T) driver;
+    interface SWITCHES_DRIVER driver;
 
         // getSwitches
         // Return the current value of the wire.
@@ -72,7 +72,7 @@ module mkGeneralSwitchDevice
 
     // The wires which are tied to the switches by the UCF
 
-    interface SWITCHES_WIRES#(number_switches_T) wires;
+    interface SWITCHES_WIRES wires;
         
         // switches
         // Set the Wire to whatever the switches are.

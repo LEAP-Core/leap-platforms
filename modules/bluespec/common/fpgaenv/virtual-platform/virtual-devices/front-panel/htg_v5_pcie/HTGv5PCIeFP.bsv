@@ -1,12 +1,22 @@
-import low_level_platform_interface::*;
-import toplevel_wires::*;
+`include "low_level_platform_interface.bsh"
+`include "physical_platform.bsh"
+`include "switch_device.bsh"
+`include "led_device.bsh"
+// TEMPORARY:
+`include "pci_express_device.bsh"
 
-typedef TOPWIRES_LEDS FRONTP_LEDS;
-typedef SizeOf#(FRONTP_LEDS) FRONTP_NUM_LEDS;
+typedef 8 FRONTP_NUM_LEDS;
+typedef 8 FRONTP_NUM_SWITCHES;
+typedef 5 FRONTP_NUM_BUTTONS;   // Fake buttons
+
+typedef Bit#(FRONTP_NUM_LEDS)     FRONTP_LEDS;
+typedef Bit#(FRONTP_NUM_SWITCHES) FRONTP_SWITCHES;
+typedef Bit#(FRONTP_NUM_BUTTONS)  FRONTP_BUTTONS;
 
 //
 // Data structure for updating specific LEDs and leaving others unchanged.
 //
+
 typedef struct
 {
     FRONTP_LEDS state;
@@ -14,12 +24,6 @@ typedef struct
 }
 FRONTP_MASKED_LEDS deriving (Eq, Bits);
 
-
-typedef TOPWIRES_SWITCHES FRONTP_SWITCHES;
-typedef SizeOf#(FRONTP_SWITCHES) FRONTP_NUM_SWITCHES;
-
-typedef Bit#(5) FRONTP_BUTTONS;
-typedef SizeOf#(FRONTP_BUTTONS) FRONTP_NUM_BUTTONS;
 
 interface FrontPanel;
     method FRONTP_SWITCHES readSwitches();
@@ -32,8 +36,11 @@ module mkFrontPanel#(LowLevelPlatformInterface llpi) (FrontPanel);
     Reg#(FRONTP_LEDS) led_state <- mkReg(0);
 
     method FRONTP_SWITCHES readSwitches();
-        // read from toplevel wires
-        return (llpi.switchesDriver.getSwitches());
+        // read from physical platform
+        // return (llpi.physicalDrivers.switchesDriver.getSwitches());
+        // TEMPORARY:
+        // READ FROM PCIE "SWITCH"
+        return (zeroExtend(llpi.physicalDrivers.pciExpressDriver.read_led_switch()));
     endmethod
 
     method FRONTP_BUTTONS readButtons();
@@ -46,7 +53,7 @@ module mkFrontPanel#(LowLevelPlatformInterface llpi) (FrontPanel);
     method Action writeLEDs(FRONTP_MASKED_LEDS data);
         FRONTP_LEDS s = (led_state & ~data.mask) | (data.state & data.mask);
         led_state <= s;
-        llpi.ledsDriver.setLEDs(s);
+        llpi.physicalDrivers.ledsDriver.setLEDs(s);
     endmethod
 
 endmodule

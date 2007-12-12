@@ -32,8 +32,6 @@ Packagehint=platforms
 virtual_devices=Standard Virtual Devices
 low_level_platform_interface=Low Level Platform Interface
 
-
-
 [Hybrid Front Panel]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid/hybrid-fp.awb
 Packagehint=platforms
@@ -49,7 +47,7 @@ Packagehint=platforms
 [Low Level Platform Interface/Requires]
 channelio=ChannelIO Module for Simulation
 rrr=RRR Clients and Servers
-toplevel_wires=Null TopLevel Wires
+physical_platform=Null Physical Platform
 
 [ChannelIO Module for Simulation]
 File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/sim/sim-channelio.awb
@@ -57,10 +55,6 @@ Packagehint=platforms
 
 [RRR Clients and Servers]
 File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/rrr.awb
-Packagehint=platforms
-
-[Null TopLevel Wires]
-File=modules/bluespec/common/fpgaenv/toplevel-wires/null/null-toplevel-wires.awb
 Packagehint=platforms
 
 [Hybrid Memory]
@@ -75,3 +69,15 @@ Packagehint=platforms
 memory=Hybrid Memory
 console=Null Serial Console
 front_panel=Hybrid Front Panel
+
+
+
+
+
+
+[Null Physical Platform]
+File=modules/bluespec/common/fpgaenv/physical-platform/null/null-physical-platfrom.awb
+Packagehint=platforms
+
+[Null Physical Platform/Params]
+FPGA_PART="xc5vlx50t-ff1136"

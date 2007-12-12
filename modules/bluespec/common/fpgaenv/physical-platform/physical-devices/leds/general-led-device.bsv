@@ -24,7 +24,7 @@ endinterface
 // It defines wires that are passed to the toplevel where the 
 // UCF in the hardware-platform ties them to LED pins
 
-interface LED_WIRES#(parameter numeric type n);
+interface LEDS_WIRES#(parameter numeric type n);
 
     (* always_ready *)
     (* result = "LED" *)
@@ -38,10 +38,10 @@ endinterface
 // By convention a Device is a combination of the Driver and the Wires.
 // This interface is polymorphic in the number of LEDs available.
 
-interface LED_DEVICE#(parameter numeric type n);
+interface LEDS_DEVICE#(parameter numeric type n);
 
-  interface LED_DRIVER#(n) driver;
-  interface LED_WIRES#(n)  wires;
+  interface LEDS_DRIVER#(n) driver;
+  interface LEDS_WIRES#(n)  wires;
 
 endinterface
 
@@ -50,9 +50,9 @@ endinterface
 
 // An LED Device generalized to any bit width.
 
-module mkGeneralLEDDevice 
+module mkLEDsDevice 
     // interface:
-                 (LED_DEVICE#(number_leds_T));
+                 (LEDS_DEVICE#(number_leds_T));
 
     // A register to hold the LEDs at the current value, 
     // until the next time someone changes them.
@@ -61,7 +61,7 @@ module mkGeneralLEDDevice
     
     // Interface used by the rest of the FPGA.
 
-    interface LED_DRIVER#(number_leds_T) driver;
+    interface LEDS_DRIVER driver;
 
         // setLEDs
         // Just set the register.
@@ -74,7 +74,7 @@ module mkGeneralLEDDevice
 
     // This interface should get tied to the LED pins.
 
-    interface LED_WIRES#(number_leds_T) wires;
+    interface LEDS_WIRES wires;
 
         // leds
 

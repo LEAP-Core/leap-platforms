@@ -1,16 +1,16 @@
+// xup-physical-platform
 
-// htg-v5-pcie-enabled
-
-// The Physical Platform for the HTG Virtex 5 with PCI Express.
+// Physical Platform for an XUP board
 
 `include "led_device.bsh"
 `include "switch_device.bsh"
-`include "pci_express_device.bsh"
+`include "button_device.bsh"
 
 // 8 switches and leds
 
-`define NUMBER_LEDS 8
-`define NUMBER_SWITCHES 8
+`define NUMBER_LEDS 4
+`define NUMBER_SWITCHES 4
+`define NUMBER_BUTTONS 5
 
 // PHYSICAL_DRIVERS
 
@@ -22,7 +22,7 @@ interface PHYSICAL_DRIVERS;
 
     interface LEDS_DRIVER#(`NUMBER_LEDS)         ledsDriver;
     interface SWITCHES_DRIVER#(`NUMBER_SWITCHES) switchesDriver;
-    interface PCI_EXPRESS_DRIVER                 pciExpressDriver;
+    interface BUTTONS_DRIVER#(`NUMBER_BUTTONS)   buttonsDriver;
         
 endinterface
 
@@ -37,7 +37,7 @@ interface TOP_LEVEL_WIRES;
 
     interface LEDS_WIRES#(`NUMBER_LEDS)          ledsWires;
     interface SWITCHES_WIRES#(`NUMBER_SWITCHES)  switchesWires;
-    interface PCI_EXPRESS_WIRES                  pciExpressWires;
+    interface BUTTONS_WIRES#(`NUMBER_BUTTONS)    buttonsWires;
     
 endinterface
 
@@ -65,7 +65,7 @@ module mkPhysicalPlatform
     
     LEDS_DEVICE#(`NUMBER_LEDS)         leds_device         <- mkLEDsDevice();
     SWITCHES_DEVICE#(`NUMBER_SWITCHES) switches_device     <- mkSwitchesDevice();
-    PCI_EXPRESS_DEVICE                 pci_express_device  <- mkPCIExpressDevice();
+    BUTTONS_DEVICE#(`NUMBER_BUTTONS)   buttons_device      <- mkButtonsDevice();
     
     // Aggregate the drivers
     
@@ -73,7 +73,7 @@ module mkPhysicalPlatform
     
         interface ledsDriver         = leds_device.driver;
         interface switchesDriver     = switches_device.driver;
-        interface pciExpressDriver   = pci_express_device.driver;
+        interface buttonsDriver      = buttons_device.driver;
     
     endinterface
     
@@ -83,7 +83,7 @@ module mkPhysicalPlatform
     
         interface ledsWires        = leds_device.wires;
         interface switchesWires    = switches_device.wires;
-        interface pciExpressWires  = pci_express_device.wires;
+        interface buttonsWires     = buttons_device.wires;
 
     endinterface
                

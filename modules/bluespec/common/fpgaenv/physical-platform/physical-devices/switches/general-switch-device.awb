@@ -2,6 +2,6 @@
 %name General Switch Device
 %desc General Switch Device for any bit width
 
-%provides switch-device
+%provides switch_device
 
 %public general-switch-device.bsv

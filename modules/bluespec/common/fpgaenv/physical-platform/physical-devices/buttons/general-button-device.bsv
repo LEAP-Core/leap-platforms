@@ -8,23 +8,23 @@
 // *************************************
 
 
-// BUTTON_DRIVER
+// BUTTONS_DRIVER
 
 // The interface the rest of the FPGA uses to read the buttons
 
-interface BUTTON_DRIVER#(parameter numeric type n);
+interface BUTTONS_DRIVER#(parameter numeric type n);
 
     method Bit#(n) getButtons();
 
 endinterface
 
-// BUTTON_WIRES
+// BUTTONS_WIRES
 
 // This interface is not used by the rest of the FPGA.
 // Rather this represents wires which are passed to the top level and tied
 // to the physical button pins by the UCF file.
 
-interface BUTTON_WIRES#(parameter numeric type n);
+interface BUTTONS_WIRES#(parameter numeric type n);
 
     (* always_ready, always_enabled *)
     (* prefix = "" *)
@@ -46,41 +46,41 @@ interface BUTTONS_DEVICE#(parameter numeric type n);
 endinterface
 
 
-// mkGeneralButtonDevice
+// mkButtonsDevice
 
 // A button device generalized to any bit width.
 // Uses a Wire to return the current value of the buttons.
 
-module mkGeneralButtonDevice
+module mkButtonsDevice
     // interface:
                  (BUTTONS_DEVICE#(number_buttons_T));
 
     // A Wire used to communicate the buttons to the rest of the world.
 
-    Wire#(Bit#(number_buttons_T)) button_wire <- mkWire();
+    Wire#(Bit#(number_buttons_T)) buttons_wire <- mkWire();
   
     // The interface used by the rest of the FPGA
   
-    interface BUTTONS_DRIVER#(number_buttons_T) driver;
+    interface BUTTONS_DRIVER driver;
 
         // getButtons
         // Return the current value of the wire.
 
         method Bit#(number_buttons_T) getButtons();
-            return button_wire;
+            return buttons_wire;
         endmethod
 
     endinterface
 
     // The wires which are tied to the buttons by the UCF
 
-    interface BUTTONS_WIRES#(number_buttons_T) wires;
+    interface BUTTONS_WIRES wires;
         
         // buttons
         // Set the Wire to whatever the buttons are.
         
         method Action buttons(Bit#(number_buttons_T) bu);
-            button_wire <= bu;
+            buttons_wire <= bu;
         endmethod
   
     endinterface

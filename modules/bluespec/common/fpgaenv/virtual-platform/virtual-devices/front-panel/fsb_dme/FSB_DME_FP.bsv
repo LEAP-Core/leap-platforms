@@ -1,4 +1,6 @@
-import toplevel_wires::*;
+import low_level_platform_interface::*;
+import physical_platform::*;
+import fsb_dme_device::*;
 
 interface FrontPanel;
   method Action putData(Bit#(256) data, Bool begin_xfer, Bool end_xfer);
@@ -7,23 +9,23 @@ interface FrontPanel;
   method ActionValue#(Bit#(75)) getCmd();
 endinterface
 
-module mkFrontPanel#(TopLevelWiresDriver wires) (FrontPanel);
+module mkFrontPanel#(LowLevelPlatformInterface pint) (FrontPanel);
 
   method Action putData(Bit#(256) data, Bool begin_xfer, Bool end_xfer);
-    wires.putData(data, begin_xfer, end_xfer);
+    pint.physicalDrivers.dmeDriver.putData(data, begin_xfer, end_xfer);
   endmethod
   
   method Action putCmd(Bit#(75) cmd);
-    wires.putCmd(cmd);
+    pint.physicalDrivers.dmeDriver.putCmd(cmd);
   endmethod
   
   method ActionValue#(Tuple3#(Bit#(256), Bool, Bool)) getData();
-    let r <- wires.getData();
+    let r <- pint.physicalDrivers.dmeDriver.getData();
     return r;
   endmethod
   
   method ActionValue#(Bit#(75)) getCmd();
-    let r <- wires.getCmd();
+    let r <- pint.physicalDrivers.dmeDriver.getCmd();
     return r;
   endmethod
   

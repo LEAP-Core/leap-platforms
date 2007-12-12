@@ -16,7 +16,7 @@ CONFIG PART = XC5VLX50T-FF1136-1 ;
 # to suit your requirements and VCCO voltage banking rules.
 #
 
-NET "sys_reset_n"      LOC = "H27"  | IOSTANDARD = LVCMOS25 | PULLUP | NODELAY ;
+NET "EN_pciExpressWires_sys_reset_n"      LOC = "H27"  | IOSTANDARD = LVCMOS25 | PULLUP | NODELAY ;
 
 #
 # SYS clock 100 MHz (input) signal. The sys_clk_p and sys_clk_n
@@ -29,8 +29,8 @@ NET "sys_reset_n"      LOC = "H27"  | IOSTANDARD = LVCMOS25 | PULLUP | NODELAY ;
 # (UG196) for guidelines regarding clock resource selection.
 #
 
-NET  "sys_clk_p"       LOC = "Y4"  ;
-NET  "sys_clk_n"       LOC = "Y3"  ;
+NET  "EN_pciExpressWires_sys_clk_p"       LOC = "Y4"  ;
+NET  "EN_pciExpressWires_sys_clk_n"       LOC = "Y3"  ;
 
 #
 # Transceiver instance placement.  This constraint selects the
@@ -41,10 +41,10 @@ NET  "sys_clk_n"       LOC = "Y3"  ;
 #
 
 # PCIe Lanes 0, 1
-INST "m_pi_llpint_pciep/ep/BU2/U0/pcie_ep0/pcie_blk/SIO/.pcie_gt_wrapper_i/GTD[0].GT_i" LOC = GTP_DUAL_X0Y3;
+INST "m_pi_llpint_phys_plat_pci_express_device/ep/BU2/U0/pcie_ep0/pcie_blk/SIO/.pcie_gt_wrapper_i/GTD[0].GT_i" LOC = GTP_DUAL_X0Y3;
 
 # PCIe Lanes 2, 3
-INST "m_pi_llpint_pciep/ep/BU2/U0/pcie_ep0/pcie_blk/SIO/.pcie_gt_wrapper_i/GTD[2].GT_i" LOC = GTP_DUAL_X0Y2;
+INST "m_pi_llpint_phys_plat_pci_express_device/ep/BU2/U0/pcie_ep0/pcie_blk/SIO/.pcie_gt_wrapper_i/GTD[2].GT_i" LOC = GTP_DUAL_X0Y2;
 
 
 
@@ -56,19 +56,19 @@ INST "m_pi_llpint_pciep/ep/BU2/U0/pcie_ep0/pcie_blk/SIO/.pcie_gt_wrapper_i/GTD[2
 # BlockRAM placement
 #
 
-INST "m_pi_llpint_pciep/ep/BU2/U0/pcie_ep0/pcie_blk/pcie_mim_wrapper_i/bram_tl_tx/generate_tdp2[1].ram_tdp2_inst" LOC = RAMB36_X1Y9 ;
-INST "m_pi_llpint_pciep/ep/BU2/U0/pcie_ep0/pcie_blk/pcie_mim_wrapper_i/bram_tl_rx/generate_tdp2[1].ram_tdp2_inst" LOC = RAMB36_X1Y8 ;
-INST "m_pi_llpint_pciep/ep/BU2/U0/pcie_ep0/pcie_blk/pcie_mim_wrapper_i/bram_tl_tx/generate_tdp2[0].ram_tdp2_inst" LOC = RAMB36_X1Y7 ;
-INST "m_pi_llpint_pciep/ep/BU2/U0/pcie_ep0/pcie_blk/pcie_mim_wrapper_i/bram_tl_rx/generate_tdp2[0].ram_tdp2_inst" LOC = RAMB36_X1Y6 ;
-INST "m_pi_llpint_pciep/ep/BU2/U0/pcie_ep0/pcie_blk/pcie_mim_wrapper_i/bram_retry/generate_sdp.ram_sdp_inst"      LOC = RAMB36_X1Y5 ;
+INST "m_pi_llpint_phys_plat_pci_express_device/ep/BU2/U0/pcie_ep0/pcie_blk/pcie_mim_wrapper_i/bram_tl_tx/generate_tdp2[1].ram_tdp2_inst" LOC = RAMB36_X1Y9 ;
+INST "m_pi_llpint_phys_plat_pci_express_device/ep/BU2/U0/pcie_ep0/pcie_blk/pcie_mim_wrapper_i/bram_tl_rx/generate_tdp2[1].ram_tdp2_inst" LOC = RAMB36_X1Y8 ;
+INST "m_pi_llpint_phys_plat_pci_express_device/ep/BU2/U0/pcie_ep0/pcie_blk/pcie_mim_wrapper_i/bram_tl_tx/generate_tdp2[0].ram_tdp2_inst" LOC = RAMB36_X1Y7 ;
+INST "m_pi_llpint_phys_plat_pci_express_device/ep/BU2/U0/pcie_ep0/pcie_blk/pcie_mim_wrapper_i/bram_tl_rx/generate_tdp2[0].ram_tdp2_inst" LOC = RAMB36_X1Y6 ;
+INST "m_pi_llpint_phys_plat_pci_express_device/ep/BU2/U0/pcie_ep0/pcie_blk/pcie_mim_wrapper_i/bram_retry/generate_sdp.ram_sdp_inst"      LOC = RAMB36_X1Y5 ;
 
 #
 # Timing critical placements
 #
 
-INST "m_pi_llpint_pciep/ep/BU2/U0/pcie_ep0/pcie_blk_if/ll_bridge/tx_bridge/tx_bridge/shift_pipe1" LOC = "SLICE_X59Y36" ;
-INST "m_pi_llpint_pciep/ep/BU2/U0/pcie_ep0/pcie_blk_if/ll_bridge/rx_bridge/arb_inst/completion_available" LOC = "SLICE_X58Y26" ;
-INST "m_pi_llpint_pciep/ep/BU2/U0/pcie_ep0/pcie_blk_if/cf_bridge/management_interface/mgmt_rdata_d1_3" LOC = "SLICE_X59Y25" ;
+INST "m_pi_llpint_phys_plat_pci_express_device/ep/BU2/U0/pcie_ep0/pcie_blk_if/ll_bridge/tx_bridge/tx_bridge/shift_pipe1" LOC = "SLICE_X59Y36" ;
+INST "m_pi_llpint_phys_plat_pci_express_device/ep/BU2/U0/pcie_ep0/pcie_blk_if/ll_bridge/rx_bridge/arb_inst/completion_available" LOC = "SLICE_X58Y26" ;
+INST "m_pi_llpint_phys_plat_pci_express_device/ep/BU2/U0/pcie_ep0/pcie_blk_if/cf_bridge/management_interface/mgmt_rdata_d1_3" LOC = "SLICE_X59Y25" ;
 ###############################################################################
 # Timing Constraints
 ###############################################################################
@@ -79,7 +79,7 @@ INST "m_pi_llpint_pciep/ep/BU2/U0/pcie_ep0/pcie_blk_if/cf_bridge/management_inte
 
 # NET "sys_clk_c"                                      PERIOD = 10ns;
 
-NET "m_pi_llpint_pciep/ep/BU2/U0/pcie_ep0/pcie_blk/SIO/.pcie_gt_wrapper_i/gt_refclk_out[0]" TNM_NET = "MGTCLK" ;
+NET "m_pi_llpint_phys_plat_pci_express_device/ep/BU2/U0/pcie_ep0/pcie_blk/SIO/.pcie_gt_wrapper_i/gt_refclk_out[0]" TNM_NET = "MGTCLK" ;
 
 TIMESPEC "TS_MGTCLK"  = PERIOD "MGTCLK" 100.00 MHz HIGH 50 % ;
 
@@ -97,22 +97,22 @@ NET "CLK" LOC = "J16" | IOSTANDARD = LVCMOS25;
 
 // LEDS
 
-NET "LED[0]" LOC="J27" | IOSTANDARD=LVCMOS25 | DRIVE=12 | SLEW=SLOW;
-NET "LED[1]" LOC="J26" | IOSTANDARD=LVCMOS25 | DRIVE=12 | SLEW=SLOW;
-NET "LED[2]" LOC="G25" | IOSTANDARD=LVCMOS25 | DRIVE=12 | SLEW=SLOW; 
-NET "LED[3]" LOC="G26" | IOSTANDARD=LVCMOS25 | DRIVE=12 | SLEW=SLOW;
-NET "LED[4]" LOC="H25" | IOSTANDARD=LVCMOS25 | DRIVE=12 | SLEW=SLOW;
-NET "LED[5]" LOC="H24" | IOSTANDARD=LVCMOS25 | DRIVE=12 | SLEW=SLOW;
-NET "LED[6]" LOC="F25" | IOSTANDARD=LVCMOS25 | DRIVE=12 | SLEW=SLOW; 
-NET "LED[7]" LOC="F26" | IOSTANDARD=LVCMOS25 | DRIVE=12 | SLEW=SLOW;
+NET "ledsWires_leds[0]" LOC="J27" | IOSTANDARD=LVCMOS25 | DRIVE=12 | SLEW=SLOW;
+NET "ledsWires_leds[1]" LOC="J26" | IOSTANDARD=LVCMOS25 | DRIVE=12 | SLEW=SLOW;
+NET "ledsWires_leds[2]" LOC="G25" | IOSTANDARD=LVCMOS25 | DRIVE=12 | SLEW=SLOW; 
+NET "ledsWires_leds[3]" LOC="G26" | IOSTANDARD=LVCMOS25 | DRIVE=12 | SLEW=SLOW;
+NET "ledsWires_leds[4]" LOC="H25" | IOSTANDARD=LVCMOS25 | DRIVE=12 | SLEW=SLOW;
+NET "ledsWires_leds[5]" LOC="H24" | IOSTANDARD=LVCMOS25 | DRIVE=12 | SLEW=SLOW;
+NET "ledsWires_leds[6]" LOC="F25" | IOSTANDARD=LVCMOS25 | DRIVE=12 | SLEW=SLOW; 
+NET "ledsWires_leds[7]" LOC="F26" | IOSTANDARD=LVCMOS25 | DRIVE=12 | SLEW=SLOW;
 
 // SWITCHES
 
-NET "SWITCH[0]" LOC="K24" | IOSTANDARD=LVCMOS25;
-NET "SWITCH[1]" LOC="L24" | IOSTANDARD=LVCMOS25;
-NET "SWITCH[2]" LOC="L25" | IOSTANDARD=LVCMOS25;
-NET "SWITCH[3]" LOC="L26" | IOSTANDARD=LVCMOS25;
-NET "SWITCH[4]" LOC="J24" | IOSTANDARD=LVCMOS25;
-NET "SWITCH[5]" LOC="J25" | IOSTANDARD=LVCMOS25;
-NET "SWITCH[6]" LOC="M25" | IOSTANDARD=LVCMOS25;
-NET "SWITCH[7]" LOC="M26" | IOSTANDARD=LVCMOS25;
+NET "switchesWires_switches_1[0]" LOC="K24" | IOSTANDARD=LVCMOS25;
+NET "switchesWires_switches_1[1]" LOC="L24" | IOSTANDARD=LVCMOS25;
+NET "switchesWires_switches_1[2]" LOC="L25" | IOSTANDARD=LVCMOS25;
+NET "switchesWires_switches_1[3]" LOC="L26" | IOSTANDARD=LVCMOS25;
+NET "switchesWires_switches_1[4]" LOC="J24" | IOSTANDARD=LVCMOS25;
+NET "switchesWires_switches_1[5]" LOC="J25" | IOSTANDARD=LVCMOS25;
+NET "switchesWires_switches_1[6]" LOC="M25" | IOSTANDARD=LVCMOS25;
+NET "switchesWires_switches_1[7]" LOC="M26" | IOSTANDARD=LVCMOS25;

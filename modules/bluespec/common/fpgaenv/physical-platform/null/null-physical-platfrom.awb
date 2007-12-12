@@ -1,0 +1,11 @@
+
+%name Null Physical Platform
+%desc Null Physical Platform for simulation
+
+%provides physical_platform
+
+
+%sources -t BSV -v PUBLIC null-physical-platfrom.bsv
+
+%param FPGA_PART     "NULL-SIMULATION-ONLY" "FPGA Part ID"
+%param FPGA_POSITION 3                  "FPGA Position (in Xilinx iMPACT)"

@@ -1,26 +1,40 @@
-import rrr::*;
-import channelio::*;
-import toplevel_wires::*;
+`include "rrr.bsh"
+`include "channelio.bsh"
+`include "physical_platform.bsh"
+
+// LowLevelPlatformInterface
+
+// A convenient bundle of all ways to interact with the outside world.
 
 interface LowLevelPlatformInterface;
     interface RRRClient             rrrClient;
     interface RRRServer             rrrServer;
     interface ChannelIO             channelIO;
-    interface TopLevelWiresDriver   topLevelWires;
+    interface PHYSICAL_DRIVERS      physicalDrivers;
+    interface TOP_LEVEL_WIRES       topLevelWires;
 endinterface
 
-module mkLowLevelPlatformInterface(LowLevelPlatformInterface);
+// mkLowLevelPlatformInterface
+
+// Instantiate the subcomponents in one module.
+
+module mkLowLevelPlatformInterface
+    //interface:
+    (LowLevelPlatformInterface);
 
     // instantiate submodules
-    TopLevelWiresDriver     wires   <- mkTopLevelWiresDriver();
-    ChannelIO               cio     <- mkChannelIO(wires);
-    RRRClient               rrrc    <- mkRRRClient(cio);
-    RRRServer               rrrs    <- mkRRRServer(cio);
+    
+    PHYSICAL_PLATFORM       phys_plat   <- mkPhysicalPlatform();
+    ChannelIO               cio         <- mkChannelIO(phys_plat.physicalDrivers);
+    RRRClient               rrrc        <- mkRRRClient(cio);
+    RRRServer               rrrs        <- mkRRRServer(cio);
 
     // plumb interfaces
-    interface               rrrClient       = rrrc;
-    interface               rrrServer       = rrrs;
-    interface               channelIO       = cio;
-    interface               topLevelWires   = wires;
+
+    interface               rrrClient        = rrrc;
+    interface               rrrServer        = rrrs;
+    interface               channelIO        = cio;
+    interface               physicalDrivers  = phys_plat.physicalDrivers;
+    interface               topLevelWires    = phys_plat.topLevelWires;
 
 endmodule

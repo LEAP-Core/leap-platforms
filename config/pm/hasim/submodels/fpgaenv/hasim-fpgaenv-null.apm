@@ -32,10 +32,6 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/virtual-platform/std-virtual-platform.awb
 Packagehint=platforms
 
-[Null TopLevel Wires]
-File=modules/bluespec/common/fpgaenv/toplevel-wires/null/null-toplevel-wires.awb
-Packagehint=platforms
-
 [Null Channel IO Module]
 File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/null/null-channelio.awb
 Packagehint=platforms
@@ -55,7 +51,7 @@ Packagehint=platforms
 [Low Level Platform Interface/Requires]
 rrr=Null RRR Module
 channelio=Null Channel IO Module
-toplevel_wires=Null TopLevel Wires
+physical_platform=Null Physical Platform
 
 [Low Level Platform Interface]
 File=modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface/low-level-platform-interface.awb
@@ -73,3 +69,15 @@ front_panel=Console Front Panel
 [Null Platform Memory]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/null/null-memory.awb
 Packagehint=platforms
+
+
+
+
+
+
+[Null Physical Platform]
+File=modules/bluespec/common/fpgaenv/physical-platform/null/null-physical-platfrom.awb
+Packagehint=platforms
+
+[Null Physical Platform/Params]
+FPGA_PART="xc5vlx50t-ff1136"

@@ -24,14 +24,10 @@ Packagehint=platforms
 virtual_devices=Standard Virtual Devices
 low_level_platform_interface=Low Level Platform Interface
 
-
 [Software FPGA Components]
 File=modules/bluespec/common/fpgaenv/fpga-components/software/software-fpga-components.awb
 Packagehint=platforms
 
-[Null TopLevel Wires]
-File=modules/bluespec/common/fpgaenv/toplevel-wires/null/null-toplevel-wires.awb
-Packagehint=platforms
 
 [FPGA Environment]
 File=modules/bluespec/common/fpgaenv/fpga-environment.awb
@@ -48,7 +44,7 @@ Packagehint=platforms
 [Low Level Platform Interface/Requires]
 rrr=Null RRR Module
 channelio=Null Channel IO Module
-toplevel_wires=Null TopLevel Wires
+physical_platform=Null Physical Platform
 
 [Low Level Platform Interface]
 File=modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface/low-level-platform-interface.awb
@@ -73,4 +69,8 @@ Packagehint=platforms
 
 [Null Channel IO Module]
 File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/null/null-channelio.awb
+Packagehint=platforms
+
+[Null Physical Platform]
+File=modules/bluespec/common/fpgaenv/physical-platform/null/null-physical-platfrom.awb
 Packagehint=platforms

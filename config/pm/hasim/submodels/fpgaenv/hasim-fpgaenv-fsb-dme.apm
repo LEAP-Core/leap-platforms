@@ -45,9 +45,6 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/fsb_dme/fsb-dme-fp.awb
 Packagehint=platforms
 
-[FSB DME TopLevel Wires]
-File=modules/bluespec/common/fpgaenv/toplevel-wires/fsb_dme/fsb-dme-toplevel-wires.awb
-Packagehint=platforms
 
 [FPGA Environment]
 File=modules/bluespec/common/fpgaenv/fpga-environment.awb
@@ -64,7 +61,7 @@ Packagehint=platforms
 [Low Level Platform Interface/Requires]
 rrr=Null RRR Module
 channelio=Null Channel IO Module
-toplevel_wires=FSB DME TopLevel Wires
+physical_platform=HTG Virtex 5 PCIE Enabled
 
 [Low Level Platform Interface]
 File=modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface/low-level-platform-interface.awb
@@ -73,3 +70,24 @@ Packagehint=platforms
 [Hybrid Memory]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid/hybrid-memory.awb
 Packagehint=platforms
+
+[HTG Virtex 5 PCIE Enabled]
+File=modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled/htg-v5-pcie-enabled.awb
+Packagehint=platforms
+
+[PCI Express Physical Device VHDL Import]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pci-express-vhdl-import.awb
+Packagehint=platforms
+
+[General Switch Device]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/switches/general-switch-device.awb
+Packagehint=platforms
+
+[General LED Device]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/leds/general-led-device.awb
+Packagehint=platforms
+
+[HTG Virtex 5 PCIE Enabled/Requires]
+pci_express_device=PCI Express Physical Device VHDL Import
+led_device=General LED Device
+switch_device=General Switch Device

@@ -1,5 +1,5 @@
-import low_level_platform_interface::*;
-import channelio::*;
+`include "low_level_platform_interface.bsh"
+`include "channelio.bsh"
 
 typedef Bit#(8) FRONTP_LEDS;
 typedef SizeOf#(FRONTP_LEDS) FRONTP_NUM_LEDS;

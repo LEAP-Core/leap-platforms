@@ -1,4 +1,3 @@
-import toplevel_wires::*;
 import low_level_platform_interface::*;
 
 typedef Bit#(4) FRONTP_LEDS;

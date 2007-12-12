@@ -2,23 +2,25 @@
 %name PCI Express Physical Device VHDL Import
 %desc PCI Express Physical Device VHDL Import
 
-%provides pci-express-device
+%provides pci_express_device
 
-%public pci-express-vhdl-import.bsv
+%sources -t BSV -v PUBLIC pci-express-vhdl-import.bsv
 
-%private BMD.vhd
-%private BMD_EP_MEM.vhd
-%private bmd_pak.vhd
-%private xilinx_pci_exp_ep.vhd
-%private BMD_64_RX_ENGINE.vhd
-%private BMD_EP_MEM_ACCESS.vhd
-%private pci_exp_64b_app.vhd
-%private BMD_64_TX_ENGINE.vhd
-%private BMD_INTR_CTRL.vhd
-%private pcieblkplus.vhd
-%private BMD_EP.vhd
-%private PIO_EP_MEM_ACCESS.vhd
-%private ram.vhd
+%sources -t VHD -v PRIVATE BMD.vhd
+%sources -t VHD -v PRIVATE BMD_EP_MEM.vhd
+%sources -t VHD -v PRIVATE bmd_pak.vhd
+%sources -t VHD -v PRIVATE xilinx_pci_exp_ep.vhd
+%sources -t VHD -v PRIVATE BMD_64_RX_ENGINE.vhd
+%sources -t VHD -v PRIVATE BMD_EP_MEM_ACCESS.vhd
+%sources -t VHD -v PRIVATE pci_exp_64b_app.vhd
+%sources -t VHD -v PRIVATE BMD_64_TX_ENGINE.vhd
+%sources -t VHD -v PRIVATE BMD_INTR_CTRL.vhd
+%sources -t VHD -v PRIVATE pcieblkplus.vhd
+%sources -t VHD -v PRIVATE BMD_EP.vhd
+%sources -t VHD -v PRIVATE PIO_EP_MEM_ACCESS.vhd
+%sources -t VHD -v PRIVATE ram.vhd
+%sources -t NGC -v PRIVATE pcieblkplus.ngc
+%sources -t NGC -v PRIVATE ram.ngc
 
 %param PCIE_PHYS_ADDR_SIZE 64 "Number of bits in PCIe Physical Address."
 %param PCIE_LEN_SIZE 32 "Number of bits in PCIe length parameter." 

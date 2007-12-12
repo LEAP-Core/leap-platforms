@@ -93,7 +93,7 @@ endinterface
 
 // By convention a Device is a Driver and a Wires
 
-interface PCI_EXPRESS_DEVICE
+interface PCI_EXPRESS_DEVICE;
 
   interface PCI_EXPRESS_DRIVER driver;
   interface PCI_EXPRESS_WIRES  wires;
@@ -212,13 +212,13 @@ import "BVI" xilinx_pci_exp_ep = module mkPCIExpressDevice
   schedule interrupt_host CF (csr_read_req, csr_read_resp, csr_write, csr_h2f_reg0_read, csr_f2h_reg0_write, start_dma_write, dma_write_data, start_dma_read, dma_read_data);
   */
 
-  interface PCIE_DEVICE device;
+  interface PCI_EXPRESS_DRIVER driver;
 
       method led_switch read_led_switch();
   
   endinterface
 
-  interface PCIE_Wires wires;
+  interface PCI_EXPRESS_WIRES wires;
   
 
       method sys_clk_p() enable(sys_clk_p);
@@ -236,5 +236,15 @@ import "BVI" xilinx_pci_exp_ep = module mkPCIExpressDevice
       method pci_exp_txp pci_exp_txp();
     
   endinterface
+  
+endmodule
+
+// mkPCIExpressDeviceDisabled
+
+// An empty version of the PCI Device for configurations which do not use PCIE.
+
+module mkPCIExpressDeviceDisabled (PCI_EXPRESS_DEVICE);
+
+  return ?;
   
 endmodule

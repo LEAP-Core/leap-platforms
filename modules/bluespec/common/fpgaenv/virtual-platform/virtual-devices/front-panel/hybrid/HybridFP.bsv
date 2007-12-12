@@ -1,6 +1,6 @@
 `include "low_level_platform_interface.bsh"
 `include "rrr.bsh"
-`include "toplevel_wires.bsh"
+`include "physical_platform.bsh"
 
 `include "rrr_service_ids.bsh"
 

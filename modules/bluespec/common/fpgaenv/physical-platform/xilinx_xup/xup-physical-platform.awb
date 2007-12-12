@@ -1,0 +1,21 @@
+********************************************************************
+*
+* Awb module specification
+*
+*******************************************************************/
+
+%AWB_START
+
+%name XUP Physical Platform
+%desc XUP Physical Platform
+
+%provides physical_platform
+%requires led_device button_device switch_device
+
+%public xup-physical-platform.bsv
+%private xup.ucf xilinx.ut xilinx.xst xilinx.download
+
+%param FPGA_PART     "xc2vp30-7-ff896" "FPGA Part ID"
+%param FPGA_POSITION 3                 "FPGA Position (in Xilinx iMPACT)"
+
+%AWB_END

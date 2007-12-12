@@ -1,0 +1,8 @@
+run
+-ifmt mixed
+-vlgincdir @BLUESPECDIR@/Verilog
+-ifn config/@APM_NAME@.prj
+-ofn @TMP_XILINX_DIR@/@APM_NAME@
+-ofmt NGC
+-p @FPGA_PART@
+-top mk_model_Wrapper

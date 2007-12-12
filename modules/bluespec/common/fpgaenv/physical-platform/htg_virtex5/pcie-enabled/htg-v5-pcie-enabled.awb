@@ -2,7 +2,15 @@
 %name HTG Virtex 5 PCIE Enabled
 %desc HTG Virtex 5 PCIE Enabled
 
-%provides physical-platform
+%provides physical_platform
 
-%public  htg-v5-pcie-enabled.bsv
-%private htg-v5-pcie-enabled.ucf
+%requires led_device switch_device pci_express_device
+
+%sources -t BSV -v PUBLIC htg-v5-pcie-enabled.bsv
+%sources -t UCF -v PRIVATE htg-v5-pcie-enabled.ucf
+%sources -t UT  xilinx.ut
+%sources -t XST xilinx.xst
+%sources -t DOWNLOAD xilinx.download
+
+%param FPGA_PART     "xc5vlx50t-ff1136" "FPGA Part ID"
+%param FPGA_POSITION 3                  "FPGA Position (in Xilinx iMPACT)"

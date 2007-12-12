@@ -1,4 +1,4 @@
-`include "toplevel_wires.bsh"
+`include "physical_platform.bsh"
 
 interface ChannelIO;
     method ActionValue#(Maybe#(Bit#(32)))   read();
@@ -11,7 +11,7 @@ import "BDPI" function ActionValue#(Bit#(32)) cio_read(Bit#(8) handle);
 import "BDPI" function Action   cio_write(Bit#(8) handle, Bit#(32) data);
 import "BDPI" function ActionValue#(Bit#(8))  cio_isdestroyed(Bit#(8) handle);
 
-module mkChannelIO#(TopLevelWiresDriver wires) (ChannelIO);
+module mkChannelIO#(PHYSICAL_DRIVERS drivers) (ChannelIO);
 
     Reg#(Bit#(8))   handle  <- mkReg(0);
     Reg#(Bit#(1))   ready   <- mkReg(0);

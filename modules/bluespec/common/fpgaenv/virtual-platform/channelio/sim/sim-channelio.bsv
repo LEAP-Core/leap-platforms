@@ -1,7 +1,7 @@
 import FIFOF::*;
 import Vector::*;
 
-`include "toplevel_wires.bsh"
+`include "physical_platform.bsh"
 `include "umf.bsh"
 
 `define CIO_NULL        'hFFFFFFFF00000000
@@ -29,7 +29,7 @@ interface ChannelIO;
 endinterface
 
 // channelio module
-module mkChannelIO#(TopLevelWiresDriver wires) (ChannelIO);
+module mkChannelIO#(PHYSICAL_DRIVERS drivers) (ChannelIO);
 
     Reg#(Bit#(8))   handle              <- mkReg(0);
     Reg#(Bit#(2))   ready               <- mkReg(0);

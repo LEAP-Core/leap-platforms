@@ -2,6 +2,6 @@
 %name General Button Device
 %desc General Button Device for any bit width
 
-%provides button-device
+%provides button_device
 
 %public general-button-device.bsv

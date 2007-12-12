@@ -40,9 +40,6 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/fpga-components/hardware/hardware-fpga-components.awb
 Packagehint=platforms
 
-[XUP TopLevel Wires]
-File=modules/bluespec/common/fpgaenv/toplevel-wires/xilinx/xup-toplevel-wires.awb
-Packagehint=platforms
 
 [Standard Virtual Devices/Requires]
 console=Null Serial Console
@@ -64,7 +61,7 @@ Packagehint=platforms
 [Low Level Platform Interface/Requires]
 rrr=Null RRR Module
 channelio=Null Channel IO Module
-toplevel_wires=XUP TopLevel Wires
+physical_platform=XUP Physical Platform
 
 [Low Level Platform Interface]
 File=modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface/low-level-platform-interface.awb
@@ -72,4 +69,25 @@ Packagehint=platforms
 
 [Null Platform Memory]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/null/null-memory.awb
+Packagehint=platforms
+
+[XUP Physical Platform]
+File=modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup/xup-physical-platform.awb
+Packagehint=platforms
+
+[XUP Physical Platform/Requires]
+led_device=General LED Device
+button_device=General Button Device
+switch_device=General Switch Device
+
+[General Switch Device]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/switches/general-switch-device.awb
+Packagehint=platforms
+
+[General LED Device]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/leds/general-led-device.awb
+Packagehint=platforms
+
+[General Button Device]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/buttons/general-button-device.awb
 Packagehint=platforms

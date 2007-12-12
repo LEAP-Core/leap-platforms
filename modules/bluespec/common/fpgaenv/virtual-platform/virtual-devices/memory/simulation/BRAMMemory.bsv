@@ -1,7 +1,5 @@
-import rrr::*;
-import toplevel_wires::*;
-import fpga_components::*;
-import low_level_platform_interface::*;
+`include "fpga_components.bsh"
+`include "low_level_platform_interface.bsh"
 
 typedef Bit#(`MEMORY_ADDR_SIZE) MEM_Addr;
 typedef Bit#(`MEMORY_VALUE_SIZE) MEM_Value;

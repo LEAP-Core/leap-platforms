@@ -3,6 +3,6 @@
 
 %provides low_level_platform_interface
 
-%requires rrr channelio toplevel_wires
+%requires rrr channelio physical_platform
 
 %sources -t BSV -v PUBLIC LowLevelPlatformInterface.bsv

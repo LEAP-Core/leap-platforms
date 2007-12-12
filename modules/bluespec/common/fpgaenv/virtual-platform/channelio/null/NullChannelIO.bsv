@@ -1,7 +1,7 @@
-`include "toplevel_wires.bsh"
+`include "physical_platform.bsh"
 
 interface ChannelIO;
 endinterface
 
-module mkChannelIO#(TopLevelWiresDriver wires) (ChannelIO);
+module mkChannelIO#(PHYSICAL_DRIVERS drivers) (ChannelIO);
 endmodule

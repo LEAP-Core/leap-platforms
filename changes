@@ -1293,3 +1293,110 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr
  software-server.h         Locally Modified           30 
 
 Slight cleanup and of sim-channelio.
+
+----------
+pellauer    Date: Wed Dec 12 11:44:16 EST 2007  CSN: CSN-platforms-33
+                  Wed Dec 12 16:44:16 UTC 2007
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ hasim-fpgaenv-fsb-afu.apm Locally Modified           32 
+ hasim-fpgaenv-software-no-gui.apm Locally Modified           32 
+ hasim-fpgaenv-hybrid-sim.apm Locally Modified           32 
+ hasim-fpgaenv-htg-v5-pcie.apm Locally Modified           32 
+ hasim-fpgaenv-null.apm    Locally Modified           32 
+ hasim-fpgaenv-software.apm Locally Modified           32 
+ hasim-fpgaenv-xup.apm     Locally Modified           32 
+ hasim-fpgaenv-fsb-dme.apm Locally Modified           32 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/unix
+ UNIXChannelIO.bsv         Locally Modified           32 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/sim
+ sim-channelio.bsv         Locally Modified           32 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/null
+ NullChannelIO.bsv         Locally Modified           32 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface
+ LowLevelPlatformInterface.bsv Locally Modified           32 
+ low-level-platform-interface.awb Locally Modified           32 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/fsb_dme
+ FSB_DME_FP.bsv            Locally Modified           32 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid
+ HybridFP.bsv              Locally Modified           32 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/console
+ NullFP.bsv                Locally Modified           32 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/fsb_afu
+ FSB_AFU_FP.bsv            Locally Modified           32 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/graphical
+ GraphicalFP.bsv           Locally Modified           32 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/xup
+ XUPFP.bsv                 Locally Modified           32 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/htg_v5_pcie
+ HTGv5PCIeFP.bsv           Locally Modified           32 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/simulation
+ BRAMMemory.bsv            Locally Modified           32 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup
+ xup-physical-platform.awb Locally Added               0 
+ xup-physical-platform.bsv Locally Added               0 
+ xilinx.download           Locally Added               0 
+ xilinx.ut                 Locally Added               0 
+ xup.ucf                   Locally Added               0 
+ xilinx.xst                Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-disabled
+ htg-v5-pcie-disabled.awb  Locally Modified           32 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled
+ xilinx.download           Locally Added               0 
+ xilinx.ut                 Locally Added               0 
+ htg-v5-pcie-enabled.awb   Locally Modified           32 
+ xilinx.xst                Locally Added               0 
+ htg-v5-pcie-enabled.bsv   Locally Modified           32 
+ htg-v5-pcie-enabled.ucf   Locally Modified           32 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform
+ null/                     Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/null
+ null-physical-platfrom.bsv Locally Added               0 
+ null-physical-platfrom.awb Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express
+ pcieblkplus.ngc           Locally Added               0 
+ ram.ngc                   Locally Added               0 
+ pci-express-vhdl-import.bsv Locally Modified           32 
+ pci-express-vhdl-import.awb Locally Modified           32 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/leds
+ general-led-device.awb    Locally Modified           32 
+ general-led-device.bsv    Locally Modified           32 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/switches
+ general-switch-device.awb Locally Modified           32 
+ general-switch-device.bsv Locally Modified           32 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/buttons
+ general-button-device.awb Locally Modified           32 
+ general-button-device.bsv Locally Modified           32 
+
+
+physical_platforms replaces toplevel_wires as the way to represent the physical wires (and the way
+that the wires are driven). All references to TopLevelWires should be expunged.
+
+The HTG physical platform is in place, and XUP has also been rolled over to the new system.
+Simulation platforms should still work too.
+
+TBD: Remove obsolete files. Rename "physical-devices" and other things to their final names.
+
+Michael P.
