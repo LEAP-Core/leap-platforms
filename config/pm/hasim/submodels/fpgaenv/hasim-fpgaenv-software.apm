@@ -36,7 +36,6 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/fpga-components/software/software-fpga-components.awb
 Packagehint=platforms
 
-
 [FPGA Environment]
 File=modules/bluespec/common/fpgaenv/fpga-environment.awb
 Packagehint=platforms
@@ -46,7 +45,7 @@ virtual_platform=Standard Virtual Platform
 fpga_components=Software FPGA Components
 
 [Null RRR Module]
-File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/null-rrr.awb
+File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/null/null-rrr.awb
 Packagehint=platforms
 
 [Low Level Platform Interface/Requires]
@@ -57,8 +56,6 @@ physical_platform=Null Physical Platform
 [Low Level Platform Interface]
 File=modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface/low-level-platform-interface.awb
 Packagehint=platforms
-
-
 
 [Simulation only Memory no RRR]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/simulation/simulation-memory.awb

@@ -3,4 +3,4 @@
 
 %provides rrr
 
-%sources -t BSV -v PUBLIC NullRRR.bsv
+%sources -t BSV -v PUBLIC null-rrr.bsv

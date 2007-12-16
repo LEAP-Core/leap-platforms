@@ -7,8 +7,9 @@
 %sources -t BSV     -v PUBLIC   sim-channelio.bsv umf.bsh
 %sources -t BDPI_C  -v PUBLIC   sim-channelio-bdpi.h
 %sources -t BDPI_C  -v PRIVATE  sim-channelio-bdpi.c
-%sources -t CPP     -v PUBLIC   sim-channelio.h umf.h
-%sources -t CPP     -v PRIVATE  sim-channelio.cpp umf.cpp
+%sources -t CPP     -v PUBLIC   sim-channelio.h
+%sources -t CPP     -v PRIVATE  umf.h physical-channel.h
+%sources -t CPP     -v PRIVATE  sim-channelio.cpp umf.cpp physical-channel.cpp
 
 %param BDPI_NAMES   "cio_init cio_open cio_read cio_write"  "list of BDPI-exported names"
 

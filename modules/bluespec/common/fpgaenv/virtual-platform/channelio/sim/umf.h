@@ -23,7 +23,8 @@ class UMF_MESSAGE_CLASS
         int writeIndex;
 
     public:
-        // constructor/destructor
+        // constructors and destructor
+        UMF_MESSAGE_CLASS(int len);
         UMF_MESSAGE_CLASS(unsigned char header[]);
         UMF_MESSAGE_CLASS(int cid, int sid, int mid, int len);
         ~UMF_MESSAGE_CLASS();
@@ -34,6 +35,11 @@ class UMF_MESSAGE_CLASS
         int             GetMethodID()   { return methodID;  }
         int             GetLength()     { return length;    }
         unsigned char*  GetMessage()    { return message;   }
+
+        // header modifiers
+        void    SetChannelID(int cid)   { channelID = cid; }
+        void    SetServiceID(int sid)   { serviceID = sid; }
+        void    SetMethodID(int mid)    { methodID  = mid; }
 
         // message modifiers
         void Append(int nbytes, unsigned char data[]);

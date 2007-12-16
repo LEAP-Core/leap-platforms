@@ -1,0 +1,8 @@
+%name RRR Clients and Servers
+%desc RRR Clients and Servers
+
+%provides rrr
+
+%sources -t BSV -v PUBLIC  basic-rrr-client.bsv basic-rrr-server.bsv basic-rrr.bsh
+%sources -t CPP -v PUBLIC  basic-rrr-server.h basic-rrr-client.h
+%sources -t CPP -v PRIVATE basic-rrr-server.cpp basic-rrr-client.cpp

@@ -1,8 +1,0 @@
-%name RRR Clients and Servers
-%desc RRR Clients and Servers
-
-%provides rrr
-
-%sources -t BSV -v PUBLIC HardwareClient.bsv HardwareServer.bsv rrr_common.bsh
-%sources -t CPP -v PUBLIC software-server.h
-%sources -t CPP -v PRIVATE software-server.cpp

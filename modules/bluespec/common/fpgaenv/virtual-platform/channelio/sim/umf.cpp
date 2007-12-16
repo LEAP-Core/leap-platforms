@@ -12,6 +12,19 @@ using namespace std;
 
 // constructors
 UMF_MESSAGE_CLASS::UMF_MESSAGE_CLASS(
+    int len)
+{
+    length = len;
+
+    // allocate space for message
+    message = new unsigned char[length];
+
+    // init
+    readIndex = 0;
+    writeIndex = 0;
+}
+
+UMF_MESSAGE_CLASS::UMF_MESSAGE_CLASS(
     unsigned char header[])
 {
     // the following code assumes a 32-bit header

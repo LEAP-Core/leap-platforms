@@ -54,7 +54,7 @@ File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/sim/sim-channeli
 Packagehint=platforms
 
 [RRR Clients and Servers]
-File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/rrr.awb
+File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic/basic-rrr.awb
 Packagehint=platforms
 
 [Hybrid Memory]

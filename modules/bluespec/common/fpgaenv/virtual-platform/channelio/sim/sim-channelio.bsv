@@ -190,7 +190,7 @@ module mkChannelIO#(PHYSICAL_DRIVERS drivers) (ChannelIO);
             higher_priority_request[i] = higher_priority_request[i-1] || request[i];
         end
 
-        // start new write message
+        // start writing new message
         rule write_physical_channel_newmsg (ready == 1 && grant[i]);
 
             // get header packet

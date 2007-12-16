@@ -2,7 +2,7 @@ import Vector::*;
 import FIFO::*;
 
 `include "channelio.bsh"
-`include "rrr_common.bsh"
+`include "basic-rrr.bsh"
 `include "rrr_service_ids.bsh"
 
 /* RRR Server: my job is to scan channelio for incoming requests and queue

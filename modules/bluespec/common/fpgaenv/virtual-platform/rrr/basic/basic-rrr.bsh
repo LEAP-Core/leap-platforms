@@ -1,5 +1,5 @@
-`ifndef _RRR_COMMON_
-`define _RRR_COMMON_
+`ifndef _BASIC_RRR_
+`define _BASIC_RRR_
 
 `define RRR_CHUNK_SIZE      4
 `define LOG_RRR_CHUNK_SIZE  2

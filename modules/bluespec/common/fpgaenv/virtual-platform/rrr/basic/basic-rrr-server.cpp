@@ -8,7 +8,7 @@
 #include <signal.h>
 #include <string.h>
 
-#include "software-server.h"
+#include "basic-rrr-server.h"
 
 #define CHANNEL_ID  0
 
@@ -70,7 +70,7 @@ RRR_SERVER_CLASS::unsetServiceValid(
 
 // constructor
 RRR_SERVER_CLASS::RRR_SERVER_CLASS(
-    HASIM_SW_MODULE p,
+    HASIM_MODULE p,
     CHANNELIO cio)
 {
     parent = p;
@@ -96,6 +96,9 @@ RRR_SERVER_CLASS::Init()
             ServiceMap[i]->Init(this);
         }
     }
+
+    // register with channelio for message delivery
+    channelio->RegisterForDelivery(CHANNEL_ID, this);
 }
 
 // uninit
@@ -146,62 +149,63 @@ RRR_SERVER_CLASS::pack(
     return retval;
 }
 
+// accept a delivered message from channelio
+void
+RRR_SERVER_CLASS::DeliverMessage(
+    UMF_MESSAGE message)
+{
+    int serviceID = message->GetServiceID();
+
+    // validate serviceID
+    if (isServiceValid(serviceID) == false)
+    {
+        fprintf(stderr, "software server: invalid serviceID: %u\n", serviceID);
+        parent->CallbackExit(1);
+    }
+
+    // read args from channelio and place into args array
+    int argc = 3;
+    UINT32 argv[MAX_ARGS];
+    argv[0] = message->GetMethodID();
+    for (int i = 1; i < argc; i++)
+    {
+        unsigned char buf[4];
+        message->Extract(4, buf);
+        argv[i] = pack(buf);
+    }
+
+    // we have extracted everything we need from the message,
+    // so we can de-allocate it now. TODO: in future, services
+    // will be passed the entire message, and they will
+    // de-allocate it themselves.
+    delete message;
+
+    // invoke service method to obtain result
+    UINT32 result;
+    bool send_result = ServiceMap[serviceID]->Request(argv[0], argv[1], argv[2], &result);
+
+    // send result to channelio if this is a value method
+    if (send_result)
+    {
+        unsigned char buf[4];
+        unpack(result, buf);
+
+        // create a new channelio message
+        UMF_MESSAGE message = new UMF_MESSAGE_CLASS(4); // payload = 4 bytes
+        message->SetServiceID(serviceID);
+
+        // update message data
+        message->Append(4, buf);
+
+        // send to channelio
+        channelio->Write(CHANNEL_ID, message);
+    }
+}
+
 // poll
 void
 RRR_SERVER_CLASS::Poll()
 {
-    // read new message from channelio
-    UMF_MESSAGE message = channelio->Read(CHANNEL_ID);
-
-    if (message != NULL)
-    {
-        int serviceID = message->GetServiceID();
-
-        // validate serviceID
-        if (isServiceValid(serviceID) == false)
-        {
-            fprintf(stderr, "software server: invalid serviceID: %u\n", serviceID);
-            parent->CallbackExit(1);
-        }
-
-        // read args from channelio and place into args array
-        int argc = 3;
-        UINT32 argv[MAX_ARGS];
-        argv[0] = message->GetMethodID();
-        for (int i = 1; i < argc; i++)
-        {
-            unsigned char buf[4];
-            message->Extract(4, buf);
-            argv[i] = pack(buf);
-        }
-
-        // we have extracted everything we need from the message,
-        // so we can de-allocate it now. TODO: in future, services
-        // will be passed the entire message, and they will
-        // de-allocate it themselves.
-        delete message;
-
-        // invoke service method to obtain result
-        UINT32 result;
-        bool send_result = ServiceMap[serviceID]->Request(argv[0], argv[1], argv[2], &result);
-
-        // send result to channelio if this is a value method
-        if (send_result)
-        {
-            unsigned char buf[4];
-            unpack(result, buf);
-
-            // create a new channelio message
-            UMF_MESSAGE message = new UMF_MESSAGE_CLASS(CHANNEL_ID, // channelID,
-                                                        serviceID,  // serviceID,
-                                                        0,          // methodID, don't care
-                                                        4           // length of payload
-                                                       );
-            message->Append(4, buf);
-            channelio->Write(CHANNEL_ID, message);
-        }
-    }
-
     // poll each service module
     for (int i = 0; i < MAX_SERVICES; i++)
     {

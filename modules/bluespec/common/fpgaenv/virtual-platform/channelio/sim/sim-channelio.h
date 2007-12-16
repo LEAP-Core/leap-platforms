@@ -4,18 +4,9 @@
 #include <queue>
 #include "main.h"
 #include "umf.h"
+#include "physical-channel.h"
 
 using namespace std;
-
-#define STDIN                   0
-#define STDOUT                  1
-#define CHANNELIO_HOST_2_FPGA   100
-#define CHANNELIO_FPGA_2_HOST   101
-
-#define BLOCK_SIZE      4
-#define MSG_BUFFER_SIZE 4
-
-#define SELECT_TIMEOUT  1000
 
 #define CIO_NUM_CHANNELS    2
 
@@ -23,41 +14,59 @@ using namespace std;
 typedef unsigned int UINT32;
 typedef unsigned long long UINT64;
 
-// =============== Channel I/O ================
+// ============================================
+//       Base Class for Message Receivers
+// ============================================
+
+typedef class CIO_DELIVERY_STATION_CLASS* CIO_DELIVERY_STATION;
+class CIO_DELIVERY_STATION_CLASS
+{
+    public:
+        virtual void DeliverMessage(UMF_MESSAGE) = 0;
+};
+
+// ============================================
+//             Channel I/O Station
+// ============================================
+
+enum CIO_STATION_TYPE
+{
+    CIO_STATION_TYPE_READ,
+    CIO_STATION_TYPE_DELIVERY
+};
+
+struct CIO_STATION_INFO
+{
+    // type of reads the station does (read/delivery)
+    CIO_STATION_TYPE        type;
+
+    // link to module (only required for interrupt-type stations)
+    CIO_DELIVERY_STATION    module;
+
+    // buffers
+    queue<UMF_MESSAGE>  readBuffer;
+};
+
+// ============================================
+//                 Channel I/O                 
+// ============================================
 
 typedef class CHANNELIO_CLASS* CHANNELIO;
-class CHANNELIO_CLASS:  public HASIM_SW_MODULE_CLASS
+class CHANNELIO_CLASS:  public HASIM_MODULE_CLASS
 {
     private:
-        // process/pipe state (physical channel)
-        int inpipe[2], outpipe[2];
-        int childpid;
+        // physical channel instance
+        PHYSICAL_CHANNEL_CLASS  physicalChannel;
 
-        #define PARENT_READ     inpipe[0]
-        #define CHILD_WRITE     inpipe[1]
-        #define CHILD_READ      outpipe[0]
-        #define PARENT_WRITE    outpipe[1]
-
-        // buffers
-        queue<UMF_MESSAGE>      readBuffer[CIO_NUM_CHANNELS];
-        queue<UMF_MESSAGE>      writeBuffer[CIO_NUM_CHANNELS];
-
-        // other state
-        UMF_MESSAGE    currentMessage;
-
-        // internal methods
-        void    initHardware();
-        void    uninitHardware();
-        void    syncReadBuffers();
-        void    flushWriteBuffer(int channel);
+        // stations attached to virtual channels
+        CIO_STATION_INFO    stations[CIO_NUM_CHANNELS];
 
     public:
-        CHANNELIO_CLASS(HASIM_SW_MODULE);
+        CHANNELIO_CLASS(HASIM_MODULE);
         ~CHANNELIO_CLASS();
-        void        Init();
-        void        Uninit();
-        UMF_MESSAGE Read(int channel);
-        void        Write(int channel, UMF_MESSAGE message);
+        void        RegisterForDelivery(int, CIO_DELIVERY_STATION);
+        UMF_MESSAGE Read(int);
+        void        Write(int, UMF_MESSAGE);
         void        Poll();
 };
 

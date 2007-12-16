@@ -1,5 +1,5 @@
-#ifndef __SOFTWARE_RRR_SERVER__
-#define __SOFTWARE_RRR_SERVER__
+#ifndef __BASIC_RRR_SERVER__
+#define __BASIC_RRR_SERVER__
 
 #include <stdio.h>
 
@@ -9,7 +9,7 @@
 #define MAX_SERVICES            64
 #define MAX_ARGS                3
 
-// *************** RRR service base class ***************
+// ============== RRR service base class =================
 typedef class RRR_SERVICE_CLASS* RRR_SERVICE;
 class RRR_SERVICE_CLASS
 {
@@ -17,18 +17,19 @@ class RRR_SERVICE_CLASS
         int             serviceID;  // unique service ID
 
     public:
-        virtual void    Init(HASIM_SW_MODULE)                       = 0;
+        virtual void    Init(HASIM_MODULE)                          = 0;
         virtual void    Uninit()                                    = 0;
         virtual bool    Request(UINT32, UINT32, UINT32, UINT32 *)   = 0;
         virtual void    Poll(void)                                  = 0;
 };
 
 
-// ***************** software RRR server *****************
+// ================== Basic RRR server ==================
 
 // main server class
 typedef class RRR_SERVER_CLASS* RRR_SERVER;
-class RRR_SERVER_CLASS: public HASIM_SW_MODULE_CLASS
+class RRR_SERVER_CLASS: public HASIM_MODULE_CLASS,
+                        public CIO_DELIVERY_STATION_CLASS
 {
     private:
 
@@ -57,11 +58,12 @@ class RRR_SERVER_CLASS: public HASIM_SW_MODULE_CLASS
         static void RegisterService(int serviceid, RRR_SERVICE service);
 
         // regular methods
-        RRR_SERVER_CLASS(HASIM_SW_MODULE, CHANNELIO);
+        RRR_SERVER_CLASS(HASIM_MODULE, CHANNELIO);
         ~RRR_SERVER_CLASS();
         void    Init();
         void    Uninit();
         void    Poll();
+        void    DeliverMessage(UMF_MESSAGE msg);
 };
 
 #endif

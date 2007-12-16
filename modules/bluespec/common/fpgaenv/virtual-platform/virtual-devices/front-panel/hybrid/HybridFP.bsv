@@ -6,7 +6,7 @@
 
 `define FP_POLL_INTERVAL    1000
 
-typedef TOPWIRES_LEDS FRONTP_LEDS;
+typedef Bit#(4) FRONTP_LEDS;
 typedef SizeOf#(FRONTP_LEDS) FRONTP_NUM_LEDS;
 
 //
@@ -19,8 +19,7 @@ typedef struct
 }
 FRONTP_MASKED_LEDS deriving (Eq, Bits);
 
-
-typedef TOPWIRES_SWITCHES FRONTP_SWITCHES;
+typedef Bit#(4) FRONTP_SWITCHES;
 typedef SizeOf#(FRONTP_SWITCHES) FRONTP_NUM_SWITCHES;
 
 typedef Bit#(5) FRONTP_BUTTONS;

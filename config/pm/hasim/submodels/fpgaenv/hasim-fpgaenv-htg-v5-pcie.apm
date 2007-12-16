@@ -50,7 +50,7 @@ File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/null/null-channe
 Packagehint=platforms
 
 [Null RRR Module]
-File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/null-rrr.awb
+File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/null/null-rrr.awb
 Packagehint=platforms
 
 [Low Level Platform Interface/Requires]

@@ -1,7 +1,7 @@
 #ifndef __HYBRID_FRONT_PANEL__
 #define __HYBRID_FRONT_PANEL__
 
-#include "software-server.h"
+#include "basic-rrr-server.h"
 
 #define SELECT_TIMEOUT      1000
 #define DIALOG_PACKET_SIZE  4
@@ -9,7 +9,7 @@
 #define STDOUT              1
 
 class FRONT_PANEL_CLASS:    public RRR_SERVICE_CLASS,
-                            public HASIM_SW_MODULE_CLASS
+                            public HASIM_MODULE_CLASS
 {
     private:
         // self-instantiation
@@ -33,7 +33,7 @@ class FRONT_PANEL_CLASS:    public RRR_SERVICE_CLASS,
     public:
         FRONT_PANEL_CLASS();
         ~FRONT_PANEL_CLASS();
-        void    Init(HASIM_SW_MODULE);
+        void    Init(HASIM_MODULE);
         void    Uninit();
         bool    Request(UINT32, UINT32, UINT32, UINT32 *);
         void    Poll();

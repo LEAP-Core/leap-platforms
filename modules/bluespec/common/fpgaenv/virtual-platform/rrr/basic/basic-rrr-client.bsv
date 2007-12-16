@@ -1,5 +1,5 @@
 `include "channelio.bsh"
-`include "rrr_common.bsh"
+`include "basic-rrr.bsh"
 
 `define CLIENT_CHANNEL_ID 0
 

@@ -31,7 +31,7 @@ FRONT_PANEL_CLASS::~FRONT_PANEL_CLASS()
 // init
 void
 FRONT_PANEL_CLASS::Init(
-    HASIM_SW_MODULE     p)
+    HASIM_MODULE     p)
 {
     // set parent pointer
     parent = p;

@@ -1410,3 +1410,73 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/unix
  unix-channelio.awb        Locally Modified           33 
 
 Explicit tagging of BDPI_C.
+
+----------
+aparasha    Date: Sun Dec 16 16:13:21 EST 2007  CSN: CSN-platforms-35
+                  Sun Dec 16 21:13:21 UTC 2007
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ hasim-fpgaenv-fsb-afu.apm Locally Modified           34 
+ hasim-fpgaenv-software-no-gui.apm Locally Modified           34 
+ hasim-fpgaenv-hybrid-sim.apm Locally Modified           34 
+ hasim-fpgaenv-htg-v5-pcie.apm Locally Modified           34 
+ hasim-fpgaenv-null.apm    Locally Modified           34 
+ hasim-fpgaenv-software.apm Locally Modified           34 
+ hasim-fpgaenv-xup.apm     Locally Modified           34 
+ hasim-fpgaenv-fsb-dme.apm Locally Modified           34 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/sim
+ sim-channelio.bsv         Locally Modified           34 
+ physical-channel.cpp      Locally Added               0 
+ sim-channelio.cpp         Locally Modified           34 
+ umf.cpp                   Locally Modified           34 
+ physical-channel.h        Locally Added               0 
+ sim-channelio.h           Locally Modified           34 
+ umf.h                     Locally Modified           34 
+ sim-channelio.awb         Locally Modified           34 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr
+ software-server.cpp       Locally Removed            34 
+ basic/                    Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ basic-rrr.bsh             Locally Added               0 
+ basic-rrr-server.bsv      Locally Added               0 
+ basic-rrr-client.cpp      Locally Added               0 
+ basic-rrr-client.h        Locally Added               0 
+ basic-rrr-server.cpp      Locally Added               0 
+ basic-rrr-client.bsv      Locally Added               0 
+ basic-rrr.awb             Locally Added               0 
+ basic-rrr-server.h        Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr
+ software-server.h         Locally Removed            34 
+ null-rrr.awb              Locally Removed            34 
+ HardwareClient.bsv        Locally Removed            34 
+ rrr_common.bsh            Locally Removed            34 
+ NullRRR.bsv               Locally Removed            34 
+ null/                     Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/null
+ null-rrr.awb              Locally Added               0 
+ null-rrr.bsv              Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr
+ rrr.awb                   Locally Removed            34 
+ HardwareServer.bsv        Locally Removed            34 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid
+ HybridFP.bsv              Locally Modified           34 
+ hybrid-fp-sw.h            Locally Modified           34 
+ hybrid-fp-sw.cpp          Locally Modified           34 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-memory-sw.cpp      Locally Modified           34 
+ hybrid-memory-sw.h        Locally Modified           34 
+ vmh-utils.h               Locally Modified           34 
+
+- additional support for software-client/hardware server. Not yet functional.
+  All models behave as before.
+- minor re-organization of RRR directory structure
+- removed references to TOPWIRES_LEDS and TOPWIRES_SWITCHES from HybridFP.bsv.

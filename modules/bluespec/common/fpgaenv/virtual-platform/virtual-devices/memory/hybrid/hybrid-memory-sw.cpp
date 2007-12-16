@@ -32,7 +32,7 @@ MEMORY_CLASS::~MEMORY_CLASS()
 // init
 void
 MEMORY_CLASS::Init(
-    HASIM_SW_MODULE     p)
+    HASIM_MODULE     p)
 {
     // set parent pointer
     parent = p;
