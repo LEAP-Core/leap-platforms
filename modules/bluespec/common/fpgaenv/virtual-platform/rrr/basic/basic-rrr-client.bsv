@@ -62,7 +62,7 @@ module mkRRRClient#(ChannelIO channel) (RRRClient);
                                     channelID: `CLIENT_CHANNEL_ID,
                                     serviceID: request.serviceID,
                                     methodID : truncate(pack(request.param0)),
-                                    length   : 8
+                                    numChunks: 2
                                 };
                                     
         channel.writePorts[`CLIENT_CHANNEL_ID].write(hdrpacket);

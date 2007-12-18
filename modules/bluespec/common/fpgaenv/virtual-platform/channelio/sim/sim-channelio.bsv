@@ -126,14 +126,8 @@ module mkChannelIO#(PHYSICAL_DRIVERS drivers) (ChannelIO);
             readBuffers[packet.UMF_PACKET_header.channelID].enq(packet);
 
             // setup channel for remaining chunks
-            UMF_MSG_LENGTH totalchunks = packet.UMF_PACKET_header.length >> `UMF_CHUNK_LOG_BYTES;
-
-            if ((totalchunks & (`UMF_CHUNK_BITS - 1)) != 0)
-                readChunksRemaining <= totalchunks;
-            else
-                readChunksRemaining <= totalchunks - 1;
-
-            currentReadChannel <= zeroExtend(packet.UMF_PACKET_header.channelID);
+            readChunksRemaining <= packet.UMF_PACKET_header.numChunks;
+            currentReadChannel  <= zeroExtend(packet.UMF_PACKET_header.channelID);
         end
 
     endrule
@@ -148,7 +142,6 @@ module mkChannelIO#(PHYSICAL_DRIVERS drivers) (ChannelIO);
         // CIO_NULL implies "no data"
         if (data != `CIO_NULL)
         begin
-
             UMF_CHUNK  chunk  = data[`UMF_CHUNK_BITS - 1 : 0];
             UMF_PACKET packet = tagged UMF_PACKET_dataChunk chunk;
 
@@ -156,7 +149,6 @@ module mkChannelIO#(PHYSICAL_DRIVERS drivers) (ChannelIO);
 
             // increment chunks read
             readChunksRemaining <= readChunksRemaining - 1;
-
         end
 
     endrule
@@ -207,13 +199,7 @@ module mkChannelIO#(PHYSICAL_DRIVERS drivers) (ChannelIO);
             cio_write(handle, pack(headerChunk));
 
             // setup remaining chunks
-            UMF_MSG_LENGTH totalchunks = packet.UMF_PACKET_header.length >> `UMF_CHUNK_LOG_BYTES;
-
-            if ((totalchunks & (`UMF_CHUNK_BITS - 1)) != 0)
-                writeChunksRemaining <= totalchunks;
-            else
-                writeChunksRemaining <= totalchunks - 1;
-
+            writeChunksRemaining <= packet.UMF_PACKET_header.numChunks;
             currentWriteChannel <= fromInteger(i);
 
         endrule

@@ -1480,3 +1480,32 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memor
   All models behave as before.
 - minor re-organization of RRR directory structure
 - removed references to TOPWIRES_LEDS and TOPWIRES_SWITCHES from HybridFP.bsv.
+
+----------
+aparasha    Date: Tue Dec 18 09:22:14 EST 2007  CSN: CSN-platforms-36
+                  Tue Dec 18 14:22:14 UTC 2007
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/sim
+ sim-channelio.bsv         Locally Modified           35 
+ umf.bsh                   Locally Modified           35 
+ umf.cpp                   Locally Modified           35 
+ sim-channelio.awb         Locally Modified           35 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ basic-rrr-server.bsv      Locally Modified           35 
+ basic-rrr-client.bsv      Locally Modified           35 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-memory-sw.cpp      Locally Modified           35 
+ HybridMemory.bsv          Locally Modified           35 
+ hybrid-memory-fpga-service-stub.bsh Locally Modified           35 
+
+- modified hardware-side UMF structure to store size of message
+  in number of chunks instead of number of bytes. This avoids
+  having to re-compute number of chunks at multiple levels in
+  the hierarchy. Exact number of bytes only matters at the stub
+  level, which are already aware of these sizes (since they are
+  auto-generated from RRR files).
+
+- fixed some bugs in hardware RRR server.

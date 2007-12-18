@@ -5,13 +5,18 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "hybrid-memory-sw.h"
 #include "main.h"
 #include "software-controller.h"
 #include "vmh-utils.h"
-#include "hybrid-memory-sw.h"
+#include "basic-rrr-client.h"
+
 #include "rrr_service_ids.h"
 
 #define SERVICE_ID  MEMORY_SERVICE_ID
+
+// DEBUG: temporary link to RRR client
+extern RRR_CLIENT globalRRRClient;
 
 // service instantiations
 MEMORY_CLASS        MEMORY_CLASS::instance;

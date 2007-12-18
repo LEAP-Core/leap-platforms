@@ -23,24 +23,24 @@ endinterface
 module mkServiceStub_MEMORY#(RRRServer server) (ServiceStub_MEMORY);
 
     DeMarshaller#(32, 32, 1)    dem <- mkDeMarshaller();
-    Reg#(RRR_MethodID)          mid <- mkReg(0);
+    Reg#(UMF_METHOD_ID)         mid <- mkReg(0);
     Reg#(Bit#(8))               state <- mkReg(`STATE_IDLE);
 
-    rule probe_dispatcher_for_mid (state == `STATE_IDLE);
-        RRR_Chunk chunk <- server.getNextChunk(`MEMORY_SERVICE_ID);
-        mid <= chunk[27:24];
+    rule probe_server_for_header (state == `STATE_IDLE);
+        UMF_PACKET packet <- server.read(`MEMORY_SERVICE_ID);
+        mid <= packet.UMF_PACKET_header.methodID;
         state <= `STATE_PROCESSING;
     endrule
 
     rule probe_dispatcher_for_chunks (state == `STATE_PROCESSING);
-        RRR_Chunk chunk <- server.getNextChunk(`MEMORY_SERVICE_ID);
-        dem.enq(chunk);
+        UMF_PACKET packet <- server.read(`MEMORY_SERVICE_ID);
+        dem.enq(pack(packet.UMF_PACKET_dataChunk));
     endrule
 
     method ActionValue#(MEM_Addr) acceptRequest_Invalidate() if (mid == `MID_INVAL);
         Bit#(32) a <- dem.deq();
         MEM_Addr retval = unpack(a);
-        state <= `STATE_AWAITING_RESPONSE;
+        state <= `STATE_IDLE;
         return retval;
     endmethod
 

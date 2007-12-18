@@ -5,96 +5,73 @@ import FIFO::*;
 `include "basic-rrr.bsh"
 `include "rrr_service_ids.bsh"
 
-/* RRR Server: my job is to scan channelio for incoming requests and queue
- * them in service-private internal buffers. Services will periodically probe
- * me to inquire if there are any outstanding requests for them */
+// RRR Server: my job is to scan channelio for incoming requests and queue
+// them in service-private internal buffers. Services will periodically probe
+// me to inquire if there are any outstanding requests for them
 
 `define SERVER_CHANNEL_ID  1
 
-`define DECODE_LENGTH(chunk)    chunk[15:0]
-`define DECODE_CID(chunk)       chunk[19:16]
-`define DECODE_SID(chunk)       chunk[23:16]
-`define DECODE_MID(chunk)       chunk[19:16]
-
 interface RRRServer;
-    method ActionValue#(RRR_Chunk) getNextChunk(RRR_ServiceID i);
+    method ActionValue#(UMF_PACKET) read(UMF_SERVICE_ID i);
 endinterface
 
 // server
 module mkRRRServer#(ChannelIO channel) (RRRServer);
 
-    /* --- state --- */
+    // === state ===
 
-    Reg#(Bit#(32))  chunksRemaining     <-  mkReg(0);
-    Reg#(Bit#(32))  activeQueueIndex    <-  mkReg(0);
+    Reg#(UMF_MSG_LENGTH)    chunksRemaining     <-  mkReg(0);
+    Reg#(UMF_SERVICE_ID)    activeQueueIndex    <-  mkReg(0);
 
-    FIFO#(RRR_Chunk)    serviceQueues[`NUM_SERVICES];
+    FIFO#(UMF_PACKET)    serviceQueues[`NUM_SERVICES];
     for (Integer i = 0; i < `NUM_SERVICES; i=i+1)
         serviceQueues[i] <- mkFIFO();
 
-    /* --- rules --- */
+    // === rules ===
 
-    // scan channel for incoming requests
+    // scan channel for incoming request headers
     rule scan_requests (chunksRemaining == 0);
 
-        UMF_PACKET data <- channel.readPorts[`SERVER_CHANNEL_ID].read();
-        $display("hardware server: impossible! request arrived from channelio!");
-        $finish(0);
+        UMF_PACKET packet <- channel.readPorts[`SERVER_CHANNEL_ID].read();
 
-        // new request is available, decode serviceID
-        RRR_Chunk chunk = 0; // unpack(data);
-        RRR_ServiceID   sid = `DECODE_SID(chunk);
+        // enqueue header in service's queue
+        serviceQueues[packet.UMF_PACKET_header.serviceID].enq(packet);
 
-        // find out number of chunks in parameter list
-        Bit#(32) chunkLength = zeroExtend(`DECODE_LENGTH(chunk));
-        Bit#(32) totalchunks = chunkLength >> `LOG_RRR_CHUNK_SIZE;
-        if ((chunkLength & (`RRR_CHUNK_SIZE - 1)) != 0)
-            chunksRemaining <= totalchunks;
-        else
-            chunksRemaining <= totalchunks - 1;
-
-        activeQueueIndex <= zeroExtend(sid);
-
-        // place chunk into service queue too, so that service
-        // can read method ID
-        serviceQueues[sid].enq(chunk);
+        // set up remaining chunks
+        chunksRemaining <= packet.UMF_PACKET_header.numChunks;
+        activeQueueIndex <= packet.UMF_PACKET_header.serviceID;
 
     endrule
 
-    // scan channel for incoming param chunks
-    rule scan_params (chunksRemaining > 0);
+    // scan channel for message chunks
+    rule scan_params (chunksRemaining != 0);
 
-        // grab a chunk from channelio (we know that this is a param
-        // chunk) and place it into the active request queue
-        UMF_PACKET data <- channel.readPorts[`SERVER_CHANNEL_ID].read();
-        RRR_Chunk chunk = 0; // unpack(data);
-        serviceQueues[activeQueueIndex].enq(chunk);
+        // grab a chunk from channelio and place it into the active request queue
+        UMF_PACKET packet <- channel.readPorts[`SERVER_CHANNEL_ID].read();
+        serviceQueues[activeQueueIndex].enq(packet);
 
         // one chunk processed
         chunksRemaining <= chunksRemaining - 1;
 
     endrule
 
-    /* --- methods --- */
+    // === methods ===
 
     // get the next available chunk in a particular service's queue
-    method ActionValue#(RRR_Chunk) getNextChunk(RRR_ServiceID i);
+    method ActionValue#(UMF_PACKET) read(UMF_SERVICE_ID i);
 
-        $display("this method must not fire");
-        $finish(0);
-
-        RRR_Chunk chunk = serviceQueues[i].first();
+        UMF_PACKET packet = serviceQueues[i].first();
         serviceQueues[i].deq();
-        return chunk;
+        return packet;
 
     endmethod
 
 endmodule
 
 
-/* RRR parameter de-marshaller. To keep this module simple,
-   we instantiate it with a given inbits, outbits and
-   marshalling factor such that inbits * factor = outbits */
+// RRR parameter de-marshaller. To keep this module simple,
+// we instantiate it with a given inbits, outbits and
+// marshalling factor such that inbits * factor = outbits
 
 interface DeMarshaller#(numeric type inbits, numeric type outbits, numeric type factor);
     method Action                       enq(Bit#(inbits) in);

@@ -1,6 +1,7 @@
 `include "low_level_platform_interface.bsh"
 `include "rrr.bsh"
 `include "rrr_service_ids.bsh"
+`include "channelio.bsh"    // for UMF
 `include "hybrid-memory-fpga-service-stub.bsh"
 
 typedef Bit#(`MEMORY_ADDR_SIZE) MEM_Addr;
@@ -82,7 +83,6 @@ module mkMemory#(LowLevelPlatformInterface llpint) (Memory);
   method ActionValue#(MEM_Addr) getInvalidateRequest();
 
     MEM_Addr inval_addr <- stub.acceptRequest_Invalidate();
-    $display("received invalidate request: inval_addr");
     return inval_addr;
 
   endmethod
