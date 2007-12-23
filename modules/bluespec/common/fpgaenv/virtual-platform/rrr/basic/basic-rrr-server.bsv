@@ -69,32 +69,38 @@ module mkRRRServer#(ChannelIO channel) (RRRServer);
 endmodule
 
 
-// RRR parameter de-marshaller. To keep this module simple,
-// we instantiate it with a given inbits, outbits and
-// marshalling factor such that inbits * factor = outbits
+// RRR parameter de-marshaller
 
-interface DeMarshaller#(numeric type inbits, numeric type outbits, numeric type factor);
-    method Action                       enq(Bit#(inbits) in);
+interface DeMarshaller#(numeric type inbits, numeric type outbits);
+    method Action                       enq(Bit#(inbits) chunk);
     method ActionValue#(Bit#(outbits))  deq();
 endinterface
 
-module mkDeMarshaller(DeMarshaller#(inbits, outbits, factor));
+module mkDeMarshaller(DeMarshaller#(inbits, outbits));
 
-    Reg#(Bit#(inbits))  outreg[valueOf(factor)];
-    for (Integer i = 0; i < valueOf(factor); i=i+1)
+    // compute degree
+    Integer in     = valueof(inbits);
+    Integer out    = valueof(outbits);
+    Integer degree = (out % in) == 0 ? (out / in) : (out / in) + 1;
+
+    // instantiate output register
+    Reg#(Bit#(inbits))  outreg[degree];
+    for (Integer i = 0; i < degree; i=i+1)
         outreg[i] <- mkReg(0);
 
+    // current index
     Reg#(Bit#(8)) index <- mkReg(0);
 
-    method Action enq(Bit#(inbits) in) if (index != fromInteger(valueOf(factor)));
-        outreg[index] <= in;
+    // methods
+    method Action enq(Bit#(inbits) chunk) if (index != fromInteger(degree));
+        outreg[index] <= chunk;
         index <= index + 1;
     endmethod
 
-    method ActionValue#(Bit#(outbits)) deq() if (index == fromInteger(valueOf(factor)));
+    method ActionValue#(Bit#(outbits)) deq() if (index == fromInteger(degree));
         Bit#(outbits) outval = 0;
-        for (Integer i = 0; i < valueOf(factor); i=i+1)
-            outval[ (i+1)*valueOf(inbits)-1 : i*valueOf(inbits) ] = outreg[i];
+        for (Integer i = 0; i < degree; i=i+1)
+            outval[ (i+1)*in - 1 : i*in ] = outreg[i];
         index <= 0;
         return outval;
     endmethod

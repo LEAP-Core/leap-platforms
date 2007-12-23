@@ -1,0 +1,54 @@
+`ifndef _MEMORY_SERVICE_STUB_
+`define _MEMORY_SERVICE_STUB_
+
+//
+// Synthesized service stub file
+//
+
+`include "rrr.bsh"
+`include "rrr_service_ids.bsh"
+
+typedef enum
+{
+    STUB_STATE_idle,
+    STUB_STATE_processing,
+    STUB_STATE_awaitingResponse
+}
+STUB_STATE
+    deriving (Bits, Eq);
+
+`define Invalidate_METHOD_ID 0
+
+interface ServiceStub_MEMORY;
+    method ActionValue#(MEM_Addr) acceptRequest_Invalidate();
+endinterface
+
+module mkServiceStub_MEMORY#(RRRServer server) (ServiceStub_MEMORY);
+
+    DeMarshaller#(`UMF_CHUNK_BITS, 32)
+                        dem   <- mkDeMarshaller();
+    Reg#(UMF_METHOD_ID) mid   <- mkReg(0);
+    Reg#(STUB_STATE)    state <- mkReg(STUB_STATE_idle);
+
+    rule probe_server_for_header (state == STUB_STATE_idle);
+        UMF_PACKET packet <- server.read(`MEMORY_SERVICE_ID);
+        mid <= packet.UMF_PACKET_header.methodID;
+        state <= STUB_STATE_processing;
+    endrule
+
+    rule probe_dispatcher_for_chunks (state == STUB_STATE_processing);
+        UMF_PACKET packet <- server.read(`MEMORY_SERVICE_ID);
+        dem.enq(pack(packet.UMF_PACKET_dataChunk));
+    endrule
+
+    method ActionValue#(MEM_Addr) acceptRequest_Invalidate() if (mid == `Invalidate_METHOD_ID);
+        Bit#(32) a <- dem.deq();
+        MEM_Addr retval = unpack(a);
+        state <= STUB_STATE_idle;
+        return retval;
+    endmethod
+
+endmodule
+
+`endif
+

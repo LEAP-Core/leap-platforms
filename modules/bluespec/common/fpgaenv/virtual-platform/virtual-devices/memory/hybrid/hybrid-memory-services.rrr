@@ -1,7 +1,7 @@
-rrrclass MEMORY
+service MEMORY
 {
-    partition FPGA
+    server hw <- sw
     {
-        method Invalidate(request 8, response 0);
+        method Invalidate(in MEM_Addr[32] addr);
     };
 };
