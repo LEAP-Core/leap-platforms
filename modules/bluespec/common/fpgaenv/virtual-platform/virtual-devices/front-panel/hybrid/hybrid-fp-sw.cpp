@@ -9,8 +9,12 @@
 #include "hybrid-fp-sw.h"
 #include "rrr_service_ids.h"
 #include "main.h"
+#include "basic-rrr-client.h"
 
 #define SERVICE_ID  FRONT_PANEL_SERVICE_ID
+
+// DEBUG: temporary link to RRR client
+extern RRR_CLIENT globalRRRClient;
 
 // service instantiation
 FRONT_PANEL_CLASS   FRONT_PANEL_CLASS::instance;
@@ -74,6 +78,7 @@ FRONT_PANEL_CLASS::Init(
         // initial state
         childAlive = true;
         inputCache = 0;
+        inputDirty = false;
         outputCache = 0;
         outputDirty = false;
     }
@@ -106,9 +111,12 @@ FRONT_PANEL_CLASS::Request(
         outputDirty = true;
     }
 
+    /*
     // return state from input cache
     *result = inputCache;
     return true;
+    */
+    return false;
 }
 
 // poll
@@ -121,13 +129,28 @@ FRONT_PANEL_CLASS::Poll()
         return;
     }
 
+    // if output cache is dirty relative to dialog, update dialog
     if (outputDirty)
     {
         syncOutputs();
         outputDirty = false;
     }
 
+    // sync input cache with dialog
     syncInputs();
+
+    // if input cache was changed, update hardware partition
+    if (inputDirty)
+    {
+        UMF_MESSAGE msg = new UMF_MESSAGE_CLASS(4);
+        msg->SetServiceID(SERVICE_ID);
+        msg->SetMethodID(0);
+        msg->Append(4, (unsigned char*)&inputCache);
+
+        globalRRRClient->MakeRequestNoResponse(msg);
+
+        inputDirty = false;
+    }
 }
 
 // internal helper method: sync input cache state with dialog box
@@ -201,7 +224,11 @@ FRONT_PANEL_CLASS::syncInputs()
                 }
 
                 // update cache
-                inputCache = data;
+                if (inputCache != data)
+                {
+                    inputCache = data;
+                    inputDirty = true;
+                }
             }
             else
             {

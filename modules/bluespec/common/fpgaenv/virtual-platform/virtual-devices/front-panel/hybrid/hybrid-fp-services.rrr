@@ -1,3 +1,7 @@
 service FRONT_PANEL
 {
+    server hw <- sw
+    {
+        method Update(in FRONTP_INPUT_STATE[32] state);
+    };
 };

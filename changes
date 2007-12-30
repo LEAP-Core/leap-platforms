@@ -1535,3 +1535,23 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front
   the updated stubgen. This file is currently placed manually in
   the build tree only because the build process has not yet been
   updated to invoke stubgen to create the stub.
+
+----------
+aparasha    Date: Sat Dec 29 19:55:15 EST 2007  CSN: CSN-platforms-38
+                  Sun Dec 30 00:55:15 UTC 2007
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid
+ hybrid-fp-services.rrr    Locally Modified           37 
+ hybrid-fp-sw.cpp          Locally Modified           36 
+ HybridFP.bsv              Locally Modified           36 
+ hybrid-fp-sw.h            Locally Modified           36 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-memory-services.bsh Locally Removed            37 
+ hybrid-memory.awb         Locally Modified           37 
+
+- removed explicit hardware service stub from hybrid memory. Hardware
+  service stubs are now generated automatically during configure.
+- updated hybrid front panel to use new software client/hardware server
+  path to send switch/button updates to hardware.

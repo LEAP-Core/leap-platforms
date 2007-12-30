@@ -3,6 +3,7 @@
 `include "physical_platform.bsh"
 
 `include "rrr_service_ids.bsh"
+`include "hybrid-fp-services.bsh"
 
 `define FP_POLL_INTERVAL    1000
 
@@ -25,46 +26,42 @@ typedef SizeOf#(FRONTP_SWITCHES) FRONTP_NUM_SWITCHES;
 typedef Bit#(5) FRONTP_BUTTONS;
 typedef SizeOf#(FRONTP_BUTTONS) FRONTP_NUM_BUTTONS;
 
+typedef Bit#(32) FRONTP_INPUT_STATE;
+
 interface FrontPanel;
     method FRONTP_SWITCHES readSwitches();
     method FRONTP_BUTTONS  readButtons();
     method Action          writeLEDs(FRONTP_MASKED_LEDS data);
 endinterface
 
-module mkFrontPanel#(LowLevelPlatformInterface llpint) (FrontPanel);
-    // maintain input and output caches
-    Reg#(Bit#(32))  inputCache  <- mkReg(0);
-    Reg#(Bit#(8))   state       <- mkReg(0);
-    Reg#(Bit#(16))  pollCounter <- mkReg(0);
-    Reg#(FRONTP_LEDS) led_state <- mkReg(0);
+module mkFrontPanel#(LowLevelPlatformInterface llpi) (FrontPanel);
 
-    // ugly: constantly keep sending RRR requests to sync up
-    // state of both inputs and outputs
-    rule sendRRRRequest (state == 0 && pollCounter == 0);
+    // state
+    Reg#(FRONTP_INPUT_STATE)    inputCache  <- mkReg(0);
+    Reg#(FRONTP_LEDS)           ledState    <- mkReg(0);
+    Reg#(Bool)                  outputDirty <- mkReg(False);
+
+    // service stub
+    ServiceStub_FRONT_PANEL stub <- mkServiceStub_FRONT_PANEL(llpi.rrrServer);
+
+    // sync LED state
+    rule send_RRR_request (outputDirty == True);
         RRR_Request req;
         req.serviceID       = `FRONT_PANEL_SERVICE_ID;
-        req.param0          = zeroExtend(led_state);
+        req.param0          = zeroExtend(ledState);
         req.param1          = 0;
         req.param2          = 0;
-        req.needResponse    = True;
-        llpint.rrrClient.makeRequest(req);
-        state <= 1;
+        req.needResponse    = False;
+
+        llpi.rrrClient.makeRequest(req);
+
+        outputDirty <= False;
     endrule
 
-    rule cyclePollCounter (True);
-        if (pollCounter == `FP_POLL_INTERVAL - 1)
-            pollCounter <= 0;
-        else
-            pollCounter <= pollCounter + 1;
-    endrule
-
-    // read RRR response and update input cache... note that
-    // we do not need any internal state machine to determine
-    // when we can perform a valid read
-    rule readRRRResponse (state == 1);
-        Bit#(32) data <- llpint.rrrClient.getResponse();
+    // read incoming updates for switch/button state
+    rule probe_updates (True);
+        FRONTP_INPUT_STATE data <- stub.acceptRequest_Update();
         inputCache <= data;
-        state <= 0;
     endrule
 
     // return switch state from input cache
@@ -79,7 +76,12 @@ module mkFrontPanel#(LowLevelPlatformInterface llpint) (FrontPanel);
 
     // write to LEDs
     method Action writeLEDs(FRONTP_MASKED_LEDS data);
-        led_state <= (led_state & ~data.mask) | (data.state & data.mask);
+        FRONTP_LEDS new_state = (ledState & ~data.mask) | (data.state & data.mask);
+        if (new_state != ledState)
+        begin
+            ledState <= new_state;
+            outputDirty <= True;
+        end
     endmethod
 
 endmodule

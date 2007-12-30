@@ -21,6 +21,7 @@ class FRONT_PANEL_CLASS:    public RRR_SERVICE_CLASS,
         int     parent_to_child[2];
 
         UINT32  inputCache;
+        bool    inputDirty;
         UINT32  outputCache;
         bool    outputDirty;
 
