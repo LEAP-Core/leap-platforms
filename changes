@@ -1555,3 +1555,22 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memor
   service stubs are now generated automatically during configure.
 - updated hybrid front panel to use new software client/hardware server
   path to send switch/button updates to hardware.
+
+----------
+aparasha    Date: Wed Jan  9 17:54:45 EST 2008  CSN: CSN-platforms-39
+                  Wed Jan  9 22:54:45 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ basic-rrr.bsh             Locally Modified           38 
+ basic-rrr-client.cpp      Locally Modified           38 
+ basic-rrr-client.h        Locally Modified           38 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid
+ hybrid-fp-sw.cpp          Locally Modified           38 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-memory-sw.cpp      Locally Modified           38 
+
+minor updates required due to the modifications to
+software main().

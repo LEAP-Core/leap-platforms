@@ -7,6 +7,9 @@
 
 using namespace std;
 
+// global link
+RRR_CLIENT RRRClient;
+
 // constructor
 RRR_CLIENT_CLASS::RRR_CLIENT_CLASS(
     HASIM_MODULE p,

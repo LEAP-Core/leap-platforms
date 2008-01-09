@@ -4,7 +4,6 @@
 #include "sim-channelio.h"
 
 typedef class RRR_CLIENT_CLASS* RRR_CLIENT;
-
 class RRR_CLIENT_CLASS: public HASIM_MODULE_CLASS
 {
     private:
@@ -18,5 +17,8 @@ class RRR_CLIENT_CLASS: public HASIM_MODULE_CLASS
         UMF_MESSAGE MakeRequest(UMF_MESSAGE);
         void MakeRequestNoResponse(UMF_MESSAGE);
 };
+
+// globally-visible link
+extern RRR_CLIENT RRRClient;
 
 #endif

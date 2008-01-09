@@ -11,6 +11,8 @@ typedef Bit#(4) RRR_MethodID;
 typedef Bit#(32) RRR_Param;
 typedef Bit#(32) RRR_Response;
 
+typedef Bit#(32) UINT32;
+
 typedef struct
 {
     RRR_ServiceID   serviceID;

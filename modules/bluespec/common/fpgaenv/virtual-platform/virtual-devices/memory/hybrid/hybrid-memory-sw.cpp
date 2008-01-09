@@ -7,7 +7,6 @@
 
 #include "hybrid-memory-sw.h"
 #include "main.h"
-#include "software-controller.h"
 #include "vmh-utils.h"
 #include "basic-rrr-client.h"
 

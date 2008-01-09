@@ -13,9 +13,6 @@
 
 #define SERVICE_ID  FRONT_PANEL_SERVICE_ID
 
-// DEBUG: temporary link to RRR client
-extern RRR_CLIENT globalRRRClient;
-
 // service instantiation
 FRONT_PANEL_CLASS   FRONT_PANEL_CLASS::instance;
 
@@ -147,7 +144,7 @@ FRONT_PANEL_CLASS::Poll()
         msg->SetMethodID(0);
         msg->Append(4, (unsigned char*)&inputCache);
 
-        globalRRRClient->MakeRequestNoResponse(msg);
+        RRRClient->MakeRequestNoResponse(msg);
 
         inputDirty = false;
     }
