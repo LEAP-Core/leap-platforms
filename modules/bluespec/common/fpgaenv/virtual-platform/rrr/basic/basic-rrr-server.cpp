@@ -117,38 +117,6 @@ RRR_SERVER_CLASS::Uninit()
     ServiceValidMask = 0;
 }
 
-// unpack
-void
-RRR_SERVER_CLASS::unpack(
-    UINT32 src,
-    unsigned char dst[])
-{
-    // unpack UINT32 into byte sequence
-    unsigned int mask = 0xFF;
-    int i;
-    for (i = 0; i < sizeof(UINT32); i++)
-    {
-        unsigned char byte = (mask & src) >> (i * 8);
-        dst[i] = (unsigned char)byte;
-        mask = mask << 8;
-    }
-}
-
-// pack
-UINT32
-RRR_SERVER_CLASS::pack(
-    unsigned char dst[])
-{
-    UINT32 retval = 0;
-    int i;
-    for (i = 0; i < sizeof(UINT32); i++)
-    {
-        unsigned int byte = (unsigned int)dst[i];
-        retval |= (byte << (i * 8));
-    }
-    return retval;
-}
-
 // accept a delivered message from channelio
 void
 RRR_SERVER_CLASS::DeliverMessage(
@@ -169,9 +137,7 @@ RRR_SERVER_CLASS::DeliverMessage(
     argv[0] = message->GetMethodID();
     for (int i = 1; i < argc; i++)
     {
-        unsigned char buf[4];
-        message->Extract(4, buf);
-        argv[i] = pack(buf);
+        argv[i] = message->ExtractUINT32();
     }
 
     // we have extracted everything we need from the message,
@@ -187,15 +153,12 @@ RRR_SERVER_CLASS::DeliverMessage(
     // send result to channelio if this is a value method
     if (send_result)
     {
-        unsigned char buf[4];
-        unpack(result, buf);
-
         // create a new channelio message
         UMF_MESSAGE message = new UMF_MESSAGE_CLASS(4); // payload = 4 bytes
         message->SetServiceID(serviceID);
 
         // update message data
-        message->Append(4, buf);
+        message->AppendUINT32(result);
 
         // send to channelio
         channelio->Write(CHANNEL_ID, message);

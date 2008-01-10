@@ -5,6 +5,10 @@
 #define UMF_CHUNK_BYTES     4
 #define UMF_CHUNK_LOG_BYTES 2
 
+// general typedefs
+typedef unsigned int UINT32;
+typedef unsigned long long UINT64;
+
 // ================ UMF Message ================
 
 typedef class UMF_MESSAGE_CLASS* UMF_MESSAGE;
@@ -41,9 +45,15 @@ class UMF_MESSAGE_CLASS
         void    SetServiceID(int sid)   { serviceID = sid; }
         void    SetMethodID(int mid)    { methodID  = mid; }
 
-        // message modifiers
-        void Append(int nbytes, unsigned char data[]);
-        void Extract(int nbytes, unsigned char data[]);
+        // marshallers
+        void AppendBytes(int nbytes, unsigned char data[]);
+        void AppendUINT32(UINT32 data);
+        void AppendUINT64(UINT64 data);
+
+        // demarshallers
+        void   ExtractBytes(int nbytes, unsigned char data[]);
+        UINT32 ExtractUINT32();
+        UINT64 ExtractUINT64();
 
         // other
         void ConstructHeader(unsigned char buf[]);

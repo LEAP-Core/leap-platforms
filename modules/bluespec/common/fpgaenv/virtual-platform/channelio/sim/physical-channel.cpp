@@ -263,6 +263,6 @@ PHYSICAL_CHANNEL_CLASS::readPipe()
         }
 
         // append read bytes into message
-        incomingMessage->Append(bytes_read, buf);
+        incomingMessage->AppendBytes(bytes_read, buf);
     }
 }

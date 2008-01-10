@@ -142,7 +142,7 @@ FRONT_PANEL_CLASS::Poll()
         UMF_MESSAGE msg = new UMF_MESSAGE_CLASS(4);
         msg->SetServiceID(SERVICE_ID);
         msg->SetMethodID(0);
-        msg->Append(4, (unsigned char*)&inputCache);
+        msg->AppendUINT32(inputCache);
 
         RRRClient->MakeRequestNoResponse(msg);
 

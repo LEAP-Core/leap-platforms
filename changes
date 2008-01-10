@@ -1591,3 +1591,25 @@ Directory modules/bluespec/common/fpgaenv
  hardware-platform/        Locally Removed            38 
 
 - removed the obsolete hardware-platform/ directory.
+
+----------
+aparasha    Date: Thu Jan 10 15:03:13 EST 2008  CSN: CSN-platforms-41
+                  Thu Jan 10 20:03:13 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/sim
+ physical-channel.cpp      Locally Modified           39 
+ umf.cpp                   Locally Modified           39 
+ sim-channelio.h           Locally Modified           39 
+ umf.h                     Locally Modified           39 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ basic-rrr-server.cpp      Locally Modified           39 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid
+ hybrid-fp-sw.cpp          Locally Modified           39 
+
+- slightly enhanced marshalling/demarshalling capabilities
+  built into the software UMF class
+- cleaned up some code in rrr-server and devices as a result
+  of above enhancements

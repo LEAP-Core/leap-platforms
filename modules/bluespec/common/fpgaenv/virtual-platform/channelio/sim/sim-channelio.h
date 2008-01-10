@@ -10,10 +10,6 @@ using namespace std;
 
 #define CIO_NUM_CHANNELS    2
 
-// general typedefs
-typedef unsigned int UINT32;
-typedef unsigned long long UINT64;
-
 // ============================================
 //       Base Class for Message Receivers
 // ============================================
