@@ -22,6 +22,8 @@ using namespace std;
 // constructor: set up hardware partition
 PHYSICAL_CHANNEL_CLASS::PHYSICAL_CHANNEL_CLASS()
 {
+    childAlive = false;
+
     // create I/O pipes
     if (pipe(inpipe) < 0 || pipe(outpipe) < 0)
     {
@@ -85,14 +87,25 @@ PHYSICAL_CHANNEL_CLASS::PHYSICAL_CHANNEL_CLASS()
 
         // more parent initialization
         incomingMessage = NULL;
+        childAlive = true;
     }
 }
 
-// destructor: uninitialize hardware partition
+// destructor
 PHYSICAL_CHANNEL_CLASS::~PHYSICAL_CHANNEL_CLASS()
 {
-    // kill child process
-    kill(childpid, SIGTERM);
+    Uninit();
+}
+
+// uninit: uninitialize the hardware partition
+void
+PHYSICAL_CHANNEL_CLASS::Uninit()
+{
+    if (childAlive)
+    {
+        kill(childpid, SIGTERM);
+        childAlive = false;
+    }
 }
 
 // blocking read

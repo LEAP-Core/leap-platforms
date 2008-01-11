@@ -60,6 +60,7 @@ class CHANNELIO_CLASS:  public HASIM_MODULE_CLASS
     public:
         CHANNELIO_CLASS(HASIM_MODULE);
         ~CHANNELIO_CLASS();
+        void        Uninit();
         void        RegisterForDelivery(int, CIO_DELIVERY_STATION);
         UMF_MESSAGE Read(int);
         void        Write(int, UMF_MESSAGE);

@@ -20,8 +20,9 @@ class PHYSICAL_CHANNEL_CLASS
 {
     private:
         // process/pipe state (physical channel)
-        int inpipe[2], outpipe[2];
-        int childpid;
+        int  inpipe[2], outpipe[2];
+        int  childpid;
+        bool childAlive;
 
         #define PARENT_READ     inpipe[0]
         #define CHILD_WRITE     inpipe[1]
@@ -38,6 +39,7 @@ class PHYSICAL_CHANNEL_CLASS
     public:
         PHYSICAL_CHANNEL_CLASS();
         ~PHYSICAL_CHANNEL_CLASS();
+        void        Uninit();
 
         UMF_MESSAGE Read();             // blocking read
         UMF_MESSAGE TryRead();          // non-blocking read

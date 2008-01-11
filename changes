@@ -1626,3 +1626,16 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
  basic-rrr-server.bsv      Locally Modified           41 
 
 - bugfixes to hardware server request demarshaller
+
+----------
+aparasha    Date: Thu Jan 10 21:41:29 EST 2008  CSN: CSN-platforms-43
+                  Fri Jan 11 02:41:29 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/sim
+ sim-channelio.cpp         Locally Modified           41 
+ physical-channel.h        Locally Modified           41 
+ sim-channelio.h           Locally Modified           41 
+ physical-channel.cpp      Locally Modified           41 
+
+- fixed unclean exit bug
