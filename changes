@@ -1613,3 +1613,16 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front
   built into the software UMF class
 - cleaned up some code in rrr-server and devices as a result
   of above enhancements
+
+----------
+aparasha    Date: Thu Jan 10 19:02:25 EST 2008  CSN: CSN-platforms-42
+                  Fri Jan 11 00:02:25 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/sim
+ umf.cpp                   Locally Modified           41 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ basic-rrr-server.bsv      Locally Modified           41 
+
+- bugfixes to hardware server request demarshaller

@@ -35,7 +35,7 @@ UMF_MESSAGE_CLASS::UMF_MESSAGE_CLASS(
 
     // note: length in encoded header is in terms
     // of number of chunks
-    length    = UMF_CHUNK_BYTES * ((int(header[1]) << 8) + header[0]);
+    length = UMF_CHUNK_BYTES * ((int(header[1]) << 8) + header[0]);
 
     // allocate space for message
     message = new unsigned char[length];

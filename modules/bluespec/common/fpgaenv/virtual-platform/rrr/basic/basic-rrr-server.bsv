@@ -71,7 +71,17 @@ endmodule
 
 // RRR parameter de-marshaller
 
+typedef enum
+{
+    DEM_STATE_idle,
+    DEM_STATE_active
+}
+DEM_STATE
+    deriving (Bits, Eq);
+
+// outbits *has* to be a multiple of inbits
 interface DeMarshaller#(numeric type inbits, numeric type outbits);
+    method Action                       start(UMF_MSG_LENGTH nchunks);
     method Action                       enq(Bit#(inbits) chunk);
     method ActionValue#(Bit#(outbits))  deq();
 endinterface
@@ -88,20 +98,36 @@ module mkDeMarshaller(DeMarshaller#(inbits, outbits));
     for (Integer i = 0; i < degree; i=i+1)
         outreg[i] <- mkReg(0);
 
+    // output release register
+    Reg#(UMF_MSG_LENGTH) outchunks <- mkReg(0);
+
     // current index
-    Reg#(Bit#(8)) index <- mkReg(0);
+    Reg#(UMF_MSG_LENGTH) index <- mkReg(0);
+
+    // state
+    Reg#(DEM_STATE) state <- mkReg(DEM_STATE_idle);
+
+    // set up de-marshalling wires that generate the output
+    Bit#(outbits) outval = 0;
+    for (Integer i = 0; i < degree; i=i+1)
+        outval[ (i+1)*in - 1 : i*in ] = outreg[i];
 
     // methods
-    method Action enq(Bit#(inbits) chunk) if (index != fromInteger(degree));
+    method Action start(UMF_MSG_LENGTH nchunks) if (state == DEM_STATE_idle);
+        index <= 0;
+        outchunks <= nchunks;
+        state <= DEM_STATE_active;
+    endmethod
+
+    method Action enq(Bit#(inbits) chunk) if (state == DEM_STATE_active &&
+                                              index != outchunks);
         outreg[index] <= chunk;
         index <= index + 1;
     endmethod
 
-    method ActionValue#(Bit#(outbits)) deq() if (index == fromInteger(degree));
-        Bit#(outbits) outval = 0;
-        for (Integer i = 0; i < degree; i=i+1)
-            outval[ (i+1)*in - 1 : i*in ] = outreg[i];
-        index <= 0;
+    method ActionValue#(Bit#(outbits)) deq() if (state == DEM_STATE_active &&
+                                                 index == outchunks);
+        state <= DEM_STATE_idle;
         return outval;
     endmethod
 
