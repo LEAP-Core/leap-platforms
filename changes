@@ -1639,3 +1639,53 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/sim
  physical-channel.cpp      Locally Modified           41 
 
 - fixed unclean exit bug
+
+----------
+aparasha    Date: Sat Jan 12 13:08:18 EST 2008  CSN: CSN-platforms-44
+                  Sat Jan 12 18:08:18 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/pci-express
+ pcie-channelio.cpp        Locally Added               0 
+ physical-channel/         Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/pci-express/physical-channel
+ physical-channel.cpp      Locally Added               0 
+ physical-channel.h        Locally Added               0 
+ physical-channel.awb      Locally Added               0 
+ physical-channel.bsv      Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/pci-express
+ pcie-channelio.h          Locally Added               0 
+ pcie-channelio.awb        Locally Added               0 
+ umf/                      Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/pci-express/umf
+ basic-umf.bsh             Locally Added               0 
+ basic-umf.cpp             Locally Added               0 
+ basic-umf.h               Locally Added               0 
+ basic-umf.awb             Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/pci-express
+ pcie-channelio.bsv        Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio
+ pci-express/              Locally Added               0 
+
+- added a new PCI-express channelio module. This will later be unified
+  with the existing sim (and probably unix) channelio modules to form
+  a generic channelio module, requiring a platform-specific "physical
+  channel" submodule, and a generic "umf" submodule.
+
+- added a PCI-express CSR-based physical channel module which creates
+  a FIFO interface on top of the CSR interface provided by the pci-e
+  physical platform.
+  - The available CSRs are split into two segments, one for each
+    direction.
+  - Four CSRs are dedicated for use as head and tail pointers.
+  - Since the CSR interface provides only one read and one write port,
+    these ports are arbitrated between data and pointer requests.
+  - Pointer update requests are sent out intermittently. Correctness
+    is guaranteed, but efficiency could be improved.
+  BSV code for the physical channel is being uploaded with this commit,
+  but remains untested. C code is not yet ready.
