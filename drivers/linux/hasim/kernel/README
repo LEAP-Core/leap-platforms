@@ -1,0 +1,8 @@
+- Makefile
+  makefile for driver. 
+
+- pchnl_if.h
+  PCIe Hardware Channel interface declaration
+
+- pchnl_main.[c|h]
+  PCIe Hardware Channel driver

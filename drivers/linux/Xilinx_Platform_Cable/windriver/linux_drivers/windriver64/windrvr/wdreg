@@ -50,6 +50,17 @@ fi
 if [ $use_udev == "no" ] ; then 
 	major=`grep -w $module_base_name /proc/devices | cut -f1 -d" "`
 	mknod /dev/$module_base_name c $major 0 
-        chmod a+rw /dev/$module_base_name
+        chmod 644 /dev/$module_base_name
+
+        #
+        # Programming the FPGA while it is configured as a PCIe device can
+        # crash the machine.  The programming driver is, by default,
+        # available only to root.  It will be made user-writable only
+        # when the PCIe bus is disabled.  The following link is used
+        # to change the protection of the programming cable.
+        #
+        mkdir -p /usr/hasim/dev
+        rm -f /usr/hasim/dev/usb_programming_cable0
+        ln -s /dev/$module_base_name /usr/hasim/dev/usb_programming_cable0
 fi
 

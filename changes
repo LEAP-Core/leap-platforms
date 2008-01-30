@@ -1689,3 +1689,42 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio
     is guaranteed, but efficiency could be improved.
   BSV code for the physical channel is being uploaded with this commit,
   but remains untested. C code is not yet ready.
+
+----------
+mcadler     Date: Wed Jan 30 18:02:58 EST 2008  CSN: CSN-platforms-45
+                  Wed Jan 30 23:02:58 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup
+ xup-physical-platform.awb Locally Modified           44 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled
+ htg-v5-pcie-enabled.awb   Locally Modified           44 
+
+Directory drivers/linux
+ hasim/                    Locally Added               0 
+
+Directory drivers/linux/hasim
+ hasim-fpga-ctrl.c         Locally Added               0 
+ kernel/                   Locally Added               0 
+
+Directory drivers/linux/hasim/kernel
+ pchnl_if.h                Locally Added               0 
+ pchnl_main.c              Locally Added               0 
+ Makefile                  Locally Added               0 
+ README                    Locally Added               0 
+ pchnl_main.h              Locally Added               0 
+
+Directory drivers/linux/hasim
+ README.dev                Locally Added               0 
+ Makefile                  Locally Added               0 
+
+Directory drivers/linux/Xilinx_Platform_Cable/windriver/linux_drivers/windriver64/windrvr
+ wdreg                     Locally Modified           44 
+
+First version of PCIe driver and control program.  Both are installed
+on any machine with a PCIe FPGA in /usr/hasim.  The new program
+/usr/hasim/bin/hasim-fpga-ctrl controls the state of the PCIe bus
+and programming cables, making user-mode access available to the
+programming cable and FPGA kernel drivers only when everything is
+in the right states.

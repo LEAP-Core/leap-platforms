@@ -8,9 +8,9 @@
 
 %sources -t BSV -v PUBLIC htg-v5-pcie-enabled.bsv
 %sources -t UCF -v PRIVATE htg-v5-pcie-enabled.ucf
-%sources -t UT  xilinx.ut
-%sources -t XST xilinx.xst
-%sources -t DOWNLOAD xilinx.download
+%sources -t UT  -v PRIVATE xilinx.ut
+%sources -t XST -v PRIVATE xilinx.xst
+%sources -t DOWNLOAD -v PRIVATE xilinx.download
 
 %param FPGA_PART     "xc5vlx50t-ff1136" "FPGA Part ID"
 %param FPGA_POSITION 3                  "FPGA Position (in Xilinx iMPACT)"

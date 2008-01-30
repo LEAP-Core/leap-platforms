@@ -13,7 +13,8 @@
 %requires led_device button_device switch_device
 
 %public xup-physical-platform.bsv
-%private xup.ucf xilinx.ut xilinx.xst xilinx.download
+%private xup.ucf xilinx.ut xilinx.xst
+%source -t DOWNLOAD -v PRIVATE xilinx.download
 
 %param FPGA_PART     "xc2vp30-7-ff896" "FPGA Part ID"
 %param FPGA_POSITION 3                 "FPGA Position (in Xilinx iMPACT)"

@@ -1,0 +1,15 @@
+This directory holds links to local devices needed for programming or accessing
+FPGAs.  The intent is to have standard names for devices across all machines,
+independent of PCIe controllers, etc.
+
+The following links are required:
+
+pcie_fpga_power0
+    Link to hot plug power system file for the PCIe bus for an FPGA card.
+    Writing 0 to the file turns off the bus.  Writing 1 turns it back on.
+
+usb_programming_cable0
+    Link to driver that provides access to the USB <-> JTAG programming
+    cable.  This link is just used to change the permissions on the driver
+    so that user access is only available when PCIe power is off.
+    Reprogramming an active PCIe bus can crash the machine.
