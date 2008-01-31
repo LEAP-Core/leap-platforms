@@ -1728,3 +1728,13 @@ on any machine with a PCIe FPGA in /usr/hasim.  The new program
 and programming cables, making user-mode access available to the
 programming cable and FPGA kernel drivers only when everything is
 in the right states.
+
+----------
+mcadler     Date: Wed Jan 30 20:19:08 EST 2008  CSN: CSN-platforms-46
+                  Thu Jan 31 01:19:08 UTC 2008
+
+
+Directory drivers/linux/hasim
+ README                    Locally Added               0 
+
+Add a README file describing the build/installation procedure.

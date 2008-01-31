@@ -1,0 +1,25 @@
+This directory tree builds programs and drivers that populate the /usr/hasim
+tree on machines with FPGA devices.  The files must be on a local disk because
+they are either setuid root, loaded as kernel drivers or are links to machine-
+specific files.
+
+To populate /usr/hasim for a machine, do the following in this directory.
+
+  A.  make
+
+  B.  sudo make install
+
+  C.  Populate the links in /usr/hasim/dev.  For PCIe-based FPGA cards
+      this probably means two links:
+
+      1.  /usr/hasim/dev/pcie_fpga_power0 -> the PCIe power controller file,
+          e.g. /sys/bus/pci/slots/1/power
+
+      2.  /usr/hasim/dev/usb_programming_cable0 -> the Xilinx USB programming
+          cable device, e.g. /dev/windrvr6
+
+
+
+Some other README files in this directory (e.g. README.dev) may appear confusing
+here.  They are installed in /usr/hasim and attempt to explain details of
+subdirectories of /usr/hasim.
