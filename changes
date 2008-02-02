@@ -1738,3 +1738,13 @@ Directory drivers/linux/hasim
  README                    Locally Added               0 
 
 Add a README file describing the build/installation procedure.
+
+----------
+mcadler     Date: Sat Feb  2 11:29:55 EST 2008  CSN: CSN-platforms-47
+                  Sat Feb  2 16:29:55 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ basic-rrr-server.bsv      Locally Modified           46 
+
+New compiler requires proviso for extend.

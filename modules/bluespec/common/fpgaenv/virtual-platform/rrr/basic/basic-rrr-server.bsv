@@ -86,7 +86,8 @@ interface DeMarshaller#(numeric type inbits, numeric type outbits);
     method ActionValue#(Bit#(outbits))  deq();
 endinterface
 
-module mkDeMarshaller(DeMarshaller#(inbits, outbits));
+module mkDeMarshaller(DeMarshaller#(inbits, outbits))
+    provisos(Add#(a__, inbits, outbits));
 
     // compute degree
     Integer in     = valueof(inbits);
