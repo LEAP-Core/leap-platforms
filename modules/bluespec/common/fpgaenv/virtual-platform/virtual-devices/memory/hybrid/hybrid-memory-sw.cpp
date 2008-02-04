@@ -10,7 +10,7 @@
 #include "vmh-utils.h"
 #include "basic-rrr-client.h"
 
-#include "rrr_service_ids.h"
+#include "asim/rrr/rrr_service_ids.h"
 
 #define SERVICE_ID  MEMORY_SERVICE_ID
 

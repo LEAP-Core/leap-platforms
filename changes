@@ -1748,3 +1748,36 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
  basic-rrr-server.bsv      Locally Modified           46 
 
 New compiler requires proviso for extend.
+
+----------
+mcadler     Date: Mon Feb  4 18:49:40 EST 2008  CSN: CSN-platforms-48
+                  Mon Feb  4 23:49:40 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/pci-express/physical-channel
+ physical-channel.awb      Locally Modified           47 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/pci-express
+ pcie-channelio.awb        Locally Modified           47 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/pci-express/umf
+ basic-umf.awb             Locally Modified           47 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/sim
+ sim-channelio.awb         Locally Modified           47 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ basic-rrr-server.bsv      Locally Modified           47 
+ basic-rrr.awb             Locally Modified           47 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid
+ HybridFP.bsv              Locally Modified           47 
+ hybrid-fp.awb             Locally Modified           47 
+ hybrid-fp-sw.cpp          Locally Modified           47 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-memory.awb         Locally Modified           47 
+ hybrid-memory-sw.cpp      Locally Modified           47 
+ HybridMemory.bsv          Locally Modified           47 
+
+Changes for build environment update.

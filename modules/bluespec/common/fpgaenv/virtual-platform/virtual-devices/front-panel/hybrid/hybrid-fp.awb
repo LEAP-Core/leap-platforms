@@ -6,5 +6,5 @@
 
 %sources -t BSV -v PUBLIC   HybridFP.bsv
 %sources -t CPP -v PRIVATE  hybrid-fp-sw.cpp
-%sources -t CPP -v PUBLIC   hybrid-fp-sw.h
+%sources -t H   -v PUBLIC   hybrid-fp-sw.h
 %sources -t RRR -v PRIVATE  hybrid-fp-services.rrr

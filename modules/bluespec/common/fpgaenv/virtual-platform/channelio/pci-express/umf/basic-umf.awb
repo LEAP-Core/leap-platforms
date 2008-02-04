@@ -5,7 +5,7 @@
 %provides umf
 
 %sources -t BSV -v PUBLIC   umf.bsh
-%sources -t CPP -v PUBLIC   umf.h
+%sources -t H   -v PUBLIC   umf.h
 %sources -t CPP -v PRIVATE  umf.cpp
 
 %param UMF_CHUNK_BITS       32  "Bits in UMF Chunk"

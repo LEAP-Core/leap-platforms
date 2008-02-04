@@ -5,7 +5,7 @@
 %provides physical_channel
 
 %sources -t BSV -v PUBLIC   physical-channel.bsv
-%sources -t CPP -v PUBLIC   physical-channel.h
+%sources -t H   -v PUBLIC   physical-channel.h
 %sources -t CPP -v PRIVATE  physical-channel.cpp
 
 %param CSR_H2F_HEAD         249 "Dedicated CSR for Host-to-FPGA Head Pointer"

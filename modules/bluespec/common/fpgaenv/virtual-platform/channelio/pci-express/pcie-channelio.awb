@@ -8,7 +8,7 @@
 %requires physical_channel
 
 %sources -t BSV -v PUBLIC   pcie-channelio.bsv
-%sources -t CPP -v PUBLIC   pcie-channelio.h
+%sources -t H   -v PUBLIC   pcie-channelio.h
 %sources -t CPP -v PRIVATE  pcie-channelio.cpp
 
 %param CIO_NUM_CHANNELS     2   "Number of virtual duplex channels"

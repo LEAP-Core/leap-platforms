@@ -3,7 +3,7 @@ import FIFO::*;
 
 `include "channelio.bsh"
 `include "basic-rrr.bsh"
-`include "rrr_service_ids.bsh"
+`include "asim/rrr/rrr_service_ids.bsh"
 
 // RRR Server: my job is to scan channelio for incoming requests and queue
 // them in service-private internal buffers. Services will periodically probe

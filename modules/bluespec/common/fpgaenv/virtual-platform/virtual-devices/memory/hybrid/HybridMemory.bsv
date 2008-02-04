@@ -1,8 +1,8 @@
 `include "low_level_platform_interface.bsh"
 `include "rrr.bsh"
-`include "rrr_service_ids.bsh"
+`include "asim/rrr/rrr_service_ids.bsh"
 `include "channelio.bsh"
-`include "hybrid-memory-services.bsh"
+`include "asim/rrr/hybrid-memory-services.bsh"
 
 typedef Bit#(`MEMORY_ADDR_SIZE) MEM_Addr;
 typedef Bit#(`MEMORY_VALUE_SIZE) MEM_Value;

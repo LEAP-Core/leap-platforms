@@ -7,7 +7,7 @@
 #include <signal.h>
 
 #include "hybrid-fp-sw.h"
-#include "rrr_service_ids.h"
+#include "asim/rrr/rrr_service_ids.h"
 #include "main.h"
 #include "basic-rrr-client.h"
 
