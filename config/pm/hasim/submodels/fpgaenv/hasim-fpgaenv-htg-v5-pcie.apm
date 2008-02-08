@@ -103,5 +103,3 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic/basic-rrr.awb
 Packagehint=platforms
 
-[HTG Virtex 5 PCIE Enabled/Params]
-FPGA_POSITION=2

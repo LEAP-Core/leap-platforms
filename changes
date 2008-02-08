@@ -2038,3 +2038,24 @@ Directory .
   code from CBL
 - split UMF away from physical channel into a separate module
 - multiple misc. bugfixes, updates, additions.
+
+----------
+mcadler     Date: Fri Feb  8 15:30:38 EST 2008  CSN: CSN-platforms-50
+                  Fri Feb  8 20:30:38 UTC 2008
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ hasim-fpgaenv-htg-v5-pcie.apm Locally Modified           49 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/sim
+ physical-channel.cpp      Locally Modified           49 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-disabled
+ htg-v5-pcie-disabled.ucf  Locally Modified           49 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled
+ htg-v5-pcie-enabled.awb   Locally Modified           49 
+ htg-v5-pcie-enabled.ucf   Locally Modified           49 
+
+-Switch to LX110T
+-More error state when failing to start up

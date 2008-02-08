@@ -1,5 +1,5 @@
 
-CONFIG PART = XC5VLX50T-FF1136-1 ;
+CONFIG PART = XC5VLX110T-FF1136-1 ;
 
 ###############################################################################
 # Pinout and Related I/O Constraints

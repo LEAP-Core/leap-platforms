@@ -55,6 +55,7 @@ PHYSICAL_CHANNEL_CLASS::PHYSICAL_CHANNEL_CLASS()
         execlp(hardware_exe, hardware_exe, NULL);
 
         // error
+        fprintf(stderr, "Error attempting to invoke %s\n", hardware_exe);
         perror("execlp");
         exit(1);
     }
