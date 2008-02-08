@@ -1,3 +1,5 @@
+import FIFO::*;
+import Clocks::*;
 
 // htg-v5-pcie-enabled
 
@@ -74,7 +76,8 @@ module mkPhysicalPlatform
         interface ledsDriver         = leds_device.driver;
         interface switchesDriver     = switches_device.driver;
         interface pciExpressDriver   = pci_express_device.driver;
-    
+
+
     endinterface
     
     // Aggregate the wires

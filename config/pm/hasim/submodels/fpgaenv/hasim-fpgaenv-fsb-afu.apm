@@ -23,6 +23,7 @@ Packagehint=platforms
 [Standard Virtual Platform/Requires]
 virtual_devices=Standard Virtual Devices
 low_level_platform_interface=Low Level Platform Interface
+umf=Null Unified Message Format
 
 [Standard Virtual Devices]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/std-virtual-devices.awb
@@ -40,7 +41,6 @@ memory=Hybrid Memory
 [Null Channel IO Module]
 File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/null/null-channelio.awb
 Packagehint=platforms
-
 
 [Physical FSB AFU Front Panel]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/fsb_afu/fsb-afu-fp.awb
@@ -91,3 +91,8 @@ Packagehint=platforms
 pci_express_device=PCI Express Physical Device VHDL Import
 led_device=General LED Device
 switch_device=General Switch Device
+
+
+[Null Unified Message Format]
+File=modules/bluespec/common/fpgaenv/virtual-platform/umf/null/null-umf.awb
+Packagehint=platforms

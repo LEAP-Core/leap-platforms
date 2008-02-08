@@ -1,6 +1,5 @@
 #include <iostream>
 
-#include "sim-channelio.h"
 #include "basic-rrr-client.h"
 
 #define CHANNEL_ID  1

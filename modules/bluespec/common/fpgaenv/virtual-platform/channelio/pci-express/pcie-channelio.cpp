@@ -10,7 +10,7 @@
 #include <string.h>
 #include <iostream>
 
-#include "sim-channelio.h"
+#include "asim/provides/channelio.h"
 
 using namespace std;
 
@@ -125,13 +125,19 @@ CHANNELIO_CLASS::Poll()
         // get virtual channel ID
         int channelID = msg->GetChannelID();
 
+        //cout << "channelio: got message via poll: channel " << msg->GetChannelID()
+        //     << " service " << msg->GetServiceID() << " method "
+        //     << msg->GetMethodID() << " length " << msg->GetLength() << ", ";
+
         // if this message is for a read-type station, then enqueue it
         if (stations[channelID].type == CIO_STATION_TYPE_READ)
         {
+            //cout << "buffering" << endl;
             stations[channelID].readBuffer.push(msg);
         }
         else
         {
+            //cout << "delivering" << endl;
             // deliver message to station module immediately
             stations[channelID].module->DeliverMessage(msg);
         }

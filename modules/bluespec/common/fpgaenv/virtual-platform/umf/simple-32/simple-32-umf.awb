@@ -1,12 +1,12 @@
 
-%name Basic UMF Module
-%desc Basic UMF (Unified Message Format) Module
+%name Simple 32-bit Unified Message Format
+%desc Simple 32-bit Unified Message Format
 
 %provides umf
 
-%sources -t BSV -v PUBLIC   umf.bsh
-%sources -t H   -v PUBLIC   umf.h
-%sources -t CPP -v PRIVATE  umf.cpp
+%sources -t BSV -v PUBLIC   simple-32-umf.bsv
+%sources -t H   -v PUBLIC   simple-32-umf.h
+%sources -t CPP -v PRIVATE  simple-32-umf.cpp
 
 %param UMF_CHUNK_BITS       32  "Bits in UMF Chunk"
 %param UMF_CHUNK_BYTES      4   "Bytes in UMF Chunk"

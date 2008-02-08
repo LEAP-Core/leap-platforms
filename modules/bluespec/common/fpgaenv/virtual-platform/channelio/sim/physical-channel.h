@@ -1,7 +1,7 @@
 #ifndef __PHYSICAL_CHANNEL__
 #define __PHYSICAL_CHANNEL__
 
-#include "umf.h"
+#include "asim/provides/umf.h"
 
 #define STDIN                   0
 #define STDOUT                  1

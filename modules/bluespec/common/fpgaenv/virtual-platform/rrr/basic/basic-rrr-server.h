@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 #include "main.h"
-#include "sim-channelio.h"
+#include "asim/provides/channelio.h"
 
 #define MAX_SERVICES            64
 #define MAX_ARGS                3

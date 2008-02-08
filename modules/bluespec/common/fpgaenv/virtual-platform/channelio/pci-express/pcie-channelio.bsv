@@ -30,7 +30,7 @@ module mkChannelIO#(PHYSICAL_DRIVERS drivers) (ChannelIO);
     Reg#(Bit#(8)) currentWriteChannel <- mkReg(0);
 
     // physical channel
-    PhysicalChannel physicalChannel <- mkPhysicalChannel();
+    PhysicalChannel physicalChannel <- mkPhysicalChannel(drivers);
 
     // ==============================================================
     //                        Ports and Buffers
@@ -93,7 +93,7 @@ module mkChannelIO#(PHYSICAL_DRIVERS drivers) (ChannelIO);
     // probe physical channel for incoming read data (continuing old message)
     rule read_physical_channel_contmsg (readChunksRemaining != 0);
 
-        UMF_CHUNK  chunk  = physicalChannel.read();
+        UMF_CHUNK chunk <- physicalChannel.read();
         UMF_PACKET packet = tagged UMF_PACKET_dataChunk chunk;
 
         readBuffers[currentReadChannel].enq(packet);
@@ -133,7 +133,7 @@ module mkChannelIO#(PHYSICAL_DRIVERS drivers) (ChannelIO);
         end
 
         // start writing new message
-        rule write_physical_channel_newmsg (ready == 1 && grant[i]);
+        rule write_physical_channel_newmsg (grant[i]);
 
             // get header packet
             UMF_PACKET packet = writeBuffers[i].first();
@@ -157,7 +157,7 @@ module mkChannelIO#(PHYSICAL_DRIVERS drivers) (ChannelIO);
     end // for
 
     // continue writing message
-    rule write_physical_channel_continue (ready == 1 && writeChunksRemaining != 0);
+    rule write_physical_channel_continue (writeChunksRemaining != 0);
 
         // get the next packet from the active write channel
         UMF_PACKET packet = writeBuffers[currentWriteChannel].first();

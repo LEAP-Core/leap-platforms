@@ -27,6 +27,7 @@ Packagehint=platforms
 [Standard Virtual Platform/Requires]
 virtual_devices=Standard Virtual Devices
 low_level_platform_interface=Low Level Platform Interface
+umf=Null Unified Message Format
 
 [Channel IO to/from a UNIX Process]
 File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/unix/unix-channelio.awb
@@ -72,4 +73,9 @@ front_panel=Graphical Front Panel
 
 [Null Physical Platform]
 File=modules/bluespec/common/fpgaenv/physical-platform/null/null-physical-platfrom.awb
+Packagehint=platforms
+
+
+[Null Unified Message Format]
+File=modules/bluespec/common/fpgaenv/virtual-platform/umf/null/null-umf.awb
 Packagehint=platforms

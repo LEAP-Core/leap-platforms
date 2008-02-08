@@ -1781,3 +1781,260 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memor
  HybridMemory.bsv          Locally Modified           47 
 
 Changes for build environment update.
+
+----------
+aparasha    Date: Thu Feb  7 18:12:58 EST 2008  CSN: CSN-platforms-49
+                  Thu Feb  7 23:12:58 UTC 2008
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ hasim-fpgaenv-fsb-afu.apm Locally Modified           48 
+ hasim-fpgaenv-software-no-gui.apm Locally Modified           48 
+ hasim-fpgaenv-hybrid-sim.apm Locally Modified           48 
+ hasim-fpgaenv-htg-v5-pcie.apm Locally Modified           48 
+ hasim-fpgaenv-null.apm    Locally Modified           48 
+ hasim-fpgaenv-software.apm Locally Modified           48 
+ hasim-fpgaenv-xup.apm     Locally Modified           48 
+ hasim-fpgaenv-fsb-dme.apm Locally Modified           48 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/pci-express
+ pcie-channelio.cpp        Locally Modified           48 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/pci-express/physical-channel
+ driver-interface.h        Locally Added               0 
+ libpchnl.h                Locally Added               0 
+ physical-channel.cpp      Locally Modified           48 
+ physical-channel.h        Locally Modified           48 
+ pchnl_if.h                Locally Added               0 
+ physical-channel.awb      Locally Modified           48 
+ driver-interface.cpp      Locally Added               0 
+ physical-channel.bsv      Locally Modified           48 
+ libpchnl.c                Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/pci-express
+ pcie-channelio.awb        Locally Modified           48 
+ umf/                      Locally Removed            48 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/pci-express/umf
+ basic-umf.bsh             Locally Removed            48 
+ basic-umf.cpp             Locally Removed            48 
+ basic-umf.h               Locally Removed            48 
+ basic-umf.awb             Locally Removed            48 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/pci-express
+ pcie-channelio.bsv        Locally Modified           48 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/sim
+ umf.bsh                   Locally Removed            48 
+ umf.cpp                   Locally Removed            48 
+ physical-channel.h        Locally Modified           48 
+ sim-channelio.h           Locally Modified           48 
+ umf.h                     Locally Removed            48 
+ sim-channelio.awb         Locally Modified           48 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ basic-rrr-server.bsv      Locally Modified           48 
+ basic-rrr-client.cpp      Locally Modified           48 
+ basic-rrr-client.h        Locally Modified           48 
+ basic-rrr-client.bsv      Locally Modified           48 
+ basic-rrr-server.h        Locally Modified           48 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform
+ umf/                      Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/umf
+ null/                     Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/null
+ null-umf.awb              Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/umf
+ simple-32/                Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/simple-32
+ simple-32-umf.cpp         Locally Added               0 
+ simple-32-umf.h           Locally Added               0 
+ simple-32-umf.awb         Locally Added               0 
+ simple-32-umf.bsv         Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform
+ std-virtual-platform.awb  Locally Modified           48 
+ fast-virtual-platform.awb Locally Modified           48 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled
+ htg-v5-pcie-enabled.bsv   Locally Modified           48 
+ htg-v5-pcie-enabled.ucf   Locally Modified           48 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express
+ h2f_data_fifo.ngc         Locally Added               0 
+ f2h_data_fifo.ngc         Locally Added               0 
+ pci_exp_64b_app.vhd       Locally Removed            48 
+ BMD.vhd                   Locally Removed            48 
+ pcieblkplus.ngc           Locally Modified           48 
+ ram.ngc                   Locally Modified           48 
+ BMD_EP_MEM_ACCESS.vhd     Locally Removed            48 
+ xilinx_pci_exp_ep.vhd     Locally Removed            48 
+ channel.vhd               Locally Added               0 
+ BMD_64_RX_ENGINE.vhd      Locally Removed            48 
+ f2h_data_fifo.vhd         Locally Added               0 
+ BMD_64_TX_ENGINE.vhd      Locally Removed            48 
+ h2f_data_fifo.vhd         Locally Added               0 
+ pcieblkplus.vhd           Locally Modified           48 
+ pci-express-vhdl-import.bsv Locally Modified           48 
+ CSR_BRAM.ngc              Locally Added               0 
+ PCIE_RX_ENGINE.vhd        Locally Added               0 
+ ram.vhd                   Locally Modified           48 
+ INTR_CONTROLLER.vhd       Locally Added               0 
+ PCIE_TX_ENGINE.vhd        Locally Added               0 
+ BMD_INTR_CTRL.vhd         Locally Removed            48 
+ PCIE_BAR0.vhd             Locally Added               0 
+ BMD_EP_MEM.vhd            Locally Removed            48 
+ BMD_EP.vhd                Locally Removed            48 
+ CSR_BRAM.vhd              Locally Added               0 
+ PIO_EP_MEM_ACCESS.vhd     Locally Removed            48 
+ CSR_CONTROLLER.vhd        Locally Added               0 
+ Channel_top.vhd           Locally Added               0 
+ bmd_pak.vhd               Locally Removed            48 
+ pci-express-vhdl-import.awb Locally Modified           48 
+
+- updated pci-express physical device with latest
+  VHDL modules from CBL
+- added BVI interface to new CBL module (includes
+  clock synchronizers)
+- updated PCIE-CSR Channel's algorithm, fixed several
+  bugs
+- added a debugging state machine to PCIE-CSR module
+
+----------
+aparasha    Date: Fri Feb  8 13:21:06 EST 2008  CSN: CSN-platforms-49
+                  Fri Feb  8 18:21:06 UTC 2008
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ hasim-fpgaenv-fsb-afu.apm Locally Modified           48 
+ hasim-fpgaenv-software-no-gui.apm Locally Modified           48 
+ hasim-fpgaenv-hybrid-sim.apm Locally Modified           48 
+ hasim-fpgaenv-htg-v5-pcie.apm Locally Modified           48 
+ hasim-fpgaenv-null.apm    Locally Modified           48 
+ hasim-fpgaenv-software.apm Locally Modified           48 
+ hasim-fpgaenv-xup.apm     Locally Modified           48 
+ hasim-fpgaenv-fsb-dme.apm Locally Modified           48 
+
+Directory admin
+ mytags                    Locally Modified           48 
+
+Directory admin/packages
+ platforms                 Locally Modified           48 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/pci-express
+ pcie-channelio.cpp        Locally Modified           48 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/pci-express/physical-channel
+ driver-interface.h        Locally Added               0 
+ libpchnl.h                Locally Added               0 
+ physical-channel.cpp      Locally Modified           48 
+ physical-channel.h        Locally Modified           48 
+ pchnl_if.h                Locally Added               0 
+ physical-channel.awb      Locally Modified           48 
+ driver-interface.cpp      Locally Added               0 
+ physical-channel.bsv      Locally Modified           48 
+ libpchnl.c                Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/pci-express
+ pcie-channelio.h          Locally Modified           48 
+ pcie-channelio.awb        Locally Modified           48 
+ umf/                      Locally Removed            48 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/pci-express/umf
+ basic-umf.bsh             Locally Removed            48 
+ basic-umf.cpp             Locally Removed            48 
+ basic-umf.h               Locally Removed            48 
+ basic-umf.awb             Locally Removed            48 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/pci-express
+ pcie-channelio.bsv        Locally Modified           48 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/sim
+ umf.bsh                   Locally Removed            48 
+ umf.cpp                   Locally Removed            48 
+ physical-channel.h        Locally Modified           48 
+ sim-channelio.h           Locally Modified           48 
+ umf.h                     Locally Removed            48 
+ sim-channelio.awb         Locally Modified           48 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ basic-rrr-server.bsv      Locally Modified           48 
+ basic-rrr-client.cpp      Locally Modified           48 
+ basic-rrr-client.h        Locally Modified           48 
+ basic-rrr-server.cpp      Locally Modified           48 
+ basic-rrr-client.bsv      Locally Modified           48 
+ basic-rrr-server.h        Locally Modified           48 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform
+ umf/                      Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/umf
+ null/                     Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/null
+ null-umf.awb              Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/umf
+ simple-32/                Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/simple-32
+ simple-32-umf.cpp         Locally Added               0 
+ simple-32-umf.h           Locally Added               0 
+ simple-32-umf.awb         Locally Added               0 
+ simple-32-umf.bsv         Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform
+ std-virtual-platform.awb  Locally Modified           48 
+ fast-virtual-platform.awb Locally Modified           48 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled
+ htg-v5-pcie-enabled.bsv   Locally Modified           48 
+ htg-v5-pcie-enabled.ucf   Locally Modified           48 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express
+ h2f_data_fifo.ngc         Locally Added               0 
+ f2h_data_fifo.ngc         Locally Added               0 
+ pci_exp_64b_app.vhd       Locally Removed            48 
+ BMD.vhd                   Locally Removed            48 
+ pcieblkplus.ngc           Locally Modified           48 
+ ram.ngc                   Locally Modified           48 
+ BMD_EP_MEM_ACCESS.vhd     Locally Removed            48 
+ xilinx_pci_exp_ep.vhd     Locally Removed            48 
+ channel.vhd               Locally Added               0 
+ BMD_64_RX_ENGINE.vhd      Locally Removed            48 
+ f2h_data_fifo.vhd         Locally Added               0 
+ BMD_64_TX_ENGINE.vhd      Locally Removed            48 
+ h2f_data_fifo.vhd         Locally Added               0 
+ pcieblkplus.vhd           Locally Modified           48 
+ pci-express-vhdl-import.bsv Locally Modified           48 
+ CSR_BRAM.ngc              Locally Added               0 
+ PCIE_RX_ENGINE.vhd        Locally Added               0 
+ ram.vhd                   Locally Modified           48 
+ INTR_CONTROLLER.vhd       Locally Added               0 
+ PCIE_TX_ENGINE.vhd        Locally Added               0 
+ BMD_INTR_CTRL.vhd         Locally Removed            48 
+ PCIE_BAR0.vhd             Locally Added               0 
+ BMD_EP_MEM.vhd            Locally Removed            48 
+ BMD_EP.vhd                Locally Removed            48 
+ CSR_BRAM.vhd              Locally Added               0 
+ PIO_EP_MEM_ACCESS.vhd     Locally Removed            48 
+ CSR_CONTROLLER.vhd        Locally Added               0 
+ Channel_top.vhd           Locally Added               0 
+ bmd_pak.vhd               Locally Removed            48 
+ pci-express-vhdl-import.awb Locally Modified           48 
+
+Directory .
+ changes                   Locally Modified           48 
+
+- added a debugging state machine into the CSR-based physical
+  channel module
+- updated support for PCI-Express CSR-based physical channel
+- updated HTG PCI-Express Driver with latest LX50T-targeted
+  code from CBL
+- split UMF away from physical channel into a separate module
+- multiple misc. bugfixes, updates, additions.

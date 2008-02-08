@@ -10,10 +10,16 @@
 #include <string.h>
 #include <iostream>
 
-#include "physical-channel.h"
+#include "asim/provides/physical_channel.h"
 
 using namespace std;
 
+#define SLEEP for (unsigned long i = 0; i < (100000); i++)
+
+// ==============================================
+//            WARNING WARNING WARNING
+// This code is swarming with potential deadlocks
+// ==============================================
 
 // ============================================
 //               Physical Channel              
@@ -22,73 +28,31 @@ using namespace std;
 // constructor: set up hardware partition
 PHYSICAL_CHANNEL_CLASS::PHYSICAL_CHANNEL_CLASS()
 {
-    childAlive = false;
+    // initialize pointers
+    f2hHead      = CSR_F2H_BUF_START;
+    f2hTailCache = CSR_F2H_BUF_START;
+    h2fHeadCache = CSR_H2F_BUF_START;
+    h2fTail      = CSR_H2F_BUF_START;
 
-    // create I/O pipes
-    if (pipe(inpipe) < 0 || pipe(outpipe) < 0)
+    // other initialization
+    iid = 0;
+
+    // bootstrap: first write indices that I control
+    driver.WriteCommonCSR(CSR_F2H_HEAD, f2hHead);
+    driver.WriteCommonCSR(CSR_H2F_TAIL, h2fTail);
+
+    // give green signal to FPGA
+    driver.WriteSystemCSR(genIID() | 0x50000);
+
+    CSR_DATA data;
+    do
     {
-        perror("pipe");
-        exit(1);
+        data = driver.ReadSystemCSR();
+        SLEEP;
     }
+    while (data != SIGNAL_GREEN);
 
-    // create target process
-    childpid = fork();
-    if (childpid < 0)
-    {
-        perror("fork");
-        exit(1);
-    }
-
-    if (childpid == 0)
-    {
-        char hardware_exe[256];
-
-        // CHILD: setup pipes for hardware side
-        close(PARENT_READ);
-        close(PARENT_WRITE);
-
-        dup2(CHILD_READ, CHANNELIO_HOST_2_FPGA);
-        dup2(CHILD_WRITE, CHANNELIO_FPGA_2_HOST);
-
-        // launch hardware executable/download bitfile
-        sprintf(hardware_exe, "./%s_hw.exe", APM_NAME);
-        execlp(hardware_exe, hardware_exe, NULL);
-
-        // error
-        perror("execlp");
-        exit(1);
-    }
-    else
-    {
-        // PARENT: setup pipes for software side
-        close(CHILD_READ);
-        close(CHILD_WRITE);
-
-        // make sure channel is working by exchanging message with FPGA
-        char buf[32] = "NULL";
-        
-        if (write(PARENT_WRITE, "SYN", 4) == -1)
-        {
-            perror("host/init/write");
-            exit(1);
-        }
-
-        if (read(PARENT_READ, buf, 4) == -1)
-        {
-            perror("host/init/read");
-            exit(1);
-        }
-
-        if (strcmp(buf, "ACK") != 0)
-        {
-            fprintf(stderr, "host: incorrect ack message from FPGA: %s\n", buf);
-            exit(1);
-        }
-
-        // more parent initialization
-        incomingMessage = NULL;
-        childAlive = true;
-    }
+    //cout << "pchannel: received green signal from FPGA" << endl << flush;
 }
 
 // destructor
@@ -101,11 +65,6 @@ PHYSICAL_CHANNEL_CLASS::~PHYSICAL_CHANNEL_CLASS()
 void
 PHYSICAL_CHANNEL_CLASS::Uninit()
 {
-    if (childAlive)
-    {
-        kill(childpid, SIGTERM);
-        childAlive = false;
-    }
 }
 
 // blocking read
@@ -121,11 +80,21 @@ PHYSICAL_CHANNEL_CLASS::Read()
             // message is ready!
             UMF_MESSAGE msg = incomingMessage;
             incomingMessage = NULL;
+            //cout << "pchannel: reading message: channel " << msg->GetChannelID()
+            //     << " service " << msg->GetServiceID() << " method " << msg->GetMethodID()
+            //     << " length " << msg->GetLength() << endl;
             return msg;
         }
 
-        // block-read data from pipe
-        readPipe();
+        // if CSRs are empty, then poll pointers till some data is available
+        while (f2hHead == f2hTailCache)
+        {
+            f2hTailCache = driver.ReadCommonCSR(CSR_F2H_TAIL);
+            SLEEP;
+        }
+
+        // read some data from CSRs
+        readCSR();
     }
 
     // shouldn't be here
@@ -136,17 +105,24 @@ PHYSICAL_CHANNEL_CLASS::Read()
 UMF_MESSAGE
 PHYSICAL_CHANNEL_CLASS::TryRead()
 {
-    // if there's fresh data on the pipe, update
-    if (dataAvailableOnPipe())
+    // if CSRs are empty, then poll pointers (OPTIONAL)
+    if (f2hHead == f2hTailCache)
     {
-        readPipe();
+        f2hTailCache = driver.ReadCommonCSR(CSR_F2H_TAIL);
+        SLEEP;
     }
+
+    // now attempt read 
+    readCSR();
 
     // now see if we have a complete message
     if (incomingMessage && incomingMessage->BytesRemaining() == 0)
     {
         UMF_MESSAGE msg = incomingMessage;
         incomingMessage = NULL;
+        //cout << "pchannel: try-reading message: channel " << msg->GetChannelID()
+        //     << " service " << msg->GetServiceID() << " method " << msg->GetMethodID()
+        //     << " length " << msg->GetLength() << endl;
         return msg;
     }
 
@@ -159,90 +135,93 @@ void
 PHYSICAL_CHANNEL_CLASS::Write(
     UMF_MESSAGE message)
 {
+    // block until buffer has sufficient space
+    CSR_INDEX h2fTailPlusOne = (h2fTail == CSR_H2F_BUF_END) ? CSR_H2F_BUF_START : (h2fTail + 1);
+    while (h2fTailPlusOne == h2fHeadCache)
+    {
+        h2fHeadCache = driver.ReadCommonCSR(CSR_H2F_HEAD);
+        SLEEP;
+    }
+
+    //cout << "pchannel: writing message: channel " << message->GetChannelID()
+    //     << " service " << message->GetServiceID() << " method " << message->GetMethodID()
+    //     << " length " << message->GetLength() << endl;
+
     // construct header
-    unsigned char header[UMF_CHUNK_BYTES];
-    message->ConstructHeader(header);
+    UMF_CHUNK header = message->ConstructHeader();
+    CSR_DATA csr_data = CSR_DATA(header);
 
     // write header to physical channel
-    int nbytes = write(PARENT_WRITE, header, UMF_CHUNK_BYTES);
-    assert(nbytes == UMF_CHUNK_BYTES);    // ugh
+    driver.WriteCommonCSR(h2fTail, csr_data);
+    h2fTail = h2fTailPlusOne;
+    h2fTailPlusOne = (h2fTail == CSR_H2F_BUF_END) ? CSR_H2F_BUF_START : (h2fTail + 1);
 
     // write message data to physical channel
-    nbytes = write(PARENT_WRITE, message->GetMessage(), message->GetLength());
-    assert (nbytes == message->GetLength());
+    message->StartRead();
+    while (message->CanRead())
+    {
+        // this gets ugly - we need to block until space is available
+        while (h2fTailPlusOne == h2fHeadCache)
+        {
+            h2fHeadCache = driver.ReadCommonCSR(CSR_H2F_HEAD);
+            SLEEP;
+        }
+
+        // space is available, write
+        UMF_CHUNK chunk = message->ReadChunk();
+        csr_data = CSR_DATA(chunk);
+
+        driver.WriteCommonCSR(h2fTail, csr_data);
+        h2fTail = h2fTailPlusOne;
+        h2fTailPlusOne = (h2fTail == CSR_H2F_BUF_END) ? CSR_H2F_BUF_START : (h2fTail + 1);
+    }
+
+    // sync h2fTail pointer (OPTIONAL)
+    driver.WriteCommonCSR(CSR_H2F_TAIL, h2fTail);
+    driver.WriteSystemCSR(genIID() | 0x60000);
 
     // de-allocate message
     delete message;
 }
 
-// probe (via select) pipe to look for fresh data
-bool
-PHYSICAL_CHANNEL_CLASS::dataAvailableOnPipe()
-{
-    // test for incoming data on physical channel
-    struct timeval  timeout;
-    int             data_available;
-    fd_set          readfds;
-
-    FD_ZERO(&readfds);
-    FD_SET(PARENT_READ, &readfds);
-
-    timeout.tv_sec  = 0;
-    timeout.tv_usec = SELECT_TIMEOUT;
-
-    data_available = select(PARENT_READ + 1, &readfds, NULL, NULL, &timeout);
-
-    if (data_available == -1)
-    {
-        perror("select");
-        exit(1);
-    }
-
-    if (data_available != 0)
-    {
-        // incoming! sanity check
-        if (data_available != 1 || FD_ISSET(PARENT_READ, &readfds) == 0)
-        {
-            cerr << "channelio-sw: activity detected on unknown descriptor" << endl;
-            exit(1);
-        }
-
-        // yes, data is available
-        return true;
-    }
-
-    // no fresh data
-    return false;
-}
-
-// read un-processed data on the pipe
+// read one CSR's worth of unread data
 void
-PHYSICAL_CHANNEL_CLASS::readPipe()
+PHYSICAL_CHANNEL_CLASS::readCSR()
 {
+    UMF_CHUNK chunk;
+    CSR_DATA csr_data;
+
+    // check cached pointers to see if we can actually read anything
+    if (f2hHead == f2hTailCache)
+    {
+        return;
+    }
+
+    // read in one CSR
+    csr_data = driver.ReadCommonCSR(f2hHead);
+    chunk = UMF_CHUNK(csr_data);
+
+    //cout << "readCSR: read new chunk at F2H head = " << f2hHead
+    //     << " data = 0x" << hex << chunk << dec << endl << flush;
+
+    // update head pointer
+    f2hHead = (f2hHead == CSR_F2H_BUF_END) ? CSR_F2H_BUF_START : (f2hHead + 1);
+
+    // sync head pointer (OPTIONAL)
+    driver.WriteCommonCSR(CSR_F2H_HEAD, f2hHead);
+    driver.WriteSystemCSR(genIID() | 0x70000);
+
     // determine if we are starting a new message
     if (incomingMessage == NULL)
     {
-        // new message: we assume we can read in the entire
-        // header chunk in one shot
-        unsigned char header[UMF_CHUNK_BYTES];
+        // new message
+        incomingMessage = new UMF_MESSAGE_CLASS();
+        incomingMessage->DecodeHeaderFromChunk(chunk);
 
-        int bytes_requested = UMF_CHUNK_BYTES;
-        int bytes_read = read(PARENT_READ, header, bytes_requested);
-
-        if (bytes_read == 0)
-        {
-            // pipe read returned 0 => hardware process has terminated, so exit
-            exit(0);
-        }
-
-        if (bytes_read < bytes_requested)
-        {
-            cerr << "channelio-sw: could not read header chunk in one read" << endl;
-            exit(1);
-        }
-
-        // create a new message
-        incomingMessage = new UMF_MESSAGE_CLASS(header);
+        UMF_MESSAGE m = incomingMessage;
+        //cout << "readCSR: starting new message: channel " << m->GetChannelID()
+        //     << " service " << m->GetServiceID() << " method " << m->GetMethodID()
+        //     << " length " << m->GetLength() << endl;
     }
     else if (incomingMessage->BytesRemaining() == 0)
     {
@@ -253,29 +232,15 @@ PHYSICAL_CHANNEL_CLASS::readPipe()
     else
     {
         // read in some more bytes for the current message
-        unsigned char buf[BLOCK_SIZE];
-        int bytes_requested = BLOCK_SIZE;
-
-        if (incomingMessage->BytesRemaining() < BLOCK_SIZE)
-        {
-            bytes_requested = incomingMessage->BytesRemaining();
-        }
-
-        int bytes_read = read(PARENT_READ, buf, bytes_requested);
-
-        if (bytes_read == 0)
-        {
-            // pipe read returned 0 => hardware process has terminated, so exit
-            exit(0);
-        }
-
-        if (bytes_read == -1)
-        {
-            perror("read");
-            exit(1);
-        }
-
-        // append read bytes into message
-        incomingMessage->AppendBytes(bytes_read, buf);
+        incomingMessage->AppendChunk(chunk);
     }
+}
+
+// generate a new Instruction ID
+CSR_DATA
+PHYSICAL_CHANNEL_CLASS::genIID()
+{
+    assert(sizeof(CSR_DATA) >= 4);
+    iid = (iid == 255) ? 0 : (iid + 1);
+    return (iid << 24);
 }

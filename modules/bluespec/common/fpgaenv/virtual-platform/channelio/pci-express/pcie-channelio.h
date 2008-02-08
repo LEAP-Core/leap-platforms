@@ -3,8 +3,8 @@
 
 #include <queue>
 #include "main.h"
-#include "umf.h"
-#include "physical-channel.h"
+#include "asim/provides/umf.h"
+#include "asim/provides/physical_channel.h"
 
 using namespace std;
 

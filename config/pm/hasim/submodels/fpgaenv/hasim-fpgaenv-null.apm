@@ -23,6 +23,7 @@ Packagehint=platforms
 [Standard Virtual Platform/Requires]
 virtual_devices=Standard Virtual Devices
 low_level_platform_interface=Low Level Platform Interface
+umf=Null Unified Message Format
 
 [Null Serial Console]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/console/null-serial/null-serial.awb
@@ -70,14 +71,14 @@ front_panel=Console Front Panel
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/null/null-memory.awb
 Packagehint=platforms
 
-
-
-
-
-
 [Null Physical Platform]
 File=modules/bluespec/common/fpgaenv/physical-platform/null/null-physical-platfrom.awb
 Packagehint=platforms
 
 [Null Physical Platform/Params]
 FPGA_PART="xc5vlx50t-ff1136"
+
+
+[Null Unified Message Format]
+File=modules/bluespec/common/fpgaenv/virtual-platform/umf/null/null-umf.awb
+Packagehint=platforms

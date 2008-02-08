@@ -1,7 +1,7 @@
 #ifndef __BASIC_RRR_CLIENT__
 #define __BASIC_RRR_CLIENT__
 
-#include "sim-channelio.h"
+#include "asim/provides/channelio.h"
 
 typedef class RRR_CLIENT_CLASS* RRR_CLIENT;
 class RRR_CLIENT_CLASS: public HASIM_MODULE_CLASS

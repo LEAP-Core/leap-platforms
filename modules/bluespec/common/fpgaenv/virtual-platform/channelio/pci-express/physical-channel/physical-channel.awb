@@ -7,6 +7,11 @@
 %sources -t BSV -v PUBLIC   physical-channel.bsv
 %sources -t H   -v PUBLIC   physical-channel.h
 %sources -t CPP -v PRIVATE  physical-channel.cpp
+%sources -t H   -v PUBLIC   driver-interface.h
+%sources -t CPP -v PRIVATE  driver-interface.cpp
+%sources -t H   -v PUBLIC   pchnl_if.h
+%sources -t H   -v PUBLIC   libpchnl.h
+%sources -t CPP -v PRIVATE  libpchnl.c
 
 %param CSR_H2F_HEAD         249 "Dedicated CSR for Host-to-FPGA Head Pointer"
 %param CSR_H2F_TAIL         248 "Dedicated CSR for Host-to-FPGA Tail Pointer"
@@ -17,4 +22,7 @@
 %param CSR_H2F_BUF_END      122 "End CSR for Host-to-FPGA Buffer"
 %param CSR_F2H_BUF_START    123 "Start CSR for FPGA-to-Host Buffer"
 %param CSR_F2H_BUF_END      244 "End CSR for FPGA-to-Host Buffer"
+
+%param SIGNAL_RED           0   "Red Signal ID used for Bootstrapping"
+%param SIGNAL_GREEN         2882400203  "Green Signal ID used for Bootstrapping"
 

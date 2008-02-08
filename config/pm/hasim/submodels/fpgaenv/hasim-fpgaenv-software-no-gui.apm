@@ -23,11 +23,11 @@ Packagehint=platforms
 [Standard Virtual Platform/Requires]
 virtual_devices=Standard Virtual Devices
 low_level_platform_interface=Low Level Platform Interface
+umf=Null Unified Message Format
 
 [Software FPGA Components]
 File=modules/bluespec/common/fpgaenv/fpga-components/software/software-fpga-components.awb
 Packagehint=platforms
-
 
 [FPGA Environment]
 File=modules/bluespec/common/fpgaenv/fpga-environment.awb
@@ -73,4 +73,9 @@ Packagehint=platforms
 
 [Null Physical Platform]
 File=modules/bluespec/common/fpgaenv/physical-platform/null/null-physical-platfrom.awb
+Packagehint=platforms
+
+
+[Null Unified Message Format]
+File=modules/bluespec/common/fpgaenv/virtual-platform/umf/null/null-umf.awb
 Packagehint=platforms

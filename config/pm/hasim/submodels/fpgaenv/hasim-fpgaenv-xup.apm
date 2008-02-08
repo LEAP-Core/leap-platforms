@@ -27,6 +27,7 @@ Packagehint=platforms
 [Standard Virtual Platform/Requires]
 virtual_devices=Standard Virtual Devices
 low_level_platform_interface=Low Level Platform Interface
+umf=Null Unified Message Format
 
 [FPGA Environment]
 File=modules/bluespec/common/fpgaenv/fpga-environment.awb
@@ -39,7 +40,6 @@ Packagehint=platforms
 [Hardware FPGA Components]
 File=modules/bluespec/common/fpgaenv/fpga-components/hardware/hardware-fpga-components.awb
 Packagehint=platforms
-
 
 [Standard Virtual Devices/Requires]
 console=Null Serial Console
@@ -90,4 +90,9 @@ Packagehint=platforms
 
 [General Button Device]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/buttons/general-button-device.awb
+Packagehint=platforms
+
+
+[Null Unified Message Format]
+File=modules/bluespec/common/fpgaenv/virtual-platform/umf/null/null-umf.awb
 Packagehint=platforms

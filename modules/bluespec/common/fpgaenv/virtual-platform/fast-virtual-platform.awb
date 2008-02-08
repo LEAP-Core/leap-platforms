@@ -5,4 +5,7 @@
 
 %provides virtual_platform
 
-%requires virtual_devices channelio fast_channelio
+%requires virtual_devices
+%requires channelio
+%requires fast_channelio
+%requires umf

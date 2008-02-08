@@ -31,6 +31,7 @@ Packagehint=platforms
 [Standard Virtual Platform/Requires]
 virtual_devices=Standard Virtual Devices
 low_level_platform_interface=Low Level Platform Interface
+umf=Simple 32-bit Unified Message Format
 
 [Hybrid Front Panel]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid/hybrid-fp.awb
@@ -70,14 +71,14 @@ memory=Hybrid Memory
 console=Null Serial Console
 front_panel=Hybrid Front Panel
 
-
-
-
-
-
 [Null Physical Platform]
 File=modules/bluespec/common/fpgaenv/physical-platform/null/null-physical-platfrom.awb
 Packagehint=platforms
 
 [Null Physical Platform/Params]
 FPGA_PART="xc5vlx50t-ff1136"
+
+
+[Simple 32-bit Unified Message Format]
+File=modules/bluespec/common/fpgaenv/virtual-platform/umf/simple-32/simple-32-umf.awb
+Packagehint=platforms

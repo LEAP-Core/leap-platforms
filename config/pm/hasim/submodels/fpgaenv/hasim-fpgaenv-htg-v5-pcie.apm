@@ -27,6 +27,7 @@ Packagehint=platforms
 [Standard Virtual Platform/Requires]
 virtual_devices=Standard Virtual Devices
 low_level_platform_interface=Low Level Platform Interface
+umf=Simple 32-bit Unified Message Format
 
 [FPGA Environment]
 File=modules/bluespec/common/fpgaenv/fpga-environment.awb
@@ -42,20 +43,12 @@ Packagehint=platforms
 
 [Standard Virtual Devices/Requires]
 console=Null Serial Console
-front_panel=Physical HTG-v5-PCIe Front Panel
+front_panel=Hybrid Front Panel
 memory=Null Platform Memory
 
-[Null Channel IO Module]
-File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/null/null-channelio.awb
-Packagehint=platforms
-
-[Null RRR Module]
-File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/null/null-rrr.awb
-Packagehint=platforms
-
 [Low Level Platform Interface/Requires]
-rrr=Null RRR Module
-channelio=Null Channel IO Module
+rrr=RRR Clients and Servers
+channelio=ChannelIO Module for PCI-Express
 physical_platform=HTG Virtex 5 PCIE Enabled
 
 [Low Level Platform Interface]
@@ -64,10 +57,6 @@ Packagehint=platforms
 
 [Null Platform Memory]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/null/null-memory.awb
-Packagehint=platforms
-
-[Physical HTG-v5-PCIe Front Panel]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/htg_v5_pcie/htg-v5-pcie-fp.awb
 Packagehint=platforms
 
 [HTG Virtex 5 PCIE Enabled]
@@ -90,3 +79,29 @@ switch_device=General Switch Device
 [General Switch Device]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/switches/general-switch-device.awb
 Packagehint=platforms
+
+[ChannelIO Module for PCI-Express]
+File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/pci-express/pcie-channelio.awb
+Packagehint=platforms
+
+[PCI-Express CSR-based Physical Channel]
+File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/pci-express/physical-channel/physical-channel.awb
+Packagehint=platforms
+
+[ChannelIO Module for PCI-Express/Requires]
+physical_channel=PCI-Express CSR-based Physical Channel
+
+[Hybrid Front Panel]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid/hybrid-fp.awb
+Packagehint=platforms
+
+[Simple 32-bit Unified Message Format]
+File=modules/bluespec/common/fpgaenv/virtual-platform/umf/simple-32/simple-32-umf.awb
+Packagehint=platforms
+
+[RRR Clients and Servers]
+File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic/basic-rrr.awb
+Packagehint=platforms
+
+[HTG Virtex 5 PCIE Enabled/Params]
+FPGA_POSITION=2

@@ -4,7 +4,6 @@
 
 %provides channelio
 
-%requires umf
 %requires physical_channel
 
 %sources -t BSV -v PUBLIC   pcie-channelio.bsv

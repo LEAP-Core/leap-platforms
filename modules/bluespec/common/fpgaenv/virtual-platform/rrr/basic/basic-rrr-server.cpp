@@ -7,8 +7,11 @@
 #include <sys/wait.h>
 #include <signal.h>
 #include <string.h>
+#include <iostream>
 
 #include "basic-rrr-server.h"
+
+using namespace std;
 
 #define CHANNEL_ID  0
 
@@ -145,6 +148,9 @@ RRR_SERVER_CLASS::DeliverMessage(
     // will be passed the entire message, and they will
     // de-allocate it themselves.
     delete message;
+
+    //cout << "server: received message: service " << serviceID << " method "
+    //     << argv[0] << " arg1 " << argv[1] << " arg2 " << argv[2] << endl;
 
     // invoke service method to obtain result
     UINT32 result;
