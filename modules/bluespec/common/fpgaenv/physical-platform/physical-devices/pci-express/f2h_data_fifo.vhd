@@ -7,14 +7,14 @@
 -- \   \   \/     Version: J.39
 --  \   \         Application: netgen
 --  /   /         Filename: f2h_data_fifo.vhd
--- /___/   /\     Timestamp: Fri Jan 18 15:53:47 2008
+-- /___/   /\     Timestamp: Wed Jan 16 14:55:51 2008
 -- \   \  /  \ 
 --  \___\/\___\
 --             
--- Command	: -intstyle ise -w -sim -ofmt vhdl C:\lwang\Projects\HW_Channel(CSR)\HW_Channel(01.18)(50t)\tmp\_cg\f2h_data_fifo.ngc C:\lwang\Projects\HW_Channel(CSR)\HW_Channel(01.18)(50t)\tmp\_cg\f2h_data_fifo.vhd 
--- Device	: 5vlx50tff1136-1
--- Input file	: C:/lwang/Projects/HW_Channel(CSR)/HW_Channel(01.18)(50t)/tmp/_cg/f2h_data_fifo.ngc
--- Output file	: C:/lwang/Projects/HW_Channel(CSR)/HW_Channel(01.18)(50t)/tmp/_cg/f2h_data_fifo.vhd
+-- Command	: -intstyle ise -w -sim -ofmt vhdl C:\lwang\Projects\HW_Channel(CSR)\HW_Channel(01.16)\tmp\_cg\f2h_data_fifo.ngc C:\lwang\Projects\HW_Channel(CSR)\HW_Channel(01.16)\tmp\_cg\f2h_data_fifo.vhd 
+-- Device	: 5vlx110tff1136-1
+-- Input file	: C:/lwang/Projects/HW_Channel(CSR)/HW_Channel(01.16)/tmp/_cg/f2h_data_fifo.ngc
+-- Output file	: C:/lwang/Projects/HW_Channel(CSR)/HW_Channel(01.16)/tmp/_cg/f2h_data_fifo.vhd
 -- # of Entities	: 1
 -- Design Name	: f2h_data_fifo
 -- Xilinx	: C:\Xilinx92i

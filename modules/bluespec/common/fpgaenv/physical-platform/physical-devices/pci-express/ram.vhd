@@ -7,14 +7,14 @@
 -- \   \   \/     Version: J.39
 --  \   \         Application: netgen
 --  /   /         Filename: ram.vhd
--- /___/   /\     Timestamp: Fri Jan 18 16:05:17 2008
+-- /___/   /\     Timestamp: Wed Jan 16 15:04:53 2008
 -- \   \  /  \ 
 --  \___\/\___\
 --             
--- Command	: -intstyle ise -w -sim -ofmt vhdl C:\lwang\Projects\HW_Channel(CSR)\HW_Channel(01.18)(50t)\tmp\_cg\ram.ngc C:\lwang\Projects\HW_Channel(CSR)\HW_Channel(01.18)(50t)\tmp\_cg\ram.vhd 
--- Device	: 5vlx50tff1136-1
--- Input file	: C:/lwang/Projects/HW_Channel(CSR)/HW_Channel(01.18)(50t)/tmp/_cg/ram.ngc
--- Output file	: C:/lwang/Projects/HW_Channel(CSR)/HW_Channel(01.18)(50t)/tmp/_cg/ram.vhd
+-- Command	: -intstyle ise -w -sim -ofmt vhdl C:\lwang\Projects\HW_Channel(CSR)\HW_Channel(01.16)\tmp\_cg\ram.ngc C:\lwang\Projects\HW_Channel(CSR)\HW_Channel(01.16)\tmp\_cg\ram.vhd 
+-- Device	: 5vlx110tff1136-1
+-- Input file	: C:/lwang/Projects/HW_Channel(CSR)/HW_Channel(01.16)/tmp/_cg/ram.ngc
+-- Output file	: C:/lwang/Projects/HW_Channel(CSR)/HW_Channel(01.16)/tmp/_cg/ram.vhd
 -- # of Entities	: 1
 -- Design Name	: ram
 -- Xilinx	: C:\Xilinx92i

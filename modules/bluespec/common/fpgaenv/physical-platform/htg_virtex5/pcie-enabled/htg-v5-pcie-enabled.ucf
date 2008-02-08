@@ -41,10 +41,10 @@ NET  "EN_pciExpressWires_sys_clk_n"       LOC = "Y3"  ;
 #
 
 # PCIe Lanes 0, 1
-INST "m_pi_llpint_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk/SIO/.pcie_gt_wrapper_i/GTD[0].GT_i" LOC = GTP_DUAL_X0Y3;
+INST "m_pi_llpint_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk/SIO/.pcie_gt_wrapper_i/GTD[0].GT_i" LOC = GTP_DUAL_X0Y4;
 
 # PCIe Lanes 2, 3
-INST "m_pi_llpint_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk/SIO/.pcie_gt_wrapper_i/GTD[2].GT_i" LOC = GTP_DUAL_X0Y2;
+INST "m_pi_llpint_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk/SIO/.pcie_gt_wrapper_i/GTD[2].GT_i" LOC = GTP_DUAL_X0Y3;
 
 
 
@@ -56,19 +56,19 @@ INST "m_pi_llpint_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_
 # BlockRAM placement
 #
 
-INST "m_pi_llpint_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk/pcie_mim_wrapper_i/bram_tl_tx/generate_tdp2[1].ram_tdp2_inst" LOC = RAMB36_X1Y9 ;
-INST "m_pi_llpint_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk/pcie_mim_wrapper_i/bram_tl_rx/generate_tdp2[1].ram_tdp2_inst" LOC = RAMB36_X1Y8 ;
-INST "m_pi_llpint_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk/pcie_mim_wrapper_i/bram_tl_tx/generate_tdp2[0].ram_tdp2_inst" LOC = RAMB36_X1Y7 ;
-INST "m_pi_llpint_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk/pcie_mim_wrapper_i/bram_tl_rx/generate_tdp2[0].ram_tdp2_inst" LOC = RAMB36_X1Y6 ;
-INST "m_pi_llpint_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk/pcie_mim_wrapper_i/bram_retry/generate_sdp.ram_sdp_inst"      LOC = RAMB36_X1Y5 ;
+INST "m_pi_llpint_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk/pcie_mim_wrapper_i/bram_retry/generate_sdp.ram_sdp_inst"      LOC = RAMB36_X3Y12 ;
+INST "m_pi_llpint_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk/pcie_mim_wrapper_i/bram_tl_tx/generate_tdp2[1].ram_tdp2_inst" LOC = RAMB36_X3Y11 ;
+INST "m_pi_llpint_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk/pcie_mim_wrapper_i/bram_tl_rx/generate_tdp2[1].ram_tdp2_inst" LOC = RAMB36_X3Y10 ;
+INST "m_pi_llpint_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk/pcie_mim_wrapper_i/bram_tl_tx/generate_tdp2[0].ram_tdp2_inst" LOC = RAMB36_X3Y9 ;
+INST "m_pi_llpint_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk/pcie_mim_wrapper_i/bram_tl_rx/generate_tdp2[0].ram_tdp2_inst" LOC = RAMB36_X3Y8 ;
 
 #
 # Timing critical placements
 #
 
-INST "m_pi_llpint_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk_if/ll_bridge/tx_bridge/tx_bridge/shift_pipe1" LOC = "SLICE_X59Y36" ;
-INST "m_pi_llpint_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk_if/ll_bridge/rx_bridge/arb_inst/completion_available" LOC = "SLICE_X58Y26" ;
-INST "m_pi_llpint_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk_if/cf_bridge/management_interface/mgmt_rdata_d1_3" LOC = "SLICE_X59Y25" ;
+INST "m_pi_llpint_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk_if/ll_bridge/tx_bridge/tx_bridge/shift_pipe1" LOC = "SLICE_X107Y56" ;
+INST "m_pi_llpint_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk_if/ll_bridge/rx_bridge/arb_inst/completion_available" LOC = "SLICE_X106Y46" ;
+INST "m_pi_llpint_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk_if/cf_bridge/management_interface/mgmt_rdata_d1_3" LOC = "SLICE_X107Y45" ;
 ###############################################################################
 # Timing Constraints
 ###############################################################################

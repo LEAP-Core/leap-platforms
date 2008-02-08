@@ -2059,3 +2059,25 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-ena
 
 -Switch to LX110T
 -More error state when failing to start up
+
+----------
+aparasha    Date: Fri Feb  8 16:48:26 EST 2008  CSN: CSN-platforms-51
+                  Fri Feb  8 21:48:26 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled
+ htg-v5-pcie-enabled.ucf   Locally Modified           50 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express
+ h2f_data_fifo.ngc         Locally Modified           50 
+ f2h_data_fifo.ngc         Locally Modified           50 
+ pcieblkplus.ngc           Locally Modified           50 
+ ram.ngc                   Locally Modified           50 
+ f2h_data_fifo.vhd         Locally Modified           50 
+ h2f_data_fifo.vhd         Locally Modified           50 
+ pcieblkplus.vhd           Locally Modified           50 
+ CSR_BRAM.ngc              Locally Modified           50 
+ ram.vhd                   Locally Modified           50 
+ CSR_BRAM.vhd              Locally Modified           50 
+
+Completed update of PCIe physical platform to 110T specs.
