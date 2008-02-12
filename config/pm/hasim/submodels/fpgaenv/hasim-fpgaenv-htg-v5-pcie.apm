@@ -16,10 +16,6 @@ model=FPGA Environment
 virtual_platform=Standard Virtual Platform
 fpga_components=Hardware FPGA Components
 
-[Null Serial Console]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/console/null-serial/null-serial.awb
-Packagehint=platforms
-
 [Standard Virtual Platform]
 File=modules/bluespec/common/fpgaenv/virtual-platform/std-virtual-platform.awb
 Packagehint=platforms
@@ -42,9 +38,9 @@ File=modules/bluespec/common/fpgaenv/fpga-components/hardware/hardware-fpga-comp
 Packagehint=platforms
 
 [Standard Virtual Devices/Requires]
-console=Null Serial Console
 front_panel=Hybrid Front Panel
-memory=Null Platform Memory
+memory=Hybrid Memory
+streams=Hybrid Streams
 
 [Low Level Platform Interface/Requires]
 rrr=RRR Clients and Servers
@@ -53,10 +49,6 @@ physical_platform=HTG Virtex 5 PCIE Enabled
 
 [Low Level Platform Interface]
 File=modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface/low-level-platform-interface.awb
-Packagehint=platforms
-
-[Null Platform Memory]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/null/null-memory.awb
 Packagehint=platforms
 
 [HTG Virtex 5 PCIE Enabled]
@@ -103,3 +95,10 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic/basic-rrr.awb
 Packagehint=platforms
 
+[Hybrid Streams]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/streams/hybrid-streams.awb
+Packagehint=platforms
+
+[Hybrid Memory]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid/hybrid-memory.awb
+Packagehint=platforms

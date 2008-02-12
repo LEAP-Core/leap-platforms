@@ -4,6 +4,8 @@
 
 using namespace std;
 
+#define SLEEP for (unsigned long i = 0; i < 10000; i++)
+
 // ============================================
 //               Driver Interface
 // ============================================
@@ -44,6 +46,7 @@ DRIVER_INTERFACE_CLASS::ReadSystemCSR()
         Uninit();
         exit(1);
     }
+    SLEEP;
     return swapEndian(data);
 }
 
@@ -57,6 +60,7 @@ DRIVER_INTERFACE_CLASS::WriteSystemCSR(
         Uninit();
         exit(1);
     }
+    SLEEP;
 }
 
 CSR_DATA
@@ -70,6 +74,7 @@ DRIVER_INTERFACE_CLASS::ReadCommonCSR(
         Uninit();
         exit(1);
     }
+    SLEEP;
     return swapEndian(data);
 }
 
@@ -84,6 +89,7 @@ DRIVER_INTERFACE_CLASS::WriteCommonCSR(
         Uninit();
         exit(1);
     }
+    SLEEP;
 }
 
 CSR_DATA

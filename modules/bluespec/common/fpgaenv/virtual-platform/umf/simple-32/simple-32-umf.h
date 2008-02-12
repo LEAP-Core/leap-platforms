@@ -1,6 +1,10 @@
 #ifndef __UMF__
 #define __UMF__
 
+#include <iostream>
+
+using namespace std;
+
 #define UMF_CHUNK_BITS      32
 #define UMF_CHUNK_BYTES     4
 #define UMF_CHUNK_LOG_BYTES 2
@@ -72,6 +76,7 @@ class UMF_MESSAGE_CLASS
 
         // other
         int  BytesRemaining() { return (length - writeIndex); }
+        void Print(ostream &out);
 };
 
 #endif

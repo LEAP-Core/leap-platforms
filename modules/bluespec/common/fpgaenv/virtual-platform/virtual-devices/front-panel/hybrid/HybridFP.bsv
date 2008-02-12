@@ -51,6 +51,7 @@ module mkFrontPanel#(LowLevelPlatformInterface llpi) (FrontPanel);
         req.param0          = zeroExtend(ledState);
         req.param1          = 0;
         req.param2          = 0;
+        req.param3          = 0;
         req.needResponse    = False;
 
         llpi.rrrClient.makeRequest(req);

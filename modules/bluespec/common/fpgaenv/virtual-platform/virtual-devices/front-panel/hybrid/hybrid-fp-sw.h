@@ -36,7 +36,7 @@ class FRONT_PANEL_CLASS:    public RRR_SERVICE_CLASS,
         ~FRONT_PANEL_CLASS();
         void    Init(HASIM_MODULE);
         void    Uninit();
-        bool    Request(UINT32, UINT32, UINT32, UINT32 *);
+        bool    Request(UINT32, UINT32, UINT32, UINT32, UINT32 *);
         void    Poll();
 };
 

@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <iostream>
+#include <iomanip>
 
 #include "asim/provides/umf.h"
 
@@ -227,6 +228,7 @@ UMF_MESSAGE_CLASS::ExtractBytes(
         cerr << "umf: message read underflow: readIndex = "
              << readIndex << " writeIndex = " << writeIndex
              << " nbytes = " << nbytes << endl;
+        Print(cerr);
         exit(1);
     }
 
@@ -251,6 +253,7 @@ UMF_MESSAGE_CLASS::ExtractUINT32()
         cerr << "umf: message read underflow: readIndex = "
              << readIndex << " writeIndex = " << writeIndex
              << " UINT32" << endl;
+        Print(cerr);
         exit(1);
     }
 
@@ -282,6 +285,7 @@ UMF_MESSAGE_CLASS::ExtractUINT64()
         cerr << "umf: message read underflow: readIndex = "
              << readIndex << " writeIndex = " << writeIndex
              << " UINT64" << endl;
+        Print(cerr);
         exit(1);
     }
 
@@ -325,6 +329,7 @@ UMF_MESSAGE_CLASS::ReadChunk()
         cerr << "umf: message read underflow: readIndex = "
              << readIndex << " writeIndex = " << writeIndex
              << " UMF_CHUNK" << endl;
+        Print(cerr);
         exit(1);
     }
 
@@ -344,4 +349,23 @@ UMF_MESSAGE_CLASS::ReadChunk()
     }
 
     return retval;
+}
+
+// print message to an output stream
+void
+UMF_MESSAGE_CLASS::Print(
+    ostream &out)
+{
+    out << "channelID: " << channelID << endl;
+    out << "serviceID: " << serviceID << endl;
+    out << "methodID : " << methodID  << endl;
+    out << "length   : " << length    << endl;
+    out << "data     : ";
+
+    for (int i = 0; i < length; i++)
+    {
+        out << setfill('0');
+        out << hex << message[i] << " ";
+    }
+    out << dec << endl;
 }

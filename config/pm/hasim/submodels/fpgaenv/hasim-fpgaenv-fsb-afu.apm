@@ -12,10 +12,6 @@ Class=Asim::Model
 DefaultAttributes=afu fsb bluespec
 model=FPGA Environment
 
-[Null Serial Console]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/console/null-serial/null-serial.awb
-Packagehint=platforms
-
 [Standard Virtual Platform]
 File=modules/bluespec/common/fpgaenv/virtual-platform/std-virtual-platform.awb
 Packagehint=platforms
@@ -34,9 +30,9 @@ File=modules/bluespec/common/fpgaenv/fpga-components/hardware/hardware-fpga-comp
 Packagehint=platforms
 
 [Standard Virtual Devices/Requires]
-console=Null Serial Console
 front_panel=Physical FSB AFU Front Panel
-memory=Hybrid Memory
+memory=Null Platform Memory
+streams=Simulation Streams
 
 [Null Channel IO Module]
 File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/null/null-channelio.awb
@@ -67,9 +63,6 @@ physical_platform=HTG Virtex 5 PCIE Enabled
 File=modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface/low-level-platform-interface.awb
 Packagehint=platforms
 
-[Hybrid Memory]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid/hybrid-memory.awb
-Packagehint=platforms
 
 [HTG Virtex 5 PCIE Enabled]
 File=modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled/htg-v5-pcie-enabled.awb
@@ -92,7 +85,14 @@ pci_express_device=PCI Express Physical Device VHDL Import
 led_device=General LED Device
 switch_device=General Switch Device
 
-
 [Null Unified Message Format]
 File=modules/bluespec/common/fpgaenv/virtual-platform/umf/null/null-umf.awb
+Packagehint=platforms
+
+[Simulation Streams]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/streams/simulation-streams.awb
+Packagehint=platforms
+
+[Null Platform Memory]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/null/null-memory.awb
 Packagehint=platforms

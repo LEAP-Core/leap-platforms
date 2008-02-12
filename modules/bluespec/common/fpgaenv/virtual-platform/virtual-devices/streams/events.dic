@@ -1,0 +1,5 @@
+def EVENTS.FETCH      "[%9u]: 1 FET: %d\n";
+def EVENTS.DECODE     "[%9u]: 2   DEC: %d\n";
+def EVENTS.EXECUTE    "[%9u]: 3     EXE: %d\n";
+def EVENTS.MEMORY     "[%9u]: 4       MEM: %d\n";
+def EVENTS.WRITEBACK  "[%9u]: 5         WBK: %d\n";

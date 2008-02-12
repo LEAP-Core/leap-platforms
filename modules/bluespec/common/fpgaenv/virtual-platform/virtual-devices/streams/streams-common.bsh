@@ -1,0 +1,31 @@
+`ifndef __STREAMS_COMMON__
+`define __STREAMS_COMMON__
+
+`include "hasim_common.bsh"
+
+`include "asim/dict/STREAMS.bsh"
+`include "asim/dict/MESSAGES.bsh"
+`include "asim/dict/EVENTS.bsh"
+`include "asim/dict/STATS.bsh"
+`include "asim/dict/ASSERTS.bsh"
+`include "asim/dict/MEMTEST.bsh"
+
+typedef struct
+{
+    DICT_STREAMS streamID;
+    union tagged
+    {
+        DICT_MESSAGES STRINGID_message;
+        DICT_EVENTS   STRINGID_event;
+        DICT_STATS    STRINGID_stat;
+        DICT_ASSERTS  STRINGID_assert;
+        DICT_MEMTEST  STRINGID_memtest;
+    }
+    stringID;
+    Bit#(32) payload0;
+    Bit#(32) payload1;
+}
+STREAMS_REQUEST
+    deriving (Bits, Eq);
+
+`endif

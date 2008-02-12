@@ -31,11 +31,17 @@ RRR_CLIENT_CLASS::MakeRequest(
     // add channelID to request
     request->SetChannelID(CHANNEL_ID);
 
+    //cout << "client: making request, need response" << endl;
+    //request->Print(cout);
+
     // write request message to channelio
     channelio->Write(CHANNEL_ID, request);
 
     // read response (blocking read) from channelio
     UMF_MESSAGE response = channelio->Read(CHANNEL_ID);
+
+    //cout << "client: received response" << endl;
+    //response->Print(cout);
 
     return response;
 }
@@ -47,6 +53,9 @@ RRR_CLIENT_CLASS::MakeRequestNoResponse(
 {
     // add channelID to request
     request->SetChannelID(CHANNEL_ID);
+
+    //cout << "client: making request, need response" << endl;
+    //request->Print(cout);
 
     // write request message to channelio
     channelio->Write(CHANNEL_ID, request);

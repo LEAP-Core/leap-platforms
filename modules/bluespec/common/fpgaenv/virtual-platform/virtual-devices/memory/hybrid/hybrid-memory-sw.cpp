@@ -74,6 +74,7 @@ MEMORY_CLASS::Request(
     UINT32 arg0,
     UINT32 arg1,
     UINT32 arg2,
+    UINT32 arg3,
     UINT32 *result)
 {
     // check to see if our image is ready

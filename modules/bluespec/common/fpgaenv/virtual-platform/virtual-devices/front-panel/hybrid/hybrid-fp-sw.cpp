@@ -99,6 +99,7 @@ FRONT_PANEL_CLASS::Request(
     UINT32 arg0,
     UINT32 arg1,
     UINT32 arg2,
+    UINT32 arg3,
     UINT32 *result)
 {
     // update cache and set dirty bit

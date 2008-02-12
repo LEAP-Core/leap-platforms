@@ -135,7 +135,7 @@ RRR_SERVER_CLASS::DeliverMessage(
     }
 
     // read args from channelio and place into args array
-    int argc = 3;
+    int argc = 4;
     UINT32 argv[MAX_ARGS];
     argv[0] = message->GetMethodID();
     for (int i = 1; i < argc; i++)
@@ -154,7 +154,7 @@ RRR_SERVER_CLASS::DeliverMessage(
 
     // invoke service method to obtain result
     UINT32 result;
-    bool send_result = ServiceMap[serviceID]->Request(argv[0], argv[1], argv[2], &result);
+    bool send_result = ServiceMap[serviceID]->Request(argv[0], argv[1], argv[2], argv[3], &result);
 
     // send result to channelio if this is a value method
     if (send_result)

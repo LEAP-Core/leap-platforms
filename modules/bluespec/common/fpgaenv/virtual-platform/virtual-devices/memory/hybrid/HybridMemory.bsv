@@ -42,6 +42,7 @@ module mkMemory#(LowLevelPlatformInterface llpint) (Memory);
         request.param0          = 0;            /* load */
         request.param1          = addr;         /* address */
         request.param2          = 0;            /* don't care */
+        request.param3          = 0;            /* don't care */
         request.needResponse    = True;         /* need response */
 
         llpint.rrrClient.makeRequest(request);
@@ -58,6 +59,7 @@ module mkMemory#(LowLevelPlatformInterface llpint) (Memory);
         request.param0          = 1;            /* store */
         request.param1          = stinfo.addr;  /* address */
         request.param2          = stinfo.val;   /* data */
+        request.param3          = 0;            /* don't care */
         request.needResponse    = False;        /* no response */
 
         llpint.rrrClient.makeRequest(request);

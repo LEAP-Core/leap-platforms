@@ -16,10 +16,6 @@ model=FPGA Environment
 virtual_platform=Standard Virtual Platform
 fpga_components=Hardware FPGA Components
 
-[Null Serial Console]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/console/null-serial/null-serial.awb
-Packagehint=platforms
-
 [Standard Virtual Platform]
 File=modules/bluespec/common/fpgaenv/virtual-platform/std-virtual-platform.awb
 Packagehint=platforms
@@ -42,9 +38,9 @@ File=modules/bluespec/common/fpgaenv/fpga-components/hardware/hardware-fpga-comp
 Packagehint=platforms
 
 [Standard Virtual Devices/Requires]
-console=Null Serial Console
 front_panel=Physical XUP Front Panel
 memory=Null Platform Memory
+streams=Simulation Streams
 
 [Physical XUP Front Panel]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/xup/xup-fp.awb
@@ -92,7 +88,10 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/buttons/general-button-device.awb
 Packagehint=platforms
 
-
 [Null Unified Message Format]
 File=modules/bluespec/common/fpgaenv/virtual-platform/umf/null/null-umf.awb
+Packagehint=platforms
+
+[Simulation Streams]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/streams/simulation-streams.awb
 Packagehint=platforms

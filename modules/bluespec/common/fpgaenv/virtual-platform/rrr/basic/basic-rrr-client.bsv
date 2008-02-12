@@ -14,6 +14,7 @@ typedef enum
     CLIENT_STATE_ready,
     CLIENT_STATE_sendParam1,
     CLIENT_STATE_sendParam2,
+    CLIENT_STATE_sendParam3,
     CLIENT_STATE_readResponseHeader,
     CLIENT_STATE_readResponseData,
     CLIENT_STATE_responseReady
@@ -26,6 +27,7 @@ module mkRRRClient#(ChannelIO channel) (RRRClient);
     Reg#(CLIENT_STATE)  state           <- mkReg(CLIENT_STATE_ready);
     Reg#(Bit#(32))      param1Buffer    <- mkReg(0);
     Reg#(Bit#(32))      param2Buffer    <- mkReg(0);
+    Reg#(Bit#(32))      param3Buffer    <- mkReg(0);
     Reg#(Bit#(32))      responseBuffer  <- mkReg(0);
     Reg#(Bool)          needResponse    <- mkReg(False);
 
@@ -37,6 +39,12 @@ module mkRRRClient#(ChannelIO channel) (RRRClient);
 
     rule send_param2(state == CLIENT_STATE_sendParam2);
         UMF_PACKET packet = tagged UMF_PACKET_dataChunk param2Buffer;
+        channel.writePorts[`CLIENT_CHANNEL_ID].write(packet);
+        state <= CLIENT_STATE_sendParam3;
+    endrule
+
+    rule send_param3(state == CLIENT_STATE_sendParam3);
+        UMF_PACKET packet = tagged UMF_PACKET_dataChunk param3Buffer;
         channel.writePorts[`CLIENT_CHANNEL_ID].write(packet);
         if (needResponse)
             state <= CLIENT_STATE_readResponseHeader;
@@ -63,7 +71,7 @@ module mkRRRClient#(ChannelIO channel) (RRRClient);
                                     channelID: `CLIENT_CHANNEL_ID,
                                     serviceID: request.serviceID,
                                     methodID : truncate(pack(request.param0)),
-                                    numChunks: 2
+                                    numChunks: 3
                                 };
                                     
         channel.writePorts[`CLIENT_CHANNEL_ID].write(hdrpacket);
@@ -71,6 +79,7 @@ module mkRRRClient#(ChannelIO channel) (RRRClient);
         // buffer params
         param1Buffer <= request.param1;
         param2Buffer <= request.param2;
+        param3Buffer <= request.param3;
         needResponse <= request.needResponse;
 
         state <= CLIENT_STATE_sendParam1;

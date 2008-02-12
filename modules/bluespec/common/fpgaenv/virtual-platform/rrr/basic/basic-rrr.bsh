@@ -19,6 +19,7 @@ typedef struct
     RRR_Param       param0;
     RRR_Param       param1;
     RRR_Param       param2;
+    RRR_Param       param3;
     Bool            needResponse;
 } RRR_Request   deriving (Eq, Bits);
 

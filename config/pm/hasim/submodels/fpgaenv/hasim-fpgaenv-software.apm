@@ -16,10 +16,6 @@ model=FPGA Environment
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/graphical/graphical-fp.awb
 Packagehint=platforms
 
-[Null Serial Console]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/console/null-serial/null-serial.awb
-Packagehint=platforms
-
 [Standard Virtual Platform]
 File=modules/bluespec/common/fpgaenv/virtual-platform/std-virtual-platform.awb
 Packagehint=platforms
@@ -68,14 +64,17 @@ Packagehint=platforms
 
 [Standard Virtual Devices/Requires]
 memory=Simulation only Memory no RRR
-console=Null Serial Console
 front_panel=Graphical Front Panel
+streams=Simulation Streams
 
 [Null Physical Platform]
 File=modules/bluespec/common/fpgaenv/physical-platform/null/null-physical-platfrom.awb
 Packagehint=platforms
 
-
 [Null Unified Message Format]
 File=modules/bluespec/common/fpgaenv/virtual-platform/umf/null/null-umf.awb
+Packagehint=platforms
+
+[Simulation Streams]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/streams/simulation-streams.awb
 Packagehint=platforms

@@ -23,7 +23,7 @@ class MEMORY_CLASS: public RRR_SERVICE_CLASS,
         ~MEMORY_CLASS();
         void    Init(HASIM_MODULE);
         void    Uninit();
-        bool    Request(UINT32, UINT32, UINT32, UINT32 *);
+        bool    Request(UINT32, UINT32, UINT32, UINT32, UINT32 *);
         void    Poll();
 };
 

@@ -2081,3 +2081,72 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci
  CSR_BRAM.vhd              Locally Modified           50 
 
 Completed update of PCIe physical platform to 110T specs.
+
+----------
+aparasha    Date: Mon Feb 11 21:45:23 EST 2008  CSN: CSN-platforms-53
+                  Tue Feb 12 02:45:23 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/pci-express/physical-channel
+ physical-channel.cpp      Locally Modified           50 
+ driver-interface.cpp      Locally Modified           50 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ basic-rrr.bsh             Locally Modified           50 
+ basic-rrr-client.cpp      Locally Modified           50 
+ basic-rrr-server.cpp      Locally Modified           50 
+ basic-rrr-client.bsv      Locally Modified           50 
+ basic-rrr-server.h        Locally Modified           50 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid
+ HybridFP.bsv              Locally Modified           50 
+ hybrid-fp-sw.h            Locally Modified           50 
+ hybrid-fp-sw.cpp          Locally Modified           50 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices
+ std-virtual-devices.awb   Locally Modified           50 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-memory-sw.cpp      Locally Modified           50 
+ HybridMemory.bsv          Locally Modified           50 
+ hybrid-memory-sw.h        Locally Modified           50 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices
+ streams/                  Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/streams
+ streams-common.bsh        Locally Added               0 
+ asserts.dic               Locally Added               0 
+ hybrid-streams-services.rrr Locally Added               0 
+ hybrid-streams.h          Locally Added               0 
+ bak.bsv                   Locally Added               0 
+ hybrid-streams.bsv        Locally Added               0 
+ mem-test.dic              Locally Added               0 
+ simulation-streams.bsv    Locally Added               0 
+ stats.dic                 Locally Added               0 
+ events.dic                Locally Added               0 
+ hybrid-streams.awb        Locally Added               0 
+ messages.dic              Locally Added               0 
+ simulation-streams.awb    Locally Added               0 
+ streams.dic               Locally Added               0 
+ hybrid-streams.cpp        Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/simple-32
+ simple-32-umf.cpp         Locally Modified           50 
+ simple-32-umf.h           Locally Modified           50 
+
+Directory config/pm/hasim/submodels/fpgaenv
+ hasim-fpgaenv-fsb-afu.apm Locally Modified           50 
+ hasim-fpgaenv-software-no-gui.apm Locally Modified           50 
+ hasim-fpgaenv-hybrid-sim.apm Locally Modified           50 
+ hasim-fpgaenv-htg-v5-pcie.apm Locally Modified           50 
+ hasim-fpgaenv-null.apm    Locally Modified           50 
+ hasim-fpgaenv-software.apm Locally Modified           50 
+ hasim-fpgaenv-xup.apm     Locally Modified           50 
+ hasim-fpgaenv-fsb-dme.apm Locally Modified           50 
+
+- added streams as a virtual device
+- reworked streams to now use dictionaries
+- misc. minor bugfixes and enhancements to channelio and RRR
+- modified fpgaenv/ submodels to include streams
+- modified hybrid HTG submodel to use hybrid memory

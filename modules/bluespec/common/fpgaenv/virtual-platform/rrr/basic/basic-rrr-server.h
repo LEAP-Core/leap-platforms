@@ -7,7 +7,7 @@
 #include "asim/provides/channelio.h"
 
 #define MAX_SERVICES            64
-#define MAX_ARGS                3
+#define MAX_ARGS                4
 
 // ============== RRR service base class =================
 typedef class RRR_SERVICE_CLASS* RRR_SERVICE;
@@ -17,10 +17,10 @@ class RRR_SERVICE_CLASS
         int             serviceID;  // unique service ID
 
     public:
-        virtual void    Init(HASIM_MODULE)                          = 0;
-        virtual void    Uninit()                                    = 0;
-        virtual bool    Request(UINT32, UINT32, UINT32, UINT32 *)   = 0;
-        virtual void    Poll(void)                                  = 0;
+        virtual void    Init(HASIM_MODULE)                                = 0;
+        virtual void    Uninit()                                          = 0;
+        virtual bool    Request(UINT32, UINT32, UINT32, UINT32, UINT32 *) = 0;
+        virtual void    Poll(void)                                        = 0;
 };
 
 

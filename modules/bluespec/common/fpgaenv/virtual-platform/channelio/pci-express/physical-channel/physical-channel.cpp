@@ -14,7 +14,7 @@
 
 using namespace std;
 
-#define SLEEP for (unsigned long i = 0; i < (100000); i++)
+#define SLEEP for (unsigned long i = 0; i < 0; i++)
 
 // ==============================================
 //            WARNING WARNING WARNING
