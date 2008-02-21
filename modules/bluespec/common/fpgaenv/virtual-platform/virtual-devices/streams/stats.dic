@@ -1,6 +1,0 @@
-def STATS.INSTS_COMMITTED  "instructions committed = %u\n";
-def STATS.DCACHE_MISSES    "dcache misses          = %u\n";
-def STATS.BPRED_MISPREDS   "branch mispredicts     = %u\n";
-def STATS.ICACHE_MISSES    "icache misses          = %u\n";
-def STATS.INSTS_FETCHED    "instructions fetched   = %u\n";
-def STATS.TOTAL_CYCLES     "total cycles           = %u\n";

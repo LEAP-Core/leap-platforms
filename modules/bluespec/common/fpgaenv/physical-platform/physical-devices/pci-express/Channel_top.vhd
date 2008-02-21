@@ -14,9 +14,9 @@ library unisim;
 use unisim.vcomponents.all;
 
 entity Channel_top is
-generic (
-	FAST_SIMULATION		: INTEGER := 0;
-	PCIE_LANE_WIDTH		: INTEGER := 4);
+--generic (
+--	FAST_SIMULATION		: INTEGER := 0;
+--	PCIE_LANE_WIDTH		: INTEGER := 4);
 port  (
 
 	-- system signals
@@ -25,14 +25,14 @@ port  (
 	sys_clk_n         : in std_logic;
 	sys_reset_n       : in std_logic;
 	
-	pci_exp_rxn       : in std_logic_vector((PCIE_LANE_WIDTH - 1) downto 0);
-	pci_exp_rxp       : in std_logic_vector((PCIE_LANE_WIDTH - 1) downto 0);
-	pci_exp_txn       : out std_logic_vector((PCIE_LANE_WIDTH - 1) downto 0);
-	pci_exp_txp       : out std_logic_vector((PCIE_LANE_WIDTH - 1) downto 0);
+	pci_exp_rxn       : in std_logic_vector((4 - 1) downto 0);
+	pci_exp_rxp       : in std_logic_vector((4 - 1) downto 0);
+	pci_exp_txn       : out std_logic_vector((4 - 1) downto 0);
+	pci_exp_txp       : out std_logic_vector((4 - 1) downto 0);
 	
 	-- exported clock
 	hwchn_clk 		: out std_logic;
-	hwchn_rst 		: out std_logic;
+	hwchn_rst			: out std_logic;
 	
 	-- regular CSR signals
 
@@ -320,7 +320,7 @@ begin
 
 
 -- convert generic FAST_SIMULATION and pass to express core
-unsigned_fast_simulation <= to_unsigned(FAST_SIMULATION,1);
+unsigned_fast_simulation <= to_unsigned(0,1); --FAST_SIMULATION = 0
 vector_fast_simulation <= std_logic_vector(unsigned_fast_simulation);
 
 -------------------------------------------------------
@@ -505,7 +505,7 @@ ep : pcieblkplus port map  (
 
 ---------------- exported clock -------------------------
 	hwchn_clk <= trn_clk_c;
-	hwchn_rst <= trn_reset_n_c and not trn_lnk_up_n_c;
+	hwchn_rst <= channel_rst_n;
 	
 ---------------- regular CSR signals --------------------
 

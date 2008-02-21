@@ -1,2 +1,0 @@
-def ASSERTS.NOTOKENS    "FUNCP: Ran out of Tokens!\n";
-def ASSERTS.NOREGISTERS "FUNCP: Ran out of physical registers!\n";

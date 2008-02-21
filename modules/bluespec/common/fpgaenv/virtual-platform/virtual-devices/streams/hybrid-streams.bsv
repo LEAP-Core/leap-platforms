@@ -15,7 +15,7 @@ endinterface
 
 // mkStreams
 module [HASim_Module] mkStreams#(LowLevelPlatformInterface llpi)
-                      // interface
+    // interface
                           (Streams);
 
     // ------------ methods ------------
@@ -23,27 +23,15 @@ module [HASim_Module] mkStreams#(LowLevelPlatformInterface llpi)
     // accept request
     method Action   makeRequest(STREAMS_REQUEST srq);
 
-        // start creating a new RRR request packet
-        RRR_Request req;
-
-        // pack serviceID and streamID
-        req.serviceID = `SERVICE_ID;
-        req.param0    = zeroExtend(pack(srq.streamID));
-
-        // pack stringID
-        req.param1    = case (srq.stringID) matches
-                            tagged STRINGID_message .x: zeroExtend(pack(x));
-                            tagged STRINGID_event   .x: zeroExtend(pack(x));
-                            tagged STRINGID_stat    .x: zeroExtend(pack(x));
-                            tagged STRINGID_assert  .x: zeroExtend(pack(x));
-                            tagged STRINGID_memtest .x: zeroExtend(pack(x));
-                        endcase;
-
-        req.param2    = srq.payload0;
-        req.param3    = srq.payload1;
-
         // make RRR request
-        llpi.rrrClient.makeRequest(req);
+        llpi.rrrClient.makeRequest(RRR_Request {
+                                       serviceID   : `SERVICE_ID,
+                                       param0      : zeroExtend(pack(srq.streamID)),
+                                       param1      : zeroExtend(pack(srq.stringID)),
+                                       param2      : srq.payload0,
+                                       param3      : srq.payload1,
+                                       needResponse: False
+                                   });
 
     endmethod
 

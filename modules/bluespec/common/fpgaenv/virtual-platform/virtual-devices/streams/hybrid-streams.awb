@@ -19,12 +19,8 @@
 # %sources -t CPP  -v PRIVATE hybrid-streams.cpp
 # %sources -t RRR  -v PUBLIC  hybrid-streams-services.rrr
 #
-# %sources -t DICT -v PUBLIC  streams.dic
-# %sources -t DICT -v PUBLIC  messages.dic
-# %sources -t DICT -v PUBLIC  events.dic
-# %sources -t DICT -v PUBLIC  stats.dic
-# %sources -t DICT -v PUBLIC  asserts.dic
-# %sources -t DICT -v PUBLIC  mem-test.dic
+# %sources -t DICT -v PUBLIC streamid.dic
+# %sources -t DICT -v PUBLIC streams.dic
 #
 # %AWB_END
 # */

@@ -1,3 +1,0 @@
-def MEMTEST.DATA  "mem[%8X] = %8X\n";
-def MEMTEST.INVAL "invalidating %8X\n";
-def MEMTEST.DONE  "memtest: done\n";

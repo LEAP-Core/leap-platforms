@@ -2150,3 +2150,46 @@ Directory config/pm/hasim/submodels/fpgaenv
 - misc. minor bugfixes and enhancements to channelio and RRR
 - modified fpgaenv/ submodels to include streams
 - modified hybrid HTG submodel to use hybrid memory
+
+----------
+aparasha    Date: Thu Feb 21 14:29:43 EST 2008  CSN: CSN-platforms-54
+                  Thu Feb 21 19:29:43 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/streams
+ streams-common.bsh        Locally Modified           53 
+ asserts.dic               Locally Removed            53 
+ hybrid-streams.h          Locally Modified           53 
+ hybrid-streams.bsv        Locally Modified           53 
+ bak.bsv                   Locally Removed            53 
+ simulation-streams.bsv    Locally Modified           53 
+ mem-test.dic              Locally Removed            53 
+ stats.dic                 Locally Removed            53 
+ events.dic                Locally Removed            53 
+ messages.dic              Locally Removed            53 
+ hybrid-streams.awb        Locally Modified           53 
+ streamid.dic              Locally Added               0 
+ simulation-streams.awb    Locally Modified           53 
+ streams.dic               Locally Modified           53 
+ hybrid-streams.cpp        Locally Modified           53 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express
+ ram.ngc                   Locally Modified           52 
+ ram.vhd                   Locally Modified           52 
+ CSR_CONTROLLER.vhd        Locally Modified           52 
+ Channel_top.vhd           Locally Modified           52 
+
+- re-worked streams. The module no longer explicitly identifies
+  and handles different streamIDs. Individual modules using streams
+  now need to register themselves with streams if they want anything
+  but the default behavior (which is to print the stream to stdout).
+
+- removed dictionaries from streams, and moved them to distributed
+  modules.
+
+- added skeleton dictionaries to streams, each with a single "NULL"
+  entry. These are required for models that do not have even a single
+  module adding to the streams dictionary.
+
+- updated PCI-express physical device VHDL code to version 02-21-2008
+  sent from CBL.

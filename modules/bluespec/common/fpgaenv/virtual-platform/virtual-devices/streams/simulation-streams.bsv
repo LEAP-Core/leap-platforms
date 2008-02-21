@@ -25,19 +25,14 @@ module [HASim_Module] mkStreams#(LowLevelPlatformInterface llpi)
         $write("streams: ");
 
         // streamID
-        $write("");
+        $write("streamID = %u ", pack(srq.streamID));
 
         // stringID
-        case (srq.stringID) matches
-            tagged STRINGID_message .x: $write("message stringID = %u ", pack(x));
-            tagged STRINGID_event   .x: $write("event   stringID = %u ", pack(x));
-            tagged STRINGID_stat    .x: $write("stat    stringID = %u ", pack(x));
-            tagged STRINGID_assert  .x: $write("assert  stringID = %u ", pack(x));
-            tagged STRINGID_memtest .x: $write("memtest stringID = %u ", pack(x));
-        endcase
+        $write("stringID = %u ", pack(srq.stringID));
 
         // payloads
-        $write("payload = 0x%X", srq.payload0);
+        $write("payload0 = 0x%X ", srq.payload0);
+        $write("payload1 = 0x%X ", srq.payload1);
 
         // newline
         $display("");

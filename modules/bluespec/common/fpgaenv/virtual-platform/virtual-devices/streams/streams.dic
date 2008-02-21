@@ -1,5 +1,1 @@
-def STREAMS.MESSAGE "message";
-def STREAMS.EVENT   "events";
-def STREAMS.STAT    "stat";
-def STREAMS.ASSERT  "assertion";
-def STREAMS.MEMTEST "memtest";
+def STREAMS.NULL "null";

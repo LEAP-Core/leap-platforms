@@ -5,19 +5,16 @@
 #include <sys/select.h>
 #include <sys/types.h>
 #include <signal.h>
+#include <string.h>
 #include <iostream>
 
 #include "asim/provides/streams.h"
 #include "asim/rrr/rrr_service_ids.h"
 
 #include "asim/dict/STREAMS.h"
-#include "asim/dict/MESSAGES.h"
-#include "asim/dict/EVENTS.h"
-#include "asim/dict/STATS.h"
-#include "asim/dict/ASSERTS.h"
-#include "asim/dict/MEMTEST.h"
+#include "asim/dict/STREAMID.h"
 
-#define SERVICE_ID  STREAMS_SERVICE_ID
+#define SERVICE_ID       STREAMS_SERVICE_ID
 
 using namespace std;
 
@@ -46,18 +43,18 @@ STREAMS_CLASS::Init(
     // set parent pointer
     parent = p;
 
-    // open events and stats files
-    eventfile = fopen("software_events.out", "w+");
-    statfile = fopen("software_stats.out", "w+");
+    // initialize maps
+    for (int i = 0; i < MAX_STREAMS; i++)
+    {
+        streamOutput[i] = stdout;
+        callbackModule[i] = NULL;
+    }
 }
 
 // uninit
 void
 STREAMS_CLASS::Uninit()
 {
-    // close stat and event files
-    fclose(eventfile);
-    fclose(statfile);
 }
 
 // request
@@ -69,46 +66,65 @@ STREAMS_CLASS::Request(
     UINT32 arg3,
     UINT32 *result)
 {
-    bool retval = false;
+    // extract IDs and payloads
+    UINT32 streamID = arg0;
+    UINT32 stringID = arg1;
+    UINT32 payload0 = arg2;
+    UINT32 payload1 = arg3;
 
-    //cout << "streams: received request: method " << arg0 << " arg1 "
-    //     << arg1 << " arg2 " << arg2 << endl;
-
-    // decode request
-    switch(arg0)
+    // sanity checks
+    if (streamID > STREAMID_last)
     {
-        case STREAMS_MESSAGE:
-            PrintMessage(arg1, arg2, arg3);
-            retval = false;
+        cerr << "streams: invalid streamID: " << streamID << endl;
+        CallbackExit(1);
+    }
+
+    if (stringID > STREAMS_last)
+    {
+        cerr << "streams: " << DICT_STREAMID::Str(streamID)
+             << ": invalid stringID: " << stringID << endl;
+        CallbackExit(1);
+    }
+
+    // lookup format string from dictionary
+    const char *fmtstr = DICT_STREAMS::Str(stringID);
+
+    // lookup output stream
+    FILE *outstream = streamOutput[streamID];
+
+    // find number of payloads
+    int payloads = CountPayloads(fmtstr);
+
+    // print message
+    switch (payloads)
+    {
+        case 0:
+            fprintf(outstream, fmtstr);
             break;
 
-        case STREAMS_EVENT:
-            PrintEvent(arg1, arg2, arg3);
-            retval = false;
+        case 1:
+            fprintf(outstream, fmtstr, payload0);
             break;
 
-        case STREAMS_STAT:
-            PrintStat(arg1, arg2);
-            retval = false;
-            break;
-
-        case STREAMS_ASSERT:
-            PrintAssert(arg1, arg2);
-            retval = false;
-            break;
-
-        case STREAMS_MEMTEST:
-            PrintMemTestReq(arg1, arg2, arg3);
-            retval = false;
+        case 2:
+            fprintf(outstream, fmtstr, payload0, payload1);
             break;
 
         default:
-            cerr << "console: invalid request" << endl;
-            CallbackExit(1);
+            cerr << "streams: invalid number of payloads" << endl;
             break;
     }
+    fflush(outstream);
 
-    return retval;
+    // call back module if required
+    STREAMS_CALLBACK_MODULE module = callbackModule[streamID];
+    if (module != NULL)
+    {
+        module->StreamsCallback(stringID, payload0, payload1);
+    }
+
+    // no RRR response
+    return false;
 }
 
 // poll
@@ -117,117 +133,56 @@ STREAMS_CLASS::Poll()
 {
 }
 
-// ===== internal print methods =====
-
-// print message
+// map a stream to an output file
 void
-STREAMS_CLASS::PrintMessage(
-    UINT32 stringID,
-    UINT32 payload0,
-    UINT32 payload1)
+STREAMS_CLASS::MapStream(
+    int   streamID,
+    FILE *out)
 {
-    if (stringID > MESSAGES_last)
+    // sanity check
+    if (streamID > STREAMID_last)
     {
-        cerr << "streams: " << DICT_STREAMS::Str(STREAMS_MESSAGE)
-             << ": invalid stringID: " << stringID << endl;
+        cerr << "streams: invalid streamID: " << streamID << endl;
         CallbackExit(1);
     }
 
-    const char *fmtstr = DICT_MESSAGES::Str(stringID);
-
-    // need to special-case certain messages
-    if (stringID == MESSAGES_START || stringID == MESSAGES_SUCCESS || stringID == MESSAGES_FAILURE)
-    {
-        printf(fmtstr, payload0);
-    }
-    else
-    {
-        printf(fmtstr, payload0, payload1);
-    }
-    fflush(stdout);
+    // map stream
+    streamOutput[streamID] = out;
 }
 
-// print event
+// set link to module to be called back
 void
-STREAMS_CLASS::PrintEvent(
-    UINT32 stringID,
-    UINT32 payload0,
-    UINT32 payload1)
+STREAMS_CLASS::RegisterCallback(
+    int streamID,
+    STREAMS_CALLBACK_MODULE module)
 {
-    if (stringID > EVENTS_last)
-    {
-        cerr << "streams: " << DICT_STREAMS::Str(STREAMS_EVENT)
-             << ": invalid stringID: " << stringID << endl;
-        CallbackExit(1);
-    }
-
-    const char *fmtstr = DICT_EVENTS::Str(stringID);
-    fprintf(eventfile, fmtstr, payload0, payload1);
-    fflush(eventfile);
+    callbackModule[streamID] = module;
 }
 
-// print stat
-void
-STREAMS_CLASS::PrintStat(
-    UINT32 stringID,
-    UINT32 value)
+// count number of payloads in a printf-style format string
+int
+STREAMS_CLASS::CountPayloads(
+    const char *str)
 {
-    if (stringID > STATS_last)
+    // simply count the number of %'s in the string. The only
+    // exception is escaped characters. This heuristic can be
+    // improved in future.
+    int count = 0;
+    for (int i = 0; i < strlen(str); i++)
     {
-        cerr << "streams: " << DICT_STREAMS::Str(STREAMS_STAT)
-             << ": invalid stringID: " << stringID << endl;
-        CallbackExit(1);
+        // skip escape sequences
+        if (str[i] == '\\')
+        {
+            i++;
+            continue;
+        }
+
+        if (str[i] == '%')
+        {
+            count++;
+        }
     }
 
-    const char *fmtstr = DICT_STATS::Str(stringID);
-    fprintf(statfile, fmtstr, value);
+    return count;
 }
 
-// print assert
-void
-STREAMS_CLASS::PrintAssert(
-    UINT32 stringID,
-    UINT32 severity)
-{
-    if (stringID > ASSERTS_last)
-    {
-        cerr << "streams: " << DICT_STREAMS::Str(STREAMS_ASSERT)
-             << ": invalid stringID: " << stringID << endl;
-        CallbackExit(1);
-    }
-
-    const char *fmtstr = DICT_ASSERTS::Str(stringID);
-    printf(fmtstr);
-    fflush(stdout);
-
-    if (severity > 1)
-    {
-        CallbackExit(1);
-    }
-}
-
-// print memtest message
-void
-STREAMS_CLASS::PrintMemTestReq(
-    UINT32 stringID,
-    UINT32 payload0,
-    UINT32 payload1)
-{
-    if (stringID > MEMTEST_last)
-    {
-        cerr << "streams: " << DICT_STREAMS::Str(STREAMS_MEMTEST)
-             << ": invalid stringID: " << stringID << endl;
-        CallbackExit(1);
-    }
-
-    const char *fmtstr = DICT_MEMTEST::Str(stringID);
-
-    switch (stringID)
-    {
-        case MEMTEST_DATA : printf(fmtstr, payload0, payload1); break;
-        case MEMTEST_INVAL: printf(fmtstr, payload0);           break;
-        case MEMTEST_DONE : printf(fmtstr);                     break;
-    }
-
-    fflush(stdout);
-}

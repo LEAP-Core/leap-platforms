@@ -1,5 +1,0 @@
-def MESSAGES.START      "[%12u]: controller: program started.\n";
-def MESSAGES.SUCCESS    "[%12u]: controller: test program finished succesfully.\n";
-def MESSAGES.FAILURE    "[%12u]: controller: test program finished, one or more failures occurred.\n";
-def MESSAGES.ERROR      "[%12u]: controller: ERROR: unexpected timing partition response: 0x%x\n";
-def MESSAGES.HEARTBEAT  "[%12u]: controller: model cycles completed: %9u\n";

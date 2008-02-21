@@ -68,9 +68,9 @@ port(
 );
 end CSR_CONTROLLER;
 
-architecture Behavioral of CSR_CONTROLLER is
-    component  CSR_BRAM IS
-		port (
+architecture rtl of CSR_CONTROLLER is
+component  CSR_BRAM IS
+port (
 	clka: IN std_logic;
 	dina: IN std_logic_VECTOR(31 downto 0);
 	addra: IN std_logic_VECTOR(7 downto 0);
@@ -80,10 +80,11 @@ architecture Behavioral of CSR_CONTROLLER is
 	addrb: IN std_logic_VECTOR(7 downto 0);
 	enb: IN std_logic;
 	doutb: OUT std_logic_VECTOR(31 downto 0));
-   END component;
+END component;
 	 
-	type csr_controller_state is (
+type csr_controller_state is (
 	CSR_IDLE,
+	CSR_LOOKAHEAD, -- to check whether another en signal is toggled.
 	CSR_PCIE_WRITE,
 	CSR_PCIE_WRITE_ACK,
 	CSR_PCIE_READ,
@@ -95,7 +96,11 @@ architecture Behavioral of CSR_CONTROLLER is
 	CSR_READ_WAIT,
 	CSR_READ_ACK
 );
-	SIGNAL CSR_STATE:csr_controller_state;
+SIGNAL CSR_STATE:csr_controller_state;
+
+--type pcie_spl_arbitrator_state is {
+--	PCIE_SPL_ARBIT_RST,
+--	PCIE_SPL_ARBIT_
 	 
 	-------------------------------------------------------
 --	signal csr_out_h2f_reg0_r: std_logic_vector((32 - 1) downto 0);
@@ -117,7 +122,16 @@ architecture Behavioral of CSR_CONTROLLER is
 	signal addrb									: std_logic_vector((8 - 1) downto 0);
 	signal doutb									: std_logic_vector((32 - 1) downto 0);
 	
+	-- do pcie side transaction when pcie_spl_selector = 1
+	-- do spl side transactin when pcie_spl_selector = 0
 	signal pcie_spl_selector      : std_logic;
+	
+	signal pcie_csr_rd_en_c				: std_logic;
+	signal pcie_csr_wr_en_c				: std_logic;
+	signal csr_rd_en_c						: std_logic;
+	signal csr_wr_en_c						: std_logic;
+	
+	signal csr_ready							: std_logic;
 begin 
 
 pcie_csr_out_rd_data <= doutb when pcie_spl_selector = '1' else
@@ -135,6 +149,8 @@ addra <= pcie_csr_wr_index_c when pcie_spl_selector = '1' else
 dina <= pcie_csr_wr_data_c when pcie_spl_selector = '1' else
 				csr_wr_data_c;
 				
+				
+				
 CSR_ram_test : CSR_BRAM port map (
 	clka => clk,--
 	dina => dina,--csr_wr_data_c
@@ -147,16 +163,25 @@ CSR_ram_test : CSR_BRAM port map (
 	doutb => doutb--csr_out_rd_data
 );
 
+pcie_csr_out_rd_ready <= (not(pcie_csr_in_wr_en or pcie_csr_in_rd_en or
+														 csr_in_wr_en or csr_in_rd_en)) and csr_ready;
+pcie_csr_out_wr_ready <= (not(pcie_csr_in_wr_en or pcie_csr_in_rd_en or
+														 csr_in_wr_en or csr_in_rd_en)) and csr_ready;
+csr_out_rd_ready <= (not(pcie_csr_in_wr_en or pcie_csr_in_rd_en or
+														 csr_in_wr_en or csr_in_rd_en)) and csr_ready;
+csr_out_wr_ready <= (not(pcie_csr_in_wr_en or pcie_csr_in_rd_en or
+														 csr_in_wr_en or csr_in_rd_en)) and csr_ready;
+														 
 process(clk,rst_n)
 begin
 	if(rst_n = '0')then
 		CSR_STATE <= CSR_IDLE;
-		pcie_csr_out_rd_ready <= '1';
-		pcie_csr_out_wr_ready <= '1';
+--		pcie_csr_out_rd_ready <= '1';
+--		pcie_csr_out_wr_ready <= '1';
 		pcie_csr_out_rd_done  <= '0';
 		
-		csr_out_rd_ready <= '1';
-		csr_out_wr_ready <= '1';
+--		csr_out_rd_ready <= '1';
+--		csr_out_wr_ready <= '1';
 		csr_out_rd_done <= '0';
 		
 		
@@ -169,142 +194,216 @@ begin
 		csr_wr_index_c <= (others => '0');
 		csr_wr_data_c <= (others => '0');
 		
+		pcie_csr_rd_en_c <= '0';
+		pcie_csr_wr_en_c <= '0';
+		csr_rd_en_c <= '0';
+		csr_wr_en_c <= '0';
+		
 		wr_en_r <= '0'; 
 		-- ports for PCIe is defaultly selected
-		pcie_spl_selector <= '1';
+		pcie_spl_selector <= '0';
+		
+		csr_ready <= '1';
 	elsif(rising_edge(clk))then
 		case CSR_STATE is
 		when CSR_IDLE =>                    
 			pcie_csr_out_rd_done  <= '0';
-			wr_en_r <= '0'; 
-			if(pcie_csr_in_wr_en = '1')then
-				pcie_csr_out_wr_ready <= '0';
-				pcie_csr_out_rd_ready <= '0';
-				csr_out_wr_ready <= '0';
-				csr_out_rd_ready <= '0';
-				
-				pcie_csr_wr_index_c <= pcie_csr_in_wr_index;
-				pcie_csr_wr_data_c <= pcie_csr_in_wr_data;
-				
-				pcie_spl_selector <= '1';
-				
-				CSR_STATE <= CSR_PCIE_WRITE;
-			elsif(pcie_csr_in_rd_en = '1')then
-				pcie_csr_out_wr_ready <= '0';
-				pcie_csr_out_rd_ready <= '0';
-				csr_out_wr_ready <= '0';
-				csr_out_rd_ready <= '0';
-				
-				pcie_csr_rd_index_c <= pcie_csr_in_rd_index;
-				
-				pcie_spl_selector <= '1';
-				
-				CSR_STATE <= CSR_PCIE_READ;
-			elsif(csr_in_wr_en = '1') then
-				pcie_csr_out_wr_ready <= '0';
-				pcie_csr_out_rd_ready <= '0';
-				csr_out_wr_ready <= '0';
-				csr_out_rd_ready <= '0';
-				
-				csr_wr_index_c <= csr_in_wr_index;
-				csr_wr_data_c <= csr_in_wr_data;
-				
-				pcie_spl_selector <= '0';
-				
-				CSR_STATE <= CSR_WRITE;										
-			elsif(csr_in_rd_en = '1') then
-				pcie_csr_out_wr_ready <= '0';
-				pcie_csr_out_rd_ready <= '0';
-				csr_out_wr_ready <= '0';
-				csr_out_rd_ready <= '0';
-				
-				csr_rd_index_c <= csr_in_rd_index;
-				
-				pcie_spl_selector <= '0';
-				
-				CSR_STATE <= CSR_READ;										
-			else 
-				pcie_csr_out_wr_ready <= '1';
-				pcie_csr_out_rd_ready <= '1';
-				csr_out_wr_ready <= '1';
-				csr_out_rd_ready <= '1';	
-				
-				pcie_spl_selector <= '1';
-				
+			wr_en_r <= '0';
+			
+			--buffer the input signal
+
+			pcie_csr_rd_en_c <= pcie_csr_in_rd_en;
+--			pcie_csr_rd_data_c <= pcie_csr_out_rd_data;
+			pcie_csr_rd_index_c <= pcie_csr_in_rd_index;
+
+			pcie_csr_wr_en_c <= pcie_csr_in_wr_en;
+			pcie_csr_wr_data_c <=pcie_csr_in_wr_data;
+			pcie_csr_wr_index_c <= pcie_csr_in_wr_index;
+
+			csr_rd_en_c <= csr_in_rd_en;
+--			csr_rd_data_c <= csr_out_rd_data;
+			csr_rd_index_c <= csr_in_rd_index;
+
+			csr_wr_en_c <= csr_in_wr_en;
+			csr_wr_data_c <= csr_in_wr_data;
+			csr_wr_index_c <= csr_in_wr_index;
+			
+			pcie_spl_selector <= '0';
+	
+			if ( (pcie_csr_in_wr_en = '1') or
+					 (pcie_csr_in_rd_en = '1') or
+					 (csr_in_wr_en = '1') or
+					 (csr_in_rd_en = '1')) then
+					 
+--				pcie_csr_out_wr_ready <= '0';
+--				pcie_csr_out_rd_ready <= '0';
+--				csr_out_wr_ready <= '0';
+--				csr_out_rd_ready <= '0';
+				csr_ready <= '0';	
+				CSR_STATE <= CSR_READ;
+					
+			else
+--				pcie_csr_out_wr_ready <= '1';
+--				pcie_csr_out_rd_ready <= '1';
+--				csr_out_wr_ready <= '1';
+--				csr_out_rd_ready <= '1';
+				csr_ready <= '1';
 				CSR_STATE <= CSR_IDLE;
+			end if;		 
+--			if(pcie_csr_in_wr_en = '1')then
+--				pcie_csr_out_wr_ready <= '0';
+--				pcie_csr_out_rd_ready <= '0';
+--				csr_out_wr_ready <= '0';
+--				csr_out_rd_ready <= '0';
+--				
+--				pcie_csr_wr_index_c <= pcie_csr_in_wr_index;
+--				pcie_csr_wr_data_c <= pcie_csr_in_wr_data;
+--				
+--				pcie_spl_selector <= '1';
+--				
+--				CSR_STATE <= CSR_PCIE_WRITE;
+--			elsif(pcie_csr_in_rd_en = '1')then
+--				pcie_csr_out_wr_ready <= '0';
+--				pcie_csr_out_rd_ready <= '0';
+--				csr_out_wr_ready <= '0';
+--				csr_out_rd_ready <= '0';
+--				
+--				pcie_csr_rd_index_c <= pcie_csr_in_rd_index;
+--				
+--				pcie_spl_selector <= '1';
+--				
+--				CSR_STATE <= CSR_PCIE_READ;
+--			elsif(csr_in_wr_en = '1') then
+--				pcie_csr_out_wr_ready <= '0';
+--				pcie_csr_out_rd_ready <= '0';
+--				csr_out_wr_ready <= '0';
+--				csr_out_rd_ready <= '0';
+--				
+--				csr_wr_index_c <= csr_in_wr_index;
+--				csr_wr_data_c <= csr_in_wr_data;
+--				
+--				pcie_spl_selector <= '0';
+--				
+--				CSR_STATE <= CSR_WRITE;										
+--			elsif(csr_in_rd_en = '1') then
+--				pcie_csr_out_wr_ready <= '0';
+--				pcie_csr_out_rd_ready <= '0';
+--				csr_out_wr_ready <= '0';
+--				csr_out_rd_ready <= '0';
+--				
+--				csr_rd_index_c <= csr_in_rd_index;
+--				
+--				pcie_spl_selector <= '0';
+--				
+--				CSR_STATE <= CSR_READ;										
+--			else 
+--				pcie_csr_out_wr_ready <= '1';
+--				pcie_csr_out_rd_ready <= '1';
+--				csr_out_wr_ready <= '1';
+--				csr_out_rd_ready <= '1';	
+--				
+--				pcie_spl_selector <= '1';
+--				
+--				CSR_STATE <= CSR_IDLE;
+--			end if;
+
+		when CSR_READ =>
+			if ( csr_rd_en_c = '1') then 
+				CSR_STATE <= CSR_READ_WAIT;
+			else
+				CSR_STATE <= CSR_WRITE;
+			end if;
+
+		when CSR_READ_WAIT =>
+			csr_out_rd_done <= '1';
+			CSR_STATE <= CSR_READ_ACK;
+
+		when CSR_READ_ACK =>
+			if(csr_in_rd_ack = '1')then
+--				pcie_csr_out_wr_ready <= '1';
+--				pcie_csr_out_rd_ready <= '1';
+--				csr_out_wr_ready <= '1';
+--				csr_out_rd_ready <= '1';	
+				
+				csr_out_rd_done <= '0';
+				CSR_STATE <= CSR_WRITE;
+			else 
+				CSR_STATE <=  CSR_READ_ACK;
+--				csr_out_rd_ready <= '0';
+				csr_out_rd_done  <= '1';
 			end if;
 			
-		when CSR_PCIE_WRITE =>
-			wr_en_r <= '1';  
-			CSR_STATE <= CSR_PCIE_WRITE_ACK;
+		when CSR_WRITE =>
+			if ( csr_wr_en_c = '1') then
+				wr_en_r <= '1';
+				CSR_STATE <= CSR_WRITE_ACK;
+			else
+				wr_en_r <= '0';
+				pcie_spl_selector <= '1';
+				CSR_STATE <= CSR_PCIE_READ;
+			end if;
 			
-		when CSR_PCIE_WRITE_ACK => 
-			wr_en_r <= '0';  
-			pcie_csr_out_wr_ready <= '1';
-			pcie_csr_out_rd_ready <= '1';
-			csr_out_wr_ready <= '1';
-			csr_out_rd_ready <= '1';												 
+		when CSR_WRITE_ACK =>
+			wr_en_r <= '0';
+			pcie_spl_selector <= '1';
+--			pcie_csr_out_wr_ready <= '1';
+--			pcie_csr_out_rd_ready <= '1';
+--			csr_out_wr_ready <= '1';
+--			csr_out_rd_ready <= '1';
 			
-			CSR_STATE <= CSR_IDLE;
-		
+			CSR_STATE <= CSR_PCIE_READ;
+
 		when CSR_PCIE_READ =>
-			--wait a cycle to let bram get the data
-			CSR_STATE <= CSR_PCIE_READ_WAIT;
+			if ( pcie_csr_rd_en_c = '1') then
+				CSR_STATE <= CSR_PCIE_READ_WAIT;
+			else
+				CSR_STATE <= CSR_PCIE_WRITE;
+			end if;
 			
 		when CSR_PCIE_READ_WAIT =>
 			pcie_csr_out_rd_done <= '1';
 			CSR_STATE <= CSR_PCIE_READ_ACK;
-			
+
 		when CSR_PCIE_READ_ACK =>             
 			if(pcie_csr_in_rd_ack = '1')then
-				pcie_csr_out_wr_ready <= '1';
-				pcie_csr_out_rd_ready <= '1';
-				csr_out_wr_ready <= '1';
-				csr_out_rd_ready <= '1';	
+--				pcie_csr_out_wr_ready <= '1';
+--				pcie_csr_out_rd_ready <= '1';
+--				csr_out_wr_ready <= '1';
+--				csr_out_rd_ready <= '1';	
 				
 				pcie_csr_out_rd_done <= '0';
-				CSR_STATE <= CSR_IDLE;
+				CSR_STATE <= CSR_PCIE_WRITE;
 			else 
 				CSR_STATE <=  CSR_PCIE_READ_ACK;
-				pcie_csr_out_rd_ready <= '0';
+--				pcie_csr_out_rd_ready <= '0';
 				pcie_csr_out_rd_done  <= '1';
-			end if; 
-		
-		when CSR_WRITE =>
-			wr_en_r <= '1';
-			CSR_STATE <= CSR_WRITE_ACK;
+			end if; 		
 			
-		when CSR_WRITE_ACK =>
-			wr_en_r <= '0';
-			pcie_csr_out_wr_ready <= '1';
-			pcie_csr_out_rd_ready <= '1';
-			csr_out_wr_ready <= '1';
-			csr_out_rd_ready <= '1';
+		when CSR_PCIE_WRITE =>
+			if (pcie_csr_wr_en_c = '1') then
+				wr_en_r <= '1';  
+				CSR_STATE <= CSR_PCIE_WRITE_ACK;
+			else
+--				pcie_csr_out_wr_ready <= '1';
+--				pcie_csr_out_rd_ready <= '1';
+--				csr_out_wr_ready <= '1';
+--				csr_out_rd_ready <= '1';
+				csr_ready <= '1';
+				pcie_spl_selector <= '0';
+				
+				CSR_STATE <= CSR_IDLE;
+			end if;
+			
+		when CSR_PCIE_WRITE_ACK => 
+			wr_en_r <= '0';  
+--			pcie_csr_out_wr_ready <= '1';
+--			pcie_csr_out_rd_ready <= '1';
+--			csr_out_wr_ready <= '1';
+--			csr_out_rd_ready <= '1';												 
+			csr_ready <= '1';
+			pcie_spl_selector <= '0';
 			
 			CSR_STATE <= CSR_IDLE;
-			
-		when CSR_READ =>
-			--wait a cycle to let bram get the data
-			CSR_STATE <= CSR_READ_WAIT;
-			
-		when CSR_READ_WAIT =>
-			csr_out_rd_done <= '1';
-			CSR_STATE <= CSR_READ_ACK;
-			
-		when CSR_READ_ACK =>
-			if(csr_in_rd_ack = '1')then
-				pcie_csr_out_wr_ready <= '1';
-				pcie_csr_out_rd_ready <= '1';
-				csr_out_wr_ready <= '1';
-				csr_out_rd_ready <= '1';	
-				
-				csr_out_rd_done <= '0';
-				CSR_STATE <= CSR_IDLE;
-			else 
-				CSR_STATE <=  CSR_READ_ACK;
-				csr_out_rd_ready <= '0';
-				csr_out_rd_done  <= '1';
-			end if;
 		
 		when others =>
 			null;
@@ -343,5 +442,5 @@ begin
 	end if;
 end process;
 
-end Behavioral;
+end rtl;
 
