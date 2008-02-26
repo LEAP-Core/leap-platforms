@@ -37,10 +37,7 @@ module mkFrontPanel#(LowLevelPlatformInterface llpi) (FrontPanel);
 
     method FRONTP_SWITCHES readSwitches();
         // read from physical platform
-        // return (llpi.physicalDrivers.switchesDriver.getSwitches());
-        // TEMPORARY:
-        // READ FROM PCIE "SWITCH"
-        return (zeroExtend(llpi.physicalDrivers.pciExpressDriver.read_led_switch()));
+        return (llpi.physicalDrivers.switchesDriver.getSwitches());
     endmethod
 
     method FRONTP_BUTTONS readButtons();

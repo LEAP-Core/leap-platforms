@@ -2193,3 +2193,26 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci
 
 - updated PCI-express physical device VHDL code to version 02-21-2008
   sent from CBL.
+
+----------
+aparasha    Date: Tue Feb 26 18:06:12 EST 2008  CSN: CSN-platforms-55
+                  Tue Feb 26 23:06:12 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/htg_v5_pcie
+ HTGv5PCIeFP.bsv           Locally Modified           53 
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-htg-hwonly.apm    Locally Added               0 
+ hasim-fpgaenv-htg-v5-pcie.apm Locally Modified           53 
+
+- added new fpgaenv submodel for hardware-only HTG platform. The
+  APM filename, name and description have been given based on a
+  new naming convention that all other fpgaenv submodels will be
+  moved to eventually.
+
+- modified name and description for hybrid HTG fpgaenv to make them
+  comply with the new naming convention, but did not change the
+  submodel APM filename.
+
+- removed temporary debugging code from HTG Front Panel.
