@@ -12,5 +12,5 @@
 %sources -t XST -v PRIVATE xilinx.xst
 %sources -t DOWNLOAD -v PRIVATE xilinx.download
 
-%param FPGA_PART     "xc5vlx110t-ff1136" "FPGA Part ID"
-%param FPGA_POSITION 2                   "FPGA Position (in Xilinx iMPACT)"
+%param FPGA_PART     "xc5vlx110tff1136-1" "FPGA Part ID"
+%param FPGA_POSITION 2                    "FPGA Position (in Xilinx iMPACT)"

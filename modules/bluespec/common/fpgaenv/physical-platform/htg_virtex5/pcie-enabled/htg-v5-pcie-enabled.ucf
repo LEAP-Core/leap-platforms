@@ -1,6 +1,3 @@
-
-CONFIG PART = XC5VLX110T-FF1136-1 ;
-
 ###############################################################################
 # Pinout and Related I/O Constraints
 ###############################################################################
@@ -77,10 +74,13 @@ INST "m_pi_llpint_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_
 # Timing requirements and related constraints.
 #
 
-# NET "sys_clk_c"                                      PERIOD = 10ns;
+// CLOCKS
+
+NET "CLK" LOC = "J16" | IOSTANDARD = LVCMOS25;
+NET "CLK" TNM_NET = "CLK" ;
+TIMESPEC "TS_CLK"  = PERIOD "CLK" 100.00 MHz HIGH 50 % ;
 
 NET "m_pi_llpint_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk/SIO/.pcie_gt_wrapper_i/gt_refclk_out[0]" TNM_NET = "MGTCLK" ;
-
 TIMESPEC "TS_MGTCLK"  = PERIOD "MGTCLK" 100.00 MHz HIGH 50 % ;
 
 ###############################################################################
@@ -90,10 +90,6 @@ TIMESPEC "TS_MGTCLK"  = PERIOD "MGTCLK" 100.00 MHz HIGH 50 % ;
 // RST_N
 
 NET "RST_N" LOC="G27";
-
-// CLOCK
-
-NET "CLK" LOC = "J16" | IOSTANDARD = LVCMOS25;
 
 // LEDS
 

@@ -2216,3 +2216,19 @@ Directory config/pm/hasim/submodels/fpgaenv
   submodel APM filename.
 
 - removed temporary debugging code from HTG Front Panel.
+
+----------
+mcadler     Date: Thu Feb 28 11:45:54 EST 2008  CSN: CSN-platforms-56
+                  Thu Feb 28 16:45:54 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-disabled
+ htg-v5-pcie-disabled.ucf  Locally Modified           55 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled
+ htg-v5-pcie-enabled.awb   Locally Modified           55 
+ htg-v5-pcie-enabled.ucf   Locally Modified           55 
+
+- Change HTG part name for proper speed bin (we were configured for a
+  higher bin than our part -- could cause random failures)
+- Fix CLK specification in UCF file.
