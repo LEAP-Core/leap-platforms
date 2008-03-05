@@ -2232,3 +2232,30 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-ena
 - Change HTG part name for proper speed bin (we were configured for a
   higher bin than our part -- could cause random failures)
 - Fix CLK specification in UCF file.
+
+----------
+mcadler     Date: Wed Mar  5 11:32:40 EST 2008  CSN: CSN-platforms-57
+                  Wed Mar  5 16:32:40 UTC 2008
+
+
+Directory drivers/linux/hasim
+ hasim-fpga-ctrl.c         Locally Modified           56 
+
+Change commands for FPGA access.  Commands are now:
+
+  --reserve   Reserve the FPGA.
+  --program   Enable programming mode.  Removes the PCIe driver, disables
+              the PCIe bus and enable's user write access to the programming
+              cable, if necesary.
+  --activate  Activate the PCIe bus, load the driver and disable write access
+              to the programming cable.
+  --drop-reservation
+
+  --force may be specified to override another user's reservation.
+
+It is safe to switch between the "program" and "activate" states without
+dropping a reservation.
+
+Note that the program uses getopt_long() to parse arguments.  That function
+accepts the shortest unique string to specify an argument, so you can currently
+use "hasim-fpga-ctrl --p" and "hasim-fpga-ctrl --a".
