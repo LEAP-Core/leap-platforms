@@ -132,6 +132,11 @@ SIGNAL CSR_STATE:csr_controller_state;
 	signal csr_wr_en_c						: std_logic;
 	
 	signal csr_ready							: std_logic;
+
+    -- Angshuman TEMP DEBUG
+    signal csr_out_rd_ready_latch : std_logic;
+    signal csr_out_wr_ready_latch : std_logic;
+
 begin 
 
 pcie_csr_out_rd_data <= doutb when pcie_spl_selector = '1' else
@@ -164,27 +169,31 @@ CSR_ram_test : CSR_BRAM port map (
 );
 
 pcie_csr_out_rd_ready <= (not(pcie_csr_in_wr_en or pcie_csr_in_rd_en or
-														 csr_in_wr_en or csr_in_rd_en)) and csr_ready;
+													 csr_in_wr_en or csr_in_rd_en)) and csr_ready;
 pcie_csr_out_wr_ready <= (not(pcie_csr_in_wr_en or pcie_csr_in_rd_en or
-														 csr_in_wr_en or csr_in_rd_en)) and csr_ready;
-csr_out_rd_ready <= (not(pcie_csr_in_wr_en or pcie_csr_in_rd_en or
-														 csr_in_wr_en or csr_in_rd_en)) and csr_ready;
-csr_out_wr_ready <= (not(pcie_csr_in_wr_en or pcie_csr_in_rd_en or
-														 csr_in_wr_en or csr_in_rd_en)) and csr_ready;
-														 
+													 csr_in_wr_en or csr_in_rd_en)) and csr_ready;
+
+-- Angshuman
+csr_out_rd_ready      <= csr_out_rd_ready_latch;
+csr_out_wr_ready      <= csr_out_wr_ready_latch;
+
 process(clk,rst_n)
 begin
+
+    -- Angshuman begin
+    if (rising_edge(clk)) then
+        csr_out_rd_ready_latch <= (not(pcie_csr_in_wr_en or pcie_csr_in_rd_en or
+					         						 csr_in_wr_en or csr_in_rd_en)) and csr_ready;
+        csr_out_wr_ready_latch <= (not(pcie_csr_in_wr_en or pcie_csr_in_rd_en or
+                        							 csr_in_wr_en or csr_in_rd_en)) and csr_ready;
+    end if;
+    -- Angshuman end
+
 	if(rst_n = '0')then
 		CSR_STATE <= CSR_IDLE;
---		pcie_csr_out_rd_ready <= '1';
---		pcie_csr_out_wr_ready <= '1';
 		pcie_csr_out_rd_done  <= '0';
 		
---		csr_out_rd_ready <= '1';
---		csr_out_wr_ready <= '1';
 		csr_out_rd_done <= '0';
-		
-		
 		
 		pcie_csr_rd_index_c <= (others => '0');
 		pcie_csr_wr_index_c <= (others => '0');
@@ -204,6 +213,7 @@ begin
 		pcie_spl_selector <= '0';
 		
 		csr_ready <= '1';
+
 	elsif(rising_edge(clk))then
 		case CSR_STATE is
 		when CSR_IDLE =>                    
@@ -235,77 +245,13 @@ begin
 					 (csr_in_wr_en = '1') or
 					 (csr_in_rd_en = '1')) then
 					 
---				pcie_csr_out_wr_ready <= '0';
---				pcie_csr_out_rd_ready <= '0';
---				csr_out_wr_ready <= '0';
---				csr_out_rd_ready <= '0';
 				csr_ready <= '0';	
 				CSR_STATE <= CSR_READ;
 					
 			else
---				pcie_csr_out_wr_ready <= '1';
---				pcie_csr_out_rd_ready <= '1';
---				csr_out_wr_ready <= '1';
---				csr_out_rd_ready <= '1';
 				csr_ready <= '1';
 				CSR_STATE <= CSR_IDLE;
 			end if;		 
---			if(pcie_csr_in_wr_en = '1')then
---				pcie_csr_out_wr_ready <= '0';
---				pcie_csr_out_rd_ready <= '0';
---				csr_out_wr_ready <= '0';
---				csr_out_rd_ready <= '0';
---				
---				pcie_csr_wr_index_c <= pcie_csr_in_wr_index;
---				pcie_csr_wr_data_c <= pcie_csr_in_wr_data;
---				
---				pcie_spl_selector <= '1';
---				
---				CSR_STATE <= CSR_PCIE_WRITE;
---			elsif(pcie_csr_in_rd_en = '1')then
---				pcie_csr_out_wr_ready <= '0';
---				pcie_csr_out_rd_ready <= '0';
---				csr_out_wr_ready <= '0';
---				csr_out_rd_ready <= '0';
---				
---				pcie_csr_rd_index_c <= pcie_csr_in_rd_index;
---				
---				pcie_spl_selector <= '1';
---				
---				CSR_STATE <= CSR_PCIE_READ;
---			elsif(csr_in_wr_en = '1') then
---				pcie_csr_out_wr_ready <= '0';
---				pcie_csr_out_rd_ready <= '0';
---				csr_out_wr_ready <= '0';
---				csr_out_rd_ready <= '0';
---				
---				csr_wr_index_c <= csr_in_wr_index;
---				csr_wr_data_c <= csr_in_wr_data;
---				
---				pcie_spl_selector <= '0';
---				
---				CSR_STATE <= CSR_WRITE;										
---			elsif(csr_in_rd_en = '1') then
---				pcie_csr_out_wr_ready <= '0';
---				pcie_csr_out_rd_ready <= '0';
---				csr_out_wr_ready <= '0';
---				csr_out_rd_ready <= '0';
---				
---				csr_rd_index_c <= csr_in_rd_index;
---				
---				pcie_spl_selector <= '0';
---				
---				CSR_STATE <= CSR_READ;										
---			else 
---				pcie_csr_out_wr_ready <= '1';
---				pcie_csr_out_rd_ready <= '1';
---				csr_out_wr_ready <= '1';
---				csr_out_rd_ready <= '1';	
---				
---				pcie_spl_selector <= '1';
---				
---				CSR_STATE <= CSR_IDLE;
---			end if;
 
 		when CSR_READ =>
 			if ( csr_rd_en_c = '1') then 
@@ -320,16 +266,10 @@ begin
 
 		when CSR_READ_ACK =>
 			if(csr_in_rd_ack = '1')then
---				pcie_csr_out_wr_ready <= '1';
---				pcie_csr_out_rd_ready <= '1';
---				csr_out_wr_ready <= '1';
---				csr_out_rd_ready <= '1';	
-				
 				csr_out_rd_done <= '0';
 				CSR_STATE <= CSR_WRITE;
 			else 
 				CSR_STATE <=  CSR_READ_ACK;
---				csr_out_rd_ready <= '0';
 				csr_out_rd_done  <= '1';
 			end if;
 			
@@ -346,11 +286,6 @@ begin
 		when CSR_WRITE_ACK =>
 			wr_en_r <= '0';
 			pcie_spl_selector <= '1';
---			pcie_csr_out_wr_ready <= '1';
---			pcie_csr_out_rd_ready <= '1';
---			csr_out_wr_ready <= '1';
---			csr_out_rd_ready <= '1';
-			
 			CSR_STATE <= CSR_PCIE_READ;
 
 		when CSR_PCIE_READ =>
@@ -366,16 +301,10 @@ begin
 
 		when CSR_PCIE_READ_ACK =>             
 			if(pcie_csr_in_rd_ack = '1')then
---				pcie_csr_out_wr_ready <= '1';
---				pcie_csr_out_rd_ready <= '1';
---				csr_out_wr_ready <= '1';
---				csr_out_rd_ready <= '1';	
-				
 				pcie_csr_out_rd_done <= '0';
 				CSR_STATE <= CSR_PCIE_WRITE;
 			else 
 				CSR_STATE <=  CSR_PCIE_READ_ACK;
---				pcie_csr_out_rd_ready <= '0';
 				pcie_csr_out_rd_done  <= '1';
 			end if; 		
 			
@@ -384,10 +313,6 @@ begin
 				wr_en_r <= '1';  
 				CSR_STATE <= CSR_PCIE_WRITE_ACK;
 			else
---				pcie_csr_out_wr_ready <= '1';
---				pcie_csr_out_rd_ready <= '1';
---				csr_out_wr_ready <= '1';
---				csr_out_rd_ready <= '1';
 				csr_ready <= '1';
 				pcie_spl_selector <= '0';
 				
@@ -396,10 +321,6 @@ begin
 			
 		when CSR_PCIE_WRITE_ACK => 
 			wr_en_r <= '0';  
---			pcie_csr_out_wr_ready <= '1';
---			pcie_csr_out_rd_ready <= '1';
---			csr_out_wr_ready <= '1';
---			csr_out_rd_ready <= '1';												 
 			csr_ready <= '1';
 			pcie_spl_selector <= '0';
 			

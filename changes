@@ -2273,3 +2273,22 @@ Bluesim-only streams is now fleshed out and works properly with dictionaries.
 
 TBD: unify the string formatting between Verilog/C (%u, etc).
 
+
+----------
+aparasha    Date: Wed Mar  5 15:36:49 EST 2008  CSN: CSN-platforms-59
+                  Wed Mar  5 20:36:49 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/pci-express/physical-channel
+ driver-interface.cpp      Locally Modified           58 
+ physical-channel.bsv      Locally Modified           58 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express
+ pci-express-vhdl-import.bsv Locally Modified           58 
+ CSR_CONTROLLER.vhd        Locally Modified           58 
+
+- added a temporary latch to the VHDL CSR controller to make it's interface
+  with Bluespec behave like it expects it to.
+- added some debugging code to the PCIe VHDL import module (most of this will gradually
+  be removed).
+- removed all polling delays from the software physical channel layer.

@@ -4,7 +4,7 @@
 
 using namespace std;
 
-#define SLEEP for (unsigned long i = 0; i < 10000; i++)
+#define SLEEP for (unsigned long i = 0; i < 0; i++)
 
 // ============================================
 //               Driver Interface

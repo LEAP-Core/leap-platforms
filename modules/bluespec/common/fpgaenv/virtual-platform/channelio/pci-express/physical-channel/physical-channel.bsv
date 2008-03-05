@@ -83,30 +83,49 @@ module mkPhysicalChannel#(PHYSICAL_DRIVERS drivers)
     // DEBUG regs
     Reg#(Bit#(32)) counter <- mkReg(0);
 
-    Bit#(32) status;
+    Bit#(32) status_flags;
+    Bit#(32) status_pointers;
+    Bit#(32) status_vhdl;
 
-    status[0]  = h2fEmpty     ? 1 : 0;
-    status[1]  = h2fHeadDirty ? 1 : 0;
-    status[2]  = h2fTailValid ? 1 : 0;
-    status[3]  = f2hFull      ? 1 : 0;
+    // status flags
+    status_flags[0]  = h2fEmpty ? 1 : 0;
+    status_flags[1]  = h2fFull  ? 1 : 0;
+    status_flags[2]  = f2hEmpty ? 1 : 0;
+    status_flags[3]  = f2hFull  ? 1 : 0;
 
-    status[4]  = f2hHeadValid ? 1 : 0;
-    status[5]  = f2hTailDirty ? 1 : 0;
-    status[6]  = readState == READ_STATE_ready        ? 1 : 0;
-    status[7]  = readState == READ_STATE_busy_h2fTail ? 1 : 0;
+    status_flags[4]  = h2fHeadDirty ? 1 : 0;
+    status_flags[5]  = h2fTailValid ? 1 : 0;
+    status_flags[6]  = f2hHeadValid ? 1 : 0;
+    status_flags[7]  = f2hTailDirty ? 1 : 0;
 
-    status[8]  = readState == READ_STATE_busy_f2hHead ? 1 : 0;
-    status[9]  = initStage[0];
-    status[10] = initStage[1];
-    status[11] = initStage[2];
+    status_flags[8]  = readState == READ_STATE_ready        ? 1 : 0;
+    status_flags[9]  = readState == READ_STATE_busy_h2fTail ? 1 : 0;
+    status_flags[10] = readState == READ_STATE_busy_f2hHead ? 1 : 0;
+    status_flags[11] = readState == READ_STATE_busy_data    ? 1 : 0;
 
-    status[12] = start ? 1 : 0;
-    status[13] = drivers.pciExpressDriver.read_resp_ready();
-    status[14] = 0;
-    status[15] = 0;
+    status_flags[12] = initStage[0];
+    status_flags[13] = initStage[1];
+    status_flags[14] = initStage[2];
+    status_flags[15] = initStage[3];
 
-    status[23:16] = h2fTail;
-    status[31:24] = f2hHead;
+    // status pointers
+    status_pointers[7:0]   = f2hTail;
+    status_pointers[15:8]  = f2hHead;
+    status_pointers[23:16] = h2fTail;
+    status_pointers[31:24] = h2fHead;
+
+    // vhdl/synchronizer status
+    status_vhdl[15:0] = drivers.pciExpressDriver.read_data()[15:0];
+
+    status_vhdl[16] = drivers.pciExpressDriver.read_req_ready();
+    status_vhdl[17] = drivers.pciExpressDriver.read_resp_ready();
+    status_vhdl[18] = drivers.pciExpressDriver.write_ready();
+    status_vhdl[19] = 0;
+
+    status_vhdl[21:20] = drivers.pciExpressDriver.write_sync_depth_bsv();
+    status_vhdl[23:22] = '0; // drivers.pciExpressDriver.write_sync_depth_vhdl();
+    status_vhdl[27:24] = '0; // drivers.pciExpressDriver.write_sync_enq_count();
+    status_vhdl[31:28] = '0; // drivers.pciExpressDriver.write_sync_deq_count();
 
     // === debugging state machine ===
     
@@ -123,7 +142,9 @@ module mkPhysicalChannel#(PHYSICAL_DRIVERS drivers)
     //        05: start
     //        06: invalidate h2fTail
     //        07: invalidate f2hHead
-    //        08: CSR[sys]   := status
+    //        08: CSR[sys]   := status (flags)
+    //        09: CSR[sys]   := status (pointers)
+    //        0A: CSR[sys]   := status (VHDL)
 
     Reg#(DMSTATE) dmstate <- mkReg(DMSTATE_ready);
 
@@ -159,11 +180,13 @@ module mkPhysicalChannel#(PHYSICAL_DRIVERS drivers)
                              data    <= inst[7:0];
                              dmstate <= DMSTATE_doWriteCSR;
                          end
-                'h04   : leds <= truncate(status);
+                'h04   : leds <= truncate(status_flags);
                 'h05   : start <= True;
                 'h06   : h2fTailValid <= False;
                 'h07   : f2hHeadValid <= False;
-                'h08   : drivers.pciExpressDriver.csr_f2h_reg0_write(status);
+                'h08   : drivers.pciExpressDriver.csr_f2h_reg0_write(status_flags);
+                'h09   : drivers.pciExpressDriver.csr_f2h_reg0_write(status_pointers);
+                'h0A   : drivers.pciExpressDriver.csr_f2h_reg0_write(status_vhdl);
                 default: noAction;
             endcase
 
