@@ -5,6 +5,9 @@
 
 `include "streams-common.bsh"
 
+`include "asim/dict/STREAMS.bsh"
+`include "asim/dict/STREAMID.bsh"
+
 // Streams
 interface Streams;
     method Action   makeRequest(STREAMS_REQUEST srq);
@@ -14,28 +17,107 @@ endinterface
 module [HASim_Module] mkStreams#(LowLevelPlatformInterface llpi)
                       // interface
                           (Streams);
+ 
+    Reg#(File) event_log  <- mkReg(InvalidFile);
+    Reg#(File) stat_log   <- mkReg(InvalidFile);
+    Reg#(File) assert_log <- mkReg(InvalidFile);
 
+    rule open_events (event_log == InvalidFile);
+    
+      let fd <- $fopen("stream_events.out");
+      
+      if (fd == InvalidFile)
+      begin
+      
+        $display("ERROR: STREAMS: Could not open file stream_events.out");
+        $finish(1);
+      
+      end
+      
+      event_log <= fd;
+    
+    endrule
+
+    rule open_stats (stat_log == InvalidFile);
+    
+      let fd <- $fopen("stream_stats.out");
+      
+      if (fd == InvalidFile)
+      begin
+      
+        $display("ERROR: STREAMS: Could not open file stream_stats.out");
+        $finish(1);
+      
+      end
+      
+      stat_log <= fd;
+    
+    endrule
+
+    rule open_asserts (assert_log == InvalidFile);
+    
+      let fd <- $fopen("stream_asserts.out");
+      
+      if (fd == InvalidFile)
+      begin
+      
+        $display("ERROR: STREAMS: Could not open file stream_assserts.out");
+        $finish(1);
+      
+      end
+      
+      assert_log <= fd;
+    
+    endrule
     // ------------ methods ------------
 
     // accept request
     method Action   makeRequest(STREAMS_REQUEST srq);
 
-        // TODO: use dictionaries to display string messages instead of IDs
-        // once dictionaries are updated to include strings for BSV
-        $write("streams: ");
+        String msg = showDICT_STREAMS(srq.stringID);
+        
+        case (srq.streamID)
 
-        // streamID
-        $write("streamID = %u ", pack(srq.streamID));
+            ASSERT:
+            begin
+              case (srq.payload0)
+                0:
+                begin
+                  $fdisplay(assert_log, "MESSAGE: %s", msg); //Message
+                end
+                1: 
+                begin
+                  $fdisplay(assert_log, "WARNING: %s", msg);
+                  $display("ASSERTION FAILURE: WARNING: %s", msg);
+                end
+                2:
+                begin
+                  $fdisplay(assert_log, "ERROR: %s", msg);
+                  $display("ASSERTION FAILURE: ERRROR: %s", msg);
+                  $finish(1);
+                end
+                
+              endcase
+              
+            end
+            EVENT:
+            begin
+              $fdisplay(event_log, msg, srq.payload0, srq.payload1);
+            end
+            HEARTBEAT:
+            begin
+              $display("Heartbeat: FPGA Cycle: %0d, Model Cycle: %0d", srq.payload0, srq.payload1); 
+            end
+            STAT:
+            begin
+              $fdisplay(stat_log, msg, srq.payload0);
+            end
+            NULL:
+            begin
+              noAction;
+            end
 
-        // stringID
-        $write("stringID = %u ", pack(srq.stringID));
-
-        // payloads
-        $write("payload0 = 0x%X ", srq.payload0);
-        $write("payload1 = 0x%X ", srq.payload1);
-
-        // newline
-        $display("");
+        endcase
 
     endmethod
 

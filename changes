@@ -2259,3 +2259,17 @@ dropping a reservation.
 Note that the program uses getopt_long() to parse arguments.  That function
 accepts the shortest unique string to specify an argument, so you can currently
 use "hasim-fpga-ctrl --p" and "hasim-fpga-ctrl --a".
+
+----------
+pellauer    Date: Wed Mar  5 12:38:37 EST 2008  CSN: CSN-platforms-58
+                  Wed Mar  5 17:38:37 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/streams
+ simulation-streams.bsv    Locally Modified           57 
+
+
+Bluesim-only streams is now fleshed out and works properly with dictionaries.
+
+TBD: unify the string formatting between Verilog/C (%u, etc).
+
