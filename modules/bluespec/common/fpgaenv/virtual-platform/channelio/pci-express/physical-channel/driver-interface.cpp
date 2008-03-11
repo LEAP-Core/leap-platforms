@@ -17,7 +17,7 @@ DRIVER_INTERFACE_CLASS::DRIVER_INTERFACE_CLASS()
 {
     if (pchnl_open_channel(&pchannel) < 0)
     {
-        cerr << "driver interface: unable to open driver"
+        cerr << "driver interface: unable to open pchnl driver"
              << endl;
         exit(1);
     }

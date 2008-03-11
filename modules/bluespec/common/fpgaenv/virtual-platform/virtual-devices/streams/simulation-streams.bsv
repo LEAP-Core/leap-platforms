@@ -74,11 +74,11 @@ module [HASim_Module] mkStreams#(LowLevelPlatformInterface llpi)
     // accept request
     method Action   makeRequest(STREAMS_REQUEST srq);
 
-        String msg = showDICT_STREAMS(srq.stringID);
+        String msg = showSTREAMS_DICT(srq.stringID);
         
         case (srq.streamID)
 
-            ASSERT:
+            `STREAMID_ASSERT:
             begin
               case (srq.payload0)
                 0:
@@ -100,19 +100,19 @@ module [HASim_Module] mkStreams#(LowLevelPlatformInterface llpi)
               endcase
               
             end
-            EVENT:
+            `STREAMID_EVENT:
             begin
               $fdisplay(event_log, msg, srq.payload0, srq.payload1);
             end
-            HEARTBEAT:
+            `STREAMID_HEARTBEAT:
             begin
               $display("Heartbeat: FPGA Cycle: %0d, Model Cycle: %0d", srq.payload0, srq.payload1); 
             end
-            STAT:
+            `STREAMID_STAT:
             begin
               $fdisplay(stat_log, msg, srq.payload0);
             end
-            NULL:
+            `STREAMID_NULL:
             begin
               noAction;
             end

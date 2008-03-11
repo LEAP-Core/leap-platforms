@@ -72,25 +72,22 @@ STREAMS_CLASS::Request(
     UINT32 payload0 = arg2;
     UINT32 payload1 = arg3;
 
-    // sanity checks
-    if (streamID > STREAMID_last)
+    // lookup format string from dictionary
+    const char *fmtstr = STREAMS_DICT::Str(stringID);
+    if (fmtstr == NULL)
     {
-        cerr << "streams: invalid streamID: " << streamID << endl;
-        CallbackExit(1);
-    }
-
-    if (stringID > STREAMS_last)
-    {
-        cerr << "streams: " << DICT_STREAMID::Str(streamID)
+        cerr << "streams: " << STREAMID_DICT::Str(streamID)
              << ": invalid stringID: " << stringID << endl;
         CallbackExit(1);
     }
 
-    // lookup format string from dictionary
-    const char *fmtstr = DICT_STREAMS::Str(stringID);
-
     // lookup output stream
     FILE *outstream = streamOutput[streamID];
+    if (outstream == NULL)
+    {
+        cerr << "streams: invalid streamID: " << streamID << endl;
+        CallbackExit(1);
+    }
 
     // find number of payloads
     int payloads = CountPayloads(fmtstr);
@@ -140,7 +137,7 @@ STREAMS_CLASS::MapStream(
     FILE *out)
 {
     // sanity check
-    if (streamID > STREAMID_last)
+    if (streamID >= MAX_STREAMS)
     {
         cerr << "streams: invalid streamID: " << streamID << endl;
         CallbackExit(1);

@@ -8,8 +8,8 @@
 
 typedef struct
 {
-    DICT_STREAMID streamID;
-    DICT_STREAMS  stringID;
+    STREAMID_DICT_TYPE streamID;
+    STREAMS_DICT_TYPE  stringID;
     Bit#(32) payload0;
     Bit#(32) payload1;
 }

@@ -2292,3 +2292,28 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci
 - added some debugging code to the PCIe VHDL import module (most of this will gradually
   be removed).
 - removed all polling delays from the software physical channel layer.
+
+----------
+mcadler     Date: Tue Mar 11 16:24:37 EDT 2008  CSN: CSN-platforms-60
+                  Tue Mar 11 20:24:37 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/pci-express/physical-channel
+ driver-interface.cpp      Locally Modified           59 
+ libpchnl.c                Locally Modified           59 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/streams
+ streams-common.bsh        Locally Modified           59 
+ hybrid-streams.h          Locally Modified           59 
+ simulation-streams.bsv    Locally Modified           59 
+ hybrid-streams.cpp        Locally Modified           59 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled
+ htg-v5-pcie-enabled.ucf   Locally Modified           59 
+
+Directory drivers/linux/hasim
+ hasim-fpga-ctrl.c         Locally Modified           59 
+
+- Syntax changes for new dictionary structure.
+- HTG board has a 50MHz crystal, not 100MHz.
+- Clean up error printing when FPGA PCIe driver doesn't load correctly.

@@ -6,8 +6,7 @@
 #include "asim/dict/STREAMID.h"
 
 // constants
-const int MAX_STREAMS = STREAMID_last + 1;
-const int MAX_STRINGS = STREAMS_last + 1;
+const int MAX_STREAMS = (1 << STREAMID_DICT_BITS);
 
 // ===== STREAMS callback module =====
 typedef class STREAMS_CALLBACK_MODULE_CLASS* STREAMS_CALLBACK_MODULE;

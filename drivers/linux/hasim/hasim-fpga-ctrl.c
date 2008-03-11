@@ -317,6 +317,11 @@ void set_pci_state(FPGA_STATE_T state)
         int trips;
 
         //
+        // Let PCI settle
+        //
+        sleep(1);
+
+        //
         // Make sure kernel driver is loaded
         //
         if (! kernel_driver_is_loaded())
