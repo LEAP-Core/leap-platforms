@@ -273,11 +273,11 @@ void set_pci_state(FPGA_STATE_T state)
     switch (state)
     {
       case STATE_PCI_PROGRAM:
-        printf("hasim-fpga-ctrl: Turing off PCIe bus...\n");
+        printf("hasim-fpga-ctrl: Turning off PCIe bus...\n");
         req = '0';
         break;
       case STATE_PCI_ACTIVE:
-        printf("hasim-fpga-ctrl: Turing on PCIe bus...\n");
+        printf("hasim-fpga-ctrl: Turning on PCIe bus...\n");
         req = '1';
         break;
       default:

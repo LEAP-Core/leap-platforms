@@ -2422,3 +2422,17 @@ Reorganized ChannelIO and Physical Channels.
   to the ChannelIO Multiplexer above by talking to the
   available physical devices on their respective Physical
   Platforms.
+
+----------
+mcadler     Date: Fri Mar 14 15:38:49 EDT 2008  CSN: CSN-platforms-62
+                  Fri Mar 14 19:38:49 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/streams
+ simulation-streams.bsv    Locally Modified           61 
+
+Directory drivers/linux/hasim
+ hasim-fpga-ctrl.c         Locally Modified           61 
+
+- Temporary fix for models using only the NULL streamID.
+- Fix typo in hasim-fpga-ctrl
