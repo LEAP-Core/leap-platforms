@@ -149,9 +149,6 @@ RRR_SERVER_CLASS::DeliverMessage(
     // de-allocate it themselves.
     delete message;
 
-    //cout << "server: received message: service " << serviceID << " method "
-    //     << argv[0] << " arg1 " << argv[1] << " arg2 " << argv[2] << endl;
-
     // invoke service method to obtain result
     UINT32 result;
     bool send_result = ServiceMap[serviceID]->Request(argv[0], argv[1], argv[2], argv[3], &result);

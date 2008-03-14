@@ -9,7 +9,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#include "sim-channelio-bdpi.h"
+#include "sim-physical-channel-bdpi.h"
 
 /* global table of open channel handles */
 Channel OCHT[MAX_OPEN_CHANNELS];
@@ -22,7 +22,7 @@ void cleanup()
 }
 
 /* initialize global data structures */
-void cio_init(void)
+void pch_init(void)
 {
     int i;
     char buf[32];
@@ -51,9 +51,9 @@ void cio_init(void)
 
     /* make sure channel is working by exchanging
      * message with software */
-    if (read(CHANNELIO_HOST_2_FPGA, buf, 4) == -1)
+    if (read(PCH_HOST_2_FPGA, buf, 4) == -1)
     {
-        perror("FPGA/cio_init/read");
+        perror("FPGA/pch_init/read");
         exit(1);
     }
 
@@ -63,15 +63,15 @@ void cio_init(void)
         exit(1);
     }
 
-    if (write(CHANNELIO_FPGA_2_HOST, "ACK", 4) == -1)
+    if (write(PCH_FPGA_2_HOST, "ACK", 4) == -1)
     {
-        perror("FPGA/cio_init/write");
+        perror("FPGA/pch_init/write");
         exit(1);
     }
 }
 
 /* create process and initialize data structures */
-unsigned char cio_open(unsigned char serviceID)
+unsigned char pch_open(unsigned char serviceID)
 {
     int i;
     Channel *channel;
@@ -117,7 +117,7 @@ unsigned char cio_open(unsigned char serviceID)
 }
 
 /* read one chunk of data */
-unsigned long long cio_read(unsigned char handle)
+unsigned long long pch_read(unsigned char handle)
 {
     struct timeval timeout;
     int done;
@@ -142,12 +142,12 @@ unsigned long long cio_read(unsigned char handle)
         fd_set  readfds;
 
         FD_ZERO(&readfds);
-        FD_SET(CHANNELIO_HOST_2_FPGA, &readfds);
+        FD_SET(PCH_HOST_2_FPGA, &readfds);
 
         timeout.tv_sec  = 0;
         timeout.tv_usec = SELECT_TIMEOUT;
 
-        data_available = select(CHANNELIO_HOST_2_FPGA + 1, &readfds,
+        data_available = select(PCH_HOST_2_FPGA + 1, &readfds,
                                 NULL, NULL, &timeout);
 
         if (data_available == -1)
@@ -163,7 +163,7 @@ unsigned long long cio_read(unsigned char handle)
             int bytes_read;
 
             /* sanity check */
-            if (data_available != 1 || FD_ISSET(CHANNELIO_HOST_2_FPGA, &readfds) == 0)
+            if (data_available != 1 || FD_ISSET(PCH_HOST_2_FPGA, &readfds) == 0)
             {
                 fprintf(stderr, "activity detected on unknown descriptor\n");
                 exit(1);
@@ -172,7 +172,7 @@ unsigned long long cio_read(unsigned char handle)
             /* read in data, keep it aligned */
             bytes_requested = BLOCK_SIZE - channel->ibTail;
 
-            bytes_read = read(CHANNELIO_HOST_2_FPGA,
+            bytes_read = read(PCH_HOST_2_FPGA,
                               &channel->inputBuffer[channel->ibTail],
                               bytes_requested);
 
@@ -197,7 +197,7 @@ unsigned long long cio_read(unsigned char handle)
 
         /* sanity checks */
         assert(channel->ibHead <= channel->ibTail);
-        assert(retval != CIO_NULL);
+        assert(retval != PCH_NULL);
 
         /* now that we have a full chunk, see if head and tail are
          * aligned, and if so, reset both pointers */
@@ -212,11 +212,11 @@ unsigned long long cio_read(unsigned char handle)
     }
 
     /* if we're here, then there's no data on the incoming channel */
-    return CIO_NULL;
+    return PCH_NULL;
 }
 
 /* write one chunk of data */
-void cio_write(unsigned char handle, unsigned int data)
+void pch_write(unsigned char handle, unsigned int data)
 {   
     int bytes_written;
     unsigned char databuf[BDPI_CHUNK_BYTES];
@@ -241,10 +241,10 @@ void cio_write(unsigned char handle, unsigned int data)
     }
 
     /* send message on pipe */
-    bytes_written = write(CHANNELIO_FPGA_2_HOST, databuf, BDPI_CHUNK_BYTES);
+    bytes_written = write(PCH_FPGA_2_HOST, databuf, BDPI_CHUNK_BYTES);
     if (bytes_written == -1)
     {
-        perror("FPGA/cio_write/write");
+        perror("FPGA/pch_write/write");
         cleanup();
         exit(1);
     }

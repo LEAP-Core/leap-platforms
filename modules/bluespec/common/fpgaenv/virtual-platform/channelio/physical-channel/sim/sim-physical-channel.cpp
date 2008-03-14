@@ -10,7 +10,7 @@
 #include <string.h>
 #include <iostream>
 
-#include "physical-channel.h"
+#include "asim/provides/physical_channel.h"
 
 using namespace std;
 

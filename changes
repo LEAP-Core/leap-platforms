@@ -2317,3 +2317,108 @@ Directory drivers/linux/hasim
 - Syntax changes for new dictionary structure.
 - HTG board has a 50MHz crystal, not 100MHz.
 - Clean up error printing when FPGA PCIe driver doesn't load correctly.
+
+----------
+aparasha    Date: Fri Mar 14 11:20:26 EDT 2008  CSN: CSN-platforms-61
+                  Fri Mar 14 15:20:26 UTC 2008
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ hasim-fpgaenv-hybrid-sim.apm Locally Modified           60 
+ hasim-fpgaenv-htg-v5-pcie.apm Locally Modified           60 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio
+ basic/                    Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/basic
+ basic-channelio.cpp       Locally Added               0 
+ basic-channelio.h         Locally Added               0 
+ basic-channelio.awb       Locally Added               0 
+ basic-channelio.bsv       Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio
+ pci-express/              Locally Removed            60 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/pci-express
+ pcie-channelio.cpp        Locally Removed            60 
+ physical-channel/         Locally Removed            60 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/pci-express/physical-channel
+ driver-interface.h        Locally Removed            60 
+ libpchnl.h                Locally Removed            60 
+ physical-channel.cpp      Locally Removed            60 
+ pchnl_if.h                Locally Removed            60 
+ physical-channel.h        Locally Removed            60 
+ driver-interface.cpp      Locally Removed            60 
+ physical-channel.awb      Locally Removed            60 
+ physical-channel.bsv      Locally Removed            60 
+ libpchnl.c                Locally Removed            60 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/pci-express
+ pcie-channelio.h          Locally Removed            60 
+ pcie-channelio.awb        Locally Removed            60 
+ pcie-channelio.bsv        Locally Removed            60 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio
+ physical-channel/         Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel
+ pci-express/              Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/pci-express
+ driver-interface.h        Locally Added               0 
+ libpchnl.h                Locally Added               0 
+ pcie-physical-channel.cpp Locally Added               0 
+ pcie-physical-channel.h   Locally Added               0 
+ pchnl_if.h                Locally Added               0 
+ pcie-physical-channel.awb Locally Added               0 
+ pcie-physical-channel.bsv Locally Added               0 
+ driver-interface.cpp      Locally Added               0 
+ libpchnl.c                Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel
+ sim/                      Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/sim
+ sim-physical-channel.awb  Locally Added               0 
+ sim-physical-channel.bsv  Locally Added               0 
+ sim-physical-channel-bdpi.c Locally Added               0 
+ sim-physical-channel.cpp  Locally Added               0 
+ sim-physical-channel-bdpi.h Locally Added               0 
+ sim-physical-channel.h    Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio
+ sim/                      Locally Removed            60 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/sim
+ sim-channelio.bsv         Locally Removed            60 
+ physical-channel.cpp      Locally Removed            60 
+ sim-channelio-bdpi.c      Locally Removed            60 
+ sim-channelio.cpp         Locally Removed            60 
+ physical-channel.h        Locally Removed            60 
+ sim-channelio-bdpi.h      Locally Removed            60 
+ sim-channelio.h           Locally Removed            60 
+ sim-channelio.awb         Locally Removed            60 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ basic-rrr-server.cpp      Locally Modified           60 
+
+Reorganized ChannelIO and Physical Channels.
+
+- ChannelIO is now platform independent, and only performs
+  Virtual Channel Multiplexing.
+
+- There are two valid implementations of ChannelIO, 'basic'
+  and 'null'. Both are platform-independent.
+
+- The module called 'Channel I/O to a UNIX process' of type
+  channelio is an anomaly and will be re-located soon. It
+  has nothing to do with Channel I/O and is in fact simply
+  a Front Panel Physical Device for Pure Simulation.
+
+- There are two platform-dependent PhysicalChannel modules,
+  one for PCI-Express and the other for Hybrid Simulation,
+  each of which knows how to provide the exact same interface
+  to the ChannelIO Multiplexer above by talking to the
+  available physical devices on their respective Physical
+  Platforms.

@@ -14,18 +14,27 @@
  **/
 int pchnl_open_channel(struct hw_channel *pchnl)
 {
-    if (pchnl == NULL){
-        LIB_PCHNL_ALERT("invalid channel parameter\n");
-        return -ECHANNEL;
-    }
+     int ret = 0;
 
-    pchnl->fd = open("/dev/pchnl", O_RDWR);
-    if (pchnl->fd < 0){
-        LIB_PCHNL_ALERT("error opening device\n");
-        return -ENODEVICE;
-    }
+     if (pchnl == NULL){
+          LIB_PCHNL_ALERT("invalid channel parameter\n");
+          ret = -ECHANNEL;
+          goto err;
+     }
 
-    return 0;
+     pchnl->fd = open("/dev/pchnl", O_RDWR);
+     if (pchnl->fd < 0){
+          LIB_PCHNL_ALERT("error opening device\n");
+          ret = -ENODEVICE;
+          goto no_device;
+     }
+
+     return ret;
+no_device:
+     free(pchnl);
+no_mem:
+err:
+     return ret;
 }
 
 /**

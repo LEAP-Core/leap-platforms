@@ -1,0 +1,14 @@
+
+%name Basic Virtual Channel Multiplexer
+%desc Basic Virtual Channel Multiplexer
+
+%provides channelio
+
+%requires physical_channel
+
+%sources -t BSV -v PUBLIC   basic-channelio.bsv
+%sources -t H   -v PUBLIC   basic-channelio.h
+%sources -t CPP -v PRIVATE  basic-channelio.cpp
+
+%param CIO_NUM_CHANNELS     2   "Number of virtual duplex channels"
+

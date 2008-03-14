@@ -44,7 +44,7 @@ streams=Hybrid Streams
 
 [Low Level Platform Interface/Requires]
 rrr=RRR Clients and Servers
-channelio=ChannelIO Module for PCI-Express
+channelio=Basic Virtual Channel Multiplexer
 physical_platform=HTG Virtex 5 PCIE Enabled
 
 [Low Level Platform Interface]
@@ -72,16 +72,11 @@ switch_device=General Switch Device
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/switches/general-switch-device.awb
 Packagehint=platforms
 
-[ChannelIO Module for PCI-Express]
-File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/pci-express/pcie-channelio.awb
-Packagehint=platforms
 
 [PCI-Express CSR-based Physical Channel]
-File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/pci-express/physical-channel/physical-channel.awb
+File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/pci-express/pcie-physical-channel.awb
 Packagehint=platforms
 
-[ChannelIO Module for PCI-Express/Requires]
-physical_channel=PCI-Express CSR-based Physical Channel
 
 [Hybrid Front Panel]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid/hybrid-fp.awb
@@ -102,3 +97,10 @@ Packagehint=platforms
 [Hybrid Memory]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid/hybrid-memory.awb
 Packagehint=platforms
+
+[Basic Virtual Channel Multiplexer]
+File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/basic/basic-channelio.awb
+Packagehint=platforms
+
+[Basic Virtual Channel Multiplexer/Requires]
+physical_channel=PCI-Express CSR-based Physical Channel

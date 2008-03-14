@@ -4,9 +4,9 @@
 
 %provides physical_channel
 
-%sources -t BSV -v PUBLIC   physical-channel.bsv
-%sources -t H   -v PUBLIC   physical-channel.h
-%sources -t CPP -v PRIVATE  physical-channel.cpp
+%sources -t BSV -v PUBLIC   pcie-physical-channel.bsv
+%sources -t H   -v PUBLIC   pcie-physical-channel.h
+%sources -t CPP -v PRIVATE  pcie-physical-channel.cpp
 %sources -t H   -v PUBLIC   driver-interface.h
 %sources -t CPP -v PRIVATE  driver-interface.cpp
 %sources -t H   -v PUBLIC   pchnl_if.h

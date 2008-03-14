@@ -42,13 +42,10 @@ File=modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interfa
 Packagehint=platforms
 
 [Low Level Platform Interface/Requires]
-channelio=ChannelIO Module for Simulation
+channelio=Basic Virtual Channel Multiplexer
 rrr=RRR Clients and Servers
 physical_platform=Null Physical Platform
 
-[ChannelIO Module for Simulation]
-File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/sim/sim-channelio.awb
-Packagehint=platforms
 
 [RRR Clients and Servers]
 File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic/basic-rrr.awb
@@ -81,3 +78,14 @@ Packagehint=platforms
 [Hybrid Streams]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/streams/hybrid-streams.awb
 Packagehint=platforms
+
+[Simulation Physical Channel]
+File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/sim/sim-physical-channel.awb
+Packagehint=platforms
+
+[Basic Virtual Channel Multiplexer]
+File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/basic/basic-channelio.awb
+Packagehint=platforms
+
+[Basic Virtual Channel Multiplexer/Requires]
+physical_channel=Simulation Physical Channel
