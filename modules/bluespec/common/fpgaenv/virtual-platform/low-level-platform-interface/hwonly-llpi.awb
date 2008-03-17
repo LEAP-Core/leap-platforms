@@ -1,0 +1,8 @@
+%name Low Level Platform Interface Hardware-Only
+%desc Low Level Platform Interface for Hardware-Only Models
+
+%provides low_level_platform_interface
+
+%requires rrr channelio physical_platform
+
+%sources -t BSV -v PUBLIC llpi.bsv

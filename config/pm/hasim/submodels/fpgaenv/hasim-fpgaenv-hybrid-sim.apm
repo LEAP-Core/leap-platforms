@@ -30,22 +30,12 @@ Packagehint=platforms
 
 [Standard Virtual Platform/Requires]
 virtual_devices=Standard Virtual Devices
-low_level_platform_interface=Low Level Platform Interface
+low_level_platform_interface=Low Level Platform Interface Hybrid
 umf=Simple 32-bit Unified Message Format
 
 [Hybrid Front Panel]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid/hybrid-fp.awb
 Packagehint=platforms
-
-[Low Level Platform Interface]
-File=modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface/low-level-platform-interface.awb
-Packagehint=platforms
-
-[Low Level Platform Interface/Requires]
-channelio=Basic Virtual Channel Multiplexer
-rrr=RRR Clients and Servers
-physical_platform=Null Physical Platform
-
 
 [RRR Clients and Servers]
 File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic/basic-rrr.awb
@@ -63,13 +53,6 @@ Packagehint=platforms
 memory=Hybrid Memory
 front_panel=Hybrid Front Panel
 streams=Hybrid Streams
-
-[Null Physical Platform]
-File=modules/bluespec/common/fpgaenv/physical-platform/null/null-physical-platfrom.awb
-Packagehint=platforms
-
-[Null Physical Platform/Params]
-FPGA_PART="xc5vlx50t-ff1136"
 
 [Simple 32-bit Unified Message Format]
 File=modules/bluespec/common/fpgaenv/virtual-platform/umf/simple-32/simple-32-umf.awb
@@ -89,3 +72,23 @@ Packagehint=platforms
 
 [Basic Virtual Channel Multiplexer/Requires]
 physical_channel=Simulation Physical Channel
+
+[Low Level Platform Interface Hybrid]
+File=modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface/hybrid-llpi.awb
+Packagehint=platforms
+
+[Low Level Platform Interface Hybrid/Requires]
+physical_platform=Simulation Physical Platform
+channelio=Basic Virtual Channel Multiplexer
+rrr=RRR Clients and Servers
+
+[UNIX Pipe Physical Device]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe/unix-pipe-device.awb
+Packagehint=platforms
+
+[Simulation Physical Platform/Requires]
+unix_pipe_device=UNIX Pipe Physical Device
+
+[Simulation Physical Platform]
+File=modules/bluespec/common/fpgaenv/physical-platform/simulation/sim-physical-platform.awb
+Packagehint=platforms

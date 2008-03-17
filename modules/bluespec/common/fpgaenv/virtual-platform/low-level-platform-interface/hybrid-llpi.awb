@@ -1,0 +1,10 @@
+%name Low Level Platform Interface Hybrid
+%desc Low Level Platform Interface for Hybrid Models
+
+%provides low_level_platform_interface
+
+%requires rrr channelio physical_platform
+
+%sources -t BSV -v PUBLIC  llpi.bsv
+%sources -t H   -v PUBLIC  llpi.h
+%sources -t CPP -v PRIVATE llpi.cpp

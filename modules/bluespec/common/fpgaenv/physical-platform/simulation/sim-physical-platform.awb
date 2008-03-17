@@ -1,0 +1,12 @@
+
+%name Simulation Physical Platform
+%desc Simulation Physical Platform
+
+%provides physical_platform
+
+%requires unix_pipe_device
+
+%sources -t BSV -v PUBLIC  sim-physical-platform.bsv
+%sources -t H   -v PUBLIC  sim-physical-platform.h
+%sources -t CPP -v PRIVATE sim-physical-platform.cpp
+

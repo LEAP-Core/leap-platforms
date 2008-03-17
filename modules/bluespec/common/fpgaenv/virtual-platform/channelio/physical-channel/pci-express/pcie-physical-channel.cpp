@@ -26,8 +26,14 @@ using namespace std;
 // ============================================
 
 // constructor: set up hardware partition
-PHYSICAL_CHANNEL_CLASS::PHYSICAL_CHANNEL_CLASS()
+PHYSICAL_CHANNEL_CLASS::PHYSICAL_CHANNEL_CLASS(
+    HASIM_MODULE     p,
+    PHYSICAL_DEVICES d) :
+        HASIM_MODULE_CLASS(p)
 {
+    // cache links to useful physical devices
+    pciExpressDevice = d->GetPCIExpressDevice();
+
     // initialize pointers
     f2hHead      = CSR_F2H_BUF_START;
     f2hTailCache = CSR_F2H_BUF_START;
@@ -38,16 +44,16 @@ PHYSICAL_CHANNEL_CLASS::PHYSICAL_CHANNEL_CLASS()
     iid = 0;
 
     // bootstrap: first write indices that I control
-    driver.WriteCommonCSR(CSR_F2H_HEAD, f2hHead);
-    driver.WriteCommonCSR(CSR_H2F_TAIL, h2fTail);
+    pciExpressDevice->WriteCommonCSR(CSR_F2H_HEAD, f2hHead);
+    pciExpressDevice->WriteCommonCSR(CSR_H2F_TAIL, h2fTail);
 
     // give green signal to FPGA
-    driver.WriteSystemCSR(genIID() | 0x50000);
+    pciExpressDevice->WriteSystemCSR(genIID() | 0x50000);
 
     CSR_DATA data;
     do
     {
-        data = driver.ReadSystemCSR();
+        data = pciExpressDevice->ReadSystemCSR();
         SLEEP;
     }
     while (data != SIGNAL_GREEN);
@@ -89,7 +95,7 @@ PHYSICAL_CHANNEL_CLASS::Read()
         // if CSRs are empty, then poll pointers till some data is available
         while (f2hHead == f2hTailCache)
         {
-            f2hTailCache = driver.ReadCommonCSR(CSR_F2H_TAIL);
+            f2hTailCache = pciExpressDevice->ReadCommonCSR(CSR_F2H_TAIL);
             SLEEP;
         }
 
@@ -108,7 +114,7 @@ PHYSICAL_CHANNEL_CLASS::TryRead()
     // if CSRs are empty, then poll pointers (OPTIONAL)
     if (f2hHead == f2hTailCache)
     {
-        f2hTailCache = driver.ReadCommonCSR(CSR_F2H_TAIL);
+        f2hTailCache = pciExpressDevice->ReadCommonCSR(CSR_F2H_TAIL);
         SLEEP;
     }
 
@@ -139,7 +145,7 @@ PHYSICAL_CHANNEL_CLASS::Write(
     CSR_INDEX h2fTailPlusOne = (h2fTail == CSR_H2F_BUF_END) ? CSR_H2F_BUF_START : (h2fTail + 1);
     while (h2fTailPlusOne == h2fHeadCache)
     {
-        h2fHeadCache = driver.ReadCommonCSR(CSR_H2F_HEAD);
+        h2fHeadCache = pciExpressDevice->ReadCommonCSR(CSR_H2F_HEAD);
         SLEEP;
     }
 
@@ -152,7 +158,7 @@ PHYSICAL_CHANNEL_CLASS::Write(
     CSR_DATA csr_data = CSR_DATA(header);
 
     // write header to physical channel
-    driver.WriteCommonCSR(h2fTail, csr_data);
+    pciExpressDevice->WriteCommonCSR(h2fTail, csr_data);
     h2fTail = h2fTailPlusOne;
     h2fTailPlusOne = (h2fTail == CSR_H2F_BUF_END) ? CSR_H2F_BUF_START : (h2fTail + 1);
 
@@ -163,7 +169,7 @@ PHYSICAL_CHANNEL_CLASS::Write(
         // this gets ugly - we need to block until space is available
         while (h2fTailPlusOne == h2fHeadCache)
         {
-            h2fHeadCache = driver.ReadCommonCSR(CSR_H2F_HEAD);
+            h2fHeadCache = pciExpressDevice->ReadCommonCSR(CSR_H2F_HEAD);
             SLEEP;
         }
 
@@ -171,14 +177,14 @@ PHYSICAL_CHANNEL_CLASS::Write(
         UMF_CHUNK chunk = message->ReadChunk();
         csr_data = CSR_DATA(chunk);
 
-        driver.WriteCommonCSR(h2fTail, csr_data);
+        pciExpressDevice->WriteCommonCSR(h2fTail, csr_data);
         h2fTail = h2fTailPlusOne;
         h2fTailPlusOne = (h2fTail == CSR_H2F_BUF_END) ? CSR_H2F_BUF_START : (h2fTail + 1);
     }
 
     // sync h2fTail pointer (OPTIONAL)
-    driver.WriteCommonCSR(CSR_H2F_TAIL, h2fTail);
-    driver.WriteSystemCSR(genIID() | 0x60000);
+    pciExpressDevice->WriteCommonCSR(CSR_H2F_TAIL, h2fTail);
+    pciExpressDevice->WriteSystemCSR(genIID() | 0x60000);
 
     // de-allocate message
     delete message;
@@ -198,7 +204,7 @@ PHYSICAL_CHANNEL_CLASS::readCSR()
     }
 
     // read in one CSR
-    csr_data = driver.ReadCommonCSR(f2hHead);
+    csr_data = pciExpressDevice->ReadCommonCSR(f2hHead);
     chunk = UMF_CHUNK(csr_data);
 
     //cout << "readCSR: read new chunk at F2H head = " << f2hHead
@@ -208,8 +214,8 @@ PHYSICAL_CHANNEL_CLASS::readCSR()
     f2hHead = (f2hHead == CSR_F2H_BUF_END) ? CSR_F2H_BUF_START : (f2hHead + 1);
 
     // sync head pointer (OPTIONAL)
-    driver.WriteCommonCSR(CSR_F2H_HEAD, f2hHead);
-    driver.WriteSystemCSR(genIID() | 0x70000);
+    pciExpressDevice->WriteCommonCSR(CSR_F2H_HEAD, f2hHead);
+    pciExpressDevice->WriteSystemCSR(genIID() | 0x70000);
 
     // determine if we are starting a new message
     if (incomingMessage == NULL)

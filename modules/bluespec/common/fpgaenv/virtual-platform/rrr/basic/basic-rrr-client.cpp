@@ -12,9 +12,9 @@ RRR_CLIENT RRRClient;
 // constructor
 RRR_CLIENT_CLASS::RRR_CLIENT_CLASS(
     HASIM_MODULE p,
-    CHANNELIO cio)
+    CHANNELIO    cio) :
+        HASIM_MODULE_CLASS(p)
 {
-    parent = p;
     channelio = cio;
 }
 
@@ -30,9 +30,6 @@ RRR_CLIENT_CLASS::MakeRequest(
 {
     // add channelID to request
     request->SetChannelID(CHANNEL_ID);
-
-    //cout << "client: making request, need response" << endl;
-    //request->Print(cout);
 
     // write request message to channelio
     channelio->Write(CHANNEL_ID, request);

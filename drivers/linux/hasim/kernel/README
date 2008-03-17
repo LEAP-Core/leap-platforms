@@ -4,5 +4,8 @@
 - pchnl_if.h
   PCIe Hardware Channel interface declaration
 
+- pchnl_if.awb
+  AWB Module Wrapper around pchnl_if.h
+
 - pchnl_main.[c|h]
   PCIe Hardware Channel driver

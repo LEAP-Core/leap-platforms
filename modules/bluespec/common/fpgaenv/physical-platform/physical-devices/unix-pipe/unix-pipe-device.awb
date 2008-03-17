@@ -1,0 +1,13 @@
+
+%name UNIX Pipe Physical Device
+%desc UNIX Pipe Physical Device
+
+%provides unix_pipe_device
+
+%sources -t BSV    -v PUBLIC  unix-pipe-device.bsv
+%sources -t BDPI_H -v PUBLIC  unix-pipe-device-bdpi.h
+%sources -t BDPI_C -v PRIVATE unix-pipe-device-bdpi.c
+%sources -t H      -v PUBLIC  unix-pipe-device.h
+%sources -t CPP    -v PRIVATE unix-pipe-device.cpp
+
+%param BDPI_NAMES   "pipe_init pipe_open pipe_read pipe_write"  "list of BDPI-exported names"

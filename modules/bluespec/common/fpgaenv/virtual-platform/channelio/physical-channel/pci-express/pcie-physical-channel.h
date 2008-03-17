@@ -2,17 +2,18 @@
 #define __PHYSICAL_CHANNEL__
 
 #include "asim/provides/umf.h"
-#include "driver-interface.h"
+#include "asim/provides/pci_express_device.h"
+#include "asim/provides/physical_platform.h"
 
 // ============================================
 //               Physical Channel              
 // ============================================
 
-class PHYSICAL_CHANNEL_CLASS
+class PHYSICAL_CHANNEL_CLASS: public HASIM_MODULE_CLASS
 {
     private:
-        // driver interface
-        DRIVER_INTERFACE_CLASS driver;
+        // links to useful physical devices
+        PCIE_DEVICE pciExpressDevice;
 
         // physical channel state
         CSR_INDEX f2hHead;
@@ -31,7 +32,7 @@ class PHYSICAL_CHANNEL_CLASS
         CSR_DATA genIID();
 
     public:
-        PHYSICAL_CHANNEL_CLASS();
+        PHYSICAL_CHANNEL_CLASS(HASIM_MODULE, PHYSICAL_DEVICES);
         ~PHYSICAL_CHANNEL_CLASS();
         void        Uninit();
 

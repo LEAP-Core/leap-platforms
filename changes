@@ -2436,3 +2436,151 @@ Directory drivers/linux/hasim
 
 - Temporary fix for models using only the NULL streamID.
 - Fix typo in hasim-fpga-ctrl
+
+----------
+aparasha    Date: Mon Mar 17 10:23:34 EDT 2008  CSN: CSN-platforms-63
+                  Mon Mar 17 14:23:34 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/basic
+ basic-channelio.cpp       Locally Modified           61 
+ basic-channelio.h         Locally Modified           61 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/pci-express
+ driver-interface.h        Locally Removed            61 
+ libpchnl.h                Locally Removed            61 
+ pcie-physical-channel.cpp Locally Modified           61 
+ pcie-physical-channel.h   Locally Modified           61 
+ pchnl_if.h                Locally Removed            61 
+ pcie-physical-channel.awb Locally Modified           61 
+ driver-interface.cpp      Locally Removed            61 
+ libpchnl.c                Locally Removed            61 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/sim
+ sim-physical-channel.awb  Locally Modified           61 
+ sim-physical-channel.bsv  Locally Modified           61 
+ sim-physical-channel-bdpi.c Locally Removed            61 
+ sim-physical-channel.cpp  Locally Modified           61 
+ sim-physical-channel-bdpi.h Locally Removed            61 
+ sim-physical-channel.h    Locally Modified           61 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ basic-rrr-client.cpp      Locally Modified           61 
+ basic-rrr-server.cpp      Locally Modified           61 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface
+ llpi.cpp                  Locally Added               0 
+ hwonly-llpi.awb           Locally Added               0 
+ llpi.h                    Locally Added               0 
+ hybrid-llpi.awb           Locally Added               0 
+ LowLevelPlatformInterface.bsv Locally Removed            61 
+ llpi.bsv                  Locally Added               0 
+ low-level-platform-interface.awb Locally Removed            61 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform
+ simulation/               Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/simulation
+ sim-physical-platform.cpp Locally Added               0 
+ sim-physical-platform.h   Locally Added               0 
+ sim-physical-platform.awb Locally Added               0 
+ sim-physical-platform.bsv Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled
+ htg-v5-pcie-enabled.cpp   Locally Added               0 
+ htg-v5-pcie-enabled.h     Locally Added               0 
+ htg-v5-pcie-enabled.awb   Locally Modified           61 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express
+ pci-express-device-import.awb Locally Added               0 
+ pci-express-c-import.h    Locally Added               0 
+ libpchnl.h                Locally Added               0 
+ pci-express-c-import.cpp  Locally Added               0 
+ libpchnl.c                Locally Added               0 
+ pci-express-vhdl-import.awb Locally Removed            61 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices
+ unix-pipe/                Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe
+ unix-pipe-device.h        Locally Added               0 
+ unix-pipe-device.awb      Locally Added               0 
+ unix-pipe-device.bsv      Locally Added               0 
+ unix-pipe-device-bdpi.c   Locally Added               0 
+ unix-pipe-device.cpp      Locally Added               0 
+ unix-pipe-device-bdpi.h   Locally Added               0 
+
+Directory drivers/linux/hasim/kernel
+ pchnl_if.awb              Locally Added               0 
+ README                    Locally Modified           61 
+
+Directory config/pm/hasim/submodels/fpgaenv
+ hasim-fpgaenv-software-no-gui.apm Locally Modified           61 
+ hasim-fpgaenv-hybrid-sim.apm Locally Modified           61 
+ hasim-fpgaenv-htg-v5-pcie.apm Locally Modified           61 
+ hasim-fpgaenv-software.apm Locally Modified           61 
+
+Significant Reorganization of Host Software Stack to make its
+hierarchy similar to FPGA-side stack.
+
+Summary of Changes
+------------------
+
+Software stack now instantiates and uses physical platforms
+similar to the way Bluespec does. However, unlike Bluespec,
+it does not have to go through an additional layer of "drivers"
+sitting on top of devices.
+
+All devices in the physical platform are collected together
+into a PHYSICAL_DEVICES class, with accessors available for
+each device, e.g., physicalDevices->GetPCIExpressDevice().
+
+PCI-Express Physical Platform
+-----------------------------
+
+- Removed duplicate copy of kernel header "pchnl_if.h" from
+  Physical Channel. Added an AWB file at the driver's location
+  (platforms/drivers/...) which can be used to tap into the
+  header.
+
+- Removed "libpchnl.*" code from PCIe Physical Channel as well
+  as the "driver_interface.*" wrappers into the PCIe Physical
+  Device under Physical Platform. These are now part of the
+  software side of the PCI-Express Physical Device. All VHDL
+  and user-level C code provided by CBL is now imported in this
+  module. The VHDL is wrapped in Bluespec and seen as an
+  FPGA-side Device, and the C is wrapped in C++ and seen as a
+  software-side Device.
+
+- Added C++ files to htg_v5_pcie physical platform module.
+  This code wraps together all physical devices available to
+  the software side (currently, PCIe is the only device).
+
+Simulation Physical Platform
+----------------------------
+
+- Added a Simulation Physical Platform. This should probably
+  be renamed to "Hybrid-Simulation Physical Platform", since it
+  is not clear (to me) yet whether this platform can be shared
+  between Pure Simulation and Hybrid Simulation models.
+  Currently, only Hybrid Simulation models use it.
+
+- Added a UNIX Pipe Physical Device. Moved all C++ and BSV code
+  that dealt with the lowest levels of interfacing with a UNIX
+  pipe from the Simulation Physical Channel module to this
+  device module. This includes all BDPI code. Barring some
+  anomalous modules used for Pure Simulation (which will be
+  fixed soon), Virtual Platforms is now free of any BDPI code.
+
+- Simulation Physical Platform instantiates the UNIX Pipe
+  Physical Device and makes it available to the upper layers
+  as part of the PHYSICAL_DEVICES colelction.
+
+Other
+-----
+
+- Added a Hybrid LLPI module that also adds a software version
+  of the LLPI. Software LLPI now instantiates Physical Platform,
+  ChannelIO and RRR modules (similar to BSV LLPI).
+
+- Updated fpgaenv submodules to reflect the new organization.

@@ -74,9 +74,9 @@ RRR_SERVER_CLASS::unsetServiceValid(
 // constructor
 RRR_SERVER_CLASS::RRR_SERVER_CLASS(
     HASIM_MODULE p,
-    CHANNELIO cio)
+    CHANNELIO    cio) :
+        HASIM_MODULE_CLASS(p)
 {
-    parent = p;
     channelio = cio;
     Init();
 }
@@ -87,7 +87,8 @@ RRR_SERVER_CLASS::~RRR_SERVER_CLASS()
     Uninit();
 }
 
-// init
+// init: all services MUST have registered when this
+// method is called
 void
 RRR_SERVER_CLASS::Init()
 {

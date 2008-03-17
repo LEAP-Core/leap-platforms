@@ -58,7 +58,7 @@ class CHANNELIO_CLASS:  public HASIM_MODULE_CLASS
         CIO_STATION_INFO    stations[CIO_NUM_CHANNELS];
 
     public:
-        CHANNELIO_CLASS(HASIM_MODULE);
+        CHANNELIO_CLASS(HASIM_MODULE, PHYSICAL_DEVICES);
         ~CHANNELIO_CLASS();
         void        Uninit();
         void        RegisterForDelivery(int, CIO_DELIVERY_STATION);
