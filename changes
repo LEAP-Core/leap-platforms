@@ -2584,3 +2584,24 @@ Other
   ChannelIO and RRR modules (similar to BSV LLPI).
 
 - Updated fpgaenv submodules to reflect the new organization.
+
+----------
+aparasha    Date: Mon Mar 17 11:49:47 EDT 2008  CSN: CSN-platforms-64
+                  Mon Mar 17 15:49:47 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express
+ libpchnl.h                Locally Modified           63 
+ libpchnl.c                Locally Modified           63 
+
+Directory drivers/linux/hasim/kernel
+ pchnl_if.h                Locally Modified           62 
+ pchnl_main.c              Locally Modified           62 
+ pchnl_main.h              Locally Modified           62 
+
+- updated software PCIe kernel driver with latest code from CBL
+  featuring support for memory-mapped IO and an updated
+  interrupt interface.
+
+- updated libpchnl code in PCIe physical device with latest
+  snapshot from CBL.

@@ -251,3 +251,25 @@ int pchnl_intr_tester(struct hw_channel *pchnl)
 failed:
      return ret;
 }
+
+int pchnl_register_intr_status_addr(struct hw_channel *pchnl, unsigned int * intr_status_reg)
+{
+     struct pchnl_req req;
+     int ret = 0;
+
+     if (pchnl == NULL){
+          LIB_PCHNL_ALERT("no channel specified\n");
+          ret = -ECHANNEL;
+          goto failed;
+     }
+
+     req.u.tranx_set_intr_reg.intr_reg_p = intr_status_reg;
+
+     if ( ioctl(pchnl->fd, PCHNL_SET_INTR_REG, &req) == -1){
+          LIB_PCHNL_ALERT("set intr status reg failed\n");
+          ret = -ECHANNEL;
+          goto failed;
+     }
+failed:
+     return ret;
+}

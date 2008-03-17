@@ -29,6 +29,7 @@
 #include <linux/poll.h>
 #include <linux/moduleparam.h>
 #include <linux/version.h>
+#include <asm/uaccess.h>
 
 #ifdef DBG
 #define PCHNL_DBG(args...) printk(KERN_DEBUG "pchnl: " args)
@@ -41,6 +42,7 @@
 #define BAR_0 0
 #define PCI_DMA_64BIT	0xffffffffffffffffULL
 #define PCI_DMA_32BIT	0x00000000ffffffffULL
+#define BUF_SIZE        (1uL << 20)
 
 struct pchnl_driver;
 struct pchnl_device;
@@ -50,13 +52,18 @@ struct pchnl_device
      struct pci_dev *pdev;
      uint8_t *hw_addr;
      unsigned long io_base;
-     
+     void *dma_h2fp;
+     struct page *h2f_pg_base;
+     struct page *f2h_pg_base;
+     void *dma_f2hp;
 };
 
 struct pchnl_driver
 {
      struct miscdevice miscdev;
      char *name;
+     unsigned int intr_count;
+     unsigned int * usr_intr_reg_p;
 };
 
 

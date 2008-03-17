@@ -21,6 +21,7 @@ __BEGIN_DECLS
 #endif
 
 #define COMM_CSR_COUNT 256
+#define CSR_REGION_SIZE (1uL << 13)
 #define COMM_CSR_BASE_OFFSET ( 1uL << 12)
 #define SYS_CSR_BASE_OFFSET (0)
 
@@ -40,6 +41,13 @@ struct pchnl_req
                uint32_t val;
           }tranx_csr_tester;
           struct{
+               uint32_t len;
+               void *datap;
+          }tranx_dma;
+          struct{
+               unsigned int * intr_reg_p;
+          }tranx_set_intr_reg;
+          struct{
                uint32_t misc;
           }tranx_intr_tester;
      } u;
@@ -51,6 +59,9 @@ struct pchnl_req
 #define PCHNL_SYS_CSR_WRITE _IOW('x', 0x03, struct pchnl_req)
 #define PCHNL_SYS_CSR_READ _IOR('x', 0x04, struct pchnl_req)
 #define PCHNL_INTR_TESTER _IOW('x', 0x05, struct pchnl_req)
+#define PCHNL_DMA_H2F _IOW('x', 0x06, struct pchnl_req)
+#define PCHNL_DMA_F2H _IOR('x', 0x07, struct pchnl_req)
+#define PCHNL_SET_INTR_REG _IOW('x', 0x08, struct pchnl_req)
 __END_DECLS
 
 #endif
