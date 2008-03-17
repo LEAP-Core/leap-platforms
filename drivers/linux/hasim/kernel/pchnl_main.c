@@ -578,14 +578,12 @@ pchnl_mmap(struct file *filp, struct vm_area_struct *vma)
           return -EINVAL;
      printk("off: %ld, vsize: %ld, psize: %ld\n", off, vsize, psize);
      
-#if 1
 #if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,9)
      return remap_pfn_range(vma, vma->vm_start, vma->vm_pgoff,
                             vsize, vma->vm_page_prot);
 #else
-     return remap_page_range(vma, vma->vmm_start, vma->vm_pgoff >> PAGE_SHIFT,
+     return remap_page_range(vma, vma->vm_start, vma->vm_pgoff >> PAGE_SHIFT,
                              vsize, vma->vm_page_prot);
-#endif
 #endif
 }
 

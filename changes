@@ -2605,3 +2605,13 @@ Directory drivers/linux/hasim/kernel
 
 - updated libpchnl code in PCIe physical device with latest
   snapshot from CBL.
+
+----------
+mcadler     Date: Mon Mar 17 13:28:49 EDT 2008  CSN: CSN-platforms-65
+                  Mon Mar 17 17:28:49 UTC 2008
+
+
+Directory drivers/linux/hasim/kernel
+ pchnl_main.c              Locally Modified           64 
+
+Fix a typo.
