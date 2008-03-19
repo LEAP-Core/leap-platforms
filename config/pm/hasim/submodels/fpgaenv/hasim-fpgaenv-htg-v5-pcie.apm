@@ -51,7 +51,7 @@ File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/leds/gen
 Packagehint=platforms
 
 [HTG Virtex 5 PCIE Enabled/Requires]
-pci_express_device=PCI Express Physical Device HwChannels Import
+pci_express_device=PCI Express Physical Device (mmap-based)
 led_device=General LED Device
 switch_device=General Switch Device
 
@@ -99,13 +99,15 @@ physical_platform=HTG Virtex 5 PCIE Enabled
 channelio=Basic Virtual Channel Multiplexer
 rrr=RRR Clients and Servers
 
-[PCI Express Physical Device HwChannels Import]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pci-express-device-import.awb
-Packagehint=platforms
-
-[PCI Express Physical Device HwChannels Import/Requires]
-pcie_driver_header=Driver Header for PCIe Kernel Module
-
 [Driver Header for PCIe Kernel Module]
 File=drivers/linux/hasim/kernel/pchnl_if.awb
+Packagehint=platforms
+
+
+
+[PCI Express Physical Device (mmap-based)/Requires]
+pci_express_driver_header=Driver Header for PCIe Kernel Module
+
+[PCI Express Physical Device (mmap-based)]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pci-express-device-mmap.awb
 Packagehint=platforms

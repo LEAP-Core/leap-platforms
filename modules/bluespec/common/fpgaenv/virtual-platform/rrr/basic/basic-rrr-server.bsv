@@ -2,7 +2,7 @@ import Vector::*;
 import FIFO::*;
 
 `include "channelio.bsh"
-`include "basic-rrr.bsh"
+`include "rrr.bsh"
 `include "asim/rrr/rrr_service_ids.bsh"
 `include "umf.bsh"
 

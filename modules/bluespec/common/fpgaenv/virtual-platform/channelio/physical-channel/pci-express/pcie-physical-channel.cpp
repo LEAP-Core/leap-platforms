@@ -50,6 +50,7 @@ PHYSICAL_CHANNEL_CLASS::PHYSICAL_CHANNEL_CLASS(
     // give green signal to FPGA
     pciExpressDevice->WriteSystemCSR(genIID() | 0x50000);
 
+    // wait for green signal from FPGA
     CSR_DATA data;
     do
     {
@@ -57,8 +58,6 @@ PHYSICAL_CHANNEL_CLASS::PHYSICAL_CHANNEL_CLASS(
         SLEEP;
     }
     while (data != SIGNAL_GREEN);
-
-    //cout << "pchannel: received green signal from FPGA" << endl << flush;
 }
 
 // destructor

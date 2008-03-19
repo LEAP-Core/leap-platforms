@@ -18,7 +18,7 @@ Packagehint=platforms
 
 [Standard Virtual Platform/Requires]
 virtual_devices=Standard Virtual Devices
-low_level_platform_interface=Low Level Platform Interface
+low_level_platform_interface=Low Level Platform Interface Hardware-Only
 umf=Null Unified Message Format
 
 [Standard Virtual Devices]
@@ -54,36 +54,12 @@ fpga_components=Hardware FPGA Components
 File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/null/null-rrr.awb
 Packagehint=platforms
 
-[Low Level Platform Interface/Requires]
-rrr=Null RRR Module
-channelio=Null Channel IO Module
-physical_platform=HTG Virtex 5 PCIE Enabled
-
-[Low Level Platform Interface]
-File=modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface/low-level-platform-interface.awb
-Packagehint=platforms
 
 
-[HTG Virtex 5 PCIE Enabled]
-File=modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled/htg-v5-pcie-enabled.awb
-Packagehint=platforms
 
-[PCI Express Physical Device VHDL Import]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pci-express-vhdl-import.awb
-Packagehint=platforms
 
-[General Switch Device]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/switches/general-switch-device.awb
-Packagehint=platforms
 
-[General LED Device]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/leds/general-led-device.awb
-Packagehint=platforms
 
-[HTG Virtex 5 PCIE Enabled/Requires]
-pci_express_device=PCI Express Physical Device VHDL Import
-led_device=General LED Device
-switch_device=General Switch Device
 
 [Null Unified Message Format]
 File=modules/bluespec/common/fpgaenv/virtual-platform/umf/null/null-umf.awb
@@ -95,4 +71,17 @@ Packagehint=platforms
 
 [Null Platform Memory]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/null/null-memory.awb
+Packagehint=platforms
+
+[Low Level Platform Interface Hardware-Only/Requires]
+physical_platform=Null Physical Platform
+channelio=Null Channel IO Module
+rrr=Null RRR Module
+
+[Null Physical Platform]
+File=modules/bluespec/common/fpgaenv/physical-platform/null/null-physical-platfrom.awb
+Packagehint=platforms
+
+[Low Level Platform Interface Hardware-Only]
+File=modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface/hwonly-llpi.awb
 Packagehint=platforms

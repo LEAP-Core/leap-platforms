@@ -22,7 +22,7 @@ Packagehint=platforms
 
 [Standard Virtual Platform/Requires]
 virtual_devices=Standard Virtual Devices
-low_level_platform_interface=Low Level Platform Interface
+low_level_platform_interface=Low Level Platform Interface Hardware-Only
 umf=Null Unified Message Format
 
 [FPGA Environment]
@@ -54,14 +54,7 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/null/null-rrr.awb
 Packagehint=platforms
 
-[Low Level Platform Interface/Requires]
-rrr=Null RRR Module
-channelio=Null Channel IO Module
-physical_platform=XUP Physical Platform
 
-[Low Level Platform Interface]
-File=modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface/low-level-platform-interface.awb
-Packagehint=platforms
 
 [Null Platform Memory]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/null/null-memory.awb
@@ -94,4 +87,13 @@ Packagehint=platforms
 
 [Simulation Streams]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/streams/simulation-streams.awb
+Packagehint=platforms
+
+[Low Level Platform Interface Hardware-Only/Requires]
+physical_platform=XUP Physical Platform
+channelio=Null Channel IO Module
+rrr=Null RRR Module
+
+[Low Level Platform Interface Hardware-Only]
+File=modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface/hwonly-llpi.awb
 Packagehint=platforms

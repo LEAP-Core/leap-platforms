@@ -4,5 +4,8 @@
 
 %provides physical_platform
 
+%requires led_device
+%requires switch_device
+
 %public  htg-v5-pcie-disabled.bsv
 %private htg-v5-pcie-disabled.ucf

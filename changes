@@ -2615,3 +2615,51 @@ Directory drivers/linux/hasim/kernel
  pchnl_main.c              Locally Modified           64 
 
 Fix a typo.
+
+----------
+aparasha    Date: Wed Mar 19 13:43:58 EDT 2008  CSN: CSN-platforms-66
+                  Wed Mar 19 17:43:58 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ basic-rrr.bsh             Locally Removed            65 
+ basic-rrr-server.bsv      Locally Modified           65 
+ basic-rrr-common.bsh      Locally Added               0 
+ basic-rrr-client.bsv      Locally Modified           65 
+ basic-rrr.awb             Locally Modified           65 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/pci-express
+ pcie-physical-channel.cpp Locally Modified           63 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express
+ pci-express-device-mmap.awb Locally Added               0 
+ pci-express-c-import-mmap.cpp Locally Added               0 
+ pci-express-c-import-mmap.h Locally Added               0 
+ pci-express-c-import.cpp  Locally Removed            63 
+ pci-express-device-ioctl.awb Locally Added               0 
+ pci-express-device-import.awb Locally Removed            65 
+ pci-express-c-import.h    Locally Removed            63 
+ pci-express-c-import-ioctl.cpp Locally Added               0 
+ pci-express-c-import-ioctl.h Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-disabled
+ htg-v5-pcie-disabled.awb  Locally Modified           63 
+
+Directory drivers/linux/hasim/kernel
+ pchnl_if.awb              Locally Modified           65 
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-htg-hwonly.apm    Locally Modified           63 
+ hasim-fpgaenv-fsb-afu.apm Locally Modified           63 
+ hasim-fpgaenv-htg-v5-pcie.apm Locally Modified           63 
+ hasim-fpgaenv-null.apm    Locally Modified           63 
+ hasim-fpgaenv-xup.apm     Locally Modified           63 
+ hasim-fpgaenv-fsb-dme.apm Locally Modified           63 
+
+- added support for Memory-Mapped CSR I/O on the host side (doesn't
+  work yet). Ioctl-based or Memory-Mapped IO can be selected by
+  choosing the approproiate PCIe device.
+
+- fixed some fpgaenv submodels that were broken by the last checkin.
+
+- renamed a file in RRR.

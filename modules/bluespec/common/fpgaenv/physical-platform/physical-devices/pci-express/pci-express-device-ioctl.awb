@@ -1,10 +1,10 @@
 
-%name PCI Express Physical Device HwChannels Import
-%desc PCI Express Physical Device HwChannels Import
+%name PCI Express Physical Device (ioctl-based)
+%desc PCI Express Physical Device (ioctl-based)
 
 %provides pci_express_device
 
-%requires pcie_driver_header
+%requires pci_express_driver_header
 
 %sources -t BSV -v PUBLIC pci-express-vhdl-import.bsv
 
@@ -29,8 +29,8 @@
 
 %sources -t H   -v PUBLIC  libpchnl.h
 %sources -t CPP -v PRIVATE libpchnl.c
-%sources -t H   -v PUBLIC  pci-express-c-import.h
-%sources -t CPP -v PRIVATE pci-express-c-import.cpp
+%sources -t H   -v PUBLIC  pci-express-c-import-ioctl.h
+%sources -t CPP -v PRIVATE pci-express-c-import-ioctl.cpp
 
 %param PCIE_PHYS_ADDR_SIZE 64 "Number of bits in PCIe Physical Address."
 %param PCIE_LEN_SIZE 32 "Number of bits in PCIe length parameter." 
