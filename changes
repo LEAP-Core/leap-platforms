@@ -2673,3 +2673,15 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci
  libpchnl.c                Locally Modified           66 
 
 Fix double free on error opening driver, again.
+
+----------
+jsemer      Date: Thu Mar 20 16:48:59 EDT 2008  CSN: CSN-platforms-68
+                  Thu Mar 20 20:48:59 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/streams
+ hybrid-streams.bsv        Locally Modified           67 
+
+Removed gratuitous reference to soft connections in the platform.
+
+Joel

@@ -1,6 +1,5 @@
 `include "hasim_common.bsh"
 `include "rrr.bsh"
-`include "soft_connections.bsh"
 `include "low_level_platform_interface.bsh"
 
 `include "asim/rrr/rrr_service_ids.bsh"
