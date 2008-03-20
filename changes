@@ -2663,3 +2663,13 @@ Directory config/pm/hasim/submodels/fpgaenv
 - fixed some fpgaenv submodels that were broken by the last checkin.
 
 - renamed a file in RRR.
+
+----------
+mcadler     Date: Thu Mar 20 07:46:31 EDT 2008  CSN: CSN-platforms-67
+                  Thu Mar 20 11:46:31 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express
+ libpchnl.c                Locally Modified           66 
+
+Fix double free on error opening driver, again.
