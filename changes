@@ -2685,3 +2685,16 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/strea
 Removed gratuitous reference to soft connections in the platform.
 
 Joel
+
+----------
+aparasha    Date: Thu Mar 20 17:41:58 EDT 2008  CSN: CSN-platforms-69
+                  Thu Mar 20 21:41:58 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ basic-rrr-server.bsv      Locally Modified           68 
+ basic-rrr-common.bsh      Locally Modified           68 
+ basic-rrr.awb             Locally Modified           68 
+ demarshaller.bsv          Locally Added               0 
+
+- split demarshaller code away from rrr-server into separate file
