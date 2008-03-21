@@ -2722,3 +2722,46 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/strea
  hybrid-streams.bsv        Locally Modified           70 
 
 Removed unneeded references to hasim-common in streams module.
+
+----------
+aparasha    Date: Fri Mar 21 16:57:02 EDT 2008  CSN: CSN-platforms-72
+                  Fri Mar 21 20:57:02 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel
+ pci-express/              Locally Removed            69 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/pci-express
+ pcie-physical-channel.cpp Locally Removed            69 
+ pcie-physical-channel.h   Locally Removed            69 
+ pcie-physical-channel.awb Locally Removed            69 
+ pcie-physical-channel.bsv Locally Removed            69 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel
+ pcie-debugger/            Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/pcie-debugger
+ pcie-debugger.cpp         Locally Added               0 
+ pcie-debugger.h           Locally Added               0 
+ pcie-debugger.awb         Locally Added               0 
+ pcie-debugger.bsv         Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel
+ pcie-csr/                 Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/pcie-csr
+ pcie-physical-channel.cpp Locally Added               0 
+ pcie-physical-channel.h   Locally Added               0 
+ pcie-physical-channel.awb Locally Added               0 
+ pcie-physical-channel.bsv Locally Added               0 
+
+Directory config/pm/hasim/submodels/fpgaenv
+ hasim-fpgaenv-htg-v5-pcie.apm Locally Modified           69 
+
+- added separate physical channel module for debugging PCIe I/O (the original
+  physical channel code still has some of this functionality, this will be
+  removed soon).
+
+- renamed some directories in physical channel
+
+- updated htg fpgaenv to reflect the directory name change
