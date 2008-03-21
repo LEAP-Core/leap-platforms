@@ -1,6 +1,5 @@
 import FIFOF::*;
 
-`include "hasim_common.bsh"
 `include "physical_platform.bsh"
 `include "pci_express_device.bsh"
 `include "led_device.bsh"

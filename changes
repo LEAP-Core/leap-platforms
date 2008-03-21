@@ -2765,3 +2765,13 @@ Directory config/pm/hasim/submodels/fpgaenv
 - renamed some directories in physical channel
 
 - updated htg fpgaenv to reflect the directory name change
+
+----------
+aparasha    Date: Fri Mar 21 18:01:38 EDT 2008  CSN: CSN-platforms-73
+                  Fri Mar 21 22:01:38 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/pcie-csr
+ pcie-physical-channel.bsv Locally Modified           72 
+
+removed unnecessary reference to hasim_common.
