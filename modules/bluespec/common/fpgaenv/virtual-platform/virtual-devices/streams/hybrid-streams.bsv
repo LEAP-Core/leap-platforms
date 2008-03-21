@@ -1,4 +1,3 @@
-`include "hasim_common.bsh"
 `include "rrr.bsh"
 `include "low_level_platform_interface.bsh"
 
@@ -13,7 +12,7 @@ interface Streams;
 endinterface
 
 // mkStreams
-module [HASim_Module] mkStreams#(LowLevelPlatformInterface llpi)
+module mkStreams#(LowLevelPlatformInterface llpi)
     // interface
                           (Streams);
 

@@ -2711,3 +2711,14 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-ena
  htg-v5-pcie-enabled.h     Locally Modified           68 
 
 - fixed two minor syntactic bugs in llpi.h and htg-v5-pcie-enabled.h
+
+----------
+jsemer      Date: Fri Mar 21 16:27:37 EDT 2008  CSN: CSN-platforms-71
+                  Fri Mar 21 20:27:37 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/streams
+ streams-common.bsh        Locally Modified           70 
+ hybrid-streams.bsv        Locally Modified           70 
+
+Removed unneeded references to hasim-common in streams module.

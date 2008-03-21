@@ -1,8 +1,6 @@
 `ifndef __STREAMS_COMMON__
 `define __STREAMS_COMMON__
 
-`include "hasim_common.bsh"
-
 `include "asim/dict/STREAMS.bsh"
 `include "asim/dict/STREAMID.bsh"
 
