@@ -2698,3 +2698,16 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
  demarshaller.bsv          Locally Added               0 
 
 - split demarshaller code away from rrr-server into separate file
+
+----------
+aparasha    Date: Fri Mar 21 10:59:29 EDT 2008  CSN: CSN-platforms-70
+                  Fri Mar 21 14:59:29 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface
+ llpi.h                    Locally Modified           68 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled
+ htg-v5-pcie-enabled.h     Locally Modified           68 
+
+- fixed two minor syntactic bugs in llpi.h and htg-v5-pcie-enabled.h

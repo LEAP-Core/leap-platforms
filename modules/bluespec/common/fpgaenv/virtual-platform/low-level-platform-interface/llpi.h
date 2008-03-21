@@ -20,8 +20,8 @@ class LLPI_CLASS: public HASIM_MODULE_CLASS
         
     public:
         // constructor - destructor
-        LLPI_CLASS::LLPI_CLASS();
-        LLPI_CLASS::~LLPI_CLASS();
+        LLPI_CLASS();
+        ~LLPI_CLASS();
         
         // accessors
         PHYSICAL_DEVICES GetPhysicalDevices() { return &physicalDevices; }
