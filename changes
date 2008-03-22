@@ -2775,3 +2775,14 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-ch
  pcie-physical-channel.bsv Locally Modified           72 
 
 removed unnecessary reference to hasim_common.
+
+----------
+jsemer      Date: Fri Mar 21 20:50:49 EDT 2008  CSN: CSN-platforms-74
+                  Sat Mar 22 00:50:49 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/simulation
+ sim-physical-platform.h   Locally Modified           73 
+
+Eliminated extra qualification on constructor/destructor that gcc 4.1
+was unhappy with.

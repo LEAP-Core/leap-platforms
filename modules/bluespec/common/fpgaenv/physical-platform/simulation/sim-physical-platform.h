@@ -18,8 +18,8 @@ class PHYSICAL_DEVICES_CLASS: public HASIM_MODULE_CLASS
 
     public:
         // constructor-destructor
-        PHYSICAL_DEVICES_CLASS::PHYSICAL_DEVICES_CLASS(HASIM_MODULE);
-        PHYSICAL_DEVICES_CLASS::~PHYSICAL_DEVICES_CLASS();
+        PHYSICAL_DEVICES_CLASS(HASIM_MODULE);
+        ~PHYSICAL_DEVICES_CLASS();
 
         // accessors to individual devices
         UNIX_PIPE_DEVICE GetUNIXPipeDevice() { return &unixPipeDevice; }
