@@ -2786,3 +2786,13 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/simulation
 
 Eliminated extra qualification on constructor/destructor that gcc 4.1
 was unhappy with.
+
+----------
+mcadler     Date: Tue Mar 25 16:33:12 EDT 2008  CSN: CSN-platforms-75
+                  Tue Mar 25 20:33:12 UTC 2008
+
+
+Directory drivers/linux/hasim/kernel
+ pchnl_main.c              Locally Modified           74 
+
+Shift for page offset was in wrong direction for Linux kernels <= 2.6.9
