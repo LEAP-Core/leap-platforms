@@ -51,7 +51,7 @@ File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/leds/gen
 Packagehint=platforms
 
 [HTG Virtex 5 PCIE Enabled/Requires]
-pci_express_device=PCI Express Physical Device (ioctl-based)
+pci_express_device=PCI Express Physical Device (mmap-based)
 led_device=General LED Device
 switch_device=General Switch Device
 
@@ -105,9 +105,9 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/pcie-csr/pcie-physical-channel.awb
 Packagehint=platforms
 
-[PCI Express Physical Device (ioctl-based)]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pci-express-device-ioctl.awb
-Packagehint=platforms
-
-[PCI Express Physical Device (ioctl-based)/Requires]
+[PCI Express Physical Device (mmap-based)/Requires]
 pci_express_driver_header=Driver Header for PCIe Kernel Module
+
+[PCI Express Physical Device (mmap-based)]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pci-express-device-mmap.awb
+Packagehint=platforms

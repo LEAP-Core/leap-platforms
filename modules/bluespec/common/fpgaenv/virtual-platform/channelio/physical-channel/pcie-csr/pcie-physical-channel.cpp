@@ -85,9 +85,7 @@ PHYSICAL_CHANNEL_CLASS::Read()
             // message is ready!
             UMF_MESSAGE msg = incomingMessage;
             incomingMessage = NULL;
-            //cout << "pchannel: reading message: channel " << msg->GetChannelID()
-            //     << " service " << msg->GetServiceID() << " method " << msg->GetMethodID()
-            //     << " length " << msg->GetLength() << endl;
+            // cout << "pchannel: reading message: channel "; message->Print(cout);
             return msg;
         }
 
@@ -125,9 +123,7 @@ PHYSICAL_CHANNEL_CLASS::TryRead()
     {
         UMF_MESSAGE msg = incomingMessage;
         incomingMessage = NULL;
-        //cout << "pchannel: try-reading message: channel " << msg->GetChannelID()
-        //     << " service " << msg->GetServiceID() << " method " << msg->GetMethodID()
-        //     << " length " << msg->GetLength() << endl;
+        // cout << "pchannel: try-reading message: channel "; message->Print(cout);
         return msg;
     }
 
@@ -148,9 +144,7 @@ PHYSICAL_CHANNEL_CLASS::Write(
         SLEEP;
     }
 
-    //cout << "pchannel: writing message: channel " << message->GetChannelID()
-    //     << " service " << message->GetServiceID() << " method " << message->GetMethodID()
-    //     << " length " << message->GetLength() << endl;
+    // cout << "pchannel: writing message: channel "; message->Print(cout);
 
     // construct header
     UMF_CHUNK header = message->ConstructHeader();
@@ -206,8 +200,8 @@ PHYSICAL_CHANNEL_CLASS::readCSR()
     csr_data = pciExpressDevice->ReadCommonCSR(f2hHead);
     chunk = UMF_CHUNK(csr_data);
 
-    //cout << "readCSR: read new chunk at F2H head = " << f2hHead
-    //     << " data = 0x" << hex << chunk << dec << endl << flush;
+    // cout << "readCSR: read new chunk at F2H head = " << f2hHead
+    //      << " data = 0x" << hex << chunk << dec << endl << flush;
 
     // update head pointer
     f2hHead = (f2hHead == CSR_F2H_BUF_END) ? CSR_F2H_BUF_START : (f2hHead + 1);
@@ -224,9 +218,7 @@ PHYSICAL_CHANNEL_CLASS::readCSR()
         incomingMessage->DecodeHeaderFromChunk(chunk);
 
         UMF_MESSAGE m = incomingMessage;
-        //cout << "readCSR: starting new message: channel " << m->GetChannelID()
-        //     << " service " << m->GetServiceID() << " method " << m->GetMethodID()
-        //     << " length " << m->GetLength() << endl;
+        // cout << "readCSR: starting new message: channel "; message->Print(cout);
     }
     else if (incomingMessage->BytesRemaining() == 0)
     {

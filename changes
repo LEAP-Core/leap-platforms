@@ -2796,3 +2796,22 @@ Directory drivers/linux/hasim/kernel
  pchnl_main.c              Locally Modified           74 
 
 Shift for page offset was in wrong direction for Linux kernels <= 2.6.9
+
+----------
+aparasha    Date: Tue Mar 25 18:21:28 EDT 2008  CSN: CSN-platforms-76
+                  Tue Mar 25 22:21:28 UTC 2008
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ hasim-fpgaenv-htg-v5-pcie.apm Locally Modified           75 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/pcie-csr
+ pcie-physical-channel.cpp Locally Modified           75 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ basic-rrr-server.cpp      Locally Modified           75 
+
+- changed HTG fpgaenv submodel to mmap-based PCI-express device
+
+- fixed a MAJOR bug in RRR server software code. It was not setting the
+  methodID properly for call returns.

@@ -127,6 +127,7 @@ RRR_SERVER_CLASS::DeliverMessage(
     UMF_MESSAGE message)
 {
     int serviceID = message->GetServiceID();
+    int methodID  = message->GetMethodID();
 
     // validate serviceID
     if (isServiceValid(serviceID) == false)
@@ -138,7 +139,7 @@ RRR_SERVER_CLASS::DeliverMessage(
     // read args from channelio and place into args array
     int argc = 4;
     UINT32 argv[MAX_ARGS];
-    argv[0] = message->GetMethodID();
+    argv[0] = methodID;
     for (int i = 1; i < argc; i++)
     {
         argv[i] = message->ExtractUINT32();
@@ -160,6 +161,7 @@ RRR_SERVER_CLASS::DeliverMessage(
         // create a new channelio message
         UMF_MESSAGE message = new UMF_MESSAGE_CLASS(4); // payload = 4 bytes
         message->SetServiceID(serviceID);
+        message->SetMethodID(methodID);
 
         // update message data
         message->AppendUINT32(result);
