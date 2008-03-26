@@ -31,7 +31,7 @@ Packagehint=platforms
 
 [Standard Virtual Devices/Requires]
 front_panel=Physical FSB DME Front Panel
-memory=Null Platform Memory
+memory=Null Memory Device
 streams=Simulation Streams
 
 [Null Channel IO Module]
@@ -54,13 +54,6 @@ fpga_components=Hardware FPGA Components
 File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/null/null-rrr.awb
 Packagehint=platforms
 
-
-
-
-
-
-
-
 [Null Unified Message Format]
 File=modules/bluespec/common/fpgaenv/virtual-platform/umf/null/null-umf.awb
 Packagehint=platforms
@@ -69,9 +62,6 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/streams/simulation-streams.awb
 Packagehint=platforms
 
-[Null Platform Memory]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/null/null-memory.awb
-Packagehint=platforms
 
 [Low Level Platform Interface Hardware-Only/Requires]
 physical_platform=Null Physical Platform
@@ -84,4 +74,8 @@ Packagehint=platforms
 
 [Low Level Platform Interface Hardware-Only]
 File=modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface/hwonly-llpi.awb
+Packagehint=platforms
+
+[Null Memory Device]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/null/memory_virtual_device_null.awb
 Packagehint=platforms

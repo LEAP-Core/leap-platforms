@@ -39,7 +39,7 @@ Packagehint=platforms
 
 [Standard Virtual Devices/Requires]
 front_panel=Hybrid Front Panel
-memory=Hybrid Memory
+memory=Hybrid Memory Device
 streams=Hybrid Streams
 
 [HTG Virtex 5 PCIE Enabled]
@@ -75,9 +75,6 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/streams/hybrid-streams.awb
 Packagehint=platforms
 
-[Hybrid Memory]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid/hybrid-memory.awb
-Packagehint=platforms
 
 [Basic Virtual Channel Multiplexer]
 File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/basic/basic-channelio.awb
@@ -99,8 +96,6 @@ rrr=RRR Clients and Servers
 File=drivers/linux/hasim/kernel/pchnl_if.awb
 Packagehint=platforms
 
-
-
 [PCI-Express CSR-based Physical Channel]
 File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/pcie-csr/pcie-physical-channel.awb
 Packagehint=platforms
@@ -110,4 +105,8 @@ pci_express_driver_header=Driver Header for PCIe Kernel Module
 
 [PCI Express Physical Device (mmap-based)]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pci-express-device-mmap.awb
+Packagehint=platforms
+
+[Hybrid Memory Device]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid/memory_virtual_device_hybrid.awb
 Packagehint=platforms

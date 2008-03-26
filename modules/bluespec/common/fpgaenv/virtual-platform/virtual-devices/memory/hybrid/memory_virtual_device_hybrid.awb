@@ -1,10 +1,11 @@
 
-%name Hybrid Memory
-%desc Hybrid Memory
+%name Hybrid Memory Device
+%desc Hybrid Memory Device
 
 %provides memory
 
-%sources -t BSV -v PUBLIC   HybridMemory.bsv
+%sources -t BSV -v PUBLIC   memory_virtual_device_datatypes.bsv
+%sources -t BSV -v PUBLIC   memory_virtual_device_hybrid.bsv
 %sources -t CPP -v PRIVATE  hybrid-memory-sw.cpp vmh-utils.cpp
 %sources -t H   -v PRIVATE  vmh-utils.h
 %sources -t H   -v PUBLIC   hybrid-memory-sw.h

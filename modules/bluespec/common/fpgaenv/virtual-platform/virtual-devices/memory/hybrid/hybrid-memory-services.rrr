@@ -2,6 +2,6 @@ service MEMORY
 {
     server hw <- sw
     {
-        method Invalidate(in MEM_Addr[32] addr);
+        method Invalidate(in MEM_ADDRESS[32] addr);
     };
 };

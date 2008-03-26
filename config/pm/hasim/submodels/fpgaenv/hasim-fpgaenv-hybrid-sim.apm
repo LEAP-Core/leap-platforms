@@ -41,16 +41,13 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic/basic-rrr.awb
 Packagehint=platforms
 
-[Hybrid Memory]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid/hybrid-memory.awb
-Packagehint=platforms
 
 [Standard Virtual Devices]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/std-virtual-devices.awb
 Packagehint=platforms
 
 [Standard Virtual Devices/Requires]
-memory=Hybrid Memory
+memory=Hybrid Memory Device
 front_panel=Hybrid Front Panel
 streams=Hybrid Streams
 
@@ -91,4 +88,8 @@ unix_pipe_device=UNIX Pipe Physical Device
 
 [Simulation Physical Platform]
 File=modules/bluespec/common/fpgaenv/physical-platform/simulation/sim-physical-platform.awb
+Packagehint=platforms
+
+[Hybrid Memory Device]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid/memory_virtual_device_hybrid.awb
 Packagehint=platforms

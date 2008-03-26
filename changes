@@ -2815,3 +2815,60 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
 
 - fixed a MAJOR bug in RRR server software code. It was not setting the
   methodID properly for call returns.
+
+----------
+pellauer    Date: Wed Mar 26 18:03:42 EDT 2008  CSN: CSN-platforms-77
+                  Wed Mar 26 22:03:42 UTC 2008
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-htg-hwonly.apm    Locally Modified           76 
+ hasim-fpgaenv-fsb-afu.apm Locally Modified           76 
+ hasim-fpgaenv-software-no-gui.apm Locally Modified           76 
+ hasim-fpgaenv-hybrid-sim.apm Locally Modified           76 
+ hasim-fpgaenv-htg-v5-pcie.apm Locally Modified           76 
+ hasim-fpgaenv-null.apm    Locally Modified           76 
+ hasim-fpgaenv-software.apm Locally Modified           76 
+ hasim-fpgaenv-xup.apm     Locally Modified           76 
+ hasim-fpgaenv-fsb-dme.apm Locally Modified           76 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-memory.awb         Locally Removed            76 
+ HybridMemory.bsv          Locally Removed            76 
+ memory_virtual_device_datatypes.bsv Locally Added               0 
+ memory_virtual_device_hybrid.awb Locally Added               0 
+ memory_virtual_device_hybrid.bsv Locally Added               0 
+ hybrid-memory-services.rrr Locally Modified           76 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/simulation
+ simulation-memory.awb     Locally Removed            76 
+ BRAMMemory.bsv            Locally Removed            76 
+ virtual_device_memory_datatypes.bsv Locally Added               0 
+ virtual_device_memory_simulation.awb Locally Added               0 
+ virtual_device_memory_simulation.bsv Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/null
+ memory_virtual_device_null.awb Locally Added               0 
+ memory_virtual_device_null.bsv Locally Added               0 
+ memory_virtual_device_datatypes.bsv Locally Added               0 
+ null-memory.awb           Locally Removed            76 
+ NullMemory.bsv            Locally Removed            76 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory
+ template/                 Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/template
+ memory_virtual_device_template.awb Locally Added               0 
+ memory_virtual_device_template.bsv Locally Added               0 
+ memory_virtual_device_datatypes.bsv Locally Added               0 
+
+
+Updated all versions of the memory virtual device to the latest coding
+conventions.
+
+Added a code template for the memory virtual device which details the
+requirements and interface.
+
+Updated all models to use the new memory virtual device correctly.
+
+Michael P.

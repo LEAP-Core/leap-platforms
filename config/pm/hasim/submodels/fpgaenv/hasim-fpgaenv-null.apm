@@ -45,25 +45,19 @@ fpga_components=Software FPGA Components
 File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/null/null-rrr.awb
 Packagehint=platforms
 
-
-
 [Standard Virtual Devices]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/std-virtual-devices.awb
 Packagehint=platforms
 
 [Standard Virtual Devices/Requires]
-memory=Null Platform Memory
+memory=Null Memory Device
 front_panel=Console Front Panel
 streams=Simulation Streams
 
-[Null Platform Memory]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/null/null-memory.awb
-Packagehint=platforms
 
 [Null Physical Platform]
 File=modules/bluespec/common/fpgaenv/physical-platform/null/null-physical-platfrom.awb
 Packagehint=platforms
-
 
 [Null Unified Message Format]
 File=modules/bluespec/common/fpgaenv/virtual-platform/umf/null/null-umf.awb
@@ -80,4 +74,8 @@ rrr=Null RRR Module
 
 [Low Level Platform Interface Hardware-Only]
 File=modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface/hwonly-llpi.awb
+Packagehint=platforms
+
+[Null Memory Device]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/null/memory_virtual_device_null.awb
 Packagehint=platforms

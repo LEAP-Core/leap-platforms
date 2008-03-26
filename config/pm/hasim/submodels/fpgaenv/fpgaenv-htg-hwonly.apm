@@ -39,7 +39,7 @@ Packagehint=platforms
 
 [Standard Virtual Devices/Requires]
 front_panel=Physical HTG-v5-PCIe Front Panel
-memory=Null Platform Memory
+memory=Null Memory Device
 streams=Simulation Streams
 
 [Physical HTG-v5-PCIe Front Panel]
@@ -56,10 +56,6 @@ Packagehint=platforms
 
 [Null Channel IO Module]
 File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/null/null-channelio.awb
-Packagehint=platforms
-
-[Null Platform Memory]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/null/null-memory.awb
 Packagehint=platforms
 
 [Null Unified Message Format]
@@ -89,4 +85,8 @@ Packagehint=platforms
 
 [General LED Device]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/leds/general-led-device.awb
+Packagehint=platforms
+
+[Null Memory Device]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/null/memory_virtual_device_null.awb
 Packagehint=platforms

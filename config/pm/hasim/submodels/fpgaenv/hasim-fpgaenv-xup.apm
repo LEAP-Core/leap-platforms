@@ -39,7 +39,7 @@ Packagehint=platforms
 
 [Standard Virtual Devices/Requires]
 front_panel=Physical XUP Front Panel
-memory=Null Platform Memory
+memory=Null Memory Device
 streams=Simulation Streams
 
 [Physical XUP Front Panel]
@@ -54,11 +54,6 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/null/null-rrr.awb
 Packagehint=platforms
 
-
-
-[Null Platform Memory]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/null/null-memory.awb
-Packagehint=platforms
 
 [XUP Physical Platform]
 File=modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup/xup-physical-platform.awb
@@ -96,4 +91,8 @@ rrr=Null RRR Module
 
 [Low Level Platform Interface Hardware-Only]
 File=modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface/hwonly-llpi.awb
+Packagehint=platforms
+
+[Null Memory Device]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/null/memory_virtual_device_null.awb
 Packagehint=platforms

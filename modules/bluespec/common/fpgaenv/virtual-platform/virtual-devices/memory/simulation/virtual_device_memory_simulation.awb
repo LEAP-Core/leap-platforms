@@ -1,10 +1,11 @@
 
-%name Simulation only Memory no RRR
-%desc Simulation only Memory no RRR
+%name Hardware-Only Memory Device for Simulation
+%desc Hardware-Only Memory Device for Simulation (Not Synthesizable)
 
 %provides memory
 
-%sources -t BSV -v PUBLIC BRAMMemory.bsv
+%sources -t BSV -v PUBLIC virtual_device_memory_datatypes.bsv
+%sources -t BSV -v PUBLIC virtual_device_memory_simulation.bsv
 
 
 %param MEMORY_ADDR_SIZE 32 "Number of bits to address memory."

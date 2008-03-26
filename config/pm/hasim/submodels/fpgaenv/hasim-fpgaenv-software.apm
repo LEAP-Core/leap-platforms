@@ -41,16 +41,13 @@ fpga_components=Software FPGA Components
 File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/null/null-rrr.awb
 Packagehint=platforms
 
-[Simulation only Memory no RRR]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/simulation/simulation-memory.awb
-Packagehint=platforms
 
 [Standard Virtual Devices]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/std-virtual-devices.awb
 Packagehint=platforms
 
 [Standard Virtual Devices/Requires]
-memory=Simulation only Memory no RRR
+memory=Hardware-Only Memory Device for Simulation
 front_panel=Graphical Front Panel
 streams=Simulation Streams
 
@@ -75,7 +72,10 @@ rrr=Null RRR Module
 File=modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface/hwonly-llpi.awb
 Packagehint=platforms
 
-
 [Channel IO to/from a UNIX Process]
 File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/unix/unix-channelio.awb
+Packagehint=platforms
+
+[Hardware-Only Memory Device for Simulation]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/simulation/virtual_device_memory_simulation.awb
 Packagehint=platforms
