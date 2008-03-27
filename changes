@@ -2872,3 +2872,14 @@ requirements and interface.
 Updated all models to use the new memory virtual device correctly.
 
 Michael P.
+
+----------
+aparasha    Date: Thu Mar 27 17:04:43 EDT 2008  CSN: CSN-platforms-78
+                  Thu Mar 27 21:04:43 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ demarshaller.bsv          Locally Modified           77 
+
+Updated demarshaller to support arbitrary output bitwidths (including
+zero).

@@ -1,82 +1,127 @@
 import Vector::*;
 import FIFO::*;
 
-`include "channelio.bsh"
-`include "rrr.bsh"
-`include "asim/rrr/rrr_service_ids.bsh"
-`include "umf.bsh"
 
-// RRR parameter de-marshaller
+// DeMarshaller
 
+// A de-marshaller takes n input "chunks" and produces one larger value.
+
+// Overall RRR service-stub flow control primarily lives in this code.
+// The stub itself initiates a demarshalling sequence by calling "start"
+// and passing in the number of chunks after which the demarshaller should
+// activate the output. The demarshaller will not accept a new start
+// request until the previous sequence has been read out. The stub itself
+// does not have to explicitly maintain any other flow-control related
+// state.
+
+// types
 typedef enum
 {
-    DEM_STATE_idle,
-    DEM_STATE_active
+    STATE_idle,
+    STATE_queueing
 }
-DEM_STATE
-    deriving (Bits, Eq);
+STATE
+    deriving(Bits, Eq);
 
-// outbits *has* to be a multiple of inbits
-interface DeMarshaller#(numeric type inbits_t, numeric type outbits_t);
-    method Action                        start(UMF_MSG_LENGTH nchunks);
-    method Action                        enq(Bit#(inbits_t) chunk);
-    method ActionValue#(Bit#(outbits_t)) deq();
+// interface
+interface DEMARSHALLER#(parameter type in_T, parameter type out_T);
+    
+    // start a demarshalling sequence
+    method Action start(UMF_MSG_LENGTH nchunks);
+        
+    // insert a chunk
+    method Action insert(in_T chunk);
+        
+    // read the whole completed value and delete it
+    method ActionValue#(out_T) readAndDelete();
+
 endinterface
 
-module mkDeMarshaller(DeMarshaller#(inbits_t, outbits_t))
-    provisos(Add#(a__, inbits_t, outbits_t));
-
-    // compute degree
-    Integer inbits    = valueof(inbits_t);
-    Integer outbits   = valueof(outbits_t);
-    Integer remainder = outbits % inbits;
-    Integer degree    = remainder == 0     ?
-                        (outbits / inbits) :
-                        (outbits / inbits) + 1;
-
-    // instantiate output register
-    Reg#(Bit#(inbits_t))  outreg[degree];
-    for (Integer i = 0; i < degree; i=i+1)
-        outreg[i] <- mkReg(0);
-
-    // output release register
-    Reg#(UMF_MSG_LENGTH) outchunks <- mkReg(0);
-
-    // current index
-    Reg#(UMF_MSG_LENGTH) index <- mkReg(0);
-
-    // state
-    Reg#(DEM_STATE) state <- mkReg(DEM_STATE_idle);
-
-    // set up a bit-vector that generates the output wires
-    Bit#(outbits_t) outval = '0;
-
-    // special-case last chunk
-    outval [ outbits-1 : (degree-1)*inbits ] = outreg[ degree-1 ];
-
-    // other chunks
-    for (Integer i = 0; i < degree-1; i=i+1)
+// module
+module mkDeMarshaller
+    // interface:
+        (DEMARSHALLER#(in_T, out_T))
+    provisos
+        (Bits#(in_T, in_SZ),
+         Bits#(out_T, out_SZ),
+         Div#(out_SZ, in_SZ, k__));
+    
+    // =============== state ================
+    
+    // degree (max number of chunks) of our shift register
+    Integer degree = valueof(k__);
+    
+    // shift register we fill up as chunks come in.
+    Vector#(k__, Reg#(Bit#(in_SZ))) chunks = newVector();
+    
+    // fill in the vector
+    for (Integer x = degree - 1; x >= 0; x = x - 1)
     begin
-        outval[ (i+1)*inbits - 1 : i*inbits ] = outreg[i];
+        chunks[x] <- mkReg(0);
     end
-
-    // methods
-    method Action start(UMF_MSG_LENGTH nchunks) if (state == DEM_STATE_idle);
-        index <= 0;
-        outchunks <= nchunks;
-        state <= DEM_STATE_active;
+    
+    // number of chunks remaining in current sequence
+    Reg#(UMF_MSG_LENGTH) chunksRemaining <- mkReg(0);
+    
+    // demarshaller state
+    Reg#(STATE) state <- mkReg(STATE_idle);
+    
+    // =============== methods ===============
+    
+    // start a demarshalling sequence
+    method Action start(UMF_MSG_LENGTH nchunks) if (state == STATE_idle);
+        
+        // initialize number of chunks in sequence
+        chunksRemaining <= nchunks;
+        state <= STATE_queueing;
+        
     endmethod
-
-    method Action enq(Bit#(inbits_t) chunk) if (state == DEM_STATE_active &&
-                                                index != outchunks);
-        outreg[index] <= chunk;
-        index <= index + 1;
+    
+    // add the chunk to the first place in the vector and
+    // shift the other elements.
+    method Action insert(in_T chunk) if (state == STATE_queueing &&
+                                         chunksRemaining != 0);
+    
+        // newer chunks are closer to the MSB.
+        if (degree != 0)
+        begin
+            chunks[degree - 1] <= pack(chunk);
+        end
+      
+        // Do the shift with a for loop
+        for (Integer x = degree - 1; x > 1; x = x - 1)
+        begin
+            chunks[x-1] <= chunks[x];
+        end
+        
+        // decrement chunks remaining
+        chunksRemaining <= chunksRemaining - 1;
+        
     endmethod
-
-    method ActionValue#(Bit#(outbits_t)) deq() if (state == DEM_STATE_active &&
-                                                   index == outchunks);
-        state <= DEM_STATE_idle;
-        return outval;
+    
+    // return the entire vector
+    method ActionValue#(out_T) readAndDelete() if (state == STATE_queueing &&
+                                                   chunksRemaining == 0);
+    
+        Bit#(out_SZ) final_val = 0;
+      
+        // this is where the good stuff happens
+        // fill in the result one bit at a time
+        for (Integer x = 0; x < valueof(out_SZ); x = x + 1)
+        begin
+        
+            Integer j = x / valueof(in_SZ);
+            Integer k = x % valueof(in_SZ);
+            final_val[x] = chunks[j][k];
+      
+        end
+        
+        // switch to idle state
+        state <= STATE_idle;
+    
+        // return
+        return unpack(final_val);
+    
     endmethod
 
 endmodule
