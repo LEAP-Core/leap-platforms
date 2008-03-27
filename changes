@@ -2883,3 +2883,31 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
 
 Updated demarshaller to support arbitrary output bitwidths (including
 zero).
+
+----------
+aparasha    Date: Thu Mar 27 18:48:18 EDT 2008  CSN: CSN-platforms-79
+                  Thu Mar 27 22:48:18 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ basic-rrr-server.bsv      Locally Modified           77 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface
+ llpi.bsv                  Locally Modified           77 
+
+Hardware RRR Server update
+--------------------------
+- updated interface to export a vector of request and response ports
+  (one pair per service) instead of the old single request/response
+  methods with the serviceID as parameter. The ports are connected
+  to per-service queues internal to the server.
+
+- added support for response path. Arbitration between multiple
+  incoming responses on the response ports is done explicitly via
+  a simple priority tree. Highest priority is currently given to the
+  service with the lowest ID, although this can easily be changed
+  later.
+
+- updated interface name to conform to coding conventions.
+
+- updated LLPI to match new server interface name.

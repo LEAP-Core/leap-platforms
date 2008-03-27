@@ -1,5 +1,5 @@
 import Vector::*;
-import FIFO::*;
+import FIFOF::*;
 
 `include "channelio.bsh"
 `include "rrr.bsh"
@@ -12,59 +12,179 @@ import FIFO::*;
 
 `define SERVER_CHANNEL_ID  1
 
-interface RRRServer;
-    method ActionValue#(UMF_PACKET) read(UMF_SERVICE_ID i);
+// request/response port interfaces
+interface REQUEST_PORT;
+    method ActionValue#(UMF_PACKET) acceptRequest();
 endinterface
 
+interface RESPONSE_PORT;
+    method Action sendResponse(UMF_PACKET data);
+endinterface
+
+// channelio interface
+interface RRR_SERVER;
+    interface Vector#(`NUM_SERVICES, REQUEST_PORT)  requestPorts;
+    interface Vector#(`NUM_SERVICES, RESPONSE_PORT) responsePorts;
+endinterface
+
+//    method ActionValue#(UMF_PACKET) read(UMF_SERVICE_ID i);
+
 // server
-module mkRRRServer#(ChannelIO channel) (RRRServer);
+module mkRRRServer#(ChannelIO channel) (RRR_SERVER);
 
-    // === state ===
+    // ==============================================================
+    //                        Ports and Queues
+    // ==============================================================
 
-    Reg#(UMF_MSG_LENGTH)    chunksRemaining     <-  mkReg(0);
-    Reg#(UMF_SERVICE_ID)    activeQueueIndex    <-  mkReg(0);
+    // create request/response buffers and link them to ports
+    FIFOF#(UMF_PACKET)                    requestQueues[`NUM_SERVICES];
+    Vector#(`NUM_SERVICES, REQUEST_PORT)  req_ports = newVector();
 
-    FIFO#(UMF_PACKET)    serviceQueues[`NUM_SERVICES];
-    for (Integer i = 0; i < `NUM_SERVICES; i=i+1)
-        serviceQueues[i] <- mkFIFO();
+    FIFOF#(UMF_PACKET)                    responseQueues[`NUM_SERVICES];
+    Vector#(`NUM_SERVICES, RESPONSE_PORT) resp_ports = newVector();
 
-    // === rules ===
+    for (Integer i = 0; i < `NUM_SERVICES; i = i+1)
+    begin
+        requestQueues[i]  <- mkFIFOF();
+        responseQueues[i] <- mkFIFOF();
+
+        // create a new request port and link it to the FIFO
+        req_ports[i] = interface REQUEST_PORT
+                           method ActionValue#(UMF_PACKET) acceptRequest();
+
+                               UMF_PACKET val = requestQueues[i].first();
+                               requestQueues[i].deq();
+                               return val;
+
+                           endmethod
+                       endinterface;
+
+        // create a new response port and link it to the FIFO
+        resp_ports[i] = interface RESPONSE_PORT
+                            method Action sendResponse(UMF_PACKET data);
+
+                                responseQueues[i].enq(data);
+
+                            endmethod
+                        endinterface;
+    end
+
+    // === other state ===
+
+    Reg#(UMF_MSG_LENGTH) requestChunksRemaining  <- mkReg(0);
+    Reg#(UMF_MSG_LENGTH) responseChunksRemaining <- mkReg(0);
+
+    Reg#(UMF_SERVICE_ID) requestActiveQueue  <- mkReg(0);
+    Reg#(UMF_SERVICE_ID) responseActiveQueue <- mkReg(0);
+
+    // ==============================================================
+    //                          Request Rules
+    // ==============================================================
 
     // scan channel for incoming request headers
-    rule scan_requests (chunksRemaining == 0);
+    rule scan_requests (requestChunksRemaining == 0);
 
         UMF_PACKET packet <- channel.readPorts[`SERVER_CHANNEL_ID].read();
 
         // enqueue header in service's queue
-        serviceQueues[packet.UMF_PACKET_header.serviceID].enq(packet);
+        requestQueues[packet.UMF_PACKET_header.serviceID].enq(packet);
 
         // set up remaining chunks
-        chunksRemaining <= packet.UMF_PACKET_header.numChunks;
-        activeQueueIndex <= packet.UMF_PACKET_header.serviceID;
+        requestChunksRemaining <= packet.UMF_PACKET_header.numChunks;
+        requestActiveQueue     <= packet.UMF_PACKET_header.serviceID;
 
     endrule
 
-    // scan channel for message chunks
-    rule scan_params (chunksRemaining != 0);
+    // scan channel for request message chunks
+    rule scan_params (requestChunksRemaining != 0);
 
         // grab a chunk from channelio and place it into the active request queue
         UMF_PACKET packet <- channel.readPorts[`SERVER_CHANNEL_ID].read();
-        serviceQueues[activeQueueIndex].enq(packet);
+        requestQueues[requestActiveQueue].enq(packet);
 
         // one chunk processed
-        chunksRemaining <= chunksRemaining - 1;
+        requestChunksRemaining <= requestChunksRemaining - 1;
 
     endrule
 
-    // === methods ===
+    // ==============================================================
+    //                          Response Rules
+    // ==============================================================
+    
+    // start generating explicit priority arbiter
+    Bool p_request[`NUM_SERVICES];
+    Bool higher_priority_request[`NUM_SERVICES];
+    Bool p_grant[`NUM_SERVICES];
 
-    // get the next available chunk in a particular service's queue
-    method ActionValue#(UMF_PACKET) read(UMF_SERVICE_ID i);
+    // static loop for all response queues
+    for (Integer i = 0; i < `NUM_SERVICES; i = i + 1)
+    begin
 
-        UMF_PACKET packet = serviceQueues[i].first();
-        serviceQueues[i].deq();
-        return packet;
+        // compute priority for this queue (static request/grant)
+        // current algorithm involves a chain OR, which is fine for
+        // a small number of response queues
 
-    endmethod
+        p_request[i] = (responseChunksRemaining == 0) &&
+                       (responseQueues[i].notEmpty());
+
+        if (i == 0)
+        begin
+            p_grant[i] = p_request[i];
+            higher_priority_request[i] = p_request[i];
+        end
+        else
+        begin
+            p_grant[i] = (!higher_priority_request[i-1]) && p_request[i];
+            higher_priority_request[i] = higher_priority_request[i-1] || p_request[i];
+        end
+
+        // start writing new message
+        rule write_response_newmsg (p_grant[i]);
+
+            // get header packet
+            UMF_PACKET packet = responseQueues[i].first();
+            responseQueues[i].deq();
+
+            // add my virtual channelID to header
+            UMF_PACKET newpacket = tagged UMF_PACKET_header
+                                   {
+                                       channelID: `SERVER_CHANNEL_ID,
+                                       serviceID: packet.UMF_PACKET_header.serviceID,
+                                       methodID : packet.UMF_PACKET_header.methodID,
+                                       numChunks: packet.UMF_PACKET_header.numChunks
+                                   };
+
+            // send the header packet to channelio
+            channel.writePorts[`SERVER_CHANNEL_ID].write(newpacket);
+
+            // setup remaining chunks
+            responseChunksRemaining <= newpacket.UMF_PACKET_header.numChunks;
+            responseActiveQueue <= fromInteger(i);
+
+        endrule
+
+    end // for
+    
+    // continue writing message
+    rule write_response_continue (responseChunksRemaining != 0);
+
+        // get the next packet from the active response queue
+        UMF_PACKET packet = responseQueues[responseActiveQueue].first();
+        responseQueues[responseActiveQueue].deq();
+
+        // send the packet to channelio
+        channel.writePorts[`SERVER_CHANNEL_ID].write(packet);
+
+        // one more chunk processed
+        responseChunksRemaining <= responseChunksRemaining - 1;
+
+    endrule
+
+    // ==============================================================
+    //                        Set Interfaces
+    // ==============================================================
+
+    interface requestPorts  = req_ports;
+    interface responsePorts = resp_ports;
 
 endmodule

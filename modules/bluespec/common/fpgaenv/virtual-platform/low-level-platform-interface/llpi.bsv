@@ -8,7 +8,7 @@
 
 interface LowLevelPlatformInterface;
     interface RRRClient             rrrClient;
-    interface RRRServer             rrrServer;
+    interface RRR_SERVER            rrrServer;
     interface ChannelIO             channelIO;
     interface PHYSICAL_DRIVERS      physicalDrivers;
     interface TOP_LEVEL_WIRES       topLevelWires;
@@ -27,7 +27,7 @@ module mkLowLevelPlatformInterface
     PHYSICAL_PLATFORM       phys_plat   <- mkPhysicalPlatform();
     ChannelIO               cio         <- mkChannelIO(phys_plat.physicalDrivers);
     RRRClient               rrrc        <- mkRRRClient(cio);
-    RRRServer               rrrs        <- mkRRRServer(cio);
+    RRR_SERVER              rrrs        <- mkRRRServer(cio);
 
     // plumb interfaces
 
