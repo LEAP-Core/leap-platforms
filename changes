@@ -2943,3 +2943,20 @@ the only argument.
 
 Eliminated some hasim references in the simulation-streams
 implementation.
+
+----------
+pellauer    Date: Fri Mar 28 13:26:34 EDT 2008  CSN: CSN-platforms-81
+                  Fri Mar 28 17:26:34 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/null
+ null-rrr.bsv              Locally Modified           80 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/null
+ null-umf.awb              Locally Modified           80 
+ null-umf.bsv              Locally Added               0 
+
+
+Added an update to Null RRR/UMF to make them work in the Hardware-Only FPGA environment.
+
+Michael P.

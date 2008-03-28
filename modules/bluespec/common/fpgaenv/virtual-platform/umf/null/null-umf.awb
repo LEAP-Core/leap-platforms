@@ -4,3 +4,13 @@
 
 %provides umf
 
+%sources -t BSV -v PUBLIC null-umf.bsv
+
+%param UMF_CHUNK_BITS       32  "Bits in UMF Chunk"
+%param UMF_CHUNK_BYTES      4   "Bytes in UMF Chunk"
+%param UMF_CHUNK_LOG_BYTES  2   "Log(Bytes in UMF Chunk)"
+%param UMF_CHANNEL_ID_BITS  4   "Bits in UMF ChannelID"
+%param UMF_SERVICE_ID_BITS  8   "Bits in UMF ServiceID"
+%param UMF_METHOD_ID_BITS   4   "Bits in UMF MethodID"
+%param UMF_MSG_LENGTH_BITS  16  "Bits in UMF MsgLength"
+

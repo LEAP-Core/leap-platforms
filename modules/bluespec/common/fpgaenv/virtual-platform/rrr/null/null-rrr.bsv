@@ -1,4 +1,10 @@
+import Vector::*;
+
+
 `include "channelio.bsh"
+
+`include "asim/rrr/rrr_service_ids.bsh"
+`include "umf.bsh"
 
 typedef Bit#(32) RRR_ServiceID;
 typedef Bit#(32) RRR_Param;
@@ -32,15 +38,28 @@ module mkRRRClient#(ChannelIO channel) (RRRClient);
 
 endmodule
 
-interface RRRServer;
-    method ActionValue#(RRR_Chunk) getNextChunk(RRR_ServiceID i);
+// request/response port interfaces
+interface REQUEST_PORT;
+    method ActionValue#(UMF_PACKET) acceptRequest();
 endinterface
 
-module mkRRRServer#(ChannelIO channel) (RRRServer);
+interface RESPONSE_PORT;
+    method Action sendResponse(UMF_PACKET data);
+endinterface
 
-    method ActionValue#(RRR_Chunk) getNextChunk(RRR_ServiceID i);
-        noAction;
-        return 0;
-    endmethod
+interface RRR_SERVER;
+    interface Vector#(`NUM_SERVICES, REQUEST_PORT)  requestPorts;
+    interface Vector#(`NUM_SERVICES, RESPONSE_PORT) responsePorts;
+endinterface
+
+
+module mkRRRServer#(ChannelIO channel) (RRR_SERVER);
+
+    Vector#(`NUM_SERVICES, REQUEST_PORT)  reqPorts = newVector();
+    Vector#(`NUM_SERVICES, RESPONSE_PORT) rspPorts = newVector();
+    
+    
+    interface requestPorts = reqPorts;
+    interface responsePorts = rspPorts;
 
 endmodule
