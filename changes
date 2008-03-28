@@ -2911,3 +2911,35 @@ Hardware RRR Server update
 - updated interface name to conform to coding conventions.
 
 - updated LLPI to match new server interface name.
+
+----------
+jsemer      Date: Fri Mar 28 11:55:05 EDT 2008  CSN: CSN-platforms-80
+                  Fri Mar 28 15:55:05 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid
+ HybridFP.bsv              Locally Modified           79 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/console
+ NullFP.bsv                Locally Modified           79 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/graphical
+ GraphicalFP.bsv           Locally Modified           79 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/xup
+ XUPFP.bsv                 Locally Modified           79 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/htg_v5_pcie
+ HTGv5PCIeFP.bsv           Locally Modified           79 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/streams
+ hybrid-streams.bsv        Locally Modified           79 
+ simulation-streams.bsv    Locally Modified           79 
+
+Updated the various implementations of the front panel
+and streams virtual devices to use individual arguments
+for the remote methods rather than passing a struct as
+the only argument.
+
+Eliminated some hasim references in the simulation-streams
+implementation.

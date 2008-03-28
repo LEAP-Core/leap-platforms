@@ -1,6 +1,4 @@
-`include "hasim_common.bsh"
 `include "rrr.bsh"
-`include "soft_connections.bsh"
 `include "low_level_platform_interface.bsh"
 
 `include "streams-common.bsh"
@@ -10,11 +8,14 @@
 
 // Streams
 interface Streams;
-    method Action   makeRequest(STREAMS_REQUEST srq);
+    method Action   makeRequest( STREAMID_DICT_TYPE streamID,
+                                 STREAMS_DICT_TYPE  stringID,
+                                 Bit#(32) payload0,
+                                 Bit#(32) payload1);
 endinterface
 
 // mkStreams
-module [HASim_Module] mkStreams#(LowLevelPlatformInterface llpi)
+module  mkStreams#(LowLevelPlatformInterface llpi)
                       // interface
                           (Streams);
  
@@ -73,11 +74,14 @@ module [HASim_Module] mkStreams#(LowLevelPlatformInterface llpi)
 
     // accept request
 
-    method Action   makeRequest(STREAMS_REQUEST srq);
+    method Action   makeRequest( STREAMID_DICT_TYPE streamID,
+                                 STREAMS_DICT_TYPE  stringID,
+                                 Bit#(32) payload0,
+                                 Bit#(32) payload1);
 
-        String msg = showSTREAMS_DICT(srq.stringID);
+        String msg = showSTREAMS_DICT(stringID);
         
-        case (srq.streamID)
+        case (streamID)
 
     //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     //
@@ -94,7 +98,7 @@ module [HASim_Module] mkStreams#(LowLevelPlatformInterface llpi)
 `ifdef STREAMID_ASSERT
             `STREAMID_ASSERT:
             begin
-              case (srq.payload0)
+              case (payload0)
                 0:
                 begin
                   $fdisplay(assert_log, "MESSAGE: %s", msg); //Message
@@ -118,21 +122,21 @@ module [HASim_Module] mkStreams#(LowLevelPlatformInterface llpi)
 `ifdef STREAMID_EVENT
             `STREAMID_EVENT:
             begin
-              $fdisplay(event_log, msg, srq.payload0, srq.payload1);
+              $fdisplay(event_log, msg, payload0, payload1);
             end
 `endif              
 
 `ifdef STREAMID_HEARTBEAT
             `STREAMID_HEARTBEAT:
             begin
-              $display("Heartbeat: FPGA Cycle: %0d, Model Cycle: %0d", srq.payload0, srq.payload1); 
+              $display("Heartbeat: FPGA Cycle: %0d, Model Cycle: %0d", payload0, payload1); 
             end
 `endif              
 
 `ifdef STREAMID_STAT
             `STREAMID_STAT:
             begin
-              $fdisplay(stat_log, msg, srq.payload0);
+              $fdisplay(stat_log, msg, payload0);
             end
 `endif              
 

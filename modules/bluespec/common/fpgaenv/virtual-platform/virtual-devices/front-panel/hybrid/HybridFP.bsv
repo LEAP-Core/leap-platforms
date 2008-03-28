@@ -31,7 +31,7 @@ typedef Bit#(32) FRONTP_INPUT_STATE;
 interface FrontPanel;
     method FRONTP_SWITCHES readSwitches();
     method FRONTP_BUTTONS  readButtons();
-    method Action          writeLEDs(FRONTP_MASKED_LEDS data);
+    method Action          writeLEDs(FRONTP_LEDS state, FRONTP_LEDS mask);
 endinterface
 
 module mkFrontPanel#(LowLevelPlatformInterface llpi) (FrontPanel);
@@ -76,8 +76,8 @@ module mkFrontPanel#(LowLevelPlatformInterface llpi) (FrontPanel);
     endmethod
 
     // write to LEDs
-    method Action writeLEDs(FRONTP_MASKED_LEDS data);
-        FRONTP_LEDS new_state = (ledState & ~data.mask) | (data.state & data.mask);
+    method Action writeLEDs(FRONTP_LEDS state, FRONTP_LEDS mask);
+        FRONTP_LEDS new_state = (ledState & ~mask) | (state & mask);
         if (new_state != ledState)
         begin
             ledState <= new_state;

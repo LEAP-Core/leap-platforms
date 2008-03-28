@@ -23,7 +23,7 @@ typedef SizeOf#(FRONTP_BUTTONS) FRONTP_NUM_BUTTONS;
 interface FrontPanel;
     method FRONTP_SWITCHES readSwitches();
     method FRONTP_BUTTONS  readButtons();
-    method Action          writeLEDs(FRONTP_MASKED_LEDS data);
+    method Action          writeLEDs(FRONTP_LEDS state, FRONTP_LEDS mask);
 endinterface
 
 module mkFrontPanel#(LowLevelPlatformInterface llpi) (FrontPanel);
@@ -60,9 +60,9 @@ module mkFrontPanel#(LowLevelPlatformInterface llpi) (FrontPanel);
     endmethod
 
     // write to LEDs
-    method Action writeLEDs(FRONTP_MASKED_LEDS data);
+    method Action writeLEDs(FRONTP_LEDS state, FRONTP_LEDS mask);
         // write to channel only if state has changed
-        FRONTP_LEDS s = (led_state & ~data.mask) | (data.state & data.mask);
+        FRONTP_LEDS s = (led_state & ~mask) | (state & mask);
         if (s != led_state)
         begin
             led_state <= s;

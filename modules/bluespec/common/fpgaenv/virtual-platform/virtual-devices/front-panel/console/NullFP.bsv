@@ -23,7 +23,7 @@ typedef SizeOf#(FRONTP_BUTTONS) FRONTP_NUM_BUTTONS;
 interface FrontPanel;
     method FRONTP_SWITCHES readSwitches();
     method FRONTP_BUTTONS  readButtons();
-    method Action          writeLEDs(FRONTP_MASKED_LEDS data);
+    method Action          writeLEDs(FRONTP_LEDS state, FRONTP_LEDS mask);
 endinterface
 
 module mkFrontPanel#(LowLevelPlatformInterface pint) (FrontPanel);
@@ -36,7 +36,7 @@ module mkFrontPanel#(LowLevelPlatformInterface pint) (FrontPanel);
         return 0;
     endmethod
 
-    method Action writeLEDs(FRONTP_MASKED_LEDS data);
+    method Action writeLEDs(FRONTP_LEDS state, FRONTP_LEDS mask);
         noAction;
     endmethod
 

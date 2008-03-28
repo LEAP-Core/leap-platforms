@@ -8,7 +8,10 @@
 
 // Streams
 interface Streams;
-    method Action   makeRequest(STREAMS_REQUEST srq);
+    method Action   makeRequest( STREAMID_DICT_TYPE streamID,
+                                 STREAMS_DICT_TYPE  stringID,
+                                 Bit#(32) payload0,
+                                 Bit#(32) payload1);
 endinterface
 
 // mkStreams
@@ -19,15 +22,18 @@ module mkStreams#(LowLevelPlatformInterface llpi)
     // ------------ methods ------------
 
     // accept request
-    method Action   makeRequest(STREAMS_REQUEST srq);
+    method Action   makeRequest( STREAMID_DICT_TYPE streamID,
+                                 STREAMS_DICT_TYPE  stringID,
+                                 Bit#(32) payload0,
+                                 Bit#(32) payload1);
 
         // make RRR request
         llpi.rrrClient.makeRequest(RRR_Request {
                                        serviceID   : `SERVICE_ID,
-                                       param0      : zeroExtend(pack(srq.streamID)),
-                                       param1      : zeroExtend(pack(srq.stringID)),
-                                       param2      : srq.payload0,
-                                       param3      : srq.payload1,
+                                       param0      : zeroExtend(pack(streamID)),
+                                       param1      : zeroExtend(pack(stringID)),
+                                       param2      : payload0,
+                                       param3      : payload1,
                                        needResponse: False
                                    });
 
