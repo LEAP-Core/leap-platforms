@@ -2960,3 +2960,15 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/null
 Added an update to Null RRR/UMF to make them work in the Hardware-Only FPGA environment.
 
 Michael P.
+
+----------
+joel        Date: Fri Mar 28 18:17:50 EDT 2008  CSN: CSN-platforms-82
+                  Fri Mar 28 22:17:50 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/streams
+ simulation-streams.bsv    Locally Modified           81 
+
+Simulation streams now default to print to STDOUT like the hybrid streams.
+But because we aren't yet checking the format string for the number of arguments 
+that need to be printed, junk numbers get printed for the excess arguments.

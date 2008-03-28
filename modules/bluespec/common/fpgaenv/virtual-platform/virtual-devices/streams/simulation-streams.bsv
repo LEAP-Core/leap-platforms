@@ -19,9 +19,22 @@ module  mkStreams#(LowLevelPlatformInterface llpi)
                       // interface
                           (Streams);
  
+
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//
+// NOTE:  The rules below should really be distributed to different
+//        managers to handle individual flavors of stream ids.
+//        It should be legal to build a model with just a NULL
+//        streamID.  For now we use a hack and add special case
+//        code for certain well known stream IDs, but this should
+//        be fixed.
+//
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+`ifdef STREAMID_EVENTS
+
     Reg#(File) event_log  <- mkReg(InvalidFile);
-    Reg#(File) stat_log   <- mkReg(InvalidFile);
-    Reg#(File) assert_log <- mkReg(InvalidFile);
 
     rule open_events (event_log == InvalidFile);
     
@@ -39,6 +52,11 @@ module  mkStreams#(LowLevelPlatformInterface llpi)
     
     endrule
 
+`endif
+
+`ifdef STREAMID_STATS
+    Reg#(File) stat_log   <- mkReg(InvalidFile);
+
     rule open_stats (stat_log == InvalidFile);
     
       let fd <- $fopen("stream_stats.out");
@@ -54,6 +72,10 @@ module  mkStreams#(LowLevelPlatformInterface llpi)
       stat_log <= fd;
     
     endrule
+`endif
+
+`ifdef STREAMID_ASSERTS
+    Reg#(File) assert_log <- mkReg(InvalidFile);
 
     rule open_asserts (assert_log == InvalidFile);
     
@@ -70,6 +92,8 @@ module  mkStreams#(LowLevelPlatformInterface llpi)
       assert_log <= fd;
     
     endrule
+`endif
+
     // ------------ methods ------------
 
     // accept request
@@ -143,6 +167,13 @@ module  mkStreams#(LowLevelPlatformInterface llpi)
             `STREAMID_NULL:
             begin
               noAction;
+            end
+
+	    default:
+	    begin
+               // TBD: Count payloads so we don't print junk...
+
+               $write(msg, payload0, payload1);
             end
 
         endcase
