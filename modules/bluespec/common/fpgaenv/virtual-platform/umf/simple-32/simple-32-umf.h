@@ -23,10 +23,10 @@ class UMF_MESSAGE_CLASS
 {
     private:
         // header info
-        int channelID;
-        int serviceID;
-        int methodID;
-        int length;
+        UINT32 channelID;
+        UINT32 serviceID;
+        UINT32 methodID;
+        UINT32 length;
 
         // message
         unsigned char *message;

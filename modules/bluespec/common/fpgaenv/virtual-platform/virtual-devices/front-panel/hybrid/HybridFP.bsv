@@ -3,7 +3,7 @@
 `include "physical_platform.bsh"
 
 `include "asim/rrr/rrr_service_ids.bsh"
-`include "asim/rrr/hybrid-fp-services.bsh"
+`include "asim/rrr/rrr_service_stub_FRONT_PANEL.bsh"
 
 `define FP_POLL_INTERVAL    1000
 

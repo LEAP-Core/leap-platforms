@@ -40,11 +40,11 @@ endmodule
 
 // request/response port interfaces
 interface REQUEST_PORT;
-    method ActionValue#(UMF_PACKET) acceptRequest();
+    method ActionValue#(UMF_PACKET) read();
 endinterface
 
 interface RESPONSE_PORT;
-    method Action sendResponse(UMF_PACKET data);
+    method Action write(UMF_PACKET data);
 endinterface
 
 interface RRR_SERVER;

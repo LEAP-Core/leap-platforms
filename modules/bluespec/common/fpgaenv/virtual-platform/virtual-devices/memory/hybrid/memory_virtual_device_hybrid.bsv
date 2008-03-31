@@ -7,7 +7,7 @@
 `include "rrr.bsh"
 `include "channelio.bsh"
 `include "asim/rrr/rrr_service_ids.bsh"
-`include "asim/rrr/hybrid-memory-services.bsh"
+`include "asim/rrr/rrr_service_stub_MEMORY.bsh"
 
 
 // ***** Modules *****

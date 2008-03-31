@@ -14,11 +14,11 @@ import FIFOF::*;
 
 // request/response port interfaces
 interface REQUEST_PORT;
-    method ActionValue#(UMF_PACKET) acceptRequest();
+    method ActionValue#(UMF_PACKET) read();
 endinterface
 
 interface RESPONSE_PORT;
-    method Action sendResponse(UMF_PACKET data);
+    method Action write(UMF_PACKET data);
 endinterface
 
 // channelio interface
@@ -50,7 +50,7 @@ module mkRRRServer#(ChannelIO channel) (RRR_SERVER);
 
         // create a new request port and link it to the FIFO
         req_ports[i] = interface REQUEST_PORT
-                           method ActionValue#(UMF_PACKET) acceptRequest();
+                           method ActionValue#(UMF_PACKET) read();
 
                                UMF_PACKET val = requestQueues[i].first();
                                requestQueues[i].deq();
@@ -61,7 +61,7 @@ module mkRRRServer#(ChannelIO channel) (RRR_SERVER);
 
         // create a new response port and link it to the FIFO
         resp_ports[i] = interface RESPONSE_PORT
-                            method Action sendResponse(UMF_PACKET data);
+                            method Action write(UMF_PACKET data);
 
                                 responseQueues[i].enq(data);
 

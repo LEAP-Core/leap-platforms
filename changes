@@ -2986,3 +2986,29 @@ Fixed some typos in simulation-streams.
 
 Michael P.
 
+
+----------
+aparasha    Date: Mon Mar 31 18:52:45 EDT 2008  CSN: CSN-platforms-84
+                  Mon Mar 31 22:52:45 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ basic-rrr-server.bsv      Locally Modified           83 
+ marshaller.bsv            Locally Added               0 
+ basic-rrr.awb             Locally Modified           83 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/null
+ null-rrr.bsv              Locally Modified           83 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid
+ HybridFP.bsv              Locally Modified           83 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ memory_virtual_device_hybrid.bsv Locally Modified           83 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/simple-32
+ simple-32-umf.cpp         Locally Modified           83 
+ simple-32-umf.h           Locally Modified           83 
+
+- completed RRR Response path for software client/hardware server
+- fixed a bug in UMF

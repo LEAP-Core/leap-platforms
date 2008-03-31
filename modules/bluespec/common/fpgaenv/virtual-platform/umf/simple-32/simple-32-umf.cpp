@@ -36,12 +36,12 @@ UMF_MESSAGE_CLASS::UMF_MESSAGE_CLASS(
 UMF_MESSAGE_CLASS::UMF_MESSAGE_CLASS(
     unsigned char header[])
 {
-    channelID =  header[3] >> 4;
-    serviceID = (header[3] << 4) | (header[2] >> 4);
-    methodID  =  header[2] & 0x0F;
+    channelID =   header[3] >> 4;
+    serviceID = ((header[3] & 0x0F) << 4) | (header[2] >> 4);
+    methodID  =   header[2] & 0x0F;
 
     // note: length in encoded header is in terms of number of chunks
-    length = UMF_CHUNK_BYTES * ((int(header[1]) << 8) + header[0]);
+    length = UMF_CHUNK_BYTES * ((UINT32(header[1]) << 8) | header[0]);
 
     // allocate space for message
     message = new unsigned char[length];
@@ -365,7 +365,7 @@ UMF_MESSAGE_CLASS::Print(
     for (int i = 0; i < length; i++)
     {
         out << setfill('0');
-        out << hex << message[i] << " ";
+        out << hex << setw(2) << UINT32(message[i]) << " ";
     }
     out << dec << endl;
 }
