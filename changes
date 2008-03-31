@@ -2972,3 +2972,17 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/strea
 Simulation streams now default to print to STDOUT like the hybrid streams.
 But because we aren't yet checking the format string for the number of arguments 
 that need to be printed, junk numbers get printed for the excess arguments.
+
+----------
+pellauer    Date: Mon Mar 31 11:14:38 EDT 2008  CSN: CSN-platforms-83
+                  Mon Mar 31 15:14:38 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/streams
+ simulation-streams.bsv    Locally Modified           82 
+
+
+Fixed some typos in simulation-streams.
+
+Michael P.
+

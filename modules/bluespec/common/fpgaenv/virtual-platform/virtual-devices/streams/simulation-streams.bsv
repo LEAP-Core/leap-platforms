@@ -119,8 +119,8 @@ module  mkStreams#(LowLevelPlatformInterface llpi)
     //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
-`ifdef STREAMID_ASSERT
-            `STREAMID_ASSERT:
+`ifdef STREAMID_ASSERTS
+            `STREAMID_ASSERTS:
             begin
               case (payload0)
                 0:
@@ -143,8 +143,8 @@ module  mkStreams#(LowLevelPlatformInterface llpi)
             end
 `endif              
 
-`ifdef STREAMID_EVENT
-            `STREAMID_EVENT:
+`ifdef STREAMID_EVENTS
+            `STREAMID_EVENTS:
             begin
               $fdisplay(event_log, msg, payload0, payload1);
             end
@@ -157,8 +157,8 @@ module  mkStreams#(LowLevelPlatformInterface llpi)
             end
 `endif              
 
-`ifdef STREAMID_STAT
-            `STREAMID_STAT:
+`ifdef STREAMID_STATS
+            `STREAMID_STATS:
             begin
               $fdisplay(stat_log, msg, payload0);
             end
