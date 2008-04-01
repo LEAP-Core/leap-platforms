@@ -3012,3 +3012,29 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/simple-32
 
 - completed RRR Response path for software client/hardware server
 - fixed a bug in UMF
+
+----------
+aparasha    Date: Tue Apr  1 14:51:01 EDT 2008  CSN: CSN-platforms-85
+                  Tue Apr  1 18:51:01 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/simulation
+ sim-physical-platform.cpp Locally Modified           84 
+ sim-physical-platform.h   Locally Modified           84 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled
+ htg-v5-pcie-enabled.cpp   Locally Modified           84 
+ htg-v5-pcie-enabled.h     Locally Modified           84 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express
+ pci-express-c-import-ioctl.cpp Locally Modified           84 
+
+- Added missing Uninit() methods to software sim-physical-platform and
+  htg-v5-pcie physical platform. This completes the Uninit() chain all
+  the way from the top level (main) of the instantiation hierarchy down
+  to the leaf-nodes (physical devices), thereby ensuring a clean exit
+  whenever any module in the hierarchy calls CallbackExit().
+
+  This fixes the zombie Bluesim process bug.
+
+- Removed unnecessary cout status messages in pcie device C code.

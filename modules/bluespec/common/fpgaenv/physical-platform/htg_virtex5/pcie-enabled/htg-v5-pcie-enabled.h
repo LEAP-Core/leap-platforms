@@ -21,6 +21,8 @@ class PHYSICAL_DEVICES_CLASS: public HASIM_MODULE_CLASS
         PHYSICAL_DEVICES_CLASS(HASIM_MODULE);
         ~PHYSICAL_DEVICES_CLASS();
 
+        void Uninit();
+
         // accessors to individual devices
         PCIE_DEVICE GetPCIExpressDevice() { return &pciExpressDevice; }
 };

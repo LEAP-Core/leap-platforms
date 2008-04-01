@@ -26,7 +26,6 @@ PCIE_DEVICE_CLASS::PCIE_DEVICE_CLASS()
         cerr << "pcie device: unable to open driver" << endl;
         exit(1);
     }
-    cout << "pcie device: channel opened" << endl;
 }
 
 PCIE_DEVICE_CLASS::~PCIE_DEVICE_CLASS()
@@ -38,7 +37,6 @@ void
 PCIE_DEVICE_CLASS::Uninit()
 {
     pchnl_close_channel(&pchannel);
-    cout << "pcie device: channel closed" << endl;
 }
 
 CSR_DATA
