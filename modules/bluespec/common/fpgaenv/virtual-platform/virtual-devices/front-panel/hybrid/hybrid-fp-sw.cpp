@@ -26,7 +26,7 @@ FRONT_PANEL_CLASS::FRONT_PANEL_CLASS()
 // destructor
 FRONT_PANEL_CLASS::~FRONT_PANEL_CLASS()
 {
-    Uninit();
+    Cleanup();
 }
 
 // init
@@ -81,9 +81,20 @@ FRONT_PANEL_CLASS::Init(
     }
 }
 
-// uninit
+// uninit: override
 void
 FRONT_PANEL_CLASS::Uninit()
+{
+    // cleanup
+    Cleanup();
+
+    // chain
+    HASIM_MODULE_CLASS::Uninit();
+}
+
+// cleanup: kill panel process
+void
+FRONT_PANEL_CLASS::Cleanup()
 {
     if (childAlive)
     {

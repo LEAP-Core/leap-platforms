@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 
-#include "main.h"
+#include "hasim-module.h"
 #include "asim/provides/channelio.h"
 
 #define MAX_SERVICES            64
@@ -18,7 +18,6 @@ class RRR_SERVICE_CLASS
 
     public:
         virtual void    Init(HASIM_MODULE)                                = 0;
-        virtual void    Uninit()                                          = 0;
         virtual bool    Request(UINT32, UINT32, UINT32, UINT32, UINT32 *) = 0;
         virtual void    Poll(void)                                        = 0;
 };

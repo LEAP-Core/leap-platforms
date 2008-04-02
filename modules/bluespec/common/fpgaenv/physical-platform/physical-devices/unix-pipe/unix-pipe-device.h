@@ -1,7 +1,7 @@
 #ifndef __UNIX_PIPE__
 #define __UNIX_PIPE__
 
-#include "main.h"
+#include "hasim-module.h"
 #include "asim/provides/umf.h"
 
 #define STDIN             0
@@ -32,6 +32,7 @@ class UNIX_PIPE_DEVICE_CLASS: public HASIM_MODULE_CLASS
         UNIX_PIPE_DEVICE_CLASS(HASIM_MODULE);
         ~UNIX_PIPE_DEVICE_CLASS();
 
+        void Cleanup();                    // cleanup
         void Uninit();                     // uninit
         bool Probe();                      // probe for data
         void Read(unsigned char*, int);    // blocking read

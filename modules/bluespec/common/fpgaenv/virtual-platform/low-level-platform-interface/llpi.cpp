@@ -15,7 +15,6 @@ LLPI_CLASS::LLPI_CLASS() :
 
 LLPI_CLASS::~LLPI_CLASS()
 {
-    Uninit();
 }
 
 void
@@ -24,14 +23,4 @@ LLPI_CLASS::Poll()
     // poll channelio and RRR server
     channelio.Poll();
     rrrServer.Poll();
-}
-
-void
-LLPI_CLASS::Uninit()
-{
-    // uninit submodules
-    physicalDevices.Uninit();
-    channelio.Uninit();
-    rrrClient.Uninit();
-    rrrServer.Uninit();
 }

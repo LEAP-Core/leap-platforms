@@ -3050,3 +3050,65 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-ena
 Didn't compile because PCIE_DEVICE_CLASS constructor doesn't take arguments.
 Since no arguments are needed, it shouldn't have to be mentioned in the
 initialization list.  Not tested beyond noting that it now compiles.
+
+----------
+aparasha    Date: Wed Apr  2 12:05:02 EDT 2008  CSN: CSN-platforms-87
+                  Wed Apr  2 16:05:02 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/simulation
+ sim-physical-platform.cpp Locally Modified           85 
+ sim-physical-platform.h   Locally Modified           85 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled
+ htg-v5-pcie-enabled.cpp   Locally Modified           86 
+ htg-v5-pcie-enabled.h     Locally Modified           86 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express
+ pci-express-c-import-mmap.cpp Locally Modified           84 
+ pci-express-c-import-mmap.h Locally Modified           84 
+ pci-express-c-import-ioctl.cpp Locally Modified           85 
+ pci-express-c-import-ioctl.h Locally Modified           84 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe
+ unix-pipe-device.h        Locally Modified           84 
+ unix-pipe-device.cpp      Locally Modified           84 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/basic
+ basic-channelio.cpp       Locally Modified           84 
+ basic-channelio.h         Locally Modified           84 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/pcie-debugger
+ pcie-debugger.cpp         Locally Modified           84 
+ pcie-debugger.h           Locally Modified           84 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/pcie-csr
+ pcie-physical-channel.cpp Locally Modified           84 
+ pcie-physical-channel.h   Locally Modified           84 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ basic-rrr-server.cpp      Locally Modified           84 
+ basic-rrr-server.h        Locally Modified           84 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid
+ hybrid-fp-sw.h            Locally Modified           84 
+ hybrid-fp-sw.cpp          Locally Modified           84 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-memory-sw.cpp      Locally Modified           84 
+ hybrid-memory-sw.h        Locally Modified           84 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/streams
+ hybrid-streams.h          Locally Modified           84 
+ hybrid-streams.cpp        Locally Modified           84 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface
+ llpi.cpp                  Locally Modified           84 
+ llpi.h                    Locally Modified           84 
+
+- removed explicit Uninit() methods from all C++ classes, except in
+  cases where the module must perform some specific cleanup tasks
+  before propagating the signal to its children.
+
+- updated PCIe device class to derive from HASIM_MODULE_CLASS;
+  restored original instantiation code in HTGv5 platform class.

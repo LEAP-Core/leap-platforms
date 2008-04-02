@@ -51,10 +51,12 @@ STREAMS_CLASS::Init(
     }
 }
 
-// uninit
+// uninit: we have to write this explicitly
 void
 STREAMS_CLASS::Uninit()
 {
+    // simply chain
+    HASIM_MODULE_CLASS::Uninit();
 }
 
 // request

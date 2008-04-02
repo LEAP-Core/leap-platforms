@@ -2,7 +2,7 @@
 #define __SIM_CHANNELIO__
 
 #include <queue>
-#include "main.h"
+#include "hasim-module.h"
 #include "asim/provides/umf.h"
 #include "asim/provides/physical_channel.h"
 
@@ -60,7 +60,7 @@ class CHANNELIO_CLASS:  public HASIM_MODULE_CLASS
     public:
         CHANNELIO_CLASS(HASIM_MODULE, PHYSICAL_DEVICES);
         ~CHANNELIO_CLASS();
-        void        Uninit();
+
         void        RegisterForDelivery(int, CIO_DELIVERY_STATION);
         UMF_MESSAGE Read(int);
         void        Write(int, UMF_MESSAGE);

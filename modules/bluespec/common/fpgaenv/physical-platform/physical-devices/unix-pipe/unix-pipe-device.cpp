@@ -94,12 +94,26 @@ UNIX_PIPE_DEVICE_CLASS::UNIX_PIPE_DEVICE_CLASS(
 // destructor
 UNIX_PIPE_DEVICE_CLASS::~UNIX_PIPE_DEVICE_CLASS()
 {
-    Uninit();
+    // cleanup
+    Cleanup();
 }
 
-// uninit: uninitialize the hardware partition
+// override default chain-uninit method because
+// we need to do something special
 void
 UNIX_PIPE_DEVICE_CLASS::Uninit()
+{
+    // do basic cleanup
+    Cleanup();
+
+    // call default uninit so that we can continue
+    // chain if necessary
+    HASIM_MODULE_CLASS::Uninit();
+}
+
+// cleanup: kill the process at the other end of the pipe
+void
+UNIX_PIPE_DEVICE_CLASS::Cleanup()
 {
     if (childAlive)
     {

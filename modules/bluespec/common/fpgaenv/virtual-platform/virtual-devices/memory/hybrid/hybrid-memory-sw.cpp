@@ -30,7 +30,7 @@ MEMORY_CLASS::MEMORY_CLASS()
 // destructor
 MEMORY_CLASS::~MEMORY_CLASS()
 {
-    Uninit();
+    Cleanup();
 }
 
 // init
@@ -50,9 +50,20 @@ MEMORY_CLASS::Init(
     vmhLoaded = false;
 }
 
-// uninit
+// uninit: override
 void
 MEMORY_CLASS::Uninit()
+{
+    // cleanup
+    Cleanup();
+    
+    // chain
+    HASIM_MODULE_CLASS::Uninit();
+}
+
+// cleanup
+void
+MEMORY_CLASS::Cleanup()
 {
     if (M)
     {

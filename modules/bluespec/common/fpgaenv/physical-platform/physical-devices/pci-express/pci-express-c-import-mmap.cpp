@@ -16,7 +16,9 @@ using namespace std;
 //              PCI Express Device
 // ============================================
 
-PCIE_DEVICE_CLASS::PCIE_DEVICE_CLASS()
+PCIE_DEVICE_CLASS::PCIE_DEVICE_CLASS(
+    HASIM_MODULE p) :
+        HASIM_MODULE_CLASS(p)
 {
     // obtain a descriptor for the driver
     driverFD = open("/dev/pchnl", O_RDWR);
@@ -47,11 +49,24 @@ PCIE_DEVICE_CLASS::PCIE_DEVICE_CLASS()
 
 PCIE_DEVICE_CLASS::~PCIE_DEVICE_CLASS()
 {
-    Uninit();
+    Cleanup();
 }
 
+// override default chain-uninit method because
+// we need to do something special
 void
 PCIE_DEVICE_CLASS::Uninit()
+{
+    Cleanup();
+
+    // call default uninit so that we can continue
+    // chain if necessary
+    HASIM_MODULE_CLASS::Uninit();
+}
+
+// cleanup
+void
+PCIE_DEVICE_CLASS::Cleanup()
 {
     // unmap devices
     munmap(0, CSR_REGION_SIZE);
@@ -60,6 +75,7 @@ PCIE_DEVICE_CLASS::Uninit()
     close(driverFD);
 }
 
+// read system CSR
 CSR_DATA
 PCIE_DEVICE_CLASS::ReadSystemCSR()
 {
@@ -67,6 +83,7 @@ PCIE_DEVICE_CLASS::ReadSystemCSR()
     return swapEndian(*systemCSR_Read);
 }
 
+// write system CSR
 void
 PCIE_DEVICE_CLASS::WriteSystemCSR(
     CSR_DATA data)
@@ -75,6 +92,7 @@ PCIE_DEVICE_CLASS::WriteSystemCSR(
     *systemCSR_Write = swapEndian(data);
 }
 
+// read common CSR
 CSR_DATA
 PCIE_DEVICE_CLASS::ReadCommonCSR(
     CSR_INDEX index)
@@ -83,6 +101,7 @@ PCIE_DEVICE_CLASS::ReadCommonCSR(
     return swapEndian(commonCSRs[index]);
 }
 
+// write common CSR
 void
 PCIE_DEVICE_CLASS::WriteCommonCSR(
     CSR_INDEX index,
@@ -92,6 +111,7 @@ PCIE_DEVICE_CLASS::WriteCommonCSR(
     commonCSRs[index] = swapEndian(data);
 }
 
+// swap endianness
 CSR_DATA
 PCIE_DEVICE_CLASS::swapEndian(
     CSR_DATA data)

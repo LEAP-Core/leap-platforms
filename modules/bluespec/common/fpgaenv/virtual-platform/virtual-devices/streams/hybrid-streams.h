@@ -37,10 +37,10 @@ class STREAMS_CLASS: public RRR_SERVICE_CLASS,
         ~STREAMS_CLASS();
 
         // generic RRR methods
-        void  Init(HASIM_MODULE);
-        void  Uninit();
-        bool  Request(UINT32, UINT32, UINT32, UINT32, UINT32 *);
-        void  Poll();
+        void Init(HASIM_MODULE);
+        void Uninit();
+        bool Request(UINT32, UINT32, UINT32, UINT32, UINT32 *);
+        void Poll();
 
         // static methods
         static STREAMS   GetInstance() { return &instance; }

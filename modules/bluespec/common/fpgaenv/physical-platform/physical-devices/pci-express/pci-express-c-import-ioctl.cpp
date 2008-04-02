@@ -19,7 +19,9 @@ using namespace std;
 // takes care of talking to driver and resolving
 // endianness issues
 
-PCIE_DEVICE_CLASS::PCIE_DEVICE_CLASS()
+PCIE_DEVICE_CLASS::PCIE_DEVICE_CLASS(
+    HASIM_MODULE p) :
+        HASIM_MODULE_CLASS(p)
 {
     if (pchnl_open_channel(&pchannel) < 0)
     {
@@ -30,11 +32,23 @@ PCIE_DEVICE_CLASS::PCIE_DEVICE_CLASS()
 
 PCIE_DEVICE_CLASS::~PCIE_DEVICE_CLASS()
 {
-    Uninit();
+    Cleanup();
+}
+
+// override default chain-uninit method because
+// we need to do something special
+void
+PCIE_DEVICE_CLASS::Uninit()
+{
+    Cleanup();
+
+    // call default uninit so that we can continue
+    // chain if necessary
+    HASIM_MODULE_CLASS::Uninit();
 }
 
 void
-PCIE_DEVICE_CLASS::Uninit()
+PCIE_DEVICE_CLASS::Cleanup()
 {
     pchnl_close_channel(&pchannel);
 }

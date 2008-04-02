@@ -2,7 +2,7 @@
 #define __PHYSICAL_PLATFORM__
 
 #include "asim/provides/unix_pipe_device.h"
-#include "main.h"
+#include "hasim-module.h"
 
 // ====================================================
 //             Simulation Physical Platform
@@ -20,8 +20,6 @@ class PHYSICAL_DEVICES_CLASS: public HASIM_MODULE_CLASS
         // constructor-destructor
         PHYSICAL_DEVICES_CLASS(HASIM_MODULE);
         ~PHYSICAL_DEVICES_CLASS();
-
-        void Uninit();
 
         // accessors to individual devices
         UNIX_PIPE_DEVICE GetUNIXPipeDevice() { return &unixPipeDevice; }

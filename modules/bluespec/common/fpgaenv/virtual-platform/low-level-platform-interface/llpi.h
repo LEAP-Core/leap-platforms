@@ -31,9 +31,6 @@ class LLPI_CLASS: public HASIM_MODULE_CLASS
 
         // poll
         void Poll();
-
-        // cleanup
-        void Uninit();
 };
 
 #endif

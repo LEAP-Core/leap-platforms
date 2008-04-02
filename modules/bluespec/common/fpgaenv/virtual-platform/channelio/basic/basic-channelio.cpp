@@ -37,14 +37,6 @@ CHANNELIO_CLASS::CHANNELIO_CLASS(
 // destructor
 CHANNELIO_CLASS::~CHANNELIO_CLASS()
 {
-    Uninit();
-}
-
-// uninit
-void
-CHANNELIO_CLASS::Uninit()
-{
-    physicalChannel.Uninit();
 }
 
 // register a station for message delivery

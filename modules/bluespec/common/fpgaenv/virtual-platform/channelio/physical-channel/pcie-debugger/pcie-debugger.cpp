@@ -41,13 +41,6 @@ PHYSICAL_CHANNEL_CLASS::PHYSICAL_CHANNEL_CLASS(
 // destructor
 PHYSICAL_CHANNEL_CLASS::~PHYSICAL_CHANNEL_CLASS()
 {
-    Uninit();
-}
-
-// uninit: uninitialize the hardware partition
-void
-PHYSICAL_CHANNEL_CLASS::Uninit()
-{
 }
 
 void

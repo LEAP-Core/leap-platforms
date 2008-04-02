@@ -34,7 +34,6 @@ class PHYSICAL_CHANNEL_CLASS: public HASIM_MODULE_CLASS
     public:
         PHYSICAL_CHANNEL_CLASS(HASIM_MODULE, PHYSICAL_DEVICES);
         ~PHYSICAL_CHANNEL_CLASS();
-        void        Uninit();
 
         UMF_MESSAGE Read();             // blocking read
         UMF_MESSAGE TryRead();          // non-blocking read

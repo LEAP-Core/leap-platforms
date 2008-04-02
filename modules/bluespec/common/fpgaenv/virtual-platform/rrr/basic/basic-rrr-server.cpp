@@ -84,7 +84,6 @@ RRR_SERVER_CLASS::RRR_SERVER_CLASS(
 // destructor
 RRR_SERVER_CLASS::~RRR_SERVER_CLASS()
 {
-    Uninit();
 }
 
 // init: all services MUST have registered when this
@@ -97,6 +96,9 @@ RRR_SERVER_CLASS::Init()
     {
         if (isServiceValid(i))
         {
+            // set myself as the HASIM_MODULE parent
+            // for all services so that I can chain
+            // uninit()s to them
             ServiceMap[i]->Init(this);
         }
     }
@@ -105,7 +107,7 @@ RRR_SERVER_CLASS::Init()
     channelio->RegisterForDelivery(CHANNEL_ID, this);
 }
 
-// uninit
+// uninit: override
 void
 RRR_SERVER_CLASS::Uninit()
 {
@@ -114,11 +116,16 @@ RRR_SERVER_CLASS::Uninit()
     {
         if (isServiceValid(i))
         {
-            ServiceMap[i]->Uninit();
+            // no need to explicitly call Uninit() on
+            // services, this will happen automatically
+            // when we chain the call
             ServiceMap[i] = NULL;
         }
     }
     ServiceValidMask = 0;
+
+    // chain
+    HASIM_MODULE_CLASS::Uninit();
 }
 
 // accept a delivered message from channelio
