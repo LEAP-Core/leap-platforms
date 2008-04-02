@@ -3,6 +3,6 @@
 
 #include "basic-rrr-server.h"
 
-int vmh_load_image(char *filename, UINT32 *M, int memsize);
+int vmh_load_image(const char *filename, UINT32 *M, int memsize);
 
 #endif

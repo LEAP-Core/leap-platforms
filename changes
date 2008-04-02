@@ -3112,3 +3112,21 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-in
 
 - updated PCIe device class to derive from HASIM_MODULE_CLASS;
   restored original instantiation code in HTGv5 platform class.
+
+----------
+mcadler     Date: Wed Apr  2 13:57:57 EDT 2008  CSN: CSN-platforms-88
+                  Wed Apr  2 17:57:57 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid
+ hybrid-fp-sw.cpp          Locally Modified           87 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-memory-sw.cpp      Locally Modified           87 
+ vmh-utils.cpp             Locally Modified           87 
+ vmh-utils.h               Locally Modified           87 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe
+ unix-pipe-device.cpp      Locally Modified           87 
+
+Change the way command line arguments are passed around.

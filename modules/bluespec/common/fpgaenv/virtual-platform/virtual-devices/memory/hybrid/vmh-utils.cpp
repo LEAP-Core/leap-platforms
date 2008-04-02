@@ -4,7 +4,7 @@
 #include "vmh-utils.h"
 
 /* load image into memory */
-int vmh_load_image(char *filename, UINT32 *M, int memsize)
+int vmh_load_image(const char *filename, UINT32 *M, int memsize)
 {
     /* assume file is in VMH format */
     char *line;

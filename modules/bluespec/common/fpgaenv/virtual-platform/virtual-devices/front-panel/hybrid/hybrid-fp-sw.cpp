@@ -38,7 +38,7 @@ FRONT_PANEL_CLASS::Init(
     parent = p;
 
     // see if we should pop up the dialog box
-    if (globalArgs.showFrontPanel == false)
+    if (globalArgs->ShowFrontPanel() == false)
     {
         return;
     }
@@ -133,7 +133,7 @@ void
 FRONT_PANEL_CLASS::Poll()
 {
     // if dialog is disabled, don't do anything
-    if (globalArgs.showFrontPanel == false)
+    if (globalArgs->ShowFrontPanel() == false)
     {
         return;
     }

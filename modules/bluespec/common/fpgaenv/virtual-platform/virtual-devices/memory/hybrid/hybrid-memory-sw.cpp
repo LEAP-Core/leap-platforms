@@ -91,7 +91,10 @@ MEMORY_CLASS::Request(
     // check to see if our image is ready
     if (vmhLoaded == false)
     {
-        vmh_load_image(globalArgs.benchmark, M, MEM_SIZE);
+        if (vmh_load_image(globalArgs->Benchmark(), M, MEM_SIZE) == -1)
+        {
+            exit(1);
+        }
         vmhLoaded = true;
     }
 

@@ -42,8 +42,6 @@ UNIX_PIPE_DEVICE_CLASS::UNIX_PIPE_DEVICE_CLASS(
 
     if (childpid == 0)
     {
-        char hardware_exe[256];
-
         // CHILD: setup pipes for hardware side
         close(PARENT_READ);
         close(PARENT_WRITE);
@@ -52,12 +50,12 @@ UNIX_PIPE_DEVICE_CLASS::UNIX_PIPE_DEVICE_CLASS(
         dup2(CHILD_WRITE, DESC_FPGA_2_HOST);
 
         // launch hardware executable/download bitfile
-        sprintf(hardware_exe, "./%s_hw.exe", APM_NAME);
-        execlp(hardware_exe, hardware_exe, NULL);
+        string hw_exe = string(globalArgs->ModelDir()) + "/" + APM_NAME + "_hw.exe";
+        
+        execlp(hw_exe.c_str(), hw_exe.c_str(), NULL);
 
         // error
-        fprintf(stderr, "Error attempting to invoke %s\n", hardware_exe);
-        perror("execlp");
+        cerr << "Error attempting to invoke " << hw_exe << endl;
         exit(1);
     }
     else
