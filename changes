@@ -3038,3 +3038,15 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci
   This fixes the zombie Bluesim process bug.
 
 - Removed unnecessary cout status messages in pcie device C code.
+
+----------
+mcadler     Date: Wed Apr  2 09:23:25 EDT 2008  CSN: CSN-platforms-86
+                  Wed Apr  2 13:23:25 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled
+ htg-v5-pcie-enabled.cpp   Locally Modified           85 
+
+Didn't compile because PCIE_DEVICE_CLASS constructor doesn't take arguments.
+Since no arguments are needed, it shouldn't have to be mentioned in the
+initialization list.  Not tested beyond noting that it now compiles.

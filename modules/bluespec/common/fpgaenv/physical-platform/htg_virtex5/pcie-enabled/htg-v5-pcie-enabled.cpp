@@ -2,8 +2,7 @@
 
 PHYSICAL_DEVICES_CLASS::PHYSICAL_DEVICES_CLASS(
     HASIM_MODULE p) :
-        HASIM_MODULE_CLASS(p),
-        pciExpressDevice(this)
+        HASIM_MODULE_CLASS(p)
 {
 }
 
