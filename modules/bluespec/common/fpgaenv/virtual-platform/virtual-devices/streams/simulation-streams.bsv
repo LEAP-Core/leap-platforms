@@ -99,11 +99,10 @@ module  mkStreams#(LowLevelPlatformInterface llpi)
     // accept request
 
     method Action   makeRequest( STREAMID_DICT_TYPE streamID,
-                                 STREAMS_DICT_TYPE  stringID,
+                                 Bit#(32) stringID,
                                  Bit#(32) payload0,
                                  Bit#(32) payload1);
 
-        String msg = showSTREAMS_DICT(stringID);
         
         case (streamID)
 
@@ -122,6 +121,9 @@ module  mkStreams#(LowLevelPlatformInterface llpi)
 `ifdef STREAMID_ASSERTS
             `STREAMID_ASSERTS:
             begin
+
+              String msg = showASSERTS_DICT(stringID);
+
               case (payload0)
                 0:
                 begin
@@ -146,6 +148,7 @@ module  mkStreams#(LowLevelPlatformInterface llpi)
 `ifdef STREAMID_EVENTS
             `STREAMID_EVENTS:
             begin
+              String msg = showEVENTS_DICT(stringID);
               $fdisplay(event_log, msg, payload0, payload1);
             end
 `endif              
@@ -153,6 +156,7 @@ module  mkStreams#(LowLevelPlatformInterface llpi)
 `ifdef STREAMID_HEARTBEAT
             `STREAMID_HEARTBEAT:
             begin
+              String msg = showHEARTBEAT_DICT(stringID);
               $display("Heartbeat: FPGA Cycle: %0d, Model Cycle: %0d", payload0, payload1); 
             end
 `endif              
@@ -160,6 +164,7 @@ module  mkStreams#(LowLevelPlatformInterface llpi)
 `ifdef STREAMID_STATS
             `STREAMID_STATS:
             begin
+              String msg = showSTATS_DICT(stringID);
               $fdisplay(stat_log, msg, payload0);
             end
 `endif              

@@ -10,6 +10,7 @@
 #include <string.h>
 #include <iostream>
 
+#include "main.h"
 #include "asim/provides/unix_pipe_device.h"
 
 using namespace std;

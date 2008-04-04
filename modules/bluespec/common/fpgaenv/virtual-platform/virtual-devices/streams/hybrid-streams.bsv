@@ -23,7 +23,7 @@ module mkStreams#(LowLevelPlatformInterface llpi)
 
     // accept request
     method Action   makeRequest( STREAMID_DICT_TYPE streamID,
-                                 STREAMS_DICT_TYPE  stringID,
+                                 STREAMS_DICT_TYPE stringID,
                                  Bit#(32) payload0,
                                  Bit#(32) payload1);
 

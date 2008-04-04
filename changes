@@ -3130,3 +3130,22 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/uni
  unix-pipe-device.cpp      Locally Modified           87 
 
 Change the way command line arguments are passed around.
+
+----------
+pellauer    Date: Fri Apr  4 16:09:09 EDT 2008  CSN: CSN-platforms-89
+                  Fri Apr  4 20:09:09 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/streams
+ streams-common.bsh        Locally Modified           88 
+ hybrid-streams.bsv        Locally Modified           88 
+ simulation-streams.bsv    Locally Modified           88 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe
+ unix-pipe-device.cpp      Locally Modified           88 
+
+
+* Events are no longer handled by streams.
+* Fixed a missing include in unix-pipe-device.
+
+Michael P.
