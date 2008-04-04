@@ -30,7 +30,7 @@ int vmh_load_image(const char *filename, UINT32 *M, int memsize)
             if (line[0] == '@')
             {
                 /* recover the rest of the address */
-                addr = strtol(&line[1], NULL, 16);
+                addr = strtoul(&line[1], NULL, 16);
 
                 /* address in VMH file is already word
                  * aligned, so no shifting required */
@@ -46,7 +46,7 @@ int vmh_load_image(const char *filename, UINT32 *M, int memsize)
                    care about endianness.
                           *** TODO: ENDIANNESS ***
                    */
-                UINT32 data = strtol(line, NULL, 16);
+                UINT32 data = strtoul(line, NULL, 16);
                 M[addr] = data;
 
                 /* increment address pointer - since our

@@ -3149,3 +3149,16 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/uni
 * Fixed a missing include in unix-pipe-device.
 
 Michael P.
+
+----------
+pellauer    Date: Fri Apr  4 16:09:57 EDT 2008  CSN: CSN-platforms-90
+                  Fri Apr  4 20:09:57 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ vmh-utils.cpp             Locally Modified           89 
+
+
+* Changed strtol() to strtoul() to work on 32-bit platforms.
+
+Michael P.
