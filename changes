@@ -3162,3 +3162,14 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memor
 * Changed strtol() to strtoul() to work on 32-bit platforms.
 
 Michael P.
+
+----------
+mcadler     Date: Sun Apr  6 09:39:14 EDT 2008  CSN: CSN-platforms-91
+                  Sun Apr  6 13:39:14 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/streams
+ simulation-streams.bsv    Locally Modified           90 
+
+Fix parameter mismatch between declarations and remove reference to msg
+in default clause for printing messages, since it no longer has meaning.

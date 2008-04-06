@@ -99,7 +99,7 @@ module  mkStreams#(LowLevelPlatformInterface llpi)
     // accept request
 
     method Action   makeRequest( STREAMID_DICT_TYPE streamID,
-                                 Bit#(32) stringID,
+                                 STREAMS_DICT_TYPE stringID,
                                  Bit#(32) payload0,
                                  Bit#(32) payload1);
 
@@ -169,16 +169,16 @@ module  mkStreams#(LowLevelPlatformInterface llpi)
             end
 `endif              
 
+`ifdef STREAMID_NULL
             `STREAMID_NULL:
             begin
               noAction;
             end
+`endif              
 
 	    default:
 	    begin
-               // TBD: Count payloads so we don't print junk...
-
-               $write(msg, payload0, payload1);
+              noAction;
             end
 
         endcase
