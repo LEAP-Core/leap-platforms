@@ -10,9 +10,9 @@
 #include <string.h>
 #include <iostream>
 
-#include "main.h"
 #include "platforms-module.h"
 #include "asim/provides/unix_pipe_device.h"
+#include "asim/provides/model.h"
 
 using namespace std;
 

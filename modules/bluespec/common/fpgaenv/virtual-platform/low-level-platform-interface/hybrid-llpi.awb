@@ -8,3 +8,5 @@
 %sources -t BSV -v PUBLIC  llpi.bsv
 %sources -t H   -v PUBLIC  llpi.h
 %sources -t CPP -v PRIVATE llpi.cpp
+%sources -t H   -v PUBLIC  platforms-module.h
+%sources -t CPP -v PRIVATE platforms-module.cpp

@@ -3235,3 +3235,32 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/uni
 
 TODO: The "PLATFORMS_MODULE" file should really be a library, but
 hasim-configure doesn't support them yet.
+
+----------
+pellauer    Date: Wed Apr  9 16:54:05 EDT 2008  CSN: CSN-platforms-93
+                  Wed Apr  9 20:54:05 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface
+ platforms-module.h        Locally Added               0 
+ hybrid-llpi.awb           Locally Modified           92 
+ platforms-module.cpp      Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid
+ hybrid-fp-sw.cpp          Locally Modified           92 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-memory-sw.cpp      Locally Modified           92 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe
+ unix-pipe-device.cpp      Locally Modified           92 
+
+
+* Updated global args. 
+
+* Moved platform-modules to low-level-platform interface until it can become a
+library.
+
+Michael P.
+
+

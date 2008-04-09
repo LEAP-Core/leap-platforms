@@ -6,9 +6,9 @@
 #include <string.h>
 
 #include "hybrid-memory-sw.h"
-#include "main.h"
 #include "vmh-utils.h"
 #include "basic-rrr-client.h"
+#include "asim/provides/model.h"
 
 #include "asim/rrr/rrr_service_ids.h"
 

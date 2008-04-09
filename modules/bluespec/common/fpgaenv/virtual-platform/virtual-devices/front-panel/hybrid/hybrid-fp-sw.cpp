@@ -8,7 +8,7 @@
 
 #include "hybrid-fp-sw.h"
 #include "asim/rrr/rrr_service_ids.h"
-#include "main.h"
+#include "asim/provides/model.h"
 #include "basic-rrr-client.h"
 
 #define SERVICE_ID  FRONT_PANEL_SERVICE_ID
