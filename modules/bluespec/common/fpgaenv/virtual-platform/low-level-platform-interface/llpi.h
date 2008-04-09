@@ -9,7 +9,7 @@
 
 // A convenient bundle of all ways to interact with the outside world.
 typedef class LLPI_CLASS* LLPI;
-class LLPI_CLASS: public HASIM_MODULE_CLASS
+class LLPI_CLASS: public PLATFORMS_MODULE_CLASS
 {
     private:
         // LLPI stack layers

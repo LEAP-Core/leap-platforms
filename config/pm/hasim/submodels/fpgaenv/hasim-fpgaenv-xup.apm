@@ -1,11 +1,11 @@
 
 [Global]
 SaveParameters=0
-Description=Bluespec FPGA Environment for XUP Board
+Description=Hardware-Only XUP Environment
 File=hasim-fpgaenv-xup
 Version=2.1
 Type=HAsim
-Name=Bluespec FPGA Environment for XUP Board
+Name=Hardware-Only XUP Environment
 Class=Asim::Model
 
 [Model]
@@ -53,7 +53,6 @@ Packagehint=platforms
 [Null RRR Module]
 File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/null/null-rrr.awb
 Packagehint=platforms
-
 
 [XUP Physical Platform]
 File=modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup/xup-physical-platform.awb

@@ -1,7 +1,7 @@
 #include "asim/provides/low_level_platform_interface.h"
 
 LLPI_CLASS::LLPI_CLASS() :
-        HASIM_MODULE_CLASS(NULL),
+        PLATFORMS_MODULE_CLASS(NULL),
         physicalDevices(this),
         channelio(this, &physicalDevices),
         rrrClient(this, &channelio),

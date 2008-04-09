@@ -1,10 +1,10 @@
 
 [Global]
 SaveParameters=0
-Description=Bluespec Null FPGA ENV
+Description=Hardware-Only Simulation Environment
 File=hasim-fpgaenv-null
 Version=2.1
-Name=Bluespec Null FPGA Env
+Name=Hardware-Only Simulation Environment
 Type=HAsim
 Class=Asim::Model
 
@@ -53,7 +53,6 @@ Packagehint=platforms
 memory=Null Memory Device
 front_panel=Console Front Panel
 streams=Simulation Streams
-
 
 [Null Physical Platform]
 File=modules/bluespec/common/fpgaenv/physical-platform/null/null-physical-platfrom.awb

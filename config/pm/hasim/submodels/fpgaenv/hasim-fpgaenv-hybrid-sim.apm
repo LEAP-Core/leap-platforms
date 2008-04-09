@@ -1,11 +1,11 @@
 
 [Global]
 SaveParameters=0
-Description=Bluespec Hybrid FPGA Environment for Simulation
+Description=Hybrid Simulation Environment
 File=hasim-fpgaenv-hybrid-sim
 Version=2.1
 Type=HAsim
-Name=Bluespec Hybrid FPGA Environment for Simulation
+Name=Hybrid Simulation Environment
 Class=Asim::Model
 
 [Model]
@@ -40,7 +40,6 @@ Packagehint=platforms
 [RRR Clients and Servers]
 File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic/basic-rrr.awb
 Packagehint=platforms
-
 
 [Standard Virtual Devices]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/std-virtual-devices.awb

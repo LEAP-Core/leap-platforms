@@ -9,7 +9,7 @@
 #define STDOUT              1
 
 class FRONT_PANEL_CLASS:    public RRR_SERVICE_CLASS,
-                            public HASIM_MODULE_CLASS
+                            public PLATFORMS_MODULE_CLASS
 {
     private:
         // self-instantiation
@@ -35,7 +35,7 @@ class FRONT_PANEL_CLASS:    public RRR_SERVICE_CLASS,
         FRONT_PANEL_CLASS();
         ~FRONT_PANEL_CLASS();
 
-        void    Init(HASIM_MODULE);
+        void    Init(PLATFORMS_MODULE);
         void    Uninit();
         void    Cleanup();
         bool    Request(UINT32, UINT32, UINT32, UINT32, UINT32 *);

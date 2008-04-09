@@ -11,9 +11,9 @@ RRR_CLIENT RRRClient;
 
 // constructor
 RRR_CLIENT_CLASS::RRR_CLIENT_CLASS(
-    HASIM_MODULE p,
+    PLATFORMS_MODULE p,
     CHANNELIO    cio) :
-        HASIM_MODULE_CLASS(p)
+        PLATFORMS_MODULE_CLASS(p)
 {
     channelio = cio;
 }

@@ -2,7 +2,7 @@
 #define __SIM_CHANNELIO__
 
 #include <queue>
-#include "hasim-module.h"
+#include "platforms-module.h"
 #include "asim/provides/umf.h"
 #include "asim/provides/physical_channel.h"
 
@@ -48,7 +48,7 @@ struct CIO_STATION_INFO
 // ============================================
 
 typedef class CHANNELIO_CLASS* CHANNELIO;
-class CHANNELIO_CLASS:  public HASIM_MODULE_CLASS
+class CHANNELIO_CLASS:  public PLATFORMS_MODULE_CLASS
 {
     private:
         // physical channel instance
@@ -58,7 +58,7 @@ class CHANNELIO_CLASS:  public HASIM_MODULE_CLASS
         CIO_STATION_INFO    stations[CIO_NUM_CHANNELS];
 
     public:
-        CHANNELIO_CLASS(HASIM_MODULE, PHYSICAL_DEVICES);
+        CHANNELIO_CLASS(PLATFORMS_MODULE, PHYSICAL_DEVICES);
         ~CHANNELIO_CLASS();
 
         void        RegisterForDelivery(int, CIO_DELIVERY_STATION);

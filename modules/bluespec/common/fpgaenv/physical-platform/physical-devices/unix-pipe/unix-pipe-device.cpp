@@ -11,6 +11,7 @@
 #include <iostream>
 
 #include "main.h"
+#include "platforms-module.h"
 #include "asim/provides/unix_pipe_device.h"
 
 using namespace std;
@@ -21,8 +22,8 @@ using namespace std;
 
 // constructor: set up hardware partition
 UNIX_PIPE_DEVICE_CLASS::UNIX_PIPE_DEVICE_CLASS(
-    HASIM_MODULE p) :
-        HASIM_MODULE_CLASS(p)
+    PLATFORMS_MODULE p) :
+        PLATFORMS_MODULE_CLASS(p)
 {
     childAlive = false;
 
@@ -107,7 +108,7 @@ UNIX_PIPE_DEVICE_CLASS::Uninit()
 
     // call default uninit so that we can continue
     // chain if necessary
-    HASIM_MODULE_CLASS::Uninit();
+    PLATFORMS_MODULE_CLASS::Uninit();
 }
 
 // cleanup: kill the process at the other end of the pipe

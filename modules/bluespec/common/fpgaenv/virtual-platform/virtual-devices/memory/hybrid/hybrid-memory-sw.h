@@ -9,7 +9,7 @@
 #define CMD_STORE   1
 
 class MEMORY_CLASS: public RRR_SERVICE_CLASS,
-                    public HASIM_MODULE_CLASS
+                    public PLATFORMS_MODULE_CLASS
 {
     private:
         // self-instantiation
@@ -22,7 +22,7 @@ class MEMORY_CLASS: public RRR_SERVICE_CLASS,
         MEMORY_CLASS();
         ~MEMORY_CLASS();
 
-        void    Init(HASIM_MODULE);
+        void    Init(PLATFORMS_MODULE);
         void    Uninit();
         void    Cleanup();
         bool    Request(UINT32, UINT32, UINT32, UINT32, UINT32 *);

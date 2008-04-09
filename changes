@@ -3173,3 +3173,65 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/strea
 
 Fix parameter mismatch between declarations and remove reference to msg
 in default clause for printing messages, since it no longer has meaning.
+
+----------
+pellauer    Date: Wed Apr  9 15:28:52 EDT 2008  CSN: CSN-platforms-92
+                  Wed Apr  9 19:28:52 UTC 2008
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-htg-hwonly.apm    Locally Modified           91 
+ hasim-fpgaenv-fsb-afu.apm Locally Removed            91 
+ hasim-fpgaenv-software-no-gui.apm Locally Removed            91 
+ hasim-fpgaenv-hybrid-sim.apm Locally Modified           91 
+ hasim-fpgaenv-htg-v5-pcie.apm Locally Modified           91 
+ hasim-fpgaenv-null.apm    Locally Modified           91 
+ hasim-fpgaenv-software.apm Locally Removed            91 
+ hasim-fpgaenv-xup.apm     Locally Modified           91 
+ hasim-fpgaenv-fsb-dme.apm Locally Removed            91 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/basic
+ basic-channelio.cpp       Locally Modified           91 
+ basic-channelio.h         Locally Modified           91 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/sim
+ sim-physical-channel.cpp  Locally Modified           91 
+ sim-physical-channel.h    Locally Modified           91 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ basic-rrr-client.cpp      Locally Modified           91 
+ basic-rrr-client.h        Locally Modified           91 
+ basic-rrr-server.cpp      Locally Modified           91 
+ basic-rrr-server.h        Locally Modified           91 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface
+ llpi.cpp                  Locally Modified           91 
+ llpi.h                    Locally Modified           91 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid
+ hybrid-fp-sw.h            Locally Modified           91 
+ hybrid-fp-sw.cpp          Locally Modified           91 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-memory-sw.cpp      Locally Modified           91 
+ hybrid-memory-sw.h        Locally Modified           91 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/streams
+ hybrid-streams.h          Locally Modified           91 
+ simulation-streams.bsv    Locally Modified           91 
+ hybrid-streams.cpp        Locally Modified           91 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/simulation
+ sim-physical-platform.cpp Locally Modified           91 
+ sim-physical-platform.h   Locally Modified           91 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe
+ unix-pipe-device.h        Locally Modified           91 
+ unix-pipe-device.cpp      Locally Modified           91 
+
+
+* Made the FPGA environments consistent with the new controller/model organization.
+* Changed "HASIM_MODULE" to "PLATFORMS_MODULE"
+
+TODO: The "PLATFORMS_MODULE" file should really be a library, but
+hasim-configure doesn't support them yet.

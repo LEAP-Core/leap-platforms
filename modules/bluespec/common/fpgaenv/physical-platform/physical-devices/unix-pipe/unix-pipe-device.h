@@ -1,7 +1,7 @@
 #ifndef __UNIX_PIPE__
 #define __UNIX_PIPE__
 
-#include "hasim-module.h"
+#include "platforms-module.h"
 #include "asim/provides/umf.h"
 
 #define STDIN             0
@@ -15,7 +15,7 @@
 //           UNIX Pipe Physical Device
 // ============================================
 typedef class UNIX_PIPE_DEVICE_CLASS* UNIX_PIPE_DEVICE;
-class UNIX_PIPE_DEVICE_CLASS: public HASIM_MODULE_CLASS
+class UNIX_PIPE_DEVICE_CLASS: public PLATFORMS_MODULE_CLASS
 {
     private:
         // process/pipe state (physical channel)
@@ -29,7 +29,7 @@ class UNIX_PIPE_DEVICE_CLASS: public HASIM_MODULE_CLASS
         #define PARENT_WRITE    outpipe[1]
 
     public:
-        UNIX_PIPE_DEVICE_CLASS(HASIM_MODULE);
+        UNIX_PIPE_DEVICE_CLASS(PLATFORMS_MODULE);
         ~UNIX_PIPE_DEVICE_CLASS();
 
         void Cleanup();                    // cleanup

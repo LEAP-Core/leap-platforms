@@ -73,9 +73,9 @@ RRR_SERVER_CLASS::unsetServiceValid(
 
 // constructor
 RRR_SERVER_CLASS::RRR_SERVER_CLASS(
-    HASIM_MODULE p,
+    PLATFORMS_MODULE p,
     CHANNELIO    cio) :
-        HASIM_MODULE_CLASS(p)
+        PLATFORMS_MODULE_CLASS(p)
 {
     channelio = cio;
     Init();
@@ -96,7 +96,7 @@ RRR_SERVER_CLASS::Init()
     {
         if (isServiceValid(i))
         {
-            // set myself as the HASIM_MODULE parent
+            // set myself as the PLATFORMS_MODULE parent
             // for all services so that I can chain
             // uninit()s to them
             ServiceMap[i]->Init(this);
@@ -125,7 +125,7 @@ RRR_SERVER_CLASS::Uninit()
     ServiceValidMask = 0;
 
     // chain
-    HASIM_MODULE_CLASS::Uninit();
+    PLATFORMS_MODULE_CLASS::Uninit();
 }
 
 // accept a delivered message from channelio

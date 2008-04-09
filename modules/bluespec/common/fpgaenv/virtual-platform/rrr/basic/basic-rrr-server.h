@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 
-#include "hasim-module.h"
+#include "platforms-module.h"
 #include "asim/provides/channelio.h"
 
 #define MAX_SERVICES            64
@@ -17,7 +17,7 @@ class RRR_SERVICE_CLASS
         int             serviceID;  // unique service ID
 
     public:
-        virtual void    Init(HASIM_MODULE)                                = 0;
+        virtual void    Init(PLATFORMS_MODULE)                            = 0;
         virtual bool    Request(UINT32, UINT32, UINT32, UINT32, UINT32 *) = 0;
         virtual void    Poll(void)                                        = 0;
 };
@@ -27,7 +27,7 @@ class RRR_SERVICE_CLASS
 
 // main server class
 typedef class RRR_SERVER_CLASS* RRR_SERVER;
-class RRR_SERVER_CLASS: public HASIM_MODULE_CLASS,
+class RRR_SERVER_CLASS: public PLATFORMS_MODULE_CLASS,
                         public CIO_DELIVERY_STATION_CLASS
 {
     private:
@@ -57,7 +57,7 @@ class RRR_SERVER_CLASS: public HASIM_MODULE_CLASS,
         static void RegisterService(int serviceid, RRR_SERVICE service);
 
         // regular methods
-        RRR_SERVER_CLASS(HASIM_MODULE, CHANNELIO);
+        RRR_SERVER_CLASS(PLATFORMS_MODULE, CHANNELIO);
         ~RRR_SERVER_CLASS();
         void    Init();
         void    Uninit();

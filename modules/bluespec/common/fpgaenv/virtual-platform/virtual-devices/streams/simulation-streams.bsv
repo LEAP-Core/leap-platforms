@@ -31,29 +31,6 @@ module  mkStreams#(LowLevelPlatformInterface llpi)
 //
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-
-`ifdef STREAMID_EVENTS
-
-    Reg#(File) event_log  <- mkReg(InvalidFile);
-
-    rule open_events (event_log == InvalidFile);
-    
-      let fd <- $fopen("stream_events.out");
-      
-      if (fd == InvalidFile)
-      begin
-      
-        $display("ERROR: STREAMS: Could not open file stream_events.out");
-        $finish(1);
-      
-      end
-      
-      event_log <= fd;
-    
-    endrule
-
-`endif
-
 `ifdef STREAMID_STATS
     Reg#(File) stat_log   <- mkReg(InvalidFile);
 
@@ -122,7 +99,7 @@ module  mkStreams#(LowLevelPlatformInterface llpi)
             `STREAMID_ASSERTS:
             begin
 
-              String msg = showASSERTS_DICT(stringID);
+              String msg = showSTREAMS_ASSERTS_DICT(stringID);
 
               case (payload0)
                 0:
@@ -145,18 +122,10 @@ module  mkStreams#(LowLevelPlatformInterface llpi)
             end
 `endif              
 
-`ifdef STREAMID_EVENTS
-            `STREAMID_EVENTS:
-            begin
-              String msg = showEVENTS_DICT(stringID);
-              $fdisplay(event_log, msg, payload0, payload1);
-            end
-`endif              
-
 `ifdef STREAMID_HEARTBEAT
             `STREAMID_HEARTBEAT:
             begin
-              String msg = showHEARTBEAT_DICT(stringID);
+              String msg = showSTREAMS_HEARTBEAT_DICT(stringID);
               $display("Heartbeat: FPGA Cycle: %0d, Model Cycle: %0d", payload0, payload1); 
             end
 `endif              
@@ -164,7 +133,7 @@ module  mkStreams#(LowLevelPlatformInterface llpi)
 `ifdef STREAMID_STATS
             `STREAMID_STATS:
             begin
-              String msg = showSTATS_DICT(stringID);
+              String msg = showSTREAMS_STATS_DICT(stringID);
               $fdisplay(stat_log, msg, payload0);
             end
 `endif              

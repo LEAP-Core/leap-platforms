@@ -38,7 +38,7 @@ STREAMS_CLASS::~STREAMS_CLASS()
 // init
 void
 STREAMS_CLASS::Init(
-    HASIM_MODULE     p)
+    PLATFORMS_MODULE     p)
 {
     // set parent pointer
     parent = p;
@@ -56,7 +56,7 @@ void
 STREAMS_CLASS::Uninit()
 {
     // simply chain
-    HASIM_MODULE_CLASS::Uninit();
+    PLATFORMS_MODULE_CLASS::Uninit();
 }
 
 // request

@@ -1,11 +1,11 @@
 
 [Global]
 SaveParameters=0
-Description=Hybrid FPGA Environment for HTG-v5-PCIe Board
+Description=Hybrid HTG-v5-PCIe Environment
 File=hasim-fpgaenv-htg-v5-pcie
 Version=2.1
 Type=HAsim
-Name=Hybrid FPGA Environment for HTG-v5-PCIe Board
+Name=Hybrid HTG-v5-PCIe Environment
 Class=Asim::Model
 
 [Model]
@@ -74,7 +74,6 @@ Packagehint=platforms
 [Hybrid Streams]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/streams/hybrid-streams.awb
 Packagehint=platforms
-
 
 [Basic Virtual Channel Multiplexer]
 File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/basic/basic-channelio.awb

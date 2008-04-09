@@ -20,9 +20,9 @@ using namespace std;
 
 // constructor
 CHANNELIO_CLASS::CHANNELIO_CLASS(
-    HASIM_MODULE     p,
+    PLATFORMS_MODULE     p,
     PHYSICAL_DEVICES d) :
-        HASIM_MODULE_CLASS(p),
+        PLATFORMS_MODULE_CLASS(p),
         physicalChannel(this, d)
 {
     // set up stations

@@ -36,7 +36,7 @@ MEMORY_CLASS::~MEMORY_CLASS()
 // init
 void
 MEMORY_CLASS::Init(
-    HASIM_MODULE     p)
+    PLATFORMS_MODULE     p)
 {
     // set parent pointer
     parent = p;
@@ -58,7 +58,7 @@ MEMORY_CLASS::Uninit()
     Cleanup();
     
     // chain
-    HASIM_MODULE_CLASS::Uninit();
+    PLATFORMS_MODULE_CLASS::Uninit();
 }
 
 // cleanup

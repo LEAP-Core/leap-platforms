@@ -19,7 +19,7 @@ class STREAMS_CALLBACK_MODULE_CLASS
 // ===== STREAMS =====
 typedef class STREAMS_CLASS* STREAMS;
 class STREAMS_CLASS: public RRR_SERVICE_CLASS,
-                     public HASIM_MODULE_CLASS
+                     public PLATFORMS_MODULE_CLASS
 {
     private:
         // self-instantiation
@@ -37,7 +37,7 @@ class STREAMS_CLASS: public RRR_SERVICE_CLASS,
         ~STREAMS_CLASS();
 
         // generic RRR methods
-        void Init(HASIM_MODULE);
+        void Init(PLATFORMS_MODULE);
         void Uninit();
         bool Request(UINT32, UINT32, UINT32, UINT32, UINT32 *);
         void Poll();

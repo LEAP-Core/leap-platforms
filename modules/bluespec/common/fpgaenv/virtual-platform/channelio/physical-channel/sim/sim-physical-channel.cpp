@@ -20,9 +20,9 @@ using namespace std;
 
 // constructor
 PHYSICAL_CHANNEL_CLASS::PHYSICAL_CHANNEL_CLASS(
-    HASIM_MODULE     p,
+    PLATFORMS_MODULE     p,
     PHYSICAL_DEVICES d) :
-        HASIM_MODULE_CLASS(p)
+        PLATFORMS_MODULE_CLASS(p)
 {
     unixPipeDevice  = d->GetUNIXPipeDevice();
     incomingMessage = NULL;

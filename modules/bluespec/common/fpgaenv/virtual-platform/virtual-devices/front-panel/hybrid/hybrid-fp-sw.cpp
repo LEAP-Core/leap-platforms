@@ -32,7 +32,7 @@ FRONT_PANEL_CLASS::~FRONT_PANEL_CLASS()
 // init
 void
 FRONT_PANEL_CLASS::Init(
-    HASIM_MODULE     p)
+    PLATFORMS_MODULE     p)
 {
     // set parent pointer
     parent = p;
@@ -89,7 +89,7 @@ FRONT_PANEL_CLASS::Uninit()
     Cleanup();
 
     // chain
-    HASIM_MODULE_CLASS::Uninit();
+    PLATFORMS_MODULE_CLASS::Uninit();
 }
 
 // cleanup: kill panel process
