@@ -3264,3 +3264,15 @@ library.
 Michael P.
 
 
+
+----------
+pellauer    Date: Mon Apr 14 15:02:20 EDT 2008  CSN: CSN-platforms-94
+                  Mon Apr 14 19:02:20 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ basic-rrr-common.bsh      Locally Modified           93 
+
+
+Added UINT64 to rrr-common.
+

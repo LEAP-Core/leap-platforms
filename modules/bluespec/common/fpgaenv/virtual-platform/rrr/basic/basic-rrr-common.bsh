@@ -13,6 +13,7 @@ typedef Bit#(32) RRR_Response;
 
 typedef Bit#(16) UINT16;
 typedef Bit#(32) UINT32;
+typedef Bit#(64) UINT64;
 
 typedef struct
 {
