@@ -1,0 +1,101 @@
+
+[Global]
+SaveParameters=0
+Description=m5 Alpha Hybrid Simulation Environment
+File=hasim-fpgaenv-hybrid-m5-alpha-sim
+Version=2.1
+Type=HAsim
+Name=m5 Alpha Hybrid Simulation Environment
+Class=Asim::Model
+
+[Model]
+DefaultAttributes=bluespec m5 alpha
+model=FPGA Environment
+
+[Software FPGA Components]
+File=modules/bluespec/common/fpgaenv/fpga-components/software/software-fpga-components.awb
+Packagehint=platforms
+
+[FPGA Environment]
+File=modules/bluespec/common/fpgaenv/fpga-environment.awb
+Packagehint=platforms
+
+[FPGA Environment/Requires]
+virtual_platform=m5 Virtual Platform
+fpga_components=Software FPGA Components
+
+
+
+[Hybrid Front Panel]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid/hybrid-fp.awb
+Packagehint=platforms
+
+[RRR Clients and Servers]
+File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic/basic-rrr.awb
+Packagehint=platforms
+
+[Standard Virtual Devices]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/std-virtual-devices.awb
+Packagehint=platforms
+
+[Standard Virtual Devices/Requires]
+memory=Hybrid Memory Device
+front_panel=Hybrid Front Panel
+streams=Hybrid Streams
+
+[Simple 32-bit Unified Message Format]
+File=modules/bluespec/common/fpgaenv/virtual-platform/umf/simple-32/simple-32-umf.awb
+Packagehint=platforms
+
+[Hybrid Streams]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/streams/hybrid-streams.awb
+Packagehint=platforms
+
+[Simulation Physical Channel]
+File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/sim/sim-physical-channel.awb
+Packagehint=platforms
+
+[Basic Virtual Channel Multiplexer]
+File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/basic/basic-channelio.awb
+Packagehint=platforms
+
+[Basic Virtual Channel Multiplexer/Requires]
+physical_channel=Simulation Physical Channel
+
+[Low Level Platform Interface Hybrid]
+File=modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface/hybrid-llpi.awb
+Packagehint=platforms
+
+[Low Level Platform Interface Hybrid/Requires]
+physical_platform=Simulation Physical Platform
+channelio=Basic Virtual Channel Multiplexer
+rrr=RRR Clients and Servers
+
+[UNIX Pipe Physical Device]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe/unix-pipe-device.awb
+Packagehint=platforms
+
+[Simulation Physical Platform/Requires]
+unix_pipe_device=UNIX Pipe Physical Device
+
+[Simulation Physical Platform]
+File=modules/bluespec/common/fpgaenv/physical-platform/simulation/sim-physical-platform.awb
+Packagehint=platforms
+
+[Hybrid Memory Device]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid/memory_virtual_device_hybrid.awb
+Packagehint=platforms
+
+[m5 Virtual Platform]
+File=modules/bluespec/common/fpgaenv/virtual-platform/m5-virtual-platform.awb
+Packagehint=platforms
+
+[m5 Alpha User-Mode Simulator]
+File=platform/m5/m5-alpha-se.awb
+Packagehint=hasim-alpha
+
+[m5 Virtual Platform/Requires]
+m5_simulator=m5 Alpha User-Mode Simulator
+umf=Simple 32-bit Unified Message Format
+low_level_platform_interface=Low Level Platform Interface Hybrid
+virtual_devices=Standard Virtual Devices

@@ -9,3 +9,5 @@
 %requires channelio
 %requires fast_channelio
 %requires umf
+
+%sources -v PUBLIC std-virtual-platform.h

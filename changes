@@ -3276,3 +3276,26 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
 
 Added UINT64 to rrr-common.
 
+
+----------
+mcadler     Date: Mon Apr 14 21:10:03 EDT 2008  CSN: CSN-platforms-95
+                  Tue Apr 15 01:10:03 UTC 2008
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ hasim-fpgaenv-hybrid-m5-alpha-sim.apm Locally Added               0 
+
+Directory admin/packages
+ platforms                 Locally Modified           94 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform
+ m5-virtual-platform.awb   Locally Added               0 
+ std-virtual-platform.h    Locally Added               0 
+ std-virtual-platform.awb  Locally Modified           94 
+ fast-virtual-platform.awb Locally Modified           94 
+ m5-virtual-platform.h     Locally Added               0 
+
+- Define a virtual platform that includes m5.
+- All virtual platforms now have a VIRTUAL_PLATFORM class with a constructor
+  that takes a subset of the command line parameters.  m5 needs this.
+  The std-virtual-platform.h class does nothing.
