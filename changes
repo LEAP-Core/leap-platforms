@@ -3299,3 +3299,13 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform
 - All virtual platforms now have a VIRTUAL_PLATFORM class with a constructor
   that takes a subset of the command line parameters.  m5 needs this.
   The std-virtual-platform.h class does nothing.
+
+----------
+mcadler     Date: Wed Apr 16 15:18:10 EDT 2008  CSN: CSN-platforms-96
+                  Wed Apr 16 19:18:10 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-memory-sw.cpp      Locally Modified           95 
+
+No more --benchmark.  Get the vmh file from the --funcp parameter.

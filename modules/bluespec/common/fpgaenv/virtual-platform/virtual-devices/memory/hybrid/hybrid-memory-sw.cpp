@@ -91,7 +91,12 @@ MEMORY_CLASS::Request(
     // check to see if our image is ready
     if (vmhLoaded == false)
     {
-        if (vmh_load_image(globalArgs->Benchmark(), M, MEM_SIZE) == -1)
+        char *benchmark = "program.vmh";
+        if (globalArgs->FuncPlatformArgc() > 1)
+        {
+            benchmark = globalArgs->FuncPlatformArgv()[1];
+        }
+        if (vmh_load_image(benchmark, M, MEM_SIZE) == -1)
         {
             exit(1);
         }
