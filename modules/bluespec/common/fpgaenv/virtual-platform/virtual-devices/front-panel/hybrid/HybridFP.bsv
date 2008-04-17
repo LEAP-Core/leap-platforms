@@ -2,8 +2,8 @@
 `include "rrr.bsh"
 `include "physical_platform.bsh"
 
-`include "asim/rrr/rrr_service_ids.bsh"
-`include "asim/rrr/rrr_service_stub_FRONT_PANEL.bsh"
+`include "asim/rrr/service_ids.bsh"
+`include "asim/rrr/server_stub_FRONT_PANEL.bsh"
 
 `define FP_POLL_INTERVAL    1000
 

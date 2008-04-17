@@ -3309,3 +3309,29 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memor
  hybrid-memory-sw.cpp      Locally Modified           95 
 
 No more --benchmark.  Get the vmh file from the --funcp parameter.
+
+----------
+aparasha    Date: Thu Apr 17 00:27:33 EDT 2008  CSN: CSN-platforms-97
+                  Thu Apr 17 04:27:33 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ basic-rrr-server.bsv      Locally Modified           96 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid
+ HybridFP.bsv              Locally Modified           96 
+ hybrid-fp-services.rrr    Locally Modified           96 
+ hybrid-fp-sw.cpp          Locally Modified           96 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-memory-sw.cpp      Locally Modified           96 
+ memory_virtual_device_hybrid.bsv Locally Modified           96 
+ hybrid-memory-services.rrr Locally Modified           96 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/streams
+ hybrid-streams.bsv        Locally Modified           96 
+ hybrid-streams.cpp        Locally Modified           96 
+
+- updated source files to include renamed stub files
+  (see hasim commit).
+- updated .rrr spec files to conform to updated syntax.

@@ -10,7 +10,7 @@
 #include "basic-rrr-client.h"
 #include "asim/provides/model.h"
 
-#include "asim/rrr/rrr_service_ids.h"
+#include "asim/rrr/service_ids.h"
 
 #define SERVICE_ID  MEMORY_SERVICE_ID
 

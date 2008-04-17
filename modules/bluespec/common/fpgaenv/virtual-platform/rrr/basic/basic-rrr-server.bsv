@@ -3,7 +3,7 @@ import FIFOF::*;
 
 `include "channelio.bsh"
 `include "rrr.bsh"
-`include "asim/rrr/rrr_service_ids.bsh"
+`include "asim/rrr/service_ids.bsh"
 `include "umf.bsh"
 
 // RRR Server: my job is to scan channelio for incoming requests and queue

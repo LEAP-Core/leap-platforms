@@ -1,7 +1,7 @@
 `include "rrr.bsh"
 `include "low_level_platform_interface.bsh"
 
-`include "asim/rrr/rrr_service_ids.bsh"
+`include "asim/rrr/service_ids.bsh"
 `include "streams-common.bsh"
 
 `define SERVICE_ID  `STREAMS_SERVICE_ID

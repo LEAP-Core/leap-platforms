@@ -6,8 +6,8 @@
 `include "low_level_platform_interface.bsh"
 `include "rrr.bsh"
 `include "channelio.bsh"
-`include "asim/rrr/rrr_service_ids.bsh"
-`include "asim/rrr/rrr_service_stub_MEMORY.bsh"
+`include "asim/rrr/service_ids.bsh"
+`include "asim/rrr/server_stub_MEMORY.bsh"
 
 
 // ***** Modules *****

@@ -1,6 +1,6 @@
 service MEMORY
 {
-    server hw <- sw
+    server hw (bsv, method) <- sw (cpp, method)
     {
         method Invalidate(in MEM_ADDRESS[32] addr);
     };

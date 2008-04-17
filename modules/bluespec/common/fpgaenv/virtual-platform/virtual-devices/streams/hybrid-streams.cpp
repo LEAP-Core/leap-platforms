@@ -9,7 +9,7 @@
 #include <iostream>
 
 #include "asim/provides/streams.h"
-#include "asim/rrr/rrr_service_ids.h"
+#include "asim/rrr/service_ids.h"
 
 #include "asim/dict/STREAMS.h"
 #include "asim/dict/STREAMID.h"
