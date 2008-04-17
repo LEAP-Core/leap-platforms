@@ -28,7 +28,7 @@ module mkStreams#(LowLevelPlatformInterface llpi)
                                  Bit#(32) payload1);
 
         // make RRR request
-        llpi.rrrClient.makeRequest(RRR_Request {
+        llpi.oldrrrClient.makeRequest(RRR_Request {
                                        serviceID   : `SERVICE_ID,
                                        param0      : zeroExtend(pack(streamID)),
                                        param1      : zeroExtend(pack(stringID)),

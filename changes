@@ -3335,3 +3335,61 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/strea
 - updated source files to include renamed stub files
   (see hasim commit).
 - updated .rrr spec files to conform to updated syntax.
+
+----------
+aparasha    Date: Thu Apr 17 15:32:14 EDT 2008  CSN: CSN-platforms-98
+                  Thu Apr 17 19:32:14 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ basic-rrr-server.cpp      Locally Modified           96 
+ basic-rrr-client.bsv      Locally Modified           96 
+ basic-rrr.awb             Locally Modified           96 
+ basic-rrr-server.h        Locally Modified           96 
+ basic-rrr-server.bsv      Locally Modified           97 
+ old-rrr-client.bsv        Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid
+ HybridFP.bsv              Locally Modified           97 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ memory_virtual_device_hybrid.bsv Locally Modified           97 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/streams
+ hybrid-streams.bsv        Locally Modified           97 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/basic
+ basic-channelio.h         Locally Modified           96 
+ basic-channelio.awb       Locally Modified           96 
+ basic-channelio.bsv       Locally Modified           96 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/unix
+ UNIXChannelIO.bsv         Locally Modified           96 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/null
+ NullChannelIO.bsv         Locally Modified           96 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface
+ llpi.bsv                  Locally Modified           96 
+
+- added new fully pipelined hardware-side RRR client that the auto-
+  generated stubs can connect to (see hasim commit).
+
+- deprecated old blocking RRR client. This client is still instantiated
+  by LLPI and used by all existing modules that were already using it,
+  but the interface and instance names have been changed to make it
+  obvious that this code is deprecated (mkOldRRRClient, oldrrrClient, etc.)
+ 
+- added a third virtual channel to ChannelIO that the deprecated RRR
+  Client hooks up to. The new RRR client uses the original hw->sw
+  virtual channel. In this way, both clients can coexist while the
+  modules that were using the old client can be gradually ported to
+  the new client.
+
+- added support for handling requests from both hardware clients (old
+  and new) to software RRR server. The software side taps in to both
+  virtual channels, and knows how to handle each case. Existing
+  software-server modules continue to function correctly unchanged.
+
+- changed the interface name ChannelIO to CHANNEL_IO in accordance with
+  coding conventions.

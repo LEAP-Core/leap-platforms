@@ -4,6 +4,7 @@
 %provides rrr
 
 %sources -t BSV -v PUBLIC  basic-rrr-client.bsv
+%sources -t BSV -v PUBLIC  old-rrr-client.bsv
 %sources -t BSV -v PUBLIC  basic-rrr-server.bsv
 %sources -t BSV -v PUBLIC  basic-rrr-common.bsh
 %sources -t BSV -v PUBLIC  demarshaller.bsv

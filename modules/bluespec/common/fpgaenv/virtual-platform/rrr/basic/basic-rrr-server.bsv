@@ -13,24 +13,24 @@ import FIFOF::*;
 `define SERVER_CHANNEL_ID  1
 
 // request/response port interfaces
-interface REQUEST_PORT;
+interface SERVER_REQUEST_PORT;
     method ActionValue#(UMF_PACKET) read();
 endinterface
 
-interface RESPONSE_PORT;
+interface SERVER_RESPONSE_PORT;
     method Action write(UMF_PACKET data);
 endinterface
 
 // channelio interface
 interface RRR_SERVER;
-    interface Vector#(`NUM_SERVICES, REQUEST_PORT)  requestPorts;
-    interface Vector#(`NUM_SERVICES, RESPONSE_PORT) responsePorts;
+    interface Vector#(`NUM_SERVICES, SERVER_REQUEST_PORT)  requestPorts;
+    interface Vector#(`NUM_SERVICES, SERVER_RESPONSE_PORT) responsePorts;
 endinterface
 
 //    method ActionValue#(UMF_PACKET) read(UMF_SERVICE_ID i);
 
 // server
-module mkRRRServer#(ChannelIO channel) (RRR_SERVER);
+module mkRRRServer#(CHANNEL_IO channel) (RRR_SERVER);
 
     // ==============================================================
     //                        Ports and Queues
@@ -38,10 +38,10 @@ module mkRRRServer#(ChannelIO channel) (RRR_SERVER);
 
     // create request/response buffers and link them to ports
     FIFOF#(UMF_PACKET)                    requestQueues[`NUM_SERVICES];
-    Vector#(`NUM_SERVICES, REQUEST_PORT)  req_ports = newVector();
+    Vector#(`NUM_SERVICES, SERVER_REQUEST_PORT)  req_ports = newVector();
 
     FIFOF#(UMF_PACKET)                    responseQueues[`NUM_SERVICES];
-    Vector#(`NUM_SERVICES, RESPONSE_PORT) resp_ports = newVector();
+    Vector#(`NUM_SERVICES, SERVER_RESPONSE_PORT) resp_ports = newVector();
 
     for (Integer i = 0; i < `NUM_SERVICES; i = i+1)
     begin
@@ -49,7 +49,7 @@ module mkRRRServer#(ChannelIO channel) (RRR_SERVER);
         responseQueues[i] <- mkFIFOF();
 
         // create a new request port and link it to the FIFO
-        req_ports[i] = interface REQUEST_PORT
+        req_ports[i] = interface SERVER_REQUEST_PORT
                            method ActionValue#(UMF_PACKET) read();
 
                                UMF_PACKET val = requestQueues[i].first();
@@ -60,7 +60,7 @@ module mkRRRServer#(ChannelIO channel) (RRR_SERVER);
                        endinterface;
 
         // create a new response port and link it to the FIFO
-        resp_ports[i] = interface RESPONSE_PORT
+        resp_ports[i] = interface SERVER_RESPONSE_PORT
                             method Action write(UMF_PACKET data);
 
                                 responseQueues[i].enq(data);

@@ -13,7 +13,8 @@
 
 using namespace std;
 
-#define CHANNEL_ID  0
+#define CHANNEL_ID    0
+#define BC_CHANNEL_ID 2 // for backwards-compatibility
 
 // instantiate global service table; this table will be
 // populated by the individual services (also statically
@@ -21,9 +22,62 @@ using namespace std;
 RRR_SERVICE RRR_SERVER_CLASS::ServiceMap[MAX_SERVICES];
 UINT64      RRR_SERVER_CLASS::ServiceValidMask = 0;
 
+
 // ===========================
-//       static methods    
+//   RRR service base class
 // ===========================
+
+// base-class Request() method is for backwards compatibility
+// only. This method translates the call to a legacy Request()
+// call. Newer server modules will overrride this method and
+// handle the UMF_MESSAGE directly
+UMF_MESSAGE
+RRR_SERVICE_CLASS::Request(
+    UMF_MESSAGE message)
+{
+    // basically we manually de-marshall the message into
+    // individual UINT32 arguments and call the legacy
+    // Request() method
+    int methodID  = message->GetMethodID();
+
+    // de-marshall args place into args array
+    int argc = 4;
+    UINT32 argv[MAX_ARGS];
+    argv[0] = methodID;
+    for (int i = 1; i < argc; i++)
+    {
+        argv[i] = message->ExtractUINT32();
+    }
+
+    // de-allocate message
+    delete message;
+
+    // invoke legacy Request() method to obtain result
+    UINT32 result;
+    bool send_result = Request(argv[0], argv[1], argv[2], argv[3], &result);
+
+    // construct a result if required
+    if (send_result)
+    {
+        // create a new channelio message
+        message = new UMF_MESSAGE_CLASS(4); // payload = 4 bytes
+        message->SetMethodID(methodID);
+
+        // update message data
+        message->AppendUINT32(result);
+
+        // return
+        return message;
+    }
+
+    // no response, return NULL
+    return NULL;
+}
+
+
+// ==================================
+// Server (dispatcher) static methods    
+// ==================================
 
 // register a service
 void
@@ -105,6 +159,10 @@ RRR_SERVER_CLASS::Init()
 
     // register with channelio for message delivery
     channelio->RegisterForDelivery(CHANNEL_ID, this);
+
+    // backwards compatibility: also register for delivery
+    // on BC channel
+    channelio->RegisterForDelivery(BC_CHANNEL_ID, this);
 }
 
 // uninit: override
@@ -133,8 +191,9 @@ void
 RRR_SERVER_CLASS::DeliverMessage(
     UMF_MESSAGE message)
 {
+    // record channelID for backwards compatibility
+    int channelID = message->GetChannelID();
     int serviceID = message->GetServiceID();
-    int methodID  = message->GetMethodID();
 
     // validate serviceID
     if (isServiceValid(serviceID) == false)
@@ -143,38 +202,17 @@ RRR_SERVER_CLASS::DeliverMessage(
         parent->CallbackExit(1);
     }
 
-    // read args from channelio and place into args array
-    int argc = 4;
-    UINT32 argv[MAX_ARGS];
-    argv[0] = methodID;
-    for (int i = 1; i < argc; i++)
+    // call service and obtain result
+    UMF_MESSAGE result = ServiceMap[serviceID]->Request(message);
+
+    // see if we need to respond
+    if (result)
     {
-        argv[i] = message->ExtractUINT32();
-    }
+        // set serviceID
+        result->SetServiceID(serviceID);
 
-    // we have extracted everything we need from the message,
-    // so we can de-allocate it now. TODO: in future, services
-    // will be passed the entire message, and they will
-    // de-allocate it themselves.
-    delete message;
-
-    // invoke service method to obtain result
-    UINT32 result;
-    bool send_result = ServiceMap[serviceID]->Request(argv[0], argv[1], argv[2], argv[3], &result);
-
-    // send result to channelio if this is a value method
-    if (send_result)
-    {
-        // create a new channelio message
-        UMF_MESSAGE message = new UMF_MESSAGE_CLASS(4); // payload = 4 bytes
-        message->SetServiceID(serviceID);
-        message->SetMethodID(methodID);
-
-        // update message data
-        message->AppendUINT32(result);
-
-        // send to channelio
-        channelio->Write(CHANNEL_ID, message);
+        // send to channelio... send on original virtual channel (BC)
+        channelio->Write(channelID, result);
     }
 }
 
@@ -191,4 +229,3 @@ RRR_SERVER_CLASS::Poll()
         }
     }
 }
-

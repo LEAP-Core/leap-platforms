@@ -42,7 +42,7 @@ module mkFrontPanel#(LowLevelPlatformInterface llpi) (FrontPanel);
     Reg#(Bool)                  outputDirty <- mkReg(False);
 
     // service stub
-    ServiceStub_FRONT_PANEL stub <- mkServiceStub_FRONT_PANEL(llpi.rrrServer);
+    ServerStub_FRONT_PANEL stub <- mkServerStub_FRONT_PANEL(llpi.rrrServer);
 
     // sync LED state
     rule send_RRR_request (outputDirty == True);
@@ -54,7 +54,7 @@ module mkFrontPanel#(LowLevelPlatformInterface llpi) (FrontPanel);
         req.param3          = 0;
         req.needResponse    = False;
 
-        llpi.rrrClient.makeRequest(req);
+        llpi.oldrrrClient.makeRequest(req);
 
         outputDirty <= False;
     endrule

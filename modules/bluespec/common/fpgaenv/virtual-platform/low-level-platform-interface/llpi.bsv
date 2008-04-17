@@ -7,9 +7,10 @@
 // A convenient bundle of all ways to interact with the outside world.
 
 interface LowLevelPlatformInterface;
-    interface RRRClient             rrrClient;
+    interface RRRClient             oldrrrClient;
+    interface RRR_CLIENT            rrrClient;
     interface RRR_SERVER            rrrServer;
-    interface ChannelIO             channelIO;
+    interface CHANNEL_IO            channelIO;
     interface PHYSICAL_DRIVERS      physicalDrivers;
     interface TOP_LEVEL_WIRES       topLevelWires;
 endinterface
@@ -25,12 +26,14 @@ module mkLowLevelPlatformInterface
     // instantiate submodules
     
     PHYSICAL_PLATFORM       phys_plat   <- mkPhysicalPlatform();
-    ChannelIO               cio         <- mkChannelIO(phys_plat.physicalDrivers);
-    RRRClient               rrrc        <- mkRRRClient(cio);
+    CHANNEL_IO              cio         <- mkChannelIO(phys_plat.physicalDrivers);
+    RRRClient               orrrc       <- mkOldRRRClient(cio);
+    RRR_CLIENT              rrrc        <- mkRRRClient(cio);
     RRR_SERVER              rrrs        <- mkRRRServer(cio);
 
     // plumb interfaces
 
+    interface               oldrrrClient     = orrrc;
     interface               rrrClient        = rrrc;
     interface               rrrServer        = rrrs;
     interface               channelIO        = cio;

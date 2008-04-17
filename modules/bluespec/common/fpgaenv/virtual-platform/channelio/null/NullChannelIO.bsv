@@ -1,7 +1,7 @@
 `include "physical_platform.bsh"
 
-interface ChannelIO;
+interface CHANNEL_IO;
 endinterface
 
-module mkChannelIO#(PHYSICAL_DRIVERS drivers) (ChannelIO);
+module mkChannelIO#(PHYSICAL_DRIVERS drivers) (CHANNEL_IO);
 endmodule

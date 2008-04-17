@@ -15,13 +15,13 @@ interface CIOWritePort;
 endinterface
 
 // channelio interface
-interface ChannelIO;
+interface CHANNEL_IO;
     interface Vector#(`CIO_NUM_CHANNELS, CIOReadPort)  readPorts;
     interface Vector#(`CIO_NUM_CHANNELS, CIOWritePort) writePorts;
 endinterface
 
 // channelio module
-module mkChannelIO#(PHYSICAL_DRIVERS drivers) (ChannelIO);
+module mkChannelIO#(PHYSICAL_DRIVERS drivers) (CHANNEL_IO);
 
     Reg#(UMF_MSG_LENGTH) readChunksRemaining  <- mkReg(0);
     Reg#(UMF_MSG_LENGTH) writeChunksRemaining <- mkReg(0);

@@ -27,7 +27,7 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpint)
     Reg#(Bit#(8)) state   <- mkReg(0);
     
     // The stub to the memory RRR service.
-    ServiceStub_MEMORY stub <- mkServiceStub_MEMORY(llpint.rrrServer);
+    ServerStub_MEMORY stub <- mkServerStub_MEMORY(llpint.rrrServer);
 
     // ***** Methods ******
 
@@ -49,7 +49,7 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpint)
           request.param3          = 0;            /* don't care */
           request.needResponse    = True;         /* need response */
 
-          llpint.rrrClient.makeRequest(request);
+          llpint.oldrrrClient.makeRequest(request);
 
           state <= 1;
 
@@ -66,7 +66,7 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpint)
           request.param3          = 0;            /* don't care */
           request.needResponse    = False;        /* no response */
 
-          llpint.rrrClient.makeRequest(request);
+          llpint.oldrrrClient.makeRequest(request);
 
           state <= 0;
 
@@ -82,7 +82,7 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpint)
 
     method ActionValue#(MEM_VALUE) getMemResponse() if (state == 1);
 
-      MEM_VALUE v <- llpint.rrrClient.getResponse();
+      MEM_VALUE v <- llpint.oldrrrClient.getResponse();
       state <= 0;
       return v;
 

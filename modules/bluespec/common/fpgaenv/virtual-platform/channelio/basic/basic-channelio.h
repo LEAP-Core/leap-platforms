@@ -8,8 +8,6 @@
 
 using namespace std;
 
-#define CIO_NUM_CHANNELS    2
-
 // ============================================
 //       Base Class for Message Receivers
 // ============================================
