@@ -29,6 +29,8 @@
 
 #include "sim/m5_main.hh"
 
+#include <Python.h>
+
 typedef class VIRTUAL_PLATFORM_CLASS *VIRTUAL_PLATFORM;
 
 class VIRTUAL_PLATFORM_CLASS
@@ -39,7 +41,10 @@ class VIRTUAL_PLATFORM_CLASS
         m5_main(argc, argv);
     };
 
-    ~VIRTUAL_PLATFORM_CLASS() {};
+    ~VIRTUAL_PLATFORM_CLASS()
+    {
+        Py_Finalize();
+    };
 };
 
 #endif // __M5_VIRTUAL_PLATFORM_h__

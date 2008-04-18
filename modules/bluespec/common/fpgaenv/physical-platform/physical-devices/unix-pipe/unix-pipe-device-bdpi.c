@@ -8,6 +8,7 @@
 #include <assert.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <errno.h>
 
 #include "unix-pipe-device-bdpi.h"
 
@@ -175,6 +176,17 @@ unsigned long long pipe_read(unsigned char handle)
             bytes_read = read(DESC_HOST_2_FPGA,
                               &channel->inputBuffer[channel->ibTail],
                               bytes_requested);
+
+            if (bytes_read == 0)
+            {
+                fprintf(stderr, "EOF in unix-pipe-device-bdpi::pipe_read()\n");
+                exit(1);
+            }
+            else if (bytes_read == -1)
+            {
+                fprintf(stderr, "Error %d in unix-pipe-device-bdpi::pipe_read()\n", errno);
+                exit(1);
+            }
 
             channel->ibTail += bytes_read;
         }

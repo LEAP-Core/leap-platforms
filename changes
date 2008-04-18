@@ -3421,3 +3421,17 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front
 - fixed some bugs with new hardware client/software server path.
 - updated hybrid front panel to use new RRR client.
 - changed some front panel filenames to conform to conventions.
+
+----------
+mcadler     Date: Fri Apr 18 08:31:02 EDT 2008  CSN: CSN-platforms-100
+                  Fri Apr 18 12:31:02 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform
+ m5-virtual-platform.h     Locally Modified           99 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe
+ unix-pipe-device-bdpi.c   Locally Modified           99 
+
+- Detect EOF on BDPI pipe and exit.  Used to go into an infinite loop.
+- Moved Python cleanup out of m5_main().
