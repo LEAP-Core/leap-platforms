@@ -3435,3 +3435,13 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/uni
 
 - Detect EOF on BDPI pipe and exit.  Used to go into an infinite loop.
 - Moved Python cleanup out of m5_main().
+
+----------
+mcadler     Date: Fri Apr 18 10:00:12 EDT 2008  CSN: CSN-platforms-101
+                  Fri Apr 18 14:00:12 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/simple-32
+ simple-32-umf.h           Locally Modified          100 
+
+Use asim/syntax.h instead of private types.

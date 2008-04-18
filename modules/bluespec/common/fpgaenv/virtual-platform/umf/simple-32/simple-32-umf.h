@@ -3,15 +3,13 @@
 
 #include <iostream>
 
+#include "asim/syntax.h"
+
 using namespace std;
 
 #define UMF_CHUNK_BITS      32
 #define UMF_CHUNK_BYTES     4
 #define UMF_CHUNK_LOG_BYTES 2
-
-// general typedefs
-typedef unsigned int UINT32;
-typedef unsigned long long UINT64;
 
 // specific types for this UMF implementation
 typedef UINT32 UMF_CHUNK;
