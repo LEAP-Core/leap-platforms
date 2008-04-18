@@ -6,7 +6,7 @@
 #include <sys/types.h>
 #include <signal.h>
 
-#include "hybrid-fp-sw.h"
+#include "asim/provides/front_panel.h"
 #include "asim/rrr/service_ids.h"
 #include "asim/provides/model.h"
 #include "basic-rrr-client.h"
@@ -104,6 +104,7 @@ FRONT_PANEL_CLASS::Cleanup()
     }
 }
 
+/*
 // request
 bool
 FRONT_PANEL_CLASS::Request(
@@ -120,12 +121,30 @@ FRONT_PANEL_CLASS::Request(
         outputDirty = true;
     }
 
-    /*
-    // return state from input cache
-    *result = inputCache;
-    return true;
-    */
     return false;
+}
+*/
+
+// request
+UMF_MESSAGE
+FRONT_PANEL_CLASS::Request(
+    UMF_MESSAGE req)
+{
+    // extract value
+    UINT32 data = req->ExtractUINT32();
+
+    // update cache and set dirty bit
+    if (outputCache != data)
+    {
+        outputCache = data;
+        outputDirty = true;
+    }
+
+    // get rid of request message
+    delete req;
+
+    // no response, return NULL
+    return NULL;
 }
 
 // poll

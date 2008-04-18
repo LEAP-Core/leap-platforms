@@ -48,7 +48,7 @@ module mkRRRClient#(CHANNEL_IO channel) (RRR_CLIENT);
         req_ports[i] = interface CLIENT_REQUEST_PORT
                            method Action write(UMF_PACKET data);
         
-                               responseQueues[i].enq(data);
+                               requestQueues[i].enq(data);
                            
                            endmethod
                        endinterface;
@@ -57,8 +57,8 @@ module mkRRRClient#(CHANNEL_IO channel) (RRR_CLIENT);
         resp_ports[i] = interface CLIENT_RESPONSE_PORT
                             method ActionValue#(UMF_PACKET) read();
 
-                                UMF_PACKET val = requestQueues[i].first();
-                                requestQueues[i].deq();
+                                UMF_PACKET val = responseQueues[i].first();
+                                responseQueues[i].deq();
                                 return val;
                             
                             endmethod

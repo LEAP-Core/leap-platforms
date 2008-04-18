@@ -1,7 +1,0 @@
-service FRONT_PANEL
-{
-    server hw (bsv, method) <- sw (cpp, method)
-    {
-        method Update(in FRONTP_INPUT_STATE[32] state);
-    };
-};

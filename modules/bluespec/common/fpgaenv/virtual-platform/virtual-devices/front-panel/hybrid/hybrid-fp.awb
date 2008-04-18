@@ -4,7 +4,7 @@
 
 %provides front_panel
 
-%sources -t BSV -v PUBLIC   HybridFP.bsv
-%sources -t CPP -v PRIVATE  hybrid-fp-sw.cpp
-%sources -t H   -v PUBLIC   hybrid-fp-sw.h
-%sources -t RRR -v PRIVATE  hybrid-fp-services.rrr
+%sources -t BSV -v PUBLIC   hybrid-fp.bsv
+%sources -t CPP -v PRIVATE  hybrid-fp.cpp
+%sources -t H   -v PUBLIC   hybrid-fp.h
+%sources -t RRR -v PRIVATE  hybrid-fp.rrr

@@ -4,6 +4,7 @@
 
 `include "asim/rrr/service_ids.bsh"
 `include "asim/rrr/server_stub_FRONT_PANEL.bsh"
+`include "asim/rrr/client_stub_FRONT_PANEL.bsh"
 
 `define FP_POLL_INTERVAL    1000
 
@@ -41,27 +42,19 @@ module mkFrontPanel#(LowLevelPlatformInterface llpi) (FrontPanel);
     Reg#(FRONTP_LEDS)           ledState    <- mkReg(0);
     Reg#(Bool)                  outputDirty <- mkReg(False);
 
-    // service stub
-    ServerStub_FRONT_PANEL stub <- mkServerStub_FRONT_PANEL(llpi.rrrServer);
+    // stubs
+    ServerStub_FRONT_PANEL server_stub <- mkServerStub_FRONT_PANEL(llpi.rrrServer);
+    ClientStub_FRONT_PANEL client_stub <- mkClientStub_FRONT_PANEL(llpi.rrrClient);
 
     // sync LED state
     rule send_RRR_request (outputDirty == True);
-        RRR_Request req;
-        req.serviceID       = `FRONT_PANEL_SERVICE_ID;
-        req.param0          = zeroExtend(ledState);
-        req.param1          = 0;
-        req.param2          = 0;
-        req.param3          = 0;
-        req.needResponse    = False;
-
-        llpi.oldrrrClient.makeRequest(req);
-
+        client_stub.makeRequest_UpdateLEDs(ledState);
         outputDirty <= False;
     endrule
 
     // read incoming updates for switch/button state
     rule probe_updates (True);
-        FRONTP_INPUT_STATE data <- stub.acceptRequest_Update();
+        FRONTP_INPUT_STATE data <- server_stub.acceptRequest_UpdateSwitchesButtons();
         inputCache <= data;
     endrule
 

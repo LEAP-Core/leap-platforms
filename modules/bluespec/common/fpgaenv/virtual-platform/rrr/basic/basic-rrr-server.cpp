@@ -74,6 +74,18 @@ RRR_SERVICE_CLASS::Request(
     return NULL;
 }
 
+// legacy-style method for base class should default to an error
+bool
+RRR_SERVICE_CLASS::Request(
+    UINT32 arg0,
+    UINT32 arg1,
+    UINT32 arg2,
+    UINT32 arg3,
+    UINT32 *result)
+{
+    cout << "server: error: base-class legacy Request() method\n";
+    exit(1);
+}
 
 // ==================================
 // Server (dispatcher) static methods    

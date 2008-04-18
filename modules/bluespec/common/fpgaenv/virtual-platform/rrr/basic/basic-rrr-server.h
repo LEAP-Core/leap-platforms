@@ -18,7 +18,7 @@ class RRR_SERVICE_CLASS
 
     public:
         virtual void        Init(PLATFORMS_MODULE)                            = 0;
-        virtual bool        Request(UINT32, UINT32, UINT32, UINT32, UINT32 *) = 0; // back-compat
+        virtual bool        Request(UINT32, UINT32, UINT32, UINT32, UINT32 *);     // back-compat
         virtual UMF_MESSAGE Request(UMF_MESSAGE);
         virtual void        Poll(void)                                        = 0;
 };

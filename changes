@@ -3393,3 +3393,31 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-in
 
 - changed the interface name ChannelIO to CHANNEL_IO in accordance with
   coding conventions.
+
+----------
+aparasha    Date: Thu Apr 17 22:16:38 EDT 2008  CSN: CSN-platforms-99
+                  Fri Apr 18 02:16:38 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/basic
+ basic-channelio.cpp       Locally Modified           97 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ basic-rrr-server.cpp      Locally Modified           98 
+ basic-rrr-client.bsv      Locally Modified           98 
+ basic-rrr-server.h        Locally Modified           98 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid
+ hybrid-fp.cpp             Locally Added               0 
+ hybrid-fp.rrr             Locally Added               0 
+ hybrid-fp-services.rrr    Locally Removed            97 
+ hybrid-fp.h               Locally Added               0 
+ hybrid-fp.awb             Locally Modified           97 
+ hybrid-fp-sw.cpp          Locally Removed            97 
+ hybrid-fp.bsv             Locally Added               0 
+ HybridFP.bsv              Locally Removed            98 
+ hybrid-fp-sw.h            Locally Removed            97 
+
+- fixed some bugs with new hardware client/software server path.
+- updated hybrid front panel to use new RRR client.
+- changed some front panel filenames to conform to conventions.
