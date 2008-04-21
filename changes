@@ -3445,3 +3445,44 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/simple-32
  simple-32-umf.h           Locally Modified          100 
 
 Use asim/syntax.h instead of private types.
+
+----------
+mcadler     Date: Mon Apr 21 15:54:14 EDT 2008  CSN: CSN-platforms-102
+                  Mon Apr 21 19:54:14 UTC 2008
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-htg-hwonly.apm    Locally Modified          101 
+ hasim-fpgaenv-hybrid-sim.apm Locally Modified          101 
+ hasim-fpgaenv-htg-v5-pcie.apm Locally Modified          101 
+ hasim-fpgaenv-hybrid-m5-alpha-sim.apm Locally Removed           101 
+ hasim-fpgaenv-null.apm    Locally Modified          101 
+ hasim-fpgaenv-xup.apm     Locally Modified          101 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ basic-rrr-client.cpp      Locally Modified          101 
+ basic-rrr-server.cpp      Locally Modified          101 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid
+ hybrid-fp.cpp             Locally Modified          101 
+ hybrid-fp.h               Locally Modified          101 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices
+ std-virtual-devices.awb   Locally Modified          101 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ memory_virtual_device_hybrid.awb Locally Modified          101 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/simulation
+ virtual_device_memory_simulation.awb Locally Modified          101 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/null
+ memory_virtual_device_null.awb Locally Modified          101 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/template
+ memory_virtual_device_template.awb Locally Modified          101 
+
+The memory that used to be defined under fpgaenv is now called scratchpad
+memory.  All models currently specify NULL scratchpad memory.  What used to
+be the VMH memory initializer is now in the hasim repository and is used
+by the functional partition.

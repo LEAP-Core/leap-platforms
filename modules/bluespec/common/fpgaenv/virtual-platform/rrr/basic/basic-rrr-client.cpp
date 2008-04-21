@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "basic-rrr-client.h"
+#include "asim/provides/rrr.h"
 
 #define CHANNEL_ID  1
 

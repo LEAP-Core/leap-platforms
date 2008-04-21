@@ -1,7 +1,7 @@
 #ifndef __HYBRID_FRONT_PANEL__
 #define __HYBRID_FRONT_PANEL__
 
-#include "basic-rrr-server.h"
+#include "asim/provides/rrr.h"
 
 #define SELECT_TIMEOUT      1000
 #define DIALOG_PACKET_SIZE  4

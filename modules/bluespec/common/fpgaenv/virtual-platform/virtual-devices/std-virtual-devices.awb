@@ -4,5 +4,4 @@
 
 %provides virtual_devices
 
-%requires front_panel memory streams
-
+%requires front_panel scratchpad_memory streams

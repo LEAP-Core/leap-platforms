@@ -50,9 +50,9 @@ File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/std-virtua
 Packagehint=platforms
 
 [Standard Virtual Devices/Requires]
-memory=Null Memory Device
 front_panel=Console Front Panel
 streams=Simulation Streams
+scratchpad_memory=Null Scratchpad Memory Device
 
 [Null Physical Platform]
 File=modules/bluespec/common/fpgaenv/physical-platform/null/null-physical-platfrom.awb
@@ -75,6 +75,8 @@ rrr=Null RRR Module
 File=modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface/hwonly-llpi.awb
 Packagehint=platforms
 
-[Null Memory Device]
+
+
+[Null Scratchpad Memory Device]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/null/memory_virtual_device_null.awb
 Packagehint=platforms

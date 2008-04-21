@@ -9,7 +9,7 @@
 #include "asim/provides/front_panel.h"
 #include "asim/rrr/service_ids.h"
 #include "asim/provides/model.h"
-#include "basic-rrr-client.h"
+#include "asim/provides/rrr.h"
 
 #define SERVICE_ID  FRONT_PANEL_SERVICE_ID
 

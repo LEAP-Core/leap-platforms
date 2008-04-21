@@ -1,8 +1,8 @@
 
-%name Null Memory Device
-%desc Null Memory Device
+%name Null Scratchpad Memory Device
+%desc Null Scratchpad Memory Device
 
-%provides memory
+%provides scratchpad_memory
 
 %sources -t BSV -v PUBLIC memory_virtual_device_datatypes.bsv
 %sources -t BSV -v PUBLIC memory_virtual_device_null.bsv

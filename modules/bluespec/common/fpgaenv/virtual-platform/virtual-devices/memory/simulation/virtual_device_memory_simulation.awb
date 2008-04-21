@@ -2,7 +2,7 @@
 %name Hardware-Only Memory Device for Simulation
 %desc Hardware-Only Memory Device for Simulation (Not Synthesizable)
 
-%provides memory
+%provides scratchpad_memory
 
 %sources -t BSV -v PUBLIC virtual_device_memory_datatypes.bsv
 %sources -t BSV -v PUBLIC virtual_device_memory_simulation.bsv

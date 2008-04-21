@@ -2,7 +2,7 @@
 %name Memory Device Template
 %desc Memory Device Template
 
-%provides memory
+%provides scratchpad_memory
 %attributes template
 
 %sources -t BSV -v PUBLIC memory_virtual_device_datatypes.bsv

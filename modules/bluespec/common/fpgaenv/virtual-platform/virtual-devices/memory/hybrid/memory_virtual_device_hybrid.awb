@@ -1,8 +1,8 @@
 
-%name Hybrid Memory Device
-%desc Hybrid Memory Device
+%name Hybrid Scratchpad Memory Device
+%desc Hybrid Scratchpad Memory Device
 
-%provides memory
+%provides scratchpad_memory
 
 %sources -t BSV -v PUBLIC   memory_virtual_device_datatypes.bsv
 %sources -t BSV -v PUBLIC   memory_virtual_device_hybrid.bsv

@@ -39,8 +39,8 @@ Packagehint=platforms
 
 [Standard Virtual Devices/Requires]
 front_panel=Physical HTG-v5-PCIe Front Panel
-memory=Null Memory Device
 streams=Simulation Streams
+scratchpad_memory=Null Scratchpad Memory Device
 
 [Physical HTG-v5-PCIe Front Panel]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/htg_v5_pcie/htg-v5-pcie-fp.awb
@@ -87,6 +87,8 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/leds/general-led-device.awb
 Packagehint=platforms
 
-[Null Memory Device]
+
+
+[Null Scratchpad Memory Device]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/null/memory_virtual_device_null.awb
 Packagehint=platforms
