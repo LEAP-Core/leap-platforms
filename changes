@@ -3500,3 +3500,14 @@ Stop killing the Bluesim process on exit!  The kill() was causing lost data
 on unbuffered debugging log streams.  Now that the Bluesim side pipe code
 exits correctly on EOF we can terminate the pair from the sw side just by
 closing the pipe.
+
+----------
+aparasha    Date: Tue Apr 22 17:38:26 EDT 2008  CSN: CSN-platforms-104
+                  Tue Apr 22 21:38:26 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ marshaller.bsv            Locally Modified          103 
+
+added the ability to marshal words of size smaller than the maximum
+size that the marshaller can take.
