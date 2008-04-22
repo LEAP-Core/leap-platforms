@@ -3486,3 +3486,17 @@ The memory that used to be defined under fpgaenv is now called scratchpad
 memory.  All models currently specify NULL scratchpad memory.  What used to
 be the VMH memory initializer is now in the hasim repository and is used
 by the functional partition.
+
+----------
+mcadler     Date: Tue Apr 22 16:08:57 EDT 2008  CSN: CSN-platforms-103
+                  Tue Apr 22 20:08:57 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe
+ unix-pipe-device-bdpi.c   Locally Modified          102 
+ unix-pipe-device.cpp      Locally Modified          102 
+
+Stop killing the Bluesim process on exit!  The kill() was causing lost data
+on unbuffered debugging log streams.  Now that the Bluesim side pipe code
+exits correctly on EOF we can terminate the pair from the sw side just by
+closing the pipe.

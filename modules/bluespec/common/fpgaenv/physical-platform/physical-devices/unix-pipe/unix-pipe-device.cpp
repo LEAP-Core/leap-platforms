@@ -111,13 +111,14 @@ UNIX_PIPE_DEVICE_CLASS::Uninit()
     PLATFORMS_MODULE_CLASS::Uninit();
 }
 
-// cleanup: kill the process at the other end of the pipe
+// cleanup: close the pipe.  The other side will exit.
 void
 UNIX_PIPE_DEVICE_CLASS::Cleanup()
 {
     if (childAlive)
     {
-        kill(childpid, SIGTERM);
+        close(PARENT_READ);
+        close(PARENT_WRITE);
         childAlive = false;
     }
 }

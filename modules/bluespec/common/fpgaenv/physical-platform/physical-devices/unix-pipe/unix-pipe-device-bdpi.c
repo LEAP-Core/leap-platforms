@@ -54,7 +54,7 @@ void pipe_init(void)
      * message with software */
     if (read(DESC_HOST_2_FPGA, buf, 4) == -1)
     {
-        perror("FPGA/pipe_init/read");
+        fprintf(stderr, "         HW side exiting (pipe closed)\n");
         exit(1);
     }
 
@@ -66,7 +66,7 @@ void pipe_init(void)
 
     if (write(DESC_FPGA_2_HOST, "ACK", 4) == -1)
     {
-        perror("FPGA/pipe_init/write");
+        fprintf(stderr, "         HW side exiting (pipe closed)\n");
         exit(1);
     }
 }
@@ -256,7 +256,7 @@ void pipe_write(unsigned char handle, unsigned int data)
     bytes_written = write(DESC_FPGA_2_HOST, databuf, BDPI_CHUNK_BYTES);
     if (bytes_written == -1)
     {
-        perror("FPGA/pipe_write/write");
+        fprintf(stderr, "         HW side exiting (pipe closed)\n");
         cleanup();
         exit(1);
     }
