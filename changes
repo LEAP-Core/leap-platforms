@@ -3511,3 +3511,14 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
 
 added the ability to marshal words of size smaller than the maximum
 size that the marshaller can take.
+
+----------
+aparasha    Date: Thu Apr 24 13:07:49 EDT 2008  CSN: CSN-platforms-105
+                  Thu Apr 24 17:07:49 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/simple-32
+ simple-32-umf.cpp         Locally Modified          104 
+ simple-32-umf.h           Locally Modified          104 
+
+added append and extract methods for variable-sized UINTs.

@@ -194,6 +194,35 @@ UMF_MESSAGE_CLASS::AppendUINT64(
 }
 
 void
+UMF_MESSAGE_CLASS::AppendUINT(
+    UINT64 data,
+    int nbytes)
+{
+    assert(message);
+
+    if (nbytes > 8)
+    {
+        cerr << "umf: AppendUINT can take 8 bytes maximum" << endl;
+        exit(1);
+    }
+
+    if ((writeIndex + nbytes) > length)
+    {
+        cerr << "umf: messsage write overflow" << endl;
+        exit(1);
+    }
+
+    // convert UINT into byte sequence in an endian-agnostic manner
+    UINT64 mask = 0xFF;
+    int i;
+    for (i = 0; i < nbytes; i++)
+    {
+        message[writeIndex++] = (unsigned char)((mask & data) >> (i * 8));
+        mask = mask << 8;
+    }
+}
+
+void
 UMF_MESSAGE_CLASS::AppendChunk(
     UMF_CHUNK chunk)
 {
@@ -299,6 +328,45 @@ UMF_MESSAGE_CLASS::ExtractUINT64()
     // extract a UINT64 from the byte sequence in an endian-agnostic manner
     UINT64 retval = 0;
     for (int i = 0; i < sizeof(UINT64); i++)
+    {
+        UINT64 byte = (UINT64)(message[readIndex++]);
+        retval |= (byte << (i * 8));
+    }
+
+    return retval;
+}
+
+UINT64
+UMF_MESSAGE_CLASS::ExtractUINT(
+    int nbytes)
+{
+    assert(message);
+
+    if (nbytes > 8)
+    {
+        cerr << "umf: ExtractUINT can take 8 bytes maximum" << endl;
+        exit(1);
+    }
+
+    if ((readIndex + nbytes) > writeIndex)
+    {
+        cerr << "umf: message read underflow: readIndex = "
+             << readIndex << " writeIndex = " << writeIndex
+             << " UINT64" << endl;
+        Print(cerr);
+        exit(1);
+    }
+
+    if (writeIndex != length)
+    {
+        cerr << "umf: [WARNING] attempt to read from incomplete "
+             << "message, are you sure you want to do this?" << endl;
+        // do not exit
+    }
+
+    // extract a UINT from the byte sequence in an endian-agnostic manner
+    UINT64 retval = 0;
+    for (int i = 0; i < nbytes; i++)
     {
         UINT64 byte = (UINT64)(message[readIndex++]);
         retval |= (byte << (i * 8));

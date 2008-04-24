@@ -60,13 +60,15 @@ class UMF_MESSAGE_CLASS
         void AppendBytes(int nbytes, unsigned char data[]);
         void AppendUINT32(UINT32 data);
         void AppendUINT64(UINT64 data);
-
+        void AppendUINT(UINT64 data, int nbytes);
+        
         void AppendChunk(UMF_CHUNK chunk);
 
         // demarshallers
         void   ExtractBytes(int nbytes, unsigned char data[]);
         UINT32 ExtractUINT32();
         UINT64 ExtractUINT64();
+        UINT64 ExtractUINT(int nbytes);
 
         void      StartRead();
         bool      CanRead();
