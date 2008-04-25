@@ -8,6 +8,7 @@
 #include <sys/wait.h>
 #include <signal.h>
 #include <string.h>
+#include <errno.h>
 #include <iostream>
 
 #include "platforms-module.h"
@@ -142,8 +143,15 @@ UNIX_PIPE_DEVICE_CLASS::Probe()
 
     if (data_available == -1)
     {
-        perror("select");
-        exit(1);
+        if (errno == EINTR)
+        {
+            data_available = 0;
+        }
+        else
+        {
+            perror("unix-pipe-device select");
+            exit(1);
+        }
     }
 
     if (data_available != 0)

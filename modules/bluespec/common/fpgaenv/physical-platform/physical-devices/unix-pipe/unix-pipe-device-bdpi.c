@@ -153,8 +153,15 @@ unsigned long long pipe_read(unsigned char handle)
 
         if (data_available == -1)
         {
-            perror("select");
-            exit(1);
+            if (errno == EINTR)
+            {
+                data_available = 0;
+            }
+            else
+            {
+                perror("select");
+                exit(1);
+            }
         }
 
         if (data_available != 0)

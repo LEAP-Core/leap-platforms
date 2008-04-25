@@ -3522,3 +3522,21 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/simple-32
  simple-32-umf.h           Locally Modified          104 
 
 added append and extract methods for variable-sized UINTs.
+
+----------
+mcadler     Date: Thu Apr 24 21:12:29 EDT 2008  CSN: CSN-platforms-106
+                  Fri Apr 25 01:12:29 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform
+ m5-virtual-platform.awb   Locally Removed           105 
+ std-virtual-platform.h    Locally Modified          105 
+ m5-virtual-platform.h     Locally Removed           105 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe
+ unix-pipe-device-bdpi.c   Locally Modified          105 
+ unix-pipe-device.cpp      Locally Modified          105 
+
+- m5 is no longer a virtual platform.  It is part of the hybrid functional model.
+- Standard virtual platform shouldn't get functional argument vector
+- Don't abort for EINTR on pipes

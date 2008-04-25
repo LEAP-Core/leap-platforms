@@ -32,7 +32,7 @@ typedef class VIRTUAL_PLATFORM_CLASS *VIRTUAL_PLATFORM;
 class VIRTUAL_PLATFORM_CLASS
 {
   public:
-    VIRTUAL_PLATFORM_CLASS(int argc, char *argv[]) {};
+    VIRTUAL_PLATFORM_CLASS() {};
     ~VIRTUAL_PLATFORM_CLASS() {};
 };
 
