@@ -9,7 +9,7 @@
 //               Physical Channel              
 // ============================================
 
-class PHYSICAL_CHANNEL_CLASS: public HASIM_MODULE_CLASS
+class PHYSICAL_CHANNEL_CLASS: public PLATFORMS_MODULE_CLASS
 {
     private:
         // links to useful physical devices
@@ -32,7 +32,7 @@ class PHYSICAL_CHANNEL_CLASS: public HASIM_MODULE_CLASS
         CSR_DATA genIID();
 
     public:
-        PHYSICAL_CHANNEL_CLASS(HASIM_MODULE, PHYSICAL_DEVICES);
+        PHYSICAL_CHANNEL_CLASS(PLATFORMS_MODULE, PHYSICAL_DEVICES);
         ~PHYSICAL_CHANNEL_CLASS();
 
         UMF_MESSAGE Read();             // blocking read

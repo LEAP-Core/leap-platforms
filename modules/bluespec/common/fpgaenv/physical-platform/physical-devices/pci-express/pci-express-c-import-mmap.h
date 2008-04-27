@@ -1,7 +1,7 @@
 #ifndef __PCI_EXPRESS_DEVICE__
 #define __PCI_EXPRESS_DEVICE__
 
-#include "hasim-module.h"
+#include "platforms-module.h"
 
 // ===============================================
 //               PCI-Express Device
@@ -30,7 +30,7 @@ typedef unsigned long long CSR_INDEX;
 
 // =========== The actual Device Class ===========
 typedef class PCIE_DEVICE_CLASS* PCIE_DEVICE;
-class PCIE_DEVICE_CLASS: public HASIM_MODULE_CLASS
+class PCIE_DEVICE_CLASS: public PLATFORMS_MODULE_CLASS
 {
     private:
         // driver descriptor
@@ -48,7 +48,7 @@ class PCIE_DEVICE_CLASS: public HASIM_MODULE_CLASS
         inline CSR_DATA swapEndian(CSR_DATA);
 
     public:
-        PCIE_DEVICE_CLASS(HASIM_MODULE);
+        PCIE_DEVICE_CLASS(PLATFORMS_MODULE);
         ~PCIE_DEVICE_CLASS();
 
         void     Cleanup();

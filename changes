@@ -3540,3 +3540,25 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/uni
 - m5 is no longer a virtual platform.  It is part of the hybrid functional model.
 - Standard virtual platform shouldn't get functional argument vector
 - Don't abort for EINTR on pipes
+
+----------
+mcadler     Date: Sun Apr 27 15:19:51 EDT 2008  CSN: CSN-platforms-107
+                  Sun Apr 27 19:19:51 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/pcie-csr
+ pcie-physical-channel.cpp Locally Modified          106 
+ pcie-physical-channel.h   Locally Modified          106 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface
+ llpi.h                    Locally Modified          106 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled
+ htg-v5-pcie-enabled.cpp   Locally Modified          106 
+ htg-v5-pcie-enabled.h     Locally Modified          106 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express
+ pci-express-c-import-mmap.cpp Locally Modified          106 
+ pci-express-c-import-mmap.h Locally Modified          106 
+
+Update HTG / PCIe modules so they compile.

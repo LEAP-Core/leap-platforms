@@ -17,8 +17,8 @@ using namespace std;
 // ============================================
 
 PCIE_DEVICE_CLASS::PCIE_DEVICE_CLASS(
-    HASIM_MODULE p) :
-        HASIM_MODULE_CLASS(p)
+    PLATFORMS_MODULE p) :
+        PLATFORMS_MODULE_CLASS(p)
 {
     // obtain a descriptor for the driver
     driverFD = open("/dev/pchnl", O_RDWR);
@@ -61,7 +61,7 @@ PCIE_DEVICE_CLASS::Uninit()
 
     // call default uninit so that we can continue
     // chain if necessary
-    HASIM_MODULE_CLASS::Uninit();
+    PLATFORMS_MODULE_CLASS::Uninit();
 }
 
 // cleanup

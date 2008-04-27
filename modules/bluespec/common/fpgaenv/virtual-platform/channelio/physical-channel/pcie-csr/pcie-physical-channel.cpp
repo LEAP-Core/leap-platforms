@@ -27,9 +27,9 @@ using namespace std;
 
 // constructor: set up hardware partition
 PHYSICAL_CHANNEL_CLASS::PHYSICAL_CHANNEL_CLASS(
-    HASIM_MODULE     p,
+    PLATFORMS_MODULE p,
     PHYSICAL_DEVICES d) :
-        HASIM_MODULE_CLASS(p)
+        PLATFORMS_MODULE_CLASS(p)
 {
     // cache links to useful physical devices
     pciExpressDevice = d->GetPCIExpressDevice();

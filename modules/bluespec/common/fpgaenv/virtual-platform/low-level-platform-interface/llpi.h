@@ -1,6 +1,7 @@
 #ifndef __LLPI__
 #define __LLPI__
 
+#include "platforms-module.h"
 #include "asim/provides/physical_platform.h"
 #include "asim/provides/channelio.h"
 #include "asim/provides/rrr.h"
