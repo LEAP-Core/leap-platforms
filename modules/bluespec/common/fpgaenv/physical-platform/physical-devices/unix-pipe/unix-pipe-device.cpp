@@ -54,8 +54,12 @@ UNIX_PIPE_DEVICE_CLASS::UNIX_PIPE_DEVICE_CLASS(
 
         // launch hardware executable/download bitfile
         string hw_exe = string(globalArgs->ModelDir()) + "/" + APM_NAME + "_hw.exe";
+        string bluesim_args = string(globalArgs->BluesimArgs());
         
-        execlp(hw_exe.c_str(), hw_exe.c_str(), NULL);
+        if( bluesim_args == "" )
+            execlp(hw_exe.c_str(), hw_exe.c_str(), NULL);
+        else
+            execlp(hw_exe.c_str(), hw_exe.c_str(), bluesim_args.c_str(), NULL);
 
         // error
         cerr << "Error attempting to invoke " << hw_exe << endl;

@@ -89,7 +89,7 @@ module mkDeMarshaller
         end
       
         // Do the shift with a for loop
-        for (Integer x = degree - 1; x > 1; x = x - 1)
+        for (Integer x = degree - 1; x > 0; x = x - 1)
         begin
             chunks[x-1] <= chunks[x];
         end

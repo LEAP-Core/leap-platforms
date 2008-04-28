@@ -3562,3 +3562,22 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci
  pci-express-c-import-mmap.h Locally Modified          106 
 
 Update HTG / PCIe modules so they compile.
+
+----------
+vmurali     Date: Mon Apr 28 18:15:24 EDT 2008  CSN: CSN-platforms-108
+                  Mon Apr 28 22:15:24 UTC 2008
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ hasim-fpgaenv-hybrid-sim.apm Locally Modified          107 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ demarshaller.bsv          Locally Modified          107 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe
+ unix-pipe-device.cpp      Locally Modified          107 
+
+
+- Fixed bug in demarshaller (off by 1 error)
+- Passing flag to bluesimargs
+
