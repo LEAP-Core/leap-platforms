@@ -54,12 +54,22 @@ UNIX_PIPE_DEVICE_CLASS::UNIX_PIPE_DEVICE_CLASS(
 
         // launch hardware executable/download bitfile
         string hw_exe = string(globalArgs->ModelDir()) + "/" + APM_NAME + "_hw.exe";
-        string bluesim_args = string(globalArgs->BluesimArgs());
+
+        // Make a copy of the argument vector so we can put the file name
+        // as argv[0]
+        char **argv = new char *[globalArgs->BluesimArgc() + 2];
+
+        // Pointer to exe is argv[0]
+        argv[0] = new char[hw_exe.length() + 1];
+        strcpy(argv[0], hw_exe.c_str());
+
+        // Copy remaining argv pointers, including trailing NULL
+        for (int i = 1; i < globalArgs->BluesimArgc() + 1; i++)
+        {
+            argv[i] = globalArgs->BluesimArgv()[i];
+        }
         
-        if( bluesim_args == "" )
-            execlp(hw_exe.c_str(), hw_exe.c_str(), NULL);
-        else
-            execlp(hw_exe.c_str(), hw_exe.c_str(), bluesim_args.c_str(), NULL);
+        execvp(argv[0], argv);
 
         // error
         cerr << "Error attempting to invoke " << hw_exe << endl;

@@ -3581,3 +3581,13 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/uni
 - Fixed bug in demarshaller (off by 1 error)
 - Passing flag to bluesimargs
 
+
+----------
+mcadler     Date: Wed Apr 30 00:26:00 EDT 2008  CSN: CSN-platforms-109
+                  Wed Apr 30 04:26:00 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe
+ unix-pipe-device.cpp      Locally Modified          108 
+
+Use new bluesim argument vector.
