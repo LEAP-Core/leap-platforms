@@ -13,7 +13,7 @@
 
 // You write this.
 
-module mkMemoryVirtualDevice#(LowLevelPlatformInterface pint) (MEMORY_VIRTUAL_DEVICE);
+module mkMemoryVirtualDevice#(LowLevelPlatformInterface pint) (SCRATCHPAD_MEMORY_VIRTUAL_DEVICE);
 
     // ***** Local State *****
     
@@ -25,7 +25,7 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface pint) (MEMORY_VIRTUAL_DE
 
     // Service a memory request.
 
-    method Action makeMemRequest(MEM_REQUEST req);
+    method Action makeMemRequest(SCRATCHPAD_MEM_REQUEST req);
 
         noAction;
 
@@ -36,7 +36,7 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface pint) (MEMORY_VIRTUAL_DE
     
     // Give a response back to the user.
 
-    method ActionValue#(MEM_VALUE) getMemResponse();
+    method ActionValue#(SCRATCHPAD_MEM_VALUE) getMemResponse();
     
         noAction;
         return 0; 
@@ -50,7 +50,7 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface pint) (MEMORY_VIRTUAL_DE
     
     // Note: this method is disabled so it never invalidates.
 
-    method ActionValue#(MEM_ADDRESS) getInvalidateRequest() if (False);
+    method ActionValue#(SCRATCHPAD_MEM_ADDRESS) getInvalidateRequest() if (False);
     
         noAction;
         return 0;

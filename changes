@@ -3591,3 +3591,22 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/uni
  unix-pipe-device.cpp      Locally Modified          108 
 
 Use new bluesim argument vector.
+
+----------
+mcadler     Date: Wed Apr 30 08:35:33 EDT 2008  CSN: CSN-platforms-110
+                  Wed Apr 30 12:35:33 UTC 2008
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ hasim-fpgaenv-hybrid-sim.apm Locally Modified          109 
+ hasim-fpgaenv-htg-v5-pcie.apm Locally Modified          109 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/null
+ memory_virtual_device_null.awb Locally Modified          109 
+ memory_virtual_device_null.bsv Locally Modified          109 
+ memory_virtual_device_datatypes.bsv Locally Modified          109 
+
+Change the names of types in scratchpad memory so they don't conflict with
+functional partition memory.  It is no longer necessary to change the
+sizes of the null scratchpad memory to conform to the functional memory
+service sizes.

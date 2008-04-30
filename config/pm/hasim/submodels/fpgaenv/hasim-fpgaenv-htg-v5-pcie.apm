@@ -106,8 +106,7 @@ pci_express_driver_header=Driver Header for PCIe Kernel Module
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pci-express-device-mmap.awb
 Packagehint=platforms
 
-
-
 [Null Scratchpad Memory Device]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/null/memory_virtual_device_null.awb
 Packagehint=platforms
+

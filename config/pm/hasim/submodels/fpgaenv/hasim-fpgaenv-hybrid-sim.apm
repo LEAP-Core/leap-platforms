@@ -93,6 +93,3 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/null/memory_virtual_device_null.awb
 Packagehint=platforms
 
-[Null Scratchpad Memory Device/Params]
-MEMORY_ADDR_SIZE=64
-MEMORY_VALUE_SIZE=64

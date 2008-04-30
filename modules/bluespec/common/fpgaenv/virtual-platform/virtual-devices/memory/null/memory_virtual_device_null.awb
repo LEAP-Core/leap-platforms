@@ -7,5 +7,5 @@
 %sources -t BSV -v PUBLIC memory_virtual_device_datatypes.bsv
 %sources -t BSV -v PUBLIC memory_virtual_device_null.bsv
 
-%param MEMORY_ADDR_SIZE 32 "Number of bits to address memory."
-%param MEMORY_VALUE_SIZE 32 "Number of bits to read from and write to memory."
+%param SCRATCHPAD_MEMORY_ADDR_SIZE 32 "Number of bits to address memory."
+%param SCRATCHPAD_MEMORY_VALUE_SIZE 32 "Number of bits to read from and write to memory."
