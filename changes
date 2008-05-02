@@ -3610,3 +3610,15 @@ Change the names of types in scratchpad memory so they don't conflict with
 functional partition memory.  It is no longer necessary to change the
 sizes of the null scratchpad memory to conform to the functional memory
 service sizes.
+
+----------
+mcadler     Date: Fri May  2 16:57:44 EDT 2008  CSN: CSN-platforms-111
+                  Fri May  2 20:57:44 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ basic-rrr-common.bsh      Locally Modified          110 
+
+Add a few Bluespec types for passing 72, 96 and 128 bit objects through RRR.
+These can go away when we solve type specification for RRR.  Types are:
+UMF_UINT72, UMF_UINT96 and UMF_UNIT128.

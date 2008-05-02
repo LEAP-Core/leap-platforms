@@ -15,6 +15,15 @@ typedef Bit#(16) UINT16;
 typedef Bit#(32) UINT32;
 typedef Bit#(64) UINT64;
 
+//
+// A few hacks for defining simple types to pass multiple concatenated values
+// through RRR.  These will go away once we figure out how to represent types
+// and multiple arguments to RRR methods.
+//
+typedef Bit#(72)  UMF_UINT72;
+typedef Bit#(96)  UMF_UINT96;
+typedef Bit#(128) UMF_UINT128;
+
 typedef struct
 {
     RRR_ServiceID   serviceID;
