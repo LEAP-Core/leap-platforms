@@ -3622,3 +3622,14 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
 Add a few Bluespec types for passing 72, 96 and 128 bit objects through RRR.
 These can go away when we solve type specification for RRR.  Types are:
 UMF_UINT72, UMF_UINT96 and UMF_UNIT128.
+
+----------
+jsemer      Date: Mon May  5 11:55:00 EDT 2008  CSN: CSN-platforms-112
+                  Mon May  5 15:55:00 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/null
+ null-rrr.bsv              Locally Modified          111 
+
+Updated null RRR modules to conform to latest version of the RRR
+interface.

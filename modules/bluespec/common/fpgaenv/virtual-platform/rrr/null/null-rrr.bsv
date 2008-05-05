@@ -2,9 +2,9 @@ import Vector::*;
 
 
 `include "channelio.bsh"
-
-`include "asim/rrr/rrr_service_ids.bsh"
 `include "umf.bsh"
+
+`define NUM_SERVICES 0
 
 typedef Bit#(32) RRR_ServiceID;
 typedef Bit#(32) RRR_Param;
@@ -20,12 +20,30 @@ typedef struct
     Bool            needResponse;
 } RRR_Request   deriving (Eq, Bits);
 
+interface RRR_CLIENT;
+    method Action                       makeRequest(RRR_Request request);
+    method ActionValue#(RRR_Response)   getResponse();
+endinterface
+
+module mkRRRClient#(CHANNEL_IO channel) (RRR_CLIENT);
+
+    method Action makeRequest(RRR_Request request);
+        noAction;
+    endmethod
+
+    method ActionValue#(RRR_Response) getResponse();
+        noAction;
+        return 0;
+    endmethod
+
+endmodule
+
 interface RRRClient;
     method Action                       makeRequest(RRR_Request request);
     method ActionValue#(RRR_Response)   getResponse();
 endinterface
 
-module mkRRRClient#(ChannelIO channel) (RRRClient);
+module mkOldRRRClient#(CHANNEL_IO channel) (RRRClient);
 
     method Action makeRequest(RRR_Request request);
         noAction;
@@ -53,7 +71,7 @@ interface RRR_SERVER;
 endinterface
 
 
-module mkRRRServer#(ChannelIO channel) (RRR_SERVER);
+module mkRRRServer#(CHANNEL_IO channel) (RRR_SERVER);
 
     Vector#(`NUM_SERVICES, REQUEST_PORT)  reqPorts = newVector();
     Vector#(`NUM_SERVICES, RESPONSE_PORT) rspPorts = newVector();
