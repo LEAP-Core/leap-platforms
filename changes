@@ -3643,3 +3643,23 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/uni
  unix-pipe-device.cpp      Locally Modified          112 
 
 Look for Bluesim and then Verilog simulation.
+
+----------
+jsemer      Date: Fri May  9 15:28:47 EDT 2008  CSN: CSN-platforms-114
+                  Fri May  9 19:28:47 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid
+ hybrid-fp.cpp             Locally Modified          113 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/streams
+ streams.dic               Locally Modified          113 
+ hybrid-streams.cpp        Locally Modified          113 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe
+ unix-pipe-device.cpp      Locally Modified          113 
+
+Use commands_switches.h rather than main.h to get command switch info.
+
+Added a special message to the streams service STREAMS_MESSAGE_EXIT, which
+takes an exit status as an argument and terminates the run when called.

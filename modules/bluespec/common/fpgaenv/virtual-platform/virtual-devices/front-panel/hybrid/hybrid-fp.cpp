@@ -6,10 +6,12 @@
 #include <sys/types.h>
 #include <signal.h>
 
-#include "asim/provides/front_panel.h"
+
 #include "asim/rrr/service_ids.h"
-#include "asim/provides/model.h"
 #include "asim/provides/rrr.h"
+
+#include "asim/provides/command_switches.h"
+#include "asim/provides/front_panel.h"
 
 #define SERVICE_ID  FRONT_PANEL_SERVICE_ID
 

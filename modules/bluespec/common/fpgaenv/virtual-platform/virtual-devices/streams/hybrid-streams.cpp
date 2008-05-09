@@ -122,6 +122,11 @@ STREAMS_CLASS::Request(
         module->StreamsCallback(stringID, payload0, payload1);
     }
 
+    // On special exit message exit the program
+    if ( stringID == STREAMS_MESSAGE_EXIT ) {
+        exit(arg1);
+    }
+
     // no RRR response
     return false;
 }
