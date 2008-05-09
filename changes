@@ -3633,3 +3633,13 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/null
 
 Updated null RRR modules to conform to latest version of the RRR
 interface.
+
+----------
+mcadler     Date: Fri May  9 09:37:24 EDT 2008  CSN: CSN-platforms-113
+                  Fri May  9 13:37:24 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe
+ unix-pipe-device.cpp      Locally Modified          112 
+
+Look for Bluesim and then Verilog simulation.

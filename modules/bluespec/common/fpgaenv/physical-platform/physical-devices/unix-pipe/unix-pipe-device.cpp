@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <sys/select.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <sys/wait.h>
 #include <signal.h>
 #include <string.h>
@@ -53,7 +54,26 @@ UNIX_PIPE_DEVICE_CLASS::UNIX_PIPE_DEVICE_CLASS(
         dup2(CHILD_WRITE, DESC_FPGA_2_HOST);
 
         // launch hardware executable/download bitfile
-        string hw_exe = string(globalArgs->ModelDir()) + "/" + APM_NAME + "_hw.exe";
+        string hw_bluesim = string(globalArgs->ModelDir()) + "/" + APM_NAME + "_hw.exe";
+        string hw_verilog = string(globalArgs->ModelDir()) + "/" + APM_NAME + "_hw.vexe";
+
+        struct stat buf;
+        string hw_exe;
+        if (! stat(hw_bluesim.c_str(), &buf))
+        {
+            hw_exe = hw_bluesim;
+        }
+        else if (! stat(hw_verilog.c_str(), &buf))
+        {
+            hw_exe = hw_verilog;
+        }
+        else
+        {
+            cerr << "Can't find either Bluesim or Verilog HW simulator." << endl;
+            cerr << "  Looked for Bluesim: " << hw_bluesim << endl;
+            cerr << "             Verilog: " << hw_verilog << endl;
+            exit(1);
+        }
 
         // Make a copy of the argument vector so we can put the file name
         // as argv[0]
