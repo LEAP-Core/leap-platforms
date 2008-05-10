@@ -30,6 +30,9 @@ class FRONT_PANEL_CLASS:    public RRR_SERVICE_CLASS,
         // internal methods
         void    syncInputs();
         void    syncOutputs();
+     
+        void    syncInputsConsole();
+        void    syncOutputsConsole();
 
     public:
         FRONT_PANEL_CLASS();

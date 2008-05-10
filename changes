@@ -3663,3 +3663,14 @@ Use commands_switches.h rather than main.h to get command switch info.
 
 Added a special message to the streams service STREAMS_MESSAGE_EXIT, which
 takes an exit status as an argument and terminates the run when called.
+
+----------
+jsemer      Date: Fri May  9 20:57:37 EDT 2008  CSN: CSN-platforms-115
+                  Sat May 10 00:57:37 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid
+ hybrid-fp.cpp             Locally Modified          114 
+ hybrid-fp.h               Locally Modified          114 
+
+If --showfp is not set, then print LED changes to STDOUT.

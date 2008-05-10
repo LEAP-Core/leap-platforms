@@ -39,6 +39,12 @@ FRONT_PANEL_CLASS::Init(
     // set parent pointer
     parent = p;
 
+    // set intial state
+    inputCache = 0;
+    inputDirty = false;
+    outputCache = 0;
+    outputDirty = false;
+
     // see if we should pop up the dialog box
     if (globalArgs->ShowFrontPanel() == false)
     {
@@ -76,10 +82,6 @@ FRONT_PANEL_CLASS::Init(
 
         // initial state
         childAlive = true;
-        inputCache = 0;
-        inputDirty = false;
-        outputCache = 0;
-        outputDirty = false;
     }
 }
 
@@ -156,6 +158,11 @@ FRONT_PANEL_CLASS::Poll()
     // if dialog is disabled, don't do anything
     if (globalArgs->ShowFrontPanel() == false)
     {
+        if (outputDirty) 
+        {
+            syncOutputsConsole();
+            outputDirty = false;
+        }
         return;
     }
 
@@ -182,6 +189,21 @@ FRONT_PANEL_CLASS::Poll()
         inputDirty = false;
     }
 }
+
+// internal helper method: sync input cache state for console
+void
+FRONT_PANEL_CLASS::syncInputsConsole()
+{
+}
+
+
+// internal helper method: sync output cache state for console
+void
+FRONT_PANEL_CLASS::syncOutputsConsole()
+{
+    printf("LEDS: %032x\n", outputCache);
+}
+
 
 // internal helper method: sync input cache state with dialog box
 void
