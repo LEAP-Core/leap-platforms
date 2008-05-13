@@ -155,10 +155,10 @@ FRONT_PANEL_CLASS::Request(
 void
 FRONT_PANEL_CLASS::Poll()
 {
-    // if dialog is disabled, don't do anything
+    // Is dialog disabled?
     if (globalArgs->ShowFrontPanel() == false)
     {
-        if (outputDirty) 
+        if (outputDirty && globalArgs->ShowLEDsOnStdOut())
         {
             syncOutputsConsole();
             outputDirty = false;

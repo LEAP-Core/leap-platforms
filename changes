@@ -3674,3 +3674,13 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front
  hybrid-fp.h               Locally Modified          114 
 
 If --showfp is not set, then print LED changes to STDOUT.
+
+----------
+mcadler     Date: Tue May 13 08:32:07 EDT 2008  CSN: CSN-platforms-116
+                  Tue May 13 12:32:07 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid
+ hybrid-fp.cpp             Locally Modified          115 
+
+Add option to turn off LED messages to stdout
