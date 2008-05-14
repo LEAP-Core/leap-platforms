@@ -3684,3 +3684,13 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front
  hybrid-fp.cpp             Locally Modified          115 
 
 Add option to turn off LED messages to stdout
+
+----------
+aparasha    Date: Wed May 14 17:47:52 EDT 2008  CSN: CSN-platforms-117
+                  Wed May 14 21:47:52 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ basic-rrr-common.bsh      Locally Modified          116 
+
+added UINT8 type.
