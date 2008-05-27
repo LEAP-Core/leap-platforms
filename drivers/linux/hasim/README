@@ -20,6 +20,48 @@ To populate /usr/hasim for a machine, do the following in this directory.
 
 
 
+Notes on hotplug:
+
+For PCIe hotplug most machines generate errors if the PCIe card is electrically
+present but not offering a true PCIe interface at boot time.  Hitech Global
+ships their cards with flashing LEDs and no PCIe interface, by default.
+We must replace the default startup FPGA image with one that handles PCIe.
+Do the following:
+
+  A.  Get an .mcs file for programming the PROM that has PCIe support.
+      Either:
+
+      1. Recommended:
+         Build any HAsim model that includes PCIe support.  Find the .bit
+         file in the pm/.xilinx directory and generate an MCS file for
+         loading in the PROM using:
+
+           promgen -u 0 <model>_par.bit
+
+         if you do this it will come up was a "Xilinx" card name and a
+         vendor id 0x10ee
+
+      or
+
+      2. Use the sample file that came with the HighTech Global card at
+           /proj/asim/www/html/documentation/HAsim/other/HiTech_Global_LX110T_CD/Reference_Designs
+
+         if you do this the card will come up as "unknown" with a vendor id
+         of 0x19aa and device id 0xe004
+
+  B.  Use Xilinx "impact" tool to program the .mcs file in the
+      PROM.  Notes:
+
+      1.  You must set the "Parallel Mode" option during programming.
+
+      1.  You must erase the PROM before programming it.  Failure to do so
+          will trigger errors during programming with no explanation.
+
+      2.  Xilinx impact from ISE tools 10.1 seems abort on an attempt to
+          erase the PROM.  impact from 9.1i seems to work.
+
+
+
 Some other README files in this directory (e.g. README.dev) may appear confusing
 here.  They are installed in /usr/hasim and attempt to explain details of
 subdirectories of /usr/hasim.

@@ -306,10 +306,31 @@ void set_pci_state(FPGA_STATE_T state)
 
     if (write(f, &req, 1) != 1)
     {
+        fprintf(stderr, "hasim-fpga-ctrl: errno = %d\n", errno);
         error("Write failed to PCIe power control file " PCIE_POWER);
     }
 
     close(f);
+
+    //
+    // Monitor PCI until the state matches the request
+    //
+    char pciState;
+    do
+    {
+        sleep(1);
+
+        f = open(PCIE_POWER, O_RDONLY);
+        if (f == -1) error("Failed to open PCIe power control file " PCIE_POWER);
+
+        if (read(f, &pciState, 1) != 1)
+        {
+            error("Read failed from PCIe power control file " PCIE_POWER);
+        }
+
+        close(f);
+    }
+    while (pciState != req);
 
 
     if (state == STATE_PCI_ACTIVE)
@@ -319,7 +340,7 @@ void set_pci_state(FPGA_STATE_T state)
         //
         // Let PCI settle
         //
-        sleep(1);
+        sleep(2);
 
         //
         // Make sure kernel driver is loaded

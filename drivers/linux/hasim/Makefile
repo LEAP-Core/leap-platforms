@@ -18,6 +18,7 @@ install:
 	mkdir -p $(PREFIX)/bin $(PREFIX)/dev $(PREFIX)/kernel $(PREFIX)/reservations
 	install --owner=root --group=root --mode=4555 hasim-fpga-ctrl $(PREFIX)/bin
 	install kernel/pchnl.ko $(PREFIX)/kernel
+	cp -f README.dev $(PREFIX)/dev/README
 
 .PHONY clean:
 clean:

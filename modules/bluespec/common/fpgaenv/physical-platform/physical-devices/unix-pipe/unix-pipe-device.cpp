@@ -79,16 +79,19 @@ UNIX_PIPE_DEVICE_CLASS::UNIX_PIPE_DEVICE_CLASS(
 
         // Make a copy of the argument vector so we can put the file name
         // as argv[0]
-        char **argv = new char *[globalArgs->BluesimArgc() + 2];
+        char **argv = new char *[globalArgs->BluesimArgc() + 3];
 
         // Pointer to exe is argv[0]
         argv[0] = new char[hw_exe.length() + 1];
         strcpy(argv[0], hw_exe.c_str());
 
+        // Wait for Bluesim license
+        argv[1] = "-w";
+
         // Copy remaining argv pointers, including trailing NULL
         for (int i = 1; i < globalArgs->BluesimArgc() + 1; i++)
         {
-            argv[i] = globalArgs->BluesimArgv()[i];
+            argv[i + 1] = globalArgs->BluesimArgv()[i];
         }
         
         execvp(argv[0], argv);

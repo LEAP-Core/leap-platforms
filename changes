@@ -3694,3 +3694,26 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
  basic-rrr-common.bsh      Locally Modified          116 
 
 added UINT8 type.
+
+----------
+mcadler     Date: Tue May 27 16:51:27 EDT 2008  CSN: CSN-platforms-118
+                  Tue May 27 20:51:27 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe
+ unix-pipe-device.cpp      Locally Modified          117 
+
+Directory drivers/linux/hasim
+ hasim-fpga-ctrl.c         Locally Modified          117 
+ Makefile                  Locally Modified          117 
+ README                    Locally Modified          117 
+
+Directory drivers/linux/Xilinx_Platform_Cable/windriver/linux_drivers/pcusb
+ xusb_xup.hex              Locally Modified          117 
+ xusb_xlp.hex              Locally Modified          117 
+ xusb_emb.hex              Locally Modified          117 
+ xusbdfwu.hex              Locally Modified          117 
+ xusb_xpr.hex              Locally Modified          117 
+
+- Wait for Bluesim license
+- Update Xilinx platform cable firmware
