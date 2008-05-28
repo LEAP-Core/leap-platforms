@@ -3717,3 +3717,16 @@ Directory drivers/linux/Xilinx_Platform_Cable/windriver/linux_drivers/pcusb
 
 - Wait for Bluesim license
 - Update Xilinx platform cable firmware
+
+----------
+mcadler     Date: Wed May 28 11:54:22 EDT 2008  CSN: CSN-platforms-119
+                  Wed May 28 15:54:22 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/streams
+ hybrid-streams.cpp        Locally Modified          118 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe
+ unix-pipe-device-bdpi.c   Locally Modified          118 
+
+Make argument to exit() correspond to exit status of simulated program.

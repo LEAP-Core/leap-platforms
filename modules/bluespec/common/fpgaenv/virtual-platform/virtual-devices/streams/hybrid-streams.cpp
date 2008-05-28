@@ -124,7 +124,7 @@ STREAMS_CLASS::Request(
 
     // On special exit message exit the program
     if ( stringID == STREAMS_MESSAGE_EXIT ) {
-        exit(arg1);
+        exit(arg1 == 0);
     }
 
     // no RRR response

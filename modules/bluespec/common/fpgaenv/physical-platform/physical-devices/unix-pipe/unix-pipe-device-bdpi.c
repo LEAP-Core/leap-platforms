@@ -187,7 +187,7 @@ unsigned long long pipe_read(unsigned char handle)
             if (bytes_read == 0)
             {
                 fprintf(stderr, "EOF in unix-pipe-device-bdpi::pipe_read()\n");
-                exit(1);
+                exit(0);
             }
             else if (bytes_read == -1)
             {
