@@ -3730,3 +3730,13 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/uni
  unix-pipe-device-bdpi.c   Locally Modified          118 
 
 Make argument to exit() correspond to exit status of simulated program.
+
+----------
+mcadler     Date: Fri May 30 15:56:33 EDT 2008  CSN: CSN-platforms-120
+                  Fri May 30 19:56:33 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ basic-rrr-server.h        Locally Modified          119 
+
+Provide a default (null) implementation of Poll().
