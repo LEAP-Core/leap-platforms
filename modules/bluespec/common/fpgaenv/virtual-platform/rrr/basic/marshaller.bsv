@@ -4,6 +4,7 @@ import FIFO::*;
 // MARSHALLER
 
 // A marshaller takes one larger value and breaks it into a stream of n output chunks.
+// Chunks are sent out starting from the LS chunk and ending with the MS chunk
 
 interface MARSHALLER#(parameter type in_T, parameter type out_T);
 
@@ -45,8 +46,6 @@ module mkMarshaller
     // Are we done with the current value?
     Reg#(Bool) done <- mkReg(True);
 
-    // setChunks
-    
     // enq
     
     // Add the chunk to the first place in the vector and

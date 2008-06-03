@@ -5,6 +5,7 @@ import FIFO::*;
 // DeMarshaller
 
 // A de-marshaller takes n input "chunks" and produces one larger value.
+// Chunks are received starting from the MS chunk and ending with the LS chunk
 
 // Overall RRR service-stub flow control primarily lives in this code.
 // The stub itself initiates a demarshalling sequence by calling "start"
@@ -82,16 +83,16 @@ module mkDeMarshaller
     method Action insert(in_T chunk) if (state == STATE_queueing &&
                                          chunksRemaining != 0);
     
-        // newer chunks are closer to the MSB.
+        // newer chunks are closer to the LSB.
         if (degree != 0)
         begin
-            chunks[degree - 1] <= pack(chunk);
+            chunks[0] <= pack(chunk);
         end
       
         // Do the shift with a for loop
-        for (Integer x = degree - 1; x > 0; x = x - 1)
+        for (Integer x = 1; x < degree; x = x+1)
         begin
-            chunks[x-1] <= chunks[x];
+            chunks[x] <= chunks[x-1];
         end
         
         // decrement chunks remaining

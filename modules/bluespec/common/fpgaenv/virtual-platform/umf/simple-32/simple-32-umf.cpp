@@ -419,6 +419,54 @@ UMF_MESSAGE_CLASS::ReadChunk()
     return retval;
 }
 
+// reverse (MSByte -> LSByte) read methods
+
+void
+UMF_MESSAGE_CLASS::StartReverseRead()
+{
+    readIndex = length;
+}
+
+bool
+UMF_MESSAGE_CLASS::CanReverseRead()
+{
+    return(readIndex > 0);
+}
+
+UMF_CHUNK
+UMF_MESSAGE_CLASS::ReverseReadChunk()
+{
+    assert(message);
+
+    // if readIndex = i, we want to read bytes
+    // (i - CHUNK_SIZE) .. (i - 1)
+    if (readIndex < sizeof(UMF_CHUNK))
+    {
+        cerr << "umf: message reverse-read underflow: readIndex = "
+             << readIndex << " UMF_CHUNK" << endl;
+        Print(cerr);
+        exit(1);
+    }
+
+    if (writeIndex != length)
+    {
+        cerr << "umf: [WARNING] attempt to reverse-read from incomplete "
+             << "message, are you sure you want to do this?" << endl;
+        // do not exit
+    }
+
+    // extract a UMF_CHUNK from the byte sequence in an endian-agnostic manner
+    UMF_CHUNK retval = 0;
+    readIndex = readIndex - sizeof(UMF_CHUNK);
+    for (int i = 0; i < sizeof(UMF_CHUNK); i++)
+    {
+        UMF_CHUNK byte = (UMF_CHUNK)(message[readIndex + i]);
+        retval |= (byte << (i * 8));
+    }
+
+    return retval;
+}
+
 // print message to an output stream
 void
 UMF_MESSAGE_CLASS::Print(

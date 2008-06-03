@@ -149,8 +149,11 @@ PHYSICAL_CHANNEL_CLASS::Write(
     h2fTailPlusOne = (h2fTail == CSR_H2F_BUF_END) ? CSR_H2F_BUF_START : (h2fTail + 1);
 
     // write message data to physical channel
-    message->StartRead();
-    while (message->CanRead())
+    // NOTE: hardware demarshaller expects chunk pattern to start from most
+    //       significant chunk and end at least significant chunk, so we will
+    //       send chunks in reverse order
+    message->StartReverseRead();
+    while (message->CanReverseRead())
     {
         // this gets ugly - we need to block until space is available
         while (h2fTailPlusOne == h2fHeadCache)
@@ -160,7 +163,7 @@ PHYSICAL_CHANNEL_CLASS::Write(
         }
 
         // space is available, write
-        UMF_CHUNK chunk = message->ReadChunk();
+        UMF_CHUNK chunk = message->ReverseReadChunk();
         csr_data = CSR_DATA(chunk);
 
         pciExpressDevice->WriteCommonCSR(h2fTail, csr_data);

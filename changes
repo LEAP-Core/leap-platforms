@@ -3740,3 +3740,37 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
  basic-rrr-server.h        Locally Modified          119 
 
 Provide a default (null) implementation of Poll().
+
+----------
+aparasha    Date: Tue Jun  3 18:25:16 EDT 2008  CSN: CSN-platforms-121
+                  Tue Jun  3 22:25:16 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/pcie-csr
+ pcie-physical-channel.cpp Locally Modified          120 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/sim
+ sim-physical-channel.cpp  Locally Modified          120 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ marshaller.bsv            Locally Modified          120 
+ demarshaller.bsv          Locally Modified          120 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/simple-32
+ simple-32-umf.cpp         Locally Modified          120 
+ simple-32-umf.h           Locally Modified          120 
+
+- Fixed a bug in the demarshaller that was causing it to behave
+  incorrectly when a method's total input size was less than the
+  demarshaller's maximum width. Part of the fix involved changing
+  the demarshaller's sequencing algorithm - it now accepts chunks
+  starting from the most significant and ending with the least
+  significant.
+
+- Modified physical channel(s) to send chunks in reverse (MS -> LS)
+  order as expected by the new demarshaller.
+
+- Added methods to software UMF to enable reading its contents in
+  reverse order at chunk granularities.
+
+Models now work with the Null cache. This should fix all regressions.

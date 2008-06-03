@@ -74,6 +74,10 @@ class UMF_MESSAGE_CLASS
         bool      CanRead();
         UMF_CHUNK ReadChunk();
 
+        void      StartReverseRead();
+        bool      CanReverseRead();
+        UMF_CHUNK ReverseReadChunk();
+
         // other
         int  BytesRemaining() { return (length - writeIndex); }
         void Print(ostream &out);

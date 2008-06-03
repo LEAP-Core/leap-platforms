@@ -92,7 +92,15 @@ PHYSICAL_CHANNEL_CLASS::Write(
     unixPipeDevice->Write(header, UMF_CHUNK_BYTES);
 
     // write message data to pipe
-    unixPipeDevice->Write(message->GetMessage(), message->GetLength());
+    // NOTE: hardware demarshaller expects chunk pattern to start from most
+    //       significant chunk and end at least significant chunk, so we will
+    //       send chunks in reverse order
+    message->StartReverseRead();
+    while (message->CanReverseRead())
+    {
+        UMF_CHUNK chunk = message->ReverseReadChunk();
+        unixPipeDevice->Write((unsigned char*)&chunk, sizeof(UMF_CHUNK));
+    }
 
     // de-allocate message
     delete message;
