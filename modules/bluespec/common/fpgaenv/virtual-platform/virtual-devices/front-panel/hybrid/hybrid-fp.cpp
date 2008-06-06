@@ -108,27 +108,6 @@ FRONT_PANEL_CLASS::Cleanup()
     }
 }
 
-/*
-// request
-bool
-FRONT_PANEL_CLASS::Request(
-    UINT32 arg0,
-    UINT32 arg1,
-    UINT32 arg2,
-    UINT32 arg3,
-    UINT32 *result)
-{
-    // update cache and set dirty bit
-    if (outputCache != arg0)
-    {
-        outputCache = arg0;
-        outputDirty = true;
-    }
-
-    return false;
-}
-*/
-
 // request
 UMF_MESSAGE
 FRONT_PANEL_CLASS::Request(
@@ -145,7 +124,7 @@ FRONT_PANEL_CLASS::Request(
     }
 
     // get rid of request message
-    delete req;
+    req->Delete();
 
     // no response, return NULL
     return NULL;
@@ -179,7 +158,8 @@ FRONT_PANEL_CLASS::Poll()
     // if input cache was changed, update hardware partition
     if (inputDirty)
     {
-        UMF_MESSAGE msg = new UMF_MESSAGE_CLASS(4);
+        UMF_MESSAGE msg = UMF_MESSAGE_CLASS::New();
+        msg->SetLength(4);
         msg->SetServiceID(SERVICE_ID);
         msg->SetMethodID(0);
         msg->AppendUINT32(inputCache);

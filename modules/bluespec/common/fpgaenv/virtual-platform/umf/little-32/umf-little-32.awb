@@ -1,12 +1,14 @@
 
-%name Simple 32-bit Unified Message Format
-%desc Simple 32-bit Unified Message Format
+%name Little-Endian 32-bit Unified Message Format
+%desc Little-Endian 32-bit Unified Message Format
 
 %provides umf
 
-%sources -t BSV -v PUBLIC   simple-32-umf.bsv
-%sources -t H   -v PUBLIC   simple-32-umf.h
-%sources -t CPP -v PRIVATE  simple-32-umf.cpp
+%sources -t BSV -v PUBLIC   umf-little-32.bsv
+%sources -t H   -v PUBLIC   umf-little-32.h
+%sources -t CPP -v PRIVATE  umf-little-32.cpp
+%sources -t H   -v PUBLIC   umf-allocator.h
+%sources -t CPP -v PRIVATE  umf-allocator.cpp
 
 %param UMF_CHUNK_BITS       32  "Bits in UMF Chunk"
 %param UMF_CHUNK_BYTES      4   "Bytes in UMF Chunk"

@@ -50,7 +50,7 @@ RRR_SERVICE_CLASS::Request(
     }
 
     // de-allocate message
-    delete message;
+    message->Delete();
 
     // invoke legacy Request() method to obtain result
     UINT32 result;
@@ -60,7 +60,8 @@ RRR_SERVICE_CLASS::Request(
     if (send_result)
     {
         // create a new channelio message
-        message = new UMF_MESSAGE_CLASS(4); // payload = 4 bytes
+        message = UMF_MESSAGE_CLASS::New();
+        message->SetLength(4);              // payload = 4 bytes
         message->SetMethodID(methodID);
 
         // update message data

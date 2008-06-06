@@ -3774,3 +3774,61 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/simple-32
   reverse order at chunk granularities.
 
 Models now work with the Null cache. This should fix all regressions.
+
+----------
+aparasha    Date: Fri Jun  6 01:29:52 EDT 2008  CSN: CSN-platforms-122
+                  Fri Jun  6 05:29:52 UTC 2008
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ hasim-fpgaenv-hybrid-sim.apm Locally Modified          121 
+ hasim-fpgaenv-htg-v5-pcie.apm Locally Modified          121 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/pcie-csr
+ pcie-physical-channel.cpp Locally Modified          121 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/sim
+ sim-physical-channel.cpp  Locally Modified          121 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ basic-rrr-server.cpp      Locally Modified          121 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid
+ hybrid-fp.cpp             Locally Modified          121 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/umf
+ little-32/                Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/little-32
+ umf-little-32.cpp         Locally Added               0 
+ umf-allocator.cpp         Locally Added               0 
+ umf-little-32.h           Locally Added               0 
+ umf-allocator.h           Locally Added               0 
+ umf-little-32.awb         Locally Added               0 
+ umf-little-32.bsv         Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/umf
+ simple-32/                Locally Removed           121 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/simple-32
+ simple-32-umf.cpp         Locally Removed           121 
+ simple-32-umf.h           Locally Removed           121 
+ simple-32-umf.awb         Locally Removed           121 
+ simple-32-umf.bsv         Locally Removed           121 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express
+ pci-express-c-import-ioctl.cpp Locally Modified          121 
+ pci-express-vhdl-import.bsv Locally Modified          121 
+ pci-express-c-import-mmap.cpp Locally Modified          121 
+
+- Renamed "Simple 32" UMF to "Little-endian 32-bit" UMF and simplified the code. There's
+  a further trivial optimization which I will add soon.
+
+- Changed UMF allocation/deallocation system. UMF internally maintains an allocator and
+  a pool of resources. Instead of using new and delete to allocate UMF messages, users
+  should call the static method UMF_MESSAGE_CLASS::New() to allocate a new message, and
+  call the instanced method message->Delete() to release it back into the pool. For now,
+  the agreement that the sender allocates the message and the receiver de-allocates it
+  remains.
+
+- Moved the endian-swap from the software side of the PCIe driver to the hardware side.

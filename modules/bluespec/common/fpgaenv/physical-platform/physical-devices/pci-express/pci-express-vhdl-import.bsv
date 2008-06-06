@@ -1,4 +1,4 @@
-
+import Vector::*;
 import Clocks::*;
 import LevelFIFO::*;
 
@@ -19,44 +19,6 @@ typedef Bit#(`PCIE_PHYS_ADDR_SIZE) PCIE_Physical_Address;
 typedef Bit#(`PCIE_LEN_SIZE)       PCIE_Length;
 typedef Bit#(`PCIE_CSR_DATA_SIZE)  PCIE_CSR_Data;
 typedef Bit#(`PCIE_CSR_IDX_SIZE)   PCIE_CSR_Index;
-
-/*
-// DEBUG begin: Temp Register
-interface TempReg;
-    method Action enq(Tuple2#(PCIE_CSR_Index, PCIE_CSR_Data) i);
-    method Tuple2#(PCIE_CSR_Index, PCIE_CSR_Data) first();
-    method Action deq();
-endinterface
-
-module mkTempReg (TempReg);
-
-    Reg#(Tuple2#(PCIE_CSR_Index, PCIE_CSR_Data)) temp <- mkReg(tuple2(0, 0));
-    Reg#(Bit#(4)) state <- mkReg(0);
-    Reg#(Bit#(8)) counter <- mkReg(0);
-
-    rule cycle_counter (counter != 0);
-        counter <= counter - 1;
-    endrule
-
-    method Action enq(Tuple2#(PCIE_CSR_Index, PCIE_CSR_Data) i) if (state == 0 && counter == 0);
-        temp <= i;
-        state <= 1;
-        counter <= 15;
-    endmethod
-
-    method Tuple2#(PCIE_CSR_Index, PCIE_CSR_Data) first();
-        return temp;
-    endmethod
-
-    method Action deq() if (state == 1 && counter == 0);
-        state <= 0;
-        counter <= 15;
-    endmethod
-
-endmodule
-*/
-
-// DEBUG end
 
 // PCI_EXPRESS_DRIVER
 
@@ -217,42 +179,34 @@ module mkPCIExpressDevice
     // Synchronizers from BSV to PCIe
     SyncFIFOIfc#(PCIE_CSR_Index) sync_csr_read_req_q <- mkSyncFIFO(2, bsv_clk, bsv_rst, prim_pci.pcie_clk);
     SyncFIFOLevelIfc#(Tuple2#(PCIE_CSR_Index, PCIE_CSR_Data), 2) sync_csr_write_q <- mkSyncFIFOLevel(bsv_clk, bsv_rst, prim_pci.pcie_clk);
-    // SyncFIFOIfc#(Tuple2#(PCIE_CSR_Index, PCIE_CSR_Data)) sync_csr_write_q <- mkSyncFIFO(2, bsv_clk, bsv_rst, prim_pci.pcie_clk);
     SyncFIFOIfc#(PCIE_CSR_Data) sync_csr_f2h_reg0_write_q <- mkSyncFIFO(2, bsv_clk, bsv_rst, prim_pci.pcie_clk);
     SyncFIFOIfc#(Bool) sync_interrupt_host_q <- mkSyncFIFO(2, bsv_clk, bsv_rst, prim_pci.pcie_clk);
 
-    /*
-    // DEBUG begin
-    Reg#(Bit#(4))  enq_count <- mkReg(0);
+    // function to swap endianness
+    function t swapEndian(t inData)
+        provisos(Bits#(t, nbits),
+                 Div#(nbits, 8, nbytes),
+                 Bits#(Vector::Vector#(nbytes, Bit#(8)), nbits));
 
-    Reg#(Bit#(4))  write_sync_depth  <- mkReg(0, clocked_by prim_pci.pcie_clk, reset_by prim_pci.pcie_rst);
-    Reg#(Bit#(4))  write_count       <- mkReg(0, clocked_by prim_pci.pcie_clk, reset_by prim_pci.pcie_rst);
-    Reg#(Bit#(32)) latest_write_data <- mkReg(0, clocked_by prim_pci.pcie_clk, reset_by prim_pci.pcie_rst);
-    Reg#(Bit#(8))  latest_write_addr <- mkReg(0, clocked_by prim_pci.pcie_clk, reset_by prim_pci.pcie_rst);
+        Vector#(nbytes, Bit#(8)) vec = unpack(pack(inData));
+        Vector#(nbytes, Bit#(8)) rev = reverse(vec);
 
-    PCIE_CSR_Data pcie_status;
-    pcie_status[15:0]  = latest_write_data[15:0];
-    pcie_status[23:16] = latest_write_addr;
-    pcie_status[27:24] = write_count;
-    pcie_status[31:28] = write_sync_depth;
+        return unpack(pack(rev));
 
-    TempReg temp_csr_write_reg <- mkTempReg(clocked_by prim_pci.pcie_clk, reset_by prim_pci.pcie_rst);
-    Reg#(Bit#(4)) pcie_status_counter <- mkReg(0, clocked_by prim_pci.pcie_clk, reset_by prim_pci.pcie_rst);
-    // DEBUG end
-    */
+    endfunction
 
     // Rules for synchronizing from PCIe to Bluespec
 
     rule sync_csr_h2f_reg0_read (True);
     
-        sync_csr_h2f_reg0_read_r <= prim_pci.csr_h2f_reg0_read();
+        sync_csr_h2f_reg0_read_r <= swapEndian(prim_pci.csr_h2f_reg0_read());
 
     endrule
 
     rule sync_csr_read_resp (True);
 
         let x <- prim_pci.csr_read_resp();
-        sync_csr_read_resp_q.enq(x);
+        sync_csr_read_resp_q.enq(swapEndian(x));
 
     endrule
 
@@ -269,30 +223,14 @@ module mkPCIExpressDevice
 
         sync_csr_write_q.deq();
         match {.a, .v} = sync_csr_write_q.first();
-        prim_pci.csr_write(a, v);
-        /*
-        // DEBUG
-        write_count       <= write_count + 1;
-        latest_write_addr <= a;
-        latest_write_data <= v;
+        prim_pci.csr_write(a, swapEndian(v));
 
-        // temp_csr_write_reg.enq(tuple2(a, v));
-        */
     endrule
-
-    // DEBUG: do actual csr_write
-    /*
-    rule do_actual_csr_write (pcie_status_counter != 0);
-        match {.a, .v} = temp_csr_write_reg.first();
-        temp_csr_write_reg.deq();
-        prim_pci.csr_write(a, v);
-    endrule
-    */
 
     rule sync_csr_f2h_reg0_write (True);
 
         sync_csr_f2h_reg0_write_q.deq();
-        prim_pci.csr_f2h_reg0_write(sync_csr_f2h_reg0_write_q.first());
+        prim_pci.csr_f2h_reg0_write(swapEndian(sync_csr_f2h_reg0_write_q.first()));
 
     endrule
 
@@ -302,26 +240,6 @@ module mkPCIExpressDevice
         prim_pci.interrupt_host();
 
     endrule
-
-    /*
-    // DEBUG: write_sync_depth_vhdl
-    rule write_sync_depth_vhdl (True);
-        write_sync_depth <= sync_csr_write_q.dIsLessThan(1) ? 0 :
-                           (sync_csr_write_q.dIsGreaterThan(1) ? 2 : 1);
-    endrule
-
-    // DEBUG: write status to f2h system reg
-    rule write_f2h (pcie_status_counter == 0);
-        prim_pci.csr_f2h_reg0_write(pcie_status);
-    endrule
-
-    rule cycle_pcie_status_counter (True);
-        if (pcie_status_counter == 15)
-            pcie_status_counter <= 0;
-        else
-            pcie_status_counter <= pcie_status_counter + 1;
-    endrule
-    */
 
     // The wires are not domain-crossed because no one should ever look at them.
 
@@ -363,9 +281,6 @@ module mkPCIExpressDevice
         method Action csr_write(PCIE_CSR_Index idx, PCIE_CSR_Data d);
 
             sync_csr_write_q.enq(tuple2(idx, d));
-
-            // DEBUG
-            // enq_count <= (enq_count != 15) ? (enq_count + 1) : 15;
 
         endmethod
 

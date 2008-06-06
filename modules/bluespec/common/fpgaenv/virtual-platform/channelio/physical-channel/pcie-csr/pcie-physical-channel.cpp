@@ -14,8 +14,6 @@
 
 using namespace std;
 
-#define SLEEP for (unsigned long i = 0; i < 0; i++)
-
 // ==============================================
 //            WARNING WARNING WARNING
 // This code is swarming with potential deadlocks
@@ -55,7 +53,6 @@ PHYSICAL_CHANNEL_CLASS::PHYSICAL_CHANNEL_CLASS(
     do
     {
         data = pciExpressDevice->ReadSystemCSR();
-        SLEEP;
     }
     while (data != SIGNAL_GREEN);
 }
@@ -73,12 +70,11 @@ PHYSICAL_CHANNEL_CLASS::Read()
     while (true)
     {
         // check if message is ready
-        if (incomingMessage != NULL && incomingMessage->BytesRemaining() == 0)
+        if (incomingMessage && !incomingMessage->CanAppend())
         {
             // message is ready!
             UMF_MESSAGE msg = incomingMessage;
             incomingMessage = NULL;
-            // cout << "pchannel: reading message: channel "; message->Print(cout);
             return msg;
         }
 
@@ -86,7 +82,6 @@ PHYSICAL_CHANNEL_CLASS::Read()
         while (f2hHead == f2hTailCache)
         {
             f2hTailCache = pciExpressDevice->ReadCommonCSR(CSR_F2H_TAIL);
-            SLEEP;
         }
 
         // read some data from CSRs
@@ -105,18 +100,16 @@ PHYSICAL_CHANNEL_CLASS::TryRead()
     if (f2hHead == f2hTailCache)
     {
         f2hTailCache = pciExpressDevice->ReadCommonCSR(CSR_F2H_TAIL);
-        SLEEP;
     }
 
     // now attempt read 
     readCSR();
 
     // now see if we have a complete message
-    if (incomingMessage && incomingMessage->BytesRemaining() == 0)
+    if (incomingMessage && !incomingMessage->CanAppend())
     {
         UMF_MESSAGE msg = incomingMessage;
         incomingMessage = NULL;
-        // cout << "pchannel: try-reading message: channel "; message->Print(cout);
         return msg;
     }
 
@@ -134,13 +127,10 @@ PHYSICAL_CHANNEL_CLASS::Write(
     while (h2fTailPlusOne == h2fHeadCache)
     {
         h2fHeadCache = pciExpressDevice->ReadCommonCSR(CSR_H2F_HEAD);
-        SLEEP;
     }
 
-    // cout << "pchannel: writing message: channel "; message->Print(cout);
-
     // construct header
-    UMF_CHUNK header = message->ConstructHeader();
+    UMF_CHUNK header = message->EncodeHeader();
     CSR_DATA csr_data = CSR_DATA(header);
 
     // write header to physical channel
@@ -152,18 +142,17 @@ PHYSICAL_CHANNEL_CLASS::Write(
     // NOTE: hardware demarshaller expects chunk pattern to start from most
     //       significant chunk and end at least significant chunk, so we will
     //       send chunks in reverse order
-    message->StartReverseRead();
-    while (message->CanReverseRead())
+    message->StartReverseExtract();
+    while (message->CanReverseExtract())
     {
         // this gets ugly - we need to block until space is available
         while (h2fTailPlusOne == h2fHeadCache)
         {
             h2fHeadCache = pciExpressDevice->ReadCommonCSR(CSR_H2F_HEAD);
-            SLEEP;
         }
 
         // space is available, write
-        UMF_CHUNK chunk = message->ReverseReadChunk();
+        UMF_CHUNK chunk = message->ReverseExtractChunk();
         csr_data = CSR_DATA(chunk);
 
         pciExpressDevice->WriteCommonCSR(h2fTail, csr_data);
@@ -176,7 +165,7 @@ PHYSICAL_CHANNEL_CLASS::Write(
     pciExpressDevice->WriteSystemCSR(genIID() | 0x60000);
 
     // de-allocate message
-    delete message;
+    message->Delete();
 }
 
 // read one CSR's worth of unread data
@@ -196,9 +185,6 @@ PHYSICAL_CHANNEL_CLASS::readCSR()
     csr_data = pciExpressDevice->ReadCommonCSR(f2hHead);
     chunk = UMF_CHUNK(csr_data);
 
-    // cout << "readCSR: read new chunk at F2H head = " << f2hHead
-    //      << " data = 0x" << hex << chunk << dec << endl << flush;
-
     // update head pointer
     f2hHead = (f2hHead == CSR_F2H_BUF_END) ? CSR_F2H_BUF_START : (f2hHead + 1);
 
@@ -210,13 +196,12 @@ PHYSICAL_CHANNEL_CLASS::readCSR()
     if (incomingMessage == NULL)
     {
         // new message
-        incomingMessage = new UMF_MESSAGE_CLASS();
-        incomingMessage->DecodeHeaderFromChunk(chunk);
+        incomingMessage = UMF_MESSAGE_CLASS::New();
+        incomingMessage->DecodeHeader(chunk);
 
         UMF_MESSAGE m = incomingMessage;
-        // cout << "readCSR: starting new message: channel "; message->Print(cout);
     }
-    else if (incomingMessage->BytesRemaining() == 0)
+    else if (!incomingMessage->CanAppend())
     {
         // uh-oh.. we already have a full message, but it hasn't been
         // asked for yet. We will simply not read the pipe, but in

@@ -10,8 +10,6 @@
 
 using namespace std;
 
-#define SLEEP for (unsigned long i = 0; i < 0; i++)
-
 // ============================================
 //              PCI Express Device
 // ============================================
@@ -79,8 +77,7 @@ PCIE_DEVICE_CLASS::Cleanup()
 CSR_DATA
 PCIE_DEVICE_CLASS::ReadSystemCSR()
 {
-    SLEEP;
-    return swapEndian(*systemCSR_Read);
+    return *systemCSR_Read;
 }
 
 // write system CSR
@@ -88,8 +85,7 @@ void
 PCIE_DEVICE_CLASS::WriteSystemCSR(
     CSR_DATA data)
 {
-    SLEEP;
-    *systemCSR_Write = swapEndian(data);
+    *systemCSR_Write = data;
 }
 
 // read common CSR
@@ -97,8 +93,7 @@ CSR_DATA
 PCIE_DEVICE_CLASS::ReadCommonCSR(
     CSR_INDEX index)
 {
-    SLEEP;
-    return swapEndian(commonCSRs[index]);
+    return commonCSRs[index];
 }
 
 // write common CSR
@@ -107,8 +102,7 @@ PCIE_DEVICE_CLASS::WriteCommonCSR(
     CSR_INDEX index,
     CSR_DATA data)
 {
-    SLEEP;
-    commonCSRs[index] = swapEndian(data);
+    commonCSRs[index] = data;
 }
 
 // swap endianness

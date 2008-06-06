@@ -41,7 +41,7 @@ PHYSICAL_CHANNEL_CLASS::Read()
     while (true)
     {
         // check if message is ready
-        if (incomingMessage != NULL && incomingMessage->BytesRemaining() == 0)
+        if (incomingMessage && !incomingMessage->CanAppend())
         {
             // message is ready!
             UMF_MESSAGE msg = incomingMessage;
@@ -68,7 +68,7 @@ PHYSICAL_CHANNEL_CLASS::TryRead()
     }
 
     // now see if we have a complete message
-    if (incomingMessage && incomingMessage->BytesRemaining() == 0)
+    if (incomingMessage && !incomingMessage->CanAppend())
     {
         UMF_MESSAGE msg = incomingMessage;
         incomingMessage = NULL;
@@ -86,7 +86,7 @@ PHYSICAL_CHANNEL_CLASS::Write(
 {
     // construct header
     unsigned char header[UMF_CHUNK_BYTES];
-    message->ConstructHeader(header);
+    message->EncodeHeader(header);
 
     // write header to pipe
     unixPipeDevice->Write(header, UMF_CHUNK_BYTES);
@@ -95,15 +95,15 @@ PHYSICAL_CHANNEL_CLASS::Write(
     // NOTE: hardware demarshaller expects chunk pattern to start from most
     //       significant chunk and end at least significant chunk, so we will
     //       send chunks in reverse order
-    message->StartReverseRead();
-    while (message->CanReverseRead())
+    message->StartReverseExtract();
+    while (message->CanReverseExtract())
     {
-        UMF_CHUNK chunk = message->ReverseReadChunk();
+        UMF_CHUNK chunk = message->ReverseExtractChunk();
         unixPipeDevice->Write((unsigned char*)&chunk, sizeof(UMF_CHUNK));
     }
 
     // de-allocate message
-    delete message;
+    message->Delete();
 }
 
 // read un-processed data on the pipe
@@ -119,9 +119,10 @@ PHYSICAL_CHANNEL_CLASS::readPipe()
         unixPipeDevice->Read(header, UMF_CHUNK_BYTES);
 
         // create a new message
-        incomingMessage = new UMF_MESSAGE_CLASS(header);
+        incomingMessage = UMF_MESSAGE_CLASS::New();
+        incomingMessage->DecodeHeader(header);
     }
-    else if (incomingMessage->BytesRemaining() == 0)
+    else if (!incomingMessage->CanAppend())
     {
         // uh-oh.. we already have a full message, but it hasn't been
         // asked for yet. We will simply not read the pipe, but in
@@ -133,9 +134,9 @@ PHYSICAL_CHANNEL_CLASS::readPipe()
         unsigned char buf[BLOCK_SIZE];
         int bytes_requested = BLOCK_SIZE;
 
-        if (incomingMessage->BytesRemaining() < BLOCK_SIZE)
+        if (incomingMessage->BytesUnwritten() < BLOCK_SIZE)
         {
-            bytes_requested = incomingMessage->BytesRemaining();
+            bytes_requested = incomingMessage->BytesUnwritten();
         }
 
         unixPipeDevice->Read(buf, bytes_requested);

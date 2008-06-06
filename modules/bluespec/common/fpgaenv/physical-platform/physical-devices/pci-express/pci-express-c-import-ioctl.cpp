@@ -10,8 +10,6 @@ extern "C"
 
 using namespace std;
 
-#define SLEEP for (unsigned long i = 0; i < 0; i++)
-
 // ============================================
 //              PCI Express Device
 // ============================================
@@ -63,21 +61,19 @@ PCIE_DEVICE_CLASS::ReadSystemCSR()
         Uninit();
         exit(1);
     }
-    SLEEP;
-    return swapEndian(data);
+    return data;
 }
 
 void
 PCIE_DEVICE_CLASS::WriteSystemCSR(
     CSR_DATA data)
 {
-    if (pchnl_write_csr_sys(&pchannel, swapEndian(data)) < 0)
+    if (pchnl_write_csr_sys(&pchannel, data) < 0)
     {
         cerr << "pcie device: ERROR: WriteSystemCSR() failed" << endl;
         Uninit();
         exit(1);
     }
-    SLEEP;
 }
 
 CSR_DATA
@@ -91,8 +87,7 @@ PCIE_DEVICE_CLASS::ReadCommonCSR(
         Uninit();
         exit(1);
     }
-    SLEEP;
-    return swapEndian(data);
+    return data;
 }
 
 void
@@ -100,13 +95,12 @@ PCIE_DEVICE_CLASS::WriteCommonCSR(
     CSR_INDEX index,
     CSR_DATA data)
 {
-    if (pchnl_write_csr_comm(&pchannel, index, swapEndian(data)) < 0)
+    if (pchnl_write_csr_comm(&pchannel, index, data) < 0)
     {
         cerr << "pcie device: ERROR: WriteCommonCSR() failed" << endl;
         Uninit();
         exit(1);
     }
-    SLEEP;
 }
 
 CSR_DATA
