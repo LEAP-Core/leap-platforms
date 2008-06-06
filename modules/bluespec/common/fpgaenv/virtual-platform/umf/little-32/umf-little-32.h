@@ -110,6 +110,7 @@ class UMF_MESSAGE_CLASS
     // demarshallers
     void               StartExtract();
     bool               CanExtract();
+    void               CheckExtractSanity(int nbytes);
     
     void               ExtractBytes(int nbytes, unsigned char data[]);
     UINT32             ExtractUINT32();

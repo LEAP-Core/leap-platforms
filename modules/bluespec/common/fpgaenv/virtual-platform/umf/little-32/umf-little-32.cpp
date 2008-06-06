@@ -243,9 +243,8 @@ UMF_MESSAGE_CLASS::CanExtract()
 }
 
 void
-UMF_MESSAGE_CLASS::ExtractBytes(
-    int nbytes,
-    unsigned char data[])
+UMF_MESSAGE_CLASS::CheckExtractSanity(
+    int nbytes)
 {
     assert(message);
 
@@ -264,7 +263,14 @@ UMF_MESSAGE_CLASS::ExtractBytes(
              << "message, are you sure you want to do this?" << endl;
         // do not exit
     }
+}
 
+void
+UMF_MESSAGE_CLASS::ExtractBytes(
+    int nbytes,
+    unsigned char data[])
+{
+    CheckExtractSanity(nbytes);
     memcpy(data, &message[readIndex], nbytes);
     readIndex += nbytes;
 }
@@ -272,16 +278,18 @@ UMF_MESSAGE_CLASS::ExtractBytes(
 UINT32
 UMF_MESSAGE_CLASS::ExtractUINT32()
 {
-    UINT32 retval = 0;
-    ExtractBytes(sizeof(UINT32), (unsigned char*) &retval);
+    CheckExtractSanity(sizeof(UINT32));
+    UINT32 retval = *(UINT32 *)(&message[readIndex]);
+    readIndex += sizeof(UINT32);
     return retval;
 }
 
 UINT64
 UMF_MESSAGE_CLASS::ExtractUINT64()
 {
-    UINT64 retval = 0;
-    ExtractBytes(sizeof(UINT64), (unsigned char*) &retval);
+    CheckExtractSanity(sizeof(UINT64));
+    UINT64 retval = *(UINT64 *)(&message[readIndex]);
+    readIndex += sizeof(UINT64);
     return retval;
 }
 
@@ -289,22 +297,26 @@ UINT64
 UMF_MESSAGE_CLASS::ExtractUINT(
     int nbytes)
 {
-    if (nbytes > 8)
+    if (nbytes > sizeof(UINT64))
     {
         cerr << "umf: ExtractUINT can take 8 bytes maximum" << endl;
         exit(1);
     }
 
+    // it's too risky to do a direct typecast here
+    CheckExtractSanity(nbytes);
     UINT64 retval = 0;
-    ExtractBytes(nbytes, (unsigned char*) &retval);
+    memcpy((unsigned char*)&retval, &message[readIndex], nbytes);
+    readIndex += nbytes;
     return retval;
 }
 
 UMF_CHUNK
 UMF_MESSAGE_CLASS::ExtractChunk()
 {
-    UMF_CHUNK retval = 0;
-    ExtractBytes(sizeof(UMF_CHUNK), (unsigned char*) &retval);
+    CheckExtractSanity(sizeof(UMF_CHUNK));
+    UMF_CHUNK retval = *(UMF_CHUNK *)(&message[readIndex]);
+    readIndex += sizeof(UMF_CHUNK);
     return retval;
 }
 
@@ -347,11 +359,8 @@ UMF_MESSAGE_CLASS::ReverseExtractChunk()
     }
 
     // copy the data behind the pointer and retard the pointer
-    UMF_CHUNK retval = 0;
     readIndex -= sizeof(UMF_CHUNK);
-    memcpy((unsigned char*) &retval, &message[readIndex], sizeof(UMF_CHUNK));
-
-    return retval;
+    return *(UMF_CHUNK *)(&message[readIndex]);
 }
 
 // print message to an output stream

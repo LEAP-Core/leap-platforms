@@ -160,7 +160,8 @@ PHYSICAL_CHANNEL_CLASS::Write(
         h2fTailPlusOne = (h2fTail == CSR_H2F_BUF_END) ? CSR_H2F_BUF_START : (h2fTail + 1);
     }
 
-    // sync h2fTail pointer (OPTIONAL)
+    // sync h2fTail pointer. It is OPTIONAL to do this immediately, but we will do it
+    // since this is probably the response to a request the hardware might be blocked on
     pciExpressDevice->WriteCommonCSR(CSR_H2F_TAIL, h2fTail);
     pciExpressDevice->WriteSystemCSR(genIID() | 0x60000);
 
@@ -198,8 +199,6 @@ PHYSICAL_CHANNEL_CLASS::readCSR()
         // new message
         incomingMessage = UMF_MESSAGE_CLASS::New();
         incomingMessage->DecodeHeader(chunk);
-
-        UMF_MESSAGE m = incomingMessage;
     }
     else if (!incomingMessage->CanAppend())
     {
@@ -219,6 +218,6 @@ CSR_DATA
 PHYSICAL_CHANNEL_CLASS::genIID()
 {
     assert(sizeof(CSR_DATA) >= 4);
-    iid = (iid == 255) ? 0 : (iid + 1);
+    iid = (iid + 1) % 256;
     return (iid << 24);
 }
