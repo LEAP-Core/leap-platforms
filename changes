@@ -3846,3 +3846,21 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/little-32
  umf-little-32.h           Locally Modified          122 
 
 Minor performance optimizations.
+
+----------
+mcadler     Date: Fri Jun 13 13:20:02 EDT 2008  CSN: CSN-platforms-124
+                  Fri Jun 13 17:20:02 UTC 2008
+
+
+Directory drivers/linux/hasim
+ hasim-fpga-ctrl.c         Locally Modified          123 
+ Makefile                  Locally Modified          123 
+ init-hasim-fpga           Locally Added               0 
+
+- Add options to hasim-fpga-ctrl to manage the signature of bitfiles loaded
+  on FPGAs.
+- Transition from reserve to active without programming is now quick if
+  the PCIe bus was already enabled and the driver loaded.
+- Reset the FPGA image signature on reboot in case the machine was power
+  cycled.
+- Retry when turning on a bus fails.

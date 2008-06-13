@@ -17,6 +17,8 @@ driver:
 install:
 	mkdir -p $(PREFIX)/bin $(PREFIX)/dev $(PREFIX)/kernel $(PREFIX)/reservations
 	install --owner=root --group=root --mode=4555 hasim-fpga-ctrl $(PREFIX)/bin
+	install --owner=root --group=root --mode=555 init-hasim-fpga /etc/init.d/hasim-fpga
+	chkconfig hasim-fpga on
 	install kernel/pchnl.ko $(PREFIX)/kernel
 	cp -f README.dev $(PREFIX)/dev/README
 

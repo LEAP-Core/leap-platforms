@@ -30,6 +30,7 @@
 #include <pwd.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
@@ -38,17 +39,30 @@ typedef enum
 {
     STATE_FREE,
     STATE_RESERVED,
-    STATE_PCI_PROGRAM,
-    STATE_PCI_ACTIVE,
+    STATE_PROGRAM,
+    STATE_ACTIVE,
+    STATE_RESET,
     STATE_LAST              // Must be last
 }
 FPGA_STATE_T;
+
+typedef enum
+{
+    SHOW_STATE_ALL,
+    SHOW_STATE_STATUS,
+    SHOW_STATE_SIGNATURE
+}
+FPGA_SHOW_STATE_T;
 
 
 static int req_reserve = 0;
 static int req_program_pci = 0;
 static int req_activate_pci = 0;
 static int req_drop_reservation = 0;
+static int req_reset = 0;
+static int req_set_signature = 0;
+static int req_get_signature = 0;
+static int req_get_state = 0;
 static int force = 0;
 static int query_status = 0;
 
@@ -73,10 +87,10 @@ void state_print(FILE *f, FPGA_STATE_T state)
       case STATE_RESERVED:
         s = "Reserved";
         break;
-      case STATE_PCI_PROGRAM:
+      case STATE_PROGRAM:
         s = "Programming";
         break;
-      case STATE_PCI_ACTIVE:
+      case STATE_ACTIVE:
         s = "Active";
         break;
       default:
@@ -125,7 +139,7 @@ void do_system(char *cmd, char *arg)
 //          This is to make it impossible for another program to update the
 //          state until this instance of the program exits.
 //
-void change_current_reservation(FPGA_STATE_T newState)
+void change_current_reservation(FPGA_STATE_T newState, char *newSignature)
 {
     int lockf;
     FILE *lf;
@@ -134,6 +148,8 @@ void change_current_reservation(FPGA_STATE_T newState)
     uid_t owner;
     uid_t myUid;
     FPGA_STATE_T oldState;
+    char signature[512];
+    int nFields;
 
     // Open the lock file.  Create it if needed.
     lockf = open(RES_FILE, O_RDWR | O_CREAT, 00644);
@@ -149,12 +165,48 @@ void change_current_reservation(FPGA_STATE_T newState)
         error("Failed to acquire lock on file " RES_FILE);
     }
 
+    //
+    // Read the current state
+    //
     lf = fdopen(lockf, "rw+");
-    if ((fscanf(lf, "%d %d", &owner, &oldState) != 2) ||
-        (oldState >= STATE_LAST))
+    nFields = fscanf(lf, "%d %d %511s", &owner, &oldState, signature);
+    if ((nFields < 2) || (oldState >= STATE_LAST))
     {
         owner = 0;
         oldState = STATE_FREE;
+    }
+
+    //
+    // Compute the new signature
+    //
+    if (newState == STATE_PROGRAM)
+    {
+        if (newSignature != NULL)
+        {
+            // Adding a signature.  Old state must also be PROGRAM.
+            if (oldState != STATE_PROGRAM)
+            {
+                fprintf(stderr, "hasim-fpga-ctrl: Must be in PROGRAM state to add a signature\n");
+                exit(1);
+            }
+            strncpy(signature, newSignature, sizeof(signature));
+            signature[sizeof(signature)-1] = 0;
+        }
+        else
+        {
+            signature[0] = 0;
+        }
+    }
+    else if (newState == STATE_RESET)
+    {
+        // Drop old signature for reset
+        signature[0] = 0;
+        newState = STATE_FREE;
+    }
+    else if (nFields < 3)
+    {
+        // No old signature to preserve
+        signature[0] = 0;
     }
 
     myUid = getuid();
@@ -171,7 +223,7 @@ void change_current_reservation(FPGA_STATE_T newState)
         exit(1);
     }
 
-    if ((oldState == STATE_FREE) && (newState != STATE_RESERVED))
+    if ((oldState == STATE_FREE) && (newState > STATE_RESERVED))
     {
         fprintf(stderr, "hasim-fpga-ctrl: Reservation required\n");
         exit(1);
@@ -180,7 +232,7 @@ void change_current_reservation(FPGA_STATE_T newState)
     {
         // Update the state in the file.
         rewind(lf);
-        if (fprintf(lf, "%d %d\n", myUid, newState) < 0)
+        if (fprintf(lf, "%d %d %s\n", myUid, newState, signature) < 0)
         {
             error("Error writing to lock file " RES_FILE);
         }
@@ -198,11 +250,13 @@ void change_current_reservation(FPGA_STATE_T newState)
 // current_reservation_state --
 //   Print current reservation state
 //
-void current_reservation_state(FILE *of)
+void current_reservation_state(FILE *of, FPGA_SHOW_STATE_T show)
 {
     FILE *lf;
     FPGA_STATE_T oldState;
     uid_t owner;
+    char signature[512];
+    int nFields = 0;
 
     lf = fopen(RES_FILE, "r");
     if (lf == NULL)
@@ -210,24 +264,55 @@ void current_reservation_state(FILE *of)
         owner = 0;
         oldState = STATE_FREE;
     }
-    else if ((fscanf(lf, "%d %d", &owner, &oldState) != 2) ||
+    else if (((nFields = fscanf(lf, "%d %d %511s", &owner, &oldState, signature)) < 2) ||
              (oldState >= STATE_LAST))
     {
         owner = 0;
         oldState = STATE_FREE;
     }
 
-    fprintf(of, "Current state: ");
-    state_print(of, oldState);
-    fprintf(of, "\n");
-
-    if (oldState != STATE_FREE)
+    if (nFields >= 3)
     {
-        struct passwd *pw = getpwuid(owner);
-        if (pw != NULL)
+        signature[sizeof(signature)-1] = 0;
+    }
+    else
+    {
+        signature[0] = 0;
+    }
+
+    switch (show)
+    {
+      case SHOW_STATE_ALL:
+        fprintf(of, "Current state: ");
+        state_print(of, oldState);
+        fprintf(of, "\n");
+
+        if (oldState != STATE_FREE)
         {
-            fprintf(of, "Current owner: %s\n", pw->pw_name);
+            struct passwd *pw = getpwuid(owner);
+            if (pw != NULL)
+            {
+                fprintf(of, "Current owner: %s\n", pw->pw_name);
+            }
         }
+
+        if (signature[0])
+        {
+            fprintf(of, "Current signature: %s\n", signature);
+        }
+        break;
+
+      case SHOW_STATE_STATUS:
+        state_print(of, oldState);
+        fprintf(of, "\n");
+        break;
+
+      case SHOW_STATE_SIGNATURE:
+        if (signature[0])
+        {
+            fprintf(of, "%s\n", signature);
+        }
+        break;
     }
 }
 
@@ -272,12 +357,10 @@ void set_pci_state(FPGA_STATE_T state)
 
     switch (state)
     {
-      case STATE_PCI_PROGRAM:
-        printf("hasim-fpga-ctrl: Turning off PCIe bus...\n");
+      case STATE_PROGRAM:
         req = '0';
         break;
-      case STATE_PCI_ACTIVE:
-        printf("hasim-fpga-ctrl: Turning on PCIe bus...\n");
+      case STATE_ACTIVE:
         req = '1';
         break;
       default:
@@ -285,7 +368,7 @@ void set_pci_state(FPGA_STATE_T state)
     }
 
 
-    if (state == STATE_PCI_PROGRAM)
+    if (state == STATE_PROGRAM)
     {
         //
         // Make sure the kernel driver is unloaded
@@ -301,46 +384,71 @@ void set_pci_state(FPGA_STATE_T state)
     //
     // Change the PCI state
     //
-    f = open(PCIE_POWER, O_WRONLY);
-    if (f == -1) error("Failed to open PCIe power control file " PCIE_POWER);
-
-    if (write(f, &req, 1) != 1)
+    int retries = 0;
+    while (1)
     {
-        fprintf(stderr, "hasim-fpga-ctrl: errno = %d\n", errno);
-        error("Write failed to PCIe power control file " PCIE_POWER);
-    }
+        int hadError = 0;
+        char pciState;
 
-    close(f);
-
-    //
-    // Monitor PCI until the state matches the request
-    //
-    char pciState;
-    do
-    {
-        sleep(1);
-
+        //
+        // Is the bus already in the state we want?
+        //
         f = open(PCIE_POWER, O_RDONLY);
         if (f == -1) error("Failed to open PCIe power control file " PCIE_POWER);
-
         if (read(f, &pciState, 1) != 1)
         {
-            error("Read failed from PCIe power control file " PCIE_POWER);
+            fprintf(stderr, "Read failed from PCIe power control file %s\n", PCIE_POWER);
+            hadError = 1;
+        }
+        close(f);
+
+        if ((pciState == req) && ! hadError)
+        {
+            // Done
+            printf("hasim-fpga-ctrl: PCIe bus is %s...\n",
+                   (req == '0') ? "off" : "on");
+            break;
         }
 
+        if (retries == 0)
+        {
+            printf("hasim-fpga-ctrl: Turing %s PCIe bus...\n",
+                   (req == '0') ? "off" : "on");
+        }
+
+        //
+        // Write request
+        //
+        f = open(PCIE_POWER, O_WRONLY);
+        if (f == -1) error("Failed to open PCIe power control file " PCIE_POWER);
+        if (write(f, &req, 1) != 1)
+        {
+            fprintf(stderr, "hasim-fpga-ctrl: errno = %d\n", errno);
+            fprintf(stderr, "Write failed to PCIe power control file %s\n", PCIE_POWER);
+            hadError = 1;
+        }
         close(f);
-    }
-    while (pciState != req);
-
-
-    if (state == STATE_PCI_ACTIVE)
-    {
-        int trips;
 
         //
         // Let PCI settle
         //
         sleep(2);
+
+        retries += 1;
+        if (retries >= 10)
+        {
+            error("Giving up");
+        }
+
+        if (hadError)
+        {
+            fprintf(stderr, "Retrying...\n");
+        }
+    }
+
+    if (state == STATE_ACTIVE)
+    {
+        int trips;
 
         //
         // Make sure kernel driver is loaded
@@ -375,7 +483,7 @@ void set_pci_state(FPGA_STATE_T state)
 //   Pass true to enable and false to disable user access to the programming
 //   cable.
 //
-void set_prog_cable_access(int user_access)
+void set_prog_cable_access(int user_access, int quiet)
 {
     int prot = user_access ? 00666 : 00444;
     char *msg = user_access ? "Enabling" : "Disabling";
@@ -390,7 +498,10 @@ void set_prog_cable_access(int user_access)
     if ((statb.st_mode & 00777) != prot)
     {
         // Protection isn't what we want.  Change it.
-        printf("hasim-fpga-ctrl: %s programming cable...\n", msg);
+        if (! quiet)
+        {
+            printf("hasim-fpga-ctrl: %s programming cable...\n", msg);
+        }
         if (chmod(USB_PROG, prot) == -1)
         {
             fprintf(stderr, "hasim-fpga-ctrl: Failed to change protection of %s\n", USB_PROG);
@@ -413,8 +524,8 @@ void set_prog_cable_access(int user_access)
 //
 void reserve()
 {
-    change_current_reservation(STATE_RESERVED);
-    set_prog_cable_access(0);
+    change_current_reservation(STATE_RESERVED, NULL);
+    set_prog_cable_access(0, 0);
 }
 
     
@@ -428,9 +539,9 @@ void reserve()
 //
 void program_pci()
 {
-    change_current_reservation(STATE_PCI_PROGRAM);
-    set_pci_state(STATE_PCI_PROGRAM);
-    set_prog_cable_access(1);
+    change_current_reservation(STATE_PROGRAM, NULL);
+    set_pci_state(STATE_PROGRAM);
+    set_prog_cable_access(1, 0);
 }
 
 
@@ -445,9 +556,9 @@ void program_pci()
 //
 void activate_pci()
 {
-    change_current_reservation(STATE_PCI_ACTIVE);
-    set_prog_cable_access(0);
-    set_pci_state(STATE_PCI_ACTIVE);
+    change_current_reservation(STATE_ACTIVE, NULL);
+    set_prog_cable_access(0, 0);
+    set_pci_state(STATE_ACTIVE);
 }
 
 
@@ -461,8 +572,23 @@ void activate_pci()
 //
 void drop_reservation()
 {
-    change_current_reservation(STATE_FREE);
-    set_prog_cable_access(0);
+    change_current_reservation(STATE_FREE, NULL);
+    set_prog_cable_access(0, 0);
+}
+
+
+//
+// reset --
+//   Remove the programmed signature and drop any reservations
+//
+//   Tasks:
+//     - Disable access to the programming cable
+//     - Remove the kernel driver for the FPGA
+//
+void reset()
+{
+    change_current_reservation(STATE_RESET, NULL);
+    set_prog_cable_access(0, 1);
 }
 
 
@@ -471,11 +597,14 @@ void usage()
     fprintf(stderr, "Usage: hasim-fpga-ctrl <--reserve |\n");
     fprintf(stderr, "                        --program |\n");
     fprintf(stderr, "                        --activate |\n");
-    fprintf(stderr, "                        --drop-reservation\n");
+    fprintf(stderr, "                        --drop-reservation |\n");
+    fprintf(stderr, "                        --reset |\n");
+    fprintf(stderr, "                        --setsignature |\n");
+    fprintf(stderr, "                        --getsignature |\n");
     fprintf(stderr, "                        --status>\n\n");
     fprintf(stderr, "    --force may be specified to override other user's reservations\n");
     fprintf(stderr, "\n");
-    current_reservation_state(stderr);
+    current_reservation_state(stderr, SHOW_STATE_ALL);
     exit(1);
 }
 
@@ -484,22 +613,49 @@ int main(int argc, char *argv[])
 {
     int opt;
     int opt_idx;
+    char *signature = NULL;
+
+    enum OPTS
+    {
+        OPT_DUMMY,          // 0 position -- not used
+        OPT_SIGNATURE
+    };
 
     while (1)
     {
         static struct option long_options[] =
         {
-            { "program", 0, &req_program_pci, 1 },
-            { "activate", 0, &req_activate_pci, 1 },
-            { "reserve", 0, &req_reserve, 1 },
-            { "drop-reservation", 0, &req_drop_reservation, 1 },
-            { "force", 0, &force, 1 },
-            { "status", 0, &query_status, 1 },
+            { "program", no_argument, &req_program_pci, 1 },
+            { "activate", no_argument, &req_activate_pci, 1 },
+            { "reserve", no_argument, &req_reserve, 1 },
+            { "drop-reservation", no_argument, &req_drop_reservation, 1 },
+            { "reset", no_argument, &req_reset, 1 },
+            { "force", no_argument, &force, 1 },
+            { "status", no_argument, &query_status, 1 },
+            { "setsignature", required_argument, NULL, OPT_SIGNATURE },
+            { "getsignature", no_argument, &req_get_signature, 1 },
+            { "getstate", no_argument, &req_get_state, 1 },
             { 0, 0, 0, 0 }
         };
 
         opt = getopt_long(argc, argv, "", long_options, &opt_idx);
         if (-1 == opt) break;
+
+        switch (opt)
+        {
+          case 0:
+            // Simple argument
+            break;
+
+          case OPT_SIGNATURE:
+            req_set_signature = 1;
+            signature = strdup(optarg);
+            if (signature == NULL) error("strdup() failed");
+            break;
+
+          default:
+            usage();
+        }
     }
 
     //
@@ -509,16 +665,24 @@ int main(int argc, char *argv[])
         req_program_pci +
         req_activate_pci +
         req_drop_reservation +
+        req_reset +
+        req_set_signature +
+        req_get_signature +
+        req_get_state +
         query_status != 1)
     {
         usage();
     }
 
+    if (req_reset) reset();
     if (req_reserve) reserve();
-    if (req_program_pci) program_pci();
+    if (req_program_pci) program_pci(signature);
     if (req_activate_pci) activate_pci();
     if (req_drop_reservation) drop_reservation();
-    if (query_status) current_reservation_state(stdout);
+    if (req_set_signature) change_current_reservation(STATE_PROGRAM, signature);
+    if (req_get_signature) current_reservation_state(stdout, SHOW_STATE_SIGNATURE);
+    if (req_get_state) current_reservation_state(stdout, SHOW_STATE_STATUS);
+    if (query_status) current_reservation_state(stdout, SHOW_STATE_ALL);
 
     exit(0);
 }

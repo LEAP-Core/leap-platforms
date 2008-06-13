@@ -1,0 +1,38 @@
+#! /bin/sh
+# Copyright (c) 2008 Intel Corp.  All rights reserved.
+#
+# Author: Michael Adler
+#
+# /etc/init.d/hasim-fpga
+#
+# description: init script for resetting HAsim FPGA state
+### BEGIN INIT INFO
+# Provides:          hasim-fpga
+# Required-Start:    $remote_fs
+# Required-Stop:
+# Default-Start:     1 2 3 5 S
+# Default-Stop:
+# X-UnitedLinux-Default-Enabled: yes
+# Description:       reset the FPGA for HAsim
+### END INIT INFO
+
+. /etc/rc.status
+
+rc_reset
+
+
+# See how we were called.
+case "$1" in
+  start|b|stop)
+	echo -n "Resetting FPGA state"
+        /usr/hasim/bin/hasim-fpga-ctrl --reset --force
+	rc_status -v
+	;;
+  status)
+        /usr/hasim/bin/hasim-fpga-ctrl --status
+	;;
+  *)
+	echo "Usage: $0 {start|status|stop}"
+	exit 1
+esac
+rc_exit
