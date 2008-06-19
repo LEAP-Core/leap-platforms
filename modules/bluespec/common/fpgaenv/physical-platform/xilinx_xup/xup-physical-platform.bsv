@@ -24,6 +24,9 @@ interface PHYSICAL_DRIVERS;
     interface SWITCHES_DRIVER#(`NUMBER_SWITCHES) switchesDriver;
     interface BUTTONS_DRIVER#(`NUMBER_BUTTONS)   buttonsDriver;
         
+    // each set of physical drivers must support a soft reset method
+    method Action soft_reset();
+
 endinterface
 
 // TOP_LEVEL_WIRES
@@ -75,6 +78,11 @@ module mkPhysicalPlatform
         interface switchesDriver     = switches_device.driver;
         interface buttonsDriver      = buttons_device.driver;
     
+        // Soft Reset
+        method Action soft_reset();            
+            noAction;
+        endmethod
+
     endinterface
     
     // Aggregate the wires

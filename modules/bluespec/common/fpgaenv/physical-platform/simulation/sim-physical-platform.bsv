@@ -12,6 +12,9 @@ interface PHYSICAL_DRIVERS;
 
     interface UNIX_PIPE_DRIVER unixPipeDriver;
 
+    // each set of physical drivers must support a soft reset method
+    method Action soft_reset();
+
 endinterface
 
 // TOP_LEVEL_WIRES
@@ -56,6 +59,11 @@ module mkPhysicalPlatform
     interface PHYSICAL_DRIVERS physicalDrivers;
     
         interface unixPipeDriver = unix_pipe_device.driver;
+
+        // Soft Reset
+        method Action soft_reset() if (False);
+            noAction;
+        endmethod
 
     endinterface
     

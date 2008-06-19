@@ -24,9 +24,9 @@ using namespace std;
 
 // constructor: set up hardware partition
 PHYSICAL_CHANNEL_CLASS::PHYSICAL_CHANNEL_CLASS(
-    HASIM_MODULE     p,
+    PLATFORMS_MODULE p,
     PHYSICAL_DEVICES d) :
-        HASIM_MODULE_CLASS(p)
+        PLATFORMS_MODULE_CLASS(p)
 {
     // cache links to useful physical devices
     pciExpressDevice = d->GetPCIExpressDevice();
@@ -163,6 +163,10 @@ PHYSICAL_CHANNEL_CLASS::Main()
                 data = pciExpressDevice->ReadSystemCSR();
                 PrintStatus_VHDL(data);
             }
+        }
+        else if (!strcmp(cmd, "reset"))
+        {
+            pciExpressDevice->ResetFPGA();
         }
         else
         {
@@ -306,6 +310,7 @@ PHYSICAL_CHANNEL_CLASS::PrintHelp_Commands()
     printf("    write  <index> <data>\n");
     printf("    exec   <inst>\n");
     printf("    status <flags|pointers|vhdl>\n");
+    printf("    reset\n");
     printf("    quit\n");
     printf("\n");
 }

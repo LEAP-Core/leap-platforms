@@ -14,18 +14,27 @@
  **/
 int pchnl_open_channel(struct hw_channel *pchnl)
 {
+     int ret = 0;
+
      if (pchnl == NULL){
           LIB_PCHNL_ALERT("invalid channel parameter\n");
-          return -ECHANNEL;
+          ret = -ECHANNEL;
+          goto err;
      }
 
      pchnl->fd = open("/dev/pchnl", O_RDWR);
      if (pchnl->fd < 0){
           LIB_PCHNL_ALERT("error opening device\n");
-          return -ENODEVICE;
+          ret = -ENODEVICE;
+          goto no_device;
      }
 
-     return 0;
+     return ret;
+no_device:
+     //do nothing
+no_mem:
+err:
+     return ret;
 }
 
 /**
@@ -258,6 +267,25 @@ int pchnl_register_intr_status_addr(struct hw_channel *pchnl, unsigned int * int
 
      if ( ioctl(pchnl->fd, PCHNL_SET_INTR_REG, &req) == -1){
           LIB_PCHNL_ALERT("set intr status reg failed\n");
+          ret = -ECHANNEL;
+          goto failed;
+     }
+failed:
+     return ret;
+}
+
+int pchnl_soft_reset(struct hw_channel *pchnl)
+{
+     int ret = 0;
+     
+     if ( pchnl == NULL ) {
+          LIB_PCHNL_ALERT("no channel specified\n");
+          ret = -ECHANNEL;
+          goto failed;
+     }
+
+     if ( ioctl(pchnl->fd, PCHNL_RESET, NULL) == -1) {
+          LIB_PCHNL_ALERT("reset failed\n");
           ret = -ECHANNEL;
           goto failed;
      }

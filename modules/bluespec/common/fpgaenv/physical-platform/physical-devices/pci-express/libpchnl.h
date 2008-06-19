@@ -33,6 +33,7 @@ struct hw_channel
 int pchnl_open_channel(struct hw_channel *pchnl);
 int pchnl_close_channel(struct hw_channel *pchnl);
 int pchnl_register_intr_status_addr(struct hw_channel *pchnl, unsigned int *intr_status_reg);
+int pchnl_soft_reset(struct hw_channel *pchnl);
 
 
 /************** Common CSR Access ****************/

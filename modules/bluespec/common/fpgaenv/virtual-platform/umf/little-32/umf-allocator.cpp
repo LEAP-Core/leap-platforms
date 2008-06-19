@@ -79,7 +79,6 @@ UMF_ALLOCATOR_CLASS::New()
 
     // track and log
     numFree--;
-    T2("\t\tumf_allocator: New(): free list size = " << numFree);
 
     return retval;
 }
@@ -97,5 +96,4 @@ UMF_ALLOCATOR_CLASS::Delete(
 
     // track and log
     numFree++;
-    T2("\t\tumf_allocator: Delete(): free list size = " << numFree);
 }

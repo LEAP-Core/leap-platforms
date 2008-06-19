@@ -3864,3 +3864,84 @@ Directory drivers/linux/hasim
 - Reset the FPGA image signature on reboot in case the machine was power
   cycled.
 - Retry when turning on a bus fails.
+
+----------
+aparasha    Date: Thu Jun 19 12:51:39 EDT 2008  CSN: CSN-platforms-125
+                  Thu Jun 19 16:51:39 UTC 2008
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ hasim-fpgaenv-htg-v5-pcie.apm Locally Modified          124 
+
+Directory modules/bluespec/common/fpgaenv/fpga-components/software
+ BRAM1.bsv                 Locally Modified          124 
+ BRAM3.bsv                 Locally Modified          124 
+
+Directory modules/bluespec/common/fpgaenv/fpga-components/hardware
+ BRAM1.bsv                 Locally Modified          124 
+ BRAM3.bsv                 Locally Modified          124 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/pcie-debugger
+ pcie-debugger.cpp         Locally Modified          124 
+ pcie-debugger.h           Locally Modified          124 
+ pcie-debugger.bsv         Locally Modified          124 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/pcie-csr
+ pcie-physical-channel.bsv Locally Modified          124 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/little-32
+ umf-allocator.cpp         Locally Modified          124 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/simulation
+ sim-physical-platform.bsv Locally Modified          124 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup
+ xup-physical-platform.bsv Locally Modified          124 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-disabled
+ htg-v5-pcie-disabled.bsv  Locally Modified          124 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled
+ htg-v5-pcie-enabled.bsv   Locally Modified          124 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/null
+ null-physical-platfrom.bsv Locally Modified          124 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express
+ libpchnl.h                Locally Modified          124 
+ h2f_data_fifo.ngc         Locally Modified          124 
+ pcieblkplus.ngc           Locally Modified          124 
+ DMA_CONTROLLER.vhd        Locally Added               0 
+ ram.ngc                   Locally Removed           124 
+ channel.vhd               Locally Modified          124 
+ pci-express-device.bsv    Locally Added               0 
+ h2f_data_fifo.vhd         Locally Removed           124 
+ f2h_data_fifo.vhd         Locally Removed           124 
+ RST_CONTROLLER.vhd        Locally Added               0 
+ pcieblkplus.vhd           Locally Removed           124 
+ CSR_BRAM.ngc              Locally Modified          124 
+ PCIE_RX_ENGINE.vhd        Locally Modified          124 
+ pci-express-vhdl-import.bsv Locally Modified          124 
+ INTR_CONTROLLER.vhd       Locally Modified          124 
+ pci-express-device-mmap.awb Locally Modified          124 
+ ram.vhd                   Locally Removed           124 
+ PCIE_TX_ENGINE.vhd        Locally Modified          124 
+ pci-express-c-import-mmap.cpp Locally Modified          124 
+ PCIE_BAR0.vhd             Locally Modified          124 
+ CSR_BRAM.vhd              Locally Removed           124 
+ pci-express-c-import-mmap.h Locally Modified          124 
+ Channel_top.vhd           Locally Modified          124 
+ CSR_CONTROLLER.vhd        Locally Modified          124 
+ libpchnl.c                Locally Modified          124 
+
+Directory drivers/linux/hasim/kernel
+ pchnl_if.h                Locally Modified          124 
+ pchnl_main.c              Locally Modified          124 
+ pchnl_main.h              Locally Modified          124 
+
+- added PCIe soft reset controller and DMA controller
+- added support for soft reset to Bluespec PCIe device
+- added support for propagating reset signal via physical platform and LLPI
+- updated other controllers with latest code from CBL
+- added initialization code to BRAMs.
+- updated PCIe debugger (it was broken).

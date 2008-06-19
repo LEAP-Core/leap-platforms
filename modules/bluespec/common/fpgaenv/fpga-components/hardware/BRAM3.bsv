@@ -53,6 +53,7 @@ module mkBRAM_3_LoadBin#(Integer low, Integer high, String fname)
   provisos
           (Bits#(idx_type, idx), 
 	   Bits#(data_type, data),
+       Literal#(data_type),
 	   Literal#(idx_type));
 	   
   BRAM_3#(idx_type, data_type) m <- mkBRAM_3_Optimal(low, high, True, fname, True);
@@ -97,6 +98,7 @@ module mkBRAM_3_Full_LoadBin#(String fname)
   provisos
           (Bits#(idx_type, idx), 
 	   Bits#(data_type, data),
+       Literal#(data_type),
 	   Literal#(idx_type));
 
 

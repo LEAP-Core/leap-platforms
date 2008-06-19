@@ -65,13 +65,13 @@ MODULE_LICENSE("GPL");
 
 static struct file_operations pchnl_fops =
 {
-  .owner    = THIS_MODULE,
-  .open     = pchnl_open,
-  .ioctl    = pchnl_ioctl,
-  .read     = pchnl_read,
-  .write    = pchnl_write,
-  .mmap     = pchnl_mmap,
-  .release  = pchnl_close,
+     .owner    = THIS_MODULE,
+     .open     = pchnl_open,
+     .ioctl    = pchnl_ioctl,
+     .read     = pchnl_read,
+     .write    = pchnl_write,
+     .mmap     = pchnl_mmap,
+     .release  = pchnl_close,
 };
 
 
@@ -115,6 +115,7 @@ pchnl_init_module(void)
      ret = misc_register(&gpchnl_drv->miscdev);
      if (ret) {
           PCHNL_ERR("pchnl_init_module misc_register failed\n");
+          ret = -1;
           goto err_register_pchnldrv;
      }
 
@@ -442,9 +443,13 @@ pchnl_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigned l
 //     unsigned int counter;
      struct pchnl_req req;
 //     int misc;
+     if ( (void *)arg != NULL){
+          if ( (copy_from_user(&req, (void *)arg, sizeof(req))) ){
+               PCHNL_DBG("ioctl: error copy_from_user\n");
+               return -EFAULT;
+          }
+     }
      
-     if ( copy_from_user(&req, (void *)arg, sizeof(req)))
-          return -EFAULT;
      
      ret = -EINVAL;
      switch(cmd){
@@ -454,10 +459,12 @@ pchnl_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigned l
 //          printk("COMM_CSR_READ hw_addr:0x%016lx, offset: %d\n", gpchnl_dev->hw_addr, offset);
           req.u.tranx_csr.val = readl( gpchnl_dev->hw_addr + offset);
           if ( copy_to_user((void *)arg, &req, sizeof(req))){
+               PCHNL_DBG("PCHNL_CSR_READ: error copy_to_user\n");
                ret = -EFAULT;
           }else{
                ret = 0;
           }
+          PCHNL_DBG("PCHNL_CSR_READ: exit\n");
           break;
      case PCHNL_CSR_WRITE:
 
@@ -523,6 +530,9 @@ pchnl_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigned l
           ui32 = req.u.tranx_dma.len;
           writel(big_endian(ui32),
                  gpchnl_dev->hw_addr + 968);
+          ui32 = req.u.tranx_dma.loop_count;
+          writel(big_endian(ui32),
+                 gpchnl_dev->hw_addr + 984);
           ui32 = 0xffffffff;
           writel(big_endian(ui32),
                  gpchnl_dev->hw_addr + 1020);
@@ -541,6 +551,9 @@ pchnl_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigned l
           ui32 = req.u.tranx_dma.len;
           writel(big_endian(ui32),
                  gpchnl_dev->hw_addr + 980);
+          ui32 = req.u.tranx_dma.loop_count;
+          writel(big_endian(ui32),
+                 gpchnl_dev->hw_addr + 984);
           ui32 = 0xffffffff;
           writel(big_endian(ui32),
                  gpchnl_dev->hw_addr + 1020);
@@ -559,7 +572,82 @@ pchnl_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigned l
           gpchnl_drv->usr_intr_reg_p = req.u.tranx_set_intr_reg.intr_reg_p;
           ret = 0;
           break;
+     case PCHNL_DMA_DUPLEX:
+          if ( req.u.tranx_dma_duplex.h2f_datap != NULL){
+#if 0
+               if (copy_from_user(gpchnl_dev->dma_h2fp, req.u.tranx_dma_duplex.h2f_datap,
+                                  req.u.tranx_dma_duplex.h2f_len)){
+                    PCHNL_ERR("failed to copy from user\n");
+                    ret = -EFAULT;
+               }
+#endif
+               ui64 = (uint64_t)__pa(gpchnl_dev->dma_h2fp);
+               ui32 = (uint32_t)(ui64 & 0x00000000ffffffff);
+               writel(big_endian(ui32),
+                      gpchnl_dev->hw_addr + 960);
+               ui32 = (uint32_t)(((ui64 >> 32)) & 0x00000000ffffffff);
+               writel(big_endian(ui32),
+                      gpchnl_dev->hw_addr + 964);
+          }else{
+               writel(0, gpchnl_dev->hw_addr + 960);
+               writel(0, gpchnl_dev->hw_addr + 964);
+          }
+          
+          ui32 = req.u.tranx_dma_duplex.h2f_len;
+          writel(big_endian(ui32),
+                 gpchnl_dev->hw_addr + 968);
+
+          if ( req.u.tranx_dma_duplex.f2h_datap != NULL){
+               
+               ui64 = (uint64_t) __pa(gpchnl_dev->dma_f2hp);
+               ui32 = (uint32_t)(ui64 & 0x00000000ffffffff);
+               writel(big_endian(ui32),
+                      gpchnl_dev->hw_addr + 972);
+               ui32 = (uint32_t)((ui64 >> 32) & 0x00000000ffffffff);
+               writel(big_endian(ui32),
+                      gpchnl_dev->hw_addr + 976);
+          }else{
+               writel(0, gpchnl_dev->hw_addr + 972);
+               writel(0, gpchnl_dev->hw_addr + 976);
+          }
+          
+          ui32 = req.u.tranx_dma_duplex.f2h_len;
+          writel(big_endian(ui32),
+                 gpchnl_dev->hw_addr + 980);
+          ui32 = req.u.tranx_dma_duplex.loop_count;
+          writel(big_endian(ui32),
+                 gpchnl_dev->hw_addr + 984);
+          ui32 = 0xffffffff;
+          writel(big_endian(ui32),
+                 gpchnl_dev->hw_addr + 1020);
+          wait_event_interruptible(wq, flag!=0);
+          flag = 0;
+          if ( req.u.tranx_dma_duplex.f2h_datap != NULL){
+#if 0
+               if (copy_to_user(req.u.tranx_dma_duplex.f2h_datap, gpchnl_dev->dma_f2hp,
+                                req.u.tranx_dma_duplex.f2h_len)){
+                    PCHNL_ERR("failed to copy to user\n");
+                    ret = -EFAULT;
+               }
+#endif
+          }
+          
+          ret = 0;
+
+          break;
+     case PCHNL_RESET:
+          writel(0xffffffff, gpchnl_dev->hw_addr + 12);
+          /*
+          while (1){
+               ui32 = readl(gpchnl_dev->hw_addr + 12);
+               if ( ui32 == 0 )
+                    break;
+          }
+          */
+          ret = 0;
+          break;
      }
+     PCHNL_DBG("ioctl: ret %d\n", ret);
      return ret;
 }
 
@@ -578,12 +666,14 @@ pchnl_mmap(struct file *filp, struct vm_area_struct *vma)
           return -EINVAL;
      printk("off: %ld, vsize: %ld, psize: %ld\n", off, vsize, psize);
      
+#if 1
 #if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,9)
      return remap_pfn_range(vma, vma->vm_start, vma->vm_pgoff,
                             vsize, vma->vm_page_prot);
 #else
      return remap_page_range(vma, vma->vm_start, vma->vm_pgoff << PAGE_SHIFT,
                              vsize, vma->vm_page_prot);
+#endif
 #endif
 }
 

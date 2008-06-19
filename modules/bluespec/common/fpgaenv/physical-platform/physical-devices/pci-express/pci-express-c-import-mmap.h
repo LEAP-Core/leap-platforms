@@ -32,31 +32,32 @@ typedef unsigned long long CSR_INDEX;
 typedef class PCIE_DEVICE_CLASS* PCIE_DEVICE;
 class PCIE_DEVICE_CLASS: public PLATFORMS_MODULE_CLASS
 {
-    private:
-        // driver descriptor
-        int driverFD;
-
-        // device mmap
-        unsigned char *deviceMap;
-
-        // helper pointers
-        CSR_DATA* systemCSR_Read;
-        CSR_DATA* systemCSR_Write;
-        CSR_DATA* commonCSRs;
-
-        // internal methods
-        inline CSR_DATA swapEndian(CSR_DATA);
-
-    public:
-        PCIE_DEVICE_CLASS(PLATFORMS_MODULE);
-        ~PCIE_DEVICE_CLASS();
-
-        void     Cleanup();
-        void     Uninit();
-        CSR_DATA ReadSystemCSR();
-        void     WriteSystemCSR(CSR_DATA);
-        CSR_DATA ReadCommonCSR(CSR_INDEX);
-        void     WriteCommonCSR(CSR_INDEX, CSR_DATA);
+  private:
+    // driver descriptor
+    int driverFD;
+    
+    // device mmap
+    unsigned char *deviceMap;
+    
+    // helper pointers
+    CSR_DATA* systemCSR_Read;
+    CSR_DATA* systemCSR_Write;
+    CSR_DATA* commonCSRs;
+    
+    // internal methods
+    inline CSR_DATA swapEndian(CSR_DATA);
+    
+  public:
+    PCIE_DEVICE_CLASS(PLATFORMS_MODULE);
+    ~PCIE_DEVICE_CLASS();
+    
+    void     Cleanup();
+    void     Uninit();
+    void     ResetFPGA();
+    CSR_DATA ReadSystemCSR();
+    void     WriteSystemCSR(CSR_DATA);
+    CSR_DATA ReadCommonCSR(CSR_INDEX);
+    void     WriteCommonCSR(CSR_INDEX, CSR_DATA);
 };
 
 #endif

@@ -26,6 +26,9 @@ interface PHYSICAL_DRIVERS;
     interface SWITCHES_DRIVER#(`NUMBER_SWITCHES) switchesDriver;
     interface PCI_EXPRESS_DRIVER                 pciExpressDriver;
         
+    // each set of physical drivers must support a soft reset method
+    method Action soft_reset();
+        
 endinterface
 
 // TOP_LEVEL_WIRES
@@ -68,7 +71,7 @@ module mkPhysicalPlatform
     LEDS_DEVICE#(`NUMBER_LEDS)         leds_device         <- mkLEDsDevice();
     SWITCHES_DEVICE#(`NUMBER_SWITCHES) switches_device     <- mkSwitchesDevice();
     PCI_EXPRESS_DEVICE                 pci_express_device  <- mkPCIExpressDevice();
-    
+
     // Aggregate the drivers
     
     interface PHYSICAL_DRIVERS physicalDrivers;
@@ -77,7 +80,9 @@ module mkPhysicalPlatform
         interface switchesDriver     = switches_device.driver;
         interface pciExpressDriver   = pci_express_device.driver;
 
-
+        // Soft Reset method
+        method soft_reset = pci_express_device.driver.soft_reset;
+    
     endinterface
     
     // Aggregate the wires

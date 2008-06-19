@@ -4,6 +4,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <sys/mman.h>
+#include <sys/ioctl.h>
 
 #include "asim/provides/pci_express_device.h"
 #include "asim/provides/pci_express_driver_header.h"
@@ -43,6 +44,9 @@ PCIE_DEVICE_CLASS::PCIE_DEVICE_CLASS(
     systemCSR_Write = (CSR_DATA*) (deviceMap + SYS_CSR_BASE_OFFSET);
     systemCSR_Read  = (CSR_DATA*) (deviceMap + SYS_CSR_BASE_OFFSET + sizeof(CSR_DATA));
     commonCSRs      = (CSR_DATA*) (deviceMap + COMM_CSR_BASE_OFFSET);
+
+    // reset hardware
+    ResetFPGA();
 }
 
 PCIE_DEVICE_CLASS::~PCIE_DEVICE_CLASS()
@@ -71,6 +75,16 @@ PCIE_DEVICE_CLASS::Cleanup()
 
     // close driver
     close(driverFD);
+}
+
+// reset FPGA
+void
+PCIE_DEVICE_CLASS::ResetFPGA()
+{
+    ioctl(driverFD, PCHNL_RESET, NULL);
+
+    // TEMPORARY: add a small delay
+    for (int i = 0; i < 1000000; i++);
 }
 
 // read system CSR

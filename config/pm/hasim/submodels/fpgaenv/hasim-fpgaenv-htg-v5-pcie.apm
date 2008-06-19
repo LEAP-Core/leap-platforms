@@ -63,7 +63,6 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid/hybrid-fp.awb
 Packagehint=platforms
 
-
 [RRR Clients and Servers]
 File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic/basic-rrr.awb
 Packagehint=platforms
@@ -92,10 +91,6 @@ rrr=RRR Clients and Servers
 File=drivers/linux/hasim/kernel/pchnl_if.awb
 Packagehint=platforms
 
-[PCI-Express CSR-based Physical Channel]
-File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/pcie-csr/pcie-physical-channel.awb
-Packagehint=platforms
-
 [PCI Express Physical Device (mmap-based)/Requires]
 pci_express_driver_header=Driver Header for PCIe Kernel Module
 
@@ -107,7 +102,11 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/null/memory_virtual_device_null.awb
 Packagehint=platforms
 
-
 [Little-Endian 32-bit Unified Message Format]
 File=modules/bluespec/common/fpgaenv/virtual-platform/umf/little-32/umf-little-32.awb
+Packagehint=platforms
+
+
+[PCI-Express CSR-based Physical Channel]
+File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/pcie-csr/pcie-physical-channel.awb
 Packagehint=platforms

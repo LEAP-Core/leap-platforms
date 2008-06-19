@@ -114,14 +114,14 @@ module mkPhysicalChannel#(PHYSICAL_DRIVERS drivers)
     status_pointers[31:24] = h2fHead;
 
     // vhdl/synchronizer status
-    status_vhdl[15:0] = drivers.pciExpressDriver.read_data()[15:0];
+    status_vhdl[15:0] = '0; // drivers.pciExpressDriver.read_data()[15:0];
 
-    status_vhdl[16] = drivers.pciExpressDriver.read_req_ready();
-    status_vhdl[17] = drivers.pciExpressDriver.read_resp_ready();
-    status_vhdl[18] = drivers.pciExpressDriver.write_ready();
-    status_vhdl[19] = 0;
+    status_vhdl[16]   = '0; // drivers.pciExpressDriver.read_req_ready();
+    status_vhdl[17]   = '0; // drivers.pciExpressDriver.read_resp_ready();
+    status_vhdl[18]   = '0; // drivers.pciExpressDriver.write_ready();
+    status_vhdl[19]   = 0;
 
-    status_vhdl[21:20] = drivers.pciExpressDriver.write_sync_depth_bsv();
+    status_vhdl[21:20] = '0; // drivers.pciExpressDriver.write_sync_depth_bsv();
     status_vhdl[23:22] = '0; // drivers.pciExpressDriver.write_sync_depth_vhdl();
     status_vhdl[27:24] = '0; // drivers.pciExpressDriver.write_sync_enq_count();
     status_vhdl[31:28] = '0; // drivers.pciExpressDriver.write_sync_deq_count();

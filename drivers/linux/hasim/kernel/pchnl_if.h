@@ -43,7 +43,15 @@ struct pchnl_req
           struct{
                uint32_t len;
                void *datap;
+               uint32_t loop_count;
           }tranx_dma;
+          struct{
+               uint32_t h2f_len;
+               void *h2f_datap;
+               uint32_t f2h_len;
+               void *f2h_datap;
+               uint32_t loop_count;
+          }tranx_dma_duplex;
           struct{
                unsigned int * intr_reg_p;
           }tranx_set_intr_reg;
@@ -62,6 +70,8 @@ struct pchnl_req
 #define PCHNL_DMA_H2F _IOW('x', 0x06, struct pchnl_req)
 #define PCHNL_DMA_F2H _IOR('x', 0x07, struct pchnl_req)
 #define PCHNL_SET_INTR_REG _IOW('x', 0x08, struct pchnl_req)
+#define PCHNL_DMA_DUPLEX _IOW('x', 0x09, struct pchnl_req)
+#define PCHNL_RESET _IOW('x', 0x0a, struct pchnl_req)
 __END_DECLS
 
 #endif

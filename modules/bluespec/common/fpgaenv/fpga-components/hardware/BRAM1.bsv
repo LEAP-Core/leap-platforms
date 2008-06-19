@@ -74,6 +74,36 @@ module mkBRAM_Full
 
 endmodule
 
+module mkInitializedBRAM_Full#(data_type init)(BRAM#(idx_type, data_type))
+    provisos(Bits#(idx_type, idx),
+             Add#(idx, 1, idx_1),
+             Bits#(data_type, dSz),
+             Literal#(idx_type));
+
+    BRAM#(idx_type, data_type) br <- mkBRAM(0, valueOf(TExp#(idx)) - 1);
+    Reg#(Bit#(idx_1)) initialize <- mkReg(0);
+
+    Bool initialized = initialize[valueOf(idx)] == 1;
+
+    rule initializing(!initialized);
+        initialize <= initialize + 1;
+        br.write(unpack(truncate(initialize)), init);
+    endrule
+
+    method Action read_req(idx_type idx) if(initialized);
+        br.read_req(idx);
+    endmethod
+
+    method ActionValue#(data_type) read_resp() if(initialized);
+        let d <- br.read_resp();
+        return d;
+    endmethod
+
+    method Action	write(idx_type idx, data_type data) if(initialized);
+        br.write(idx, data);
+    endmethod
+endmodule
+
 module mkBRAM_Full_Load#(String fname) 
   //interface:
               (BRAM#(idx_type, data_type))
@@ -112,6 +142,7 @@ module mkBRAM_Optimal#(Integer low, Integer high, Bool loadfile, String fname, B
               (BRAM#(idx_type, data_type)) 
   provisos
           (Bits#(idx_type, idx), 
+           Add#(idx, 1, idx_1),
 	   Bits#(data_type, data),
 	   Literal#(idx_type));
 	   
@@ -119,14 +150,35 @@ module mkBRAM_Optimal#(Integer low, Integer high, Bool loadfile, String fname, B
                                   mkBRAM_Zero() :
 				  mkBRAM_NonZero(low, high, loadfile, fname, bin);
 
-  return m;
+    Reg#(Bit#(idx_1)) initialize <- mkReg(fromInteger(low));
+
+    Bool initialized = initialize == fromInteger(high + 1);
+
+    rule initializing(!initialized);
+        initialize <= initialize + 1;
+        m.write(unpack(truncate(initialize)), unpack(zeroExtend('b0)));
+    endrule
+
+  method Action read_req(idx_type i) if(initialized);
+      m.read_req(i);
+  endmethod
+
+  method Action write(idx_type i, data_type d) if(initialized);
+      m.write(i, d);
+  endmethod
+
+  method ActionValue#(data_type) read_resp() if(initialized);
+      let d <- m.read_resp();
+      return d;
+  endmethod
+
 endmodule
 
 module mkBRAM_Zero
   //interface:
               (BRAM#(idx_type, data_type)) 
   provisos
-          (Bits#(idx_type, idx), 
+          (Bits#(idx_type, idx),
 	   Bits#(data_type, data),
 	   Literal#(idx_type));
   

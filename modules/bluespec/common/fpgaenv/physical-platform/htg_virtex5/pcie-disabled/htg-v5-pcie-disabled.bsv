@@ -22,6 +22,9 @@ interface PHYSICAL_DRIVERS;
 
     interface LED_DRIVER#(`NUMBER_LEDS)        ledDriver;
     interface SWITCH_DRIVER#(`NUMBER_SWITCHES) switchDriver;
+
+    // each set of physical drivers must support a soft reset method
+    method Action soft_reset();
         
 endinterface
 
@@ -63,13 +66,18 @@ module mkPhysicalPlatform
     
     LED_DEVICE#(`NUMBER_LEDS)        led_device         <- mkGeneralLEDDevice();
     SWITCH_DEVICE#(`NUMBER_SWITCHES) switch_device      <- mkGeneralSwitchDevice();
-    
+
     // Aggregate the drivers
     
     interface PHYSICAL_DRIVERS physicalDrivers;
     
         interface ledDriver        = led_device.driver;
         interface switchDriver     = switch_device.driver;
+    
+        // Soft Reset
+        method Action soft_reset();            
+            noAction;
+        endmethod
     
     endinterface
     
