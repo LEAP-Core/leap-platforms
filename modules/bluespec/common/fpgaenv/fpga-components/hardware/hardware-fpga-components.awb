@@ -14,8 +14,10 @@
 #
 # %attributes hasim
 #
-# %public BRAM1.bsv BRAM_Verilog.bsv BRAM2.bsv BRAM3.bsv
-# %private BRAM.v
+# %public FpgaMemory.bsv FpgaMemoryHasim.bsv
+# %private Bram.v
+#
+# %param SYNTH 1 "Synthesie it to FPGAs"
 #
 # %AWB_END
 # */

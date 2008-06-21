@@ -3945,3 +3945,32 @@ Directory drivers/linux/hasim/kernel
 - updated other controllers with latest code from CBL
 - added initialization code to BRAMs.
 - updated PCIe debugger (it was broken).
+
+----------
+mvijayar    Date: Fri Jun 20 20:19:41 EDT 2008  CSN: CSN-platforms-126
+                  Sat Jun 21 00:19:41 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components/software
+ FpgaMemory.bsv            Locally Added               0 
+ software-fpga-components.awb Locally Modified          125 
+ FpgaMemoryHasim.bsv       Locally Added               0 
+ BRAM_Bluesim.bsv          Locally Removed           125 
+ BRAM1.bsv                 Locally Removed           125 
+ BRAM2.bsv                 Locally Removed           125 
+ BRAM3.bsv                 Locally Removed           125 
+
+Directory modules/bluespec/common/fpgaenv/fpga-components/hardware
+ FpgaMemory.bsv            Locally Added               0 
+ BRAM_Verilog.bsv          Locally Removed           125 
+ FpgaMemoryHasim.bsv       Locally Added               0 
+ hardware-fpga-components.awb Locally Modified          125 
+ BRAM_base.bsv             Locally Removed           125 
+ BRAM.v                    Locally Removed           125 
+ Bram.v                    Locally Added               0 
+ BRAM1.bsv                 Locally Removed           125 
+ BRAM2.bsv                 Locally Removed           125 
+ BRAM3.bsv                 Locally Removed           125 
+
+Added multi read port (initialized or not initialized ) brams
+

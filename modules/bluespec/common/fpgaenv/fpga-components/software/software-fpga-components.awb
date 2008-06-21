@@ -14,7 +14,7 @@
 #
 # %attributes hasim
 #
-# %public BRAM_Bluesim.bsv BRAM1.bsv BRAM2.bsv BRAM3.bsv
+# %public FpgaMemory.bsv FpgaMemoryHasim.bsv
 #
 # %AWB_END
 # */
