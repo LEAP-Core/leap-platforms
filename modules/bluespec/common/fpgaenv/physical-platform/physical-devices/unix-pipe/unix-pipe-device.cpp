@@ -3,6 +3,7 @@
 #include <strings.h>
 #include <assert.h>
 #include <stdlib.h>
+#include <fcntl.h>
 #include <sys/select.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -31,104 +32,137 @@ UNIX_PIPE_DEVICE_CLASS::UNIX_PIPE_DEVICE_CLASS(
 {
     childAlive = false;
 
+    //
+    // Usuall this code forks the FPGA simulator.  If the environment variable
+    // HASIM_NAMED_PIPES exists then the simulator is persistent and was
+    // started manually.
+    //
+    bool forkSimulator = (getenv("HASIM_NAMED_PIPES") == NULL);
+
     // create I/O pipes
-    if (pipe(inpipe) < 0 || pipe(outpipe) < 0)
+    if (! forkSimulator)
     {
-        perror("pipe");
-        exit(1);
-    }
-
-    // create target process
-    childpid = fork();
-    if (childpid < 0)
-    {
-        perror("fork");
-        exit(1);
-    }
-
-    if (childpid == 0)
-    {
-        // CHILD: setup pipes for hardware side
-        close(PARENT_READ);
-        close(PARENT_WRITE);
-
-        dup2(CHILD_READ, DESC_HOST_2_FPGA);
-        dup2(CHILD_WRITE, DESC_FPGA_2_HOST);
-
-        // launch hardware executable/download bitfile
-        string hw_bluesim = string(globalArgs->ModelDir()) + "/" + APM_NAME + "_hw.exe";
-        string hw_verilog = string(globalArgs->ModelDir()) + "/" + APM_NAME + "_hw.vexe";
-
-        struct stat buf;
-        string hw_exe;
-        if (! stat(hw_bluesim.c_str(), &buf))
+        outpipe[1] = open("pipes/TO_FPGA", O_WRONLY);
+        if (ParentWrite() < 0)
         {
-            hw_exe = hw_bluesim;
-        }
-        else if (! stat(hw_verilog.c_str(), &buf))
-        {
-            hw_exe = hw_verilog;
-        }
-        else
-        {
-            cerr << "Can't find either Bluesim or Verilog HW simulator." << endl;
-            cerr << "  Looked for Bluesim: " << hw_bluesim << endl;
-            cerr << "             Verilog: " << hw_verilog << endl;
+            perror("output pipe (pipes/TO_FPGA)");
             exit(1);
         }
-
-        // Make a copy of the argument vector so we can put the file name
-        // as argv[0]
-        char **argv = new char *[globalArgs->BluesimArgc() + 3];
-
-        // Pointer to exe is argv[0]
-        argv[0] = new char[hw_exe.length() + 1];
-        strcpy(argv[0], hw_exe.c_str());
-
-        // Wait for Bluesim license
-        argv[1] = "-w";
-
-        // Copy remaining argv pointers, including trailing NULL
-        for (int i = 1; i < globalArgs->BluesimArgc() + 1; i++)
-        {
-            argv[i + 1] = globalArgs->BluesimArgv()[i];
-        }
-        
-        execvp(argv[0], argv);
-
-        // error
-        cerr << "Error attempting to invoke " << hw_exe << endl;
-        exit(1);
     }
     else
     {
-        // PARENT: setup pipes for software side
-        close(CHILD_READ);
-        close(CHILD_WRITE);
-
-        // make sure channel is working by exchanging message with FPGA
-        char buf[32] = "NULL";
-        
-        if (write(PARENT_WRITE, "SYN", 4) == -1)
+        if (pipe(inpipe) < 0 || pipe(outpipe) < 0)
         {
-            perror("host/init/write");
+            perror("pipe");
             exit(1);
         }
 
-        if (read(PARENT_READ, buf, 4) == -1)
+        // create target process
+        childpid = fork();
+        if (childpid < 0)
         {
-            perror("host/init/read");
+            perror("fork");
             exit(1);
         }
 
-        if (strcmp(buf, "ACK") != 0)
+        if (childpid == 0)
         {
-            fprintf(stderr, "host: incorrect ack message from FPGA: %s\n", buf);
+            // CHILD: setup pipes for hardware side
+            close(ParentRead());
+            close(ParentWrite());
+
+            dup2(ChildRead(), DESC_HOST_2_FPGA);
+            dup2(ChildWrite(), DESC_FPGA_2_HOST);
+
+            // launch hardware executable/download bitfile
+            string hw_bluesim = string(globalArgs->ModelDir()) + "/" + APM_NAME + "_hw.exe";
+            string hw_verilog = string(globalArgs->ModelDir()) + "/" + APM_NAME + "_hw.vexe";
+
+            struct stat buf;
+            string hw_exe;
+            if (! stat(hw_bluesim.c_str(), &buf))
+            {
+                hw_exe = hw_bluesim;
+            }
+            else if (! stat(hw_verilog.c_str(), &buf))
+            {
+                hw_exe = hw_verilog;
+            }
+            else
+            {
+                cerr << "Can't find either Bluesim or Verilog HW simulator." << endl;
+                cerr << "  Looked for Bluesim: " << hw_bluesim << endl;
+                cerr << "             Verilog: " << hw_verilog << endl;
+                exit(1);
+            }
+
+            // Make a copy of the argument vector so we can put the file name
+            // as argv[0]
+            char **argv = new char *[globalArgs->BluesimArgc() + 3];
+
+            // Pointer to exe is argv[0]
+            argv[0] = new char[hw_exe.length() + 1];
+            strcpy(argv[0], hw_exe.c_str());
+
+            // Wait for Bluesim license
+            argv[1] = "-w";
+
+            // Copy remaining argv pointers, including trailing NULL
+            for (int i = 1; i < globalArgs->BluesimArgc() + 1; i++)
+            {
+                argv[i + 1] = globalArgs->BluesimArgv()[i];
+            }
+
+            execvp(argv[0], argv);
+
+            // error
+            cerr << "Error attempting to invoke " << hw_exe << endl;
             exit(1);
         }
-
-        childAlive = true;
+        else
+        {
+            // PARENT: setup pipes for software side
+            close(ChildRead());
+            close(ChildWrite());
+        }
     }
+
+    // make sure channel is working by exchanging message with FPGA
+    char buf[32] = "NULL";
+        
+    if (write(ParentWrite(), "SYN", 4) == -1)
+    {
+        perror("host/init/write");
+        exit(1);
+    }
+
+    //
+    // Had to delay opening named input pipe to here for accurate sync with
+    // the FPGA side.
+    //
+    if (! forkSimulator)
+    {
+        inpipe[0] =  open("pipes/FROM_FPGA", O_RDONLY);
+        if (ParentRead() < 0)
+        {
+            perror("input pipe (pipes/FROM_FPGA)");
+            exit(1);
+        }
+    }
+
+    if (read(ParentRead(), buf, 4) == -1)
+    {
+        perror("host/init/read");
+        exit(1);
+    }
+
+    if (strcmp(buf, "ACK") != 0)
+    {
+        fprintf(stderr, "host: incorrect ack message from FPGA: %s\n", buf);
+        exit(1);
+    }
+
+    childAlive = true;
 }
 
 // destructor
@@ -157,8 +191,8 @@ UNIX_PIPE_DEVICE_CLASS::Cleanup()
 {
     if (childAlive)
     {
-        close(PARENT_READ);
-        close(PARENT_WRITE);
+        close(ParentRead());
+        close(ParentWrite());
         childAlive = false;
     }
 }
@@ -173,12 +207,12 @@ UNIX_PIPE_DEVICE_CLASS::Probe()
     fd_set          readfds;
 
     FD_ZERO(&readfds);
-    FD_SET(PARENT_READ, &readfds);
+    FD_SET(ParentRead(), &readfds);
 
     timeout.tv_sec  = 0;
     timeout.tv_usec = SELECT_TIMEOUT;
 
-    data_available = select(PARENT_READ + 1, &readfds, NULL, NULL, &timeout);
+    data_available = select(ParentRead() + 1, &readfds, NULL, NULL, &timeout);
 
     if (data_available == -1)
     {
@@ -196,7 +230,7 @@ UNIX_PIPE_DEVICE_CLASS::Probe()
     if (data_available != 0)
     {
         // incoming! sanity check
-        if (data_available != 1 || FD_ISSET(PARENT_READ, &readfds) == 0)
+        if (data_available != 1 || FD_ISSET(ParentRead(), &readfds) == 0)
         {
             cerr << "unix-pipe: activity detected on unknown descriptor" << endl;
             exit(1);
@@ -217,7 +251,7 @@ UNIX_PIPE_DEVICE_CLASS::Read(
     int bytes_requested)
 {
     // assume we can read data in one shot
-    int bytes_read = read(PARENT_READ, buf, bytes_requested);
+    int bytes_read = read(ParentRead(), buf, bytes_requested);
 
     if (bytes_read == 0)
     {
@@ -240,7 +274,7 @@ UNIX_PIPE_DEVICE_CLASS::Write(
     int bytes_requested)
 {
     // assume we can write data in one shot
-    int bytes_written = write(PARENT_WRITE, buf, bytes_requested);
+    int bytes_written = write(ParentWrite(), buf, bytes_requested);
 
     if (bytes_written < bytes_requested)
     {

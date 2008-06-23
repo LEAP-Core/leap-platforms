@@ -61,8 +61,8 @@ module mkPhysicalPlatform
         interface unixPipeDriver = unix_pipe_device.driver;
 
         // Soft Reset
-        method Action soft_reset() if (False);
-            noAction;
+        method Action soft_reset() if (unix_pipe_device.driver.soft_reset_requested());
+            unix_pipe_device.driver.soft_reset_received();
         endmethod
 
     endinterface

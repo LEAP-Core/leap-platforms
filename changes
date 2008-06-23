@@ -3974,3 +3974,24 @@ Directory modules/bluespec/common/fpgaenv/fpga-components/hardware
 
 Added multi read port (initialized or not initialized ) brams
 
+
+----------
+mcadler     Date: Mon Jun 23 00:03:21 EDT 2008  CSN: CSN-platforms-127
+                  Mon Jun 23 04:03:21 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/simulation
+ sim-physical-platform.bsv Locally Modified          126 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe
+ unix-pipe-device.h        Locally Modified          126 
+ unix-pipe-device.awb      Locally Modified          126 
+ unix-pipe-device.bsv      Locally Modified          126 
+ unix-pipe-device-bdpi.c   Locally Modified          126 
+ unix-pipe-device.cpp      Locally Modified          126 
+
+When HASIM_NAMED_PIPES environment variable exists the connection for
+a hybrid model between software and a simulator (not hardware) goes through
+named pipes.  The software does not invoke the simulator.  When the
+software-side closes the pipe the communication layer on the HW side
+triggers a reset and waits for a new connection.

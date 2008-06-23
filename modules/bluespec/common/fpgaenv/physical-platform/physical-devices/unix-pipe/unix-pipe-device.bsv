@@ -12,6 +12,9 @@ import "BDPI" function ActionValue#(Bit#(8))  pipe_open(Bit#(8) programID);
 import "BDPI" function ActionValue#(Bit#(64)) pipe_read(Bit#(8) handle);
 import "BDPI" function Action   pipe_write(Bit#(8) handle, Bit#(32) data);
                   
+import "BDPI" function Bool                   pipe_receive_reset();
+import "BDPI" function Action                 pipe_clear_reset();
+
 // types
 typedef enum
 {
@@ -27,6 +30,8 @@ interface UNIX_PIPE_DRIVER;
 
     method ActionValue#(UMF_CHUNK) read();
     method Action                  write(UMF_CHUNK chunk);
+    method Bool                    soft_reset_requested();
+    method Action                  soft_reset_received();
         
 endinterface
 
@@ -117,6 +122,17 @@ module mkUNIXPipeDevice
             writeBuffer.enq(chunk);
         endmethod
         
+        // pass on soft reset request
+        method Bool soft_reset_requested();
+            return pipe_receive_reset();
+        endmethod
+
+        // ack soft reset request
+        method Action soft_reset_received();
+            pipe_clear_reset();
+        endmethod
+
+        // write
     endinterface
     
     // wires interface

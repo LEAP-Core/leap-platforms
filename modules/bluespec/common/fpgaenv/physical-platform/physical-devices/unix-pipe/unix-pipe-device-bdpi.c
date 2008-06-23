@@ -13,9 +13,11 @@
 #include "unix-pipe-device-bdpi.h"
 
 /* global table of open channel handles */
-Channel OCHT[MAX_OPEN_CHANNELS];
-Channel *freeList;
-unsigned char initialized = 0;
+static Channel OCHT[MAX_OPEN_CHANNELS];
+static Channel *freeList;
+static unsigned char initialized = 0;
+static unsigned char need_reset = 0;
+static unsigned char persistent = 0;
 
 /* internal helper functions */
 void cleanup()
@@ -28,7 +30,8 @@ void pipe_init(void)
     int i;
     char buf[32];
 
-    assert(initialized == 0);
+    if (initialized) return;
+
     assert(MAX_OPEN_CHANNELS >= 2);
 
     /* initialize free list, we'll maintain it as
@@ -50,6 +53,27 @@ void pipe_init(void)
     /* flags */
     initialized = 1;
 
+    if (getenv("HASIM_NAMED_PIPES") != NULL)
+    {
+        //
+        // Start by opening only the input named pipe.  That way we can read
+        // the initial SYN message to see whether the connection is really from
+        // the software model.  It allows someone to force this side to exit
+        // by sending anything other than "SYN" on the incoming pipe.
+        //
+        int in = open("pipes/TO_FPGA", O_RDONLY);
+        if (in < 0)
+        {
+            perror("named incoming pipe (pipes/TO_FPGA)");
+            exit(1);
+        }
+
+        dup2(in, DESC_HOST_2_FPGA);
+        close(in);
+
+        persistent = 1;
+    }
+
     /* make sure channel is working by exchanging
      * message with software */
     if (read(DESC_HOST_2_FPGA, buf, 4) == -1)
@@ -64,12 +88,39 @@ void pipe_init(void)
         exit(1);
     }
 
+    if (persistent)
+    {
+        int out = open("pipes/FROM_FPGA", O_WRONLY);
+        if (out < 0)
+        {
+            perror("named outgoing pipe (pipes/FROM_FPGA)");
+            exit(1);
+        }
+
+        dup2(out, DESC_FPGA_2_HOST);
+        close(out);
+    }
+
     if (write(DESC_FPGA_2_HOST, "ACK", 4) == -1)
     {
         fprintf(stderr, "         HW side exiting (pipe closed)\n");
         exit(1);
     }
 }
+
+/* trigger FPGA reset */
+unsigned char pipe_receive_reset(void)
+{
+    return need_reset;
+}
+
+
+/* ack for FPGA reset request */
+void pipe_clear_reset(void)
+{
+    need_reset = 0;
+}
+
 
 /* create process and initialize data structures */
 unsigned char pipe_open(unsigned char serviceID)
@@ -124,7 +175,10 @@ unsigned long long pipe_read(unsigned char handle)
     int done;
     Channel *channel;
 
-    assert(initialized == 1);
+    if (! initialized)
+    {
+        return PIPE_NULL;
+    }
 
     /* lookup OCHT */
     assert(handle < MAX_OPEN_CHANNELS);
@@ -187,7 +241,17 @@ unsigned long long pipe_read(unsigned char handle)
             if (bytes_read == 0)
             {
                 fprintf(stderr, "EOF in unix-pipe-device-bdpi::pipe_read()\n");
-                exit(0);
+                if (persistent)
+                {
+                    close(DESC_HOST_2_FPGA);
+                    close(DESC_FPGA_2_HOST);
+                    initialized = 0;
+                    need_reset = 1;
+                }
+                else
+                {
+                    exit(0);
+                }
             }
             else if (bytes_read == -1)
             {
@@ -243,7 +307,10 @@ void pipe_write(unsigned char handle, unsigned int data)
     int i;
     Channel *channel;
 
-    assert(initialized == 1);
+    if (! initialized)
+    {
+        return;
+    }
 
     /* lookup OCHT */
     assert(handle < MAX_OPEN_CHANNELS);

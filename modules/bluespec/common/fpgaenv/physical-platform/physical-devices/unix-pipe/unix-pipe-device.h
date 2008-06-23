@@ -17,26 +17,26 @@
 typedef class UNIX_PIPE_DEVICE_CLASS* UNIX_PIPE_DEVICE;
 class UNIX_PIPE_DEVICE_CLASS: public PLATFORMS_MODULE_CLASS
 {
-    private:
-        // process/pipe state (physical channel)
-        int  inpipe[2], outpipe[2];
-        int  childpid;
-        bool childAlive;
+  private:
+    // process/pipe state (physical channel)
+    int  inpipe[2], outpipe[2];
+    int  childpid;
+    bool childAlive;
 
-        #define PARENT_READ     inpipe[0]
-        #define CHILD_WRITE     inpipe[1]
-        #define CHILD_READ      outpipe[0]
-        #define PARENT_WRITE    outpipe[1]
+    int ParentRead() const { return inpipe[0]; };
+    int ParentWrite() const { return outpipe[1]; };
+    int ChildRead() const { return outpipe[0]; };
+    int ChildWrite() const { return inpipe[1]; };
 
-    public:
-        UNIX_PIPE_DEVICE_CLASS(PLATFORMS_MODULE);
-        ~UNIX_PIPE_DEVICE_CLASS();
+  public:
+    UNIX_PIPE_DEVICE_CLASS(PLATFORMS_MODULE);
+    ~UNIX_PIPE_DEVICE_CLASS();
 
-        void Cleanup();                    // cleanup
-        void Uninit();                     // uninit
-        bool Probe();                      // probe for data
-        void Read(unsigned char*, int);    // blocking read
-        void Write(unsigned char*, int);   // write
+    void Cleanup();                    // cleanup
+    void Uninit();                     // uninit
+    bool Probe();                      // probe for data
+    void Read(unsigned char*, int);    // blocking read
+    void Write(unsigned char*, int);   // write
 };
 
 #endif
