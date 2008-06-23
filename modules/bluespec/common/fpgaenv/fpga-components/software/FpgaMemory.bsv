@@ -215,7 +215,7 @@ module mkDualWriteMultiReadBramInitialized#(dataT init)(MultiPortBram#(readNum, 
     Bool initialized = initialize[valueOf(addrSz)] == 1;
 
     rule initializing(!initialized);
-        bram.write[0].write(truncate(initialize), init);
+        bram.write[1].write(truncate(initialize), init);
         initialize <= initialize + 1;
     endrule
 

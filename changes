@@ -4022,3 +4022,14 @@ Directory modules/bluespec/common/fpgaenv/fpga-components/hardware
 
 
 Used actual Xilinx Bram ports, which is basically 2-ports, each port can either be used as a read or as a write at a time. The interface remains the same. So now, if one instantiates a n-readPort, 1-writePort bram, you use only ceil(n/2) brams. But the downside is, write to the second port will conflict with the read to the second port, so they can not be written on the same rule.
+
+----------
+mvijayar    Date: Mon Jun 23 19:52:30 EDT 2008  CSN: CSN-platforms-130
+                  Mon Jun 23 23:52:30 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components/software
+ FpgaMemory.bsv            Locally Modified          129 
+
+Fixed a bug: initialization rule was using write port 0, which was causing conflicts in several of the rules. I think the remaining warnings are benign
+
