@@ -1,56 +1,73 @@
+// Copyright 2006--2008, University of Texas at Austin.  All rights reserved.
+// Author(s): Eric Johnson
+
+module DualPortedBram (clka, clkb, ena, enb, wea, web, addra, addrb, dia, dib, doa, dob);
+
+   parameter dataWidth = 36;
+   parameter addrWidth = 9;
+   parameter depth = 1 << addrWidth;
+
+   input clka, clkb, ena, enb, wea, web;
+   input [addrWidth-1:0] addra, addrb;
+   input [dataWidth-1:0]     dia, dib;
+   output [dataWidth-1:0]    doa, dob;
+   reg [dataWidth-1:0]       ram [depth-1:0];
+   reg [dataWidth-1:0]       doa, dob;
+
+   always @(posedge clka) begin
+      if (ena) begin
+        if (wea)
+            ram[addra] <= dia;
+        doa <= ram[addra];
+      end
+   end
+
+   always @(posedge clkb) begin
+      if (enb) begin
+        if (web)
+            ram[addrb] <= dib;
+        dob <= ram[addrb];
+      end
+   end
+
+endmodule
+
 module Bram
 (
     CLK,
     RST_N,
     CLK_GATE,
-    readEnable,
-    readAddr,
-    readReady,
-    readData,
-    readDataEnable,
-    readDataReady,
-    writeEnable,
-    writeAddr,
-    writeData,
-    writeReady,
-    noPendingBool
+    rdya,
+    rdyb,
+    ena,
+    enb,
+    wea,
+    web,
+    addra,
+    addrb,
+    dia,
+    dib,
+    rdyRespa,
+    rdyRespb,
+    doa,
+    dob
 );
-    parameter dataSize = 32;
-    parameter addrSize = 9;
-    parameter numRows = 512;
 
-    input CLK, RST_N, CLK_GATE;
-    input  readEnable;
-    input  [addrSize-1:0] readAddr;
-    output readReady;
-    output [dataSize-1:0] readData;
-    input  readDataEnable;
-    output readDataReady;
-    input  writeEnable;
-    input  [addrSize-1:0] writeAddr;
-    input  [dataSize-1:0] writeData;
-    output writeReady;
-    output noPendingBool;
+    parameter dataWidth = 36;
+    parameter addrWidth = 9;
+    parameter depth = 1 << addrWidth;
 
-    reg [dataSize-1:0] readData;
+    input CLK, RST_N, CLK_GATE, ena, enb, wea, web;
+    output rdya, rdyb, rdyRespa, rdyRespb;
+    input [addrWidth-1:0] addra, addrb;
+    input [dataWidth-1:0]     dia, dib;
+    output [dataWidth-1:0]    doa, dob;
 
-    reg [dataSize-1:0] ram [numRows-1:0];
+    assign rdya = 1;
+    assign rdyb = 1;
+    assign rdyRespa = 1;
+    assign rdyRespb = 1;
 
-    assign readReady = 1;
-    assign readDataReady = 1;
-    assign writeReady = 1;
-
-    assign noPendingBool = 1;
-
-    always@(posedge CLK)
-    begin
-        if(RST_N)
-            readData <= ram[readAddr];
-    end
-
-    always@(posedge CLK)
-    begin
-        if(writeEnable)
-            ram[writeAddr] <= writeData;
-    end
+    DualPortedBram#(.dataWidth(dataWidth), .addrWidth(addrWidth), .depth(depth)) dualPortedBram (.clka(CLK), .clkb(CLK), .ena(ena), .enb(enb), .wea(wea), .web(web),
+                                                                                                 .addra(addra), .addrb(addrb), .dia(dia), .dib(dib), .doa(doa), .dob(dob));
 endmodule

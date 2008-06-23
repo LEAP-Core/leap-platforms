@@ -4007,3 +4007,18 @@ Directory modules/bluespec/common/fpgaenv/fpga-components/hardware
 
 - Bram.v has all the required signals now
 
+
+----------
+mvijayar    Date: Mon Jun 23 16:30:00 EDT 2008  CSN: CSN-platforms-129
+                  Mon Jun 23 20:30:00 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components/software
+ FpgaMemory.bsv            Locally Modified          128 
+
+Directory modules/bluespec/common/fpgaenv/fpga-components/hardware
+ FpgaMemory.bsv            Locally Modified          128 
+ Bram.v                    Locally Modified          128 
+
+
+Used actual Xilinx Bram ports, which is basically 2-ports, each port can either be used as a read or as a write at a time. The interface remains the same. So now, if one instantiates a n-readPort, 1-writePort bram, you use only ceil(n/2) brams. But the downside is, write to the second port will conflict with the read to the second port, so they can not be written on the same rule.
