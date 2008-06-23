@@ -6,19 +6,14 @@ module Bram
     readEnable,
     readAddr,
     readReady,
-    readReqEmpty,
-    readReqEmptyReady,
     readData,
     readDataEnable,
     readDataReady,
-    readRespEmpty,
-    readRespEmptyReady,
     writeEnable,
     writeAddr,
     writeData,
     writeReady,
-    writeEmpty,
-    writeEmptyReady
+    noPendingBool
 );
     parameter dataSize = 32;
     parameter addrSize = 9;
@@ -28,19 +23,14 @@ module Bram
     input  readEnable;
     input  [addrSize-1:0] readAddr;
     output readReady;
-    output readReqEmpty;
-    output readReqEmptyReady;
     output [dataSize-1:0] readData;
     input  readDataEnable;
     output readDataReady;
-    output readRespEmpty;
-    output readRespEmptyReady;
     input  writeEnable;
     input  [addrSize-1:0] writeAddr;
     input  [dataSize-1:0] writeData;
     output writeReady;
-    output writeEmpty;
-    output writeEmptyReady;
+    output noPendingBool;
 
     reg [dataSize-1:0] readData;
 
@@ -50,12 +40,7 @@ module Bram
     assign readDataReady = 1;
     assign writeReady = 1;
 
-    assign readReqEmpty = 1;
-    assign readReqEmptyReady = 1;
-    assign readRespEmpty = 1;
-    assign readRespEmptyReady = 1;
-    assign writeEmpty = 1;
-    assign writeEmptyReady = 1;
+    assign noPendingBool = 1;
 
     always@(posedge CLK)
     begin

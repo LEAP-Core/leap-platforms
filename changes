@@ -3995,3 +3995,15 @@ a hybrid model between software and a simulator (not hardware) goes through
 named pipes.  The software does not invoke the simulator.  When the
 software-side closes the pipe the communication layer on the HW side
 triggers a reset and waits for a new connection.
+
+----------
+vmurali     Date: Mon Jun 23 09:17:46 EDT 2008  CSN: CSN-platforms-128
+                  Mon Jun 23 13:17:46 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components/hardware
+ Bram.v                    Locally Modified          127 
+
+
+- Bram.v has all the required signals now
+
