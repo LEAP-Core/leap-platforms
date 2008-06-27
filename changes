@@ -4033,3 +4033,17 @@ Directory modules/bluespec/common/fpgaenv/fpga-components/software
 
 Fixed a bug: initialization rule was using write port 0, which was causing conflicts in several of the rules. I think the remaining warnings are benign
 
+
+----------
+mvijayar    Date: Fri Jun 27 11:04:06 EDT 2008  CSN: CSN-platforms-131
+                  Fri Jun 27 15:04:06 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components/software
+ FpgaMemory.bsv            Locally Modified          130 
+
+Directory modules/bluespec/common/fpgaenv/fpga-components/hardware
+ FpgaMemory.bsv            Locally Modified          130 
+ Bram.v                    Locally Modified          130 
+
+Reverting to the older version of Brams. I am working on getting the new version ready by today.
