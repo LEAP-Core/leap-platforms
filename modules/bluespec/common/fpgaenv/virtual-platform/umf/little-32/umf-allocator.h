@@ -28,6 +28,7 @@
 #define __UMF_ALLOCATOR__
 
 #include <iostream>
+#include <pthread.h>
 
 #include "asim/syntax.h"
 #include "asim/mesg.h"
@@ -54,6 +55,9 @@ class UMF_ALLOCATOR_CLASS: public TRACEABLE_CLASS
     // free list
     UMF_MESSAGE freeList;
     int         numFree;
+
+    // lock
+    pthread_mutex_t lock;
 
   public:
     // constructors and destructor

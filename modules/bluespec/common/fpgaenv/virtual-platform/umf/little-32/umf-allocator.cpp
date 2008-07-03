@@ -48,6 +48,9 @@ UMF_ALLOCATOR_CLASS::UMF_ALLOCATOR_CLASS()
     pool[UMF_POOL_SIZE-1].SetNext(NULL);
 
     numFree = UMF_POOL_SIZE;
+
+    // initialize lock
+    pthread_mutex_init(&lock, NULL);
 }
 
 // destructor
@@ -65,6 +68,8 @@ UMF_ALLOCATOR_CLASS::~UMF_ALLOCATOR_CLASS()
 UMF_MESSAGE
 UMF_ALLOCATOR_CLASS::New()
 {
+    pthread_mutex_lock(&lock);
+
     // check if we have anything available
     if (freeList == NULL)
     {
@@ -80,6 +85,8 @@ UMF_ALLOCATOR_CLASS::New()
     // track and log
     numFree--;
 
+    pthread_mutex_unlock(&lock);
+
     return retval;
 }
 
@@ -88,6 +95,8 @@ void
 UMF_ALLOCATOR_CLASS::Delete(
     UMF_MESSAGE msg)
 {
+    pthread_mutex_lock(&lock);
+
     assert(msg);
 
     // add to free list
@@ -96,4 +105,6 @@ UMF_ALLOCATOR_CLASS::Delete(
 
     // track and log
     numFree++;
+
+    pthread_mutex_unlock(&lock);
 }

@@ -14,13 +14,16 @@
 
 using namespace std;
 
+#define LOCK   { pthread_mutex_lock(&lock);   }
+#define UNLOCK { pthread_mutex_unlock(&lock); }
+
 // ============================================
 //                 Channel I/O                 
 // ============================================
 
 // constructor
 CHANNELIO_CLASS::CHANNELIO_CLASS(
-    PLATFORMS_MODULE     p,
+    PLATFORMS_MODULE p,
     PHYSICAL_DEVICES d) :
         PLATFORMS_MODULE_CLASS(p),
         physicalChannel(this, d)
@@ -32,6 +35,10 @@ CHANNELIO_CLASS::CHANNELIO_CLASS(
         stations[i].type = CIO_STATION_TYPE_READ;
         stations[i].module = NULL;
     }
+
+    // initialize mutexes (mutices?)
+    pthread_mutex_init(&bufferLock, NULL);
+    pthread_mutex_init(&channelLock, NULL);
 }
 
 // destructor
@@ -49,16 +56,64 @@ CHANNELIO_CLASS::RegisterForDelivery(
     stations[channel].module = module;
 }
 
+// non-blocking read
+UMF_MESSAGE
+CHANNELIO_CLASS::TryRead(
+    int channel)
+{
+    UMF_MESSAGE msg = NULL;
+
+    // check if a message is already enqueued in read buffer
+    pthread_mutex_lock(&bufferLock);
+    if (stations[channel].readBuffer.empty() == false)
+    {
+        msg = stations[channel].readBuffer.front();
+        stations[channel].readBuffer.pop();
+    }
+    pthread_mutex_unlock(&bufferLock);
+    
+    return msg;
+}
+
 // blocking read
 UMF_MESSAGE
 CHANNELIO_CLASS::Read(
     int channel)
 {
+    //
+    // We will use two locks to implement this functionality.
+    // The first lock called channelLock simply guards access to
+    // the physical channel layer (and can possibly be transferred
+    // to the physical channel code). The second lock, called
+    // bufferLock is a fine-grained lock that we use to control
+    // access to our internal per-channel buffers.
+    //
+    // I am NOT convinced that these two locks are sufficient to
+    // guarantee correct atomic behavior of channelio under all
+    // circumstances. Using a global lock around the Read and Write
+    // methods is much safer and easier to reason about, but
+    // unfortunately leads to a deadlock situation because of
+    // Delivery-type stations (the lock is still held while
+    // DeliverMessage is called, which in turn might call Write
+    // on us). I think we should get rid of the entire Delivery idea
+    // and require all stations to poll us for messages, although
+    // this would reduce performance somewhat.
+    //
+
+    UMF_MESSAGE msg = NULL;
+
     // first check if a message is already enqueued in read buffer
+    pthread_mutex_lock(&bufferLock);
     if (stations[channel].readBuffer.empty() == false)
     {
-        UMF_MESSAGE msg = stations[channel].readBuffer.front();
+        msg = stations[channel].readBuffer.front();
         stations[channel].readBuffer.pop();
+    }
+    pthread_mutex_unlock(&bufferLock);
+
+    // return if we found a message
+    if (msg)
+    {
         return msg;
     }
 
@@ -66,7 +121,9 @@ CHANNELIO_CLASS::Read(
     while (true)
     {
         // block-read a message from physical channel
-        UMF_MESSAGE msg = physicalChannel.Read();
+        pthread_mutex_lock(&channelLock);
+        msg = physicalChannel.Read();
+        pthread_mutex_unlock(&channelLock);
 
         // get virtual channel ID of incoming message
         int inchannel = msg->GetChannelID();
@@ -81,7 +138,9 @@ CHANNELIO_CLASS::Read(
         if (stations[inchannel].type == CIO_STATION_TYPE_READ)
         {
             // enqueue in read buffer
+            pthread_mutex_lock(&bufferLock);
             stations[inchannel].readBuffer.push(msg);
+            pthread_mutex_unlock(&bufferLock);
         }
         else
         {
@@ -104,7 +163,9 @@ CHANNELIO_CLASS::Write(
     message->SetChannelID(channel);
 
     // send to physical channel
+    pthread_mutex_lock(&channelLock);
     physicalChannel.Write(message);
+    pthread_mutex_unlock(&channelLock);
 }
 
 // poll
@@ -112,7 +173,10 @@ void
 CHANNELIO_CLASS::Poll()
 {
     // check if physical channel has a new message
+    pthread_mutex_lock(&channelLock);
     UMF_MESSAGE msg = physicalChannel.TryRead();
+    pthread_mutex_unlock(&channelLock);
+
     if (msg != NULL)
     {
         // get virtual channel ID
@@ -121,7 +185,9 @@ CHANNELIO_CLASS::Poll()
         // if this message is for a read-type station, then enqueue it
         if (stations[channelID].type == CIO_STATION_TYPE_READ)
         {
+            pthread_mutex_lock(&bufferLock);
             stations[channelID].readBuffer.push(msg);
+            pthread_mutex_unlock(&bufferLock);
         }
         else
         {
@@ -130,4 +196,3 @@ CHANNELIO_CLASS::Poll()
         }
     }
 }
-

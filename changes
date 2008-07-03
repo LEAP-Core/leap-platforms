@@ -4047,3 +4047,26 @@ Directory modules/bluespec/common/fpgaenv/fpga-components/hardware
  Bram.v                    Locally Modified          130 
 
 Reverting to the older version of Brams. I am working on getting the new version ready by today.
+
+----------
+aparasha    Date: Thu Jul  3 11:58:27 EDT 2008  CSN: CSN-platforms-132
+                  Thu Jul  3 15:58:27 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/basic
+ basic-channelio.cpp       Locally Modified          131 
+ basic-channelio.h         Locally Modified          131 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ basic-rrr-client.cpp      Locally Modified          131 
+ basic-rrr-client.h        Locally Modified          131 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface
+ llpi.cpp                  Locally Modified          131 
+ llpi.h                    Locally Modified          131 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/little-32
+ umf-allocator.cpp         Locally Modified          131 
+ umf-allocator.h           Locally Modified          131 
+
+Split software stack into two threads (see HAsim commit).

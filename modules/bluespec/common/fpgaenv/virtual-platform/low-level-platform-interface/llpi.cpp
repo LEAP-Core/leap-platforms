@@ -18,9 +18,20 @@ LLPI_CLASS::~LLPI_CLASS()
 }
 
 void
+LLPI_CLASS::Main()
+{
+    // infinite scheduler loop
+    while (true)
+    {
+        Poll();
+    }
+}
+
+void
 LLPI_CLASS::Poll()
 {
     // poll channelio and RRR server
     channelio.Poll();
     rrrServer.Poll();
+    rrrClient.Poll();
 }
