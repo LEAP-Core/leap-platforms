@@ -4070,3 +4070,16 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/little-32
  umf-allocator.h           Locally Modified          131 
 
 Split software stack into two threads (see HAsim commit).
+
+----------
+napatil     Date: Fri Jul 18 11:59:29 EDT 2008  CSN: CSN-platforms-133
+                  Fri Jul 18 15:59:29 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components/hardware
+ FpgaMemory.bsv            Locally Modified          132 
+ FAST_BRAM.v               Locally Added               0 
+ hardware-fpga-components.awb Locally Modified          132 
+ FAST_BRAM.bsv             Locally Added               0 
+
+Add the blockram module developed at UTFAST, and revert to the blockram wrappers developed in CSN-129 with some minor changes.

@@ -15,9 +15,7 @@
 # %attributes hasim
 #
 # %public FpgaMemory.bsv FpgaMemoryHasim.bsv
-# %private Bram.v
-#
-# %param SYNTH 1 "Synthesie it to FPGAs"
+# %private FAST_BRAM.bsv FAST_BRAM.v
 #
 # %AWB_END
 # */
