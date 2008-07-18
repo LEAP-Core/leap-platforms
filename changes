@@ -4083,3 +4083,16 @@ Directory modules/bluespec/common/fpgaenv/fpga-components/hardware
  FAST_BRAM.bsv             Locally Added               0 
 
 Add the blockram module developed at UTFAST, and revert to the blockram wrappers developed in CSN-129 with some minor changes.
+
+----------
+napatil     Date: Fri Jul 18 17:00:39 EDT 2008  CSN: CSN-platforms-134
+                  Fri Jul 18 21:00:39 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components/hardware
+ Clock100MHz.v             Locally Added               0 
+ Clock100MHz.bsv           Locally Added               0 
+
+Clock multiplier to generate 100MHz clock from a 50MHz clock. Completely
+un-tested.
+
