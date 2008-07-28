@@ -4096,3 +4096,54 @@ Directory modules/bluespec/common/fpgaenv/fpga-components/hardware
 Clock multiplier to generate 100MHz clock from a 50MHz clock. Completely
 un-tested.
 
+
+----------
+
+----------
+napatil     Date: Mon Jul 28 15:07:38 EDT 2008  CSN: CSN-platforms-135
+                  Mon Jul 28 19:07:38 UTC 2008
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ hasim-fpgaenv-hybrid-sim.apm Locally Modified          134 
+ hasim-fpgaenv-htg-v5-pcie.apm Locally Modified          134 
+
+Directory admin
+ mytags                    Locally Modified          134 
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ Clock100MHz.v             Locally Added               - 
+ FpgaMemory.bsv            Locally Added               - 
+ RegFileCF.bsv             Locally Added               0 
+ software-fpga-components.awb Locally Added               - 
+ FpgaMemoryHasim.bsv       Locally Added               - 
+ FAST_BRAM.v               Locally Added               - 
+ hardware-fpga-components.awb Locally Added               - 
+ Clock100MHz.bsv           Locally Added               - 
+ FAST_BRAM.bsv             Locally Added               - 
+ RegFileCF.c               Locally Added               0 
+ software/                 Locally Removed           134 
+
+Directory modules/bluespec/common/fpgaenv/fpga-components/software
+ FpgaMemory.bsv            Locally Removed           134 
+ software-fpga-components.awb Locally Removed           134 
+ FpgaMemoryHasim.bsv       Locally Removed           134 
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ hardware/                 Locally Removed           134 
+
+Directory modules/bluespec/common/fpgaenv/fpga-components/hardware
+ FpgaMemory.bsv            Locally Removed           134 
+ Clock100MHz.v             Locally Removed           134 
+ FpgaMemoryHasim.bsv       Locally Removed           134 
+ FAST_BRAM.v               Locally Removed           134 
+ hardware-fpga-components.awb Locally Removed           134 
+ Clock100MHz.bsv           Locally Removed           134 
+ Bram.v                    Locally Removed           134 
+ FAST_BRAM.bsv             Locally Removed           134 
+
+Directory .
+ changes                   Locally Modified          134 
+
+- move files from fpga-components/{hardware,software} into a single directory fpga-components, so that the awb files can share sources.
+- Modifications to the FAST blockram, in an attempt to make software and hardware simulation as close to each other as possible.

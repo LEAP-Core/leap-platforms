@@ -39,7 +39,7 @@ module dual_ported_bram (clka, clkb, ena, enb, wea, web, addra, addrb, dia, dib,
    input [ADDR_WIDTH-1:0] addra, addrb;
    input [DATA_WIDTH-1:0] 	  dia, dib;
    output [DATA_WIDTH-1:0] 	  doa, dob;
-   reg [DATA_WIDTH-1:0] 	  ram [DEPTH-1:0];
+   reg [DATA_WIDTH-1:0] 	  ram [DEPTH-1:0] /* synthesis syn_ramstyle="no_rw_check" */;
    reg [DATA_WIDTH-1:0] 	  doa, dob;
    
    always @(posedge clka) begin
@@ -60,7 +60,7 @@ module dual_ported_bram (clka, clkb, ena, enb, wea, web, addra, addrb, dia, dib,
 
 endmodule
 
-module FAST_BRAM (CLK, RST_N, RD_ADDRA, RD_ADDRB, REA, REB, WR_ADDRA, WR_ADDRB, WEA, WEB, DIA, DIB, DOA, DOB);
+module BRAM (CLK, RST_N, RD_ADDRA, RD_ADDRB, REA, REB, WR_ADDRA, WR_ADDRB, WEA, WEB, DIA, DIB, DOA, DOB, INIT);
 
    parameter DATA_WIDTH = 36;
    parameter ADDR_WIDTH = 9;
@@ -73,6 +73,7 @@ module FAST_BRAM (CLK, RST_N, RD_ADDRA, RD_ADDRB, REA, REB, WR_ADDRA, WR_ADDRB, 
    input [ADDR_WIDTH-1:0] WR_ADDRA, WR_ADDRB;
    input [DATA_WIDTH-1:0] DIA, DIB;
    output [DATA_WIDTH-1:0] DOA, DOB;
+   output                  INIT;
 
    wire 		  CLK, RST_N;
    wire 		  REA, REB;
@@ -81,12 +82,15 @@ module FAST_BRAM (CLK, RST_N, RD_ADDRA, RD_ADDRB, REA, REB, WR_ADDRA, WR_ADDRB, 
    wire [ADDR_WIDTH-1:0]  WR_ADDRA, WR_ADDRB;
    wire [DATA_WIDTH-1:0]  DIA, DIB;
    wire [DATA_WIDTH-1:0]  DOA, DOB;
+   wire                   INIT;
 
    wire 		  ENA, ENB;
    wire [ADDR_WIDTH-1:0]  ADDRA, ADDRB;
 
-   assign 		  ENA = 1;
-   assign 		  ENB = 1;
+   assign 		  ENA = REA || WEA;
+   assign 		  ENB = REB || WEB;
+
+   assign                 INIT = 1;
 
    assign 		  ADDRA = (WEA) ? WR_ADDRA : RD_ADDRA;
    assign 		  ADDRB = (WEB) ? WR_ADDRB : RD_ADDRB;

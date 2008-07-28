@@ -51,7 +51,12 @@ endinterface
 
 module mkBramRaw(BramRaw#(addrSz, dataT))
         provisos(Bits#(dataT, dataSz));
-    FAST_BRAM#(dataT, Bit#(addrSz)) fast_bram <- mkFAST_BRAM_verilog;
+    Integer depth = valueof(TExp#(addrSz));
+    `ifdef SYNTH
+    FAST_BRAM#(dataT, Bit#(addrSz)) fast_bram <- mkFAST_BRAMU_verilog(depth);
+    `else
+    FAST_BRAM#(dataT, Bit#(addrSz)) fast_bram <- mkFAST_BRAMU_sim(depth);
+    `endif
     method Action portReq1(Bit#(addrSz) addr, dataT data, Bool write);
         if (write)
             fast_bram.write(addr, data);

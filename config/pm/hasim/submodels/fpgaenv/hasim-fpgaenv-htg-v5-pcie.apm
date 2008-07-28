@@ -34,7 +34,7 @@ File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/std-virtua
 Packagehint=platforms
 
 [Hardware FPGA Components]
-File=modules/bluespec/common/fpgaenv/fpga-components/hardware/hardware-fpga-components.awb
+File=modules/bluespec/common/fpgaenv/fpga-components/hardware-fpga-components.awb
 Packagehint=platforms
 
 [Standard Virtual Devices/Requires]
@@ -105,7 +105,6 @@ Packagehint=platforms
 [Little-Endian 32-bit Unified Message Format]
 File=modules/bluespec/common/fpgaenv/virtual-platform/umf/little-32/umf-little-32.awb
 Packagehint=platforms
-
 
 [PCI-Express CSR-based Physical Channel]
 File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/pcie-csr/pcie-physical-channel.awb

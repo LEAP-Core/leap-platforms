@@ -12,10 +12,6 @@ Class=Asim::Model
 DefaultAttributes=bluespec
 model=FPGA Environment
 
-[Software FPGA Components]
-File=modules/bluespec/common/fpgaenv/fpga-components/software/software-fpga-components.awb
-Packagehint=platforms
-
 [FPGA Environment]
 File=modules/bluespec/common/fpgaenv/fpga-environment.awb
 Packagehint=platforms
@@ -49,7 +45,6 @@ Packagehint=platforms
 front_panel=Hybrid Front Panel
 streams=Hybrid Streams
 scratchpad_memory=Null Scratchpad Memory Device
-
 
 [Hybrid Streams]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/streams/hybrid-streams.awb
@@ -90,7 +85,10 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/null/memory_virtual_device_null.awb
 Packagehint=platforms
 
-
 [Little-Endian 32-bit Unified Message Format]
 File=modules/bluespec/common/fpgaenv/virtual-platform/umf/little-32/umf-little-32.awb
+Packagehint=platforms
+
+[Software FPGA Components]
+File=modules/bluespec/common/fpgaenv/fpga-components/software-fpga-components.awb
 Packagehint=platforms
