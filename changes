@@ -4147,3 +4147,17 @@ Directory .
 
 - move files from fpga-components/{hardware,software} into a single directory fpga-components, so that the awb files can share sources.
 - Modifications to the FAST blockram, in an attempt to make software and hardware simulation as close to each other as possible.
+
+----------
+napatil     Date: Mon Jul 28 18:05:55 EDT 2008  CSN: CSN-platforms-136
+                  Mon Jul 28 22:05:55 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ FpgaMemory.bsv            Locally Modified          135 
+ software-fpga-components.awb Locally Modified          135 
+ hardware-fpga-components.awb Locally Modified          135 
+ Bram.v                    Locally Added               0 
+
+DO NOT DELETE THIS LINE! ADD COMMENTS BELOW
+reverting to blockram from csn-platforms-131

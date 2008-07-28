@@ -14,10 +14,10 @@
 #
 # %attributes hasim
 #
-# %public FpgaMemory.bsv FpgaMemoryHasim.bsv Clock100MHz.bsv
-# %private FAST_BRAM.bsv FAST_BRAM.v Clock100MHz.v RegFileCF.bsv RegFileCF.c
+# %public FpgaMemory.bsv FpgaMemoryHasim.bsv
+# %private Bram.v
 #
-# %param SYNTH 1
+# %param SYNTH 1 "Synthesie it to FPGAs"
 #
 # %AWB_END
 # */

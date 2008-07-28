@@ -15,9 +15,6 @@
 # %attributes hasim
 #
 # %public FpgaMemory.bsv FpgaMemoryHasim.bsv
-# %private FAST_BRAM.bsv RegFileCF.bsv RegFileCF.c
-#
-# %param SYNTH 0
 #
 # %AWB_END
 # */
