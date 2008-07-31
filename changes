@@ -4161,3 +4161,16 @@ Directory modules/bluespec/common/fpgaenv/fpga-components
 
 DO NOT DELETE THIS LINE! ADD COMMENTS BELOW
 reverting to blockram from csn-platforms-131
+
+----------
+aparasha    Date: Thu Jul 31 12:46:49 EDT 2008  CSN: CSN-platforms-137
+                  Thu Jul 31 16:46:49 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid
+ hybrid-fp.cpp             Locally Modified          136 
+ hybrid-fp.rrr             Locally Modified          136 
+ hybrid-fp.h               Locally Modified          136 
+ hybrid-fp.bsv             Locally Modified          136 
+
+Updated front panel to use client software stubs

@@ -2,6 +2,7 @@
 #define __HYBRID_FRONT_PANEL__
 
 #include "asim/provides/rrr.h"
+#include "asim/rrr/client_stub_FRONT_PANEL.h"
 
 #define SELECT_TIMEOUT      1000
 #define DIALOG_PACKET_SIZE  4
@@ -13,7 +14,10 @@ class FRONT_PANEL_CLASS:    public RRR_SERVICE_CLASS,
 {
     private:
         // self-instantiation
-        static FRONT_PANEL_CLASS    instance;
+        static FRONT_PANEL_CLASS instance;
+
+        // instantiate stubs
+        FRONT_PANEL_CLIENT_STUB_CLASS clientStub;
 
         // other data
         int     dialogpid;

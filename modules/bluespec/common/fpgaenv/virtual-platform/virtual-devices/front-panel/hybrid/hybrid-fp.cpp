@@ -19,7 +19,8 @@
 FRONT_PANEL_CLASS   FRONT_PANEL_CLASS::instance;
 
 // constructor
-FRONT_PANEL_CLASS::FRONT_PANEL_CLASS()
+FRONT_PANEL_CLASS::FRONT_PANEL_CLASS() :
+    clientStub(this)
 {
     // register with server's map table
     RRR_SERVER_CLASS::RegisterService(SERVICE_ID, &instance);
@@ -34,7 +35,7 @@ FRONT_PANEL_CLASS::~FRONT_PANEL_CLASS()
 // init
 void
 FRONT_PANEL_CLASS::Init(
-    PLATFORMS_MODULE     p)
+    PLATFORMS_MODULE p)
 {
     // set parent pointer
     parent = p;
@@ -158,14 +159,7 @@ FRONT_PANEL_CLASS::Poll()
     // if input cache was changed, update hardware partition
     if (inputDirty)
     {
-        UMF_MESSAGE msg = UMF_MESSAGE_CLASS::New();
-        msg->SetLength(4);
-        msg->SetServiceID(SERVICE_ID);
-        msg->SetMethodID(0);
-        msg->AppendUINT32(inputCache);
-
-        RRRClient->MakeRequestNoResponse(msg);
-
+        clientStub.UpdateSwitchesButtons(inputCache);
         inputDirty = false;
     }
 }

@@ -48,14 +48,14 @@ module mkFrontPanel#(LowLevelPlatformInterface llpi) (FrontPanel);
 
     // sync LED state
     rule send_RRR_request (outputDirty == True);
-        client_stub.makeRequest_UpdateLEDs(ledState);
+        client_stub.makeRequest_UpdateLEDs(zeroExtend(pack(ledState)));
         outputDirty <= False;
     endrule
 
     // read incoming updates for switch/button state
     rule probe_updates (True);
-        FRONTP_INPUT_STATE data <- server_stub.acceptRequest_UpdateSwitchesButtons();
-        inputCache <= data;
+        UINT32 data <- server_stub.acceptRequest_UpdateSwitchesButtons();
+        inputCache <= unpack(data);
     endrule
 
     // return switch state from input cache

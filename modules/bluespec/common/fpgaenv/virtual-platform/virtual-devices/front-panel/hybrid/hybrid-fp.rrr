@@ -2,11 +2,11 @@ service FRONT_PANEL
 {
     server hw (bsv, method) <- sw (cpp, method)
     {
-        method UpdateSwitchesButtons(in FRONTP_INPUT_STATE[32] state);
+        method UpdateSwitchesButtons(in UINT32[32] state);
     };
 
     server sw (cpp, method) <- hw (bsv, method)
     {
-        method UpdateLEDs(in FRONTP_LEDS[4] state);
+        method UpdateLEDs(in UINT8[8] state);
     };
 };
