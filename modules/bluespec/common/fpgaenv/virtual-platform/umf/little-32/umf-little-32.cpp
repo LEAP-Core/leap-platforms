@@ -192,6 +192,13 @@ UMF_MESSAGE_CLASS::AppendBytes(
 }
 
 void
+UMF_MESSAGE_CLASS::AppendUINT8(
+    UINT8 data)
+{
+    AppendBytes(sizeof(UINT8), (unsigned char*) &data);
+}
+
+void
 UMF_MESSAGE_CLASS::AppendUINT32(
     UINT32 data)
 {
@@ -273,6 +280,15 @@ UMF_MESSAGE_CLASS::ExtractBytes(
     CheckExtractSanity(nbytes);
     memcpy(data, &message[readIndex], nbytes);
     readIndex += nbytes;
+}
+
+UINT8
+UMF_MESSAGE_CLASS::ExtractUINT8()
+{
+    CheckExtractSanity(sizeof(UINT8));
+    UINT8 retval = *(UINT8 *)(&message[readIndex]);
+    readIndex += sizeof(UINT8);
+    return retval;
 }
 
 UINT32

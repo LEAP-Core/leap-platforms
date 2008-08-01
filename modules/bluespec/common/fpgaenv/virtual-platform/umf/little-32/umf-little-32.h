@@ -102,6 +102,7 @@ class UMF_MESSAGE_CLASS
     bool               CanAppend();
     
     void               AppendBytes(int nbytes, unsigned char data[]);
+    void               AppendUINT8(UINT8 data);
     void               AppendUINT32(UINT32 data);
     void               AppendUINT64(UINT64 data);
     void               AppendUINT(UINT64 data, int nbytes);
@@ -113,6 +114,7 @@ class UMF_MESSAGE_CLASS
     void               CheckExtractSanity(int nbytes);
     
     void               ExtractBytes(int nbytes, unsigned char data[]);
+    UINT8              ExtractUINT8();
     UINT32             ExtractUINT32();
     UINT64             ExtractUINT64();
     UINT64             ExtractUINT(int nbytes);

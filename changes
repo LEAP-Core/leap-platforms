@@ -4174,3 +4174,14 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front
  hybrid-fp.bsv             Locally Modified          136 
 
 Updated front panel to use client software stubs
+
+----------
+aparasha    Date: Fri Aug  1 13:42:05 EDT 2008  CSN: CSN-platforms-138
+                  Fri Aug  1 17:42:05 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/little-32
+ umf-little-32.cpp         Locally Modified          137 
+ umf-little-32.h           Locally Modified          137 
+
+added a software marshaller/demarshaller for UINT8
