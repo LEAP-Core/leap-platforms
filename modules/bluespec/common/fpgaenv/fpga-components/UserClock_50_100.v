@@ -5,12 +5,12 @@
 
 `timescale 1ns / 1ps
 
-module clk_100mhz (CLKIN_IN,
-              RST_IN,
-              CLKIN_IBUFG_OUT,
-              CLK0_OUT,
-              CLK2X_OUT,
-              LOCKED_OUT);
+module clk_50_100(CLKIN_IN,
+                  RST_IN,
+                  CLKIN_IBUFG_OUT,
+                  CLK0_OUT,
+                  CLK2X_OUT,
+                  LOCKED_OUT);
 
     input CLKIN_IN;
     input RST_IN;
@@ -81,9 +81,9 @@ module clk_100mhz (CLKIN_IN,
    defparam DCM_ADV_INST.SIM_DEVICE = "VIRTEX5";
 endmodule
 
-module vClock100MHz(CLK, RST_N, CLK_OUT, RST_N_OUT);
+module mkUserClock_50_to_100(CLK, RST_N, CLK_OUT, RST_N_OUT);
     assign RST = !RST_N;
-    clk_100mhz x (.CLKIN_IN(CLK),
+    clk_50_100 x (.CLKIN_IN(CLK),
                   .RST_IN(RST),
                   .CLKIN_IBUFG_OUT(),
                   .CLK0_OUT(),

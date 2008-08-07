@@ -14,7 +14,9 @@
 #
 # %attributes hasim
 #
-# %public FpgaMemory.bsv FpgaMemoryHasim.bsv
+# %public FpgaMemory.bsv FpgaMemoryHasim.bsv UserClock.bsv
+#
+# %param CRYSTAL_CLOCK_FREQ 50 "Input (Crystal) Clock Frequency"
 #
 # %AWB_END
 # */

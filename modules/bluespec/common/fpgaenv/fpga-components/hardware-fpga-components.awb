@@ -14,10 +14,12 @@
 #
 # %attributes hasim
 #
-# %public FpgaMemory.bsv FpgaMemoryHasim.bsv
-# %private Bram.v
+# %public FpgaMemory.bsv FpgaMemoryHasim.bsv UserClock.bsv
+# %private Bram.v UserClock_50_100.v
 #
-# %param SYNTH 1 "Synthesie it to FPGAs"
+# %param CRYSTAL_CLOCK_FREQ 50 "Input (Crystal) Clock Frequency"
+#
+# %param SYNTH 1 "Synthesize it to FPGAs"
 #
 # %AWB_END
 # */

@@ -4185,3 +4185,26 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/little-32
  umf-little-32.h           Locally Modified          137 
 
 added a software marshaller/demarshaller for UINT8
+
+----------
+nikhil      Date: Thu Aug  7 17:30:59 CDT 2008  CSN: CSN-platforms-139
+                  Thu Aug  7 22:30:59 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ Clock100MHz.v             Locally Removed           138 
+ software-fpga-components.awb Locally Modified          138 
+ UserClock_50_100.v        Locally Added               0 
+ hardware-fpga-components.awb Locally Modified          138 
+ UserClock.bsv             Locally Added               0 
+ Clock100MHz.bsv           Locally Removed           138 
+
+mkUserClock(outFreq, inFreq) generates a clock with frequency outFreq
+from a clock of frequency inFreq. Due to implementation reasons, only
+certain combinations of <inFreq, outFreq> are legal:
+
+1. out = in: The trivial case
+2. out = in / 2: This instantiates a generic clock-divide-by-two circuit.
+3. in = 50MHz, out = 100MHz: This instantiates a DCM on the FPGA.
+
+fpga-components defines %param CRYSTAL_CLOCK_FREQ to be 50MHz.
