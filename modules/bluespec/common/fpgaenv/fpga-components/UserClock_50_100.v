@@ -82,6 +82,14 @@ module clk_50_100(CLKIN_IN,
 endmodule
 
 module mkUserClock_50_to_100(CLK, RST_N, CLK_OUT, RST_N_OUT);
+
+    input CLK;
+    input RST_N;
+    output CLK_OUT;
+    output RST_N_OUT;
+
+    wire RST;
+
     assign RST = !RST_N;
     clk_50_100 x (.CLKIN_IN(CLK),
                   .RST_IN(RST),

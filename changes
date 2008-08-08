@@ -4208,3 +4208,13 @@ certain combinations of <inFreq, outFreq> are legal:
 3. in = 50MHz, out = 100MHz: This instantiates a DCM on the FPGA.
 
 fpga-components defines %param CRYSTAL_CLOCK_FREQ to be 50MHz.
+
+----------
+napatil     Date: Fri Aug  8 00:30:06 EDT 2008  CSN: CSN-platforms-140
+                  Fri Aug  8 04:30:06 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ UserClock_50_100.v        Locally Modified          139 
+
+Fixed bug in the verilog in UserClock_50_100.v (port declarations were missing), so it should synthesize now.
