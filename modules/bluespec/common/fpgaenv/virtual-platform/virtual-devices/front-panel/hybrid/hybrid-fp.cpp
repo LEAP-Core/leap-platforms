@@ -6,35 +6,34 @@
 #include <sys/types.h>
 #include <signal.h>
 
-
 #include "asim/rrr/service_ids.h"
 #include "asim/provides/rrr.h"
 
 #include "asim/provides/command_switches.h"
 #include "asim/provides/front_panel.h"
 
-#define SERVICE_ID  FRONT_PANEL_SERVICE_ID
+#define SERVICE_ID FRONT_PANEL_SERVICE_ID
 
 // service instantiation
-FRONT_PANEL_CLASS   FRONT_PANEL_CLASS::instance;
+FRONT_PANEL_SERVER_CLASS FRONT_PANEL_SERVER_CLASS::instance;
 
 // constructor
-FRONT_PANEL_CLASS::FRONT_PANEL_CLASS() :
-    clientStub(this)
+FRONT_PANEL_SERVER_CLASS::FRONT_PANEL_SERVER_CLASS()
 {
-    // register with server's map table
-    RRR_SERVER_CLASS::RegisterService(SERVICE_ID, &instance);
+    // instantiate stubs
+    clientStub = new FRONT_PANEL_CLIENT_STUB_CLASS(this);
+    serverStub = new FRONT_PANEL_SERVER_STUB_CLASS(this);
 }
 
 // destructor
-FRONT_PANEL_CLASS::~FRONT_PANEL_CLASS()
+FRONT_PANEL_SERVER_CLASS::~FRONT_PANEL_SERVER_CLASS()
 {
     Cleanup();
 }
 
 // init
 void
-FRONT_PANEL_CLASS::Init(
+FRONT_PANEL_SERVER_CLASS::Init(
     PLATFORMS_MODULE p)
 {
     // set parent pointer
@@ -88,7 +87,7 @@ FRONT_PANEL_CLASS::Init(
 
 // uninit: override
 void
-FRONT_PANEL_CLASS::Uninit()
+FRONT_PANEL_SERVER_CLASS::Uninit()
 {
     // cleanup
     Cleanup();
@@ -99,7 +98,7 @@ FRONT_PANEL_CLASS::Uninit()
 
 // cleanup: kill panel process
 void
-FRONT_PANEL_CLASS::Cleanup()
+FRONT_PANEL_SERVER_CLASS::Cleanup()
 {
     if (childAlive)
     {
@@ -107,33 +106,28 @@ FRONT_PANEL_CLASS::Cleanup()
         kill(dialogpid, SIGTERM);
         childAlive = false;
     }
+
+    // destroy stubs
+    delete clientStub;
+    delete serverStub;
 }
 
-// request
-UMF_MESSAGE
-FRONT_PANEL_CLASS::Request(
-    UMF_MESSAGE req)
+// handle UpdateLEDs request
+void
+FRONT_PANEL_SERVER_CLASS::UpdateLEDs(
+    UINT8 state)
 {
-    // extract value
-    UINT32 data = req->ExtractUINT32();
-
     // update cache and set dirty bit
-    if (outputCache != data)
+    if (outputCache != state)
     {
-        outputCache = data;
+        outputCache = state;
         outputDirty = true;
     }
-
-    // get rid of request message
-    req->Delete();
-
-    // no response, return NULL
-    return NULL;
 }
 
 // poll
 void
-FRONT_PANEL_CLASS::Poll()
+FRONT_PANEL_SERVER_CLASS::Poll()
 {
     // Is dialog disabled?
     if (globalArgs->ShowFrontPanel() == false)
@@ -159,29 +153,27 @@ FRONT_PANEL_CLASS::Poll()
     // if input cache was changed, update hardware partition
     if (inputDirty)
     {
-        clientStub.UpdateSwitchesButtons(inputCache);
+        clientStub->UpdateSwitchesButtons(inputCache);
         inputDirty = false;
     }
 }
 
 // internal helper method: sync input cache state for console
 void
-FRONT_PANEL_CLASS::syncInputsConsole()
+FRONT_PANEL_SERVER_CLASS::syncInputsConsole()
 {
 }
 
-
 // internal helper method: sync output cache state for console
 void
-FRONT_PANEL_CLASS::syncOutputsConsole()
+FRONT_PANEL_SERVER_CLASS::syncOutputsConsole()
 {
     printf("LEDS: %032x\n", outputCache);
 }
 
-
 // internal helper method: sync input cache state with dialog box
 void
-FRONT_PANEL_CLASS::syncInputs()
+FRONT_PANEL_SERVER_CLASS::syncInputs()
 {
     int     data_available;
     fd_set  readfds;
@@ -268,14 +260,14 @@ FRONT_PANEL_CLASS::syncInputs()
 
 // internal helper method: sync output cache state with dialog box
 void
-FRONT_PANEL_CLASS::syncOutputs()
+FRONT_PANEL_SERVER_CLASS::syncOutputs()
 {
     UINT32      mask;
     int         i;
     char        asciibuf[DIALOG_PACKET_SIZE * 8];
     int         nbytes;
 
-    int write_to_dialog  = parent_to_child[1];
+    int write_to_dialog = parent_to_child[1];
 
     // convert to ASCII
     mask = 1;

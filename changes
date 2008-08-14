@@ -4218,3 +4218,49 @@ Directory modules/bluespec/common/fpgaenv/fpga-components
  UserClock_50_100.v        Locally Modified          139 
 
 Fixed bug in the verilog in UserClock_50_100.v (port declarations were missing), so it should synthesize now.
+
+----------
+aparasha    Date: Thu Aug 14 15:49:52 EDT 2008  CSN: CSN-platforms-141
+                  Thu Aug 14 19:49:52 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ basic-rrr-server.bsv      Locally Modified          140 
+ arbiters.bsv              Locally Added               0 
+ old-rrr-client.bsv        Locally Removed           140 
+ basic-rrr-client.bsv      Locally Modified          140 
+ basic-rrr-server.cpp      Locally Modified          140 
+ basic-rrr.awb             Locally Modified          140 
+ basic-rrr-server.h        Locally Modified          140 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface
+ llpi.h                    Locally Modified          140 
+ llpi.bsv                  Locally Modified          140 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid
+ hybrid-fp.cpp             Locally Modified          140 
+ hybrid-fp.h               Locally Modified          140 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/streams
+ hybrid-streams-services.rrr Locally Modified          140 
+ hybrid-streams.h          Locally Modified          140 
+ hybrid-streams.bsv        Locally Modified          140 
+ hybrid-streams.cpp        Locally Modified          140 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/little-32
+ umf-little-32.cpp         Locally Modified          140 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe
+ unix-pipe-device-bdpi.c   Locally Modified          140 
+
+- added support for auto-generated software server stubs (see HAsim commit #507).
+
+- removed "old" RRR client from LLPI, and updated all services using this client to use
+  new auto-generated infrastructure.
+
+- moved the arbitration logic from basic-rrr-server.bsv and basic-rrr-client.bsv into
+  a separate module in arbiters.bsv. Also added a preliminary round-robin priority
+  arbiter that shuffles the priority every FPGA cycle. This implementation is somewhat
+  naive and will not scale well.
+
+- removed "EOF seen" message from unix-pipe-device-bdpi.c.

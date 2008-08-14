@@ -9,62 +9,64 @@
 #define MAX_SERVICES            64
 #define MAX_ARGS                4
 
-// ============== RRR service base class =================
-typedef class RRR_SERVICE_CLASS* RRR_SERVICE;
-class RRR_SERVICE_CLASS
-{
-    protected:
-        int             serviceID;  // unique service ID
+// ============== RRR server base class =================
 
-    public:
-        virtual void        Init(PLATFORMS_MODULE)                            = 0;
-        virtual bool        Request(UINT32, UINT32, UINT32, UINT32, UINT32 *);     // back-compat
-        virtual UMF_MESSAGE Request(UMF_MESSAGE);
-        virtual void        Poll(void) {};
-    
+typedef class RRR_SERVER_CLASS* RRR_SERVER;
+class RRR_SERVER_CLASS
+{
+  public:
+    virtual void        Init(PLATFORMS_MODULE) = 0;
+    virtual void        Poll(void) {};    
 };
 
+// ============== RRR server stub base class =================
 
-// ================== Basic RRR server ==================
-
-// main server class
-typedef class RRR_SERVER_CLASS* RRR_SERVER;
-class RRR_SERVER_CLASS: public PLATFORMS_MODULE_CLASS,
-                        public CIO_DELIVERY_STATION_CLASS
+typedef class RRR_SERVER_STUB_CLASS* RRR_SERVER_STUB;
+class RRR_SERVER_STUB_CLASS
 {
-    private:
+  public:
+    virtual UMF_MESSAGE Request(UMF_MESSAGE)   = 0;
+    virtual void        Init(PLATFORMS_MODULE) = 0;
+    virtual void        Poll(void)             = 0;
+};
 
-        // static service table
-        static RRR_SERVICE  ServiceMap[MAX_SERVICES];
+// ================== Basic RRR Server Monitor ==================
 
-        // maintain a valid-mask for services that have properly
-        // registered themselves. We do this because it is possible
-        // to explicitly intialize a simple integer static variable
-        // to 0, but not an entire array.
-        static UINT64       ServiceValidMask;
+typedef class RRR_SERVER_MONITOR_CLASS* RRR_SERVER_MONITOR;
+class RRR_SERVER_MONITOR_CLASS: public PLATFORMS_MODULE_CLASS,
+                                public CIO_DELIVERY_STATION_CLASS
+{
+  private:
+    
+    // static service table
+    static RRR_SERVER_STUB ServerMap[MAX_SERVICES];
+    
+    // maintain a valid-mask for services that have properly
+    // registered themselves. We do this because it is possible
+    // to explicitly intialize a simple integer static variable
+    // to 0, but not an entire array.
+    static UINT64 RegistrationMask;
+    
+    // link to lower layer in protocol stack
+    CHANNELIO channelio;
+    
+    // internal methods
+    static inline bool isServerRegistered(int serviceid);
+    static inline void setServerRegistered(int serviceid);
+    static inline void unsetServerRegistered(int serviceid);
+    
+  public:
 
-        // link to lower layer in protocol stack
-        CHANNELIO           channelio;
-
-        // internal methods
-        void    unpack(UINT32, unsigned char[]);
-        UINT32  pack(unsigned char[]);
-
-        static inline bool isServiceValid(int serviceid);
-        static inline void setServiceValid(int serviceid);
-        static inline void unsetServiceValid(int serviceid);
-
-    public:
-        // static methods used to populate service table
-        static void RegisterService(int serviceid, RRR_SERVICE service);
-
-        // regular methods
-        RRR_SERVER_CLASS(PLATFORMS_MODULE, CHANNELIO);
-        ~RRR_SERVER_CLASS();
-        void    Init();
-        void    Uninit();
-        void    Poll();
-        void    DeliverMessage(UMF_MESSAGE msg);
+    // static methods used to populate service table
+    static void RegisterServer(int serviceid, RRR_SERVER_STUB server_stub);
+    
+    // regular methods
+    RRR_SERVER_MONITOR_CLASS(PLATFORMS_MODULE, CHANNELIO);
+    ~RRR_SERVER_MONITOR_CLASS();
+    void    Init();
+    void    Uninit();
+    void    Poll();
+    void    DeliverMessage(UMF_MESSAGE msg);
 };
 
 #endif

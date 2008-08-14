@@ -14,11 +14,11 @@ class LLPI_CLASS: public PLATFORMS_MODULE_CLASS
 {
   private:
     // LLPI stack layers
-    PHYSICAL_DEVICES_CLASS physicalDevices;
-    CHANNELIO_CLASS        channelio;
-    RRR_CLIENT_CLASS       rrrClient;
-    RRR_SERVER_CLASS       rrrServer;
-    
+    PHYSICAL_DEVICES_CLASS   physicalDevices;
+    CHANNELIO_CLASS          channelio;
+    RRR_CLIENT_CLASS         rrrClient;
+    RRR_SERVER_MONITOR_CLASS rrrServer;
+
   public:
     // constructor - destructor
     LLPI_CLASS();
@@ -28,10 +28,10 @@ class LLPI_CLASS: public PLATFORMS_MODULE_CLASS
     void Main();
     
     // accessors
-    PHYSICAL_DEVICES GetPhysicalDevices() { return &physicalDevices; }
-    CHANNELIO        GetChannelIO()       { return &channelio; }
-    RRR_CLIENT       GetRRRClient()       { return &rrrClient; }
-    RRR_SERVER       GetRRRServer()       { return &rrrServer; }
+    PHYSICAL_DEVICES   GetPhysicalDevices() { return &physicalDevices; }
+    CHANNELIO          GetChannelIO()       { return &channelio; }
+    RRR_CLIENT         GetRRRClient()       { return &rrrClient; }
+    RRR_SERVER_MONITOR GetRRRServer()       { return &rrrServer; }
 
     // poll
     void Poll();

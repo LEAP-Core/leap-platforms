@@ -1,3 +1,23 @@
+/*****************************************************************************
+ * basic-rrr-client.bsv
+ *
+ * Copyright (C) 2008 Intel Corporation
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
+
 import Vector::*;
 import FIFOF::*;
 
@@ -64,7 +84,11 @@ module mkRRRClient#(CHANNEL_IO channel) (RRR_CLIENT);
                             endmethod
                         endinterface;
     end
-
+    
+    // === arbiters ===
+    
+    ARBITER#(`NUM_SERVICES) arbiter <- mkRoundRobinArbiter();
+    
     // === other state ===
 
     Reg#(UMF_MSG_LENGTH) requestChunksRemaining  <- mkReg(0);
@@ -107,35 +131,21 @@ module mkRRRClient#(CHANNEL_IO channel) (RRR_CLIENT);
     //                          Request Rules
     // ==============================================================
     
-    // start generating explicit priority arbiter
-    Bool p_request[`NUM_SERVICES];
-    Bool higher_priority_request[`NUM_SERVICES];
-    Bool p_grant[`NUM_SERVICES];
+    // arbitrate
+    Bit#(`NUM_SERVICES) request = '0;
+    for (Integer i = 0; i < `NUM_SERVICES; i = i + 1)
+    begin
+        request[i] = pack((requestChunksRemaining == 0) && (requestQueues[i].notEmpty()));
+    end
+
+    Bit#(`NUM_SERVICES) grant = arbiter.arbitrate(request);
 
     // static loop for all request queues
     for (Integer i = 0; i < `NUM_SERVICES; i = i + 1)
     begin
 
-        // compute priority for this queue (static request/grant)
-        // current algorithm involves a chain OR, which is fine for
-        // a small number of request queues
-
-        p_request[i] = (requestChunksRemaining == 0) &&
-                       (requestQueues[i].notEmpty());
-
-        if (i == 0)
-        begin
-            p_grant[i] = p_request[i];
-            higher_priority_request[i] = p_request[i];
-        end
-        else
-        begin
-            p_grant[i] = (!higher_priority_request[i-1]) && p_request[i];
-            higher_priority_request[i] = higher_priority_request[i-1] || p_request[i];
-        end
-
         // start writing new message
-        rule write_request_newmsg (p_grant[i]);
+        rule write_request_newmsg (grant[i] == 1);
 
             // get header packet
             UMF_PACKET packet = requestQueues[i].first();

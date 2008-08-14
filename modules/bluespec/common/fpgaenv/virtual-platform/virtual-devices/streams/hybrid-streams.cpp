@@ -19,26 +19,27 @@
 using namespace std;
 
 // ===== service instantiation =====
-STREAMS_CLASS STREAMS_CLASS::instance;
+STREAMS_SERVER_CLASS STREAMS_SERVER_CLASS::instance;
 
 // ===== methods =====
 
 // constructor
-STREAMS_CLASS::STREAMS_CLASS()
+STREAMS_SERVER_CLASS::STREAMS_SERVER_CLASS()
 {
-    // register with server's map table
-    RRR_SERVER_CLASS::RegisterService(SERVICE_ID, &instance);
+    // instantiate stubs
+    serverStub = new STREAMS_SERVER_STUB_CLASS(this);
 }
 
 // destructor
-STREAMS_CLASS::~STREAMS_CLASS()
+STREAMS_SERVER_CLASS::~STREAMS_SERVER_CLASS()
 {
+    Cleanup();
 }
 
 // init
 void
-STREAMS_CLASS::Init(
-    PLATFORMS_MODULE     p)
+STREAMS_SERVER_CLASS::Init(
+    PLATFORMS_MODULE p)
 {
     // set parent pointer
     parent = p;
@@ -53,27 +54,30 @@ STREAMS_CLASS::Init(
 
 // uninit: we have to write this explicitly
 void
-STREAMS_CLASS::Uninit()
+STREAMS_SERVER_CLASS::Uninit()
 {
-    // simply chain
+    Cleanup();
+
+    // chain
     PLATFORMS_MODULE_CLASS::Uninit();
 }
 
-// request
-bool
-STREAMS_CLASS::Request(
-    UINT32 arg0,
-    UINT32 arg1,
-    UINT32 arg2,
-    UINT32 arg3,
-    UINT32 *result)
+// cleanup
+void
+STREAMS_SERVER_CLASS::Cleanup()
 {
-    // extract IDs and payloads
-    UINT32 streamID = arg0;
-    UINT32 stringID = arg1;
-    UINT32 payload0 = arg2;
-    UINT32 payload1 = arg3;
+    // destroy stubs
+    delete serverStub;
+}
 
+// RRR request method
+void
+STREAMS_SERVER_CLASS::Print(
+    UINT32 streamID,
+    UINT32 stringID,
+    UINT32 payload0,
+    UINT32 payload1)
+{
     // lookup format string from dictionary
     const char *fmtstr = STREAMS_DICT::Str(stringID);
     if (fmtstr == NULL)
@@ -123,23 +127,21 @@ STREAMS_CLASS::Request(
     }
 
     // On special exit message exit the program
-    if ( stringID == STREAMS_MESSAGE_EXIT ) {
-        exit(arg1 == 0);
+    if ( stringID == STREAMS_MESSAGE_EXIT )
+    {
+        CallbackExit(payload0);
     }
-
-    // no RRR response
-    return false;
 }
 
-// poll
+// poll: FIXME FIXME FIXME we need this
 void
-STREAMS_CLASS::Poll()
+STREAMS_SERVER_CLASS::Poll()
 {
 }
 
 // map a stream to an output file
 void
-STREAMS_CLASS::MapStream(
+STREAMS_SERVER_CLASS::MapStream(
     int   streamID,
     FILE *out)
 {
@@ -156,7 +158,7 @@ STREAMS_CLASS::MapStream(
 
 // set link to module to be called back
 void
-STREAMS_CLASS::RegisterCallback(
+STREAMS_SERVER_CLASS::RegisterCallback(
     int streamID,
     STREAMS_CALLBACK_MODULE module)
 {
@@ -165,7 +167,7 @@ STREAMS_CLASS::RegisterCallback(
 
 // count number of payloads in a printf-style format string
 int
-STREAMS_CLASS::CountPayloads(
+STREAMS_SERVER_CLASS::CountPayloads(
     const char *str)
 {
     // simply count the number of %'s in the string. The only
@@ -189,4 +191,3 @@ STREAMS_CLASS::CountPayloads(
 
     return count;
 }
-

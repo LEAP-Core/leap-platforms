@@ -69,6 +69,10 @@ module mkRRRServer#(CHANNEL_IO channel) (RRR_SERVER);
                         endinterface;
     end
 
+    // === arbiters ===
+    
+    ARBITER#(`NUM_SERVICES) arbiter <- mkRoundRobinArbiter();
+    
     // === other state ===
 
     Reg#(UMF_MSG_LENGTH) requestChunksRemaining  <- mkReg(0);
@@ -111,35 +115,21 @@ module mkRRRServer#(CHANNEL_IO channel) (RRR_SERVER);
     //                          Response Rules
     // ==============================================================
     
-    // start generating explicit priority arbiter
-    Bool p_request[`NUM_SERVICES];
-    Bool higher_priority_request[`NUM_SERVICES];
-    Bool p_grant[`NUM_SERVICES];
+    // arbitrate
+    Bit#(`NUM_SERVICES) request = '0;
+    for (Integer i = 0; i < `NUM_SERVICES; i = i + 1)
+    begin
+        request[i] = pack((responseChunksRemaining == 0) && (responseQueues[i].notEmpty()));
+    end
+
+    Bit#(`NUM_SERVICES) grant = arbiter.arbitrate(request);
 
     // static loop for all response queues
     for (Integer i = 0; i < `NUM_SERVICES; i = i + 1)
     begin
 
-        // compute priority for this queue (static request/grant)
-        // current algorithm involves a chain OR, which is fine for
-        // a small number of response queues
-
-        p_request[i] = (responseChunksRemaining == 0) &&
-                       (responseQueues[i].notEmpty());
-
-        if (i == 0)
-        begin
-            p_grant[i] = p_request[i];
-            higher_priority_request[i] = p_request[i];
-        end
-        else
-        begin
-            p_grant[i] = (!higher_priority_request[i-1]) && p_request[i];
-            higher_priority_request[i] = higher_priority_request[i-1] || p_request[i];
-        end
-
         // start writing new message
-        rule write_response_newmsg (p_grant[i]);
+        rule write_response_newmsg (grant[i] == 1);
 
             // get header packet
             UMF_PACKET packet = responseQueues[i].first();

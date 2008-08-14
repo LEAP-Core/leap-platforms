@@ -240,7 +240,8 @@ unsigned long long pipe_read(unsigned char handle)
 
             if (bytes_read == 0)
             {
-                fprintf(stderr, "EOF in unix-pipe-device-bdpi::pipe_read()\n");
+                // DO WE NEED THIS STATUS MESSAGE?
+                // fprintf(stderr, "EOF in unix-pipe-device-bdpi::pipe_read()\n");
                 if (persistent)
                 {
                     close(DESC_HOST_2_FPGA);

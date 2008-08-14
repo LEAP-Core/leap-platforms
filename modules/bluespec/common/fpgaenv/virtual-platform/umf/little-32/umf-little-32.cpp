@@ -357,15 +357,7 @@ UMF_MESSAGE_CLASS::ReverseExtractChunk()
 {
     assert(message);
 
-    // if readIndex = i, we want to read bytes
-    // (i - CHUNK_SIZE) .. (i - 1)
-    if (readIndex < sizeof(UMF_CHUNK))
-    {
-        cerr << "umf: message reverse-read underflow: readIndex = "
-             << readIndex << " UMF_CHUNK" << endl;
-        Print(cerr);
-        exit(1);
-    }
+    // if readIndex = i, we want to read bytes (i - CHUNK_SIZE) .. (i - 1)
 
     if (writeIndex != length)
     {
@@ -374,9 +366,27 @@ UMF_MESSAGE_CLASS::ReverseExtractChunk()
         // do not exit
     }
 
-    // copy the data behind the pointer and retard the pointer
-    readIndex -= sizeof(UMF_CHUNK);
-    return *(UMF_CHUNK *)(&message[readIndex]);
+    // SPECIAL CASE: if this is the first reverse-read in a sequence, and
+    //               the message length is not a multiple of UMF_CHUNK size,
+    //               then pad this chunk
+    if ((readIndex % sizeof(UMF_CHUNK)) != 0)
+    {
+        // sanity: this MUST be the first read
+        ASSERTX(readIndex == length);
+
+        // pad and read out the data
+        UMF_CHUNK retval = 0;
+        UINT32 residue = readIndex % sizeof(UMF_CHUNK);
+        readIndex -= residue;
+        memcpy(&retval, &message[readIndex], residue);
+        return retval;
+    }
+    else
+    {
+        // copy the data behind the pointer and retard the pointer
+        readIndex -= sizeof(UMF_CHUNK);
+        return *(UMF_CHUNK *)(&message[readIndex]);
+    }
 }
 
 // print message to an output stream

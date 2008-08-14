@@ -17,37 +17,46 @@ class STREAMS_CALLBACK_MODULE_CLASS
 };
 
 // ===== STREAMS =====
-typedef class STREAMS_CLASS* STREAMS;
-class STREAMS_CLASS: public RRR_SERVICE_CLASS,
-                     public PLATFORMS_MODULE_CLASS
+typedef class STREAMS_SERVER_CLASS* STREAMS_SERVER;
+
+class STREAMS_SERVER_CLASS: public RRR_SERVER_CLASS,
+                            public PLATFORMS_MODULE_CLASS
 {
-    private:
-        // self-instantiation
-        static STREAMS_CLASS  instance;
+  private:
+    // self-instantiation
+    static STREAMS_SERVER_CLASS  instance;
+    
+    // stubs
+    RRR_SERVER_STUB serverStub;
 
-        // per-stream maps
-        FILE                    *streamOutput[MAX_STREAMS];
-        STREAMS_CALLBACK_MODULE  callbackModule[MAX_STREAMS];
+    // per-stream maps
+    FILE                    *streamOutput[MAX_STREAMS];
+    STREAMS_CALLBACK_MODULE  callbackModule[MAX_STREAMS];
+    
+    // internal methods
+    int CountPayloads(const char *str);
+    
+  public:
+    STREAMS_SERVER_CLASS();
+    ~STREAMS_SERVER_CLASS();
+    
+    // generic RRR methods
+    void Init(PLATFORMS_MODULE);
+    void Uninit();
+    void Cleanup();
+    void Poll();
+    
+    // RRR request methods
+    void Print(UINT32 streamID, UINT32 stringID, UINT32 payload0, UINT32 payload1);
 
-        // internal methods
-        int CountPayloads(const char *str);
-
-    public:
-        STREAMS_CLASS();
-        ~STREAMS_CLASS();
-
-        // generic RRR methods
-        void Init(PLATFORMS_MODULE);
-        void Uninit();
-        bool Request(UINT32, UINT32, UINT32, UINT32, UINT32 *);
-        void Poll();
-
-        // static methods
-        static STREAMS   GetInstance() { return &instance; }
-
-        // streams interface
-        void MapStream(int, FILE*);
-        void RegisterCallback(int, STREAMS_CALLBACK_MODULE);
+    // static methods
+    static STREAMS_SERVER GetInstance() { return &instance; }
+    
+    // streams interface
+    void MapStream(int, FILE*);
+    void RegisterCallback(int, STREAMS_CALLBACK_MODULE);
 };
+
+#include "asim/rrr/server_stub_STREAMS.h"
 
 #endif
