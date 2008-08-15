@@ -4264,3 +4264,17 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/uni
   naive and will not scale well.
 
 - removed "EOF seen" message from unix-pipe-device-bdpi.c.
+
+----------
+aparasha    Date: Fri Aug 15 00:27:32 EDT 2008  CSN: CSN-platforms-142
+                  Fri Aug 15 04:27:32 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/basic
+ basic-channelio.awb       Locally Modified          141 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ basic-rrr-server.cpp      Locally Modified          141 
+ basic-rrr-server.h        Locally Modified          141 
+
+removed some unnecessary legacy code.

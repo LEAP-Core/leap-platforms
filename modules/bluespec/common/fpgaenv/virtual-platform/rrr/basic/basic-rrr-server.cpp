@@ -14,7 +14,6 @@
 using namespace std;
 
 #define CHANNEL_ID    0
-#define BC_CHANNEL_ID 2 // for backwards-compatibility
 
 // instantiate global service table; this table will be
 // populated by the individual services (also statically
@@ -106,10 +105,6 @@ RRR_SERVER_MONITOR_CLASS::Init()
 
     // register with channelio for message delivery
     channelio->RegisterForDelivery(CHANNEL_ID, this);
-
-    // backwards compatibility: also register for delivery
-    // on BC channel
-    channelio->RegisterForDelivery(BC_CHANNEL_ID, this);
 }
 
 // uninit: override

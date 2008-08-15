@@ -7,7 +7,6 @@
 #include "asim/provides/channelio.h"
 
 #define MAX_SERVICES            64
-#define MAX_ARGS                4
 
 // ============== RRR server base class =================
 
