@@ -1,7 +1,11 @@
-import FIFOF::*;
+// bram
+
+// Instantiate primitive Block RAM components and wrap them with nice guards.
+
+import Counter::*;
+import FIFO::*;
 import Vector::*;
 import RegFile::*;
-import RWire::*;
 
 // BRAM
 
@@ -16,16 +20,14 @@ interface BRAM#(parameter type addr_T, parameter type data_T);
 
 endinterface
 
+
 // mkBRAMUnguardedNonZero
 
 // An import of the primitive unguarded Verilog BRAM.
 
 import "BVI" Bram = module mkBRAMUnguardedNonZero
     // interface:
-        (BRAM#(addr, dataT))
-    provisos
-        (Bits#(addr_T, addr_SZ,
-         Bits#(data_T, data_SZ));
+        (BRAM#(Bit#(addr_SZ), Bit#(data_SZ)));
 
     parameter addrSize = valueOf(addr_SZ);
     parameter dataSize = valueOf(data_SZ);
@@ -51,20 +53,18 @@ endmodule
 
 module mkBRAMUnguardedZero
     // interface:
-        (Bram#(addr_T, data_T))
-    provisos
-        (Bits#(addr_T, addr_SZ));
+        (BRAM#(Bit#(addr_SZ), Bit#(data_SZ)));
 
-    method Action readReq(addr_T a);
+    method Action readReq(Bit#(addr_SZ) a);
         noAction;
     endmethod
 
-    method ActionValue#(data_T) readResp();
+    method ActionValue#(Bit#(data_SZ)) readRsp();
         noAction;
         return ?;
     endmethod
 
-    method Action write(addr_T a, data_T v);
+    method Action write(Bit#(addr_SZ) a, Bit#(data_SZ) v);
         noAction;
     endmethod
 
@@ -77,23 +77,20 @@ endmodule
 
 module mkBRAMUnguardedSim
     // interface:
-        (BRAM#(addr_T, data_T))
-    provisos
-        (Bits#(addr_T, addr_SZ),
-         Bits#(dataT, data_SZ));
+        (BRAM#(Bit#(addr_SZ), Bit#(data_SZ)));
 
-    RegFile#(addr_T, dataT)        ram <- mkRegFileFull();
-    Reg#(data_T)               outputR <- mkRegU();
+    RegFile#(Bit#(addr_SZ), Bit#(data_SZ))       ram <- mkRegFileFull();
+    Reg#(Bit#(data_SZ))                      outputR <- mkRegU();
 
-    method Action readReq(addr_T a);
+    method Action readReq(Bit#(addr_SZ) a);
         outputR <= ram.sub(a);
     endmethod
 
-    method ActionValue#(data_T) readResp();
+    method ActionValue#(Bit#(data_SZ)) readRsp();
         return outputR;
     endmethod
 
-    method Action write(addr_T a, data_T d);
+    method Action write(Bit#(addr_SZ) a, Bit#(data_SZ) d);
         ram.upd(a, d);
     endmethod
 
@@ -106,15 +103,12 @@ endmodule
 
 module mkBRAMUnguarded
     // interface:
-        (BRAM#(addr_T, data_T))
-    provisos
-        (Bits#(addr_T, addr_SZ),
-         Bits#(data_T, data_SZ));
+        (BRAM#(Bit#(addr_SZ), Bit#(data_SZ)));
 
     `ifdef SYNTH
-    BRAM#(addr_T, data_T) mem <- (valueOf(addr_SZ) == 0 || valueOf(data_SZ) == 0)? mkBRAMUnguardedZero(): mkBRAMUnguardedNonZero();
+    let mem <- (valueOf(addr_SZ) == 0 || valueOf(data_SZ) == 0)? mkBRAMUnguardedZero(): mkBRAMUnguardedNonZero();
     `else
-    BRAM#(addr_T, data_T) mem <- mkBRAMUnguardedSim();
+    let mem <- mkBRAMUnguardedSim();
     `endif
     return mem;
 
@@ -132,17 +126,17 @@ module mkBRAM
     // interface:
         (BRAM#(addr_T, data_T))
     provisos
-        (Bits#(data_T, data_SZ));
+        (Bits#(addr_T, addr_SZ),
+         Bits#(data_T, data_SZ));
 
     // The primitive RAM.
-    BRAM#(addr_T, data_T) ram <- mkUnguardedBRAM();
+    BRAM#(Bit#(addr_SZ), Bit#(data_SZ)) ram <- mkBRAMUnguarded();
 
     // Buffer the responses so nothing is dropped.
-    // Use a loopy FIFO for maximum throughput.
-    FIFO#(data_T) buffer <- mkLFIFO();
+    FIFO#(Bit#(data_SZ)) buffer <- mkFIFO();
 
     // Is there a response coming from the unguarded RAM?
-    Reg#(Bool) readReqMade <- mkReg(False);
+    Counter#(1) readReqMade <- mkCounter(0);
 
     // How much buffering is available?
     Counter#(2) bufferingAvailable <- mkCounter(2);
@@ -152,8 +146,9 @@ module mkBRAM
     // When:   The cycle after a readReq happens
     // Effect: Put the response into the buffer.
 
-    rule enqIntoFIFO(readReqMade == True);
-        dataT data <- ram.readResp();
+    rule enqIntoFIFO(readReqMade.value() == 1);
+        readReqMade.down();
+        Bit#(data_SZ) data <- ram.readRsp();
         buffer.enq(data);
     endrule
     
@@ -162,8 +157,8 @@ module mkBRAM
     // When:   Any time that sufficient buffering is available.
     // Effect: Make the request and reserve the buffering spot.
 
-    method Action readReq(addr_T a) if (bufferingAvailable > 0);
-        ram.readReq(a);
+    method Action readReq(addr_T a) if (bufferingAvailable.value() > 0);
+        ram.readReq(pack(a));
         readReqMade.up();
         bufferingAvailable.down();
     endmethod
@@ -173,10 +168,10 @@ module mkBRAM
     // When:   Any time there's something in the response buffer.
     // Effect: Deq the buffering and record the new space available.
 
-    method ActionValue#(dataT) readRsp();
+    method ActionValue#(data_T) readRsp();
         bufferingAvailable.up();
         buffer.deq();
-        return buffer.first();
+        return unpack(buffer.first());
     endmethod
    
     // write
@@ -185,8 +180,8 @@ module mkBRAM
     // Effect: Just update the RAM.
     // TODO:   Check that there is not a write to the same address as a simultaneous read.
 
-    method Action write(Bit#(addrSz) addr, dataT data);
-        ram.write(addr, data);
+    method Action write(addr_T a, data_T d);
+        ram.write(pack(a), pack(d));
     endmethod
 
 endmodule
@@ -212,7 +207,7 @@ module mkBRAMInitializedWith#(function data_T init(addr_T x))
     Reg#(Bit#(addr_SZ))   cur <- mkReg(0);
     
     // Are we initializing?
-    Reg#(Bool) initializing <- mkReg(False);
+    Reg#(Bool) initializing <- mkReg(True);
 
     // initialize
     
@@ -221,7 +216,8 @@ module mkBRAMInitializedWith#(function data_T init(addr_T x))
 
     rule initialize (initializing);
 
-        mem.write(unpack(cur), init(cur));
+        addr_T cur_a = unpack(cur);
+        mem.write(cur_a, init(cur_a));
         cur <= cur + 1;
 
         if (cur + 1 == 0)
@@ -257,6 +253,7 @@ module mkBRAMInitializedWith#(function data_T init(addr_T x))
 
 endmodule
 
+
 // mkBRAMInitialized
 
 // A convenience-wrapper of mkBRAMInitializedWith where the value is constant.
@@ -269,6 +266,7 @@ module mkBRAMInitialized#(data_T initval)
          Bits#(data_T, data_SZ));
 
     // Wrap the data value in a dummy function.
+    
     function data_T initfunc(addr_T a);
     
         return initval;

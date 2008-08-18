@@ -4278,3 +4278,22 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
  basic-rrr-server.h        Locally Modified          141 
 
 removed some unnecessary legacy code.
+
+----------
+mpellaue    Date: Mon Aug 18 19:41:08 EDT 2008  CSN: CSN-platforms-143
+                  Mon Aug 18 23:41:08 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ FpgaMemory.bsv            Locally Modified          142 
+ software-fpga-components.awb Locally Modified          142 
+ user-clock.bsv            Locally Added               0 
+ hardware-fpga-components.awb Locally Modified          142 
+ bram.bsv                  Locally Added               0 
+ bram-multi-read.bsv       Locally Added               0 
+
+
+* Updated BRAM interface to match HAsim's coding conventions.
+* Replaced Wires with Counters in BRAM.
+
+Michael P.
