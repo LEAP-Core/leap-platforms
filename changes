@@ -4297,3 +4297,45 @@ Directory modules/bluespec/common/fpgaenv/fpga-components
 * Replaced Wires with Counters in BRAM.
 
 Michael P.
+
+----------
+mcadler     Date: Sun Aug 31 09:19:43 EDT 2008  CSN: CSN-platforms-144
+                  Sun Aug 31 13:19:43 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ lutram.bsv                Locally Added               0 
+ software-fpga-components.awb Locally Modified          143 
+ hardware-fpga-components.awb Locally Modified          143 
+
+Add a LUTRAM storage module to replace our use of RegFile to work around bugs
+we encountered synthesizing RegFiles on Xilinx Virtex-5 using Xst.  The
+interface is identical to RegFile.
+
+What we know about the bug:
+  - RegFiles with a 1 bit data type seem to work correctly.  All other data
+    sizes are suspect.
+  - Attemps to build a small test case that fails have, so far, been unsuccessful.
+  - Multiple read ports in RegFile are not the problem.  I tried two experiments,
+    both continued to fail:
+    - Replace the single register array in RegFile with 5 separate arrays and
+      assign one read port to each register.
+    - Replace RegFile with a different Bluespec primitive:  DualRam.  DualRam
+      has one read and one write port.  Changed all the scheduling hints in
+      our code to force at most one read per cycle.  Still fails.
+
+The solution:
+  - The bad (just an experiment, not this check-in):
+      First replaced all RegFiles with data sizes over one bit with Reg#(Vector#()).
+      The resulting code was terrible with extremely long compilation times.
+      Every update to the array wound up being a reference to every single element.
+      This option does synthesize and run correctly on the FPGA.
+  - The good (this check-in):
+      Compose storage for data sizes over one bit from a set of RegFiles of
+      one bit data.  Thus a 512 entry x 4 bit array becomes four 512 x 1 bit
+      arrays.  This works quite well.  The generated code is nearly as good
+      as the original and space used on the FPGA is virtually identical to the
+      512 x 4 case.  It also works.  NOTE:  When compiling for simulation LUTRAM
+      DOES NOT decompose large data into multiple arrays.  This simplifies
+      debugging using waveform viewers and makes compilation and simulation
+      slightly faster.  The timing should be identical.

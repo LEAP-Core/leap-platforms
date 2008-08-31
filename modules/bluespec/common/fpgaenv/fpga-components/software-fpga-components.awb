@@ -1,23 +1,13 @@
-#/********************************************************************
-# *
-# * Awb module specification
-# *
-# *******************************************************************/
+%name Software FPGA Components
+%desc Software FPGA Components
 
-#/*
-# %AWB_START
-#
-# %name Software FPGA Components
-# %desc Software FPGA Components
-#
-# %provides fpga_components
-#
-# %attributes hasim
-#
-# %public bram.bsv  bram-multi-read.bsv user-clock.bsv
-#
-# %param CRYSTAL_CLOCK_FREQ 50 "Input (Crystal) Clock Frequency"
-#
-# %AWB_END
-# */
+%provides fpga_components
+
+%attributes hasim
+
+%public bram.bsv bram-multi-read.bsv
+%public lutram.bsv
+%public user-clock.bsv
+
+%param CRYSTAL_CLOCK_FREQ 50 "Input (Crystal) Clock Frequency"
 

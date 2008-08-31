@@ -1,26 +1,18 @@
-#/********************************************************************
-# *
-# * Awb module specification
-# *
-# *******************************************************************/
+%name Hardware FPGA Components
+%desc Hardware FPGA Components
 
-#/*
-# %AWB_START
-#
-# %name Hardware FPGA Components
-# %desc Hardware FPGA Components
-#
-# %provides fpga_components
-#
-# %attributes hasim
-#
-# %public bram.bsv  bram-multi-read.bsv user-clock.bsv
-# %private Bram.v UserClock_50_100.v
-#
-# %param CRYSTAL_CLOCK_FREQ 50 "Input (Crystal) Clock Frequency"
-#
-# %param SYNTH 1 "Synthesize it to FPGAs"
-#
-# %AWB_END
-# */
+%provides fpga_components
+
+%attributes hasim
+
+%public bram.bsv bram-multi-read.bsv
+%public lutram.bsv
+%public user-clock.bsv
+
+%private Bram.v
+%private UserClock_50_100.v
+
+%param CRYSTAL_CLOCK_FREQ 50 "Input (Crystal) Clock Frequency"
+
+%param SYNTH 1 "Synthesize it to FPGAs"
 
