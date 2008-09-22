@@ -4339,3 +4339,25 @@ The solution:
       DOES NOT decompose large data into multiple arrays.  This simplifies
       debugging using waveform viewers and makes compilation and simulation
       slightly faster.  The timing should be identical.
+
+----------
+aparasha    Date: Mon Sep 22 14:28:47 EDT 2008  CSN: CSN-platforms-145
+                  Mon Sep 22 18:28:47 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-memory-sw.cpp      Locally Removed           144 
+ hybrid-memory.awb         Locally Added               - 
+ hybrid-memory.bsv         Locally Added               - 
+ hybrid-memory-sw.h        Locally Removed           144 
+ memory_virtual_device_datatypes.bsv Locally Removed           144 
+ memory_virtual_device_hybrid.awb Locally Removed           144 
+ memory_virtual_device_hybrid.bsv Locally Removed           144 
+ hybrid-memory.cpp         Locally Added               - 
+ hybrid-memory.rrr         Locally Added               - 
+ hybrid-memory-services.rrr Locally Removed           144 
+ hybrid-memory-datatypes.bsv Locally Added               - 
+ hybrid-memory.h           Locally Added               - 
+
+updated scratchpad memory device to use new RRR infrastructure
+(it was still using the antiquated RRR hand-marshalled client)
