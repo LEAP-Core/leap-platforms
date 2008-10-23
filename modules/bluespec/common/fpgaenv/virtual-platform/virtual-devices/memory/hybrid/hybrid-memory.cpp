@@ -105,6 +105,7 @@ SCRATCHPAD_MEMORY_SERVER_CLASS::AlignAddress(
         fprintf(stderr, "scratchpad_memory: address out of bounds: 0x%8x\n", addr);
         parent->CallbackExit(1);
     }
+    return aligned_addr;
 }
 
 //
