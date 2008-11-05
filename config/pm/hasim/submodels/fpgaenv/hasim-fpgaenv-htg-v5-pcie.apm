@@ -40,7 +40,7 @@ Packagehint=platforms
 [Standard Virtual Devices/Requires]
 front_panel=Hybrid Front Panel
 streams=Hybrid Streams
-scratchpad_memory=Null Scratchpad Memory Device
+scratchpad_memory=Hybrid Scratchpad Memory Device
 
 [HTG Virtex 5 PCIE Enabled]
 File=modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled/htg-v5-pcie-enabled.awb
@@ -98,9 +98,6 @@ pci_express_driver_header=Driver Header for PCIe Kernel Module
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pci-express-device-mmap.awb
 Packagehint=platforms
 
-[Null Scratchpad Memory Device]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/null/memory_virtual_device_null.awb
-Packagehint=platforms
 
 [Little-Endian 32-bit Unified Message Format]
 File=modules/bluespec/common/fpgaenv/virtual-platform/umf/little-32/umf-little-32.awb
@@ -108,4 +105,8 @@ Packagehint=platforms
 
 [PCI-Express CSR-based Physical Channel]
 File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/pcie-csr/pcie-physical-channel.awb
+Packagehint=platforms
+
+[Hybrid Scratchpad Memory Device]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid/hybrid-memory.awb
 Packagehint=platforms

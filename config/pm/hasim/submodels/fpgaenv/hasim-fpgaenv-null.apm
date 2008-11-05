@@ -12,9 +12,6 @@ Class=Asim::Model
 DefaultAttributes=bluespec
 model=FPGA Environment
 
-[Software FPGA Components]
-File=modules/bluespec/common/fpgaenv/fpga-components/software/software-fpga-components.awb
-Packagehint=platforms
 
 [Console Front Panel]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/console/console-fp.awb
@@ -39,7 +36,7 @@ Packagehint=platforms
 
 [FPGA Environment/Requires]
 virtual_platform=Standard Virtual Platform
-fpga_components=Software FPGA Components
+fpga_components=Hardware FPGA Components
 
 [Null RRR Module]
 File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/null/null-rrr.awb
@@ -75,8 +72,10 @@ rrr=Null RRR Module
 File=modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface/hwonly-llpi.awb
 Packagehint=platforms
 
-
-
 [Null Scratchpad Memory Device]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/null/memory_virtual_device_null.awb
+Packagehint=platforms
+
+[Hardware FPGA Components]
+File=modules/bluespec/common/fpgaenv/fpga-components/hardware-fpga-components.awb
 Packagehint=platforms

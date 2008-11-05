@@ -44,7 +44,7 @@ Packagehint=platforms
 [Standard Virtual Devices/Requires]
 front_panel=Hybrid Front Panel
 streams=Hybrid Streams
-scratchpad_memory=Null Scratchpad Memory Device
+scratchpad_memory=Hybrid Scratchpad Memory Device
 
 [Hybrid Streams]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/streams/hybrid-streams.awb
@@ -81,9 +81,6 @@ unix_pipe_device=UNIX Pipe Physical Device
 File=modules/bluespec/common/fpgaenv/physical-platform/simulation/sim-physical-platform.awb
 Packagehint=platforms
 
-[Null Scratchpad Memory Device]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/null/memory_virtual_device_null.awb
-Packagehint=platforms
 
 [Little-Endian 32-bit Unified Message Format]
 File=modules/bluespec/common/fpgaenv/virtual-platform/umf/little-32/umf-little-32.awb
@@ -91,4 +88,8 @@ Packagehint=platforms
 
 [Software FPGA Components]
 File=modules/bluespec/common/fpgaenv/fpga-components/software-fpga-components.awb
+Packagehint=platforms
+
+[Hybrid Scratchpad Memory Device]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid/hybrid-memory.awb
 Packagehint=platforms

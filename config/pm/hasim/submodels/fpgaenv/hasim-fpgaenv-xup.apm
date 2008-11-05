@@ -34,7 +34,7 @@ File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/std-virtua
 Packagehint=platforms
 
 [Hardware FPGA Components]
-File=modules/bluespec/common/fpgaenv/fpga-components/hardware/hardware-fpga-components.awb
+File=modules/bluespec/common/fpgaenv/fpga-components/hardware-fpga-components.awb
 Packagehint=platforms
 
 [Standard Virtual Devices/Requires]

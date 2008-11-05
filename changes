@@ -4371,3 +4371,25 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memor
  hybrid-memory.cpp         Locally Modified          145 
 
 fixed a typo in scratchpad memory
+
+----------
+mcadler     Date: Wed Nov  5 11:18:45 EST 2008  CSN: CSN-platforms-147
+                  Wed Nov  5 16:18:45 UTC 2008
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-htg-hwonly.apm    Locally Modified          146 
+ hasim-fpgaenv-hybrid-sim.apm Locally Modified          146 
+ hasim-fpgaenv-htg-v5-pcie.apm Locally Modified          146 
+ hasim-fpgaenv-null.apm    Locally Modified          146 
+ hasim-fpgaenv-xup.apm     Locally Modified          146 
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ alu-support.bsv           Locally Added               0 
+ software-fpga-components.awb Locally Modified          146 
+ hardware-fpga-components.awb Locally Modified          146 
+
+- Add ALU support module to FPGA environment.  Currently it has a Xilinx
+  pipelined integer multiplier.
+- Enable scratchpad memory
+- Clean up some broken links in less-frequently used fpgaenv apm files.
