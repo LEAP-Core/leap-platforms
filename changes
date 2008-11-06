@@ -4432,3 +4432,17 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/but
 - fixed a bug in the 50-to-100 DCM Verilog module
 - added synchronizers to physical devices to make them work properly
   with multiplied clocks
+
+----------
+mcadler     Date: Thu Nov  6 16:42:04 EST 2008  CSN: CSN-platforms-149
+                  Thu Nov  6 21:42:04 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled
+ xilinx.xst                Locally Modified          148 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/leds
+ general-led-device.bsv    Locally Modified          148 
+
+- Add register_balancing to Xst.  Gives much better timing results.
+- Fix clock synchronization in LEDs to eliminate timing violations.

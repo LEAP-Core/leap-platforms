@@ -54,18 +54,14 @@ module mkLEDsDevice#(Clock topLevelClock, Reset topLevelReset)
     // interface:
                  (LEDS_DEVICE#(number_leds_T));
     
-    // Model clock and reset
-    Clock modelClock <- exposeCurrentClock();
-    Reset modelReset <- exposeCurrentReset();
-    
-    // A register to hold the LEDs at the current value, 
-    // until the next time someone changes them.
-    // This is a sync register because the reader (outside world)
-    // and writer (BSV model) are potentially in different clock
-    // domains
-   
-    Reg#(Bit#(number_leds_T)) led_reg <- mkSyncReg(0, modelClock, modelReset, topLevelClock);
-    
+    //
+    // LEDs may be outside the model clock boundary.  The led_reg_intern
+    // holds the value inside the model clock domain.  led_reg_extern makes
+    // the register visible in the top level clock domain.
+    //
+    Reg#(Bit#(number_leds_T))      led_reg_intern <- mkReg(0);
+    ReadOnly#(Bit#(number_leds_T)) led_reg_extern <- mkNullCrossingWire(topLevelClock, led_reg_intern);
+
     // Interface used by the rest of the FPGA.
 
     interface LEDS_DRIVER driver;
@@ -74,7 +70,7 @@ module mkLEDsDevice#(Clock topLevelClock, Reset topLevelReset)
         // Just set the register.
 
 	method  Action setLEDs(Bit#(number_leds_T) leds_in);
-            led_reg <= leds_in;
+            led_reg_intern <= leds_in;
 	endmethod
 	
     endinterface
@@ -88,7 +84,7 @@ module mkLEDsDevice#(Clock topLevelClock, Reset topLevelReset)
         // Just tie the register to the leds
 
         method Bit#(number_leds_T) leds();
-            return led_reg;
+            return led_reg_extern;
         endmethod
 
     endinterface
