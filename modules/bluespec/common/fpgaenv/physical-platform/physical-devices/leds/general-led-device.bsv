@@ -3,7 +3,7 @@
 // to the outside world and wires to tie to pins.
 // Polymorphic across the number of LEDs.
 
-
+import Clocks::*;
 
 // LED_DRIVER
 
@@ -50,14 +50,21 @@ endinterface
 
 // An LED Device generalized to any bit width.
 
-module mkLEDsDevice 
+module mkLEDsDevice#(Clock topLevelClock, Reset topLevelReset)
     // interface:
                  (LEDS_DEVICE#(number_leds_T));
-
+    
+    // Model clock and reset
+    Clock modelClock <- exposeCurrentClock();
+    Reset modelReset <- exposeCurrentReset();
+    
     // A register to hold the LEDs at the current value, 
     // until the next time someone changes them.
+    // This is a sync register because the reader (outside world)
+    // and writer (BSV model) are potentially in different clock
+    // domains
    
-    Reg#(Bit#(number_leds_T)) led_reg <- mkReg(0);
+    Reg#(Bit#(number_leds_T)) led_reg <- mkSyncReg(0, modelClock, modelReset, topLevelClock);
     
     // Interface used by the rest of the FPGA.
 

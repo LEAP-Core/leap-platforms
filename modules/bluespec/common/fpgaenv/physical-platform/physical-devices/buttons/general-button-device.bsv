@@ -51,23 +51,33 @@ endinterface
 // A button device generalized to any bit width.
 // Uses a Wire to return the current value of the buttons.
 
-module mkButtonsDevice
+module mkButtonsDevice#(Clock topLevelClock, Reset topLevelReset)
     // interface:
                  (BUTTONS_DEVICE#(number_buttons_T));
 
-    // A Wire used to communicate the buttons to the rest of the world.
+    // A wire used to communicate the switches from the outside
+    // world to our BSV model
+    Wire#(Bit#(number_buttons_T)) buttons_wire <- mkWire(clocked_by topLevelClock, reset_by topLevelReset);
+    
+    // A sync register used to synchronize the above wire with the model clock
+    Reg#(Bit#(number_buttons_T)) buttons_reg <- mkSyncReg(0, topLevelClock, topLevelReset, modelClock);
 
-    Wire#(Bit#(number_buttons_T)) buttons_wire <- mkWire();
-  
+    // Copy the current value on the wire into the Sync register
+    rule wire_to_reg (True);
+        
+        buttons_reg <= buttons_wire;
+        
+    endrule
+
     // The interface used by the rest of the FPGA
   
     interface BUTTONS_DRIVER driver;
 
         // getButtons
-        // Return the current value of the wire.
+        // Return the current value of the reg.
 
         method Bit#(number_buttons_T) getButtons();
-            return buttons_wire;
+            return buttons_reg;
         endmethod
 
     endinterface

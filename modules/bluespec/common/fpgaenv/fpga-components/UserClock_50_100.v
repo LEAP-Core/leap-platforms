@@ -12,8 +12,8 @@ module clk_50_100(CLKIN_IN,
                   CLK2X_OUT,
                   LOCKED_OUT);
 
-    input CLKIN_IN;
-    input RST_IN;
+   input CLKIN_IN;
+   input RST_IN;
    output CLKIN_IBUFG_OUT;
    output CLK0_OUT;
    output CLK2X_OUT;
@@ -32,14 +32,15 @@ module clk_50_100(CLKIN_IN,
    assign GND_BUS_16 = 16'b0000000000000000;
    assign CLKIN_IBUFG_OUT = CLKIN_IBUFG;
    assign CLK0_OUT = CLKFB_IN;
-   IBUFG CLKIN_IBUFG_INST (.I(CLKIN_IN),
-                           .O(CLKIN_IBUFG));
+//   IBUFG CLKIN_IBUFG_INST (.I(CLKIN_IN),
+//                           .O(CLKIN_IBUFG));
    BUFG CLK0_BUFG_INST (.I(CLK0_BUF),
                         .O(CLKFB_IN));
    BUFG CLK2X_BUFG_INST (.I(CLK2X_BUF),
                          .O(CLK2X_OUT));
    DCM_ADV DCM_ADV_INST (.CLKFB(CLKFB_IN),
-                         .CLKIN(CLKIN_IBUFG),
+//                         .CLKIN(CLKIN_IBUFG),
+                         .CLKIN(CLKIN_IN),
                          .DADDR(GND_BUS_7[6:0]),
                          .DCLK(GND_BIT),
                          .DEN(GND_BIT),
@@ -81,20 +82,21 @@ module clk_50_100(CLKIN_IN,
    defparam DCM_ADV_INST.SIM_DEVICE = "VIRTEX5";
 endmodule
 
-module mkUserClock_50_to_100(CLK, RST_N, CLK_OUT, RST_N_OUT);
+module mkUserClock_50_to_100(CLK, RST_N, CLK_OUT, RST_N_OUT, CLK_IBUFG_OUT);
 
-    input CLK;
-    input RST_N;
-    output CLK_OUT;
-    output RST_N_OUT;
-
-    wire RST;
-
-    assign RST = !RST_N;
-    clk_50_100 x (.CLKIN_IN(CLK),
-                  .RST_IN(RST),
-                  .CLKIN_IBUFG_OUT(),
-                  .CLK0_OUT(),
-                  .CLK2X_OUT(CLK_OUT),
-                  .LOCKED_OUT(RST_OUT));
+   input CLK;
+   input RST_N;
+   output CLK_OUT;
+   output RST_N_OUT;
+   output CLK_IBUFG_OUT;
+   
+   wire   RST;
+   
+   assign RST = !RST_N;
+   clk_50_100 x (.CLKIN_IN(CLK),
+                 .RST_IN(RST),
+                 .CLKIN_IBUFG_OUT(),
+                 .CLK0_OUT(),
+                 .CLK2X_OUT(CLK_OUT),
+                 .LOCKED_OUT(RST_N_OUT));
 endmodule

@@ -37,7 +37,7 @@ endinterface
 
 // Do nothing.
 
-module mkPhysicalPlatform
+module mkPhysicalPlatform#(Clock topLevelClock, Reset topLevelReset)
        //interface: 
                     (PHYSICAL_PLATFORM);
     

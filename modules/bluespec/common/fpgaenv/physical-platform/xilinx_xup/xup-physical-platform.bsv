@@ -60,15 +60,15 @@ endinterface
 // This is a convenient way for the outside world to instantiate all the devices
 // and an aggregation of all the wires.
 
-module mkPhysicalPlatform
+module mkPhysicalPlatform#(Clock topLevelClock, Reset topLevelReset)
        //interface: 
                     (PHYSICAL_PLATFORM);
     
     // Submodules
     
-    LEDS_DEVICE#(`NUMBER_LEDS)         leds_device         <- mkLEDsDevice();
-    SWITCHES_DEVICE#(`NUMBER_SWITCHES) switches_device     <- mkSwitchesDevice();
-    BUTTONS_DEVICE#(`NUMBER_BUTTONS)   buttons_device      <- mkButtonsDevice();
+    LEDS_DEVICE#(`NUMBER_LEDS)         leds_device         <- mkLEDsDevice(topLevelClock, topLevelReset);
+    SWITCHES_DEVICE#(`NUMBER_SWITCHES) switches_device     <- mkSwitchesDevice(topLevelClock, topLevelReset);
+    BUTTONS_DEVICE#(`NUMBER_BUTTONS)   buttons_device      <- mkButtonsDevice(topLevelClock, topLevelReset);
     
     // Aggregate the drivers
     

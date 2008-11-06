@@ -46,7 +46,7 @@ endinterface
 // This is a convenient way for the outside world to instantiate all the devices
 // and an aggregation of all the wires.
 
-module mkPhysicalPlatform
+module mkPhysicalPlatform#(Clock topLevelClock, Reset topLevelReset)
        //interface: 
                     (PHYSICAL_PLATFORM);
     

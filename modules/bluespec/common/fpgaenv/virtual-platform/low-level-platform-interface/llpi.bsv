@@ -18,13 +18,13 @@ endinterface
 
 // Instantiate the subcomponents in one module.
 
-module mkLowLevelPlatformInterface
+module mkLowLevelPlatformInterface#(Clock topLevelClock, Reset topLevelReset)
     //interface:
     (LowLevelPlatformInterface);
 
     // instantiate submodules
     
-    PHYSICAL_PLATFORM       phys_plat   <- mkPhysicalPlatform();
+    PHYSICAL_PLATFORM       phys_plat   <- mkPhysicalPlatform(topLevelClock, topLevelReset);
     CHANNEL_IO              cio         <- mkChannelIO(phys_plat.physicalDrivers);
     RRR_CLIENT              rrrc        <- mkRRRClient(cio);
     RRR_SERVER              rrrs        <- mkRRRServer(cio);

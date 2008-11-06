@@ -58,14 +58,14 @@ endinterface
 // This is a convenient way for the outside world to instantiate all the devices
 // and an aggregation of all the wires.
 
-module mkPhysicalPlatform
+module mkPhysicalPlatform#(Clock topLevelClock, Reset topLevelReset)
        //interface: 
                     (PHYSICAL_PLATFORM);
     
     // Submodules
     
-    LED_DEVICE#(`NUMBER_LEDS)        led_device         <- mkGeneralLEDDevice();
-    SWITCH_DEVICE#(`NUMBER_SWITCHES) switch_device      <- mkGeneralSwitchDevice();
+    LED_DEVICE#(`NUMBER_LEDS)        led_device    <- mkGeneralLEDDevice(topLevelClock, topLevelReset);
+    SWITCH_DEVICE#(`NUMBER_SWITCHES) switch_device <- mkGeneralSwitchDevice(topLevelClock, topLevelReset);
 
     // Aggregate the drivers
     

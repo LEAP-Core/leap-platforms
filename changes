@@ -4393,3 +4393,42 @@ Directory modules/bluespec/common/fpgaenv/fpga-components
   pipelined integer multiplier.
 - Enable scratchpad memory
 - Clean up some broken links in less-frequently used fpgaenv apm files.
+
+----------
+aparasha    Date: Thu Nov  6 13:06:49 EST 2008  CSN: CSN-platforms-148
+                  Thu Nov  6 18:06:49 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ UserClock_50_100.v        Locally Modified          147 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface
+ llpi.bsv                  Locally Modified          147 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/simulation
+ sim-physical-platform.bsv Locally Modified          147 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup
+ xup-physical-platform.bsv Locally Modified          147 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-disabled
+ htg-v5-pcie-disabled.bsv  Locally Modified          147 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled
+ htg-v5-pcie-enabled.bsv   Locally Modified          147 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/null
+ null-physical-platfrom.bsv Locally Modified          147 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/leds
+ general-led-device.bsv    Locally Modified          147 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/switches
+ general-switch-device.bsv Locally Modified          147 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/buttons
+ general-button-device.bsv Locally Modified          147 
+
+- fixed a bug in the 50-to-100 DCM Verilog module
+- added synchronizers to physical devices to make them work properly
+  with multiplied clocks
