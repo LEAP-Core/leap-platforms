@@ -25,6 +25,8 @@ using namespace std;
 CHANNELIO_CLASS::CHANNELIO_CLASS(
     PLATFORMS_MODULE p,
     PHYSICAL_DEVICES d) :
+        readReq(false),
+        writeReq(false),
         PLATFORMS_MODULE_CLASS(p),
         physicalChannel(this, d)
 {
@@ -121,7 +123,9 @@ CHANNELIO_CLASS::Read(
     while (true)
     {
         // block-read a message from physical channel
+        readReq = true;
         pthread_mutex_lock(&channelLock);
+        readReq = false;
         msg = physicalChannel.Read();
         pthread_mutex_unlock(&channelLock);
 
@@ -163,7 +167,9 @@ CHANNELIO_CLASS::Write(
     message->SetChannelID(channel);
 
     // send to physical channel
+    writeReq = true;
     pthread_mutex_lock(&channelLock);
+    writeReq = false;
     physicalChannel.Write(message);
     pthread_mutex_unlock(&channelLock);
 }
@@ -172,6 +178,11 @@ CHANNELIO_CLASS::Write(
 void
 CHANNELIO_CLASS::Poll()
 {
+    // Yield if a read or write request is trying to get the lock.  On multi-core
+    // machines the pool loop can effectively hold the lock and never give it
+    // up without this.
+    if (readReq || writeReq) return;
+
     // check if physical channel has a new message
     pthread_mutex_lock(&channelLock);
     UMF_MESSAGE msg = physicalChannel.TryRead();

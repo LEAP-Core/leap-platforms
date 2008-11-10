@@ -4446,3 +4446,22 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/led
 
 - Add register_balancing to Xst.  Gives much better timing results.
 - Fix clock synchronization in LEDs to eliminate timing violations.
+
+----------
+mcadler     Date: Mon Nov 10 12:34:06 EST 2008  CSN: CSN-platforms-150
+                  Mon Nov 10 17:34:06 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe
+ unix-pipe-device-bdpi.c   Locally Modified          148 
+ unix-pipe-device.cpp      Locally Modified          148 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/basic
+ basic-channelio.cpp       Locally Modified          148 
+ basic-channelio.h         Locally Modified          148 
+
+- Fix a race in channel I/O:  on a multi-core machine the polling loop was able
+  to overwhelm the read and write methods, holding the channel lock permanently.
+  Added code to skip polling when a read or write is pending.  This was one of
+  the two causes of simulations hanging.
+- Add more checks to Unix pipe to confirm that dup2() calls work.

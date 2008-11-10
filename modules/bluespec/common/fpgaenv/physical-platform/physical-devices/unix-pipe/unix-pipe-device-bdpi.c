@@ -68,7 +68,11 @@ void pipe_init(void)
             exit(1);
         }
 
-        dup2(in, DESC_HOST_2_FPGA);
+        if (dup2(in, DESC_HOST_2_FPGA) != DESC_HOST_2_FPGA)
+        {
+            perror("dup2 bdpi DESC_HOST_2_FPGA");
+            exit(1);
+        }
         close(in);
 
         persistent = 1;
@@ -97,7 +101,11 @@ void pipe_init(void)
             exit(1);
         }
 
-        dup2(out, DESC_FPGA_2_HOST);
+        if (dup2(out, DESC_FPGA_2_HOST) != DESC_FPGA_2_HOST)
+        {
+            perror("dup2 bdpi DESC_FPGA_2_HOST");
+            exit(1);
+        }
         close(out);
     }
 

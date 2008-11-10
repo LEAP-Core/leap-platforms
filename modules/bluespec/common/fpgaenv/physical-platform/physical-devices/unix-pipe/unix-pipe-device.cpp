@@ -71,8 +71,16 @@ UNIX_PIPE_DEVICE_CLASS::UNIX_PIPE_DEVICE_CLASS(
             close(ParentRead());
             close(ParentWrite());
 
-            dup2(ChildRead(), DESC_HOST_2_FPGA);
-            dup2(ChildWrite(), DESC_FPGA_2_HOST);
+            if (dup2(ChildRead(), DESC_HOST_2_FPGA) != DESC_HOST_2_FPGA)
+            {
+                perror("dup2 DESC_HOST_2_FPGA");
+                exit(1);
+            }
+            if (dup2(ChildWrite(), DESC_FPGA_2_HOST) != DESC_FPGA_2_HOST)
+            {
+                perror("dup2 DESC_FPGA_2_HOST");
+                exit(1);
+            }
 
             // launch hardware executable/download bitfile
             string hw_bluesim = string(globalArgs->ModelDir()) + "/" + APM_NAME + "_hw.exe";

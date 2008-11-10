@@ -63,6 +63,10 @@ class CHANNELIO_CLASS:  public PLATFORMS_MODULE_CLASS
     pthread_mutex_t     bufferLock;
     pthread_mutex_t     channelLock;
 
+    // Read/write requests -- hints to Poll() to back off
+    volatile bool       readReq;
+    volatile bool       writeReq;
+
   public:
 
     CHANNELIO_CLASS(PLATFORMS_MODULE, PHYSICAL_DEVICES);
