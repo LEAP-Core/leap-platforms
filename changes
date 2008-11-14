@@ -4465,3 +4465,31 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/basic
   Added code to skip polling when a read or write is pending.  This was one of
   the two causes of simulations hanging.
 - Add more checks to Unix pipe to confirm that dup2() calls work.
+
+----------
+mcadler     Date: Fri Nov 14 00:13:32 EST 2008  CSN: CSN-platforms-151
+                  Fri Nov 14 05:13:32 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ UserClock_50_100.v        Locally Removed           150 
+ UserClock.bsv             Locally Removed           150 
+ user-clock-xilinx.v       Locally Added               - 
+ user-clock.bsv            Locally Modified          150 
+ hardware-fpga-components.awb Locally Modified          150 
+ bram.bsv                  Locally Modified          150 
+ bram-multi-read.bsv       Locally Modified          150 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled
+ xilinx.xst                Locally Modified          150 
+
+- Add a few useful options to XST script
+- Configurable model clock speed as a function of board crystal.  Model
+  provides a rational multiplier and divisor that are applied to the base
+  clock speed.
+- Clock code has a few special cases:
+  - 1/1: Just use crystal
+  - 1/2: Bluespec provides a 0.5x clock module
+  - 2/1: Xilinx has a special-case in-phase clock doubler
+- Remove check of "initializing" predicate for BRAM read response.  Predicate
+  must be true for read request to fire.

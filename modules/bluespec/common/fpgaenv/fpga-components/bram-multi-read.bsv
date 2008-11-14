@@ -129,7 +129,7 @@ module mkBRAMMultiReadInitializedWith#(function data_T init(addr_T a))
     begin
         portsLocal[i] = (interface BROM#(addr_T, data_T);
                              method Action readReq(addr_T a) if (!initializing) = mems.readPorts[i].readReq(a);
-                             method ActionValue#(data_T) readRsp() if (!initializing) = mems.readPorts[i].readRsp();
+                             method ActionValue#(data_T) readRsp() = mems.readPorts[i].readRsp();
                          endinterface);
     end
 

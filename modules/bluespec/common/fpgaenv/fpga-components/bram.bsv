@@ -238,7 +238,7 @@ module mkBRAMInitializedWith#(function data_T init(addr_T x))
 
     endmethod
 
-    method ActionValue#(data_T) readRsp() if (!initializing);
+    method ActionValue#(data_T) readRsp();
 
         data_T rsp <- mem.readRsp();
         return rsp;

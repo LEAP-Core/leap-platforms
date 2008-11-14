@@ -11,7 +11,7 @@
 %public user-clock.bsv
 
 %private Bram.v
-%private UserClock_50_100.v
+%private user-clock-xilinx.v
 
 %param CRYSTAL_CLOCK_FREQ 50 "Input (Crystal) Clock Frequency"
 
