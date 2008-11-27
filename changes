@@ -4493,3 +4493,18 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-ena
   - 2/1: Xilinx has a special-case in-phase clock doubler
 - Remove check of "initializing" predicate for BRAM read response.  Predicate
   must be true for read request to fire.
+
+----------
+mcadler     Date: Thu Nov 27 00:02:51 EST 2008  CSN: CSN-platforms-152
+                  Thu Nov 27 05:02:51 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/pcie-csr
+ pcie-physical-channel.bsv Locally Modified          151 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled
+ htg-v5-pcie-enabled.ucf   Locally Modified          151 
+
+- New compiler detected uninitialized variable in PCIe channel
+- Verilog names of switches and LEDs changed with latest compiler.  This
+  UCF file now works only with Bluespec 2008.11.C and later.
