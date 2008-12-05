@@ -23,6 +23,7 @@
 //
 
 import Vector::*;
+import RWire::*;
 
 // This comes from "asim/provides/hasim_common.bsh", which can't be included here
 // to avoid circular dependence.
@@ -111,6 +112,9 @@ module mkPipelinedUnsignedMul
         pipeValid[s] <- mkReg(False);
     end
 
+    Wire#(t_RESULT) pipeOut <- mkBypassWire();
+    Wire#(Bool) pipeValidOut <- mkBypassWire();
+
     Reg#(t_INPUT) buf0 <- mkRegU();
     Reg#(t_INPUT) buf1 <- mkRegU();
     Reg#(Bool)    bufValid <- mkReg(False);
@@ -154,7 +158,8 @@ module mkPipelinedUnsignedMul
     //            end
     //        endmodule
     //
-    rule pipeline_data (True);
+    (* fire_when_enabled *)
+    rule pipelineData (True);
         // Get pair of numbers to multiply and store them in first register pair.
         buf0 <= input0;
         buf1 <= input1;
@@ -168,14 +173,18 @@ module mkPipelinedUnsignedMul
         begin
             pipe[s] <= pipe[s - 1];
         end
+
+        // Send output to read() method
+        pipeOut <= pipe[v_nStages - 1];
     endrule
 
     //
-    // pipeline_ctrl mirrors the pipeline flow of pipeline_data so a valid bit
+    // pipelineCtrl mirrors the pipeline flow of pipelineData so a valid bit
     // will emerge from the control pipeline on cycles where valid data
     // emerges from the data pipeline above.
     //
-    rule pipeline_ctrl (True);
+    (* fire_when_enabled *)
+    rule pipelineCtrl (True);
         bufValid <= inputValid;
 
         pipeValid[0] <= bufValid;
@@ -184,6 +193,9 @@ module mkPipelinedUnsignedMul
         begin
             pipeValid[s] <= pipeValid[s - 1];
         end
+
+        // Send output to read() method
+        pipeValidOut <= pipeValid[v_nStages - 1];
     endrule
 
     //
@@ -192,18 +204,25 @@ module mkPipelinedUnsignedMul
     //
 
     PulseWire write_called <- mkPulseWire();
+    RWire#(Bit#(nBits)) incoming0 <- mkRWire();
+    RWire#(Bit#(nBits)) incoming1 <- mkRWire();
 
-    rule check_for_write (True);
+    (* fire_when_enabled *)
+    rule checkForWrite (True);
         inputValid <= write_called;
+        if (incoming0.wget() matches tagged Valid .i0)
+            input0 <= i0;
+        if (incoming1.wget() matches tagged Valid .i1)
+            input1 <= i1;
     endrule
 
     //
     // New input to push into the pipeline.
     //
     method Action write(Bit#(nBits) arg0, Bit#(nBits) arg1);
-        input0 <= arg0;
-        input1 <= arg1;
         write_called.send();
+        incoming0.wset(arg0);
+        incoming1.wset(arg1);
     endmethod
 
     //
@@ -212,8 +231,7 @@ module mkPipelinedUnsignedMul
     // at the correct cycle.
     //
     method Maybe#(t_RESULT) read();
-        return pipeValid[v_nStages - 1] ?
-                   tagged Valid pipe[v_nStages - 1] : tagged Invalid;
+        return pipeValidOut ? tagged Valid pipeOut : tagged Invalid;
     endmethod
 
 endmodule
@@ -269,7 +287,8 @@ module mkCompactUnsignedMul
 
     Reg#(Bit#(2)) outPos <- mkReg(0);
 
-    rule drain (True);
+    (* fire_when_enabled *)
+    rule drain (state == STATE_MUL_BUSY);
         if (mult.read() matches tagged Valid .m)
         begin
             case (outPos)
@@ -299,7 +318,7 @@ module mkCompactUnsignedMul
     endrule
 
     //
-    // push_partial_products --
+    // pushPartialProducts --
     //    Push the 3 remaining pairs through the pipeline.  The order of
     //    pairs must correspond to the expected order in "drain" above.
     //
@@ -307,7 +326,7 @@ module mkCompactUnsignedMul
     Reg#(Bit#(nBits)) x_arg0 <- mkRegU();
     Reg#(Bit#(nBits)) x_arg1 <- mkRegU();
 
-    rule push_partial_products (inPos != 0);
+    rule pushPartialProducts ((inPos != 0) && (state == STATE_MUL_BUSY));
         let input0 = (inPos[0] == 1) ? x_arg0[v_nBits - 1 : v_nBits / 2] : x_arg0[v_nBits / 2 - 1 : 0];
         let input1 = (inPos[0] != inPos[1]) ? x_arg1[v_nBits - 1 : v_nBits / 2] : x_arg1[v_nBits / 2 - 1 : 0];
 

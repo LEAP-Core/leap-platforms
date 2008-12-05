@@ -4508,3 +4508,21 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-ena
 - New compiler detected uninitialized variable in PCIe channel
 - Verilog names of switches and LEDs changed with latest compiler.  This
   UCF file now works only with Bluespec 2008.11.C and later.
+
+----------
+mcadler     Date: Fri Dec  5 07:42:04 EST 2008  CSN: CSN-platforms-153
+                  Fri Dec  5 12:42:04 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ alu-support.bsv           Locally Modified          152 
+ bram.bsv                  Locally Modified          152 
+
+- New Bluespec compiler sees read/write dependence among rules and prevents
+  critical rules from firing in parallel in the pipelined multiplier.  Replaced
+  with wires and annotated rules to cause errors when the design won't work.
+
+- Make response from BRAM single cycle.  Used to take a second cycle due to
+  output FIFO and because the counter we were using didn't support calls to
+  up and down in the same cycle.  Replaced counter with parallel version.
+  Replaced outgoing FIFO with a BypassFIFO.
