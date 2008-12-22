@@ -102,6 +102,10 @@ module mkUserClock#(Integer inFreq, Integer clockMultiplier, Integer clockDivide
 
     UserClock clk = ?;
 
+  `ifdef SYNTH
+
+    // FPGA synthesis...
+
     if (clockMultiplier == 1 && clockDivider == 1)
         clk <- mkUserClock_Same;
     else if (clockMultiplier == 2 && clockDivider == 1)
@@ -110,6 +114,13 @@ module mkUserClock#(Integer inFreq, Integer clockMultiplier, Integer clockDivide
         clk <- mkUserClock_DivideByTwo;
     else
         clk <- mkUserClock_Ratio(inFreq, clockMultiplier, clockDivider);
+
+  `else
+
+    // Clock ratios make no sense in Bluesim
+    clk <- mkUserClock_Same;
+
+  `endif
 
     return clk;
 

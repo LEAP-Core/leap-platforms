@@ -4526,3 +4526,26 @@ Directory modules/bluespec/common/fpgaenv/fpga-components
   output FIFO and because the counter we were using didn't support calls to
   up and down in the same cycle.  Replaced counter with parallel version.
   Replaced outgoing FIFO with a BypassFIFO.
+
+----------
+mcadler     Date: Mon Dec 22 14:31:59 EST 2008  CSN: CSN-platforms-154
+                  Mon Dec 22 19:31:59 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ user-clock.bsv            Locally Modified          153 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ basic-rrr-server.bsv      Locally Modified          153 
+ arbiters.bsv              Locally Modified          153 
+ basic-rrr-client.bsv      Locally Modified          153 
+
+- Clock generator always uses mkUserClock_Same for Bluesim builds.  This allows
+  us to set clock ratios other than 1:1 as the default, affecting FPGA builds
+  and not Bluesim.
+
+- Change the arbiters to return the index of the entry that wins arbitration as
+  a Maybe#(UInt) instead of a bit vector with at most one bit set.  Clients of
+  arbiters can then use a single rule to handle the winning entry instead of a
+  set of statically elaborated rules.  The result should be identical hardware
+  while eliminating compiler warning messages about conflicting rules.

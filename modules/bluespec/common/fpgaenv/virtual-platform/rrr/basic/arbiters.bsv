@@ -30,7 +30,7 @@ import FIFO::*;
 interface ARBITER#(numeric type bits_T);
 
     // arbitrate
-    method Bit#(bits_T) arbitrate(Bit#(bits_T) request);
+    method Maybe#(UInt#(TLog#(bits_T))) arbitrate(Bit#(bits_T) request);
 
 endinterface
 
@@ -40,9 +40,9 @@ module mkStaticArbiter
     // interface:
         (ARBITER#(bits_T));
     
-    method Bit#(bits_T) arbitrate(Bit#(bits_T) request);
+    method Maybe#(UInt#(TLog#(bits_T))) arbitrate(Bit#(bits_T) request);
         
-        Bit#(bits_T) grant;
+        Maybe#(UInt#(TLog#(bits_T))) grant;
         Bit#(bits_T) higher_priority_request;
         
         for (Integer i = 0; i < valueOf(bits_T); i = i + 1)
@@ -50,12 +50,17 @@ module mkStaticArbiter
 
             if (i == 0)
             begin
-                grant[i] = request[i];
+                if (request[i] == 1)
+                    grant = tagged Valid 0;
+                else
+                    grant = tagged Invalid;
                 higher_priority_request[i] = request[i];
             end
             else
             begin
-                grant[i] = (~higher_priority_request[i-1]) & request[i];
+                if ((~higher_priority_request[i-1] & request[i]) == 1)
+                    grant = tagged Valid fromInteger(i);
+
                 higher_priority_request[i] = higher_priority_request[i-1] | request[i];
             end
         
@@ -94,7 +99,8 @@ endmodule
 
 module mkRoundRobinArbiter
     // interface:
-        (ARBITER#(bits_T));
+    (ARBITER#(bits_T))
+    provisos (Log#(bits_T, TLog#(bits_T)));
     
     // create the n x (n-1) priority matrix
     Vector#(bits_T, Reg#(Bit#(TSub#(bits_T, 1)))) prioMatrix = newVector();
@@ -118,9 +124,9 @@ module mkRoundRobinArbiter
     endrule
 
     // arbitrate
-    method Bit#(bits_T) arbitrate(Bit#(bits_T) request);
+    method Maybe#(UInt#(TLog#(bits_T))) arbitrate(Bit#(bits_T) request);
         
-        Bit#(bits_T) grant = '0;
+        Vector#(bits_T, Bit#(1)) grant = replicate(0);
         
         for (Integer row = 0; row < valueOf(bits_T); row = row + 1)
         begin
@@ -143,7 +149,10 @@ module mkRoundRobinArbiter
         
         end
         
-        return grant;
+        //
+        // Find the unique grant bit.
+        //
+        return findElem(1, grant);
 
     endmethod
     
