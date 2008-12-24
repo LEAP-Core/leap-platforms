@@ -131,36 +131,38 @@ module mkRRRClient#(CHANNEL_IO channel) (RRR_CLIENT);
     //                          Request Rules
     // ==============================================================
     
-    // arbitrate
-    Bit#(`NUM_SERVICES) request = '0;
-    for (Integer i = 0; i < `NUM_SERVICES; i = i + 1)
-    begin
-        request[i] = pack((requestChunksRemaining == 0) && (requestQueues[i].notEmpty()));
-    end
-
     // start writing new message
-    rule write_request_newmsg (requestChunksRemaining == 0 &&&
-                               arbiter.arbitrate(request) matches tagged Valid .i);
+    rule write_request_newmsg (requestChunksRemaining == 0);
 
-        // get header packet
-        UMF_PACKET packet = requestQueues[i].first();
-        requestQueues[i].deq();
+        // arbitrate
+        Bit#(`NUM_SERVICES) request = '0;
+        for (Integer i = 0; i < `NUM_SERVICES; i = i + 1)
+        begin
+            request[i] = pack((requestChunksRemaining == 0) && (requestQueues[i].notEmpty()));
+        end
 
-        // add my virtual channelID to header
-        UMF_PACKET newpacket = tagged UMF_PACKET_header
-                               {
-                                   channelID: `CLIENT_CHANNEL_ID,
-                                   serviceID: packet.UMF_PACKET_header.serviceID,
-                                   methodID : packet.UMF_PACKET_header.methodID,
-                                   numChunks: packet.UMF_PACKET_header.numChunks
-                               };
+        if (arbiter.arbitrate(request) matches tagged Valid .i)
+        begin
+            // get header packet
+            UMF_PACKET packet = requestQueues[i].first();
+            requestQueues[i].deq();
 
-        // send the header packet to channelio
-        channel.writePorts[`CLIENT_CHANNEL_ID].write(newpacket);
+            // add my virtual channelID to header
+            UMF_PACKET newpacket = tagged UMF_PACKET_header
+                                       {
+                                        channelID: `CLIENT_CHANNEL_ID,
+                                        serviceID: packet.UMF_PACKET_header.serviceID,
+                                        methodID : packet.UMF_PACKET_header.methodID,
+                                        numChunks: packet.UMF_PACKET_header.numChunks
+                                       };
 
-        // setup remaining chunks
-        requestChunksRemaining <= newpacket.UMF_PACKET_header.numChunks;
-        requestActiveQueue <= zeroExtend(pack(i));
+            // send the header packet to channelio
+            channel.writePorts[`CLIENT_CHANNEL_ID].write(newpacket);
+
+            // setup remaining chunks
+            requestChunksRemaining <= newpacket.UMF_PACKET_header.numChunks;
+            requestActiveQueue <= zeroExtend(pack(i));
+        end
 
     endrule
     

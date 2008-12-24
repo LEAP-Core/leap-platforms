@@ -4549,3 +4549,21 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
   arbiters can then use a single rule to handle the winning entry instead of a
   set of statically elaborated rules.  The result should be identical hardware
   while eliminating compiler warning messages about conflicting rules.
+
+----------
+mcadler     Date: Wed Dec 24 08:01:46 EST 2008  CSN: CSN-platforms-155
+                  Wed Dec 24 13:01:46 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ basic-rrr-server.bsv      Locally Modified          154 
+ arbiters.bsv              Locally Modified          154 
+ basic-rrr-client.bsv      Locally Modified          154 
+
+The round robin arbiter had a lot of logic depth that was slow to compile in
+Bluespec and generated difficult place & route problems.  After some
+experimenting, found an implementation that compiles quickly and, I think,
+is equivalent.
+
+This code has a chain through all arbitrated bits.  We'll have to switch to
+a tree if the arbitration set grows too large.
