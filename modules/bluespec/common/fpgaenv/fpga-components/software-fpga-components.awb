@@ -10,5 +10,7 @@
 %public alu-support.bsv
 %public user-clock.bsv
 
-%param CRYSTAL_CLOCK_FREQ 50 "Input (Crystal) Clock Frequency"
+%param CRYSTAL_CLOCK_FREQ 50 "NOT USED IN SIMULATION -- Input (Crystal) Clock Frequency"
 
+%param --global MODEL_CLOCK_MULTIPLIER 1   "NOT USED IN SIMULATION -- Clock multiplier (integer).  Model clock freq = crystal freq * (multiplier / divider)."
+%param --global MODEL_CLOCK_DIVIDER    1   "NOT USED IN SIMULATION -- Clock divider (integer).  Model clock freq = crystal freq * (multiplier / divider)."

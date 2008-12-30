@@ -4567,3 +4567,22 @@ is equivalent.
 
 This code has a chain through all arbitrated bits.  We'll have to switch to
 a tree if the arbitration set grows too large.
+
+----------
+mcadler     Date: Tue Dec 30 09:55:32 EST 2008  CSN: CSN-platforms-156
+                  Tue Dec 30 14:55:32 UTC 2008
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ software-fpga-components.awb Locally Modified          155 
+ hardware-fpga-components.awb Locally Modified          155 
+
+Directory modules/bluespec/common/fpgaenv
+ fpga-environment.awb      Locally Modified          155 
+
+- Move FPGA clock frequency parameters from model top level down to FPGA
+  components.  The definition makes more sense here, especially when we support
+  multiple kinds of FPGAs.
+- Add Xilinx cost table specifier, though it isn't clear that a specific cost
+  table is useful as the model changes.  The cost table becomes important as
+  a design approaches the capacity of an FPGA.

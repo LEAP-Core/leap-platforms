@@ -1,21 +1,9 @@
-#/********************************************************************
-# *
-# * Awb module specification
-# *
-# *******************************************************************/
+%name FPGA Environment
+%desc FPGA Environment
 
-#/*
-# %AWB_START
-#
-# %name FPGA Environment
-# %desc FPGA Environment
-#
-# %provides fpgaenv
-#
-# %requires virtual_platform fpga_components
-#
-# %attributes hasim
-#
-# %AWB_END
-# */
+%provides fpgaenv
+
+%requires virtual_platform fpga_components
+
+%attributes hasim
 

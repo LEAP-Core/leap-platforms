@@ -15,5 +15,10 @@
 
 %param CRYSTAL_CLOCK_FREQ 50 "Input (Crystal) Clock Frequency"
 
+%param --global MODEL_CLOCK_MULTIPLIER 3   "Clock multiplier (integer).  Model clock freq = crystal freq * (multiplier / divider)."
+%param --global MODEL_CLOCK_DIVIDER    2   "Clock divider (integer).  Model clock freq = crystal freq * (multiplier / divider)."
+
+%param --global COST_TABLE 1 "Xilinx place and route cost table"
+
 %param SYNTH 1 "Synthesize it to FPGAs"
 
