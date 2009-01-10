@@ -4586,3 +4586,90 @@ Directory modules/bluespec/common/fpgaenv
 - Add Xilinx cost table specifier, though it isn't clear that a specific cost
   table is useful as the model changes.  The cost table becomes important as
   a design approaches the capacity of an FPGA.
+
+----------
+aparasha    Date: Fri Jan  9 19:01:33 EST 2009  CSN: CSN-platforms-157
+                  Sat Jan 10 00:01:33 UTC 2009
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-htg-hwonly.apm    Locally Modified          156 
+ hasim-fpgaenv-hybrid-sim.apm Locally Modified          156 
+ hasim-fpgaenv-htg-v5-pcie.apm Locally Modified          156 
+ hasim-fpgaenv-null.apm    Locally Modified          156 
+ hasim-fpgaenv-xup.apm     Locally Modified          156 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/basic
+ basic-channelio.bsv       Locally Modified          156 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel
+ pcie-debugger/            Locally Removed           156 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/pcie-debugger
+ pcie-debugger.cpp         Locally Removed           156 
+ pcie-debugger.h           Locally Removed           156 
+ pcie-debugger.awb         Locally Removed           156 
+ pcie-debugger.bsv         Locally Removed           156 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/pcie-csr
+ pcie-physical-channel.cpp Locally Modified          156 
+ pcie-physical-channel.h   Locally Modified          156 
+ pcie-physical-channel.awb Locally Modified          156 
+ pcie-physical-channel.bsv Locally Modified          156 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/sim
+ sim-physical-channel.bsv  Locally Modified          156 
+ sim-physical-channel.cpp  Locally Modified          156 
+ sim-physical-channel.h    Locally Modified          156 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface
+ llpi.cpp                  Locally Modified          156 
+ hwonly-llpi.awb           Locally Modified          156 
+ llpi.h                    Locally Modified          156 
+ hybrid-llpi.awb           Locally Modified          156 
+ llpi.bsv                  Locally Modified          156 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform
+ debuggers/                Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/debuggers
+ htg-virtex5/              Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/debuggers/htg-virtex5
+ htg-debugger.cpp          Locally Added               0 
+ htg-debugger.h            Locally Added               0 
+ htg-debugger.awb          Locally Added               0 
+ htg-debugger.bsv          Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/debuggers
+ null/                     Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/debuggers/null
+ null-debugger.h           Locally Added               0 
+ null-debugger.awb         Locally Added               0 
+ null-debugger.bsv         Locally Added               0 
+ null-debugger.cpp         Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled
+ htg-v5-pcie-enabled.cpp   Locally Modified          156 
+ htg-v5-pcie-enabled.h     Locally Modified          156 
+ htg-v5-pcie-enabled.bsv   Locally Modified          156 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express
+ pci-express-device.bsv    Locally Modified          156 
+ pci-express-vhdl-import.bsv Locally Modified          156 
+
+
+- implemented a low-level HTG v5 PCIe Platform Debugger.
+
+- implemented a low-level Null Debugger (can also be used with HTG fpgaenv).
+
+- restructured Platforms hierarchy to include platform debugger.
+  LLPI now first instantiates the physical platform, then instantiates
+  the debugger and passes the physical drivers into the debugger. The
+  debugger returns a set of gated physical drivers, which LLPI passes
+  to the remainder of the layers, and exposes to upper layers.
+
+- set Null Debugger as default for all fpgaenv submodules.
+
+- removed obsolete "Physical Channel Debugger".

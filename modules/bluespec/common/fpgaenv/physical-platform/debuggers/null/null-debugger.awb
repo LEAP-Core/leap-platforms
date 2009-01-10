@@ -1,0 +1,9 @@
+
+%name Null Physical Platform Debugger
+%desc Null Physical Platform Debugger
+
+%provides physical_platform_debugger
+
+%sources -t BSV -v PUBLIC   null-debugger.bsv
+%sources -t H   -v PUBLIC   null-debugger.h
+%sources -t CPP -v PRIVATE  null-debugger.cpp

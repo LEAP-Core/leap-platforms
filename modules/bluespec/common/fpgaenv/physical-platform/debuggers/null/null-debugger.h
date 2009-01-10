@@ -16,35 +16,25 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-#ifndef __PHYSICAL_CHANNEL__
-#define __PHYSICAL_CHANNEL__
+#ifndef __PHYSICAL_PLATFORM_DEBUGGER__
+#define __PHYSICAL_PLATFORM_DEBUGGER__
 
-#include "asim/provides/umf.h"
 #include "asim/provides/physical_platform.h"
 
 // ============================================
-//               Physical Channel              
+//       Null Physical Platform Debugger              
 // ============================================
 
-class PHYSICAL_CHANNEL_CLASS: public PLATFORMS_MODULE_CLASS
+class PHYSICAL_PLATFORM_DEBUGGER_CLASS: public PLATFORMS_MODULE_CLASS
 {
-    private:
-        // cached links to useful physical devices
-        UNIX_PIPE_DEVICE unixPipeDevice;
+  private:
 
-        // incomplete incoming read message
-        UMF_MESSAGE incomingMessage;
+  public:
 
-        // internal methods
-        void readPipe();
+    PHYSICAL_PLATFORM_DEBUGGER_CLASS(PLATFORMS_MODULE, PHYSICAL_DEVICES);
+    ~PHYSICAL_PLATFORM_DEBUGGER_CLASS();
 
-    public:
-        PHYSICAL_CHANNEL_CLASS(PLATFORMS_MODULE, PHYSICAL_DEVICES);
-        ~PHYSICAL_CHANNEL_CLASS();
-
-        UMF_MESSAGE Read();             // blocking read
-        UMF_MESSAGE TryRead();          // non-blocking read
-        void        Write(UMF_MESSAGE); // write
+    void Monitor();
 };
 
 #endif

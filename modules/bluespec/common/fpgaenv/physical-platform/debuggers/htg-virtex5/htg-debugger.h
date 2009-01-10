@@ -16,35 +16,43 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-#ifndef __PHYSICAL_CHANNEL__
-#define __PHYSICAL_CHANNEL__
+#ifndef __PHYSICAL_PLATFORM_DEBUGGER__
+#define __PHYSICAL_PLATFORM_DEBUGGER__
 
 #include "asim/provides/umf.h"
 #include "asim/provides/physical_platform.h"
 
 // ============================================
-//               Physical Channel              
+//       HTG v5 PCIe Platform Debugger              
 // ============================================
 
-class PHYSICAL_CHANNEL_CLASS: public PLATFORMS_MODULE_CLASS
+class PHYSICAL_PLATFORM_DEBUGGER_CLASS: public PLATFORMS_MODULE_CLASS
 {
-    private:
-        // cached links to useful physical devices
-        UNIX_PIPE_DEVICE unixPipeDevice;
+  private:
 
-        // incomplete incoming read message
-        UMF_MESSAGE incomingMessage;
+    // links to useful physical devices
+    PCIE_DEVICE pciExpressDevice;
+    
+    // instruction ID
+    CSR_DATA iid;
+    
+    // internal methods
+    void PrintHelp_Help();
+    void PrintHelp_CSR();
+    void PrintHelp_Inst();
+    void PrintHelp_Commands();
+    void PrintStatus_Flags(unsigned int);
+    void PrintStatus_Pointers(unsigned int);
+    void PrintStatus_VHDL(unsigned int);
+    unsigned int StoI(const char *);
+    CSR_DATA GenIID();
 
-        // internal methods
-        void readPipe();
+  public:
 
-    public:
-        PHYSICAL_CHANNEL_CLASS(PLATFORMS_MODULE, PHYSICAL_DEVICES);
-        ~PHYSICAL_CHANNEL_CLASS();
+    PHYSICAL_PLATFORM_DEBUGGER_CLASS(PLATFORMS_MODULE, PHYSICAL_DEVICES);
+    ~PHYSICAL_PLATFORM_DEBUGGER_CLASS();
 
-        UMF_MESSAGE Read();             // blocking read
-        UMF_MESSAGE TryRead();          // non-blocking read
-        void        Write(UMF_MESSAGE); // write
+    void Monitor();
 };
 
 #endif

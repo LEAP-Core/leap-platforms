@@ -13,11 +13,11 @@ import Clocks::*;
 
 // Datatype definitions
 
-typedef Bit#(`PCIE_PHYS_ADDR_SIZE) PCIE_Physical_Address;
-typedef Bit#(`PCIE_DMA_DATA_SIZE)  PCIE_DMA_Data;
-typedef Bit#(`PCIE_LEN_SIZE)       PCIE_Length;
-typedef Bit#(`PCIE_CSR_DATA_SIZE)  PCIE_CSR_Data;
-typedef Bit#(`PCIE_CSR_IDX_SIZE)   PCIE_CSR_Index;
+typedef Bit#(`PCIE_PHYS_ADDR_SIZE) PCIE_PHYSICAL_ADDRESS;
+typedef Bit#(`PCIE_DMA_DATA_SIZE)  PCIE_DMA_DATA;
+typedef Bit#(`PCIE_LEN_SIZE)       PCIE_LENGTH;
+typedef Bit#(`PCIE_CSR_DATA_SIZE)  PCIE_CSR_DATA;
+typedef Bit#(`PCIE_CSR_IDX_SIZE)   PCIE_CSR_INDEX;
 
 
 // PRIMITIVE_PCI_EXPRESS_DEVICE
@@ -29,21 +29,21 @@ interface PRIMITIVE_PCI_EXPRESS_DEVICE;
     // Methods for the Driver
 
     // CSR Read
-    method Action csr_read_req(PCIE_CSR_Index idx);
-    method ActionValue#(PCIE_CSR_Data) csr_read_resp();
+    method Action csr_read_req(PCIE_CSR_INDEX idx);
+    method ActionValue#(PCIE_CSR_DATA) csr_read_resp();
 
     // CSR Write
-    method Action csr_write(PCIE_CSR_Index idx, PCIE_CSR_Data data);
+    method Action csr_write(PCIE_CSR_INDEX idx, PCIE_CSR_DATA data);
 
     // CSR 0 is special in that we can always access it.
-    method PCIE_CSR_Data csr_h2f_reg0_read();
-    method Action  csr_f2h_reg0_write(PCIE_CSR_Data data);
+    method PCIE_CSR_DATA csr_h2f_reg0_read();
+    method Action  csr_f2h_reg0_write(PCIE_CSR_DATA data);
 
     // DMA
-    method Action dma_read_start(PCIE_Physical_Address addr, PCIE_Length len);
-    method ActionValue#(PCIE_DMA_Data) dma_read_data();
-    method Action dma_write_start(PCIE_Physical_Address addr, PCIE_Length len);
-    method Action dma_write_data(PCIE_DMA_Data data);
+    method Action dma_read_start(PCIE_PHYSICAL_ADDRESS addr, PCIE_LENGTH len);
+    method ActionValue#(PCIE_DMA_DATA) dma_read_data();
+    method Action dma_write_start(PCIE_PHYSICAL_ADDRESS addr, PCIE_LENGTH len);
+    method Action dma_write_data(PCIE_DMA_DATA data);
 
     // interrupt
     method Action interrupt_host();

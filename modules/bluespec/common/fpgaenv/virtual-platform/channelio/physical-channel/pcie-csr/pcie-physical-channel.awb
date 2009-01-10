@@ -21,3 +21,7 @@
 %param SIGNAL_RED           0   "Red Signal ID used for Bootstrapping"
 %param SIGNAL_GREEN         2882400203  "Green Signal ID used for Bootstrapping"
 
+%param OP_NOP               0 "Control Instruction Opcode for NOP"
+%param OP_START             1 "Control Instruction Opcode for START"
+%param OP_INVAL_H2FTAIL     2 "Control Instruction Opcode for INVAL_H2FTAIL"
+%param OP_INVAL_F2HHEAD     3 "Control Instruction Opcode for INVAL_F2HHEAD"

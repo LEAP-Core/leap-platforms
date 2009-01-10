@@ -12,7 +12,6 @@ Class=Asim::Model
 DefaultAttributes=bluespec
 model=FPGA Environment
 
-
 [Console Front Panel]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/console/console-fp.awb
 Packagehint=platforms
@@ -67,6 +66,7 @@ Packagehint=platforms
 physical_platform=Null Physical Platform
 channelio=Null Channel IO Module
 rrr=Null RRR Module
+physical_platform_debugger=Null Physical Platform Debugger
 
 [Low Level Platform Interface Hardware-Only]
 File=modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface/hwonly-llpi.awb
@@ -78,4 +78,8 @@ Packagehint=platforms
 
 [Hardware FPGA Components]
 File=modules/bluespec/common/fpgaenv/fpga-components/hardware-fpga-components.awb
+Packagehint=platforms
+
+[Null Physical Platform Debugger]
+File=modules/bluespec/common/fpgaenv/physical-platform/debuggers/null/null-debugger.awb
 Packagehint=platforms

@@ -1,3 +1,21 @@
+//
+// Copyright (C) 2008 Intel Corporation
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
+
 #include <stdio.h>
 #include <unistd.h>
 #include <strings.h>
@@ -10,20 +28,19 @@
 #include <string.h>
 #include <iostream>
 
-#include "asim/provides/physical_channel.h"
-
 using namespace std;
 
-#define INST_STATUS_FLAGS    0x000B0000
-#define INST_STATUS_POINTERS 0x000C0000
-#define INST_STATUS_VHDL     0x000D0000
+#define INST_STATUS_FLAGS    0x001B0000
+#define INST_STATUS_POINTERS 0x001C0000
+#define INST_STATUS_VHDL     0x001D0000
+#define INST_RUN             0x001E0000
 
 // ============================================
-//               Physical Channel              
+//          Physical Platform Debugger              
 // ============================================
 
-// constructor: set up hardware partition
-PHYSICAL_CHANNEL_CLASS::PHYSICAL_CHANNEL_CLASS(
+// constructor
+PHYSICAL_PLATFORM_DEBUGGER_CLASS::PHYSICAL_PLATFORM_DEBUGGER_CLASS(
     PLATFORMS_MODULE p,
     PHYSICAL_DEVICES d) :
         PLATFORMS_MODULE_CLASS(p)
@@ -34,35 +51,44 @@ PHYSICAL_CHANNEL_CLASS::PHYSICAL_CHANNEL_CLASS(
     // start iid numbering
     iid = 0;
 
-    // start the console
-    Main();
+    // display banner
+    printf("=================================================\n");
+    printf("           HTG v5 PCIe Debugging Console         \n");
+    printf("=================================================\n");
+    printf("\n");
+    printf("You may use the debugging functionalities only at\n");
+    printf("the start of the program. Once you type \"run\", \n");
+    printf("the benchmark will run to completion and there is\n");
+    printf("no way to get back into the debugger.            \n");
+    printf("\n");
+
+    PrintHelp_Commands();
 }
 
 // destructor
-PHYSICAL_CHANNEL_CLASS::~PHYSICAL_CHANNEL_CLASS()
+PHYSICAL_PLATFORM_DEBUGGER_CLASS::~PHYSICAL_PLATFORM_DEBUGGER_CLASS()
 {
 }
 
+// monitor
 void
-PHYSICAL_CHANNEL_CLASS::Main()
+PHYSICAL_PLATFORM_DEBUGGER_CLASS::Monitor()
 {
     CSR_DATA  inst;
     CSR_DATA  data;
     CSR_INDEX index;
     
-    printf("=================================================\n");
-    printf("               HwChannel Test Console            \n");
-    printf("=================================================\n");
-
-    PrintHelp_Commands();
-
     char cmdline[256];
     char delims[] = " \t\n";
     int quit = 0;
+
     while (!quit)
     {
-        printf("hwchannel> ");
-        gets(cmdline);
+        // printf("Enter debugger command below (because @#$^%@$&#$ fflush is not working):\n");
+        printf("htg-debugger > \n");
+        fflush(stdout);
+
+        fgets(cmdline, 256, stdin);
         
         char *cmd = strtok(cmdline, delims);
         if (cmd == NULL)
@@ -144,22 +170,19 @@ PHYSICAL_CHANNEL_CLASS::Main()
             }
             else if (!strcmp(stridx, "flags"))
             {
-                pciExpressDevice->WriteSystemCSR(
-                    GenIID() | INST_STATUS_FLAGS);
+                pciExpressDevice->WriteSystemCSR(GenIID() | INST_STATUS_FLAGS);
                 data = pciExpressDevice->ReadSystemCSR();
                 PrintStatus_Flags(data);
             }
             else if (!strcmp(stridx, "pointers"))
             {
-                pciExpressDevice->WriteSystemCSR(
-                    GenIID() | INST_STATUS_POINTERS);
+                pciExpressDevice->WriteSystemCSR(GenIID() | INST_STATUS_POINTERS);
                 data = pciExpressDevice->ReadSystemCSR();
                 PrintStatus_Pointers(data);
             }
             else if (!strcmp(stridx, "vhdl"))
             {
-                pciExpressDevice->WriteSystemCSR(
-                    GenIID() | INST_STATUS_VHDL);
+                pciExpressDevice->WriteSystemCSR(GenIID() | INST_STATUS_VHDL);
                 data = pciExpressDevice->ReadSystemCSR();
                 PrintStatus_VHDL(data);
             }
@@ -167,6 +190,11 @@ PHYSICAL_CHANNEL_CLASS::Main()
         else if (!strcmp(cmd, "reset"))
         {
             pciExpressDevice->ResetFPGA();
+        }
+        else if (!strcmp(cmd, "run"))
+        {
+            pciExpressDevice->WriteSystemCSR(GenIID() | INST_RUN);
+            return;
         }
         else
         {
@@ -179,7 +207,7 @@ PHYSICAL_CHANNEL_CLASS::Main()
 }
 
 void
-PHYSICAL_CHANNEL_CLASS::PrintHelp_Help()
+PHYSICAL_PLATFORM_DEBUGGER_CLASS::PrintHelp_Help()
 {
     printf("\n");
     printf("    help topics: commands csr inst \n");
@@ -187,7 +215,7 @@ PHYSICAL_CHANNEL_CLASS::PrintHelp_Help()
 }
 
 void
-PHYSICAL_CHANNEL_CLASS::PrintHelp_Inst()
+PHYSICAL_PLATFORM_DEBUGGER_CLASS::PrintHelp_Inst()
 {
     printf("\n");
     printf("===== 24-bit Instruction Format =====\n");
@@ -195,25 +223,25 @@ PHYSICAL_CHANNEL_CLASS::PrintHelp_Inst()
     printf("    field:   [OPCODE]  [INDEX] [IMMEDIATE]\n");
     printf("    bits :    23-16     15-8      7-0\n");
     printf("\n");
-    printf("    opcode 00: NOP\n");
-    printf("           01: LEDs         := immediate\n");
-    printf("           02: LEDs         := buffer_\n");
-    printf("           03: LEDs         := status_flags\n");
-    printf("           04: buffer_      := immediate\n");
-    printf("           05: buffer       := buffer << 8\n");
-    printf("           06: buffer       := CSR[index]\n");
-    printf("           07: CSR[index]   := buffer\n");
-    printf("           08: CSR[index]_  := imediate\n");
-    printf("           09: CSR[tail...] := seq (imm... imm + index - 1)\n");
-    printf("           0A: CSR[sys]     := buffer\n");
-    printf("           0B: CSR[sys]     := status_flags\n");
-    printf("           0C: CSR[sys]     := status_pointers)\n");
-    printf("           0D: CSR[sys]     := status_VHDL\n");
+    printf("    opcode 10: NOP\n");
+    printf("           11: LEDs         := immediate\n");
+    printf("           12: LEDs         := buffer_\n");
+    printf("           13: LEDs         := status_flags\n");
+    printf("           14: buffer_      := immediate\n");
+    printf("           15: buffer       := buffer << 8\n");
+    printf("           16: buffer       := CSR[index]\n");
+    printf("           17: CSR[index]   := buffer\n");
+    printf("           18: CSR[index]_  := imediate\n");
+    printf("           19: CSR[tail...] := seq (imm... imm + index - 1)\n");
+    printf("           1A: CSR[sys]     := buffer\n");
+    printf("           1B: CSR[sys]     := status_flags\n");
+    printf("           1C: CSR[sys]     := status_pointers)\n");
+    printf("           1D: CSR[sys]     := status_VHDL\n");
     printf("\n");
 }
 
 void
-PHYSICAL_CHANNEL_CLASS::PrintHelp_CSR()
+PHYSICAL_PLATFORM_DEBUGGER_CLASS::PrintHelp_CSR()
 {
     printf("\n");
     printf("======== Special CSRs ========\n");
@@ -231,7 +259,7 @@ PHYSICAL_CHANNEL_CLASS::PrintHelp_CSR()
 }
 
 void
-PHYSICAL_CHANNEL_CLASS::PrintStatus_Flags(
+PHYSICAL_PLATFORM_DEBUGGER_CLASS::PrintStatus_Flags(
     unsigned int status)
 {
     printf("\n");
@@ -261,7 +289,7 @@ PHYSICAL_CHANNEL_CLASS::PrintStatus_Flags(
 }
 
 void
-PHYSICAL_CHANNEL_CLASS::PrintStatus_Pointers(
+PHYSICAL_PLATFORM_DEBUGGER_CLASS::PrintStatus_Pointers(
     unsigned int status)
 {
     printf("\n");
@@ -276,7 +304,7 @@ PHYSICAL_CHANNEL_CLASS::PrintStatus_Pointers(
 }
 
 void
-PHYSICAL_CHANNEL_CLASS::PrintStatus_VHDL(
+PHYSICAL_PLATFORM_DEBUGGER_CLASS::PrintStatus_VHDL(
     unsigned int status)
 {
     printf("\n");
@@ -299,12 +327,13 @@ PHYSICAL_CHANNEL_CLASS::PrintStatus_VHDL(
 }
 
 void
-PHYSICAL_CHANNEL_CLASS::PrintHelp_Commands()
+PHYSICAL_PLATFORM_DEBUGGER_CLASS::PrintHelp_Commands()
 {
     printf("\n");
     printf("========== Commands ==========\n");
     printf("\n");
 
+    printf("    run\n");
     printf("    help   <topic>\n");
     printf("    read   <index>\n");
     printf("    write  <index> <data>\n");
@@ -316,7 +345,7 @@ PHYSICAL_CHANNEL_CLASS::PrintHelp_Commands()
 }
 
 unsigned int
-PHYSICAL_CHANNEL_CLASS::StoI(
+PHYSICAL_PLATFORM_DEBUGGER_CLASS::StoI(
     const char *s)
 {
     if (s[0] == '0' && s[1] == 'x')
@@ -325,30 +354,9 @@ PHYSICAL_CHANNEL_CLASS::StoI(
         return strtol(s, (char **)NULL, 10);
 }
 
-// blocking read
-UMF_MESSAGE
-PHYSICAL_CHANNEL_CLASS::Read()
-{
-    return NULL;
-}
-
-// non-blocking read
-UMF_MESSAGE
-PHYSICAL_CHANNEL_CLASS::TryRead()
-{
-    return NULL;
-}
-
-// write
-void
-PHYSICAL_CHANNEL_CLASS::Write(
-    UMF_MESSAGE message)
-{
-}
-
 // generate a new Instruction ID
 CSR_DATA
-PHYSICAL_CHANNEL_CLASS::GenIID()
+PHYSICAL_PLATFORM_DEBUGGER_CLASS::GenIID()
 {
     assert(sizeof(CSR_DATA) >= 4);
     iid = (iid == 255) ? 0 : (iid + 1);

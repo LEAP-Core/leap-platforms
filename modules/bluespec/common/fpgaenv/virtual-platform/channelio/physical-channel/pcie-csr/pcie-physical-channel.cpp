@@ -1,3 +1,21 @@
+//
+// Copyright (C) 2008 Intel Corporation
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
+
 #include <stdio.h>
 #include <unistd.h>
 #include <strings.h>
@@ -46,7 +64,7 @@ PHYSICAL_CHANNEL_CLASS::PHYSICAL_CHANNEL_CLASS(
     pciExpressDevice->WriteCommonCSR(CSR_H2F_TAIL, h2fTail);
 
     // give green signal to FPGA
-    pciExpressDevice->WriteSystemCSR(genIID() | 0x50000);
+    pciExpressDevice->WriteSystemCSR(genIID() | (OP_START << 16));
 
     // wait for green signal from FPGA
     CSR_DATA data;
@@ -163,7 +181,7 @@ PHYSICAL_CHANNEL_CLASS::Write(
     // sync h2fTail pointer. It is OPTIONAL to do this immediately, but we will do it
     // since this is probably the response to a request the hardware might be blocked on
     pciExpressDevice->WriteCommonCSR(CSR_H2F_TAIL, h2fTail);
-    pciExpressDevice->WriteSystemCSR(genIID() | 0x60000);
+    pciExpressDevice->WriteSystemCSR(genIID() | (OP_INVAL_H2FTAIL << 16));
 
     // de-allocate message
     message->Delete();
@@ -191,7 +209,7 @@ PHYSICAL_CHANNEL_CLASS::readCSR()
 
     // sync head pointer (OPTIONAL)
     pciExpressDevice->WriteCommonCSR(CSR_F2H_HEAD, f2hHead);
-    pciExpressDevice->WriteSystemCSR(genIID() | 0x70000);
+    pciExpressDevice->WriteSystemCSR(genIID() | (OP_INVAL_F2HHEAD << 16));
 
     // determine if we are starting a new message
     if (incomingMessage == NULL)

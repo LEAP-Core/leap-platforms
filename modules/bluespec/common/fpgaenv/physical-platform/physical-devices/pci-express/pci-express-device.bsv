@@ -2,6 +2,23 @@ import Vector::*;
 import Clocks::*;
 import LevelFIFO::*;
 
+// Subinterfaces
+
+interface COMMON_CSR_ARRAY;
+    
+    method Action                      readRequest(PCIE_CSR_INDEX index);
+    method ActionValue#(PCIE_CSR_DATA) readResponse();
+    method Action                      write(PCIE_CSR_INDEX index, PCIE_CSR_DATA data);
+        
+endinterface
+
+interface SYSTEM_CSR;
+    
+    method PCIE_CSR_DATA _read();
+    method Action        _write(PCIE_CSR_DATA data);
+        
+endinterface
+
 // PCI_EXPRESS_DRIVER
 
 // The PCIE Platform supports reading and writing data and csrs,
@@ -9,22 +26,15 @@ import LevelFIFO::*;
 
 interface PCI_EXPRESS_DRIVER;
 
-    // CSR Read
-    method Action csr_read_req(PCIE_CSR_Index idx);
-    method ActionValue#(PCIE_CSR_Data) csr_read_resp();
-    
-    // CSR Write
-    method Action csr_write(PCIE_CSR_Index idx, PCIE_CSR_Data data);
-        
-    // CSR 0 is special in that we can always access it.
-    method PCIE_CSR_Data csr_h2f_reg0_read();
-    method Action  csr_f2h_reg0_write(PCIE_CSR_Data data);
+    // CSRs
+    interface COMMON_CSR_ARRAY commonCSRs;
+    interface SYSTEM_CSR       systemCSR;
     
     // interrupt
-    method Action interrupt_host();
+    method Action interruptHost();
         
     // soft reset
-    method Action soft_reset();
+    method Action softReset();
     
 endinterface
 
@@ -105,14 +115,17 @@ module mkPCIExpressDevice
     // Device state
     Reg#(PCIE_DEVICE_STATE) state <- mkReg(PCIE_DEVICE_STATE_init);
     
+    // CSR Read Port state
+    Reg#(Bool) csrReadPortBusy <- mkReg(False);
+    
     // Device is ready only in a particular state
     Bool ready = (state == PCIE_DEVICE_STATE_ready);
 
     // Synchronizers from PCIE to Bluespec.    
-    Reg#(PCIE_CSR_Data)          sync_csr_h2f_reg0_read_r
+    Reg#(PCIE_CSR_DATA)          sync_csr_h2f_reg0_read_r
                               <- mkSyncReg(?, prim_pci.pcie_clk, trans_rst, bsv_clk);
     
-    SyncFIFOIfc#(PCIE_CSR_Data)  sync_csr_read_resp_q
+    SyncFIFOIfc#(PCIE_CSR_DATA)  sync_csr_read_resp_q
                               <- mkSyncFIFO(2, prim_pci.pcie_clk, trans_rst, bsv_clk);
 
     SyncFIFOIfc#(Bool)           sync_reset_req_q
@@ -122,13 +135,13 @@ module mkPCIExpressDevice
                               <- mkSyncFIFO(2, prim_pci.pcie_clk, trans_rst, bsv_clk);
 
     // Synchronizers from BSV to PCIe
-    SyncFIFOIfc#(PCIE_CSR_Index) sync_csr_read_req_q
+    SyncFIFOIfc#(PCIE_CSR_INDEX) sync_csr_read_req_q
                               <- mkSyncFIFO(2, bsv_clk, bsv_rst, prim_pci.pcie_clk);
 
-    SyncFIFOLevelIfc#(Tuple2#(PCIE_CSR_Index, PCIE_CSR_Data), 2) sync_csr_write_q
+    SyncFIFOLevelIfc#(Tuple2#(PCIE_CSR_INDEX, PCIE_CSR_DATA), 2) sync_csr_write_q
                               <- mkSyncFIFOLevel(bsv_clk, bsv_rst, prim_pci.pcie_clk);
     
-    SyncFIFOIfc#(PCIE_CSR_Data)  sync_csr_f2h_reg0_write_q
+    SyncFIFOIfc#(PCIE_CSR_DATA)  sync_csr_f2h_reg0_write_q
                               <- mkSyncFIFO(2, bsv_clk, bsv_rst, prim_pci.pcie_clk);
 
     SyncFIFOIfc#(Bool)           sync_interrupt_host_q
@@ -288,36 +301,52 @@ module mkPCIExpressDevice
       
     endinterface
     
+    // Drivers visible to upper layers
+    
     interface PCI_EXPRESS_DRIVER driver;
-
-        method csr_h2f_reg0_read = sync_csr_h2f_reg0_read_r;
+    
+        // Common CSRs
         
-        method ActionValue#(PCIE_CSR_Data) csr_read_resp() if (ready);
+        interface COMMON_CSR_ARRAY commonCSRs;
+    
+            method Action readRequest(PCIE_CSR_INDEX idx) if (ready);
 
-            sync_csr_read_resp_q.deq();
-            return sync_csr_read_resp_q.first();
+                sync_csr_read_req_q.enq(idx);
 
-        endmethod
+            endmethod
+
+            method ActionValue#(PCIE_CSR_DATA) readResponse() if (ready);
+
+                sync_csr_read_resp_q.deq();
+                return sync_csr_read_resp_q.first();
+
+            endmethod
         
-        method Action csr_read_req(PCIE_CSR_Index idx) if (ready);
+            method Action write(PCIE_CSR_INDEX idx, PCIE_CSR_DATA d) if (ready);
 
-            sync_csr_read_req_q.enq(idx);
+                sync_csr_write_q.enq(tuple2(idx, d));
 
-        endmethod
+            endmethod
+            
+        endinterface
+    
+        // System CSR
+        
+        interface SYSTEM_CSR systemCSR;
+        
+            method _read = sync_csr_h2f_reg0_read_r;
+        
+            method Action _write(PCIE_CSR_DATA d) if (ready);
 
-        method Action csr_write(PCIE_CSR_Index idx, PCIE_CSR_Data d) if (ready);
+                sync_csr_f2h_reg0_write_q.enq(d);
 
-            sync_csr_write_q.enq(tuple2(idx, d));
-
-        endmethod
-
-        method Action csr_f2h_reg0_write(PCIE_CSR_Data d) if (ready);
-
-            sync_csr_f2h_reg0_write_q.enq(d);
-
-        endmethod
-
-        method Action interrupt_host() if (ready);
+            endmethod
+                
+        endinterface
+    
+        // Interrupt
+        
+        method Action interruptHost() if (ready);
 
             sync_interrupt_host_q.enq(?);
 
@@ -325,7 +354,7 @@ module mkPCIExpressDevice
 
         // Reset interface
 
-        method Action soft_reset() if (ready);
+        method Action softReset() if (ready);
 
             sync_reset_req_q.deq();
             

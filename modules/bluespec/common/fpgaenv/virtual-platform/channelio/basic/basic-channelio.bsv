@@ -30,7 +30,7 @@ module mkChannelIO#(PHYSICAL_DRIVERS drivers) (CHANNEL_IO);
     Reg#(Bit#(8)) currentWriteChannel <- mkReg(0);
 
     // physical channel
-    PhysicalChannel physicalChannel <- mkPhysicalChannel(drivers);
+    PHYSICAL_CHANNEL physicalChannel <- mkPhysicalChannel(drivers);
 
     // ==============================================================
     //                        Ports and Buffers

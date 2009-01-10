@@ -86,6 +86,7 @@ Packagehint=platforms
 physical_platform=HTG Virtex 5 PCIE Enabled
 channelio=Basic Virtual Channel Multiplexer
 rrr=RRR Clients and Servers
+physical_platform_debugger=Null Physical Platform Debugger
 
 [Driver Header for PCIe Kernel Module]
 File=drivers/linux/hasim/kernel/pchnl_if.awb
@@ -98,7 +99,6 @@ pci_express_driver_header=Driver Header for PCIe Kernel Module
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pci-express-device-mmap.awb
 Packagehint=platforms
 
-
 [Little-Endian 32-bit Unified Message Format]
 File=modules/bluespec/common/fpgaenv/virtual-platform/umf/little-32/umf-little-32.awb
 Packagehint=platforms
@@ -109,4 +109,8 @@ Packagehint=platforms
 
 [Hybrid Scratchpad Memory Device]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid/hybrid-memory.awb
+Packagehint=platforms
+
+[Null Physical Platform Debugger]
+File=modules/bluespec/common/fpgaenv/physical-platform/debuggers/null/null-debugger.awb
 Packagehint=platforms

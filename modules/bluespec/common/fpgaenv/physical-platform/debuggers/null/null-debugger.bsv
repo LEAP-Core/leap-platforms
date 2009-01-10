@@ -16,15 +16,22 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-#include "asim/provides/physical_platform.h"
+`include "physical_platform.bsh"
 
-PHYSICAL_DEVICES_CLASS::PHYSICAL_DEVICES_CLASS(
-    PLATFORMS_MODULE p) :
-        PLATFORMS_MODULE_CLASS(p),
-        pciExpressDevice(this)
-{
-}
+// ============== Physical Platform Debugger ==============
 
-PHYSICAL_DEVICES_CLASS::~PHYSICAL_DEVICES_CLASS()
-{
-}
+// the debugger accepts a set of physical drivers as
+// constructor input (along with some status bits), and
+// returns exactly the same set of physical drivers as its
+// interface, but with the methods within the interface
+// gated to prevent access unless the debugger allows it
+
+// module
+module mkPhysicalPlatformDebugger#(PHYSICAL_DRIVERS drivers)
+    // interface
+        (PHYSICAL_DRIVERS);
+    
+    // simply pass-through    
+    return drivers;
+    
+endmodule

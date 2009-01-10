@@ -3,7 +3,7 @@
 
 %provides low_level_platform_interface
 
-%requires rrr channelio physical_platform
+%requires rrr channelio physical_platform physical_platform_debugger
 
 %sources -t BSV -v PUBLIC  llpi.bsv
 %sources -t H   -v PUBLIC  llpi.h
