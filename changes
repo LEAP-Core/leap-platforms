@@ -4673,3 +4673,14 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci
 - set Null Debugger as default for all fpgaenv submodules.
 
 - removed obsolete "Physical Channel Debugger".
+
+----------
+mcadler     Date: Tue Jan 20 21:44:56 EST 2009  CSN: CSN-platforms-158
+                  Wed Jan 21 02:44:56 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ basic-rrr-server.bsv      Locally Modified          157 
+ basic-rrr-client.bsv      Locally Modified          157 
+
+Split rules to simplify Bluespec scheduling predicates.

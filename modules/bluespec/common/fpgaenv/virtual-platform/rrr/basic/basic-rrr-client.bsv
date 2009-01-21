@@ -59,26 +59,26 @@ module mkRRRClient#(CHANNEL_IO channel) (RRR_CLIENT);
     FIFOF#(UMF_PACKET)                      responseQueues[`NUM_SERVICES];
     Vector#(`NUM_SERVICES, CLIENT_RESPONSE_PORT) resp_ports = newVector();
 
-    for (Integer i = 0; i < `NUM_SERVICES; i = i+1)
+    for (Integer s = 0; s < `NUM_SERVICES; s = s + 1)
     begin
-        requestQueues[i]  <- mkFIFOF();
-        responseQueues[i] <- mkFIFOF();
+        requestQueues[s]  <- mkFIFOF();
+        responseQueues[s] <- mkFIFOF();
 
         // create a new request port and link it to the FIFO
-        req_ports[i] = interface CLIENT_REQUEST_PORT
+        req_ports[s] = interface CLIENT_REQUEST_PORT
                            method Action write(UMF_PACKET data);
         
-                               requestQueues[i].enq(data);
+                               requestQueues[s].enq(data);
                            
                            endmethod
                        endinterface;
 
         // create a new response port and link it to the FIFO
-        resp_ports[i] = interface CLIENT_RESPONSE_PORT
+        resp_ports[s] = interface CLIENT_RESPONSE_PORT
                             method ActionValue#(UMF_PACKET) read();
 
-                                UMF_PACKET val = responseQueues[i].first();
-                                responseQueues[i].deq();
+                                UMF_PACKET val = responseQueues[s].first();
+                                responseQueues[s].deq();
                                 return val;
                             
                             endmethod
@@ -131,21 +131,45 @@ module mkRRRClient#(CHANNEL_IO channel) (RRR_CLIENT);
     //                          Request Rules
     // ==============================================================
     
-    // start writing new message
-    rule write_request_newmsg (requestChunksRemaining == 0);
+    //
+    // Start writing new message.  The write_request_newmsg rule is broken
+    // into two parts in order to help Bluespec generate a significantly simpler
+    // schedule than if the rules are combined.  Separating the rules breaks
+    // the connection between arbiter input vector state and the test for
+    // whether a requestQueue has data.
+    //
+
+    Wire#(Maybe#(UInt#(TLog#(`NUM_SERVICES)))) newMsgQIdx <- mkDWire(tagged Invalid);
+
+    //
+    // First half -- pick an incoming requestQueue
+    //
+    rule write_request_newmsg1 (requestChunksRemaining == 0);
 
         // arbitrate
         Bit#(`NUM_SERVICES) request = '0;
-        for (Integer i = 0; i < `NUM_SERVICES; i = i + 1)
+        for (Integer s = 0; s < `NUM_SERVICES; s = s + 1)
         begin
-            request[i] = pack((requestChunksRemaining == 0) && (requestQueues[i].notEmpty()));
+            request[s] = pack((requestChunksRemaining == 0) && (requestQueues[s].notEmpty()));
         end
 
-        if (arbiter.arbitrate(request) matches tagged Valid .i)
-        begin
+        newMsgQIdx <= arbiter.arbitrate(request);
+
+    endrule
+    
+    //
+    // Second half -- consume a value from the chosen responseQueue.  If the
+    // rule fails to fire because the channel write port is full it will fire
+    // again later after being reselected by the first half.
+    //
+    for (Integer s = 0; s < `NUM_SERVICES; s = s + 1)
+    begin
+        rule write_request_newmsg2 (newMsgQIdx matches tagged Valid .idx &&&
+                                     fromInteger(s) == idx);
+
             // get header packet
-            UMF_PACKET packet = requestQueues[i].first();
-            requestQueues[i].deq();
+            UMF_PACKET packet = requestQueues[s].first();
+            requestQueues[s].deq();
 
             // add my virtual channelID to header
             UMF_PACKET newpacket = tagged UMF_PACKET_header
@@ -161,10 +185,10 @@ module mkRRRClient#(CHANNEL_IO channel) (RRR_CLIENT);
 
             // setup remaining chunks
             requestChunksRemaining <= newpacket.UMF_PACKET_header.numChunks;
-            requestActiveQueue <= zeroExtend(pack(i));
-        end
+            requestActiveQueue <= fromInteger(s);
+        endrule
 
-    endrule
+    end
     
     // continue writing message
     rule write_request_continue (requestChunksRemaining != 0);

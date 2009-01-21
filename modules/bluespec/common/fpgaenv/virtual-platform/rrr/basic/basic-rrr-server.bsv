@@ -1,3 +1,21 @@
+//
+// Copyright (C) 2009 Intel Corporation
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
+
 import Vector::*;
 import FIFOF::*;
 
@@ -43,27 +61,27 @@ module mkRRRServer#(CHANNEL_IO channel) (RRR_SERVER);
     FIFOF#(UMF_PACKET)                    responseQueues[`NUM_SERVICES];
     Vector#(`NUM_SERVICES, SERVER_RESPONSE_PORT) resp_ports = newVector();
 
-    for (Integer i = 0; i < `NUM_SERVICES; i = i+1)
+    for (Integer s = 0; s < `NUM_SERVICES; s = s + 1)
     begin
-        requestQueues[i]  <- mkFIFOF();
-        responseQueues[i] <- mkFIFOF();
+        requestQueues[s]  <- mkFIFOF();
+        responseQueues[s] <- mkFIFOF();
 
         // create a new request port and link it to the FIFO
-        req_ports[i] = interface SERVER_REQUEST_PORT
+        req_ports[s] = interface SERVER_REQUEST_PORT
                            method ActionValue#(UMF_PACKET) read();
 
-                               UMF_PACKET val = requestQueues[i].first();
-                               requestQueues[i].deq();
+                               UMF_PACKET val = requestQueues[s].first();
+                               requestQueues[s].deq();
                                return val;
 
                            endmethod
                        endinterface;
 
         // create a new response port and link it to the FIFO
-        resp_ports[i] = interface SERVER_RESPONSE_PORT
+        resp_ports[s] = interface SERVER_RESPONSE_PORT
                             method Action write(UMF_PACKET data);
 
-                                responseQueues[i].enq(data);
+                                responseQueues[s].enq(data);
 
                             endmethod
                         endinterface;
@@ -115,40 +133,64 @@ module mkRRRServer#(CHANNEL_IO channel) (RRR_SERVER);
     //                          Response Rules
     // ==============================================================
     
-    // start writing new message
-    rule write_response_newmsg (responseChunksRemaining == 0);
+    //
+    // Start writing new message.  The write_response_newmsg rule is broken
+    // into two parts in order to help Bluespec generate a significantly simpler
+    // schedule than if the rules are combined.  Separating the rules breaks
+    // the connection between arbiter input vector state and the test for
+    // whether a responseQueue has data.
+    //
+
+    Wire#(Maybe#(UInt#(TLog#(`NUM_SERVICES)))) newMsgQIdx <- mkDWire(tagged Invalid);
+
+    //
+    // First half -- pick an incoming responseQueue
+    //
+    rule write_response_newmsg1 (responseChunksRemaining == 0);
 
         // arbitrate
         Bit#(`NUM_SERVICES) request = '0;
-        for (Integer i = 0; i < `NUM_SERVICES; i = i + 1)
+        for (Integer s = 0; s < `NUM_SERVICES; s = s + 1)
         begin
-            request[i] = pack((responseChunksRemaining == 0) && (responseQueues[i].notEmpty()));
+            request[s] = pack((responseChunksRemaining == 0) && (responseQueues[s].notEmpty()));
         end
 
-        if (arbiter.arbitrate(request) matches tagged Valid .i)
-        begin
+        newMsgQIdx <= arbiter.arbitrate(request);
+
+    endrule
+    
+    //
+    // Second half -- consume a value from the chosen responseQueue.  If the
+    // rule fails to fire because the channel write port is full it will fire
+    // again later after being reselected by the first half.
+    //
+    for (Integer s = 0; s < `NUM_SERVICES; s = s + 1)
+    begin
+        rule write_response_newmsg2 (newMsgQIdx matches tagged Valid .idx &&&
+                                     fromInteger(s) == idx);
+
             // get header packet
-            UMF_PACKET packet = responseQueues[i].first();
-            responseQueues[i].deq();
+            UMF_PACKET packet = responseQueues[s].first();
+            responseQueues[s].deq();
 
             // add my virtual channelID to header
             UMF_PACKET newpacket = tagged UMF_PACKET_header
                                        {
-                                        channelID: `SERVER_CHANNEL_ID,
-                                        serviceID: packet.UMF_PACKET_header.serviceID,
-                                        methodID : packet.UMF_PACKET_header.methodID,
-                                        numChunks: packet.UMF_PACKET_header.numChunks
-                                       };
+                                         channelID: `SERVER_CHANNEL_ID,
+                                         serviceID: packet.UMF_PACKET_header.serviceID,
+                                         methodID : packet.UMF_PACKET_header.methodID,
+                                         numChunks: packet.UMF_PACKET_header.numChunks
+                                        };
 
             // send the header packet to channelio
             channel.writePorts[`SERVER_CHANNEL_ID].write(newpacket);
 
             // setup remaining chunks
             responseChunksRemaining <= newpacket.UMF_PACKET_header.numChunks;
-            responseActiveQueue <= zeroExtend(pack(i));
-        end
+            responseActiveQueue <= fromInteger(s);
 
-    endrule
+        endrule
+    end
     
     // continue writing message
     rule write_response_continue (responseChunksRemaining != 0);
