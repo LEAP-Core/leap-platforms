@@ -4719,3 +4719,17 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci
   layers.
 
 - Added Copyright headers to some files.
+
+----------
+mcadler     Date: Wed Jan 28 20:27:31 EST 2009  CSN: CSN-platforms-160
+                  Thu Jan 29 01:27:31 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ bram-multi-read.bsv       Locally Modified          159 
+
+Define a new category of multi-read-port BRAM that has multiple virtual ports
+instead of multiple physical ports.  mkBRAMPseudoMultiRead() builds the
+specified number of read port interfaces but only allocates a single BRAM.
+Read requests are multiplexed through the single BRAM and responses are routed
+back to the proper interface.
