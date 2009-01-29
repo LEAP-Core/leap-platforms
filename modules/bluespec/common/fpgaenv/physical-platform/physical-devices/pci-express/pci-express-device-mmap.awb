@@ -27,8 +27,9 @@
 %sources -t H   -v PUBLIC  pci-express-c-import-mmap.h
 %sources -t CPP -v PRIVATE pci-express-c-import-mmap.cpp
 
-%param PCIE_PHYS_ADDR_SIZE 64 "Number of bits in PCIe Physical Address."
-%param PCIE_DMA_DATA_SIZE  64 "Number of bits in PCIe DMA Data line."
-%param PCIE_LEN_SIZE       32 "Number of bits in PCIe length parameter." 
-%param PCIE_CSR_DATA_SIZE  32 "Number of bits in PCIe CSR."
-%param PCIE_CSR_IDX_SIZE   8  "Number of bits in CSR index (determines the number of CSRs)."
+%param PCIE_PHYS_ADDR_SIZE      64 "Number of bits in PCIe Physical Address."
+%param PCIE_DMA_DATA_SIZE       64 "Number of bits in PCIe DMA Data line."
+%param PCIE_LOG_DMA_DATA_BYTES  3  "Log of number of bytes in PCIe DMA Data line."
+%param PCIE_LEN_SIZE            32 "Number of bits in PCIe length parameter." 
+%param PCIE_CSR_DATA_SIZE       32 "Number of bits in PCIe CSR."
+%param PCIE_CSR_IDX_SIZE        8  "Number of bits in CSR index (determines the number of CSRs)."

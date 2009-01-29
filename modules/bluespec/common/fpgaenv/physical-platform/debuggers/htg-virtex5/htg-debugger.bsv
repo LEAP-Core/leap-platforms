@@ -193,7 +193,9 @@ module mkPhysicalPlatformDebugger#(PHYSICAL_DRIVERS drivers)
     
     interface PCI_EXPRESS_DRIVER pciExpressDriver;
     
+        //
         // common CSRs
+        //
         
         interface COMMON_CSR_ARRAY commonCSRs;
             
@@ -222,7 +224,9 @@ module mkPhysicalPlatformDebugger#(PHYSICAL_DRIVERS drivers)
             
         endinterface
         
+        //
         // system CSR
+        //
         
         interface SYSTEM_CSR systemCSR;
             
@@ -240,7 +244,15 @@ module mkPhysicalPlatformDebugger#(PHYSICAL_DRIVERS drivers)
 
         endinterface
         
+        //
+        // DMA
+        //
+        
+        interface DMA_DRIVER dmaDriver = drivers.pciExpressDriver.dmaDriver;
+    
+        //
         // misc.
+        //
         
         method interruptHost = drivers.pciExpressDriver.interruptHost;
             

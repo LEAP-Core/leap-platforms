@@ -4762,3 +4762,20 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-ch
 Added a DMA-based Physical Channel. It is currently non-functional due to
 the abscence of physical platform hooks it needs to work. Please do not
 attempt to use this module yet.
+
+----------
+aparasha    Date: Thu Jan 29 11:07:38 EST 2009  CSN: CSN-platforms-163
+                  Thu Jan 29 16:07:38 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/debuggers/htg-virtex5
+ htg-debugger.bsv          Locally Modified          162 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express
+ pci-express-device.bsv    Locally Modified          162 
+ pci-express-device-mmap.awb Locally Modified          162 
+ pci-express-c-import-mmap.cpp Locally Modified          162 
+ pci-express-c-import-mmap.h Locally Modified          162 
+
+- Added Bluespec wrappers and synchronizers around the VHDL DMA controller.
+- Added pass-through DMA interface to HTG debugger.

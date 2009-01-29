@@ -131,3 +131,19 @@ PCIE_DEVICE_CLASS::swapEndian(
                       ((data & 0xFF000000) >> 24);
     return retval;
 }
+
+// translate a virtual address to a physical address
+UINT64
+PCIE_DEVICE_CLASS::TranslateV2P(
+    UINT64 virtual_address)
+{
+    pchnl_req req;
+    UINT64    physical_address;
+
+//    req.u.tranx_translate_v2p.va = &virtual_address;
+//    req.u.tranx_translate_v2p.pa = &physical_address;
+
+//    ioctl(driverFD, PCHNL_TRANSLATE_V2P, &req);
+
+    return physical_address;
+}

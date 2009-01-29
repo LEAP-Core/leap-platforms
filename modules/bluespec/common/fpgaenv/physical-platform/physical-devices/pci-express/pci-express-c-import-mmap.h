@@ -19,6 +19,7 @@
 #ifndef __PCI_EXPRESS_DEVICE__
 #define __PCI_EXPRESS_DEVICE__
 
+#include <asim/syntax.h>
 #include "platforms-module.h"
 
 // ===============================================
@@ -26,7 +27,7 @@
 // ===============================================
 
 // types for CSR indices and data
-#if    (PCIE_CSR_DATA_SIZE == 8)
+#if   (PCIE_CSR_DATA_SIZE == 8)
 typedef unsigned char      CSR_DATA;
 #elif (PCIE_CSR_DATA_SIZE == 32)
 typedef unsigned int       CSR_DATA;
@@ -36,7 +37,7 @@ typedef unsigned long long CSR_DATA;
 #error "invalid PCIE_CSR_DATA_SIZE"
 #endif
 
-#if    (PCIE_CSR_IDX_SIZE == 8)
+#if   (PCIE_CSR_IDX_SIZE == 8)
 typedef unsigned char      CSR_INDEX;
 #elif (PCIE_CSR_IDX_SIZE == 32)
 typedef unsigned int       CSR_INDEX;
@@ -71,11 +72,19 @@ class PCIE_DEVICE_CLASS: public PLATFORMS_MODULE_CLASS
     
     void     Cleanup();
     void     Uninit();
-    void     ResetFPGA();
+
+    // CSR interface
     CSR_DATA ReadSystemCSR();
     void     WriteSystemCSR(CSR_DATA);
     CSR_DATA ReadCommonCSR(CSR_INDEX);
     void     WriteCommonCSR(CSR_INDEX, CSR_DATA);
+
+    // Memory translation
+    // TODO: make this more general
+    UINT64   TranslateV2P(UINT64);
+
+    // Other interfaces
+    void     ResetFPGA();
 };
 
 #endif

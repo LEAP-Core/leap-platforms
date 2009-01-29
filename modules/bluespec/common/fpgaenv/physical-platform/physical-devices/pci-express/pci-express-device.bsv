@@ -19,6 +19,15 @@ interface SYSTEM_CSR;
         
 endinterface
 
+interface DMA_DRIVER;
+    
+    method Action                      startRead(PCIE_PHYSICAL_ADDRESS addr, PCIE_LENGTH len);
+    method ActionValue#(PCIE_DMA_DATA) readData();
+    method Action                      startWrite(PCIE_PHYSICAL_ADDRESS addr, PCIE_LENGTH len);
+    method Action                      writeData(PCIE_DMA_DATA data);
+        
+endinterface
+        
 // PCI_EXPRESS_DRIVER
 
 // The PCIE Platform supports reading and writing data and csrs,
@@ -30,6 +39,9 @@ interface PCI_EXPRESS_DRIVER;
     interface COMMON_CSR_ARRAY commonCSRs;
     interface SYSTEM_CSR       systemCSR;
     
+    // DMA
+    interface DMA_DRIVER dmaDriver;
+
     // interrupt
     method Action interruptHost();
         
@@ -134,6 +146,9 @@ module mkPCIExpressDevice
     SyncFIFOIfc#(Bool)           sync_init_resp_q
                               <- mkSyncFIFO(2, prim_pci.pcie_clk, trans_rst, bsv_clk);
 
+    SyncFIFOIfc#(PCIE_DMA_DATA)  sync_dma_read_data_q
+                              <- mkSyncFIFO(2, prim_pci.pcie_clk, trans_rst, bsv_clk);
+    
     // Synchronizers from BSV to PCIe
     SyncFIFOIfc#(PCIE_CSR_INDEX) sync_csr_read_req_q
                               <- mkSyncFIFO(2, bsv_clk, bsv_rst, prim_pci.pcie_clk);
@@ -151,6 +166,15 @@ module mkPCIExpressDevice
                               <- mkSyncFIFO(2, bsv_clk, bsv_rst, prim_pci.pcie_clk);
 
     SyncFIFOIfc#(Bool)           sync_init_req_q
+                              <- mkSyncFIFO(2, bsv_clk, bsv_rst, prim_pci.pcie_clk);
+
+    SyncFIFOLevelIfc#(Tuple2#(PCIE_PHYSICAL_ADDRESS, PCIE_LENGTH), 2) sync_dma_read_start_q
+                              <- mkSyncFIFOLevel(bsv_clk, bsv_rst, prim_pci.pcie_clk);
+    
+    SyncFIFOLevelIfc#(Tuple2#(PCIE_PHYSICAL_ADDRESS, PCIE_LENGTH), 2) sync_dma_write_start_q
+                              <- mkSyncFIFOLevel(bsv_clk, bsv_rst, prim_pci.pcie_clk);
+    
+    SyncFIFOIfc#(PCIE_DMA_DATA)  sync_dma_write_data_q
                               <- mkSyncFIFO(2, bsv_clk, bsv_rst, prim_pci.pcie_clk);
 
     // function to swap endianness
@@ -236,6 +260,13 @@ module mkPCIExpressDevice
 
     endrule
 
+    rule sync_dma_read_data (True);
+        
+        let x <- prim_pci.dma_read_data();
+        sync_dma_read_data_q.enq(swapEndian(x));
+        
+    endrule
+    
     // Rules for synchronizing from BSV to PCIe.
 
     rule sync_reset_resp (True);
@@ -281,6 +312,29 @@ module mkPCIExpressDevice
 
     endrule
     
+    rule sync_dma_read_start (True);
+
+        sync_dma_read_start_q.deq();
+        match {.a, .l} = sync_dma_read_start_q.first();
+        prim_pci.dma_read_start(a, l);
+
+    endrule
+
+    rule sync_dma_write_start (True);
+
+        sync_dma_write_start_q.deq();
+        match {.a, .l} = sync_dma_write_start_q.first();
+        prim_pci.dma_write_start(a, l);
+
+    endrule
+
+    rule sync_dma_write_data (True);
+
+        sync_dma_write_data_q.deq();
+        prim_pci.dma_write_data(swapEndian(sync_dma_write_data_q.first()));
+
+    endrule
+
     // The wires are not domain-crossed because no one should ever look at them.
 
     interface PCI_EXPRESS_WIRES wires;
@@ -344,6 +398,37 @@ module mkPCIExpressDevice
                 
         endinterface
     
+        // DMA
+            
+        interface DMA_DRIVER dmaDriver;
+
+            method Action startRead(PCIE_PHYSICAL_ADDRESS addr, PCIE_LENGTH len) if (ready);
+            
+                sync_dma_read_start_q.enq(tuple2(addr, len));
+            
+            endmethod
+            
+            method ActionValue#(PCIE_DMA_DATA) readData() if (ready);
+            
+                sync_dma_read_data_q.deq();
+                return sync_dma_read_data_q.first();
+            
+            endmethod
+            
+            method Action startWrite(PCIE_PHYSICAL_ADDRESS addr, PCIE_LENGTH len) if (ready);
+            
+                sync_dma_write_start_q.enq(tuple2(addr, len));
+            
+            endmethod
+            
+            method Action writeData(PCIE_DMA_DATA data) if (ready);
+            
+                sync_dma_write_data_q.enq(data);
+            
+            endmethod
+            
+        endinterface
+
         // Interrupt
         
         method Action interruptHost() if (ready);
