@@ -20,6 +20,7 @@
 #define __PHYSICAL_PLATFORM_DEBUGGER__
 
 #include "asim/provides/umf.h"
+#include "asim/provides/pci_express_device.h"
 #include "asim/provides/physical_platform.h"
 
 // ============================================

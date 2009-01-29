@@ -23,15 +23,13 @@
 // the debugger accepts a set of physical drivers as
 // constructor input (along with some status bits), and
 // returns exactly the same set of physical drivers as its
-// interface, but with the methods within the interface
-// gated to prevent access unless the debugger allows it
+// interface
 
 // module
 module mkPhysicalPlatformDebugger#(PHYSICAL_DRIVERS drivers)
     // interface
         (PHYSICAL_DRIVERS);
     
-    // simply pass-through    
     return drivers;
     
 endmodule

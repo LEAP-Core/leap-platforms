@@ -21,10 +21,10 @@
 LLPI_CLASS::LLPI_CLASS() :
         PLATFORMS_MODULE_CLASS(NULL),
         physicalDevices(this),
+        debugger(this, &physicalDevices),
         channelio(this, &physicalDevices),
         rrrClient(this, &channelio),
-        rrrServer(this, &channelio),
-        debugger(this, &physicalDevices)
+        rrrServer(this, &channelio)
 {
     // set global link to RRR client
     // the service modules need this link since they
@@ -39,11 +39,6 @@ LLPI_CLASS::~LLPI_CLASS()
 void
 LLPI_CLASS::Main()
 {
-    // ugly: explicitly enter debugger's monitor. Execution
-    // will continue (and never stop) once the debugger
-    // exits its monitor
-    debugger.Monitor();    
-
     // infinite scheduler loop
     while (true)
     {

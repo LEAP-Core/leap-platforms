@@ -35,6 +35,8 @@ using namespace std;
 #define INST_STATUS_VHDL     0x001D0000
 #define INST_RUN             0x001E0000
 
+#include "asim/provides/physical_platform_debugger.h"
+
 // ============================================
 //          Physical Platform Debugger              
 // ============================================
@@ -63,6 +65,9 @@ PHYSICAL_PLATFORM_DEBUGGER_CLASS::PHYSICAL_PLATFORM_DEBUGGER_CLASS(
     printf("\n");
 
     PrintHelp_Commands();
+
+    // ugly: directly call Monitor
+    Monitor();
 }
 
 // destructor

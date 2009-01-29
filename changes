@@ -4684,3 +4684,38 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
  basic-rrr-client.bsv      Locally Modified          157 
 
 Split rules to simplify Bluespec scheduling predicates.
+
+----------
+aparasha    Date: Wed Jan 28 19:16:10 EST 2009  CSN: CSN-platforms-159
+                  Thu Jan 29 00:16:10 UTC 2009
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ hasim-fpgaenv-htg-v5-pcie.apm Locally Modified          158 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/basic
+ basic-channelio.cpp       Locally Modified          158 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ basic-rrr-client.cpp      Locally Modified          158 
+ basic-rrr-server.cpp      Locally Modified          158 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface
+ llpi.cpp                  Locally Modified          158 
+ llpi.h                    Locally Modified          158 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/debuggers/htg-virtex5
+ htg-debugger.cpp          Locally Modified          158 
+ htg-debugger.h            Locally Modified          158 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/debuggers/null
+ null-debugger.bsv         Locally Modified          158 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express
+ pci-express-c-import-mmap.h Locally Modified          158 
+
+- Modified C++ instantiation order of LLPI layers so that debugger gets
+  instantiated after the physical devices but before any of the other
+  layers.
+
+- Added Copyright headers to some files.

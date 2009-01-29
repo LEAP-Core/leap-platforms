@@ -35,12 +35,10 @@ class LLPI_CLASS: public PLATFORMS_MODULE_CLASS
 
     // LLPI stack layers
     PHYSICAL_DEVICES_CLASS           physicalDevices;
+    PHYSICAL_PLATFORM_DEBUGGER_CLASS debugger;
     CHANNELIO_CLASS                  channelio;
     RRR_CLIENT_CLASS                 rrrClient;
     RRR_SERVER_MONITOR_CLASS         rrrServer;
-
-    // physical platform debugger
-    PHYSICAL_PLATFORM_DEBUGGER_CLASS debugger;
 
   public:
 
