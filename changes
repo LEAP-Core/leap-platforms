@@ -4744,3 +4744,21 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/debuggers/htg-virtex
  htg-debugger.bsv          Locally Modified          160 
 
 Debugged a bug in the debugger.
+
+----------
+aparasha    Date: Wed Jan 28 22:36:38 EST 2009  CSN: CSN-platforms-162
+                  Thu Jan 29 03:36:38 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel
+ pcie-dma/                 Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/pcie-dma
+ dma-physical-channel.cpp  Locally Added               0 
+ dma-physical-channel.h    Locally Added               0 
+ dma-physical-channel.awb  Locally Added               0 
+ dma-physical-channel.bsv  Locally Added               0 
+
+Added a DMA-based Physical Channel. It is currently non-functional due to
+the abscence of physical platform hooks it needs to work. Please do not
+attempt to use this module yet.
