@@ -126,16 +126,10 @@ module mkPhysicalPlatformDebugger#(PHYSICAL_DRIVERS drivers)
                       end
                 
                 // CSR[index] := buffer
-                'h17: begin
-                          drivers.pciExpressDriver.commonCSRs.write(inst[15:8], buffer);
-                          csrPortState <= CSR_PORT_STATE_busyDebugger;
-                      end
+                'h17: drivers.pciExpressDriver.commonCSRs.write(inst[15:8], buffer);
                 
                 // CSR[index][7:0] := immediate
-                'h18: begin
-                          drivers.pciExpressDriver.commonCSRs.write(inst[15:8], zeroExtend(inst[7:0]));
-                          csrPortState <= CSR_PORT_STATE_busyDebugger;
-                      end
+                'h18: drivers.pciExpressDriver.commonCSRs.write(inst[15:8], zeroExtend(inst[7:0]));
                 
                 // CSR[tail : tail + index-1] := sequence(imm..imm+index-1)
                 'h19: noAction;

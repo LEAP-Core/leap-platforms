@@ -4733,3 +4733,14 @@ instead of multiple physical ports.  mkBRAMPseudoMultiRead() builds the
 specified number of read port interfaces but only allocates a single BRAM.
 Read requests are multiplexed through the single BRAM and responses are routed
 back to the proper interface.
+
+----------
+aparasha    Date: Wed Jan 28 22:00:25 EST 2009  CSN: CSN-platforms-161
+                  Thu Jan 29 03:00:25 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/debuggers/htg-virtex5
+ htg-debugger.cpp          Locally Modified          160 
+ htg-debugger.bsv          Locally Modified          160 
+
+Debugged a bug in the debugger.

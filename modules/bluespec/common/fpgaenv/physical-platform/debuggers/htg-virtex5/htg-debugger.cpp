@@ -237,10 +237,10 @@ PHYSICAL_PLATFORM_DEBUGGER_CLASS::PrintHelp_Inst()
     printf("           16: buffer       := CSR[index]\n");
     printf("           17: CSR[index]   := buffer\n");
     printf("           18: CSR[index]_  := imediate\n");
-    printf("           19: CSR[tail...] := seq (imm... imm + index - 1)\n");
+    printf("           19: NOP\n");
     printf("           1A: CSR[sys]     := buffer\n");
     printf("           1B: CSR[sys]     := status_flags\n");
-    printf("           1C: CSR[sys]     := status_pointers)\n");
+    printf("           1C: CSR[sys]     := status_pointers\n");
     printf("           1D: CSR[sys]     := status_VHDL\n");
     printf("\n");
 }
