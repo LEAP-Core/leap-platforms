@@ -1,0 +1,37 @@
+
+%name New (BROKEN) PCI Express Physical Device (mmap-based)
+%desc New (BROKEN) PCI Express Physical Device (mmap-based)
+
+%provides pci_express_device
+
+%requires pci_express_driver_header
+
+%sources -t BSV -v PUBLIC pci-express-vhdl-import.bsv
+%sources -t BSV -v PUBLIC pci-express-device.bsv
+
+%sources -t VHD -v PRIVATE channel_top.vhd
+%sources -t VHD -v PRIVATE channel_ctrl.vhd
+%sources -t VHD -v PRIVATE csr_ctrl.vhd
+%sources -t VHD -v PRIVATE csr_fpga_ctrl.vhd
+%sources -t VHD -v PRIVATE csr_host_ctrl.vhd
+%sources -t VHD -v PRIVATE dma_ctrl.vhd
+%sources -t VHD -v PRIVATE intr_controller.vhd
+%sources -t VHD -v PRIVATE pcie_bar0.vhd
+%sources -t VHD -v PRIVATE pcie_rx_wrapper.vhd
+%sources -t VHD -v PRIVATE pcie_tx_wrapper.vhd
+%sources -t VHD -v PRIVATE rst_controller.vhd
+
+%sources -t NGC -v PRIVATE CSR_BRAM.ngc
+%sources -t NGC -v PRIVATE f2h_data_fifo.ngc
+%sources -t NGC -v PRIVATE h2f_data_fifo.ngc
+%sources -t NGC -v PRIVATE pcieblkplus.ngc
+
+%sources -t H   -v PUBLIC  pci-express-c-import-mmap.h
+%sources -t CPP -v PRIVATE pci-express-c-import-mmap.cpp
+
+%param PCIE_PHYS_ADDR_SIZE      64 "Number of bits in PCIe Physical Address."
+%param PCIE_DMA_DATA_SIZE       64 "Number of bits in PCIe DMA Data line."
+%param PCIE_LOG_DMA_DATA_BYTES  3  "Log of number of bytes in PCIe DMA Data line."
+%param PCIE_LEN_SIZE            32 "Number of bits in PCIe length parameter." 
+%param PCIE_CSR_DATA_SIZE       32 "Number of bits in PCIe CSR."
+%param PCIE_CSR_IDX_SIZE        8  "Number of bits in CSR index (determines the number of CSRs)."

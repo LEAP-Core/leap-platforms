@@ -4779,3 +4779,43 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci
 
 - Added Bluespec wrappers and synchronizers around the VHDL DMA controller.
 - Added pass-through DMA interface to HTG debugger.
+
+----------
+aparasha    Date: Tue Feb  3 16:39:28 EST 2009  CSN: CSN-platforms-164
+                  Tue Feb  3 21:39:28 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/debuggers/htg-virtex5
+ htg-debugger.cpp          Locally Modified          163 
+ htg-debugger.bsv          Locally Modified          163 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices
+ pci-express-new/          Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express-new
+ f2h_data_fifo.ngc         Locally Added               0 
+ h2f_data_fifo.ngc         Locally Added               0 
+ pcieblkplus.ngc           Locally Added               0 
+ pci-express-device.bsv    Locally Added               0 
+ csr_fpga_ctrl.vhd         Locally Added               0 
+ csr_host_ctrl.vhd         Locally Added               0 
+ csr_ctrl.vhd              Locally Added               0 
+ rst_controller.vhd        Locally Added               0 
+ pci-express-vhdl-import.bsv Locally Added               0 
+ CSR_BRAM.ngc              Locally Added               0 
+ pci-express-device-mmap.awb Locally Added               0 
+ intr_controller.vhd       Locally Added               0 
+ pci-express-c-import-mmap.cpp Locally Added               0 
+ pcie_bar0.vhd             Locally Added               0 
+ dma_ctrl.vhd              Locally Added               0 
+ pci-express-c-import-mmap.h Locally Added               0 
+ pcie_rx_wrapper.vhd       Locally Added               0 
+ channel_top.vhd           Locally Added               0 
+ pcie_tx_wrapper.vhd       Locally Added               0 
+ channel_ctrl.vhd          Locally Added               0 
+
+- added a sequential burst write instruction to the debugger
+- added a new PCI express device based on the latest code from CBL. This
+  device has DMA support but is currently unusable because the CSR support
+  is broken. The code is therefore being added as an alternate module until
+  debugging is complete.

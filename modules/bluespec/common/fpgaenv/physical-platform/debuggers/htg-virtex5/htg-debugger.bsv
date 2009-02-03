@@ -35,11 +35,12 @@ APP_STATE
 
 typedef enum
 {
-    CSR_PORT_STATE_ready,
-    CSR_PORT_STATE_busyDebugger,
-    CSR_PORT_STATE_busyApp
+    DEBUGGER_STATE_ready,
+    DEBUGGER_STATE_readingCSR,
+    DEBUGGER_STATE_appReadingCSR,
+    DEBUGGER_STATE_seqWrite
 }
-CSR_PORT_STATE
+DEBUGGER_STATE
     deriving (Bits, Eq);
 
 
@@ -58,16 +59,15 @@ module mkPhysicalPlatformDebugger#(PHYSICAL_DRIVERS drivers)
 
     // ============= State ==============
     
-    // state of application
-    Reg#(APP_STATE) appState <- mkReg(APP_STATE_stopped);
+    Reg#(APP_STATE)          appState <- mkReg(APP_STATE_stopped);
+    Reg#(DEBUGGER_STATE)     debuggerState <- mkReg(DEBUGGER_STATE_ready);
+    Reg#(Bit#(8))            lastIID <- mkReg(0);
+    Reg#(PCIE_CSR_DATA)      buffer  <- mkReg(0);
+    Reg#(Bit#(8))            leds    <- mkReg(0);
     
-    // state of common CSR read port
-    Reg#(CSR_PORT_STATE) csrPortState <- mkReg(CSR_PORT_STATE_ready);
-
-    Reg#(Bit#(8))  lastIID <- mkReg(0);
-
-    Reg#(PCIE_CSR_DATA) buffer  <- mkReg(0);
-
+    Reg#(Bit#(`PCIE_CSR_IDX_SIZE)) seqWriteIndex <- mkReg(0);
+    Reg#(Bit#(`PCIE_CSR_IDX_SIZE)) seqWriteCount <- mkReg(0);
+    
     // useless flags. FIXME.
     Bit#(32) status_flags = 0;
     Bit#(32) status_pointers = 0;
@@ -87,25 +87,27 @@ module mkPhysicalPlatformDebugger#(PHYSICAL_DRIVERS drivers)
     Bool debug_inst = (inst[23:20] != 'b0000);
         
     // process a new instruction
-    rule process_inst (csrPortState == CSR_PORT_STATE_ready && debug_inst);
+    rule process_inst (debuggerState == DEBUGGER_STATE_ready && debug_inst);
         
-        // read current instruction and decode partially
-        Bit#(8) iid    = inst[31:24];
-        Bit#(8) opcode = inst[23:16];
+        // read current instruction and decode
+        Bit#(8) inst_iid    = inst[31:24];
+        Bit#(8) inst_opcode = inst[23:16];
+        Bit#(8) inst_index  = inst[15:8];
+        Bit#(8) inst_imm    = inst[7:0];
         
         // make sure this is a new instruction
-        if (iid != lastIID)
+        if (inst_iid != lastIID)
         begin
 
-            lastIID <= iid;
+            lastIID <= inst_iid;
 
-            case (opcode)
+            case (inst_opcode)
                 
                 // NOP
                 'h10: noAction;
                 
                 // LEDs := immediate
-                'h11: drivers.ledsDriver.setLEDs(inst[7:0]);
+                'h11: drivers.ledsDriver.setLEDs(inst_imm);
                 
                 // LEDs := buffer[7:0]
                 'h12: drivers.ledsDriver.setLEDs(buffer[7:0]);
@@ -114,30 +116,32 @@ module mkPhysicalPlatformDebugger#(PHYSICAL_DRIVERS drivers)
                 'h13: drivers.ledsDriver.setLEDs(status_flags[7:0]);
 
                 // buffer[7:0] := immediate
-                'h14: buffer[7:0] <= inst[7:0];
+                'h14: buffer[7:0] <= inst_imm;
                 
                 // buffer := buffer << 8
                 'h15: buffer <= buffer << 8;
                 
                 // buffer := CSR[index]
                 'h16: begin
-                          drivers.pciExpressDriver.commonCSRs.readRequest(inst[15:8]);
-                          csrPortState <= CSR_PORT_STATE_busyDebugger;
+                          drivers.pciExpressDriver.commonCSRs.readRequest(inst_index);
+                          debuggerState <= DEBUGGER_STATE_readingCSR;
                       end
                 
                 // CSR[index] := buffer
-                'h17: drivers.pciExpressDriver.commonCSRs.write(inst[15:8], buffer);
+                'h17: drivers.pciExpressDriver.commonCSRs.write(inst_index, buffer);
                 
                 // CSR[index][7:0] := immediate
-                'h18: drivers.pciExpressDriver.commonCSRs.write(inst[15:8], zeroExtend(inst[7:0]));
+                'h18: begin
+                          drivers.pciExpressDriver.commonCSRs.write(inst_index, zeroExtend(inst_imm));
+                          leds <= (leds << 1) | ('h01);
+                      end
                 
-                // CSR[tail : tail + index-1] := sequence(imm..imm+index-1)
-                'h19: noAction;
-                      // begin
-                      //     index <= inst[15:8];
-                      //     data  <= zeroExtend(inst[7:0]);
-                      //     state <= STATE_doSeqWrite;
-                      // end
+                // CSR[index : index+imm-1] := buffer : buffer+index-1
+                'h19: begin
+                          seqWriteIndex <= inst_index;
+                          seqWriteCount <= inst_imm;
+                          debuggerState <= DEBUGGER_STATE_seqWrite;
+                      end
 
                 // CSR[sys] := buffer
                 'h1A: drivers.pciExpressDriver.systemCSR <= buffer;
@@ -167,26 +171,36 @@ module mkPhysicalPlatformDebugger#(PHYSICAL_DRIVERS drivers)
     endrule
 
     // read common CSR and place result in buffer
-    rule read_csr_resp (csrPortState == CSR_PORT_STATE_busyDebugger);
+    rule read_csr_resp (debuggerState == DEBUGGER_STATE_readingCSR);
         
         PCIE_CSR_DATA data <- drivers.pciExpressDriver.commonCSRs.readResponse();
         buffer <= data;
-        csrPortState <= CSR_PORT_STATE_ready;
+        debuggerState <= DEBUGGER_STATE_ready;
 
     endrule
 
-    // sequentially write a given number of CSRs starting from current tail
-    // rule write_seq_csr (state == STATE_doSeqWrite);
-    //
-    //     drivers.pciExpressDriver.csr_write(f2hTail, data);
-    //     f2hTail <= f2hTailPlusOne;
-    //     data    <= data + 1;
-    //     index   <= index - 1;
-    //     if (index == 1)
-    //         state <= STATE_ready;
-    // 
-    // endrule
+    // sequentially write a given number of CSRs
+    rule write_seq_csr (debuggerState == DEBUGGER_STATE_seqWrite);
+    
+        drivers.pciExpressDriver.commonCSRs.write(seqWriteIndex, buffer);
 
+        seqWriteIndex <= (seqWriteIndex == '1) ? 0 : (seqWriteIndex + 1);
+        buffer <= buffer + 1;
+        seqWriteCount <= seqWriteCount - 1;
+        if (seqWriteCount == 1)
+            debuggerState <= DEBUGGER_STATE_ready;
+    
+        leds <= (leds << 1) | ('h01);
+
+    endrule
+    
+    // update LEDs
+    rule update_leds (True);
+        
+        drivers.ledsDriver.setLEDs(leds);
+        
+    endrule
+    
     // ============== Interface Methods ==============
     
     // Gated PCI Express interface
@@ -200,25 +214,28 @@ module mkPhysicalPlatformDebugger#(PHYSICAL_DRIVERS drivers)
         interface COMMON_CSR_ARRAY commonCSRs;
             
             method Action readRequest(PCIE_CSR_INDEX index) if (appState == APP_STATE_running &&
-                                                                csrPortState == CSR_PORT_STATE_ready &&
+                                                                debuggerState == DEBUGGER_STATE_ready &&
                                                                 !debug_inst);
                 
                 drivers.pciExpressDriver.commonCSRs.readRequest(index);
-                csrPortState <= CSR_PORT_STATE_busyApp;
+                debuggerState <= DEBUGGER_STATE_appReadingCSR;
                 
             endmethod
 
-            method ActionValue#(PCIE_CSR_DATA) readResponse() if (csrPortState == CSR_PORT_STATE_busyApp);
+            method ActionValue#(PCIE_CSR_DATA) readResponse() if (debuggerState == DEBUGGER_STATE_appReadingCSR);
                 
                 PCIE_CSR_DATA data <- drivers.pciExpressDriver.commonCSRs.readResponse();
-                csrPortState <= CSR_PORT_STATE_ready;
+                debuggerState <= DEBUGGER_STATE_ready;
                 return data;
                 
             endmethod
             
-            method Action write(PCIE_CSR_INDEX index, PCIE_CSR_DATA data) if (appState == APP_STATE_running && !debug_inst);
+            method Action write(PCIE_CSR_INDEX index, PCIE_CSR_DATA data) if (appState == APP_STATE_running &&
+                                                                              debuggerState == DEBUGGER_STATE_ready &&
+                                                                              !debug_inst);
                 
                 drivers.pciExpressDriver.commonCSRs.write(index, data);
+                leds <= (leds << 1) | ('h01);
                 
             endmethod
             

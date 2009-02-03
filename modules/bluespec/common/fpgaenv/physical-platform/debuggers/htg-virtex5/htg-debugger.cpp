@@ -166,6 +166,7 @@ PHYSICAL_PLATFORM_DEBUGGER_CLASS::Monitor()
         else if (!strcmp(cmd, "init"))
         {
         }
+        /*
         else if (!strcmp(cmd, "status"))
         {
             char *stridx = strtok(NULL, delims);
@@ -192,6 +193,7 @@ PHYSICAL_PLATFORM_DEBUGGER_CLASS::Monitor()
                 PrintStatus_VHDL(data);
             }
         }
+        */
         else if (!strcmp(cmd, "reset"))
         {
             pciExpressDevice->ResetFPGA();
@@ -231,17 +233,17 @@ PHYSICAL_PLATFORM_DEBUGGER_CLASS::PrintHelp_Inst()
     printf("    opcode 10: NOP\n");
     printf("           11: LEDs         := immediate\n");
     printf("           12: LEDs         := buffer_\n");
-    printf("           13: LEDs         := status_flags\n");
+    // printf("           13: LEDs         := status_flags\n");
     printf("           14: buffer_      := immediate\n");
     printf("           15: buffer       := buffer << 8\n");
     printf("           16: buffer       := CSR[index]\n");
     printf("           17: CSR[index]   := buffer\n");
     printf("           18: CSR[index]_  := imediate\n");
-    printf("           19: NOP\n");
+    printf("           19: CSR[index : index+imm-1] := buffer : buffer+index-1\n");
     printf("           1A: CSR[sys]     := buffer\n");
-    printf("           1B: CSR[sys]     := status_flags\n");
-    printf("           1C: CSR[sys]     := status_pointers\n");
-    printf("           1D: CSR[sys]     := status_VHDL\n");
+    // printf("           1B: CSR[sys]     := status_flags\n");
+    // printf("           1C: CSR[sys]     := status_pointers\n");
+    // printf("           1D: CSR[sys]     := status_VHDL\n");
     printf("\n");
 }
 
@@ -343,7 +345,7 @@ PHYSICAL_PLATFORM_DEBUGGER_CLASS::PrintHelp_Commands()
     printf("    read   <index>\n");
     printf("    write  <index> <data>\n");
     printf("    exec   <inst>\n");
-    printf("    status <flags|pointers|vhdl>\n");
+    // printf("    status <flags|pointers|vhdl>\n");
     printf("    reset\n");
     printf("    quit\n");
     printf("\n");
