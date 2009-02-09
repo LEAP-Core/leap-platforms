@@ -83,7 +83,6 @@ module mkLUTRAMU_Vector
         (LUTRAM#(index_t, data_t))
     provisos(Bits#(data_t, data_SZ),
              Bits#(index_t, index_SZ),
-             PrimIndex#(index_t, a__),
              Bounded#(index_t));
 
     Vector#(data_SZ, RegFile#(index_t, Bit#(1))) mem <- replicateM(mkRegFileFull());
@@ -123,7 +122,6 @@ module mkLUTRAMU
         (LUTRAM#(index_t, data_t))
     provisos(Bits#(data_t, data_SZ),
              Bits#(index_t, index_SZ),
-             PrimIndex#(index_t, a__),
              Bounded#(index_t));
 
     LUTRAM#(index_t, data_t) mem;
@@ -159,10 +157,7 @@ module mkLUTRAM#(data_t init)
         (LUTRAM#(index_t, data_t))
     provisos(Bits#(data_t, data_SZ),
              Bits#(index_t, index_SZ),
-             PrimIndex#(index_t, a__),
-             Bounded#(index_t),
-             Eq#(index_t),
-             Arith#(index_t));
+             Bounded#(index_t));
 
     LUTRAM#(index_t, data_t) mem <- mkLUTRAMU();
 
@@ -176,9 +171,12 @@ module mkLUTRAM#(data_t init)
     rule initializing (!initialized);
         mem.upd(init_idx, init);
 
-        initialized <= (init_idx == maxBound);
+        // Hack to avoid needing Eq proviso for comparison
+        index_t max = maxBound;
+        initialized <= (pack(init_idx) == pack(max));
 
-        init_idx <= init_idx + 1;
+        // Hack to avoid needing Arith proviso
+        init_idx <= unpack(pack(init_idx) + 1);
     endrule
 
     //

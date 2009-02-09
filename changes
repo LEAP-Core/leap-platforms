@@ -4819,3 +4819,14 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci
   device has DMA support but is currently unusable because the CSR support
   is broken. The code is therefore being added as an alternate module until
   debugging is complete.
+
+----------
+mcadler     Date: Mon Feb  9 11:13:29 EST 2009  CSN: CSN-platforms-165
+                  Mon Feb  9 16:13:29 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ lutram.bsv                Locally Modified          164 
+
+Make the code a bit ugly but remove the need for PrimIndex, Eq and Arith
+provisos that then work their way up the chain.
