@@ -4830,3 +4830,14 @@ Directory modules/bluespec/common/fpgaenv/fpga-components
 
 Make the code a bit ugly but remove the need for PrimIndex, Eq and Arith
 provisos that then work their way up the chain.
+
+----------
+mcadler     Date: Fri Feb 13 08:30:50 EST 2009  CSN: CSN-platforms-166
+                  Fri Feb 13 13:30:50 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ lutram.bsv                Locally Modified          165 
+
+Use RegFile with no conflict between sub and upd.  sub always returns the
+value as of the beginning of the cycle.

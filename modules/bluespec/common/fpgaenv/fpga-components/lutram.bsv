@@ -50,7 +50,7 @@ module mkLUTRAMU_RegFile
              Bits#(index_t, index_SZ),
              Bounded#(index_t));
 
-    RegFile#(index_t, data_t) mem <- mkRegFileFull();
+    RegFile#(index_t, data_t) mem <- mkRegFileWCF(minBound, maxBound);
 
     //
     // Access methods
@@ -85,7 +85,7 @@ module mkLUTRAMU_Vector
              Bits#(index_t, index_SZ),
              Bounded#(index_t));
 
-    Vector#(data_SZ, RegFile#(index_t, Bit#(1))) mem <- replicateM(mkRegFileFull());
+    Vector#(data_SZ, RegFile#(index_t, Bit#(1))) mem <- replicateM(mkRegFileWCF(minBound, maxBound));
 
     //
     // Access methods
