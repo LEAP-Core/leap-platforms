@@ -109,7 +109,7 @@ module mkPhysicalChannel#(PHYSICAL_DRIVERS drivers)
     // bits :   31-24    23-20     19-16     15-8      7-0
 
     // process a new instruction
-    rule process_inst (True);
+    rule process_inst (channelState != CHANNEL_STATE_init);
         
         // read current instruction and decode partially
         Bit#(8) iid    = pciExpressDriver.systemCSR[31:24];

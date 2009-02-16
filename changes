@@ -4841,3 +4841,17 @@ Directory modules/bluespec/common/fpgaenv/fpga-components
 
 Use RegFile with no conflict between sub and upd.  sub always returns the
 value as of the beginning of the cycle.
+
+----------
+mcadler     Date: Mon Feb 16 11:41:06 EST 2009  CSN: CSN-platforms-167
+                  Mon Feb 16 16:41:06 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/pcie-csr
+ pcie-physical-channel.bsv Locally Modified          166 
+
+process_inst and do_channel_init are mutually exclusive but the source left
+the Bluespec compiler with the decision of which gets priority.  If it picked
+process_inst the channel was never initialized and the Xilinx tools optimized
+away the design.  Changed predicate on process_inst to define the FSM
+explicitly.
