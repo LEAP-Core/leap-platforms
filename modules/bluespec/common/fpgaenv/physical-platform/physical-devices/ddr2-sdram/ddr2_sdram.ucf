@@ -23,8 +23,8 @@
 # Clock constraints                                                        #
 ############################################################################
 
-NET "m_pi_llpint_phys_plat_ddr2_sdram_device_pll_CLK_125_OUT" TNM_NET = "SYS_clk0";
-TIMESPEC "TS_SYS_clk0" = PERIOD "SYS_clk0" 8 ns HIGH 50 %;
+NET "m_pi_llpint_phys_plat_ddr2_sdram_device_pll_CLK_150_OUT" TNM_NET = "SYS_clk0";
+TIMESPEC "TS_SYS_clk0" = PERIOD "SYS_clk0" 6.67 ns HIGH 50 %;
 
 ########################################################################
 # Controller 0
@@ -294,8 +294,8 @@ NET "*/u_phy_io/gen_dqs*.u_iob_dqs/en_dqs_sync" MAXDELAY = 850 ps;
 #  time = 0.4*Tcyc + 0.40ns = 1.6ns @333MHz
 INST "*/gen_dqs[*].u_iob_dqs/u_iddr_dq_ce" TNM = "TNM_DQ_CE_IDDR";
 INST "*/gen_dq[*].u_iob_dq/gen_stg2_*.u_iddr_dq" TNM = "TNM_DQS_FLOPS";
-#TIMESPEC "TS_DQ_CE" = FROM "TNM_DQ_CE_IDDR" TO "TNM_DQS_FLOPS" 3.067 ns;
-TIMESPEC "TS_DQ_CE" = FROM "TNM_DQ_CE_IDDR" TO "TNM_DQS_FLOPS" 3.6 ns;
+TIMESPEC "TS_DQ_CE" = FROM "TNM_DQ_CE_IDDR" TO "TNM_DQS_FLOPS" 3.067 ns;
+#TIMESPEC "TS_DQ_CE" = FROM "TNM_DQ_CE_IDDR" TO "TNM_DQS_FLOPS" 3.6 ns;
 
 ###############################################################################
 # MIG 2.2: Prevent unrelated logic from being packed into any slices used

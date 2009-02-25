@@ -27,8 +27,8 @@
 %sources -t VHD -v PRIVATE ddr2_usr_top.vhd
 %sources -t VHD -v PRIVATE ddr2_usr_wr.vhd
 
-%sources -t VERILOG -v PRIVATE pll-50-to-125-200.v
-%sources -t BSV     -v PUBLIC  pll-50-to-125-200.bsv
+%sources -t VERILOG -v PRIVATE ddr2-pll.v
+%sources -t BSV     -v PUBLIC  ddr2-pll.bsv
 
 %sources -t UCF -v PRIVATE ddr2_sdram.ucf
 %sources -t UCF -v PRIVATE ddr2-sdram-sync-tig.ucf

@@ -22,25 +22,25 @@
 
 import Clocks::*;
 
-interface PLL_50_TO_125_200;
+interface DDR2_PLL;
 
-    interface Clock clk_125;
+    interface Clock clk_150;
     interface Clock clk_200;
     interface Reset rst;
 
 endinterface
 
 import "BVI"
-module mkPLL_50_to_125_200
+module mkDDR2PLL
     // Interface:
-        (PLL_50_TO_125_200);
+        (DDR2_PLL);
 
     default_clock (CLK);
     default_reset (RST_N);
     
-    output_clock clk_125 (CLK_125_OUT);
+    output_clock clk_150 (CLK_150_OUT);
     output_clock clk_200 (CLK_200_OUT);
 
-    output_reset rst (RST_N_OUT) clocked_by (clk_125);
+    output_reset rst (RST_N_OUT) clocked_by (clk_150);
 
 endmodule

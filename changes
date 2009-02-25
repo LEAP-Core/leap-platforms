@@ -4952,3 +4952,23 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr
 
 - Updated the HTG fpgaenvs to use the new DDR2 Physical Device and the Local
   Scratchpad memory.
+
+----------
+aparasha    Date: Wed Feb 25 11:30:02 EST 2009  CSN: CSN-platforms-169
+                  Wed Feb 25 16:30:02 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr2-sdram
+ ddr2-pll.v                Locally Added               0 
+ ddr2-sdram-device.bsv     Locally Modified          168 
+ pll-50-to-125-200.bsv     Locally Removed           168 
+ ddr2-sdram-vhdl-import.bsv Locally Modified          168 
+ ddr2_sdram.ucf            Locally Modified          168 
+ ddr2_sdram.vhd            Locally Modified          168 
+ pll-50-to-125-200.v       Locally Removed           168 
+ ddr2-sdram-device.awb     Locally Modified          168 
+ ddr2-pll.bsv              Locally Added               0 
+ ddr2_phy_top.vhd          Locally Modified          168 
+
+- upgraded DDR2 memory controller speed to 150MHz.
+- significantly reduced the size of a Bluespec register in the DDR2 device.

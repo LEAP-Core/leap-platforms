@@ -153,7 +153,7 @@ entity ddr2_sdram is
                               -- make sure to uncomment the coregen commands
                               -- in ise_flow.bat or create_ise.bat files in
                               -- par folder.
-   CLK_PERIOD               : integer := 7999; 
+   CLK_PERIOD               : integer := 6666; 
                               -- Core/Memory clock period (in ps).
    DQS_IO_COL               : bit_vector := "0000001010101010";
                               -- I/O column location of DQS groups
@@ -437,7 +437,7 @@ component ddr2_top
     "mig_v2_3_ddr2_sdram_v5, Coregen 10.1.02";
 
   attribute CORE_GENERATION_INFO : string;
-  attribute CORE_GENERATION_INFO of arc_mem_interface_top : architecture IS "ddr2_sdram_v5,mig_v2_3,{component_name=ddr2_sdram, BANK_WIDTH=2, CKE_WIDTH=2, CLK_WIDTH=2, COL_WIDTH=10, CS_NUM=2, CS_WIDTH=2, DM_WIDTH=8, DQ_WIDTH=64, DQ_PER_DQS=8, DQS_WIDTH=8, ODT_WIDTH=2, ROW_WIDTH=13, ADDITIVE_LAT=0, BURST_LEN=4, BURST_TYPE=0, CAS_LAT=3, ECC_ENABLE=0, MULTI_BANK_EN=1, TWO_T_TIME_EN=1, ODT_TYPE=1, REDUCE_DRV=0, REG_ENABLE=0, TREFI_NS=7800, TRAS=45000, TRCD=15000, TRFC=105000, TRP=15000, TRTP=7500, TWR=15000, TWTR=7500, DDR2_CLK_PERIOD=7999, RST_ACT_LOW=1}";
+  attribute CORE_GENERATION_INFO of arc_mem_interface_top : architecture IS "ddr2_sdram_v5,mig_v2_3,{component_name=ddr2_sdram, BANK_WIDTH=2, CKE_WIDTH=2, CLK_WIDTH=2, COL_WIDTH=10, CS_NUM=2, CS_WIDTH=2, DM_WIDTH=8, DQ_WIDTH=64, DQ_PER_DQS=8, DQS_WIDTH=8, ODT_WIDTH=2, ROW_WIDTH=13, ADDITIVE_LAT=0, BURST_LEN=4, BURST_TYPE=0, CAS_LAT=3, ECC_ENABLE=0, MULTI_BANK_EN=1, TWO_T_TIME_EN=1, ODT_TYPE=1, REDUCE_DRV=0, REG_ENABLE=0, TREFI_NS=7800, TRAS=45000, TRCD=15000, TRFC=105000, TRP=15000, TRTP=7500, TWR=15000, TWTR=7500, DDR2_CLK_PERIOD=6666, RST_ACT_LOW=1}";
 
 begin
 

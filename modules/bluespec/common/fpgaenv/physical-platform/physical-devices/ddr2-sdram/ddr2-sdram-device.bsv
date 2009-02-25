@@ -145,18 +145,18 @@ module mkDDR2SDRAMDevice#(Clock topLevelClock, Reset topLevelReset)
     Clock modelClock <- exposeCurrentClock();
     Reset modelReset <- exposeCurrentReset();
     
-    PLL_50_TO_125_200 pll <- mkPLL_50_to_125_200(clocked_by topLevelClock, reset_by topLevelReset);
+    DDR2_PLL pll <- mkDDR2PLL(clocked_by topLevelClock, reset_by topLevelReset);
     
     // The PLL gets its Reset from the toplevel, so OR it with the Model Reset to get Soft Resets
     // Soft reset doesn't seem to play nice with the VHDL. For now, we'll use the raw PLL reset
     // for the controller, but we'll leave the softPLLReset signal available for now.
-    Reset transReset   <- mkAsyncReset(0, modelReset, pll.clk_125);
-    Reset softPLLReset <- mkResetEither(transReset, pll.rst, clocked_by pll.clk_125);
+    Reset transReset   <- mkAsyncReset(0, modelReset, pll.clk_150);
+    Reset softPLLReset <- mkResetEither(transReset, pll.rst, clocked_by pll.clk_150);
 
     //
     // Instantiate the Xilinx Memory Controller
     //
-    XILINX_DRAM_CONTROLLER dramController <- mkXilinxDRAMController(pll.clk_125, pll.clk_200, pll.rst);
+    XILINX_DRAM_CONTROLLER dramController <- mkXilinxDRAMController(pll.clk_150, pll.clk_200, pll.rst);
 
     // Clock the glue logic with the Controller's clock
     Clock controllerClock = dramController.clk_out;
@@ -264,7 +264,7 @@ module mkDDR2SDRAMDevice#(Clock topLevelClock, Reset topLevelReset)
     // file become invalid and ngdbuild complains.
     
     Reg#(Bit#(4)) initStage <- mkReg(0);
-    Reg#(DRAM_DUALEDGE_DATA) datasink <- mkReg(0); // can we do without this?
+    Reg#(Bit#(1)) datasink  <- mkReg(0);
 
     rule init_do_write (state == STATE_init);
 
@@ -273,20 +273,20 @@ module mkDDR2SDRAMDevice#(Clock topLevelClock, Reset topLevelReset)
             0: sync_request_q.enq(tagged DRAM_READ 0);
             
             1: begin
-                   datasink <= sync_read_data_q.first();
+                   datasink <= sync_read_data_q.first()[0];
                    sync_read_data_q.deq();
                end
             
             2: begin
                    sync_request_q.enq(tagged DRAM_WRITE 0);
-                   sync_write_data_q.enq(tuple2(datasink, 0));
+                   sync_write_data_q.enq(tuple2(zeroExtend(datasink), 0));
 
-                   datasink <= sync_read_data_q.first();
+                   datasink <= sync_read_data_q.first()[0];
                    sync_read_data_q.deq();
                end
             
             3: begin
-                   sync_write_data_q.enq(tuple2(datasink, 0));
+                   sync_write_data_q.enq(tuple2(zeroExtend(datasink), 0));
                    state <= STATE_ready;
                end
 

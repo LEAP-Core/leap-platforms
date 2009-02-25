@@ -35,9 +35,9 @@ interface XILINX_DRAM_CONTROLLER;
 endinterface
 
 import "BVI" ddr2_sdram =
-module mkXilinxDRAMController#(Clock bsv_clk125,
+module mkXilinxDRAMController#(Clock bsv_clk150,
                                Clock bsv_clk200,
-                               Reset bsv_rst125)
+                               Reset bsv_rst150)
 
     // interface:
         (XILINX_DRAM_CONTROLLER);
@@ -48,10 +48,10 @@ module mkXilinxDRAMController#(Clock bsv_clk125,
     // default_clock clk();                          // huh?
     // default_reset rst(sys_rst_n) clocked_by(clk); // huh?
     
-    input_clock   (sys_clk)      = bsv_clk125;
+    input_clock   (sys_clk)      = bsv_clk150;
     input_clock   (idly_clk_200) = bsv_clk200;
     
-    input_reset   (sys_rst_n) clocked_by (bsv_clk125) = bsv_rst125;
+    input_reset   (sys_rst_n) clocked_by (bsv_clk150) = bsv_rst150;
     
     output_clock clk_out(clk0_tb);
     output_reset rst_out(rst0_n_tb) clocked_by (clk_out);
