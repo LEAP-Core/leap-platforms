@@ -79,6 +79,7 @@ Packagehint=platforms
 [HTG Virtex 5 PCIE Disabled/Requires]
 led_device=General LED Device
 switch_device=General Switch Device
+ddr2_sdram_device=DDR2 SDRAM Physical Device
 
 [General Switch Device]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/switches/general-switch-device.awb
@@ -94,4 +95,8 @@ Packagehint=platforms
 
 [Null Physical Platform Debugger]
 File=modules/bluespec/common/fpgaenv/physical-platform/debuggers/null/null-debugger.awb
+Packagehint=platforms
+
+[DDR2 SDRAM Physical Device]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr2-sdram/ddr2-sdram-device.awb
 Packagehint=platforms

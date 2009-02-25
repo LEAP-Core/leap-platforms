@@ -4,7 +4,7 @@
 
 %provides physical_platform
 
-%requires led_device switch_device pci_express_device
+%requires led_device switch_device pci_express_device ddr2_sdram_device
 
 %sources -t BSV -v PUBLIC  htg-v5-pcie-enabled.bsv
 %sources -t H   -v PUBLIC  htg-v5-pcie-enabled.h

@@ -6,6 +6,7 @@
 
 `include "led-device.bsh"
 `include "switch-device.bsh"
+`include "ddr2_sdram_device.bsh"
 
 // 8 switches and leds
 
@@ -20,8 +21,9 @@
 
 interface PHYSICAL_DRIVERS;
 
-    interface LED_DRIVER#(`NUMBER_LEDS)        ledDriver;
-    interface SWITCH_DRIVER#(`NUMBER_SWITCHES) switchDriver;
+    interface LEDS_DRIVER#(`NUMBER_LEDS)         ledDriver;
+    interface SWITCHES_DRIVER#(`NUMBER_SWITCHES) switchDriver;
+    interface DDR2_SDRAM_DRIVER                  ddr2SDRAMDriver;
 
     // each set of physical drivers must support a soft reset method
     method Action soft_reset();
@@ -37,8 +39,9 @@ endinterface
 
 interface TOP_LEVEL_WIRES;
 
-    interface LED_WIRES#(`NUMBER_LEDS)        ledWires;
-    interface SWITCH_WIRES#(`NUMBER_SWITCHES) switchWires;
+    interface LEDS_WIRES#(`NUMBER_LEDS)         ledWires;
+    interface SWITCHES_WIRES#(`NUMBER_SWITCHES) switchWires;
+    interface DDR2_SDRAM_WIRES                  ddr2SDRAMWires;
     
 endinterface
 
@@ -64,8 +67,9 @@ module mkPhysicalPlatform#(Clock topLevelClock, Reset topLevelReset)
     
     // Submodules
     
-    LED_DEVICE#(`NUMBER_LEDS)        led_device    <- mkGeneralLEDDevice(topLevelClock, topLevelReset);
-    SWITCH_DEVICE#(`NUMBER_SWITCHES) switch_device <- mkGeneralSwitchDevice(topLevelClock, topLevelReset);
+    LEDS_DEVICE#(`NUMBER_LEDS)         led_device    <- mkGeneralLEDDevice(topLevelClock, topLevelReset);
+    SWITCHES_DEVICE#(`NUMBER_SWITCHES) switch_device <- mkGeneralSwitchDevice(topLevelClock, topLevelReset);
+    DDR2_SDRAM_DEVICE                  ddr2_sdram_device <- mkDDR2SDRAMDevice(topLevelClock, topLevelReset);
 
     // Aggregate the drivers
     
@@ -73,6 +77,7 @@ module mkPhysicalPlatform#(Clock topLevelClock, Reset topLevelReset)
     
         interface ledDriver        = led_device.driver;
         interface switchDriver     = switch_device.driver;
+        interface ddr2SDRAMDriver  = ddr2_sdram_device.driver;
     
         // Soft Reset
         method Action soft_reset();            
@@ -87,6 +92,7 @@ module mkPhysicalPlatform#(Clock topLevelClock, Reset topLevelReset)
     
         interface ledWires        = led_device.wires;
         interface switchWires     = switch_wires.wires;
+        interface ddr2SDRAMWires   = ddr2_sdram_device.wires;
 
     endinterface
                

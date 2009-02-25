@@ -40,7 +40,7 @@ Packagehint=platforms
 [Standard Virtual Devices/Requires]
 front_panel=Hybrid Front Panel
 streams=Hybrid Streams
-scratchpad_memory=Hybrid Scratchpad Memory Device
+scratchpad_memory=Scratchpad Memory Device using Local Memory
 
 [HTG Virtex 5 PCIE Enabled]
 File=modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled/htg-v5-pcie-enabled.awb
@@ -54,6 +54,7 @@ Packagehint=platforms
 pci_express_device=PCI Express Physical Device (mmap-based)
 led_device=General LED Device
 switch_device=General Switch Device
+ddr2_sdram_device=DDR2 SDRAM Physical Device
 
 [General Switch Device]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/switches/general-switch-device.awb
@@ -107,11 +108,15 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/pcie-csr/pcie-physical-channel.awb
 Packagehint=platforms
 
-[Hybrid Scratchpad Memory Device]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid/hybrid-memory.awb
+[Null Physical Platform Debugger]
+File=modules/bluespec/common/fpgaenv/physical-platform/debuggers/null/null-debugger.awb
+Packagehint=platforms
+
+[Scratchpad Memory Device using Local Memory]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/local/local-memory.awb
 Packagehint=platforms
 
 
-[Null Physical Platform Debugger]
-File=modules/bluespec/common/fpgaenv/physical-platform/debuggers/null/null-debugger.awb
+[DDR2 SDRAM Physical Device]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr2-sdram/ddr2-sdram-device.awb
 Packagehint=platforms

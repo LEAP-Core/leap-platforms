@@ -45,8 +45,8 @@ module mkChannelIO#(PHYSICAL_DRIVERS drivers) (CHANNEL_IO);
 
     for (Integer i = 0; i < `CIO_NUM_CHANNELS; i = i+1)
     begin
-        readBuffers[i] <- mkFIFOF();
-        writeBuffers[i] <- mkFIFOF();
+        readBuffers[i] <- mkSizedFIFOF(4);
+        writeBuffers[i] <- mkSizedFIFOF(4);
 
         // create a new read port and link it to the FIFO
         rports[i] = interface CIOReadPort

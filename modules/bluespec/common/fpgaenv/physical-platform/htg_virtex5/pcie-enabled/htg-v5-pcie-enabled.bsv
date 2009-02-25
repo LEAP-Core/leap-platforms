@@ -26,6 +26,7 @@ import Clocks::*;
 `include "led_device.bsh"
 `include "switch_device.bsh"
 `include "pci_express_device.bsh"
+`include "ddr2_sdram_device.bsh"
 
 // 8 switches and leds
 
@@ -43,6 +44,7 @@ interface PHYSICAL_DRIVERS;
     interface LEDS_DRIVER#(`NUMBER_LEDS)         ledsDriver;
     interface SWITCHES_DRIVER#(`NUMBER_SWITCHES) switchesDriver;
     interface PCI_EXPRESS_DRIVER                 pciExpressDriver;
+    interface DDR2_SDRAM_DRIVER                  ddr2SDRAMDriver;
         
     // each set of physical drivers must support a soft reset method
     method Action soft_reset();
@@ -61,6 +63,7 @@ interface TOP_LEVEL_WIRES;
     interface LEDS_WIRES#(`NUMBER_LEDS)          ledsWires;
     interface SWITCHES_WIRES#(`NUMBER_SWITCHES)  switchesWires;
     interface PCI_EXPRESS_WIRES                  pciExpressWires;
+    interface DDR2_SDRAM_WIRES                   ddr2SDRAMWires;
     
 endinterface
 
@@ -89,6 +92,7 @@ module mkPhysicalPlatform#(Clock topLevelClock, Reset topLevelReset)
     LEDS_DEVICE#(`NUMBER_LEDS)         leds_device         <- mkLEDsDevice(topLevelClock, topLevelReset);
     SWITCHES_DEVICE#(`NUMBER_SWITCHES) switches_device     <- mkSwitchesDevice(topLevelClock, topLevelReset);
     PCI_EXPRESS_DEVICE                 pci_express_device  <- mkPCIExpressDevice();
+    DDR2_SDRAM_DEVICE                  ddr2_sdram_device   <- mkDDR2SDRAMDevice(topLevelClock, topLevelReset);
 
     // Aggregate the drivers
     
@@ -97,6 +101,7 @@ module mkPhysicalPlatform#(Clock topLevelClock, Reset topLevelReset)
         interface ledsDriver       = leds_device.driver;
         interface switchesDriver   = switches_device.driver;
         interface pciExpressDriver = pci_express_device.driver;
+        interface ddr2SDRAMDriver  = ddr2_sdram_device.driver;
     
         // Soft Reset method
         method soft_reset = pci_express_device.driver.softReset;
@@ -110,6 +115,7 @@ module mkPhysicalPlatform#(Clock topLevelClock, Reset topLevelReset)
         interface ledsWires        = leds_device.wires;
         interface switchesWires    = switches_device.wires;
         interface pciExpressWires  = pci_express_device.wires;
+        interface ddr2SDRAMWires   = ddr2_sdram_device.wires;
 
     endinterface
                

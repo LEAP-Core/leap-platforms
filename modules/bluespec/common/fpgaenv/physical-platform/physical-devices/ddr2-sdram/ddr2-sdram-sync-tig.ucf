@@ -1,0 +1,31 @@
+############################################################################
+# Ignore Timing Violations at Sync FIFOs                                   #
+############################################################################
+
+## Un-comment these lines if you see timing violations at Sync FIFOs that
+## you're sure wouldn't cause any problems
+
+# SyncFIFO: sync_read_data_q
+
+NET "m_pi_llpint_phys_plat_ddr2_sdram_device_sync_read_data_q_dD_OUT[*]"     TIG;
+NET "m_pi_llpint_phys_plat_ddr2_sdram_device_sync_read_data_q/dGDeqPtr[*]"   TIG;
+NET "m_pi_llpint_phys_plat_ddr2_sdram_device_sync_read_data_q/dGDeqPtr1[*]"  TIG;
+NET "m_pi_llpint_phys_plat_ddr2_sdram_device_sync_read_data_q/sGEnqPtr[*]"   TIG;
+NET "m_pi_llpint_phys_plat_ddr2_sdram_device_sync_read_data_q/sGEnqPtr1[*]"  TIG;
+
+
+# SyncFIFO: sync_request_q
+
+NET "m_pi_llpint_phys_plat_ddr2_sdram_device_sync_request_q_dD_OUT[*]"       TIG;
+NET "m_pi_llpint_phys_plat_ddr2_sdram_device_sync_request_q/dGDeqPtr[*]"     TIG;
+NET "m_pi_llpint_phys_plat_ddr2_sdram_device_sync_request_q/dGDeqPtr1[*]"    TIG;
+NET "m_pi_llpint_phys_plat_ddr2_sdram_device_sync_request_q/sGEnqPtr[*]"     TIG;
+NET "m_pi_llpint_phys_plat_ddr2_sdram_device_sync_request_q/sGEnqPtr1[*]"    TIG;
+
+# SyncFIFOLevel: sync_write_data_q
+
+NET "m_pi_llpint_phys_plat_ddr2_sdram_device_sync_write_data_q_dD_OUT[*]"    TIG;
+NET "m_pi_llpint_phys_plat_ddr2_sdram_device_sync_write_data_q/dGDeqPtr[*]"  TIG;
+NET "m_pi_llpint_phys_plat_ddr2_sdram_device_sync_write_data_q/dBDeqPtr[*]"  TIG;
+NET "m_pi_llpint_phys_plat_ddr2_sdram_device_sync_write_data_q/sGEnqPtr[*]"  TIG;
+NET "m_pi_llpint_phys_plat_ddr2_sdram_device_sync_write_data_q/sBEnqPtr[*]"  TIG;

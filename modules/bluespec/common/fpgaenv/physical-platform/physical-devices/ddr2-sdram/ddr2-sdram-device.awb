@@ -1,0 +1,45 @@
+%name DDR2 SDRAM Physical Device
+%desc DDR2 SDRAM Physical Device
+
+%provides ddr2_sdram_device
+
+%sources -t BSV -v PUBLIC ddr2-sdram-device.bsv
+%sources -t BSV -v PUBLIC ddr2-sdram-vhdl-import.bsv
+
+%sources -t VHD -v PRIVATE ddr2_chipscope.vhd
+%sources -t VHD -v PRIVATE ddr2_ctrl.vhd
+%sources -t VHD -v PRIVATE ddr2_idelay_ctrl.vhd
+%sources -t VHD -v PRIVATE ddr2_infrastructure.vhd
+%sources -t VHD -v PRIVATE ddr2_mem_if_top.vhd
+%sources -t VHD -v PRIVATE ddr2_phy_calib.vhd
+%sources -t VHD -v PRIVATE ddr2_phy_ctl_io.vhd
+%sources -t VHD -v PRIVATE ddr2_phy_dm_iob.vhd
+%sources -t VHD -v PRIVATE ddr2_phy_dq_iob.vhd
+%sources -t VHD -v PRIVATE ddr2_phy_dqs_iob.vhd
+%sources -t VHD -v PRIVATE ddr2_phy_init.vhd
+%sources -t VHD -v PRIVATE ddr2_phy_io.vhd
+%sources -t VHD -v PRIVATE ddr2_phy_top.vhd
+%sources -t VHD -v PRIVATE ddr2_phy_write.vhd
+%sources -t VHD -v PRIVATE ddr2_sdram.vhd
+%sources -t VHD -v PRIVATE ddr2_top.vhd
+%sources -t VHD -v PRIVATE ddr2_usr_addr_fifo.vhd
+%sources -t VHD -v PRIVATE ddr2_usr_rd.vhd
+%sources -t VHD -v PRIVATE ddr2_usr_top.vhd
+%sources -t VHD -v PRIVATE ddr2_usr_wr.vhd
+
+%sources -t VERILOG -v PRIVATE pll-50-to-125-200.v
+%sources -t BSV     -v PUBLIC  pll-50-to-125-200.bsv
+
+%sources -t UCF -v PRIVATE ddr2_sdram.ucf
+%sources -t UCF -v PRIVATE ddr2-sdram-sync-tig.ucf
+
+%param DRAM_BURST_LENGTH        2    "DRAM Burst Length (DO NOT MODIFY)"
+%param DRAM_ADDRESS_WIDTH       26   "DRAM Address Width (DO NOT MODIFY)"
+
+%param DRAM_DATA_WIDTH          64   "DRAM Data Width (DO NOT MODIFY)"
+%param DRAM_DUALEDGE_DATA_WIDTH 128  "DRAM Dual-Edge Data Width (DO NOT MODIFY)"
+%param DRAM_BURST_DATA_WIDTH    256  "DRAM Burst Data Width (DO NOT MODIFY)"
+
+%param DRAM_MASK_WIDTH          8    "DRAM Mask Width (DO NOT MODIFY)"
+%param DRAM_DUALEDGE_MASK_WIDTH 16   "DRAM Dual-Edge Mask Width (DO NOT MODIFY)"
+%param DRAM_BURST_MASK_WIDTH    32   "DRAM Burst Mask Width (DO NOT MODIFY)"
