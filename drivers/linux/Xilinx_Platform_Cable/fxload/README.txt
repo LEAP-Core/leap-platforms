@@ -1,10 +1,10 @@
 
 FXLOAD UTILITY
 
-This program is conveniently able to download firmware into FX and FX2
-EZ-USB devices, as well as the original AnchorChips EZ-USB.  It is
-intended to be invoked by hotplug scripts when the unprogrammed device
-appears on the bus.
+This program is conveniently able to download firmware into FX, FX2,
+and FX2LP EZ-USB devices, as well as the original AnchorChips EZ-USB.
+It is intended to be invoked by hotplug scripts when the unprogrammed
+device appears on the bus.
 
 Primarily as an aid for developers, this can also be used to update
 firmware on devices which boot from I2C serial EEPROMs.  For that
@@ -32,4 +32,4 @@ form of patches against the current CVS ("cvs diff -u"), or the last
 release ("diff -u old new") is most useful, since otherwise it's awkward
 to integrate such changes into the standard distribution.
 
-$Id: README.txt,v 1.4 2002/04/12 00:21:16 dbrownell Exp $
+$Id: README.txt,v 1.5 2008/10/13 21:23:23 dbrownell Exp $

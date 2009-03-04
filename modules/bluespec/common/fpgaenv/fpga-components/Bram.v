@@ -1,3 +1,5 @@
+(* ram_style = "block" *)
+
 module Bram
 (
     CLK,

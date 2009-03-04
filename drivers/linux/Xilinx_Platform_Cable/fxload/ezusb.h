@@ -19,7 +19,7 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  */
-#ident "$Id: ezusb.h,v 1.3 2002/04/12 00:28:21 dbrownell Exp $"
+#ident "$Id: ezusb.h,v 1.4 2008/10/13 21:25:29 dbrownell Exp $"
 
 
 /*
@@ -41,7 +41,7 @@ extern int ezusb_load_ram (int dev, const char *path, int fx2, int stage);
  * where FX parts behave differently than FX2 ones.  The configuration
  * byte is as provided here (zero for an21xx parts) and the EEPROM
  * type is set so that the microcontroller will boot from it.
- * 
+ *
  * The caller must have preloaded a second stage loader that knows
  * how to respond to the EEPROM write request.
  */
@@ -59,6 +59,9 @@ extern int verbose;
 
 /*
  * $Log: ezusb.h,v $
+ * Revision 1.4  2008/10/13 21:25:29  dbrownell
+ * Whitespace fixes.
+ *
  * Revision 1.3  2002/04/12 00:28:21  dbrownell
  * support "-t an21" to program EEPROMs for those microcontrollers
  *

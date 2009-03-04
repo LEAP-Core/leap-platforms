@@ -1,3 +1,18 @@
+Recent versions of ISE support libusb (make sure it is installed on the machine).
+To use libusb do the following:
+
+1.  Install /sbin/fxload ("make install" in the fxload subdirectory).
+
+2.  Run $XILINX/bin/lin64/setup_pcusb to install platform cable firmware.
+
+3.  Set XIL_IMPACT_USE_LIBUSB environment variable to tell impact to use
+    libusb.
+
+
+
+Alternatively you can use windriver:
+
+
 This directory holds drivers and programs required to use the Xilinx
 USB Platform Cable on Linux.  There are packages here collected from
 different places:

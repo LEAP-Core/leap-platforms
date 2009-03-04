@@ -4972,3 +4972,28 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr
 
 - upgraded DDR2 memory controller speed to 150MHz.
 - significantly reduced the size of a Bluespec register in the DDR2 device.
+
+----------
+mcadler     Date: Wed Mar  4 15:41:56 EST 2009  CSN: CSN-platforms-170
+                  Wed Mar  4 20:41:56 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ Bram.v                    Locally Modified          169 
+
+Directory drivers/linux/Xilinx_Platform_Cable
+ README                    Locally Modified          169 
+
+Directory drivers/linux/Xilinx_Platform_Cable/fxload
+ fxload.8                  Locally Modified          169 
+ main.c                    Locally Modified          169 
+ ezusb.c                   Locally Modified          169 
+ README.txt                Locally Modified          169 
+ ezusb.h                   Locally Modified          169 
+
+- Add a pragma forcing BRAM to be stored in block RAM instead of allowing Xst to
+  put storage in LUTs.  We have block RAM and are out of LUTs.
+
+- Update Xilinx platform cable setup instructions describing how to use libusb.
+
+- Update fxload (USB device firmware loader).
