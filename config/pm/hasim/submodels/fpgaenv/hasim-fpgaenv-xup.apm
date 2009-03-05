@@ -15,6 +15,7 @@ model=FPGA Environment
 [FPGA Environment/Requires]
 virtual_platform=Standard Virtual Platform
 fpga_components=Hardware FPGA Components
+libfpga_bsv=FPGA Bluespec Library
 
 [Standard Virtual Platform]
 File=modules/bluespec/common/fpgaenv/virtual-platform/std-virtual-platform.awb
@@ -99,4 +100,8 @@ Packagehint=platforms
 
 [Null Physical Platform Debugger]
 File=modules/bluespec/common/fpgaenv/physical-platform/debuggers/null/null-debugger.awb
+Packagehint=platforms
+
+[FPGA Bluespec Library]
+File=config/pm/hasim/submodels/fpgaenv/libfpga-bsv.apm
 Packagehint=platforms

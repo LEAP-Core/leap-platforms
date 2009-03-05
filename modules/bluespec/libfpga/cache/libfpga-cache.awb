@@ -1,0 +1,8 @@
+%name FPGA Bluespec Caches
+%desc Manage an FPGA side cache of arbitrary objects
+%provides libfpga_bsv_cache
+
+%attributes libfpga
+
+%public fpga-set-assoc-cache.bsv
+%public fpga-tiny-cache.bsv

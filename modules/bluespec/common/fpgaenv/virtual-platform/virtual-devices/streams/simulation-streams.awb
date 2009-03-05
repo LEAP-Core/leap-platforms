@@ -13,7 +13,7 @@
 #
 # %attributes hasim
 #
-# %sources -t BSV -v PRIVATE streams-common.bsh
+# %sources -t BSH -v PRIVATE streams-common.bsh
 # %sources -t BSV -v PUBLIC  simulation-streams.bsv
 #
 # %sources -t DICT -v PUBLIC streamid.dic

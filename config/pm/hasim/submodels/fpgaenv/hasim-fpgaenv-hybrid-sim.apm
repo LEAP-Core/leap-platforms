@@ -19,6 +19,7 @@ Packagehint=platforms
 [FPGA Environment/Requires]
 virtual_platform=Standard Virtual Platform
 fpga_components=Software FPGA Components
+libfpga_bsv=FPGA Bluespec Library
 
 [Standard Virtual Platform]
 File=modules/bluespec/common/fpgaenv/virtual-platform/std-virtual-platform.awb
@@ -94,7 +95,10 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/physical-platform/debuggers/null/null-debugger.awb
 Packagehint=platforms
 
-
 [Hybrid Scratchpad Memory Device]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid/hybrid-memory.awb
+Packagehint=platforms
+
+[FPGA Bluespec Library]
+File=config/pm/hasim/submodels/fpgaenv/libfpga-bsv.apm
 Packagehint=platforms

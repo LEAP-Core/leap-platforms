@@ -3,6 +3,7 @@
 
 %provides fpgaenv
 
+%requires libfpga_bsv
 %requires virtual_platform fpga_components
 
 %attributes hasim

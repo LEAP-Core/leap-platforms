@@ -4997,3 +4997,61 @@ Directory drivers/linux/Xilinx_Platform_Cable/fxload
 - Update Xilinx platform cable setup instructions describing how to use libusb.
 
 - Update fxload (USB device firmware loader).
+
+----------
+mcadler     Date: Wed Mar  4 22:27:32 EST 2009  CSN: CSN-platforms-171
+                  Thu Mar  5 03:27:32 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ bram.bsv                  Locally Modified          169 
+
+Directory modules/bluespec/common/fpgaenv
+ fpga-environment.awb      Locally Modified          169 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ basic-rrr.awb             Locally Modified          169 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/streams
+ hybrid-streams.awb        Locally Modified          169 
+ simulation-streams.awb    Locally Modified          169 
+
+Directory modules/bluespec/libfpga
+ cache/                    Locally Added               0 
+
+Directory modules/bluespec/libfpga/cache
+ fpga-set-assoc-cache.bsv  Locally Added               0 
+ fpga-tiny-cache.bsv       Locally Added               0 
+ libfpga-cache.awb         Locally Added               0 
+
+Directory modules/bluespec/libfpga
+ libfpga-bsv.awb           Locally Added               0 
+ libfpga-bsv.bsh           Locally Added               0 
+ base/                     Locally Added               0 
+
+Directory modules/bluespec/libfpga/base
+ fifos.bsv                 Locally Added               0 
+ alias_def.bsv             Locally Added               0 
+ bluespec-common.prj       Locally Added               0 
+ counting-filter.bsv       Locally Added               0 
+ extends.bsv               Locally Added               0 
+ fpga-fifos.bsv            Locally Added               0 
+ counters.bsv              Locally Added               0 
+ hash-bits.bsv             Locally Added               0 
+ memory-heap.bsv           Locally Added               0 
+ libfpga-bsv-base.awb      Locally Added               0 
+ debug-file.bsv            Locally Added               0 
+
+Directory modules/bluespec
+ libfpga/                  Locally Added               0 
+
+Directory config/pm/hasim/submodels/fpgaenv
+ hasim-fpgaenv-hybrid-sim.apm Locally Modified          169 
+ hasim-fpgaenv-htg-v5-pcie.apm Locally Modified          169 
+ libfpga-bsv.apm           Locally Added               0 
+ hasim-fpgaenv-null.apm    Locally Modified          169 
+ hasim-fpgaenv-xup.apm     Locally Modified          169 
+
+Move core modules here from the hasim repository to separate core modules
+(libfpga) from HAsim-specific code.  This will allow us to use the core
+modules in the platform.

@@ -5,7 +5,7 @@
 
 %sources -t BSV -v PUBLIC  basic-rrr-client.bsv
 %sources -t BSV -v PUBLIC  basic-rrr-server.bsv
-%sources -t BSV -v PUBLIC  basic-rrr-common.bsh
+%sources -t BSH -v PUBLIC  basic-rrr-common.bsh
 %sources -t BSV -v PUBLIC  demarshaller.bsv
 %sources -t BSV -v PUBLIC  marshaller.bsv
 %sources -t BSV -v PUBLIC  arbiters.bsv

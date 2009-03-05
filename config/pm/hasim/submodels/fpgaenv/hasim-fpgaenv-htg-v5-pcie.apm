@@ -15,6 +15,7 @@ model=FPGA Environment
 [FPGA Environment/Requires]
 virtual_platform=Standard Virtual Platform
 fpga_components=Hardware FPGA Components
+libfpga_bsv=FPGA Bluespec Library
 
 [Standard Virtual Platform]
 File=modules/bluespec/common/fpgaenv/virtual-platform/std-virtual-platform.awb
@@ -116,7 +117,10 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/local/local-memory.awb
 Packagehint=platforms
 
-
 [DDR2 SDRAM Physical Device]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr2-sdram/ddr2-sdram-device.awb
+Packagehint=platforms
+
+[FPGA Bluespec Library]
+File=config/pm/hasim/submodels/fpgaenv/libfpga-bsv.apm
 Packagehint=platforms

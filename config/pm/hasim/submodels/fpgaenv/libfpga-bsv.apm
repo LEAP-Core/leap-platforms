@@ -1,0 +1,50 @@
+
+[Global]
+SaveParameters=0
+Description=Bluespec libfpga
+File=libfpga-bsv
+Version=2.1
+Type=HAsim
+Name=Bluespec libfpga
+Class=Asim::Model
+
+[Model]
+DefaultAttributes=libfpga bluespec
+model=FPGA Bluespec Library
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[FPGA Bluespec Base Library]
+File=modules/bluespec/libfpga/base/libfpga-bsv-base.awb
+Packagehint=platforms
+
+[FPGA Bluespec Caches]
+File=modules/bluespec/libfpga/cache/libfpga-cache.awb
+Packagehint=platforms
+
+[FPGA Bluespec Library/Requires]
+libfpga_bsv_cache=FPGA Bluespec Caches
+libfpga_bsv_base=FPGA Bluespec Base Library
+
+[FPGA Bluespec Library]
+File=modules/bluespec/libfpga/libfpga-bsv.awb
+Packagehint=platforms

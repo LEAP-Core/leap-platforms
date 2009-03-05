@@ -25,6 +25,9 @@ import SpecialFIFOs::*;
 import Vector::*;
 import RegFile::*;
 
+// Can't include "asim/provides/libfpga_bsv_base.bsh" due to a dependence loop:
+import counters::*;
+
 
 // ========================================================================
 //
@@ -345,76 +348,3 @@ module mkBRAMInitialized#(data_T initval)
     
     return m;
 endmodule
-
-
-
-// ========================================================================
-//
-//  Counter type used by the BRAM code.  The standard Bluespec counter
-//  package doesn't support simultaneous up/down firing in separate rules.
-//  We need this for full BRAM read pipelining.
-//
-//  Ideally, this code would come from the utilities in the hasim library.
-//  Unfortunately, the hasim library utilities depend on this code, so it
-//  would cause a circular dependence.
-//
-// ========================================================================
-
-// Code start with the Bluespec training samples...
-
-interface COUNTER#(numeric type nBits);
-
-    method Bit#(nBits) value();
-
-    method Action up();
-    method Action down();
-    method Action setC(Bit#(nBits) newVal);
-
-endinterface: COUNTER
-
-
-module mkLCounter#(Bit#(nBits) initial_value)
-    // interface:
-        (COUNTER#(nBits));
-
-    // Counter value
-    Reg#(Bit#(nBits)) ctr <- mkReg(initial_value);
-
-    PulseWire up_called   <- mkPulseWire();
-    PulseWire down_called <- mkPulseWire();
-    RWire#(Bit#(nBits)) setc_called <- mkRWire();
-
-    (* fire_when_enabled, no_implicit_conditions *)
-    rule update_counter;
-        let new_value = ctr;
-
-        if (setc_called.wget() matches tagged Valid .v)
-            new_value = v;
-
-        if (up_called == down_called)
-            noAction;
-        else if (up_called)
-            new_value = new_value + 1;
-        else
-            new_value = new_value - 1;
-
-        ctr <= new_value;
-    endrule
-
-    method Bit#(nBits) value();
-        return ctr;
-    endmethod
-
-    method Action up();
-        up_called.send();
-    endmethod
-
-    method Action down();
-        down_called.send();
-    endmethod
-
-    method Action setC(Bit#(nBits) newVal);
-        setc_called.wset(newVal);
-    endmethod
-
-endmodule: mkLCounter

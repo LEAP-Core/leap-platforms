@@ -1,0 +1,10 @@
+%name FPGA Bluespec Library
+%desc FPGA Bluespec Library
+
+%provides libfpga_bsv
+%requires libfpga_bsv_base
+%requires libfpga_bsv_cache
+
+%attributes libfpga
+
+%public libfpga-bsv.bsh

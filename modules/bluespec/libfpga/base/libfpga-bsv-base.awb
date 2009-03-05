@@ -1,0 +1,20 @@
+%name FPGA Bluespec Base Library
+%desc FPGA Bluespec Base Library
+
+%provides libfpga_bsv_base
+
+%attributes libfpga
+
+%public alias_def.bsv
+%public counters.bsv
+%public counting-filter.bsv
+%public debug-file.bsv
+%public extends.bsv
+%public fifos.bsv
+%public fpga-fifos.bsv
+%public hash-bits.bsv
+%public memory-heap.bsv
+
+%private bluespec-common.prj
+
+%param DEBUG_LOG_DIR  "hasim_debug"   "Debug log directory"
