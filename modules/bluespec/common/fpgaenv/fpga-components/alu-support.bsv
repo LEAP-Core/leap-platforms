@@ -25,9 +25,7 @@
 import Vector::*;
 import RWire::*;
 
-// This comes from "asim/provides/hasim_common.bsh", which can't be included here
-// to avoid circular dependence.
-import alias_def::*;
+`include "asim/provides/libfpga_bsv_base.bsh"
 
 
 // ===================================================================

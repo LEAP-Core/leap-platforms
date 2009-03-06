@@ -3,6 +3,7 @@
 
 %provides libfpga_bsv
 %requires libfpga_bsv_base
+%requires libfpga_bsv_storage
 %requires libfpga_bsv_cache
 
 %attributes libfpga

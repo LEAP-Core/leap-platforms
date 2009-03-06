@@ -1,0 +1,3 @@
+Modules in this directory may depend only on Bluespec's native packages and
+not on any other modules defined in awb.  This restriction makes it possible
+for other components in platforms to use the libfpga base modules.

@@ -16,11 +16,13 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+import Vector::*;
 import RWire::*;
 import FIFO::*;
 import FIFOF::*;
 import SpecialFIFOs::*;
 
+`include "asim/provides/libfpga_bsv_base.bsh"
 
 // ========================================================================
 //

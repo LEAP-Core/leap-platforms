@@ -25,8 +25,7 @@ import SpecialFIFOs::*;
 import Vector::*;
 import RegFile::*;
 
-// Can't include "asim/provides/libfpga_bsv_base.bsh" due to a dependence loop:
-import counters::*;
+`include "asim/provides/libfpga_bsv_base.bsh"
 
 
 // ========================================================================

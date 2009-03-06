@@ -10,10 +10,7 @@
 %public counting-filter.bsv
 %public debug-file.bsv
 %public extends.bsv
-%public fifos.bsv
-%public fpga-fifos.bsv
 %public hash-bits.bsv
-%public memory-heap.bsv
 
 %private bluespec-common.prj
 

@@ -5055,3 +5055,50 @@ Directory config/pm/hasim/submodels/fpgaenv
 Move core modules here from the hasim repository to separate core modules
 (libfpga) from HAsim-specific code.  This will allow us to use the core
 modules in the platform.
+
+----------
+mcadler     Date: Thu Mar  5 19:55:41 EST 2009  CSN: CSN-platforms-172
+                  Fri Mar  6 00:55:41 UTC 2009
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ libfpga-bsv.apm           Locally Modified          171 
+
+Directory modules/bluespec/libfpga
+ cache/                    Locally Removed           171 
+
+Directory modules/bluespec/libfpga/cache
+ fpga-set-assoc-cache.bsv  Locally Removed           171 
+ fpga-tiny-cache.bsv       Locally Removed           171 
+ libfpga-cache.awb         Locally Removed           171 
+
+Directory modules/bluespec/libfpga
+ libfpga-bsv.awb           Locally Modified          171 
+ storage/                  Locally Added               0 
+
+Directory modules/bluespec/libfpga/storage
+ fifos.bsv                 Locally Added               - 
+ libfpga-bsv-storage.awb   Locally Added               0 
+ fpga-fifos.bsv            Locally Added               - 
+ memory-heap.bsv           Locally Added               - 
+
+Directory modules/bluespec/libfpga
+ libfpga-bsv.bsh           Locally Modified          171 
+
+Directory modules/bluespec/libfpga/base
+ fifos.bsv                 Locally Removed           171 
+ fpga-fifos.bsv            Locally Removed           171 
+ memory-heap.bsv           Locally Removed           171 
+ libfpga-bsv-base.awb      Locally Modified          171 
+ README                    Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ alu-support.bsv           Locally Modified          171 
+ bram.bsv                  Locally Modified          171 
+
+Separate libfpga base into two parts:  one that depends on nothing but Bluespec
+core libraries and another that may depend on other platform modules.  The
+base modules can be included anywhere in platforms.
+
+Added a "storage" libfpga category that includes storage management including
+heaps, fifos and cache managers.

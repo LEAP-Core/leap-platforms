@@ -21,4 +21,5 @@
 //
 
 `include "asim/provides/libfpga_bsv_base.bsh"
+`include "asim/provides/libfpga_bsv_storage.bsh"
 `include "asim/provides/libfpga_bsv_cache.bsh"

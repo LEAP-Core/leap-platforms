@@ -1,4 +1,4 @@
-%name FPGA Bluespec Caches
+%name FPGA Bluespec Cache Managers
 %desc Manage an FPGA side cache of arbitrary objects
 %provides libfpga_bsv_cache
 
