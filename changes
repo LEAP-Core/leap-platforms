@@ -5181,3 +5181,73 @@ Directory config/pm/hasim/submodels/fpgaenv
  hasim-fpgaenv-null.apm    Locally Modified          173 
 
 Fix low level platform definitions for untested submodels.
+
+----------
+mcadler     Date: Wed Mar 11 17:57:35 EDT 2009  CSN: CSN-platforms-175
+                  Wed Mar 11 21:57:35 UTC 2009
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-htg-hwonly.apm    Locally Modified          174 
+ hasim-fpgaenv-hybrid-sim.apm Locally Modified          174 
+ hasim-fpgaenv-htg-v5-pcie.apm Locally Modified          174 
+ hasim-fpgaenv-null.apm    Locally Modified          174 
+ hasim-fpgaenv-xup.apm     Locally Modified          174 
+
+Directory modules/bluespec/libfpga/base
+ memory-interface.bsv      Locally Added               0 
+ libfpga-bsv-base.awb      Locally Modified          174 
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ bram.bsv                  Locally Modified          174 
+ bram-multi-read.bsv       Locally Modified          174 
+
+Directory modules/bluespec/common/fpgaenv/low-level-platform-interface/local-mem
+ local-mem-bram.bsv        Locally Modified          174 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices
+ std-virtual-devices.awb   Locally Modified          174 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory
+ simulation/               Locally Removed           174 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/simulation
+ virtual_device_memory_datatypes.bsv Locally Removed           174 
+ virtual_device_memory_simulation.awb Locally Removed           174 
+ virtual_device_memory_simulation.bsv Locally Removed           174 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory
+ null/                     Locally Removed           174 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/null
+ memory_virtual_device_null.awb Locally Removed           174 
+ memory_virtual_device_null.bsv Locally Removed           174 
+ memory_virtual_device_datatypes.bsv Locally Removed           174 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/local
+ local-mem-scratch-words.awb Locally Removed           174 
+ local-mem-scratch-words.bsv Locally Removed           174 
+ local-mem-scratch.awb     Locally Added               - 
+ local-mem-scratch.bsv     Locally Added               - 
+ local-mem-scratch-lines.awb Locally Removed           174 
+ local-mem-scratch-lines.bsv Locally Removed           174 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory
+ template/                 Locally Removed           174 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/template
+ memory_virtual_device_template.awb Locally Removed           174 
+ memory_virtual_device_template.bsv Locally Removed           174 
+ memory_virtual_device_datatypes.bsv Locally Removed           174 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices
+ std-virtual-devices.dic   Locally Added               0 
+
+- Add an abtract memory interface (MEMORY_IFC) to libfpga for multi-cycle
+  storage.  Change BRAM to use this interface and make scratchpad use the
+  same code.  The goal is to be object oriented and let us drop in different
+  backing storage for an object without changing the rest of the code.
+- Export multiple ports to scratchpad local memory using dictionaries (VDEV.SCRATCH)
+- Merge line and word local scratchpad memories into a single file using
+  awb parameters.
+- Remove old attempts at scratchpad memory.

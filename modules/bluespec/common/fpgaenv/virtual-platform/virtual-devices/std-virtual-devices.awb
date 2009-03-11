@@ -5,3 +5,5 @@
 %provides virtual_devices
 
 %requires front_panel scratchpad_memory streams
+
+%public std-virtual-devices.dic

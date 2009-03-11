@@ -1,4 +1,22 @@
-// bram_multi_read
+//
+// Copyright (C) 2009 Intel Corporation
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
+
+// Bram_multi_read
 
 // A convenient instantiation of Block RAMs with multiple read ports.
 // TODO: Make n=2 a special case that uses the second physical read port.
@@ -6,28 +24,11 @@
 import Vector::*;
 import FIFO::*;
 
-// BROM
-
-// Read-only interface
-
-interface BROM#(parameter type addr_T, parameter type data_T);
-
-    method Action readReq(addr_T a);
-    method ActionValue#(data_T) readRsp();
-
-endinterface
+`include "asim/provides/libfpga_bsv_base.bsh"
 
 
-// BRAM_MULTI_READ
-
-// Interface with multiple read ports.
-
-interface BRAM_MULTI_READ#(parameter numeric type n, parameter type addr_T, type data_T);
-
-    interface Vector#(n, BROM#(addr_T, data_T)) readPorts;
-    method Action write(addr_T a, data_T d);
-
-endinterface
+typedef MEMORY_READER_IFC#(t_ADDR, t_DATA) BROM#(type t_ADDR, type t_DATA);
+typedef MEMORY_MULTI_READ_IFC#(nReaders, t_ADDR, t_DATA) BRAM_MULTI_READ#(numeric type nReaders, type t_ADDR, type t_DATA);
 
 
 // mkBRAMMultiRead
@@ -38,14 +39,14 @@ endinterface
 
 module mkBRAMMultiRead
     // interface:
-        (BRAM_MULTI_READ#(n, addr_T, data_T))
+        (BRAM_MULTI_READ#(n, t_ADDR, t_DATA))
     provisos
-        (Bits#(addr_T, addr_SZ),
-         Bits#(data_T, data_SZ));
+        (Bits#(t_ADDR, addr_SZ),
+         Bits#(t_DATA, data_SZ));
 
-    Vector#(n, BRAM#(addr_T, data_T)) rams <- replicateM(mkBRAM());
+    Vector#(n, BRAM#(t_ADDR, t_DATA)) rams <- replicateM(mkBRAM());
 
-    Vector#(n, BROM#(addr_T, data_T)) portsLocal = newVector();
+    Vector#(n, BROM#(t_ADDR, t_DATA)) portsLocal = newVector();
 
     // readPorts
     
@@ -53,7 +54,7 @@ module mkBRAMMultiRead
 
     for(Integer i = 0; i < valueOf(n); i = i + 1)
     begin
-        portsLocal[i] = (interface BROM#(addr_T, data_T);
+        portsLocal[i] = (interface BROM#(t_ADDR, t_DATA);
                              method readReq = rams[i].readReq;
                              method readRsp = rams[i].readRsp;
                          endinterface);
@@ -67,7 +68,7 @@ module mkBRAMMultiRead
     // When:   Any time
     // Effect: Replicate the writes to all the RAMs. 
  
-    method Action write(addr_T a, data_T d);
+    method Action write(t_ADDR a, t_DATA d);
 
         for(Integer i = 0; i < valueOf(n); i = i + 1)
         begin
@@ -87,30 +88,30 @@ endmodule
 //
 module mkBRAMPseudoMultiRead
     // interface:
-        (BRAM_MULTI_READ#(n, addr_T, data_T))
+        (BRAM_MULTI_READ#(n, t_ADDR, t_DATA))
     provisos
-        (Bits#(addr_T, addr_SZ),
-         Bits#(data_T, data_SZ));
+        (Bits#(t_ADDR, addr_SZ),
+         Bits#(t_DATA, data_SZ));
 
-    BRAM#(addr_T, data_T) ram <- mkBRAM();
+    BRAM#(t_ADDR, t_DATA) ram <- mkBRAM();
     FIFO#(Bit#(TLog#(n))) readReqPort <- mkFIFO();
 
     //
     // readPorts
     //
 
-    Vector#(n, BROM#(addr_T, data_T)) portsLocal = newVector();
+    Vector#(n, BROM#(t_ADDR, t_DATA)) portsLocal = newVector();
 
     for(Integer i = 0; i < valueOf(n); i = i + 1)
     begin
         portsLocal[i] =
-            interface BROM#(addr_T, data_T);
-                method Action readReq(addr_T a);
+            interface BROM#(t_ADDR, t_DATA);
+                method Action readReq(t_ADDR a);
                     readReqPort.enq(fromInteger(i));
                     ram.readReq(a);
                 endmethod
 
-                method ActionValue#(data_T) readRsp() if (readReqPort.first() == fromInteger(i));
+                method ActionValue#(t_DATA) readRsp() if (readReqPort.first() == fromInteger(i));
                     readReqPort.deq();
                     let rsp <- ram.readRsp();
                     return rsp;
@@ -139,15 +140,15 @@ endmodule
 // If realPorts is true multiple read ports are available.  Otherwise,
 // a single read port is multiplexed across the read interfaces.
 //
-module mkBRAMBaseMultiReadInitializedWith#(Bool realPorts, function data_T init(addr_T a))
+module mkBRAMBaseMultiReadInitializedWith#(Bool realPorts, function t_DATA init(t_ADDR a))
     // interface:
-        (BRAM_MULTI_READ#(n, addr_T, data_T))
+        (BRAM_MULTI_READ#(n, t_ADDR, t_DATA))
     provisos
-        (Bits#(addr_T, addr_SZ),
-         Bits#(data_T, dataSz));
+        (Bits#(t_ADDR, addr_SZ),
+         Bits#(t_DATA, dataSz));
 
     // The primitive BRAMs.
-    BRAM_MULTI_READ#(n, addr_T, data_T) mems <- mkBRAMMultiRead();
+    BRAM_MULTI_READ#(n, t_ADDR, t_DATA) mems <- mkBRAMMultiRead();
     if (realPorts)
         mems <- mkBRAMMultiRead();
     else
@@ -163,7 +164,7 @@ module mkBRAMBaseMultiReadInitializedWith#(Bool realPorts, function data_T init(
     Reg#(Bool) initializing <- mkReg(True);
 
     rule initialize (initializing);
-        addr_T cur_a = unpack(cur);
+        t_ADDR cur_a = unpack(cur);
         mems.write(cur_a, init(cur_a));
         cur <= cur + 1;
 
@@ -179,19 +180,19 @@ module mkBRAMBaseMultiReadInitializedWith#(Bool realPorts, function data_T init(
     //
     // When:   Guard all requests until we're done initializing.
     //
-    Vector#(readNum, BROM#(addr_T, data_T)) portsLocal = newVector();
+    Vector#(readNum, BROM#(t_ADDR, t_DATA)) portsLocal = newVector();
 
     for(Integer i = 0; i < valueOf(readNum); i = i + 1)
     begin
-        portsLocal[i] = (interface BROM#(addr_T, data_T);
-                             method Action readReq(addr_T a) if (!initializing) = mems.readPorts[i].readReq(a);
-                             method ActionValue#(data_T) readRsp() = mems.readPorts[i].readRsp();
+        portsLocal[i] = (interface BROM#(t_ADDR, t_DATA);
+                             method Action readReq(t_ADDR a) if (!initializing) = mems.readPorts[i].readReq(a);
+                             method ActionValue#(t_DATA) readRsp() = mems.readPorts[i].readRsp();
                          endinterface);
     end
 
     interface readPorts = portsLocal;
 
-    method Action write(addr_T a, data_T d) if (!initializing);
+    method Action write(t_ADDR a, t_DATA d) if (!initializing);
         mems.write(a, d);
     endmethod
 
@@ -205,14 +206,14 @@ endmodule
 // The RAM cannot be accessed until the FSM is done.
 // Uses an ADDR->VAL function to determine the initial values.
 
-module mkBRAMMultiReadInitializedWith#(function data_T init(addr_T a))
+module mkBRAMMultiReadInitializedWith#(function t_DATA init(t_ADDR a))
     // interface:
-        (BRAM_MULTI_READ#(n, addr_T, data_T))
+        (BRAM_MULTI_READ#(n, t_ADDR, t_DATA))
     provisos
-        (Bits#(addr_T, addr_SZ),
-         Bits#(data_T, dataSz));
+        (Bits#(t_ADDR, addr_SZ),
+         Bits#(t_DATA, dataSz));
 
-    BRAM_MULTI_READ#(n, addr_T, data_T) m <- mkBRAMBaseMultiReadInitializedWith(True, init);
+    BRAM_MULTI_READ#(n, t_ADDR, t_DATA) m <- mkBRAMBaseMultiReadInitializedWith(True, init);
     return m;
 
 endmodule
@@ -224,20 +225,20 @@ endmodule
 // A convenience-wrapper of mkBRAMMultiReadInitializedWith where the value
 // is constant.
 //
-module mkBRAMMultiReadInitialized#(data_T initval)
+module mkBRAMMultiReadInitialized#(t_DATA initval)
     // interface:
-        (BRAM_MULTI_READ#(n, addr_T, data_T))
+        (BRAM_MULTI_READ#(n, t_ADDR, t_DATA))
     provisos
-        (Bits#(addr_T, addr_SZ),
-         Bits#(data_T, data_SZ));
+        (Bits#(t_ADDR, addr_SZ),
+         Bits#(t_DATA, data_SZ));
 
     // Wrap the data value in a dummy function.
-    function data_T initfunc(addr_T a);
+    function t_DATA initfunc(t_ADDR a);
         return initval;
     endfunction
 
     //Just instantiate the RAMs.
-    BRAM_MULTI_READ#(n, addr_T, data_T) m <- mkBRAMBaseMultiReadInitializedWith(True, initfunc);
+    BRAM_MULTI_READ#(n, t_ADDR, t_DATA) m <- mkBRAMBaseMultiReadInitializedWith(True, initfunc);
     
     return m;
 
@@ -253,14 +254,14 @@ endmodule
 // The RAM cannot be accessed until the FSM is done.
 // Uses an ADDR->VAL function to determine the initial values.
 
-module mkBRAMPseudoMultiReadInitializedWith#(function data_T init(addr_T a))
+module mkBRAMPseudoMultiReadInitializedWith#(function t_DATA init(t_ADDR a))
     // interface:
-        (BRAM_MULTI_READ#(n, addr_T, data_T))
+        (BRAM_MULTI_READ#(n, t_ADDR, t_DATA))
     provisos
-        (Bits#(addr_T, addr_SZ),
-         Bits#(data_T, dataSz));
+        (Bits#(t_ADDR, addr_SZ),
+         Bits#(t_DATA, dataSz));
 
-    BRAM_MULTI_READ#(n, addr_T, data_T) m <- mkBRAMBaseMultiReadInitializedWith(False, init);
+    BRAM_MULTI_READ#(n, t_ADDR, t_DATA) m <- mkBRAMBaseMultiReadInitializedWith(False, init);
     return m;
 
 endmodule
@@ -274,20 +275,20 @@ endmodule
 // A convenience-wrapper of mkBRAMMultiReadInitializedWith where the value
 // is constant.
 //
-module mkBRAMPseudoMultiReadInitialized#(data_T initval)
+module mkBRAMPseudoMultiReadInitialized#(t_DATA initval)
     // interface:
-        (BRAM_MULTI_READ#(n, addr_T, data_T))
+        (BRAM_MULTI_READ#(n, t_ADDR, t_DATA))
     provisos
-        (Bits#(addr_T, addr_SZ),
-         Bits#(data_T, data_SZ));
+        (Bits#(t_ADDR, addr_SZ),
+         Bits#(t_DATA, data_SZ));
 
     // Wrap the data value in a dummy function.
-    function data_T initfunc(addr_T a);
+    function t_DATA initfunc(t_ADDR a);
         return initval;
     endfunction
 
     //Just instantiate the RAMs.
-    BRAM_MULTI_READ#(n, addr_T, data_T) m <- mkBRAMBaseMultiReadInitializedWith(False, initfunc);
+    BRAM_MULTI_READ#(n, t_ADDR, t_DATA) m <- mkBRAMBaseMultiReadInitializedWith(False, initfunc);
     
     return m;
 

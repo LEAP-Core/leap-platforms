@@ -1,0 +1,9 @@
+//
+// Define a NULL virtual devices dictionary entry so there will be a handle
+// for virtual devices to find their entries.  Some virtual devices, such as
+// scratchpad memory, change their interfaces for clients that register for
+// connections using dictionary entries.  The handle declared here makes it
+// possible for virtual devices to compile even when no clients are registered.
+//
+
+def VDEV.NULL "Dummy entry";

@@ -38,6 +38,7 @@
 import FIFO::*;
 import Vector::*;
 
+`include "asim/provides/libfpga_bsv_base.bsh"
 `include "asim/provides/physical_platform.bsh"
 `include "asim/provides/fpga_components.bsh"
 

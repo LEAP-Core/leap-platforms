@@ -1,6 +1,0 @@
-%name Scratchpad Memory Device using Line-Sized Local Memory
-%desc Scratchpad Memory Device using Line-Sized Local Memory
-
-%provides scratchpad_memory
-
-%public local-mem-scratch-lines.bsv

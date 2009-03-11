@@ -41,7 +41,7 @@ Packagehint=platforms
 [Standard Virtual Devices/Requires]
 front_panel=Hybrid Front Panel
 streams=Hybrid Streams
-scratchpad_memory=Scratchpad Memory Device using Word-Sized Local Memory
+scratchpad_memory=Scratchpad Memory Device Using Local Memory
 
 [HTG Virtex 5 PCIE Enabled]
 File=modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled/htg-v5-pcie-enabled.awb
@@ -127,6 +127,6 @@ File=modules/bluespec/common/fpgaenv/low-level-platform-interface/local-mem/loca
 Packagehint=platforms
 
 
-[Scratchpad Memory Device using Word-Sized Local Memory]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/local/local-mem-scratch-words.awb
+[Scratchpad Memory Device Using Local Memory]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/local/local-mem-scratch.awb
 Packagehint=platforms

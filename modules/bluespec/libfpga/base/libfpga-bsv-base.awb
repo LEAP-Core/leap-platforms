@@ -11,6 +11,7 @@
 %public debug-file.bsv
 %public extends.bsv
 %public hash-bits.bsv
+%public memory-interface.bsv
 
 %private bluespec-common.prj
 

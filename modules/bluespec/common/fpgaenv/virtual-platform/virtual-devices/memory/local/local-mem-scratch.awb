@@ -1,0 +1,8 @@
+%name Scratchpad Memory Device Using Local Memory
+%desc Scratchpad Memory Device Using Local Memory
+
+%provides scratchpad_memory
+
+%public local-mem-scratch.bsv
+
+%param LOCAL_MEM_USE_LINES  0  "0 or 1: use word (0) or line (1) accesses to local memory."

@@ -36,12 +36,7 @@ import RegFile::*;
 
 // Standard BRAM interface
 
-interface BRAM#(parameter type addr_T, parameter type data_T);
-    method Action readReq(addr_T a);
-    method ActionValue#(data_T) readRsp();
-
-    method Action write(addr_T a, data_T v);
-endinterface
+typedef MEMORY_IFC#(t_ADDR, t_DATA) BRAM#(type t_ADDR, type t_DATA);
 
 
 //
@@ -201,10 +196,10 @@ endmodule
 //
 module mkBRAM
     // interface:
-        (BRAM#(addr_T, data_T))
+        (BRAM#(t_ADDR, t_DATA))
     provisos
-        (Bits#(addr_T, addr_SZ),
-         Bits#(data_T, data_SZ));
+        (Bits#(t_ADDR, addr_SZ),
+         Bits#(t_DATA, data_SZ));
 
     // The primitive RAM.
     BRAM#(Bit#(addr_SZ), Bit#(data_SZ)) ram <- mkBRAMUnguarded();
@@ -235,7 +230,7 @@ module mkBRAM
     // When:   Any time that sufficient buffering is available.
     // Effect: Make the request and reserve the buffering spot.
 
-    method Action readReq(addr_T a) if (bufferingAvailable.value() > 0);
+    method Action readReq(t_ADDR a) if (bufferingAvailable.value() > 0);
         ram.readReq(pack(a));
         readReqMade.up();
         bufferingAvailable.down();
@@ -246,7 +241,7 @@ module mkBRAM
     // When:   Any time there's something in the response buffer.
     // Effect: Deq the buffering and record the new space available.
 
-    method ActionValue#(data_T) readRsp();
+    method ActionValue#(t_DATA) readRsp();
         bufferingAvailable.up();
         let v = buffer.first();
         buffer.deq();
@@ -259,7 +254,7 @@ module mkBRAM
     // Effect: Just update the RAM.
     // TODO:   Check that there is not a write to the same address as a simultaneous read.
 
-    method Action write(addr_T a, data_T d);
+    method Action write(t_ADDR a, t_DATA d);
         ram.write(pack(a), pack(d));
     endmethod
 
@@ -272,15 +267,15 @@ endmodule
 //     until the FSM is done.   Uses an ADDR->VAL function to determine the
 //     initial values.
 //
-module mkBRAMInitializedWith#(function data_T init(addr_T x))
+module mkBRAMInitializedWith#(function t_DATA init(t_ADDR x))
     // interface:
-        (BRAM#(addr_T, data_T))
+        (BRAM#(t_ADDR, t_DATA))
     provisos
-        (Bits#(addr_T, addr_SZ),
-         Bits#(data_T, data_SZ));
+        (Bits#(t_ADDR, addr_SZ),
+         Bits#(t_DATA, data_SZ));
 
     // The primitive RAM.
-    BRAM#(addr_T, data_T) mem <- mkBRAM();
+    BRAM#(t_ADDR, t_DATA) mem <- mkBRAM();
     
     // The current adddress we're updating.
     Reg#(Bit#(addr_SZ))   cur <- mkReg(0);
@@ -294,7 +289,7 @@ module mkBRAMInitializedWith#(function data_T init(addr_T x))
     //     Effect: Update the RAM with the user-provided initial value.
     //
     rule initialize (initializing);
-        addr_T cur_a = unpack(cur);
+        t_ADDR cur_a = unpack(cur);
         mem.write(cur_a, init(cur_a));
         cur <= cur + 1;
 
@@ -309,16 +304,16 @@ module mkBRAMInitializedWith#(function data_T init(addr_T x))
     //     When:   Any time we're not initializing.
     //     Effect: Just do the request.
 
-    method Action readReq(addr_T a) if (!initializing);
+    method Action readReq(t_ADDR a) if (!initializing);
         mem.readReq(a);
     endmethod
 
-    method ActionValue#(data_T) readRsp();
-        data_T rsp <- mem.readRsp();
+    method ActionValue#(t_DATA) readRsp();
+        t_DATA rsp <- mem.readRsp();
         return rsp;
     endmethod
 
-    method Action write(addr_T a, data_T d) if (!initializing);
+    method Action write(t_ADDR a, t_DATA d) if (!initializing);
         mem.write(a, d);
     endmethod
 
@@ -330,20 +325,20 @@ endmodule
 //     A convenience-wrapper of mkBRAMInitializedWith where the value is
 //     constant.
 //
-module mkBRAMInitialized#(data_T initval)
+module mkBRAMInitialized#(t_DATA initval)
     // interface:
-        (BRAM#(addr_T, data_T))
+        (BRAM#(t_ADDR, t_DATA))
     provisos
-        (Bits#(addr_T, addr_SZ),
-         Bits#(data_T, data_SZ));
+        (Bits#(t_ADDR, addr_SZ),
+         Bits#(t_DATA, data_SZ));
 
     // Wrap the data value in a dummy function.
-    function data_T initfunc(addr_T a);
+    function t_DATA initfunc(t_ADDR a);
         return initval;
     endfunction
 
     // Just instantiate the RAM.
-    BRAM#(addr_T, data_T) m <- mkBRAMInitializedWith(initfunc);
+    BRAM#(t_ADDR, t_DATA) m <- mkBRAMInitializedWith(initfunc);
     
     return m;
 endmodule

@@ -49,7 +49,7 @@ Packagehint=platforms
 [Standard Virtual Devices/Requires]
 front_panel=Console Front Panel
 streams=Simulation Streams
-scratchpad_memory=Null Scratchpad Memory Device
+scratchpad_memory=Scratchpad Memory Device Using Local Memory
 
 [Null Physical Platform]
 File=modules/bluespec/common/fpgaenv/physical-platform/null/null-physical-platfrom.awb
@@ -74,9 +74,6 @@ local_mem=NULL Local Memory Interface
 File=modules/bluespec/common/fpgaenv/low-level-platform-interface/hwonly-llpi.awb
 Packagehint=platforms
 
-[Null Scratchpad Memory Device]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/null/memory_virtual_device_null.awb
-Packagehint=platforms
 
 [Hardware FPGA Components]
 File=modules/bluespec/common/fpgaenv/fpga-components/hardware-fpga-components.awb
@@ -92,4 +89,8 @@ Packagehint=platforms
 
 [NULL Local Memory Interface]
 File=modules/bluespec/common/fpgaenv/low-level-platform-interface/local-mem/local-mem-null.awb
+Packagehint=platforms
+
+[Scratchpad Memory Device Using Local Memory]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/local/local-mem-scratch.awb
 Packagehint=platforms
