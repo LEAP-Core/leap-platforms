@@ -5170,3 +5170,14 @@ bottom, up:
 - Scratchpad implementation is temporary.  For now I added two new versions
   that export either word or line sized exclusive access to local memory.
   This code is just temporary for testing.
+
+----------
+mcadler     Date: Tue Mar 10 23:26:41 EDT 2009  CSN: CSN-platforms-174
+                  Wed Mar 11 03:26:41 UTC 2009
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-htg-hwonly.apm    Locally Modified          173 
+ hasim-fpgaenv-null.apm    Locally Modified          173 
+
+Fix low level platform definitions for untested submodels.
