@@ -1,0 +1,6 @@
+%name Scratchpad Memory Device using Word-Sized Local Memory
+%desc Scratchpad Memory Device using Word-Sized Local Memory
+
+%provides scratchpad_memory
+
+%public local-mem-scratch-words.bsv

@@ -1,78 +1,92 @@
-import Vector::*;
+//
+// Copyright (C) 2009 Intel Corporation
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
+
 import Clocks::*;
 import FIFO::*;
 import FIFOLevel::*;
 
-`include "fpga_components.bsh"
 
-// Assumption throughout this module: DRAM_BURST_DATA_WIDTH == 2 * DRAM_DUALEDGE_DATA_WIDTH
-// (i.e., burst length is 4 DDR2 DRAM words)
+`include "asim/provides/libfpga_bsv_base.bsh"
 
-// NOTE TO USER: No throttling has been implemented for Reads yet. Please do not push in
-// more Read requests than the internal read buffer can handle (`MAX_OUTSTANDING_READS)
-// before reading out the data from previously issued Reads.
-
-`define MAX_OUTSTANDING_READS    2
 
 //
-// Types
+// Data sizes are fixed by the VHDL DRAM controller and the hardware and are
+// not flexible.
 //
 
-typedef Bit#(`DRAM_ADDRESS_WIDTH) DRAM_ADDRESS;
+// The smallest addressable word:
+typedef 64 FPGA_DRAM_WORD_SZ;
+typedef Bit#(FPGA_DRAM_WORD_SZ) FPGA_DRAM_WORD;
 
-typedef Bit#(`DRAM_DATA_WIDTH) DRAM_DATA;
-typedef Bit#(`DRAM_MASK_WIDTH) DRAM_MASK;
+// The DRAM controller uses both clock edges to pass data, which appears to
+// be 2 words per cycle.  Addresses are little endian, so the low address
+// goes in the low bits.  Most of the interfaces in this module pass:
+typedef 128 FPGA_DRAM_DUALEDGE_DATA_SZ;
+typedef Bit#(FPGA_DRAM_DUALEDGE_DATA_SZ) FPGA_DRAM_DUALEDGE_DATA;
 
-typedef Bit#(`DRAM_DUALEDGE_DATA_WIDTH) DRAM_DUALEDGE_DATA;
-typedef Bit#(`DRAM_DUALEDGE_MASK_WIDTH) DRAM_DUALEDGE_MASK;
+// The DRAM controller reads and writes multiple dual-edge data values for
+// a single request.  The number of dual-edge data values per request is:
+typedef 2 FPGA_DRAM_BURST_LENGTH;
 
-typedef Bit#(`DRAM_BURST_DATA_WIDTH) DRAM_BURST_DATA;
-typedef Bit#(`DRAM_BURST_MASK_WIDTH) DRAM_BURST_MASK;
+// Each byte in a write may be disabled for writes using a bit mask.
+// !!! NOTE: to conform to the controller, a mask bit is 0 to request a write !!!
+typedef Bit#(TDiv#(FPGA_DRAM_WORD_SZ, 8)) FPGA_DRAM_WORD_MASK;
+typedef Bit#(TDiv#(FPGA_DRAM_DUALEDGE_DATA_SZ, 8)) FPGA_DRAM_DUALEDGE_DATA_MASK;
 
-// A DRAM Request is either a Read or Write with an Address
-typedef union tagged
-{
-    DRAM_ADDRESS DRAM_READ;
-    DRAM_ADDRESS DRAM_WRITE;
-}
-DRAM_REQUEST
-    deriving (Bits, Eq);
+// Capacity of the memory (addressing FPGA_DRAM_WORDs):
+typedef 26 FPGA_DRAM_ADDRESS_SZ;
+typedef Bit#(FPGA_DRAM_ADDRESS_SZ) FPGA_DRAM_ADDRESS;
 
-// State
-typedef enum
-{
-    STATE_init,
-    STATE_ready
-}
-STATE
-    deriving (Bits, Eq);
 
 //
 // DDR2_SDRAM_DRIVER
 //
-
+// The driver interface could be expressed as a simple BRAM style interface
+// with write, readReq and readResp.  It is not.  Instead, the driver interface
+// corresponds to the DDR2 controller interface, passing dual-edge data
+// sized objects.  For some designs this will make the logic smaller without
+// a performance penalty.
+//
 interface DDR2_SDRAM_DRIVER;
+    // Read request/response pair.  NOTE: every read request generates
+    // FPGA_DRAM_BURST_LENGTH responses.  If the address is not aligned to
+    // the full response the DRAM controller rotates the response so the
+    // requested address is returned in the low bits of the first response.
+    method Action readReq(FPGA_DRAM_ADDRESS addr);
+    method ActionValue#(FPGA_DRAM_DUALEDGE_DATA) readRsp();
 
-    method Action             makeRequest(DRAM_REQUEST request);
+    // Write requests and data are separate since the data will ultimately
+    // be streamed to the DDR2 controller.
+    method Action writeReq(FPGA_DRAM_ADDRESS addr);
 
-    // enqueue a chunk of write data + write mask
-    method Action             enq(DRAM_DUALEDGE_DATA data, DRAM_DUALEDGE_MASK mask);
-        
-    // read/dequeue read data
-    method DRAM_DUALEDGE_DATA first();
-    method Action             deq();
-
+    // Write data corresponding to a write request.  Call writeData
+    // FPGA_DRAM_BURST_LENGTH times for every write request.  The order of
+    // writeReq() and writeData() calls are not important.
+    method Action writeData(FPGA_DRAM_DUALEDGE_DATA data, FPGA_DRAM_DUALEDGE_DATA_MASK mask);
 endinterface
 
+
 //        
-// DDR2_SDRAM_WIRES
+// DDR2_SDRAM_WIRES --
+//     These are wires which are simply passed up to the toplevel,
+//     where the UCF file ties them to pins.
 //
-
-// These are wires which are simply passed up to the toplevel,
-// where the UCF file ties them to pins.
-
 interface DDR2_SDRAM_WIRES;
-    
     //
     // wires from the mem controller to the DRAM device
     //
@@ -118,29 +132,47 @@ interface DDR2_SDRAM_WIRES;
 
     (* always_ready, always_enabled *)
     interface Inout#(Bit#(8))   dqs_n;
-
 endinterface
 
-//
-// DDR2_SDRAM_DEVICE
-//
 
-// By convention a Device is a Driver and a Wires
-
+//
+// DDR2_SDRAM_DEVICE --
+//     By convention a device is both a driver and a wires interface.
+//
 interface DDR2_SDRAM_DEVICE;
-
     interface DDR2_SDRAM_DRIVER driver;
     interface DDR2_SDRAM_WIRES  wires;
-
 endinterface
+
+
+//
+// A DRAM Request is either a read or write with an address
+//
+typedef union tagged
+{
+    FPGA_DRAM_ADDRESS DRAM_READ;
+    FPGA_DRAM_ADDRESS DRAM_WRITE;
+}
+FPGA_DRAM_REQUEST
+    deriving (Bits, Eq);
+
+
+// State
+typedef enum
+{
+    STATE_init,
+    STATE_ready
+}
+FPGA_DRAM_STATE
+    deriving (Bits, Eq);
+
 
 //
 // mkDDR2SDRAMDevice
 //
-
 module mkDDR2SDRAMDevice#(Clock topLevelClock, Reset topLevelReset)
     // interface:
-                 (DDR2_SDRAM_DEVICE);
+    (DDR2_SDRAM_DEVICE);
     
     Clock modelClock <- exposeCurrentClock();
     Reset modelReset <- exposeCurrentReset();
@@ -163,102 +195,106 @@ module mkDDR2SDRAMDevice#(Clock topLevelClock, Reset topLevelReset)
     Reset controllerReset = dramController.rst_out;
 
     // State
-    Reg#(STATE) state <- mkReg(STATE_init);
+    Reg#(FPGA_DRAM_STATE) state <- mkReg(STATE_init);
 
     //
     // Synchronizers from Controller to Model
     //
 
-    // read buffer (size this buffer to sustain as many DRAM bursts as needed)
-    SyncFIFOIfc#(DRAM_DUALEDGE_DATA) sync_read_data_q <- mkSyncFIFO(`MAX_OUTSTANDING_READS * `DRAM_BURST_LENGTH,
-                                                                    controllerClock, controllerReset, modelClock);
+    // Read buffer (size this buffer to sustain as many DRAM bursts as needed)
+    SyncFIFOIfc#(FPGA_DRAM_DUALEDGE_DATA) syncReadDataQ <-
+        mkSyncFIFO(`DRAM_MAX_OUTSTANDING_READS * valueOf(FPGA_DRAM_BURST_LENGTH),
+                   controllerClock, controllerReset, modelClock);
 
     //
     // Synchronizers from Model to Controller
     //
 
-    // request queue
-    SyncFIFOIfc#(DRAM_REQUEST) sync_request_q <- mkSyncFIFO(2, modelClock, modelReset, controllerClock);
+    // Request queue
+    SyncFIFOIfc#(FPGA_DRAM_REQUEST) syncRequestQ <- mkSyncFIFO(2, modelClock, modelReset, controllerClock);
 
-    // write data queue. Ideally its size should be min(2, `DRAM_BURST_LENGTH)
-    // but I don't know how to do that in Bluespec
-    SyncFIFOLevelIfc#(Tuple2#(DRAM_DUALEDGE_DATA, DRAM_DUALEDGE_MASK), `DRAM_BURST_LENGTH)
-        sync_write_data_q <- mkSyncFIFOLevel(modelClock, modelReset, controllerClock);
+    // Write data queue. Holds one full write.
+    SyncFIFOLevelIfc#(Tuple2#(FPGA_DRAM_DUALEDGE_DATA, FPGA_DRAM_DUALEDGE_DATA_MASK), FPGA_DRAM_BURST_LENGTH)
+        syncWriteDataQ <- mkSyncFIFOLevel(modelClock, modelReset, controllerClock);
     
     Reg#(Bool) writePending <- mkReg(False, clocked_by controllerClock, reset_by controllerReset);
     
+    // Keep track of the number of reads in flight
+    COUNTER#(TLog#(TAdd#(`DRAM_MAX_OUTSTANDING_READS, 1))) nInflightReads <- mkLCounter(0);
+    Reg#(Bit#(TLog#(TAdd#(FPGA_DRAM_BURST_LENGTH, 1)))) readBurstCnt <- mkReg(fromInteger(valueOf(TSub#(FPGA_DRAM_BURST_LENGTH, 1))));
+
     //
     // ===== Rules =====
     //
     
     // Rules for synchronizing from Controller to Model
     
-    // Push incoming data into read buffer. This rule *MUST* fire if the explicit conditions
-    // are true, else we will lose data
-    rule read_data_to_buffer (dramController.init_done());
-        
-        sync_read_data_q.enq(dramController.dequeue_data());
-
+    // Push incoming data into read buffer. This rule *MUST* fire if the explicit
+    // conditions are true, else we will lose data.
+    (* fire_when_enabled *)
+    rule readDataToBuffer (dramController.init_done());
+        syncReadDataQ.enq(dramController.dequeue_data());
     endrule
+
     
     // 
     // Rules for synchronizing from Model to Controller
     //
     
-    // peek at first request in request sync FIFO
-    DRAM_REQUEST req = sync_request_q.first();
+    // Peek at first request in request sync FIFO
+    FPGA_DRAM_REQUEST req = syncRequestQ.first();
     
-    // process Read request
-    rule process_read_request (dramController.init_done() &&&
-                               req matches tagged DRAM_READ .address);
-    
-        sync_request_q.deq();
+    rule processReadRequest (dramController.init_done() &&&
+                             req matches tagged DRAM_READ .address);
+        syncRequestQ.deq();
         dramController.enqueue_address(READ, zeroExtend(address));
-    
     endrule
+
     
-    // process Write request - stage 1
-    // Enqueue the first half of the write data. We can write the command (a) in the next
-    // cycle, or (b) in this cycle if we're sure that we can guarantee that we'll be able
-    // to also write the remainder of the data in the next cycle. We use (b), and allow
-    // the rule to fire only if the full burst data is already available in the data FIFO
-    rule process_write_request (dramController.init_done()                               &&&
-                                !writePending                                            &&&
-                                sync_write_data_q.dIsGreaterThan(`DRAM_BURST_LENGTH - 1) &&&
-                                req matches tagged DRAM_WRITE .address);
-        
+    //
+    // Process write request - stage 1
+    //   Enqueue the first half of the write data. We can write the command
+    //   (a) in the next cycle, or (b) in this cycle if we're sure that we can
+    //   guarantee that we'll be able to also write the remainder of the data
+    //   in the next cycle. We use (b), and allow the rule to fire only if the
+    //   full burst data is already available in the data FIFO.
+    //
+    rule processWriteRequest (dramController.init_done() &&&
+                              ! writePending &&&
+                              syncWriteDataQ.dIsGreaterThan(valueOf(TSub#(FPGA_DRAM_BURST_LENGTH, 1))) &&&
+                              req matches tagged DRAM_WRITE .address);
         // address + command
         dramController.enqueue_address(WRITE, zeroExtend(address));
         
-        // if we dequeue the Request queue now, we can allow a Read to be processed in
-        // parallel with the second stage of the Write, which *should* work fine. I can't
-        // see any race conditions, but BEWARE
-        sync_request_q.deq();
+        // If we dequeue the Request queue now, we can allow a read to be
+        // processed in parallel with the second stage of the write, which
+        // *should* work fine. I can't see any race conditions, but BEWARE.
+        syncRequestQ.deq();
         
-        // data + mask
-        match { .data, .mask } = sync_write_data_q.first();
-        sync_write_data_q.deq();        
+        // Data + mask
+        match { .data, .mask } = syncWriteDataQ.first();
+        syncWriteDataQ.deq();        
         dramController.enqueue_data(data, mask);
                     
         writePending <= True;
-    
     endrule
     
-    // process Write request - stage 2
-    // this rule *MUST* fire in the cycle immediately after the previous rule
-    rule continue_write_request (dramController.init_done() &&& writePending);
-        
+    //
+    // Process write request - stage 2
+    //   This rule *MUST* fire in the cycle immediately after the previous rule.
+    (* fire_when_enabled *)
+    rule continueWriteRequest (dramController.init_done() &&& writePending);
         // data + mask
-        match { .data, .mask } = sync_write_data_q.first();
-        sync_write_data_q.deq();        
+        match { .data, .mask } = syncWriteDataQ.first();
+        syncWriteDataQ.deq();        
         dramController.enqueue_data(data, mask);
 
         writePending <= False;
-        
     endrule    
+
     
     // UGLY HACK
-    // initialization rules: write and read some junk into the DRAM so that
+    // Initialization rules: write and read some junk into the DRAM so that
     // the Sync FIFOs don't get optimized away by the synthesis tools. If the
     // Sync FIFOs get optimized away, then the TIG constraints in the UCF
     // file become invalid and ngdbuild complains.
@@ -266,27 +302,27 @@ module mkDDR2SDRAMDevice#(Clock topLevelClock, Reset topLevelReset)
     Reg#(Bit#(4)) initStage <- mkReg(0);
     Reg#(Bit#(1)) datasink  <- mkReg(0);
 
-    rule init_do_write (state == STATE_init);
+    rule initDoWrite (state == STATE_init);
 
         case (initStage) matches
             
-            0: sync_request_q.enq(tagged DRAM_READ 0);
+            0: syncRequestQ.enq(tagged DRAM_READ 0);
             
             1: begin
-                   datasink <= sync_read_data_q.first()[0];
-                   sync_read_data_q.deq();
+                   datasink <= syncReadDataQ.first()[0];
+                   syncReadDataQ.deq();
                end
             
             2: begin
-                   sync_request_q.enq(tagged DRAM_WRITE 0);
-                   sync_write_data_q.enq(tuple2(zeroExtend(datasink), 0));
+                   syncRequestQ.enq(tagged DRAM_WRITE 0);
+                   syncWriteDataQ.enq(tuple2(zeroExtend(datasink), 0));
 
-                   datasink <= sync_read_data_q.first()[0];
-                   sync_read_data_q.deq();
+                   datasink <= syncReadDataQ.first()[0];
+                   syncReadDataQ.deq();
                end
             
             3: begin
-                   sync_write_data_q.enq(tuple2(zeroExtend(datasink), 0));
+                   syncWriteDataQ.enq(tuple2(zeroExtend(datasink), 0));
                    state <= STATE_ready;
                end
 
@@ -296,10 +332,9 @@ module mkDDR2SDRAMDevice#(Clock topLevelClock, Reset topLevelReset)
 
     endrule
 
-    // The wires are not domain-crossed because no one should ever look at them.
 
+    // The wires are not domain-crossed because no one should ever look at them.
     interface DDR2_SDRAM_WIRES wires;
-      
         method ck_p  = dramController.ck_p;
         method ck_n  = dramController.ck_n;
         method a     = dramController.a;
@@ -315,35 +350,42 @@ module mkDDR2SDRAMDevice#(Clock topLevelClock, Reset topLevelReset)
         interface dq    = dramController.dq;
         interface dqs   = dramController.dqs;
         interface dqs_n = dramController.dqs_n;
-      
     endinterface
     
+
     // Drivers visible to upper layers
-    
     interface DDR2_SDRAM_DRIVER driver;
     
-        method Action makeRequest(DRAM_REQUEST request) if (state == STATE_ready);
-        
-            sync_request_q.enq(request);
-        
+        method Action readReq(FPGA_DRAM_ADDRESS addr) if ((state == STATE_ready) &&
+                                                          (nInflightReads.value() < `DRAM_MAX_OUTSTANDING_READS));
+            syncRequestQ.enq(tagged DRAM_READ addr);
+            nInflightReads.up();
         endmethod
-        
-        method Action enq(DRAM_DUALEDGE_DATA data, DRAM_DUALEDGE_MASK mask) if (state == STATE_ready);
-            
-            sync_write_data_q.enq(tuple2(data, mask));
-            
-        endmethod
-        
-        method DRAM_DUALEDGE_DATA first() if (state == STATE_ready);
-            
-            return sync_read_data_q.first();
 
-        endmethod
-            
-        method Action deq() if (state == STATE_ready);
+        method ActionValue#(FPGA_DRAM_DUALEDGE_DATA) readRsp() if (state == STATE_ready);
+            let d = syncReadDataQ.first();
+            syncReadDataQ.deq();
 
-            sync_read_data_q.deq();
-            
+            if (readBurstCnt == 0)
+            begin
+                nInflightReads.down();
+                readBurstCnt <= fromInteger(valueOf(FPGA_DRAM_BURST_LENGTH)) - 1;
+            end
+            else
+            begin
+                readBurstCnt <= readBurstCnt - 1;
+            end
+
+            return d;
+        endmethod
+
+
+        method Action writeReq(FPGA_DRAM_ADDRESS addr) if (state == STATE_ready);
+            syncRequestQ.enq(tagged DRAM_WRITE addr);
+        endmethod
+        
+        method Action writeData(FPGA_DRAM_DUALEDGE_DATA data, FPGA_DRAM_DUALEDGE_DATA_MASK mask) if (state == STATE_ready);
+            syncWriteDataQ.enq(tuple2(data, mask));
         endmethod
 
     endinterface

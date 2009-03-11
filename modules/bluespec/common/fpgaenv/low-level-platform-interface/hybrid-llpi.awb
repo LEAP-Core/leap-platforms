@@ -1,0 +1,12 @@
+%name Low Level Platform Interface Hybrid
+%desc Low Level Platform Interface for Hybrid Models
+
+%provides low_level_platform_interface
+
+%requires rrr channelio local_mem physical_platform physical_platform_debugger
+
+%public  llpi.bsv
+%public  llpi.h
+%private llpi.cpp
+%public  platforms-module.h
+%private platforms-module.cpp

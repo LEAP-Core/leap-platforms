@@ -33,13 +33,4 @@
 %sources -t UCF -v PRIVATE ddr2_sdram.ucf
 %sources -t UCF -v PRIVATE ddr2-sdram-sync-tig.ucf
 
-%param DRAM_BURST_LENGTH        2    "DRAM Burst Length (DO NOT MODIFY)"
-%param DRAM_ADDRESS_WIDTH       26   "DRAM Address Width (DO NOT MODIFY)"
-
-%param DRAM_DATA_WIDTH          64   "DRAM Data Width (DO NOT MODIFY)"
-%param DRAM_DUALEDGE_DATA_WIDTH 128  "DRAM Dual-Edge Data Width (DO NOT MODIFY)"
-%param DRAM_BURST_DATA_WIDTH    256  "DRAM Burst Data Width (DO NOT MODIFY)"
-
-%param DRAM_MASK_WIDTH          8    "DRAM Mask Width (DO NOT MODIFY)"
-%param DRAM_DUALEDGE_MASK_WIDTH 16   "DRAM Dual-Edge Mask Width (DO NOT MODIFY)"
-%param DRAM_BURST_MASK_WIDTH    32   "DRAM Burst Mask Width (DO NOT MODIFY)"
+%param DRAM_MAX_OUTSTANDING_READS  8 "Maximum in-flight read requests"

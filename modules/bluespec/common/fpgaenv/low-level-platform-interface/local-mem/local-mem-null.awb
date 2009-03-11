@@ -1,0 +1,12 @@
+%name NULL Local Memory Interface
+%desc NULL Local Memory Interface
+
+%provides local_mem
+
+%public local-mem-interface.bsv
+%public local-mem-null.bsv
+
+// Dummy Values
+%param LOCAL_MEM_ADDR_BITS       2  "Local memory address size (address indexes words)"
+%param LOCAL_MEM_WORD_BITS       1  "Local memory word size"
+%param LOCAL_MEM_WORDS_PER_LINE  2  "Local memory words per line (must be power of 2)"

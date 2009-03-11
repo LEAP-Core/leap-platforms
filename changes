@@ -5102,3 +5102,71 @@ base modules can be included anywhere in platforms.
 
 Added a "storage" libfpga category that includes storage management including
 heaps, fifos and cache managers.
+
+----------
+mcadler     Date: Tue Mar 10 22:52:02 EDT 2009  CSN: CSN-platforms-173
+                  Wed Mar 11 02:52:02 UTC 2009
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ hasim-fpgaenv-xup.apm     Locally Modified          171 
+ hasim-fpgaenv-hybrid-sim.apm Locally Modified          171 
+ hasim-fpgaenv-htg-v5-pcie.apm Locally Modified          171 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/local
+ local-mem-scratch-words.awb Locally Added               0 
+ local-mem-scratch-words.bsv Locally Added               0 
+ local-memory-datatypes.bsv Locally Removed           171 
+ local-memory.awb          Locally Removed           171 
+ local-memory.bsv          Locally Removed           171 
+ local-mem-scratch-lines.awb Locally Added               0 
+ local-mem-scratch-lines.bsv Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform
+ low-level-platform-interface/ Locally Removed           171 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface
+ platforms-module.h        Locally Removed           171 
+ llpi.cpp                  Locally Removed           171 
+ hwonly-llpi.awb           Locally Removed           171 
+ llpi.h                    Locally Removed           171 
+ hybrid-llpi.awb           Locally Removed           171 
+ llpi.bsv                  Locally Removed           171 
+ platforms-module.cpp      Locally Removed           171 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr2-sdram
+ ddr2-sdram-device.bsv     Locally Modified          171 
+ ddr2-sdram-device.awb     Locally Modified          171 
+ ddr2-sdram-sync-tig.ucf   Locally Modified          171 
+
+Directory modules/bluespec/common/fpgaenv/low-level-platform-interface
+ local-mem/                Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/low-level-platform-interface/local-mem
+ local-mem-null.awb        Locally Added               0 
+ local-mem-ddr2.awb        Locally Added               0 
+ local-mem-null.bsv        Locally Added               0 
+ local-mem-ddr2.bsv        Locally Added               0 
+ local-mem-interface.bsv   Locally Added               0 
+ local-mem-bram.awb        Locally Added               0 
+ local-mem-bram.bsv        Locally Added               0 
+
+Rearrange scratchpad memory and the connection to local memory.  From the
+bottom, up:
+
+- DDR2 device parameters are now mostly Bluespec typedefs instead of AWB
+  parameters, since they are constants.
+- Add predicates controlling read rate in DDR2 driver so it is impossible
+  to overrun buffers.
+
+- Add "local_mem" to the low level platform interface.  Local memory exports
+  storage as fixed sized words.  The words are grouped into lines.  Methods
+  are provided for reading and writing both words and full lines.
+- Added three flavors of local memory:  NULL, BRAM and DDR2.
+- The DDR2 version sends requests down to the driver.
+- The BRAM version has a configurable latency so that the BRAM local memory
+  can be used for Bluesim builds to behave more like DDR2.
+
+- Scratchpad implementation is temporary.  For now I added two new versions
+  that export either word or line sized exclusive access to local memory.
+  This code is just temporary for testing.

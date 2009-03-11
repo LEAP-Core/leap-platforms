@@ -1,0 +1,11 @@
+%name Local Memory Interface using DDR2 Memory
+%desc Local Memory Interface using DDR2 Memory
+
+%provides local_mem
+
+%public local-mem-interface.bsv
+%public local-mem-ddr2.bsv
+
+%param LOCAL_MEM_ADDR_BITS      26  "Local memory address size (address indexes words)"
+%param LOCAL_MEM_WORD_BITS      64  "Local memory word size"
+%param LOCAL_MEM_WORDS_PER_LINE  4  "Local memory words per line (must be power of 2)"

@@ -89,9 +89,10 @@ physical_platform=XUP Physical Platform
 channelio=Null Channel IO Module
 rrr=Null RRR Module
 physical_platform_debugger=Null Physical Platform Debugger
+local_mem=NULL Local Memory Interface
 
 [Low Level Platform Interface Hardware-Only]
-File=modules/bluespec/common/fpgaenv/virtual-platform/low-level-platform-interface/hwonly-llpi.awb
+File=modules/bluespec/common/fpgaenv/low-level-platform-interface/hwonly-llpi.awb
 Packagehint=platforms
 
 [Null Scratchpad Memory Device]
@@ -104,4 +105,8 @@ Packagehint=platforms
 
 [FPGA Bluespec Library]
 File=config/pm/hasim/submodels/fpgaenv/libfpga-bsv.apm
+Packagehint=platforms
+
+[NULL Local Memory Interface]
+File=modules/bluespec/common/fpgaenv/low-level-platform-interface/local-mem/local-mem-null.awb
 Packagehint=platforms

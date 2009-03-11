@@ -16,10 +16,11 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-`include "rrr.bsh"
-`include "channelio.bsh"
-`include "physical_platform.bsh"
-`include "physical_platform_debugger.bsh"
+`include "asim/provides/local_mem.bsh"
+`include "asim/provides/rrr.bsh"
+`include "asim/provides/channelio.bsh"
+`include "asim/provides/physical_platform.bsh"
+`include "asim/provides/physical_platform_debugger.bsh"
 
 // LowLevelPlatformInterface
 
@@ -30,6 +31,7 @@ interface LowLevelPlatformInterface;
     interface RRR_CLIENT            rrrClient;
     interface RRR_SERVER            rrrServer;
     interface CHANNEL_IO            channelIO;
+    interface LOCAL_MEM             localMem;
     interface PHYSICAL_DRIVERS      physicalDrivers;
     interface TOP_LEVEL_WIRES       topLevelWires;
 
@@ -49,6 +51,9 @@ module mkLowLevelPlatformInterface#(Clock topLevelClock, Reset topLevelReset)
     // instantiate physical platform debugger and obtain gated drivers from it
     PHYSICAL_DRIVERS  drivers   <- mkPhysicalPlatformDebugger(phys_plat.physicalDrivers);
     
+    // instantiate local memory
+    LOCAL_MEM         locMem    <- mkLocalMem(drivers);
+
     // instantiate layers of virtual platform
     CHANNEL_IO        cio       <- mkChannelIO(drivers);
     RRR_CLIENT        rrrc      <- mkRRRClient(cio);
@@ -59,6 +64,7 @@ module mkLowLevelPlatformInterface#(Clock topLevelClock, Reset topLevelReset)
     interface               rrrClient        = rrrc;
     interface               rrrServer        = rrrs;
     interface               channelIO        = cio;
+    interface               localMem         = locMem;
     interface               physicalDrivers  = drivers;
     interface               topLevelWires    = phys_plat.topLevelWires;
 
