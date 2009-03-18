@@ -84,7 +84,7 @@ PCIE_DEVICE_CLASS::ResetFPGA()
     ioctl(driverFD, PCHNL_RESET, NULL);
 
     // TEMPORARY: add a small delay
-    for (int i = 0; i < 1000000; i++);
+    usleep(250000);
 }
 
 // read system CSR

@@ -25,6 +25,7 @@
 // is managed by clients of the scratchpad.
 // 
 
+import FIFO::*;
 import Vector::*;
 
 `include "asim/provides/libfpga_bsv_base.bsh"
@@ -62,11 +63,27 @@ typedef LOCAL_MEM_LINE SCRATCHPAD_MEM_VALUE;
 
 
 //
-// A scratchpad interface has one memory interface for each client.
+// Interface to a single scratchpad port.  By having separate ports defined
+// for each scratchpad, instead of adding a port argument to the methods,
+// this module is capable of defining the relative priority of the ports.
+//
+interface SCRATCHPAD_MEMORY_PORT;
+    interface MEMORY_IFC#(SCRATCHPAD_MEM_ADDRESS, SCRATCHPAD_MEM_VALUE) mem;
+
+    // Initialize a port, requesting an allocation of allocLastWordIdx + 1
+    // SCRATCHPAD_MEM_VALUE sized words.
+    method ActionValue#(Bool) init(SCRATCHPAD_MEM_ADDRESS allocLastWordIdx);
+endinterface: SCRATCHPAD_MEMORY_PORT
+
+//
+// A scratchpad interface has one memory interface for each client.  Using
+// a vector of MEMORY_IFCs instead of adding a port parameter to a
+// MEMORY_IFC-like interface makes the scratchpad interchangeable with
+// other memories in the clients.
 //
 interface SCRATCHPAD_MEMORY_VIRTUAL_DEVICE;
-    interface Vector#(SCRATCHPAD_N_CLIENTS, MEMORY_IFC#(SCRATCHPAD_MEM_ADDRESS, SCRATCHPAD_MEM_VALUE)) ports;
-endinterface
+    interface Vector#(SCRATCHPAD_N_CLIENTS, SCRATCHPAD_MEMORY_PORT) ports;
+endinterface: SCRATCHPAD_MEMORY_VIRTUAL_DEVICE
 
 
 
@@ -76,46 +93,97 @@ endinterface
 //
 module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi)
     // interface:
-    (SCRATCHPAD_MEMORY_VIRTUAL_DEVICE);
+    (SCRATCHPAD_MEMORY_VIRTUAL_DEVICE)
+    provisos (Bits#(SCRATCHPAD_MEM_ADDRESS, t_SCRATCHPAD_MEM_ADDRESS_SZ),
 
-    Vector#(SCRATCHPAD_N_CLIENTS, MEMORY_IFC#(SCRATCHPAD_MEM_ADDRESS, SCRATCHPAD_MEM_VALUE)) portsLocal = newVector();
+              // LUTRAM breaks with 0-sized index
+              Max#(2, SCRATCHPAD_N_CLIENTS, t_SAFE_N_CLIENTS),
+              Alias#(Bit#(TLog#(t_SAFE_N_CLIENTS)), t_PORT_ID));
 
+    DEBUG_FILE debugLog <- mkDebugFile("memory_scrathpad.out");
+
+    // Total memory allocated
+    Reg#(SCRATCHPAD_MEM_ADDRESS) totalAlloc <- mkReg(0);
+
+    // Port base-address within global memory.  Assigned dynamically as
+    // allocation requests arrive.
+    LUTRAM#(t_PORT_ID, Maybe#(SCRATCHPAD_MEM_ADDRESS)) portSegmentBase <- mkLUTRAM(tagged Invalid);
+
+    // Direct read responses to the correct port
+    FIFO#(t_PORT_ID) readQ <- mkSizedFIFO(8);
+
+    //
+    // Allocate the memory interfaces.
+    //
+    Vector#(SCRATCHPAD_N_CLIENTS, SCRATCHPAD_MEMORY_PORT) portsLocal = newVector();
+    
     for (Integer p = 0; p < valueOf(SCRATCHPAD_N_CLIENTS); p = p + 1)
     begin
         portsLocal[p] = (
-            interface MEMORY_IFC#(SCRATCHPAD_MEM_ADDRESS, SCRATCHPAD_MEM_VALUE);
-                method Action readReq(SCRATCHPAD_MEM_ADDRESS addr);
+            interface SCRATCHPAD_MEMORY_PORT;
+                interface MEMORY_IFC mem;
+                    method Action readReq(SCRATCHPAD_MEM_ADDRESS addr) if (portSegmentBase.sub(fromInteger(p)) matches tagged Valid .segment_base);
+                        let p_addr = addr + segment_base;
+                        debugLog.record($format("readReq port %0d: addr 0x%x, p_addr 0x%x", p, addr, p_addr));
+
+                        readQ.enq(fromInteger(p));
+
 `ifdef LOCAL_MEM_USE_LINES_Z
-                    llpi.localMem.readWordReq(addr);
+                        llpi.localMem.readWordReq(p_addr);
 `else
-                    llpi.localMem.readLineReq(localMemLineAddrToAddr(addr));
+                        llpi.localMem.readLineReq(localMemLineAddrToAddr(p_addr));
+`endif
+                    endmethod
+
+                    method ActionValue#(SCRATCHPAD_MEM_VALUE) readRsp() if (readQ.first() == fromInteger(p));
+                        readQ.deq();
+
+`ifdef LOCAL_MEM_USE_LINES_Z
+                        let d <- llpi.localMem.readWordRsp();
+`else
+                        let d <- llpi.localMem.readLineRsp();
 `endif
 
-                    //
-                    // This implementation of a scratchpad supports only one
-                    // client.  Multiple client support requires an algorithm
-                    // for dividing up the local memory among clients.
-                    //
-                    if (p != 0)
-                        $error("local-mem-scratch supports only one client");
+                        debugLog.record($format("readRsp port %0d: 0x%x", p, d));
+
+                        return d;
+                    endmethod
+
+                    method Action write(SCRATCHPAD_MEM_ADDRESS addr, SCRATCHPAD_MEM_VALUE val) if (portSegmentBase.sub(fromInteger(p)) matches tagged Valid .segment_base);
+                        let p_addr = addr + segment_base;
+                        debugLog.record($format("write port %0d: addr 0x%x, p_addr 0x%x, 0x%x", p, addr, p_addr, val));
+
+`ifdef LOCAL_MEM_USE_LINES_Z
+                        llpi.localMem.writeWord(p_addr, val);
+`else
+                        llpi.localMem.writeLine(localMemLineAddrToAddr(p_addr), val);
+`endif
+                    endmethod
+                endinterface
+
+
+                //
+                // Initialization
+                //
+                method ActionValue#(Bool) init(SCRATCHPAD_MEM_ADDRESS allocLastWordIdx);
+                    SCRATCHPAD_MEM_ADDRESS last_word = totalAlloc + allocLastWordIdx;
+                    debugLog.record($format("INIT port %0d: 0x%x words, base 0x%x, next 0x%x", p, allocLastWordIdx + 1, totalAlloc, last_word + 1));
+
+                    Bool ok = True;
+                    if (last_word > totalAlloc)
+                    begin
+                        portSegmentBase.upd(fromInteger(p), tagged Valid totalAlloc);
+                    end
+                    else
+                    begin
+                        debugLog.record($format("INIT port %0d: OUT OF MEMORY", p));
+                        ok = False;
+                    end
+
+                    totalAlloc <= last_word + 1;
+                    return ok;
                 endmethod
 
-                method ActionValue#(SCRATCHPAD_MEM_VALUE) readRsp();
-`ifdef LOCAL_MEM_USE_LINES_Z
-                    let d <- llpi.localMem.readWordRsp();
-`else
-                    let d <- llpi.localMem.readLineRsp();
-`endif
-                    return d;
-                endmethod
-
-                method Action write(SCRATCHPAD_MEM_ADDRESS addr, SCRATCHPAD_MEM_VALUE val);
-`ifdef LOCAL_MEM_USE_LINES_Z
-                    llpi.localMem.writeWord(addr, val);
-`else
-                    llpi.localMem.writeLine(localMemLineAddrToAddr(addr), val);
-`endif
-                endmethod
             endinterface
         );
     end

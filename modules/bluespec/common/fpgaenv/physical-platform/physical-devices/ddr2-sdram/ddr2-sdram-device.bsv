@@ -18,7 +18,9 @@
 
 import Clocks::*;
 import FIFO::*;
-import FIFOLevel::*;
+import FIFOF::*;
+import Vector::*;
+import RWire::*;
 
 
 `include "asim/provides/libfpga_bsv_base.bsh"
@@ -213,9 +215,9 @@ module mkDDR2SDRAMDevice#(Clock topLevelClock, Reset topLevelReset)
     // Request queue
     SyncFIFOIfc#(FPGA_DRAM_REQUEST) syncRequestQ <- mkSyncFIFO(2, modelClock, modelReset, controllerClock);
 
-    // Write data queue. Holds one full write.
-    SyncFIFOLevelIfc#(Tuple2#(FPGA_DRAM_DUALEDGE_DATA, FPGA_DRAM_DUALEDGE_DATA_MASK), FPGA_DRAM_BURST_LENGTH)
-        syncWriteDataQ <- mkSyncFIFOLevel(modelClock, modelReset, controllerClock);
+    // Write data queue
+    SyncFIFOIfc#(Tuple2#(FPGA_DRAM_DUALEDGE_DATA, FPGA_DRAM_DUALEDGE_DATA_MASK))
+        syncWriteDataQ <- mkSyncFIFO(2, modelClock, modelReset, controllerClock);
     
     Reg#(Bool) writePending <- mkReg(False, clocked_by controllerClock, reset_by controllerReset);
     
@@ -241,78 +243,99 @@ module mkDDR2SDRAMDevice#(Clock topLevelClock, Reset topLevelReset)
     // Rules for synchronizing from Model to Controller
     //
     
-    // Peek at first request in request sync FIFO
-    FPGA_DRAM_REQUEST req = syncRequestQ.first();
-    
     rule processReadRequest (dramController.init_done() &&&
-                             req matches tagged DRAM_READ .address);
+                             syncRequestQ.first() matches tagged DRAM_READ .address);
         syncRequestQ.deq();
         dramController.enqueue_address(READ, zeroExtend(address));
     endrule
 
     
     //
-    // Process write request - stage 1
-    //   Enqueue the first half of the write data. We can write the command
-    //   (a) in the next cycle, or (b) in this cycle if we're sure that we can
-    //   guarantee that we'll be able to also write the remainder of the data
-    //   in the next cycle. We use (b), and allow the rule to fire only if the
-    //   full burst data is already available in the data FIFO.
+    // Writes come in as two data messages and a control message.  They
+    // must be forwarded with precise timing to the DRAM.  Timing of reading
+    // directly from the sync FIFO seems to be unreliable.  The code here
+    // avoids timing problems by copying an entire write request into
+    // registers within the DRAM clock domain before forwarding a request.
     //
-    rule processWriteRequest (dramController.init_done() &&&
+
+    Reg#(Vector#(FPGA_DRAM_BURST_LENGTH, FPGA_DRAM_DUALEDGE_DATA)) writeValue <- mkRegU(clocked_by controllerClock, reset_by controllerReset);
+    Reg#(Vector#(FPGA_DRAM_BURST_LENGTH, FPGA_DRAM_DUALEDGE_DATA_MASK)) writeValueMask <- mkRegU(clocked_by controllerClock, reset_by controllerReset);
+    Reg#(Bit#(TLog#(TAdd#(1, FPGA_DRAM_BURST_LENGTH)))) writeBurstIdx <- mkReg(0, clocked_by controllerClock, reset_by controllerReset);
+
+    //
+    // copyWriteData --
+    //     Copy incoming write data from the sync FIFO to local registers.
+    //
+    rule copyWriteData (writeBurstIdx != fromInteger(valueOf(FPGA_DRAM_BURST_LENGTH)));
+        match {.data, .mask} = syncWriteDataQ.first();
+        syncWriteDataQ.deq();        
+
+        writeValue[writeBurstIdx] <= data;
+        writeValueMask[writeBurstIdx] <= mask;
+        
+        writeBurstIdx <= writeBurstIdx + 1;
+    endrule
+
+    //
+    // processWriteRequest0 --
+    //     Stage 0 of write request.  Send control message and first half of data
+    //     to the memory controller.
+    //
+    rule processWriteRequest0 (dramController.init_done() &&&
                               ! writePending &&&
-                              syncWriteDataQ.dIsGreaterThan(valueOf(TSub#(FPGA_DRAM_BURST_LENGTH, 1))) &&&
-                              req matches tagged DRAM_WRITE .address);
+                              (writeBurstIdx == fromInteger(valueOf(FPGA_DRAM_BURST_LENGTH))) &&&
+                              syncRequestQ.first() matches tagged DRAM_WRITE .address);
+
+        syncRequestQ.deq();
+
         // address + command
         dramController.enqueue_address(WRITE, zeroExtend(address));
         
-        // If we dequeue the Request queue now, we can allow a read to be
-        // processed in parallel with the second stage of the write, which
-        // *should* work fine. I can't see any race conditions, but BEWARE.
-        syncRequestQ.deq();
-        
         // Data + mask
-        match { .data, .mask } = syncWriteDataQ.first();
-        syncWriteDataQ.deq();        
-        dramController.enqueue_data(data, mask);
+        dramController.enqueue_data(writeValue[0], writeValueMask[0]);
                     
         writePending <= True;
     endrule
     
     //
-    // Process write request - stage 2
+    // processWriteRequest 1--
+    //   Stage two of write request.  Forward remainder of data to the memory.
     //   This rule *MUST* fire in the cycle immediately after the previous rule.
+    //
     (* fire_when_enabled *)
-    rule continueWriteRequest (dramController.init_done() &&& writePending);
+    rule processWriteRequest1 (dramController.init_done() &&
+                               (writeBurstIdx == fromInteger(valueOf(FPGA_DRAM_BURST_LENGTH))) &&
+                               writePending);
         // data + mask
-        match { .data, .mask } = syncWriteDataQ.first();
-        syncWriteDataQ.deq();        
-        dramController.enqueue_data(data, mask);
-
+        dramController.enqueue_data(writeValue[1], writeValueMask[1]);
+        
         writePending <= False;
+        writeBurstIdx <= 0;
     endrule    
 
-    
+
+    // ====================================================================
+    //
+    // Initialization
+    //
+    // ====================================================================
+
+    Reg#(Bit#(1)) initPhase <- mkReg(0);
+    Reg#(Bit#(2)) initLoop <- mkReg(0);
+    Reg#(Bit#(1)) datasink  <- mkReg(0);
+
     // UGLY HACK
     // Initialization rules: write and read some junk into the DRAM so that
     // the Sync FIFOs don't get optimized away by the synthesis tools. If the
     // Sync FIFOs get optimized away, then the TIG constraints in the UCF
     // file become invalid and ngdbuild complains.
-    
-    Reg#(Bit#(4)) initStage <- mkReg(0);
-    Reg#(Bit#(1)) datasink  <- mkReg(0);
-
-    rule initDoWrite (state == STATE_init);
-
-        case (initStage) matches
-            
+    rule initPhase0 ((state == STATE_init) && (initPhase == 0));
+        case (initLoop) matches
             0: syncRequestQ.enq(tagged DRAM_READ 0);
-            
             1: begin
                    datasink <= syncReadDataQ.first()[0];
                    syncReadDataQ.deq();
                end
-            
             2: begin
                    syncRequestQ.enq(tagged DRAM_WRITE 0);
                    syncWriteDataQ.enq(tuple2(zeroExtend(datasink), 0));
@@ -320,18 +343,124 @@ module mkDDR2SDRAMDevice#(Clock topLevelClock, Reset topLevelReset)
                    datasink <= syncReadDataQ.first()[0];
                    syncReadDataQ.deq();
                end
-            
             3: begin
                    syncWriteDataQ.enq(tuple2(zeroExtend(datasink), 0));
-                   state <= STATE_ready;
+                   initPhase <= 1;
                end
-
         endcase
 
-        initStage <= initStage + 1;
-
+        initLoop <= initLoop + 1;
     endrule
 
+    //
+    // initPhase1 --
+    //     Write a constant pattern to initialize memory.
+    //
+
+    Reg#(FPGA_DRAM_ADDRESS) initAddr <- mkReg(0);
+    Reg#(Bit#(1)) initPart <- mkReg(0);
+
+    rule initPhase1 ((state == STATE_init) && (initPhase == 1));
+        // Data to write
+        Vector#(TDiv#(FPGA_DRAM_DUALEDGE_DATA_SZ, 8), Bit#(8)) init_data = replicate('haa);
+
+        if (initPart == 0)
+        begin
+            // First stage write.  Write the control message and the first
+            // half of the data.
+            syncWriteDataQ.enq(tuple2(pack(init_data), 0));
+        end
+        else
+        begin
+            // Second stage write.  Write the rest of the data and check whether
+            // initialization is done.
+            syncRequestQ.enq(tagged DRAM_WRITE initAddr);
+            syncWriteDataQ.enq(tuple2(pack(init_data), 0));
+
+            // Point to next dual-edge data address
+            let next_addr = initAddr + fromInteger(valueOf(TMul#(FPGA_DRAM_BURST_LENGTH, TDiv#(FPGA_DRAM_DUALEDGE_DATA_SZ, FPGA_DRAM_WORD_SZ))));
+            initAddr <= next_addr;
+
+            if (next_addr == 0)
+            begin
+                state <= STATE_ready;
+            end
+        end
+
+        initPart <= initPart + 1;
+    endrule
+
+
+    // ====================================================================
+    //
+    // Incoming read and write synchronization
+    //
+    // ====================================================================
+
+    //
+    // The sync fifos for the clock crossing are very temperamental.
+    // These normal FIFOs isolate the synchronization from logic calling
+    // the read and write methods in the interface.
+    //
+
+    FIFO#(FPGA_DRAM_REQUEST) forwardReqQ <- mkFIFO();
+    
+    rule forwardIncomingReq (True);
+        let r = forwardReqQ.first();
+        forwardReqQ.deq();
+
+        syncRequestQ.enq(r);
+    endrule
+
+`ifdef FOOBAR
+    FIFOF#(Tuple2#(Maybe#(FPGA_DRAM_ADDRESS), Maybe#(FPGA_DRAM_ADDRESS))) forwardReqQ <- mkSizedFIFOF(128);
+    RWire#(FPGA_DRAM_ADDRESS) newReadReq <- mkRWire();
+    RWire#(FPGA_DRAM_ADDRESS) newWriteReq <- mkRWire();
+    Reg#(Bool) didRead <- mkReg(False);
+
+    //
+    // syncRequests --
+    //     Incoming reads and writes are merged into a single request
+    //     queue.  Keep them ordered here.
+    //
+    rule forwardRequests (True);
+        match {.read, .write} = forwardReqQ.first();
+        
+        if (! didRead &&& read matches tagged Valid .addr)
+        begin
+            syncRequestQ.enq(tagged DRAM_READ addr);
+
+            // Write pending from this group?
+            if (isValid(write))
+                didRead <= True;
+            else
+                forwardReqQ.deq();
+        end
+        else
+        begin
+            syncRequestQ.enq(tagged DRAM_WRITE validValue(write));
+            forwardReqQ.deq();
+            didRead <= False;
+        end
+    endrule
+
+    //
+    // mergeRequests --
+    //     Requests come in on wires and get queued together to maintain order.
+    //     The wires will not be written in the methods below unless there
+    //     is space in the forwardReqQ FIFO.
+    //
+    rule mergeRequests (isValid(newReadReq.wget()) || isValid(newWriteReq.wget()));
+        forwardReqQ.enq(tuple2(newReadReq.wget(), newWriteReq.wget()));
+    endrule
+`endif
+
+
+    // ====================================================================
+    //
+    // Methods
+    //
+    // ====================================================================
 
     // The wires are not domain-crossed because no one should ever look at them.
     interface DDR2_SDRAM_WIRES wires;
@@ -358,7 +487,7 @@ module mkDDR2SDRAMDevice#(Clock topLevelClock, Reset topLevelReset)
     
         method Action readReq(FPGA_DRAM_ADDRESS addr) if ((state == STATE_ready) &&
                                                           (nInflightReads.value() < `DRAM_MAX_OUTSTANDING_READS));
-            syncRequestQ.enq(tagged DRAM_READ addr);
+            forwardReqQ.enq(tagged DRAM_READ addr);
             nInflightReads.up();
         endmethod
 
@@ -381,7 +510,7 @@ module mkDDR2SDRAMDevice#(Clock topLevelClock, Reset topLevelReset)
 
 
         method Action writeReq(FPGA_DRAM_ADDRESS addr) if (state == STATE_ready);
-            syncRequestQ.enq(tagged DRAM_WRITE addr);
+            forwardReqQ.enq(tagged DRAM_WRITE addr);
         endmethod
         
         method Action writeData(FPGA_DRAM_DUALEDGE_DATA data, FPGA_DRAM_DUALEDGE_DATA_MASK mask) if (state == STATE_ready);

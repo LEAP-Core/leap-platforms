@@ -5251,3 +5251,48 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices
 - Merge line and word local scratchpad memories into a single file using
   awb parameters.
 - Remove old attempts at scratchpad memory.
+
+----------
+mcadler     Date: Tue Mar 17 22:00:49 EDT 2009  CSN: CSN-platforms-176
+                  Wed Mar 18 02:00:49 UTC 2009
+
+
+Directory modules/bluespec/libfpga/base
+ libfpga-bsv-base.awb      Locally Modified          175 
+ memory-pack.bsv           Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/low-level-platform-interface/local-mem
+ local-mem-ddr2.bsv        Locally Modified          175 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/pcie-csr
+ pcie-physical-channel.cpp Locally Modified          175 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/local
+ local-mem-scratch.bsv     Locally Modified          175 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr2-sdram
+ ddr2-sdram-device.bsv     Locally Modified          175 
+ ddr2-sdram-sync-tig.ucf   Locally Modified          175 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express
+ pci-express-c-import-mmap.cpp Locally Modified          175 
+
+- Add MEM_PACK_IFC and methods for packing arrays of arbitrary sized objects
+  in fixed-size containers.  The package is useful for turning a scratchpad,
+  which is an array of fixed size objects, into an array of any type.  Objects
+  are packed in bit ranges that are a power of 2 to simplify addressing.
+
+- Support multiple scratchpad regions in the local memory scratchpad by
+  allocating segments based on sizes reported by clients during run-time
+  initialization.
+
+- Fix synchronization bugs in the Bluespec DDR2 device code.  It appears
+  there is no guarantee Sync FIFOs will be read in the first cycle in which
+  they appear to be data ready.  This caused lost data on writes to memory.
+
+- Adjust the pipelining in the local memory DDR2 low level platform interface
+  so the read and write pipelines are the same depth.
+
+- The PCIe interface seems to hang some fraction of the time during start-up.
+  Changed the start-up loop to retry by raising the reset signal until a
+  response is heard.

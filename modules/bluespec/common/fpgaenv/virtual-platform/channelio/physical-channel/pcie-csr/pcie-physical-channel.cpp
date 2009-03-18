@@ -56,21 +56,33 @@ PHYSICAL_CHANNEL_CLASS::PHYSICAL_CHANNEL_CLASS(
     h2fHeadCache = CSR_H2F_BUF_START;
     h2fTail      = CSR_H2F_BUF_START;
 
-    // other initialization
-    iid = 0;
-
-    // bootstrap: first write indices that I control
-    pciExpressDevice->WriteCommonCSR(CSR_F2H_HEAD, f2hHead);
-    pciExpressDevice->WriteCommonCSR(CSR_H2F_TAIL, h2fTail);
-
-    // give green signal to FPGA
-    pciExpressDevice->WriteSystemCSR(genIID() | (OP_START << 16));
-
-    // wait for green signal from FPGA
     CSR_DATA data;
     do
     {
-        data = pciExpressDevice->ReadSystemCSR();
+        // other initialization
+        iid = 0;
+
+        // bootstrap: first write indices that I control
+        pciExpressDevice->WriteCommonCSR(CSR_F2H_HEAD, f2hHead);
+        pciExpressDevice->WriteCommonCSR(CSR_H2F_TAIL, h2fTail);
+
+        // give green signal to FPGA
+        pciExpressDevice->WriteSystemCSR(genIID() | (OP_START << 16));
+
+        // wait for green signal from FPGA
+        UINT32 trips = 0;
+        do
+        {
+            data = pciExpressDevice->ReadSystemCSR();
+            trips = trips + 1;
+        }
+        while ((data != SIGNAL_GREEN) && (trips < 1000000));
+
+        if (data != SIGNAL_GREEN)
+        {
+            // Gave up on green.  Reset again and restart the sequence.
+            pciExpressDevice->ResetFPGA();
+        }
     }
     while (data != SIGNAL_GREEN);
 }

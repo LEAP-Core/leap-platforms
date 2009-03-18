@@ -21,6 +21,7 @@
 //
 
 import FIFO::*;
+import SpecialFIFOs::*;
 import Vector::*;
 
 `include "asim/provides/physical_platform.bsh"
@@ -94,7 +95,7 @@ module mkLocalMem#(PHYSICAL_DRIVERS drivers)
     // Writes
     //
 
-    FIFO#(LOCAL_MEM_WRITE_REQ) writeQ <- mkFIFO();
+    FIFO#(LOCAL_MEM_WRITE_REQ) writeQ <- mkBypassFIFO();
     Reg#(Bit#(TLog#(TAdd#(FPGA_DRAM_BURST_LENGTH, 1)))) writeStage <- mkReg(0);
 
     //
@@ -108,11 +109,15 @@ module mkLocalMem#(PHYSICAL_DRIVERS drivers)
         // Data for this stage in the burst
         dramDriver.writeData(req.data[writeStage], req.mask[writeStage]);
 
+        // First stage in the burst?
+        if (writeStage == 0)
+        begin
+            dramDriver.writeReq(req.addr);
+        end
+ 
         // Last stage in the burst?
         if (writeStage == fromInteger(valueOf(TSub#(FPGA_DRAM_BURST_LENGTH, 1))))
         begin
-            dramDriver.writeReq(req.addr);
-
             writeQ.deq();
             writeStage <= 0;
         end
