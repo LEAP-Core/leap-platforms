@@ -121,45 +121,44 @@ module mkMemoryHeap#(MEMORY_HEAP_DATA#(t_INDEX, t_DATA) heap)
     endrule
 
     //
-    // manageFreeList --
-    //     One rule to control the free list head.  If free() has been called
-    //     take the address to free from the freeQ and push it on the free list.
-    //     If there is nothing to free then attempt to move the head of the free
-    //     list to the malloc queue.
+    // manageFreeListPop --
+    //     Populate the mallocQ, consuming reads from fillFreeList.
     //
-    rule manageFreeList (initialized);
-        //
-        // Either push freed storage on the free list or try to pop a free
-        // entry to the mallocQ.
-        //
-        if (mallocReqQ.notEmpty() &&& freeListHead matches tagged Valid .f)
-        begin
-            mallocReqQ.deq();
+    rule manageFreeListPop (initialized &&&
+                            mallocReqQ.notEmpty() &&&
+                            freeListHead matches tagged Valid .f);
+        mallocReqQ.deq();
 
-            // Update free list head pointer
-            let fl_next <- heap.freeList.readRsp();
-            if (f == pack(fl_next))
-                // Pointer to self means end of list
-                freeListHead <= tagged Invalid;
-            else
-                freeListHead <= tagged Valid pack(fl_next);
+        // Update free list head pointer
+        let fl_next <- heap.freeList.readRsp();
+        if (f == pack(fl_next))
+            // Pointer to self means end of list
+            freeListHead <= tagged Invalid;
+        else
+            freeListHead <= tagged Valid pack(fl_next);
 
-            mallocQ.enq(unpack(f));
-        end
-        else if (freeQ.notEmpty())
-        begin
-            let addr = freeQ.first();
-            freeQ.deq();
+        mallocQ.enq(unpack(f));
+    endrule
 
-            // Push on free list
-            if (freeListHead matches tagged Valid .f)
-                heap.freeList.write(addr, unpack(f));
-            else
-                // Free list was empty.  Node is end of free list.
-                heap.freeList.write(addr, addr);
+    //
+    // manageFreeListPush --
+    //     If free() has been called take the address to free from the freeQ
+    //     and push it on the free list.
+    //
+    (* descending_urgency = "manageFreeListPop, manageFreeListPush" *)
+    (* mutually_exclusive = "manageFreeListPop, manageFreeListPush" *)
+    rule manageFreeListPush (initialized && freeQ.notEmpty());
+        let addr = freeQ.first();
+        freeQ.deq();
 
-            freeListHead <= tagged Valid pack(addr);
-        end
+        // Push on free list
+        if (freeListHead matches tagged Valid .f)
+            heap.freeList.write(addr, unpack(f));
+        else
+            // Free list was empty.  Node is end of free list.
+            heap.freeList.write(addr, addr);
+
+        freeListHead <= tagged Valid pack(addr);
     endrule
 
     method ActionValue#(t_INDEX) malloc();

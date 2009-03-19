@@ -167,7 +167,11 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi)
                 //
                 method ActionValue#(Bool) init(SCRATCHPAD_MEM_ADDRESS allocLastWordIdx);
                     SCRATCHPAD_MEM_ADDRESS last_word = totalAlloc + allocLastWordIdx;
-                    debugLog.record($format("INIT port %0d: 0x%x words, base 0x%x, next 0x%x", p, allocLastWordIdx + 1, totalAlloc, last_word + 1));
+
+                    // Arithmetic for debug (includes overflow bit)
+                    Bit#(TAdd#(1, t_SCRATCHPAD_MEM_ADDRESS_SZ)) dbg_alloc_last_word_idx = zeroExtend(allocLastWordIdx) + 1;
+                    Bit#(TAdd#(1, t_SCRATCHPAD_MEM_ADDRESS_SZ)) dbg_last_word = zeroExtend(last_word) + 1;
+                    debugLog.record($format("INIT port %0d: 0x%x words, base 0x%x, next 0x%x", p, dbg_alloc_last_word_idx, totalAlloc, dbg_last_word));
 
                     Bool ok = True;
                     if (last_word > totalAlloc)

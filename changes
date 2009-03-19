@@ -5296,3 +5296,35 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci
 - The PCIe interface seems to hang some fraction of the time during start-up.
   Changed the start-up loop to retry by raising the reset signal until a
   response is heard.
+
+----------
+mcadler     Date: Wed Mar 18 20:31:48 EDT 2009  CSN: CSN-platforms-177
+                  Thu Mar 19 00:31:48 UTC 2009
+
+
+Directory modules/bluespec/libfpga/storage
+ memory-heap.bsv           Locally Modified          176 
+
+Directory modules/bluespec/libfpga/base
+ fifo-merge.bsv            Locally Added               0 
+ libfpga-bsv-base.awb      Locally Modified          176 
+ memory-pack.bsv           Locally Modified          176 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/local
+ local-mem-scratch.bsv     Locally Modified          176 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr2-sdram
+ ddr2-sdram-device.bsv     Locally Modified          176 
+
+- Add MERGE_FIFOF interface, mkMergeFIFOF and mkMergeBypassFIFOF.  These
+  provide N input ports that look like the input side of a FIFOF and output
+  methods that look like the output side of a FIFO.  Priority is regulated
+  first temporally and then lowest number port to highest number port when
+  messages arrive in the same FPGA cycle.
+
+- Add a pseudo-multi-read port version of packed memory (MEM_PACK_MULTI_READ).
+
+- Govern DDR2 requests with a merge FIFO to keep reads and writes ordered.
+
+- Restructure free list manager in heap manager to make the Bluespec scheduler
+  happier.

@@ -57,12 +57,12 @@ typedef TLog#(TDiv#(t_CONTAINER_DATA_SZ, TExp#(TLog#(t_DATA_SZ)))) MEM_PACK_SMAL
 //
 // MEM_PACK_CONTAINER_ADDR is the address type of a container that will
 // hold a vector of the desired quantity of the desired data.  Given a
-// MEM_PACK_IFC#(t_ADDR, t_DATA, t_CONTAINER_ADDR, t_CONTAINER_DATA)
+// MEM_PACK#(t_ADDR, t_DATA, t_CONTAINER_ADDR, t_CONTAINER_DATA)
 // it is the caller's responsibility to provide a corresponding container
 // with the interface:
 //
-//  MEM_IFC#(MEM_PACK_CONTAINER_ADDR#(t_ADDR_SZ, t_DATA_SZ, t_CONTAINER_DATA_SZ),
-//           t_CONTAINER_DATA)
+//  MEMORY_IFC#(MEM_PACK_CONTAINER_ADDR#(t_ADDR_SZ, t_DATA_SZ, t_CONTAINER_DATA_SZ),
+//              t_CONTAINER_DATA)
 //
 //
 // The computation works because at least one of MEM_PACK_SMALLER_OBJ_IDX_SZ
@@ -77,10 +77,15 @@ typedef Bit#(TAdd#(TSub#(t_ADDR_SZ,
 
 
 //
-// A MEM_PACK_IFC presents a memory interface to access the requested
+// A MEM_PACK presents a memory interface to access the requested
 // numer of objects of the requested type.
 //
-typedef MEMORY_IFC#(t_ADDR, t_DATA) MEM_PACK_IFC#(type t_ADDR, type t_DATA, type t_CONTAINER_ADDR, type t_CONTAINER_DATA);
+typedef MEMORY_IFC#(t_ADDR, t_DATA) MEM_PACK#(type t_ADDR, type t_DATA, type t_CONTAINER_ADDR, type t_CONTAINER_DATA);
+
+//
+// A MEM_PACK_MULTI_READ behaves like a MEM_PACK but has multiple read ports.
+//
+typedef MEMORY_MULTI_READ_IFC#(n_READERS, t_ADDR, t_DATA) MEM_PACK_MULTI_READ#(numeric type n_READERS, type t_ADDR, type t_DATA, type t_CONTAINER_ADDR, type t_CONTAINER_DATA);
 
 
 //
@@ -108,7 +113,7 @@ PACK_REQ_INFO#(numeric type t_DATA_SZ, numeric type t_CONTAINER_DATA_SZ)
 //
 module mkMemPack#(MEMORY_IFC#(t_CONTAINER_ADDR, t_CONTAINER_DATA) containerMem)
     // interface:
-    (MEM_PACK_IFC#(t_ADDR, t_DATA, t_CONTAINER_ADDR, t_CONTAINER_DATA))
+    (MEM_PACK#(t_ADDR, t_DATA, t_CONTAINER_ADDR, t_CONTAINER_DATA))
     provisos (Bits#(t_ADDR, t_ADDR_SZ),
               Bits#(t_DATA, t_DATA_SZ),
               Bits#(t_CONTAINER_ADDR, t_CONTAINER_ADDR_SZ),
@@ -136,6 +141,52 @@ module mkMemPack#(MEMORY_IFC#(t_CONTAINER_ADDR, t_CONTAINER_DATA) containerMem)
 endmodule
 
 
+//
+// mkMemPackPseudoMultiRead
+//
+// Give the illusion of more read ports by managing reader access to a single,
+// shared, read port.
+//
+module mkMemPackPseudoMultiRead#(MEMORY_IFC#(t_CONTAINER_ADDR, t_CONTAINER_DATA) containerMem)
+    // interface:
+    (MEM_PACK_MULTI_READ#(n_READERS, t_ADDR, t_DATA, t_CONTAINER_ADDR, t_CONTAINER_DATA))
+    provisos (Bits#(t_ADDR, t_ADDR_SZ),
+              Bits#(t_DATA, t_DATA_SZ),
+              Bits#(t_CONTAINER_ADDR, t_CONTAINER_ADDR_SZ),
+              Bits#(t_CONTAINER_DATA, t_CONTAINER_DATA_SZ));
+
+    MEM_PACK#(t_ADDR, t_DATA, t_CONTAINER_ADDR, t_CONTAINER_DATA) memory <- mkMemPack(containerMem);
+    FIFO#(Bit#(TLog#(n_READERS))) readReqPort <- mkFIFO();
+
+    //
+    // readPorts
+    //
+
+    Vector#(n_READERS, MEMORY_READER_IFC#(t_ADDR, t_DATA)) portsLocal = newVector();
+
+    for(Integer i = 0; i < valueOf(n_READERS); i = i + 1)
+    begin
+        portsLocal[i] =
+            interface MEMORY_READER_IFC#(t_ADDR, t_DATA);
+                method Action readReq(t_ADDR a);
+                    readReqPort.enq(fromInteger(i));
+                    memory.readReq(a);
+                endmethod
+
+                method ActionValue#(t_DATA) readRsp() if (readReqPort.first() == fromInteger(i));
+                    readReqPort.deq();
+                    let rsp <- memory.readRsp();
+                    return rsp;
+                endmethod
+            endinterface;
+    end
+
+    interface readPorts = portsLocal;
+
+    method write = memory.write;
+endmodule
+
+
 
 // ========================================================================
 //
@@ -151,7 +202,7 @@ endmodule
 //
 module mkMemPack1To1#(MEMORY_IFC#(t_CONTAINER_ADDR, t_CONTAINER_DATA) containerMem)
     // interface:
-    (MEM_PACK_IFC#(t_ADDR, t_DATA, t_CONTAINER_ADDR, t_CONTAINER_DATA))
+    (MEM_PACK#(t_ADDR, t_DATA, t_CONTAINER_ADDR, t_CONTAINER_DATA))
     provisos (Bits#(t_ADDR, t_ADDR_SZ),
               Bits#(t_DATA, t_DATA_SZ),
               Bits#(t_CONTAINER_ADDR, t_CONTAINER_ADDR_SZ),
@@ -179,7 +230,7 @@ endmodule
 //
 module mkMemPackManyTo1#(MEMORY_IFC#(t_CONTAINER_ADDR, t_CONTAINER_DATA) containerMem)
     // interface:
-    (MEM_PACK_IFC#(t_ADDR, t_DATA, t_CONTAINER_ADDR, t_CONTAINER_DATA))
+    (MEM_PACK#(t_ADDR, t_DATA, t_CONTAINER_ADDR, t_CONTAINER_DATA))
     provisos (Bits#(t_ADDR, t_ADDR_SZ),
               Bits#(t_DATA, t_DATA_SZ),
               Bits#(t_CONTAINER_ADDR, t_CONTAINER_ADDR_SZ),
@@ -201,9 +252,12 @@ module mkMemPackManyTo1#(MEMORY_IFC#(t_CONTAINER_ADDR, t_CONTAINER_DATA) contain
     // to be blocked until the read-modify-write completes.
     FIFOF#(Tuple2#(t_ADDR, t_DATA)) writeQ <- mkFIFOF1();
 
-    // Read response queue directs responses either to the readRsp method
+    // Shared read request queue directs responses either to the readRsp method
     // or to the doRMW rule.
-    FIFO#(PACK_REQ_INFO#(t_DATA_SZ, t_CONTAINER_DATA_SZ)) readRespQ <- mkSizedFIFO(8);
+    FIFO#(PACK_REQ_INFO#(t_DATA_SZ, t_CONTAINER_DATA_SZ)) sharedReadReqQ <- mkSizedFIFO(8);
+
+    // Forward read data to the readRsp method
+    FIFO#(t_DATA) readRspQ <- mkBypassFIFO();
 
     // Writes must be read-modify-write.  Read the full container, update the
     // object, and write it back.  We must be careful of read/write ordering
@@ -243,9 +297,9 @@ module mkMemPackManyTo1#(MEMORY_IFC#(t_CONTAINER_ADDR, t_CONTAINER_DATA) contain
     //     Process read response for a write.  Update the object within the
     //     container and write it back.
     //
-    rule doRMW (doingRMW && readRespQ.first().isReadForWrite && ! readReqQ.notEmpty());
-        let o_idx = readRespQ.first().objIdx;
-        readRespQ.deq();
+    rule doRMW (doingRMW && sharedReadReqQ.first().isReadForWrite && ! readReqQ.notEmpty());
+        let o_idx = sharedReadReqQ.first().objIdx;
+        sharedReadReqQ.deq();
 
         let d <- containerMem.readRsp();
 
@@ -270,7 +324,7 @@ module mkMemPackManyTo1#(MEMORY_IFC#(t_CONTAINER_ADDR, t_CONTAINER_DATA) contain
 
         match {.c_addr, .o_idx} = addrSplit(addr);
         containerMem.readReq(c_addr);
-        readRespQ.enq(PACK_REQ_INFO {isReadForWrite: True, objIdx: o_idx});
+        sharedReadReqQ.enq(PACK_REQ_INFO {isReadForWrite: True, objIdx: o_idx});
     
         doingRMW <= True;
         rmwContainerAddr <= c_addr;
@@ -286,23 +340,37 @@ module mkMemPackManyTo1#(MEMORY_IFC#(t_CONTAINER_ADDR, t_CONTAINER_DATA) contain
 
         match {.c_addr, .o_idx} = addrSplit(addr);
         containerMem.readReq(c_addr);
-        readRespQ.enq(PACK_REQ_INFO {isReadForWrite: False, objIdx: o_idx});
+        sharedReadReqQ.enq(PACK_REQ_INFO {isReadForWrite: False, objIdx: o_idx});
     endrule
 
+    //
+    // processReadRsp --
+    //     In theory the body of this rule could all go in the readRsp method
+    //     below.  In practice, the Bluespec scheduler can get confused and
+    //     introduce conflicts between callers of readRsp and doRMW above,
+    //     causing deadlocks.  Putting the code here is a rule and forwarding
+    //     through a 0-latency FIFO seems to solve the problem.
+    //
+    rule processReadRsp (! sharedReadReqQ.first().isReadForWrite);
+        let o_idx = sharedReadReqQ.first().objIdx;
+        sharedReadReqQ.deq();
+    
+        // Receive the data and return the desired object from the container.
+        let d <- containerMem.readRsp();
+        t_PACKED_CONTAINER pack_data = unpack(truncateNP(pack(d)));
+        readRspQ.enq(unpack(truncateNP(pack_data[o_idx])));
+    endrule
 
 
     method Action readReq(t_ADDR addr) if (! isBusyForRead);
         readReqQ.enq(addr);
     endmethod
 
-    method ActionValue#(t_DATA) readRsp() if (! readRespQ.first().isReadForWrite);
-        let o_idx = readRespQ.first().objIdx;
-        readRespQ.deq();
-    
-        // Receive the data and return the desired object from the container.
-        let d <- containerMem.readRsp();
-        t_PACKED_CONTAINER pack_data = unpack(truncateNP(pack(d)));
-        return unpack(truncateNP(pack_data[o_idx]));
+    method ActionValue#(t_DATA) readRsp();
+        let d = readRspQ.first();
+        readRspQ.deq();
+
+        return d;
     endmethod
 
     method Action write(t_ADDR addr, t_DATA val) if (! isBusyForWrite);
@@ -317,7 +385,7 @@ endmodule
 //
 module mkMemPack1ToMany#(MEMORY_IFC#(t_CONTAINER_ADDR, t_CONTAINER_DATA) containerMem)
     // interface:
-    (MEM_PACK_IFC#(t_ADDR, t_DATA, t_CONTAINER_ADDR, t_CONTAINER_DATA))
+    (MEM_PACK#(t_ADDR, t_DATA, t_CONTAINER_ADDR, t_CONTAINER_DATA))
     provisos (Bits#(t_ADDR, t_ADDR_SZ),
               Bits#(t_DATA, t_DATA_SZ),
               Bits#(t_CONTAINER_ADDR, t_CONTAINER_ADDR_SZ),

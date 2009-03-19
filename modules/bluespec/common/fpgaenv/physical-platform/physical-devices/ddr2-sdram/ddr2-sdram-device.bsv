@@ -399,61 +399,19 @@ module mkDDR2SDRAMDevice#(Clock topLevelClock, Reset topLevelReset)
 
     //
     // The sync fifos for the clock crossing are very temperamental.
-    // These normal FIFOs isolate the synchronization from logic calling
-    // the read and write methods in the interface.
+    // These FIFOs both merge incoming read and write requests temporally
+    // and isolate the synchronization from logic calling the read and
+    // write methods in the interface.
     //
 
-    FIFO#(FPGA_DRAM_REQUEST) forwardReqQ <- mkFIFO();
+    MERGE_FIFOF#(2, FPGA_DRAM_REQUEST) mergeReqQ <- mkMergeFIFOF();
     
     rule forwardIncomingReq (True);
-        let r = forwardReqQ.first();
-        forwardReqQ.deq();
+        let r = mergeReqQ.first();
+        mergeReqQ.deq();
 
         syncRequestQ.enq(r);
     endrule
-
-`ifdef FOOBAR
-    FIFOF#(Tuple2#(Maybe#(FPGA_DRAM_ADDRESS), Maybe#(FPGA_DRAM_ADDRESS))) forwardReqQ <- mkSizedFIFOF(128);
-    RWire#(FPGA_DRAM_ADDRESS) newReadReq <- mkRWire();
-    RWire#(FPGA_DRAM_ADDRESS) newWriteReq <- mkRWire();
-    Reg#(Bool) didRead <- mkReg(False);
-
-    //
-    // syncRequests --
-    //     Incoming reads and writes are merged into a single request
-    //     queue.  Keep them ordered here.
-    //
-    rule forwardRequests (True);
-        match {.read, .write} = forwardReqQ.first();
-        
-        if (! didRead &&& read matches tagged Valid .addr)
-        begin
-            syncRequestQ.enq(tagged DRAM_READ addr);
-
-            // Write pending from this group?
-            if (isValid(write))
-                didRead <= True;
-            else
-                forwardReqQ.deq();
-        end
-        else
-        begin
-            syncRequestQ.enq(tagged DRAM_WRITE validValue(write));
-            forwardReqQ.deq();
-            didRead <= False;
-        end
-    endrule
-
-    //
-    // mergeRequests --
-    //     Requests come in on wires and get queued together to maintain order.
-    //     The wires will not be written in the methods below unless there
-    //     is space in the forwardReqQ FIFO.
-    //
-    rule mergeRequests (isValid(newReadReq.wget()) || isValid(newWriteReq.wget()));
-        forwardReqQ.enq(tuple2(newReadReq.wget(), newWriteReq.wget()));
-    endrule
-`endif
 
 
     // ====================================================================
@@ -487,7 +445,7 @@ module mkDDR2SDRAMDevice#(Clock topLevelClock, Reset topLevelReset)
     
         method Action readReq(FPGA_DRAM_ADDRESS addr) if ((state == STATE_ready) &&
                                                           (nInflightReads.value() < `DRAM_MAX_OUTSTANDING_READS));
-            forwardReqQ.enq(tagged DRAM_READ addr);
+            mergeReqQ.ports[0].enq(tagged DRAM_READ addr);
             nInflightReads.up();
         endmethod
 
@@ -510,7 +468,7 @@ module mkDDR2SDRAMDevice#(Clock topLevelClock, Reset topLevelReset)
 
 
         method Action writeReq(FPGA_DRAM_ADDRESS addr) if (state == STATE_ready);
-            forwardReqQ.enq(tagged DRAM_WRITE addr);
+            mergeReqQ.ports[1].enq(tagged DRAM_WRITE addr);
         endmethod
         
         method Action writeData(FPGA_DRAM_DUALEDGE_DATA data, FPGA_DRAM_DUALEDGE_DATA_MASK mask) if (state == STATE_ready);

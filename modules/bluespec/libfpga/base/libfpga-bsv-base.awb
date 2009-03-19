@@ -10,6 +10,7 @@
 %public counting-filter.bsv
 %public debug-file.bsv
 %public extends.bsv
+%public fifo-merge.bsv
 %public hash-bits.bsv
 %public memory-interface.bsv
 %public memory-pack.bsv
