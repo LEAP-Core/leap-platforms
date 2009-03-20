@@ -1,9 +1,9 @@
-%name FPGA Bluespec Base Library
-%desc FPGA Bluespec Base Library
+%name RL Bluespec Base Library
+%desc Reconfigurable Logic Bluespec Base Library
 
-%provides libfpga_bsv_base
+%provides librl_bsv_base
 
-%attributes libfpga
+%attributes librl
 
 %public alias_def.bsv
 %public counters.bsv

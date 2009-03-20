@@ -19,7 +19,7 @@ Packagehint=platforms
 [FPGA Environment/Requires]
 virtual_platform=Standard Virtual Platform
 fpga_components=Software FPGA Components
-libfpga_bsv=FPGA Bluespec Library
+librl_bsv=RL Bluespec Library
 
 [Standard Virtual Platform]
 File=modules/bluespec/common/fpgaenv/virtual-platform/std-virtual-platform.awb
@@ -96,9 +96,6 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/physical-platform/debuggers/null/null-debugger.awb
 Packagehint=platforms
 
-[FPGA Bluespec Library]
-File=config/pm/hasim/submodels/fpgaenv/libfpga-bsv.apm
-Packagehint=platforms
 
 [Local Memory Interface using BRAM]
 File=modules/bluespec/common/fpgaenv/low-level-platform-interface/local-mem/local-mem-bram.awb
@@ -108,3 +105,7 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/local/local-mem-scratch.awb
 Packagehint=platforms
 
+
+[RL Bluespec Library]
+File=config/pm/hasim/submodels/fpgaenv/librl-bsv.apm
+Packagehint=platforms

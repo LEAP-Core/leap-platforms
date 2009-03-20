@@ -24,7 +24,7 @@
 import Vector::*;
 import FIFO::*;
 
-`include "asim/provides/libfpga_bsv_base.bsh"
+`include "asim/provides/librl_bsv_base.bsh"
 
 
 typedef MEMORY_READER_IFC#(t_ADDR, t_DATA) BROM#(type t_ADDR, type t_DATA);

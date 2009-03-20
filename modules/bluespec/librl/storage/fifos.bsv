@@ -22,7 +22,7 @@ import FIFO::*;
 import FIFOF::*;
 import SpecialFIFOs::*;
 
-`include "asim/provides/libfpga_bsv_base.bsh"
+`include "asim/provides/librl_bsv_base.bsh"
 
 // ========================================================================
 //

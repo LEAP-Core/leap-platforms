@@ -20,6 +20,6 @@
 // This module includes a set of standard FPGA base libraries.
 //
 
-`include "asim/provides/libfpga_bsv_base.bsh"
-`include "asim/provides/libfpga_bsv_storage.bsh"
-`include "asim/provides/libfpga_bsv_cache.bsh"
+`include "asim/provides/librl_bsv_base.bsh"
+`include "asim/provides/librl_bsv_storage.bsh"
+`include "asim/provides/librl_bsv_cache.bsh"

@@ -1,0 +1,11 @@
+%name RL Bluespec Library
+%desc Reconfigurable Logic Bluespec Library
+
+%provides librl_bsv
+%requires librl_bsv_base
+%requires librl_bsv_storage
+%requires librl_bsv_cache
+
+%attributes librl
+
+%public librl-bsv.bsh

@@ -1,0 +1,10 @@
+%name RL Bluespec Storage Library
+%desc Reconfigurable logic Bluespec modules that manage storage
+
+%provides librl_bsv_storage
+
+%attributes librl
+
+%public fifos.bsv
+%public fpga-fifos.bsv
+%public memory-heap.bsv

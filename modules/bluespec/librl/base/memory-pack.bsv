@@ -34,7 +34,7 @@ import FIFOF::*;
 import SpecialFIFOs::*;
 
 
-`include "asim/provides/libfpga_bsv_base.bsh"
+`include "asim/provides/librl_bsv_base.bsh"
 
 //
 // Compute the number of objects of desired type that can fit inside a container

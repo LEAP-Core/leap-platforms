@@ -15,7 +15,7 @@ model=FPGA Environment
 [FPGA Environment/Requires]
 virtual_platform=Standard Virtual Platform
 fpga_components=Hardware FPGA Components
-libfpga_bsv=FPGA Bluespec Library
+librl_bsv=RL Bluespec Library
 
 [Standard Virtual Platform]
 File=modules/bluespec/common/fpgaenv/virtual-platform/std-virtual-platform.awb
@@ -95,14 +95,10 @@ local_mem=NULL Local Memory Interface
 File=modules/bluespec/common/fpgaenv/low-level-platform-interface/hwonly-llpi.awb
 Packagehint=platforms
 
-
 [Null Physical Platform Debugger]
 File=modules/bluespec/common/fpgaenv/physical-platform/debuggers/null/null-debugger.awb
 Packagehint=platforms
 
-[FPGA Bluespec Library]
-File=config/pm/hasim/submodels/fpgaenv/libfpga-bsv.apm
-Packagehint=platforms
 
 [NULL Local Memory Interface]
 File=modules/bluespec/common/fpgaenv/low-level-platform-interface/local-mem/local-mem-null.awb
@@ -110,4 +106,8 @@ Packagehint=platforms
 
 [Scratchpad Memory Device Using Local Memory]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/local/local-mem-scratch.awb
+Packagehint=platforms
+
+[RL Bluespec Library]
+File=config/pm/hasim/submodels/fpgaenv/librl-bsv.apm
 Packagehint=platforms

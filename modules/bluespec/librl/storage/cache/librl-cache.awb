@@ -1,0 +1,8 @@
+%name RL Bluespec Cache Managers
+%desc Manage an RL-side cache of arbitrary objects
+%provides librl_bsv_cache
+
+%attributes librl
+
+%public fpga-set-assoc-cache.bsv
+%public fpga-tiny-cache.bsv

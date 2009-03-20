@@ -5341,3 +5341,61 @@ Directory config/pm/hasim/submodels/fpgaenv
  libfpga-bsv.apm           Locally Modified          176 
 
 First step of renaming libfpga to librl.
+
+----------
+mcadler     Date: Fri Mar 20 17:31:17 EDT 2009  CSN: CSN-platforms-179
+                  Fri Mar 20 21:31:17 UTC 2009
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ hasim-fpgaenv-xup.apm     Locally Modified          177 
+ fpgaenv-htg-hwonly.apm    Locally Modified          177 
+ hasim-fpgaenv-hybrid-sim.apm Locally Modified          177 
+ hasim-fpgaenv-htg-v5-pcie.apm Locally Modified          177 
+ libfpga-bsv.apm           Locally Removed           178 
+ librl-bsv.apm             Locally Added               - 
+ hasim-fpgaenv-null.apm    Locally Modified          177 
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ alu-support.bsv           Locally Modified          177 
+ bram.bsv                  Locally Modified          177 
+ bram-multi-read.bsv       Locally Modified          177 
+
+Directory modules/bluespec/common/fpgaenv/low-level-platform-interface/local-mem
+ local-mem-bram.bsv        Locally Modified          177 
+
+Directory modules/bluespec/common/fpgaenv
+ fpga-environment.awb      Locally Modified          177 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/local
+ local-mem-scratch.bsv     Locally Modified          177 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr2-sdram
+ ddr2-sdram-device.bsv     Locally Modified          177 
+
+Directory modules/bluespec/librl
+ libfpga-bsv.awb           Locally Removed           178 
+
+Directory modules/bluespec/librl/storage
+ fifos.bsv                 Locally Modified          178 
+
+Directory modules/bluespec/librl/storage/cache
+ fpga-set-assoc-cache.bsv  Locally Modified          178 
+ libfpga-cache.awb         Locally Removed           178 
+ librl-cache.awb           Locally Added               - 
+
+Directory modules/bluespec/librl/storage
+ libfpga-bsv-storage.awb   Locally Removed           178 
+ librl-bsv-storage.awb     Locally Added               - 
+
+Directory modules/bluespec/librl
+ librl-bsv.awb             Locally Added               - 
+ libfpga-bsv.bsh           Locally Removed           178 
+ librl-bsv.bsh             Locally Added               - 
+
+Directory modules/bluespec/librl/base
+ libfpga-bsv-base.awb      Locally Removed           178 
+ librl-bsv-base.awb        Locally Added               - 
+ memory-pack.bsv           Locally Modified          178 
+
+Rename libfpga to librl.
