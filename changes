@@ -5328,3 +5328,16 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr
 
 - Restructure free list manager in heap manager to make the Bluespec scheduler
   happier.
+
+----------
+mcadler     Date: Fri Mar 20 15:21:04 EDT 2009  CSN: CSN-platforms-178
+                  Fri Mar 20 19:21:04 UTC 2009
+
+
+Directory modules/bluespec
+ libfpga/                  Locally Removed           176 
+
+Directory config/pm/hasim/submodels/fpgaenv
+ libfpga-bsv.apm           Locally Modified          176 
+
+First step of renaming libfpga to librl.

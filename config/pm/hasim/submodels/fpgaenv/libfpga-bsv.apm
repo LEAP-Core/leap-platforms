@@ -13,7 +13,7 @@ DefaultAttributes=libfpga bluespec
 model=FPGA Bluespec Library
 
 [FPGA Bluespec Base Library]
-File=modules/bluespec/libfpga/base/libfpga-bsv-base.awb
+File=modules/bluespec/librl/base/libfpga-bsv-base.awb
 Packagehint=platforms
 
 
@@ -23,13 +23,13 @@ libfpga_bsv_base=FPGA Bluespec Base Library
 libfpga_bsv_storage=FPGA Bluespec Storage Library
 
 [FPGA Bluespec Library]
-File=modules/bluespec/libfpga/libfpga-bsv.awb
+File=modules/bluespec/librl/libfpga-bsv.awb
 Packagehint=platforms
 
 [FPGA Bluespec Storage Library]
-File=modules/bluespec/libfpga/storage/libfpga-bsv-storage.awb
+File=modules/bluespec/librl/storage/libfpga-bsv-storage.awb
 Packagehint=platforms
 
 [FPGA Bluespec Cache Managers]
-File=modules/bluespec/libfpga/storage/cache/libfpga-cache.awb
+File=modules/bluespec/librl/storage/cache/libfpga-cache.awb
 Packagehint=platforms
