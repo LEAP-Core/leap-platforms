@@ -26,6 +26,7 @@
 // 
 
 import FIFO::*;
+import FIFOF::*;
 import Vector::*;
 
 `include "asim/provides/librl_bsv_base.bsh"
@@ -110,7 +111,69 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi)
     LUTRAM#(t_PORT_ID, Maybe#(SCRATCHPAD_MEM_ADDRESS)) portSegmentBase <- mkLUTRAM(tagged Invalid);
 
     // Direct read responses to the correct port
-    FIFO#(t_PORT_ID) readQ <- mkSizedFIFO(8);
+    FIFOF#(t_PORT_ID) readQ <- mkSizedFIFOF(8);
+
+
+    // ====================================================================
+    //
+    // Initialization.  All scratchpad memory is guaranteed to start
+    // filled with zeros.
+    //
+    // ====================================================================
+
+    FIFO#(Tuple3#(t_PORT_ID, SCRATCHPAD_MEM_ADDRESS, SCRATCHPAD_MEM_ADDRESS)) initQ <- mkFIFO1();
+    Reg#(Bool) initBusy <- mkReg(False);
+    Reg#(t_PORT_ID) initPort <- mkRegU();
+    Reg#(SCRATCHPAD_MEM_ADDRESS) initAddrBase <- mkRegU();
+    Reg#(SCRATCHPAD_MEM_ADDRESS) initAddr <- mkRegU();
+    Reg#(SCRATCHPAD_MEM_ADDRESS) initCnt <- mkRegU();
+
+    //
+    // processInitReq --
+    //     Initialization requests come from the init port interface below.
+    //
+    rule processInitReq (! initBusy);
+        match {.port, .base_addr, .n_init} = initQ.first();
+        initQ.deq();
+        
+        initBusy <= True;
+        initPort <= port;
+        initAddrBase <= base_addr;
+        initAddr <= base_addr;
+        initCnt <= n_init;
+    endrule
+
+    //
+    // doInit --
+    //     Main initialization loop.  Write 0 to a scratchpad.
+    //
+    rule doInit (initBusy);
+`ifdef LOCAL_MEM_USE_LINES_Z
+        llpi.localMem.writeWord(initAddr, 0);
+`else
+        llpi.localMem.writeLine(localMemLineAddrToAddr(initAddr), 0);
+`endif
+
+        // Done?
+        if (initCnt == 0)
+        begin
+            // Flag the segment ready by setting its translation to a local
+            // memory region.
+            portSegmentBase.upd(initPort, tagged Valid initAddrBase);
+            initBusy <= False;
+            debugLog.record($format("INIT port %0d: done", initPort));
+        end
+        
+        initAddr <= initAddr + 1;
+        initCnt <= initCnt - 1;
+    endrule
+
+
+    // ====================================================================
+    //
+    // Scratchpad port methods.
+    //
+    // ====================================================================
 
     //
     // Allocate the memory interfaces.
@@ -122,7 +185,7 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi)
         portsLocal[p] = (
             interface SCRATCHPAD_MEMORY_PORT;
                 interface MEMORY_IFC mem;
-                    method Action readReq(SCRATCHPAD_MEM_ADDRESS addr) if (portSegmentBase.sub(fromInteger(p)) matches tagged Valid .segment_base);
+                    method Action readReq(SCRATCHPAD_MEM_ADDRESS addr) if (! initBusy &&& portSegmentBase.sub(fromInteger(p)) matches tagged Valid .segment_base);
                         let p_addr = addr + segment_base;
                         debugLog.record($format("readReq port %0d: addr 0x%x, p_addr 0x%x", p, addr, p_addr));
 
@@ -149,7 +212,12 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi)
                         return d;
                     endmethod
 
-                    method Action write(SCRATCHPAD_MEM_ADDRESS addr, SCRATCHPAD_MEM_VALUE val) if (portSegmentBase.sub(fromInteger(p)) matches tagged Valid .segment_base);
+                    //
+                    // write --
+                    //     write method is predicated by readQ.notFull() to ensure
+                    //     synchronization of read and write requests.
+                    //
+                    method Action write(SCRATCHPAD_MEM_ADDRESS addr, SCRATCHPAD_MEM_VALUE val) if (! initBusy &&& readQ.notFull() &&& portSegmentBase.sub(fromInteger(p)) matches tagged Valid .segment_base);
                         let p_addr = addr + segment_base;
                         debugLog.record($format("write port %0d: addr 0x%x, p_addr 0x%x, 0x%x", p, addr, p_addr, val));
 
@@ -176,7 +244,7 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi)
                     Bool ok = True;
                     if (last_word > totalAlloc)
                     begin
-                        portSegmentBase.upd(fromInteger(p), tagged Valid totalAlloc);
+                        initQ.enq(tuple3(fromInteger(p), totalAlloc, allocLastWordIdx));
                     end
                     else
                     begin

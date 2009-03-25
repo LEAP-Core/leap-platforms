@@ -5399,3 +5399,23 @@ Directory modules/bluespec/librl/base
  memory-pack.bsv           Locally Modified          178 
 
 Rename libfpga to librl.
+
+----------
+mcadler     Date: Tue Mar 24 20:59:19 EDT 2009  CSN: CSN-platforms-180
+                  Wed Mar 25 00:59:19 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/low-level-platform-interface/local-mem
+ local-mem-ddr2.bsv        Locally Modified          179 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/local
+ local-mem-scratch.bsv     Locally Modified          179 
+
+- Guarantee that scratchpad memory always starts filled with 0.  This will
+  be an especially useful default value with hybrid scratchpads, since
+  anonymous mmap regions are guaranteed zero.
+- Fix a timing problem in the local memory DDR2 interface that allowed
+  loads to go around stores.
+
+  
+

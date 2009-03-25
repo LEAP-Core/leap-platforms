@@ -21,6 +21,7 @@
 //
 
 import FIFO::*;
+import FIFOF::*;
 import SpecialFIFOs::*;
 import Vector::*;
 
@@ -39,7 +40,6 @@ typedef Vector#(FPGA_DRAM_BURST_LENGTH, FPGA_DRAM_DUALEDGE_DATA_MASK) DRAM_FULL_
 
 typedef struct
 {
-    LOCAL_MEM_ADDR addr;
     DRAM_FULL_LINE data;
     DRAM_FULL_LINE_MASK mask;
 }
@@ -55,7 +55,7 @@ module mkLocalMem#(PHYSICAL_DRIVERS drivers)
     DDR2_SDRAM_DRIVER dramDriver = drivers.ddr2SDRAMDriver;
 
     // Record read requests (either full line or a word index)
-    FIFO#(Maybe#(LOCAL_MEM_WORD_IDX)) readReqQ <- mkSizedFIFO(16);
+    FIFOF#(Maybe#(LOCAL_MEM_WORD_IDX)) readReqQ <- mkSizedFIFOF(16);
 
     //
     // Reads
@@ -95,30 +95,24 @@ module mkLocalMem#(PHYSICAL_DRIVERS drivers)
     // Writes
     //
 
-    FIFO#(LOCAL_MEM_WRITE_REQ) writeQ <- mkBypassFIFO();
+    FIFOF#(LOCAL_MEM_WRITE_REQ) writeDataQ <- mkBypassFIFOF();
     Reg#(Bit#(TLog#(TAdd#(FPGA_DRAM_BURST_LENGTH, 1)))) writeStage <- mkReg(0);
 
     //
-    // doWrites --
+    // forwardWriteData --
     //     Writes are bursts of data and an address.  Process a request until
     //     all data is passed to the driver and then dequeue the request.
     //
-    rule doWrites (True);
-        let req = writeQ.first();
+    rule forwardWriteData (True);
+        let req = writeDataQ.first();
         
         // Data for this stage in the burst
         dramDriver.writeData(req.data[writeStage], req.mask[writeStage]);
 
-        // First stage in the burst?
-        if (writeStage == 0)
-        begin
-            dramDriver.writeReq(req.addr);
-        end
- 
         // Last stage in the burst?
         if (writeStage == fromInteger(valueOf(TSub#(FPGA_DRAM_BURST_LENGTH, 1))))
         begin
-            writeQ.deq();
+            writeDataQ.deq();
             writeStage <= 0;
         end
         else
@@ -132,7 +126,12 @@ module mkLocalMem#(PHYSICAL_DRIVERS drivers)
     // Methods
     //
 
-    method Action readWordReq(LOCAL_MEM_ADDR addr);
+    //
+    // Read request methods are predicated by writeDataQ.notFull()
+    // to ensure synchronization with writes.
+    //
+
+    method Action readWordReq(LOCAL_MEM_ADDR addr) if (writeDataQ.notFull());
         match {.l_addr, .w_idx} = localMemBurstAddr(addr);
         dramDriver.readReq(localMemLineAddrToAddr(l_addr));
 
@@ -149,7 +148,7 @@ module mkLocalMem#(PHYSICAL_DRIVERS drivers)
     endmethod
 
 
-    method Action readLineReq(LOCAL_MEM_ADDR addr);
+    method Action readLineReq(LOCAL_MEM_ADDR addr) if (writeDataQ.notFull());
         dramDriver.readReq(addr);
 
         // Note full line read.
@@ -164,8 +163,12 @@ module mkLocalMem#(PHYSICAL_DRIVERS drivers)
         return d;
     endmethod
 
+    //
+    // Read request methods are predicated by readReqQ.notFull()
+    // to ensure synchronization with writes.
+    //
 
-    method Action writeWord(LOCAL_MEM_ADDR addr, LOCAL_MEM_WORD data);
+    method Action writeWord(LOCAL_MEM_ADDR addr, LOCAL_MEM_WORD data) if (readReqQ.notFull());
         match {.l_addr, .w_idx} = localMemBurstAddr(addr);
     
         // Build a mask to enable writing just the requested word.
@@ -182,10 +185,12 @@ module mkLocalMem#(PHYSICAL_DRIVERS drivers)
             line_data[w] = data;
         end
 
-        writeQ.enq(LOCAL_MEM_WRITE_REQ { addr: localMemLineAddrToAddr(l_addr), data: unpack(pack(line_data)), mask: unpack(pack(mask)) });
+        dramDriver.writeReq(localMemLineAddrToAddr(l_addr));
+        writeDataQ.enq(LOCAL_MEM_WRITE_REQ { data: unpack(pack(line_data)), mask: unpack(pack(mask)) });
     endmethod
 
-    method Action writeLine(LOCAL_MEM_ADDR addr, LOCAL_MEM_LINE data);
-        writeQ.enq(LOCAL_MEM_WRITE_REQ { addr: addr, data: unpack(data), mask: unpack(0) });
+    method Action writeLine(LOCAL_MEM_ADDR addr, LOCAL_MEM_LINE data) if (readReqQ.notFull());
+        dramDriver.writeReq(addr);
+        writeDataQ.enq(LOCAL_MEM_WRITE_REQ { data: unpack(data), mask: unpack(0) });
     endmethod
 endmodule
