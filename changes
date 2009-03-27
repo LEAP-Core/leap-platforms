@@ -5419,3 +5419,15 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memor
 
   
 
+
+----------
+aparasha    Date: Fri Mar 27 16:50:21 EDT 2009  CSN: CSN-platforms-181
+                  Fri Mar 27 20:50:21 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/pcie-csr
+ pcie-physical-channel.cpp Locally Modified          180 
+ pcie-physical-channel.awb Locally Modified          180 
+ pcie-physical-channel.bsv Locally Modified          180 
+
+Small performance optimization for PCIe CSR-Based Physical Channel

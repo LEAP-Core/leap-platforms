@@ -62,10 +62,6 @@ PHYSICAL_CHANNEL_CLASS::PHYSICAL_CHANNEL_CLASS(
         // other initialization
         iid = 0;
 
-        // bootstrap: first write indices that I control
-        pciExpressDevice->WriteCommonCSR(CSR_F2H_HEAD, f2hHead);
-        pciExpressDevice->WriteCommonCSR(CSR_H2F_TAIL, h2fTail);
-
         // give green signal to FPGA
         pciExpressDevice->WriteSystemCSR(genIID() | (OP_START << 16));
 
@@ -85,6 +81,10 @@ PHYSICAL_CHANNEL_CLASS::PHYSICAL_CHANNEL_CLASS(
         }
     }
     while (data != SIGNAL_GREEN);
+
+    // update pointers
+    pciExpressDevice->WriteSystemCSR(genIID() | (OP_UPDATE_F2HHEAD << 16) | (f2hHead << 8));
+    pciExpressDevice->WriteSystemCSR(genIID() | (OP_UPDATE_H2FTAIL << 16) | (h2fTail << 8));
 }
 
 // destructor
@@ -192,8 +192,7 @@ PHYSICAL_CHANNEL_CLASS::Write(
 
     // sync h2fTail pointer. It is OPTIONAL to do this immediately, but we will do it
     // since this is probably the response to a request the hardware might be blocked on
-    pciExpressDevice->WriteCommonCSR(CSR_H2F_TAIL, h2fTail);
-    pciExpressDevice->WriteSystemCSR(genIID() | (OP_INVAL_H2FTAIL << 16));
+    pciExpressDevice->WriteSystemCSR(genIID() | (OP_UPDATE_H2FTAIL << 16) | (h2fTail << 8));
 
     // de-allocate message
     message->Delete();
@@ -220,8 +219,7 @@ PHYSICAL_CHANNEL_CLASS::readCSR()
     f2hHead = (f2hHead == CSR_F2H_BUF_END) ? CSR_F2H_BUF_START : (f2hHead + 1);
 
     // sync head pointer (OPTIONAL)
-    pciExpressDevice->WriteCommonCSR(CSR_F2H_HEAD, f2hHead);
-    pciExpressDevice->WriteSystemCSR(genIID() | (OP_INVAL_F2HHEAD << 16));
+    pciExpressDevice->WriteSystemCSR(genIID() | (OP_UPDATE_F2HHEAD << 16) | (f2hHead << 8));
 
     // determine if we are starting a new message
     if (incomingMessage == NULL)

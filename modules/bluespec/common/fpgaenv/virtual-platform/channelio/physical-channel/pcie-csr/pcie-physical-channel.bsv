@@ -112,9 +112,10 @@ module mkPhysicalChannel#(PHYSICAL_DRIVERS drivers)
     rule process_inst (channelState != CHANNEL_STATE_init);
         
         // read current instruction and decode partially
-        Bit#(8) iid    = pciExpressDriver.systemCSR[31:24];
-        Bit#(4) opcode = pciExpressDriver.systemCSR[19:16];
-
+        Bit#(8)        iid    = pciExpressDriver.systemCSR[31:24];
+        Bit#(4)        opcode = pciExpressDriver.systemCSR[19:16];
+        PCIE_CSR_INDEX index  = pciExpressDriver.systemCSR[15:8];
+        
         // make sure this is a new instruction
         if (iid != lastIID)
         begin
@@ -124,19 +125,23 @@ module mkPhysicalChannel#(PHYSICAL_DRIVERS drivers)
             case (opcode)
                 
                 // NOP
-                `OP_NOP           : noAction;
+                `OP_NOP            : noAction;
                 
                 // start
-                `OP_START         : if (channelState == CHANNEL_STATE_idle)
-                                        channelState <= CHANNEL_STATE_init;
+                `OP_START          : if (channelState == CHANNEL_STATE_idle)
+                                         channelState <= CHANNEL_STATE_init;
                 
-                // invalidate H2F tail
-                `OP_INVAL_H2FTAIL : if (channelState == CHANNEL_STATE_active)
-                                        h2fTailValid <= False;
+                // update H2F tail
+                `OP_UPDATE_H2FTAIL : begin
+                                         h2fTail <= index;
+                                         h2fTailValid <= True;
+                                     end
                 
-                // invalidate F2H head
-                `OP_INVAL_F2HHEAD : if (channelState == CHANNEL_STATE_active)
-                                        f2hHeadValid <= False;
+                // update F2H head
+                `OP_UPDATE_F2HHEAD : begin
+                                         f2hHead <= index;
+                                         f2hHeadValid <= True;
+                                     end
 
                 default: noAction;
 
@@ -173,44 +178,6 @@ module mkPhysicalChannel#(PHYSICAL_DRIVERS drivers)
         
     endrule
 
-    // === pointer updates: READ ===
-
-    // read f2hHead pointer
-    rule make_f2hHead_read_req (channelActive && !f2hHeadValid && readState == READ_STATE_ready);
-
-        pciExpressDriver.commonCSRs.readRequest(`CSR_F2H_HEAD);
-        readState <= READ_STATE_busy_f2hHead;
-        f2hHeadValid <= True; // need this here, not at resp
-
-    endrule
-
-    // accept response for f2hHead request
-    rule recv_f2hHead_read_resp (channelActive && readState == READ_STATE_busy_f2hHead);
-        
-        PCIE_CSR_DATA data <- pciExpressDriver.commonCSRs.readResponse();
-        f2hHead <= truncate(data);
-        readState <= READ_STATE_ready;
-        
-    endrule
-
-    // read h2fTail pointer
-    rule make_h2fTail_read_req (channelActive && !h2fTailValid && readState == READ_STATE_ready);
-
-        pciExpressDriver.commonCSRs.readRequest(`CSR_H2F_TAIL);
-        readState <= READ_STATE_busy_h2fTail;
-        h2fTailValid <= True; // need this here, not at resp
-
-    endrule
-
-    // accept response for h2fTail request
-    rule recv_h2fTail_read_resp (channelActive && readState == READ_STATE_busy_h2fTail);
-
-        PCIE_CSR_DATA data <- pciExpressDriver.commonCSRs.readResponse();
-        h2fTail <= truncate(data);
-        readState <= READ_STATE_ready;
-
-    endrule
-
     // === pointer updates: WRITE ===
 
     // NOTE: all write rules are gated by READ_STATE_ready (obsolete. debug only. FIXME)
@@ -234,7 +201,7 @@ module mkPhysicalChannel#(PHYSICAL_DRIVERS drivers)
     // === data ===
 
     // send data read request
-    rule make_data_read_req (channelActive && !h2fEmpty && readState == READ_STATE_ready);
+    rule make_data_read_req (channelActive && h2fTailValid && !h2fEmpty && readState == READ_STATE_ready);
 
         pciExpressDriver.commonCSRs.readRequest(h2fHead);
         readState <= READ_STATE_busy_data;
@@ -256,7 +223,7 @@ module mkPhysicalChannel#(PHYSICAL_DRIVERS drivers)
     endrule
 
     // send data write request
-    rule make_data_write_req (channelActive && !f2hFull && readState == READ_STATE_ready);
+    rule make_data_write_req (channelActive && f2hHeadValid && !f2hFull && readState == READ_STATE_ready);
         
         PCIE_CSR_DATA data = writeBuffer.first();
         writeBuffer.deq();

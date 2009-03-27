@@ -25,3 +25,5 @@
 %param OP_START             1 "Control Instruction Opcode for START"
 %param OP_INVAL_H2FTAIL     2 "Control Instruction Opcode for INVAL_H2FTAIL"
 %param OP_INVAL_F2HHEAD     3 "Control Instruction Opcode for INVAL_F2HHEAD"
+%param OP_UPDATE_H2FTAIL    4 "Control Instruction Opcode for UPDATE_H2FTAIL"
+%param OP_UPDATE_F2HHEAD    5 "Control Instruction Opcode for UPDATE_F2HHEAD"
