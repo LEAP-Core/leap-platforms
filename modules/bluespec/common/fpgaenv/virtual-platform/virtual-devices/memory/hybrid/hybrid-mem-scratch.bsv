@@ -64,28 +64,10 @@ typedef Bit#(TLog#(SCRATCHPAD_WORDS_PER_LINE)) SCRATCHPAD_WORD_IDX;
 typedef Bit#(64) HOST_SCRATCHPAD_ADDR;
 
 //
-// Interface to a single scratchpad port.  By having separate ports defined
-// for each scratchpad, instead of adding a port argument to the methods,
-// this module is capable of defining the relative priority of the ports.
+// Now that the address and value sizes are defined the common interface
+// definition can be included.
 //
-interface SCRATCHPAD_MEMORY_PORT;
-    interface MEMORY_IFC#(SCRATCHPAD_MEM_ADDRESS, SCRATCHPAD_MEM_VALUE) mem;
-
-    // Initialize a port, requesting an allocation of allocLastWordIdx + 1
-    // SCRATCHPAD_MEM_VALUE sized words.
-    method ActionValue#(Bool) init(SCRATCHPAD_MEM_ADDRESS allocLastWordIdx);
-endinterface: SCRATCHPAD_MEMORY_PORT
-
-//
-// A scratchpad interface has one memory interface for each client.  Using
-// a vector of MEMORY_IFCs instead of adding a port parameter to a
-// MEMORY_IFC-like interface makes the scratchpad interchangeable with
-// other memories in the clients.
-//
-interface SCRATCHPAD_MEMORY_VIRTUAL_DEVICE;
-    interface Vector#(SCRATCHPAD_N_CLIENTS, SCRATCHPAD_MEMORY_PORT) ports;
-endinterface: SCRATCHPAD_MEMORY_VIRTUAL_DEVICE
-
+`include "asim/provides/scratchpad_memory_interface.bsh"
 
 
 //

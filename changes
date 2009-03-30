@@ -5472,3 +5472,37 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/uni
   possible problem I can think of with a timeout of 0 is with simulation on
   uniprocessors.  On a uniprocessor, Bluesim make take a while to yield to the
   host thread when the model is stuck waiting for a message from the host.
+
+----------
+mcadler     Date: Mon Mar 30 16:44:04 EDT 2009  CSN: CSN-platforms-183
+                  Mon Mar 30 20:44:04 UTC 2009
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ hasim-fpgaenv-xup.apm     Locally Modified          181 
+ fpgaenv-htg-hwonly.apm    Locally Modified          181 
+ hasim-fpgaenv-hybrid-sim.apm Locally Modified          182 
+ hasim-fpgaenv-htg-v5-pcie.apm Locally Modified          182 
+ hasim-fpgaenv-null.apm    Locally Modified          181 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-mem-scratch.awb    Locally Modified          182 
+ hybrid-mem-scratch.bsv    Locally Modified          182 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/local
+ local-mem-scratch.awb     Locally Modified          182 
+ local-mem-scratch.bsv     Locally Modified          181 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/interface
+ scratchpad-interface.awb  Locally Added               0 
+ scratchpad-interface.bsh  Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory
+ interface/                Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/low-level-platform-interface/local-mem
+ local-mem-bram.bsv        Locally Modified          181 
+
+Move the scratchpad memory virtual device interface to a separate module in
+an attempt to force all scratchpad implementations to conform to the same
+interface.

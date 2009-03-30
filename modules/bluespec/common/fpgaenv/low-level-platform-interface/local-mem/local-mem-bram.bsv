@@ -36,6 +36,7 @@
 //
 
 import FIFO::*;
+import FIFOF::*;
 import Vector::*;
 
 `include "asim/provides/librl_bsv_base.bsh"
@@ -74,7 +75,7 @@ module mkLocalMem#(PHYSICAL_DRIVERS drivers)
     Vector#(LOCAL_MEM_WORDS_PER_LINE, BRAM#(LOCAL_MEM_LINE_ADDR, LOCAL_MEM_WORD)) mem <- replicateM(mkBRAM());
 
     // Record read requests (either full line or a word index)
-    FIFO#(READ_REQ) readReqQ <- mkSizedFIFO(4);
+    FIFOF#(READ_REQ) readReqQ <- mkSizedFIFOF(4);
 
     //
     // Count cycle for imposing delay
@@ -146,12 +147,17 @@ module mkLocalMem#(PHYSICAL_DRIVERS drivers)
     endmethod
 
 
-    method Action writeWord(LOCAL_MEM_ADDR addr, LOCAL_MEM_WORD data);
+    //
+    // write methods are predicated with readReqQ.notFull() to ensure
+    // synchronization of read and write requests.
+    //
+
+    method Action writeWord(LOCAL_MEM_ADDR addr, LOCAL_MEM_WORD data) if (readReqQ.notFull());
         match {.l_addr, .w_idx} = localMemBurstAddr(addr);
         mem[w_idx].write(l_addr, data);
     endmethod
 
-    method Action writeLine(LOCAL_MEM_ADDR addr, LOCAL_MEM_LINE data);
+    method Action writeLine(LOCAL_MEM_ADDR addr, LOCAL_MEM_LINE data) if (readReqQ.notFull());
         match {.l_addr, .w_idx} = localMemBurstAddr(addr);
 
         Vector#(LOCAL_MEM_WORDS_PER_LINE, LOCAL_MEM_WORD) l_data = unpack(data);
