@@ -5431,3 +5431,44 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-ch
  pcie-physical-channel.bsv Locally Modified          180 
 
 Small performance optimization for PCIe CSR-Based Physical Channel
+
+----------
+mcadler     Date: Mon Mar 30 13:48:38 EDT 2009  CSN: CSN-platforms-182
+                  Mon Mar 30 17:48:38 UTC 2009
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ hasim-fpgaenv-hybrid-sim.apm Locally Modified          181 
+ hasim-fpgaenv-htg-v5-pcie.apm Locally Modified          181 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-memory.awb         Locally Removed           181 
+ hybrid-memory.bsv         Locally Removed           181 
+ hybrid-mem-scratch.cpp    Locally Added               - 
+ hybrid-mem-scratch.rrr    Locally Added               - 
+ hybrid-memory.cpp         Locally Removed           181 
+ hybrid-mem-scratch.h      Locally Added               - 
+ vmh-utils.cpp             Locally Removed           181 
+ hybrid-mem-scratch.awb    Locally Added               - 
+ hybrid-memory.rrr         Locally Removed           181 
+ hybrid-mem-scratch.bsv    Locally Added               - 
+ hybrid-memory-datatypes.bsv Locally Removed           181 
+ hybrid-memory.h           Locally Removed           181 
+ vmh-utils.h               Locally Removed           181 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/local
+ local-mem-scratch.awb     Locally Modified          181 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe
+ unix-pipe-device-bdpi.h   Locally Modified          181 
+
+- Modify hybrid scratchpad to conform to new interface.  Scratchpad memory now
+  uses the hybrid version, though it is quite slow.  Caches (coming soon) will
+  make it more efficient.
+
+- Change the timeout to 0 for the select() waiting for a message from the host
+  in simulation mode.  Non-0 waits were causing extremely slow simulation during
+  regions with no messages, such as initializing a large BRAM.  The only
+  possible problem I can think of with a timeout of 0 is with simulation on
+  uniprocessors.  On a uniprocessor, Bluesim make take a while to yield to the
+  host thread when the model is stuck waiting for a message from the host.

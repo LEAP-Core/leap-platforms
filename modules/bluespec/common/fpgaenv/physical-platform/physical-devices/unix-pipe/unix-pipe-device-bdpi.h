@@ -16,7 +16,7 @@
 #define DESC_HOST_2_FPGA  100
 #define DESC_FPGA_2_HOST  101
 #define BLOCK_SIZE        4
-#define SELECT_TIMEOUT    1000
+#define SELECT_TIMEOUT    0
 
 typedef struct _Channel
 {

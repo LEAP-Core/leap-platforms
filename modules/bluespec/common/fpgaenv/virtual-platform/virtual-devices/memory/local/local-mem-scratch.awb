@@ -1,5 +1,5 @@
-%name Scratchpad Memory Device Using Local Memory
-%desc Scratchpad Memory Device Using Local Memory
+%name Local Memory Scratchpad Memory Device
+%desc Local Memory Scratchpad Memory Device
 
 %provides scratchpad_memory
 

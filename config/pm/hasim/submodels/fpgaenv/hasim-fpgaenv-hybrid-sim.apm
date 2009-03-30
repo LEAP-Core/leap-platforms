@@ -45,7 +45,7 @@ Packagehint=platforms
 [Standard Virtual Devices/Requires]
 front_panel=Hybrid Front Panel
 streams=Hybrid Streams
-scratchpad_memory=Scratchpad Memory Device Using Local Memory
+scratchpad_memory=Hybrid Scratchpad Memory Device
 
 [Hybrid Streams]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/streams/hybrid-streams.awb
@@ -96,16 +96,15 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/physical-platform/debuggers/null/null-debugger.awb
 Packagehint=platforms
 
-
 [Local Memory Interface using BRAM]
 File=modules/bluespec/common/fpgaenv/low-level-platform-interface/local-mem/local-mem-bram.awb
-Packagehint=platforms
-
-[Scratchpad Memory Device Using Local Memory]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/local/local-mem-scratch.awb
 Packagehint=platforms
 
 
 [RL Bluespec Library]
 File=config/pm/hasim/submodels/fpgaenv/librl-bsv.apm
+Packagehint=platforms
+
+[Hybrid Scratchpad Memory Device]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid/hybrid-mem-scratch.awb
 Packagehint=platforms

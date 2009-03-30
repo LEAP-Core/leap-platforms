@@ -41,7 +41,7 @@ Packagehint=platforms
 [Standard Virtual Devices/Requires]
 front_panel=Hybrid Front Panel
 streams=Hybrid Streams
-scratchpad_memory=Scratchpad Memory Device Using Local Memory
+scratchpad_memory=Hybrid Scratchpad Memory Device
 
 [HTG Virtex 5 PCIE Enabled]
 File=modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled/htg-v5-pcie-enabled.awb
@@ -118,15 +118,15 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr2-sdram/ddr2-sdram-device.awb
 Packagehint=platforms
 
-
 [Local Memory Interface using DDR2 Memory]
 File=modules/bluespec/common/fpgaenv/low-level-platform-interface/local-mem/local-mem-ddr2.awb
 Packagehint=platforms
 
-[Scratchpad Memory Device Using Local Memory]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/local/local-mem-scratch.awb
-Packagehint=platforms
 
 [RL Bluespec Library]
 File=config/pm/hasim/submodels/fpgaenv/librl-bsv.apm
+Packagehint=platforms
+
+[Hybrid Scratchpad Memory Device]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid/hybrid-mem-scratch.awb
 Packagehint=platforms

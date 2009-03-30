@@ -1,0 +1,40 @@
+#include "asim/provides/scratchpad_memory.h"
+
+// ***
+// For now fix the data size at 64 bits until the RRR type system is more flexible.
+// ***
+
+service SCRATCHPAD_MEMORY
+{
+    server sw (cpp, method) <- hw (bsv, connection)
+    {
+        // Request regionWords scratchpad words for scratchpad region regionID.
+        method InitRegion (in UINT32[32] regionID, in UINT32[32] regionEndIdx);
+
+        //
+        // Load 4 values (a line of the scratchpad).  The address is the
+        // concatenation of the scratchpad region ID and the word-address of
+        // the data.  The word-address must be a multiple of 4 (word-aligned).
+        //
+        // The data field names count down to Bluespec vector indexing matches
+        // the field order when the return value is converted to a vector.
+        //
+        method Load (in UINT64[64] addr,
+                     out UINT64[64] data3,
+                     out UINT64[64] data2,
+                     out UINT64[64] data1,
+                     out UINT64[64] data0);
+
+        //
+        // Address requirements are the same as load.
+        //
+        method Store (in UINT64[64] addr,
+                      in UINT64[64] data3,
+                      in UINT64[64] data2,
+                      in UINT64[64] data1,
+                      in UINT64[64] data0);
+
+        method StoreWord (in UINT64[64] addr,
+                          in UINT64[64] data);
+    };
+};
