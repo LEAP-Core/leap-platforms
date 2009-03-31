@@ -5506,3 +5506,39 @@ Directory modules/bluespec/common/fpgaenv/low-level-platform-interface/local-mem
 Move the scratchpad memory virtual device interface to a separate module in
 an attempt to force all scratchpad implementations to conform to the same
 interface.
+
+----------
+mcadler     Date: Mon Mar 30 20:44:30 EDT 2009  CSN: CSN-platforms-184
+                  Tue Mar 31 00:44:30 UTC 2009
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ hasim-fpgaenv-xup.apm     Locally Modified          183 
+ fpgaenv-htg-hwonly.apm    Locally Modified          183 
+ hasim-fpgaenv-hybrid-sim.apm Locally Modified          183 
+ hasim-fpgaenv-htg-v5-pcie.apm Locally Modified          183 
+ hasim-fpgaenv-null.apm    Locally Modified          183 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-mem-scratch.awb    Locally Modified          183 
+ hybrid-mem-scratch.bsv    Locally Modified          183 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/local
+ local-mem-scratch.awb     Locally Modified          183 
+ local-mem-scratch.bsv     Locally Modified          183 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/interface
+ scratchpad-interface.awb  Locally Removed           183 
+ scratchpad-interface.bsh  Locally Removed           183 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory
+ interface/                Locally Removed           183 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices
+ std-virtual-device-interfaces.bsv Locally Added               0 
+ std-virtual-devices.awb   Locally Modified          182 
+
+Do what I should have done last time:  define a polymorphic scratchpad
+interface at the root of the virtual devices.  Other virtual devices are free
+to do the same.  Virtual devices can thus define standard interfaces without
+resorting to multiple levels of awb dependence.

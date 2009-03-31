@@ -7,3 +7,4 @@
 %requires front_panel scratchpad_memory streams
 
 %public std-virtual-devices.dic
+%public std-virtual-device-interfaces.bsv

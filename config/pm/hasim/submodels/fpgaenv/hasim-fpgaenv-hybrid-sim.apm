@@ -104,14 +104,6 @@ Packagehint=platforms
 File=config/pm/hasim/submodels/fpgaenv/librl-bsv.apm
 Packagehint=platforms
 
-[Scratchpad Memory Interface]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/interface/scratchpad-interface.awb
-Packagehint=platforms
-
-
-
-[Hybrid Scratchpad Memory Device/Requires]
-scratchpad_memory_interface=Scratchpad Memory Interface
 
 [Hybrid Scratchpad Memory Device]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid/hybrid-mem-scratch.awb

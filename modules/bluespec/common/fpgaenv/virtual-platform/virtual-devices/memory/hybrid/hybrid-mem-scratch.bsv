@@ -29,22 +29,10 @@ import Vector::*;
 `include "asim/provides/low_level_platform_interface.bsh"
 `include "asim/provides/local_mem.bsh"
 `include "asim/provides/physical_platform.bsh"
+`include "asim/provides/virtual_devices.bsh"
 `include "asim/provides/fpga_components.bsh"
 
 `include "asim/rrr/remote_client_stub_SCRATCHPAD_MEMORY.bsh"
-`include "asim/dict/VDEV.bsh"
-
-//
-// Compute the clients of scratchpad memory.  Clients register by adding entries
-// to the VDEV.SCRATCH dictionary.
-//
-
-`ifndef VDEV_SCRATCH__NENTRIES
-// No clients.
-`define VDEV_SCRATCH__NENTRIES 0
-`endif
-
-typedef `VDEV_SCRATCH__NENTRIES SCRATCHPAD_N_CLIENTS;
 
 
 //
@@ -63,12 +51,8 @@ typedef Bit#(TLog#(SCRATCHPAD_WORDS_PER_LINE)) SCRATCHPAD_WORD_IDX;
 // Host scratchpad addresses are 64 bits
 typedef Bit#(64) HOST_SCRATCHPAD_ADDR;
 
-//
-// Now that the address and value sizes are defined the common interface
-// definition can be included.
-//
-`include "asim/provides/scratchpad_memory_interface.bsh"
-
+typedef SCRATCHPAD_MEMORY_VIRTUAL_DEVICE#(SCRATCHPAD_MEM_ADDRESS, SCRATCHPAD_MEM_VALUE) SCRATCHPAD_MEMORY_IFC;
+typedef SCRATCHPAD_MEMORY_PORT#(SCRATCHPAD_MEM_ADDRESS, SCRATCHPAD_MEM_VALUE) SCRATCHPAD_MEMORY_PORT_IFC;
 
 //
 // mkMemoryVirtualDevice --
@@ -76,7 +60,7 @@ typedef Bit#(64) HOST_SCRATCHPAD_ADDR;
 //
 module [HASIM_MODULE] mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi)
     // interface:
-    (SCRATCHPAD_MEMORY_VIRTUAL_DEVICE)
+    (SCRATCHPAD_MEMORY_IFC)
     provisos (Bits#(SCRATCHPAD_MEM_ADDRESS, t_SCRATCHPAD_MEM_ADDRESS_SZ),
 
               // Storage breaks with 0-sized index
@@ -118,7 +102,7 @@ module [HASIM_MODULE] mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi)
     //
     // Allocate the memory interfaces.
     //
-    Vector#(SCRATCHPAD_N_CLIENTS, SCRATCHPAD_MEMORY_PORT) portsLocal = newVector();
+    Vector#(SCRATCHPAD_N_CLIENTS, SCRATCHPAD_MEMORY_PORT_IFC) portsLocal = newVector();
     
     for (Integer p = 0; p < valueOf(SCRATCHPAD_N_CLIENTS); p = p + 1)
     begin

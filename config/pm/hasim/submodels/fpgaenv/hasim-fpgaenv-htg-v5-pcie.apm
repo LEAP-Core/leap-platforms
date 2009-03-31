@@ -130,9 +130,4 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid/hybrid-mem-scratch.awb
 Packagehint=platforms
 
-[Hybrid Scratchpad Memory Device/Requires]
-scratchpad_memory_interface=Scratchpad Memory Interface
 
-[Scratchpad Memory Interface]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/interface/scratchpad-interface.awb
-Packagehint=platforms

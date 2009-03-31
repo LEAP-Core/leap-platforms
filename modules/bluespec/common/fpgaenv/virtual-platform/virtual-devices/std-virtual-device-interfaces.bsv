@@ -17,20 +17,44 @@
 //
 
 //
-// Common definition of the interface to a scratchpad virtual device.
+// Common definition of the interfaces to virtual devices.
 //
+
+import Vector::*;
+
+`include "asim/provides/librl_bsv_base.bsh"
+
+// ========================================================================
+//
+// Scratchpad memory
+//
+// ========================================================================
+
+`include "asim/dict/VDEV.bsh"
+
+//
+// Compute the clients of scratchpad memory.  Clients register by adding entries
+// to the VDEV.SCRATCH dictionary.
+//
+
+`ifndef VDEV_SCRATCH__NENTRIES
+// No clients.
+`define VDEV_SCRATCH__NENTRIES 0
+`endif
+
+typedef `VDEV_SCRATCH__NENTRIES SCRATCHPAD_N_CLIENTS;
 
 //
 // Interface to a single scratchpad port.  By having separate ports defined
 // for each scratchpad, instead of adding a port argument to the methods,
 // this module is capable of defining the relative priority of the ports.
 //
-interface SCRATCHPAD_MEMORY_PORT;
-    interface MEMORY_IFC#(SCRATCHPAD_MEM_ADDRESS, SCRATCHPAD_MEM_VALUE) mem;
+interface SCRATCHPAD_MEMORY_PORT#(type t_ADDR, type t_DATA);
+    interface MEMORY_IFC#(t_ADDR, t_DATA) mem;
 
     // Initialize a port, requesting an allocation of allocLastWordIdx + 1
     // SCRATCHPAD_MEM_VALUE sized words.
-    method ActionValue#(Bool) init(SCRATCHPAD_MEM_ADDRESS allocLastWordIdx);
+    method ActionValue#(Bool) init(t_ADDR allocLastWordIdx);
 endinterface: SCRATCHPAD_MEMORY_PORT
 
 //
@@ -39,6 +63,6 @@ endinterface: SCRATCHPAD_MEMORY_PORT
 // MEMORY_IFC-like interface makes the scratchpad interchangeable with
 // other memories in the clients.
 //
-interface SCRATCHPAD_MEMORY_VIRTUAL_DEVICE;
-    interface Vector#(SCRATCHPAD_N_CLIENTS, SCRATCHPAD_MEMORY_PORT) ports;
+interface SCRATCHPAD_MEMORY_VIRTUAL_DEVICE#(type t_ADDR, type t_DATA);
+    interface Vector#(SCRATCHPAD_N_CLIENTS, SCRATCHPAD_MEMORY_PORT#(t_ADDR, t_DATA)) ports;
 endinterface: SCRATCHPAD_MEMORY_VIRTUAL_DEVICE

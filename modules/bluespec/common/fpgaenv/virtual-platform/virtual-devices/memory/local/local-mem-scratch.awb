@@ -2,7 +2,6 @@
 %desc Local Memory Scratchpad Memory Device
 
 %provides scratchpad_memory
-%requires scratchpad_memory_interface
 
 %public local-mem-scratch.bsv
 

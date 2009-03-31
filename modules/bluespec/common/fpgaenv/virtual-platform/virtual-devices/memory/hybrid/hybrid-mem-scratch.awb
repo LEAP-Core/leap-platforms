@@ -2,7 +2,6 @@
 %desc Hybrid Scratchpad Memory Device
 
 %provides scratchpad_memory
-%requires scratchpad_memory_interface
 
 %public   hybrid-mem-scratch.bsv
 %private  hybrid-mem-scratch.cpp

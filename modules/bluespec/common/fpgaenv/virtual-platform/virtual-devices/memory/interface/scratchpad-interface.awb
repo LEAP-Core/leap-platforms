@@ -1,6 +1,0 @@
-%name Scratchpad Memory Interface
-%desc Scratchpad Memory Interface
-
-%provides scratchpad_memory_interface
-
-%public scratchpad-interface.bsh
