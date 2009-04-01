@@ -5542,3 +5542,28 @@ Do what I should have done last time:  define a polymorphic scratchpad
 interface at the root of the virtual devices.  Other virtual devices are free
 to do the same.  Virtual devices can thus define standard interfaces without
 resorting to multiple levels of awb dependence.
+
+----------
+mcadler     Date: Wed Apr  1 15:52:21 EDT 2009  CSN: CSN-platforms-185
+                  Wed Apr  1 19:52:21 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ lutram.bsv                Locally Modified          183 
+ software-fpga-components.awb Locally Modified          183 
+ hardware-fpga-components.awb Locally Modified          183 
+ lutram.v                  Locally Added               0 
+
+Directory modules/bluespec/librl/base
+ bluespec-common.prj       Locally Modified          183 
+
+Implement the solution suggested by Xilinx for the Xst bug that incorrectly
+assigns some RegFiles to BRAM instead of LUTs:  add a "ram_style = distributed"
+pragma to the Verilog, forcing the storage to LUTs.  Instead of modifying
+RegFile.v in the Bluespec tree I removed the reference to RegFile.v in
+the list of Verilog modules included from Bluespec.  The new module,
+lutram.v, is just a copy of Bluespec's Regfile.v with the pragma added.
+
+Removed the previous work-around in lutram.bsv that mapped N-wide RegFiles
+into N concatenated 1-bit RegFiles.  That code generated nearly identical
+results in Xilinx tools but compiled much more slowly in Bluespec.

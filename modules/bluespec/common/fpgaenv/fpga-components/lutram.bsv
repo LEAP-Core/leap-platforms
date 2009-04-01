@@ -40,10 +40,10 @@ interface LUTRAM#(type index_t, type data_t);
 endinterface: LUTRAM
 
 //
-// Internal only --
-//   RegFile version of mkLUTRAMU.  Uses LUT registers for storage.
+// mkLUTRAMU --
+//   Uninitialized version of LUTRAM, implemented with a RegFile.
 //
-module mkLUTRAMU_RegFile
+module mkLUTRAMU
     // interface:
         (LUTRAM#(index_t, data_t))
     provisos(Bits#(data_t, data_SZ),
@@ -63,88 +63,6 @@ module mkLUTRAMU_RegFile
     method data_t sub(index_t addr);
         return mem.sub(addr);
     endmethod
-
-endmodule
-
-
-//
-// Internal only --
-//   LUTRAMU_Vector is used when LUT registers don't work due to bugs.
-//
-//   Xilinx seems to have bugs with Verilog registers that look almost like
-//   block RAM but have readers needing results in the same cycle when the
-//   data size is greater than 1 bit.  This function breaks down a larger
-//   data type into separate 1 bit arrays and spreads the bits for the data
-//   across multiple arrays.  We thus get nearly the same storage efficiency
-//   with some extra logic for moving data.
-//
-module mkLUTRAMU_Vector
-    // interface:
-        (LUTRAM#(index_t, data_t))
-    provisos(Bits#(data_t, data_SZ),
-             Bits#(index_t, index_SZ),
-             Bounded#(index_t));
-
-    Vector#(data_SZ, RegFile#(index_t, Bit#(1))) mem <- replicateM(mkRegFileWCF(minBound, maxBound));
-
-    //
-    // Access methods
-    //
-
-    method Action upd(index_t addr, data_t d);
-        Bit#(data_SZ) r = pack(d);
-
-        for (Integer x = 0; x < valueOf(data_SZ); x = x + 1)
-        begin
-            mem[x].upd(addr, r[x]);
-        end
-    endmethod
-
-    method data_t sub(index_t addr);
-        Bit#(data_SZ) r = 0;
-
-        for (Integer x = 0; x < valueOf(data_SZ); x = x + 1)
-        begin
-            r[x] = mem[x].sub(addr);
-        end
-
-        return unpack(r);
-    endmethod
-
-endmodule
-
-
-//
-// mkLUTRAMU -- pick either the hardware or the simulated version of LUTRAMU.
-//
-module mkLUTRAMU
-    // interface:
-        (LUTRAM#(index_t, data_t))
-    provisos(Bits#(data_t, data_SZ),
-             Bits#(index_t, index_SZ),
-             Bounded#(index_t));
-
-    LUTRAM#(index_t, data_t) mem;
-
-    //
-    // RegFile and Vector versions have the same timing, so we always use the
-    // RegFile version for simulation since it compiles more quickly.
-    //
-
-    Bool use_regfile = True;
-
-    `ifdef SYNTH
-    if (valueOf(data_SZ) > 1)
-    begin
-        // Use vector of regs for large structures.  There is a bug in Xilinx
-        // tools.  See the comment on mkLUTRAMU_Vector().
-        use_regfile = False;
-    end
-    `endif
-
-    mem <- use_regfile ? mkLUTRAMU_RegFile() : mkLUTRAMU_Vector();
-
-    return mem;
 
 endmodule
 
