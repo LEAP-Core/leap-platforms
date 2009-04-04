@@ -5567,3 +5567,42 @@ lutram.v, is just a copy of Bluespec's Regfile.v with the pragma added.
 Removed the previous work-around in lutram.bsv that mapped N-wide RegFiles
 into N concatenated 1-bit RegFiles.  That code generated nearly identical
 results in Xilinx tools but compiled much more slowly in Bluespec.
+
+----------
+mcadler     Date: Sat Apr  4 10:21:58 EDT 2009  CSN: CSN-platforms-186
+                  Sat Apr  4 14:21:58 UTC 2009
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-htg-hwonly.apm    Locally Modified          185 
+ hasim-fpgaenv-hybrid-sim.apm Locally Modified          185 
+ hasim-fpgaenv-htg-v5-pcie.apm Locally Modified          185 
+ hasim-fpgaenv-null.apm    Locally Modified          185 
+ hasim-fpgaenv-xup.apm     Locally Modified          185 
+
+Directory modules/bluespec/librl/storage/cache
+ fpga-set-assoc-cache.bsv  Locally Modified          185 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices
+ std-virtual-device-interfaces.bsv Locally Modified          185 
+ std-virtual-devices.awb   Locally Modified          185 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-mem-scratch.dic    Locally Added               0 
+ hybrid-mem-scratch.cpp    Locally Modified          185 
+ hybrid-mem-scratch.rrr    Locally Modified          185 
+ hybrid-mem-scratch.h      Locally Modified          185 
+ hybrid-mem-scratch.awb    Locally Modified          185 
+ hybrid-mem-scratch.bsv    Locally Modified          185 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices
+ central-cache/            Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/central-cache
+ central-cache-backing-store.bsv Locally Added               0 
+ null-central-cache.awb    Locally Added               0 
+ null-central-cache.bsv    Locally Added               0 
+
+- Add a central cache definition.  Only a NULL central cache is implemented, though
+  even a NULL central cache needs to route requests to the backing storage.
+- Hybrid memory requests now go to the central cache.

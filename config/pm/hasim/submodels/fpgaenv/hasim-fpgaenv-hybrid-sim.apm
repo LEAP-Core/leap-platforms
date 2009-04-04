@@ -46,6 +46,7 @@ Packagehint=platforms
 front_panel=Hybrid Front Panel
 streams=Hybrid Streams
 scratchpad_memory=Hybrid Scratchpad Memory Device
+central_cache=NULL Central Cache
 
 [Hybrid Streams]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/streams/hybrid-streams.awb
@@ -104,7 +105,10 @@ Packagehint=platforms
 File=config/pm/hasim/submodels/fpgaenv/librl-bsv.apm
 Packagehint=platforms
 
-
 [Hybrid Scratchpad Memory Device]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid/hybrid-mem-scratch.awb
+Packagehint=platforms
+
+[NULL Central Cache]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/central-cache/null-central-cache.awb
 Packagehint=platforms

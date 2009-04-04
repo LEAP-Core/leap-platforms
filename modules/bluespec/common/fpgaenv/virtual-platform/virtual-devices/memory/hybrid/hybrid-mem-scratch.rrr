@@ -26,9 +26,14 @@ service SCRATCHPAD_MEMORY
                      out UINT64[64] data0);
 
         //
-        // Address requirements are the same as load.
+        // Store --
+        //     wordMask indicates which data elements are valid and should be
+        //     written.  Bit 0 of wordMask corresponds to data0.
+        //
+        //     Address requirements are the same as load.
         //
         method Store (in UINT64[64] addr,
+                      in UINT8[8] wordMask,
                       in UINT64[64] data3,
                       in UINT64[64] data2,
                       in UINT64[64] data1,

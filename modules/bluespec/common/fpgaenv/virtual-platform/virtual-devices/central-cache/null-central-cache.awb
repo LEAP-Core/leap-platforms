@@ -1,0 +1,7 @@
+%name NULL Central Cache
+%desc NULL Central Cache
+
+%provides central_cache
+
+%public null-central-cache.bsv
+%public central-cache-backing-store.bsv

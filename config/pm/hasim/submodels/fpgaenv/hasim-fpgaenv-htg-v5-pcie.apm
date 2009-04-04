@@ -42,6 +42,7 @@ Packagehint=platforms
 front_panel=Hybrid Front Panel
 streams=Hybrid Streams
 scratchpad_memory=Hybrid Scratchpad Memory Device
+central_cache=NULL Central Cache
 
 [HTG Virtex 5 PCIE Enabled]
 File=modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled/htg-v5-pcie-enabled.awb
@@ -131,3 +132,6 @@ File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hyb
 Packagehint=platforms
 
 
+[NULL Central Cache]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/central-cache/null-central-cache.awb
+Packagehint=platforms

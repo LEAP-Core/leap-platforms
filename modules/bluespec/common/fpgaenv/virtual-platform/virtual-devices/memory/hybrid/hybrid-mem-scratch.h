@@ -93,6 +93,7 @@ class SCRATCHPAD_MEMORY_SERVER_CLASS: public RRR_SERVER_CLASS,
 
     void Store(
         SCRATCHPAD_MEMORY_ADDR addr,
+        UINT8 wordMask,
         SCRATCHPAD_MEMORY_WORD data0,
         SCRATCHPAD_MEMORY_WORD data1,
         SCRATCHPAD_MEMORY_WORD data2,

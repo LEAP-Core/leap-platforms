@@ -58,13 +58,13 @@ typedef struct
 {
     // Not all returned words are guaranteed, so they are protected by Maybe#().
     // The requested word is guaranteed valid.
-    Vector#(nWriteDataWordsPerLine, Maybe#(t_CACHE_WORD)) words;
+    Vector#(nWordsPerLine, Maybe#(t_CACHE_WORD)) words;
     t_CACHE_ADDR addr;
     t_CACHE_REF_INFO refInfo;
 }
 HASIM_CACHE_LOAD_RESP#(type t_CACHE_ADDR,
                        type t_CACHE_WORD,
-                       numeric type nWriteDataWordsPerLine,
+                       numeric type nWordsPerLine,
                        type t_CACHE_REF_INFO)
     deriving (Eq, Bits);
 
@@ -81,7 +81,7 @@ HASIM_CACHE_LOAD_RESP#(type t_CACHE_ADDR,
 interface HASIM_CACHE#(type t_CACHE_ADDR,
                        type t_CACHE_LINE,
                        type t_CACHE_WORD,
-                       numeric type nWriteDataWordsPerLine,
+                       numeric type nWordsPerLine,
                        type t_CACHE_REF_INFO,
                        numeric type nSets,
                        numeric type nWays,
@@ -92,10 +92,10 @@ interface HASIM_CACHE#(type t_CACHE_ADDR,
     // word in the line.  If more of the line is already available it will
     // be returned as well.
     method Action readReq(t_CACHE_ADDR addr,
-                          Bit#(TLog#(nWriteDataWordsPerLine)) wordIdx,
+                          Bit#(TLog#(nWordsPerLine)) wordIdx,
                           t_CACHE_REF_INFO refInfo);
 
-    method ActionValue#(HASIM_CACHE_LOAD_RESP#(t_CACHE_ADDR, t_CACHE_WORD, nWriteDataWordsPerLine, t_CACHE_REF_INFO)) readResp();
+    method ActionValue#(HASIM_CACHE_LOAD_RESP#(t_CACHE_ADDR, t_CACHE_WORD, nWordsPerLine, t_CACHE_REF_INFO)) readResp();
 
     // Predicate to test whether a read response is ready this cycle.
     method Bool readRespReady();
@@ -105,7 +105,7 @@ interface HASIM_CACHE#(type t_CACHE_ADDR,
     // low bits of a cache line.
     method Action write(t_CACHE_ADDR addr,
                         t_CACHE_WORD val,
-                        Bit#(TLog#(nWriteDataWordsPerLine)) wordIdx,
+                        Bit#(TLog#(nWordsPerLine)) wordIdx,
                         t_CACHE_REF_INFO refInfo);
     
     // Invalidate & flush requests.  Both write dirty lines back.  Invalidate drops
@@ -138,7 +138,7 @@ endinterface: HASIM_CACHE
 //
 interface HASIM_CACHE_SOURCE_DATA#(type t_CACHE_ADDR,
                                    type t_CACHE_LINE,
-                                   numeric type nWriteDataWordsPerLine,
+                                   numeric type nWordsPerLine,
                                    type t_CACHE_REF_INFO);
 
     // Read request and response with data
@@ -147,13 +147,13 @@ interface HASIM_CACHE_SOURCE_DATA#(type t_CACHE_ADDR,
     
     // Asynchronous write (no response)
     method Action write(t_CACHE_ADDR addr,
-                        Vector#(nWriteDataWordsPerLine, Bool) wordValidMask,
+                        Vector#(nWordsPerLine, Bool) wordValidMask,
                         t_CACHE_LINE val,
                         t_CACHE_REF_INFO refInfo);
     
     // Synchronous write.  writeSyncWait() blocks until the response arrives.
     method Action writeSyncReq(t_CACHE_ADDR addr,
-                               Vector#(nWriteDataWordsPerLine, Bool) wordValidMask,
+                               Vector#(nWordsPerLine, Bool) wordValidMask,
                                t_CACHE_LINE val,
                                t_CACHE_REF_INFO refInfo);
     method Action writeSyncWait();
@@ -222,9 +222,9 @@ typedef 3 WRITE_DATA_HEAP_IDX_SZ;
 typedef struct
 {
     Bit#(WRITE_DATA_HEAP_IDX_SZ) dataIdx;
-    Bit#(TLog#(nWriteDataWordsPerLine)) wordIdx;
+    Bit#(TLog#(nWordsPerLine)) wordIdx;
 }
-HASIM_CACHE_WRITE_REQ#(numeric type nWriteDataWordsPerLine)
+HASIM_CACHE_WRITE_REQ#(numeric type nWordsPerLine)
     deriving (Eq, Bits);
 
 
@@ -241,9 +241,9 @@ typedef struct
 {
     t_CACHE_TAG tag;
     Bool dirty;
-    Vector#(nWriteDataWordsPerLine, Bool) wordValid;
+    Vector#(nWordsPerLine, Bool) wordValid;
 }
-HASIM_CACHE_METADATA#(type t_CACHE_TAG, numeric type nWriteDataWordsPerLine)
+HASIM_CACHE_METADATA#(type t_CACHE_TAG, numeric type nWordsPerLine)
     deriving(Bits, Eq);
 
 //
@@ -285,10 +285,10 @@ typedef Bit#(TLog#(HASIM_CACHE_MAX_READ)) HASIM_CACHE_READ_FIFO_IDX;
 //
 typedef struct
 {
-    Bit#(TLog#(nWriteDataWordsPerLine)) wordIdx;
+    Bit#(TLog#(nWordsPerLine)) wordIdx;
     HASIM_CACHE_READ_FIFO_IDX readFifoIdx;
 }
-HASIM_CACHE_READ_REQ#(numeric type nWriteDataWordsPerLine)
+HASIM_CACHE_READ_REQ#(numeric type nWordsPerLine)
     deriving (Eq, Bits);
 
 
@@ -317,16 +317,16 @@ HASIM_CACHE_REQ_BASE#(type t_CACHE_TAG,
 typedef union tagged
 {
     // Reads have no extra data (beyond HASIM_CACHE_REQ_BASE above)
-    HASIM_CACHE_READ_REQ#(nWriteDataWordsPerLine) HCOP_READ;
+    HASIM_CACHE_READ_REQ#(nWordsPerLine) HCOP_READ;
 
     // Writes have pointer to data to be written
-    HASIM_CACHE_WRITE_REQ#(nWriteDataWordsPerLine) HCOP_WRITE;
+    HASIM_CACHE_WRITE_REQ#(nWordsPerLine) HCOP_WRITE;
 
     // Inval and flush have a bool indicating whether an ACK is needed
     Maybe#(HASIM_CACHE_INVAL_IDX) HCOP_INVAL;
     Maybe#(HASIM_CACHE_INVAL_IDX) HCOP_FLUSH_DIRTY;
 }
-HASIM_CACHE_REQ#(numeric type nWriteDataWordsPerLine)
+HASIM_CACHE_REQ#(numeric type nWordsPerLine)
     deriving(Bits, Eq);
 
 
@@ -343,12 +343,12 @@ HASIM_CACHE_REQ#(numeric type nWriteDataWordsPerLine)
 //
 // ========================================================================
 
-module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_LINE, nWriteDataWordsPerLine, t_CACHE_REF_INFO) sourceData,
+module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_LINE, nWordsPerLine, t_CACHE_REF_INFO) sourceData,
                         HASIM_CACHE_STATS stats,
                         Bool permitOOOReadResp,
                         DEBUG_FILE debugLog)
     // interface:
-        (HASIM_CACHE#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_LINE, t_CACHE_WORD, nWriteDataWordsPerLine, t_CACHE_REF_INFO, nSets, nWays, nTagExtraLowBits))
+        (HASIM_CACHE#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_LINE, t_CACHE_WORD, nWordsPerLine, t_CACHE_REF_INFO, nSets, nWays, nTagExtraLowBits))
     provisos (Bits#(t_CACHE_LINE, t_CACHE_LINE_SZ),
               Bits#(t_CACHE_REF_INFO, t_CACHE_REF_INFO_SZ),
               Bits#(t_CACHE_WORD, t_CACHE_WORD_SZ),
@@ -360,7 +360,7 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
               Add#(nWays, 0, TExp#(TLog#(nWays))),
 
               // Write word size must tile into cache line
-              Bits#(Vector#(nWriteDataWordsPerLine, t_CACHE_WORD), t_CACHE_LINE_SZ),
+              Bits#(Vector#(nWordsPerLine, t_CACHE_WORD), t_CACHE_LINE_SZ),
 
               // Cache address size must be no larger than 64 bits
               Add#(t_CACHE_ADDR_SZ, a__, 64),
@@ -378,14 +378,14 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
               Alias#(HASIM_CACHE_WAY_IDX#(nWays), t_CACHE_WAY_IDX),
               Alias#(Vector#(nWays, HASIM_CACHE_WAY_IDX#(nWays)), t_LRU_LIST),
               Alias#(HASIM_CACHE_DATA_IDX#(nWays, t_CACHE_SET_IDX), t_CACHE_DATA_IDX),
-              Alias#(HASIM_CACHE_METADATA#(t_CACHE_TAG, nWriteDataWordsPerLine), t_METADATA),
-              Alias#(HASIM_CACHE_LOAD_RESP#(t_CACHE_ADDR, t_CACHE_WORD, nWriteDataWordsPerLine, t_CACHE_REF_INFO), t_CACHE_LOAD_RESP),
-              Alias#(Vector#(nWays, Maybe#(HASIM_CACHE_METADATA#(t_CACHE_TAG, nWriteDataWordsPerLine))), t_METADATA_VECTOR),
+              Alias#(HASIM_CACHE_METADATA#(t_CACHE_TAG, nWordsPerLine), t_METADATA),
+              Alias#(HASIM_CACHE_LOAD_RESP#(t_CACHE_ADDR, t_CACHE_WORD, nWordsPerLine, t_CACHE_REF_INFO), t_CACHE_LOAD_RESP),
+              Alias#(Vector#(nWays, Maybe#(HASIM_CACHE_METADATA#(t_CACHE_TAG, nWordsPerLine))), t_METADATA_VECTOR),
               Alias#(HASIM_CACHE_REQ_BASE#(t_CACHE_TAG, t_CACHE_SET_IDX, t_CACHE_WAY_IDX, t_CACHE_REF_INFO), t_CACHE_REQ_BASE),
-              Alias#(HASIM_CACHE_REQ#(nWriteDataWordsPerLine), t_CACHE_REQ),
-              Alias#(Bit#(TLog#(nWriteDataWordsPerLine)), t_CACHE_WRITE_WORD_IDX),
+              Alias#(HASIM_CACHE_REQ#(nWordsPerLine), t_CACHE_REQ),
+              Alias#(Bit#(TLog#(nWordsPerLine)), t_CACHE_WRITE_WORD_IDX),
               Alias#(HASIM_CACHE_WRITE_INFO#(t_CACHE_WORD, t_CACHE_WRITE_WORD_IDX), t_CACHE_WRITE_INFO),
-              Alias#(Vector#(nWriteDataWordsPerLine, Bool), t_CACHE_WORD_VALID_MASK),
+              Alias#(Vector#(nWordsPerLine, Bool), t_CACHE_WORD_VALID_MASK),
        
               Bits#(t_CACHE_REQ, t_CACHE_REQ_SZ),
 
@@ -402,7 +402,7 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
     BRAM#(t_CACHE_SET_IDX, t_METADATA_VECTOR) cacheMeta <- mkBRAMInitialized(Vector::replicate(tagged Invalid));
 
     // Values
-    Vector#(nWriteDataWordsPerLine, BRAM_MULTI_READ#(4, t_CACHE_DATA_IDX, t_CACHE_WORD)) cacheData <- replicateM(mkBRAMPseudoMultiRead());
+    Vector#(nWordsPerLine, BRAM_MULTI_READ#(4, t_CACHE_DATA_IDX, t_CACHE_WORD)) cacheData <- replicateM(mkBRAMPseudoMultiRead());
 
     // LRU hint
     BRAM#(t_CACHE_SET_IDX, t_LRU_LIST) cacheLRU <- mkBRAMInitialized(Vector::genWith(fromInteger));
@@ -452,7 +452,7 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
     FIFO#(Tuple3#(t_CACHE_REQ_BASE, t_CACHE_REQ, t_CACHE_WORD_VALID_MASK)) fillLineQ <- mkSizedFIFO(16);
 
     // Write data to an allocated queue entry
-    FIFO#(Tuple2#(t_CACHE_REQ_BASE, HASIM_CACHE_WRITE_REQ#(nWriteDataWordsPerLine))) writeDataQ <- mkFIFO();
+    FIFO#(Tuple2#(t_CACHE_REQ_BASE, HASIM_CACHE_WRITE_REQ#(nWordsPerLine))) writeDataQ <- mkFIFO();
 
     // Wait for ACK from backing store that flush was received
     FIFO#(Tuple2#(t_CACHE_SET_IDX, Maybe#(HASIM_CACHE_INVAL_IDX))) flushAckQ <- mkFIFO();
@@ -521,7 +521,7 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
 
     function Action cacheDataReadReq(Integer port, t_CACHE_DATA_IDX idx);
     action
-        for (Integer b = 0; b < valueOf(nWriteDataWordsPerLine); b = b + 1)
+        for (Integer b = 0; b < valueOf(nWordsPerLine); b = b + 1)
         begin
             cacheData[b].readPorts[port].readReq(idx);
         end
@@ -530,8 +530,8 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
 
     function ActionValue#(t_CACHE_LINE) cacheDataReadRsp(Integer port);
     actionvalue
-        Vector#(nWriteDataWordsPerLine, t_CACHE_WORD) lineVal;
-        for (Integer b = 0; b < valueOf(nWriteDataWordsPerLine); b = b + 1)
+        Vector#(nWordsPerLine, t_CACHE_WORD) lineVal;
+        for (Integer b = 0; b < valueOf(nWordsPerLine); b = b + 1)
         begin
             let v <- cacheData[b].readPorts[port].readRsp();
             lineVal[b] = v;
@@ -543,9 +543,9 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
 
     function Action cacheDataWrite(t_CACHE_DATA_IDX idx, t_CACHE_LINE v);
     action
-        Vector#(nWriteDataWordsPerLine, t_CACHE_WORD) lineVal = unpack(pack(v));
+        Vector#(nWordsPerLine, t_CACHE_WORD) lineVal = unpack(pack(v));
 
-        for (Integer b = 0; b < valueOf(nWriteDataWordsPerLine); b = b + 1)
+        for (Integer b = 0; b < valueOf(nWordsPerLine); b = b + 1)
         begin
             cacheData[b].write(idx, lineVal[b]);
         end
@@ -1313,8 +1313,8 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
         // Cache the new values.  Don't overwrite entries that are currently
         // valid, since they may be dirty.
         t_CACHE_WORD_VALID_MASK ret_valid_words;
-        Vector#(nWriteDataWordsPerLine, t_CACHE_WORD) lineWords = unpack(pack(v));
-        for (Integer w = 0; w < valueOf(nWriteDataWordsPerLine); w = w + 1)
+        Vector#(nWordsPerLine, t_CACHE_WORD) lineWords = unpack(pack(v));
+        for (Integer w = 0; w < valueOf(nWordsPerLine); w = w + 1)
         begin
             if (! cur_word_valid_mask[w])
             begin
@@ -1517,7 +1517,7 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
     // readReq -- Read a full line.  Fetch from backing store if not in the cache.
     //
     method Action readReq(t_CACHE_ADDR addr,
-                          Bit#(TLog#(nWriteDataWordsPerLine)) wordIdx,
+                          Bit#(TLog#(nWordsPerLine)) wordIdx,
                           t_CACHE_REF_INFO refInfo) if (curState == HCST_NORMAL);
         //
         // If resonses are supposed to be returned in order than allocate a slot
@@ -1529,7 +1529,7 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
             readIdx <- readRespToClientQ_InOrder.enq();
         end
 
-        HASIM_CACHE_READ_REQ#(nWriteDataWordsPerLine) req;
+        HASIM_CACHE_READ_REQ#(nWordsPerLine) req;
         req.wordIdx = wordIdx;
         req.readFifoIdx = readIdx;
     
@@ -1546,7 +1546,7 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
         // value of permitOOOReadResp.
         //
         t_CACHE_REQ_BASE req_base;
-        Vector#(nWriteDataWordsPerLine, t_CACHE_WORD) value;
+        Vector#(nWordsPerLine, t_CACHE_WORD) value;
         t_CACHE_WORD_VALID_MASK valid_words;    
 
         if (permitOOOReadResp)
@@ -1567,7 +1567,7 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
         end
 
         t_CACHE_LOAD_RESP rsp;
-        for (Integer w = 0; w < valueOf(nWriteDataWordsPerLine); w = w + 1)
+        for (Integer w = 0; w < valueOf(nWordsPerLine); w = w + 1)
             rsp.words[w] = valid_words[w] ? tagged Valid value[w] : tagged Invalid;
         rsp.addr = cacheAddr(req_base.tag, req_base.set);
         rsp.refInfo = req_base.refInfo;
@@ -1592,7 +1592,7 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
         let h <- reqInfo_writeData.malloc();
         reqInfo_writeData.upd(h, w_info);
 
-        HASIM_CACHE_WRITE_REQ#(nWriteDataWordsPerLine) w_req;
+        HASIM_CACHE_WRITE_REQ#(nWordsPerLine) w_req;
         w_req.wordIdx = wordIdx;    
         w_req.dataIdx = h;
 

@@ -42,6 +42,7 @@ Packagehint=platforms
 front_panel=Physical XUP Front Panel
 streams=Simulation Streams
 scratchpad_memory=Local Memory Scratchpad Memory Device
+central_cache=NULL Central Cache
 
 [Physical XUP Front Panel]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/xup/xup-fp.awb
@@ -107,8 +108,11 @@ Packagehint=platforms
 File=config/pm/hasim/submodels/fpgaenv/librl-bsv.apm
 Packagehint=platforms
 
-
 [Local Memory Scratchpad Memory Device]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/local/local-mem-scratch.awb
 Packagehint=platforms
 
+
+[NULL Central Cache]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/central-cache/null-central-cache.awb
+Packagehint=platforms
