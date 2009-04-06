@@ -1052,6 +1052,15 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
 
         debugLog.record($format("  WRITE Word: addr=0x%x, set=0x%x, way=%0d, word=%0d, data=0x%x", debugAddrFromTag(tag, set), set, way, w_req.wordIdx, w_data.val));
 
+        if (! writeBackCache)
+        begin
+            // Send all writes to backing storage if in write-through mode.
+            Vector#(nWordsPerLine, Bool) mask = replicate(False);
+            mask[w_req.wordIdx] = True;
+            Vector#(nWordsPerLine, t_CACHE_WORD) val = replicate(w_data.val);
+            sourceData.write(cacheAddr(tag, set), mask, unpack(pack(val)), req_base.refInfo);
+        end
+
         reqInfo_writeData.free(w_req.dataIdx);
         doneQ.enq(set);
     endrule

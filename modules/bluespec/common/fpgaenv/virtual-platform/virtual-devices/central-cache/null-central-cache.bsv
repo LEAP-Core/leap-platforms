@@ -24,6 +24,7 @@
 
 
 import FIFO::*;
+import FIFOF::*;
 import Vector::*;
 
 `include "asim/provides/librl_bsv_base.bsh"
@@ -42,8 +43,8 @@ module mkCentralCache#(LowLevelPlatformInterface llpi)
     //
     // Internal communication
     //
-    Vector#(CENTRAL_CACHE_N_CLIENTS, FIFO#(Tuple2#(CENTRAL_CACHE_ADDR,
-                                                   CENTRAL_CACHE_REF_INFO))) readQ <- replicateM(mkFIFO());
+    Vector#(CENTRAL_CACHE_N_CLIENTS, FIFOF#(Tuple2#(CENTRAL_CACHE_ADDR,
+                                                    CENTRAL_CACHE_REF_INFO))) readQ <- replicateM(mkFIFOF());
     Vector#(CENTRAL_CACHE_N_CLIENTS, FIFO#(Bool)) invalAckQ <- replicateM(mkFIFO());
 
 
@@ -106,7 +107,7 @@ module mkCentralCache#(LowLevelPlatformInterface llpi)
                 method Action write(CENTRAL_CACHE_ADDR addr,
                                     CENTRAL_CACHE_WORD val,
                                     Bit#(TLog#(CENTRAL_CACHE_WORDS_PER_LINE)) wordIdx,
-                                    CENTRAL_CACHE_REF_INFO refInfo);
+                                    CENTRAL_CACHE_REF_INFO refInfo) if (readQ[p].notFull());
 
                     debugLog.record($format("port %0d: write addr=0x%x, refInfo=0x%x, wIdx=%d, val=0x%x", p, addr, refInfo, wordIdx, val));
 
@@ -156,4 +157,8 @@ module mkCentralCache#(LowLevelPlatformInterface llpi)
     
     interface clientPorts = clientPortsLocal;
     interface backingPorts = backingPortsLocal;
+    
+    method Action init(Bool enableCache, Bool cacheIsWriteBack);
+        noAction;
+    endmethod
 endmodule

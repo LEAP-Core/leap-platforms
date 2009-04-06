@@ -1,0 +1,7 @@
+%name Local Memory Central Cache
+%desc Local Memory Central Cache
+
+%provides central_cache
+
+%public local-mem-central-cache.bsv
+%public central-cache-backing-store.bsv

@@ -5606,3 +5606,27 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/centr
 - Add a central cache definition.  Only a NULL central cache is implemented, though
   even a NULL central cache needs to route requests to the backing storage.
 - Hybrid memory requests now go to the central cache.
+
+----------
+mcadler     Date: Mon Apr  6 07:27:01 EDT 2009  CSN: CSN-platforms-187
+                  Mon Apr  6 11:27:01 UTC 2009
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ hasim-fpgaenv-hybrid-sim.apm Locally Modified          186 
+ hasim-fpgaenv-htg-v5-pcie.apm Locally Modified          186 
+
+Directory modules/bluespec/librl/storage/cache
+ fpga-set-assoc-cache.bsv  Locally Modified          186 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices
+ std-virtual-device-interfaces.bsv Locally Modified          186 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/central-cache
+ local-mem-central-cache.awb Locally Added               0 
+ local-mem-central-cache.bsv Locally Added               0 
+ central-cache-backing-store.bsv Locally Modified          186 
+ null-central-cache.bsv    Locally Modified          186 
+
+Local memory central cache is a set-associative cache.  For now it allocates
+the storage in BRAM.  Using local RAM is next.

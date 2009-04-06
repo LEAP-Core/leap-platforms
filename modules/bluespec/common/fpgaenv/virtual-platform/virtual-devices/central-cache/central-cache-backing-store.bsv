@@ -99,7 +99,7 @@ module mkCentralCacheBackingConnection#(Integer port, DEBUG_FILE debugLog)
             let w = writeQ.first();
             writeQ.deq();
 
-            debugLog.record($format("port %0d: BACKING write addr=0x%x, wMask=0x%x, refInfo=0x%x, ack=%d, val=0x%x", port, w.addr, w.wordValidMask, w.refInfo, w.sendAck, w.val));
+            debugLog.record($format("port %0d: BACKING getWriteReq addr=0x%x, wMask=0x%x, refInfo=0x%x, ack=%d, val=0x%x", port, w.addr, w.wordValidMask, w.refInfo, w.sendAck, w.val));
     
             return w;
         endmethod

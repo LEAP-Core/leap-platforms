@@ -211,4 +211,6 @@ interface CENTRAL_CACHE_VIRTUAL_DEVICE;
 
     interface Vector#(CENTRAL_CACHE_N_CLIENTS,
                       CENTRAL_CACHE_BACKING_PORT) backingPorts;
+
+    method Action init(Bool enableCache, Bool cacheIsWriteBack);
 endinterface: CENTRAL_CACHE_VIRTUAL_DEVICE
