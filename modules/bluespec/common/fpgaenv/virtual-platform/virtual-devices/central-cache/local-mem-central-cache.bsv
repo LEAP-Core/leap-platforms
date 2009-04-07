@@ -22,9 +22,11 @@ import FIFOF::*;
 import Vector::*;
 
 `include "asim/provides/librl_bsv_base.bsh"
+`include "asim/provides/fpga_components.bsh"
 `include "asim/provides/low_level_platform_interface.bsh"
 `include "asim/provides/physical_platform.bsh"
 `include "asim/provides/virtual_devices.bsh"
+`include "asim/provides/local_mem.bsh"
 
 
 typedef CENTRAL_CACHE_VIRTUAL_DEVICE CENTRAL_CACHE_IFC;
@@ -47,8 +49,20 @@ module mkCentralCache#(LowLevelPlatformInterface llpi)
               Add#(t_CENTRAL_CACHE_PORT_ID_SZ, t_CENTRAL_CACHE_ADDR_SZ, t_CENTRAL_CACHE_INTERNAL_ADDR_SZ),
 
               Alias#(Bit#(t_CENTRAL_CACHE_PORT_ID_SZ), t_CENTRAL_CACHE_PORT_ID),
-              Alias#(Tuple2#(t_CENTRAL_CACHE_PORT_ID, CENTRAL_CACHE_ADDR), t_CENTRAL_CACHE_INTERNAL_ADDR));
-    
+              Alias#(Tuple2#(t_CENTRAL_CACHE_PORT_ID, CENTRAL_CACHE_ADDR), t_CENTRAL_CACHE_INTERNAL_ADDR),
+
+              // Compute the number of sets in the cache based on the size of local
+              // memory.  Assumptions:
+              //   - Cache data uses half of the available memory, reserving the
+              //     reset for tags.  In reality tags would take less than 25%
+              //     of the memory, but the current cache algorithm requires the
+              //     number of sets to be a power of 2.
+              //   - 4 ways per set.
+              Alias#(Bit#(TSub#(TSub#(LOCAL_MEM_LINE_ADDR_SZ, 1),  // Half the memory
+                                2)),   // 4 ways per set
+                     t_CENTRAL_CACHE_SET_IDX),
+              Bits#(t_CENTRAL_CACHE_SET_IDX, t_CENTRAL_CACHE_SET_IDX_SZ));
+
     DEBUG_FILE debugLog <- mkDebugFile("memory_central_cache.out");
 
     Reg#(Bool) initialized <- mkReg(False);
@@ -68,7 +82,7 @@ module mkCentralCache#(LowLevelPlatformInterface llpi)
     // The cache talks to a single backing storage interface.  The module allocated
     // here routes cache requests to client ports.
     //
-    HASIM_CACHE_SOURCE_DATA#(Bit#(t_CENTRAL_CACHE_INTERNAL_ADDR_SZ),
+    RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CENTRAL_CACHE_INTERNAL_ADDR_SZ),
                              CENTRAL_CACHE_LINE,
                              CENTRAL_CACHE_WORDS_PER_LINE,
                              CENTRAL_CACHE_REF_INFO) backingConnection <- mkCentralCacheBacking(backingStore);
@@ -77,23 +91,28 @@ module mkCentralCache#(LowLevelPlatformInterface llpi)
     //
     // Internal communication
     //
-    Vector#(CENTRAL_CACHE_N_CLIENTS, FIFOF#(Tuple2#(CENTRAL_CACHE_ADDR,
-                                                    CENTRAL_CACHE_REF_INFO))) readQ <- replicateM(mkFIFOF());
+    Vector#(CENTRAL_CACHE_N_CLIENTS, FIFO#(Tuple2#(CENTRAL_CACHE_ADDR,
+                                                   CENTRAL_CACHE_REF_INFO))) readQ <- replicateM(mkFIFO());
     Vector#(CENTRAL_CACHE_N_CLIENTS, FIFO#(Bool)) invalAckQ <- replicateM(mkFIFO());
 
 
     //
     // The cache
     //
-    HASIM_CACHE_STATS stats <- mkNullHAsimCacheStats();
-    HASIM_CACHE#(Bit#(t_CENTRAL_CACHE_INTERNAL_ADDR_SZ),
-                 CENTRAL_CACHE_LINE,
+    RL_SA_CACHE_STATS stats <- mkNullRLCacheStats();
+
+    RL_SA_CACHE_LOCAL_DATA#(t_CENTRAL_CACHE_INTERNAL_ADDR_SZ,
+                            CENTRAL_CACHE_WORD,
+                            CENTRAL_CACHE_WORDS_PER_LINE,
+                            TExp#(t_CENTRAL_CACHE_SET_IDX_SZ),
+                            4) cacheLocalData <- mkLocalMemCacheData(llpi, debugLog);
+
+    RL_SA_CACHE#(Bit#(t_CENTRAL_CACHE_INTERNAL_ADDR_SZ),
                  CENTRAL_CACHE_WORD,
                  CENTRAL_CACHE_WORDS_PER_LINE,
                  CENTRAL_CACHE_REF_INFO,
-                 256,
-                 4,
                  0) cache <- mkCacheSetAssoc(backingConnection,
+                                             cacheLocalData,
                                              stats,
                                              True,
                                              debugLog);
@@ -195,7 +214,7 @@ module mkCentralCache#(LowLevelPlatformInterface llpi)
                 method Action write(CENTRAL_CACHE_ADDR addr,
                                     CENTRAL_CACHE_WORD val,
                                     Bit#(TLog#(CENTRAL_CACHE_WORDS_PER_LINE)) wordIdx,
-                                    CENTRAL_CACHE_REF_INFO refInfo) if (initialized && readQ[p].notFull());
+                                    CENTRAL_CACHE_REF_INFO refInfo) if (initialized);
 
                     debugLog.record($format("port %0d: write addr=0x%x, refInfo=0x%x, wIdx=%d, val=0x%x", p, addr, refInfo, wordIdx, val));
 
@@ -280,7 +299,7 @@ endmodule
 //
 module mkCentralCacheBacking#(Vector#(CENTRAL_CACHE_N_CLIENTS, CENTRAL_CACHE_BACKING_CONNECTION) backingStore)
     // interface:
-    (HASIM_CACHE_SOURCE_DATA#(Bit#(t_CENTRAL_CACHE_INTERNAL_ADDR_SZ),
+    (RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CENTRAL_CACHE_INTERNAL_ADDR_SZ),
                               CENTRAL_CACHE_LINE,
                               CENTRAL_CACHE_WORDS_PER_LINE,
                               CENTRAL_CACHE_REF_INFO))
@@ -340,4 +359,249 @@ module mkCentralCacheBacking#(Vector#(CENTRAL_CACHE_N_CLIENTS, CENTRAL_CACHE_BAC
         backingStore[writeSyncQ.first()].cacheSourceData.writeSyncWait();
         writeSyncQ.deq();
     endmethod
+endmodule
+
+
+
+// ========================================================================
+//
+// Set associative cache's local memory storage.
+//
+// ========================================================================
+
+
+//
+// mkMultiReaderLocalMem --
+//     Manage multiple, virtual, read ports from the local memory.
+//
+
+interface LOCAL_MEMORY_CACHE_IFC;
+    method Action readLineReq(LOCAL_MEM_ADDR addr);
+    method ActionValue#(LOCAL_MEM_LINE) readLineRsp();
+endinterface: LOCAL_MEMORY_CACHE_IFC
+
+
+interface LOCAL_MEMORY_MULTI_READ_CACHE_IFC#(numeric type nReadPorts);
+    interface Vector#(nReadPorts, LOCAL_MEMORY_CACHE_IFC) readPorts;
+
+    method Action writeWord(LOCAL_MEM_ADDR addr, LOCAL_MEM_WORD data);
+    method Action writeLine(LOCAL_MEM_ADDR addr, LOCAL_MEM_LINE data);
+    method Action writeLineMasked(LOCAL_MEM_ADDR addr, LOCAL_MEM_LINE data, LOCAL_MEM_LINE_MASK mask);
+endinterface: LOCAL_MEMORY_MULTI_READ_CACHE_IFC
+
+
+module mkMultiReaderLocalMem#(LowLevelPlatformInterface llpi, DEBUG_FILE debugLog)
+    // interface:
+    (LOCAL_MEMORY_MULTI_READ_CACHE_IFC#(nReadPorts));
+
+    FIFOF#(Bit#(TLog#(nReadPorts))) readQ <- mkSizedFIFOF(16);
+
+    Vector#(nReadPorts, LOCAL_MEMORY_CACHE_IFC) portsLocal = newVector;
+    for (Integer p = 0; p < valueOf(nReadPorts); p = p + 1)
+    begin
+        portsLocal[p] = (
+            interface LOCAL_MEMORY_CACHE_IFC;
+                method Action readLineReq(LOCAL_MEM_ADDR addr);
+                    llpi.localMem.readLineReq(addr);
+                    readQ.enq(fromInteger(p));
+                    debugLog.record($format("      DDR readLineReq port %0d: addr=0x%x", p, addr));
+                endmethod
+
+                method ActionValue#(LOCAL_MEM_LINE) readLineRsp() if (readQ.first() == fromInteger(p));
+                    readQ.deq();
+
+                    let d <- llpi.localMem.readLineRsp();
+                    debugLog.record($format("      DDR readLineRsp port %0d: val=0x%x", p, d));
+
+                    return d;
+                endmethod
+            endinterface
+            );
+    end
+
+    interface readPorts = portsLocal;
+
+    method Action writeWord(LOCAL_MEM_ADDR addr, LOCAL_MEM_WORD data);
+        llpi.localMem.writeWord(addr, data);
+    endmethod
+
+    method Action writeLine(LOCAL_MEM_ADDR addr, LOCAL_MEM_LINE data);
+        llpi.localMem.writeLine(addr, data);
+    endmethod
+
+    method Action writeLineMasked(LOCAL_MEM_ADDR addr, LOCAL_MEM_LINE data, LOCAL_MEM_LINE_MASK mask);
+        llpi.localMem.writeLineMasked(addr, data, mask);
+    endmethod
+endmodule
+
+
+//
+// mkLocalMemCacheData --
+//     Set associative cache local storage.
+//
+module mkLocalMemCacheData#(LowLevelPlatformInterface llpi, DEBUG_FILE debugLog)
+    // interface:
+    (RL_SA_CACHE_LOCAL_DATA#(t_CACHE_ADDR_SZ, t_CACHE_WORD, LOCAL_MEM_WORDS_PER_LINE, nSets, nWays))
+    provisos (Bits#(t_CACHE_WORD, LOCAL_MEM_WORD_SZ),
+              Alias#(RL_SA_CACHE_SET_METADATA#(t_CACHE_ADDR_SZ, LOCAL_MEM_WORDS_PER_LINE, nSets, nWays), t_SET_METADATA),
+              Bits#(t_SET_METADATA, t_SET_METADATA_SZ),
+              Alias#(RL_SA_CACHE_SET_IDX#(nSets), t_CACHE_SET_IDX),
+              Alias#(RL_SA_CACHE_WAY_IDX#(nWays), t_CACHE_WAY_IDX),
+
+              // Need an extra read port for the metadata
+              Add#(RL_SA_CACHE_DATA_READ_PORTS, 1, t_N_READ_PORTS),
+              Add#(RL_SA_CACHE_DATA_READ_PORTS, 0, t_METADATA_READ_PORT),
+
+              // Assert size relationship of number of sets & ways to address
+              Bits#(t_CACHE_SET_IDX, t_CACHE_SET_IDX_SZ),
+              Bits#(t_CACHE_WAY_IDX, t_CACHE_WAY_IDX_SZ),
+              Add#(t_CACHE_SET_IDX_SZ, TAdd#(t_CACHE_WAY_IDX_SZ, 1), LOCAL_MEM_LINE_ADDR_SZ),
+              Add#(t_CACHE_WAY_IDX_SZ, 1, TAdd#(t_CACHE_WAY_IDX_SZ, 1)),
+
+              // Assert size of data relative to local memory
+              Add#(t_SET_METADATA_SZ, t_UNUSED_META_BIT_SZ, LOCAL_MEM_LINE_SZ),
+              Bits#(Vector#(LOCAL_MEM_WORDS_PER_LINE, t_CACHE_WORD), LOCAL_MEM_LINE_SZ));
+
+    // Connection to local memory
+    LOCAL_MEMORY_MULTI_READ_CACHE_IFC#(t_N_READ_PORTS) memory <- mkMultiReaderLocalMem(llpi, debugLog);
+
+
+    // ====================================================================
+    //
+    // Data and metadata address mapping functions.  The data is limited
+    // to half of available memory since the cache algorithm depends on
+    // sets being a power of 2.  The mapping here uses the low bit of 0 to
+    // indicate data and 1 for metadata.  The metadata is not dense.
+    //
+    // Using the low bit keeps metadata on the same page as the data.
+    // Toggling the low bit instead of the high bit for the metadata
+    // read may open the DDR page for the data read.
+    //
+    // ====================================================================
+
+    //
+    // getDataAddr --
+    //     Convert set and way into a local memory address.
+    //
+    function LOCAL_MEM_ADDR getDataIdx(t_CACHE_SET_IDX set, t_CACHE_WAY_IDX way);
+        // Data is in memory with high bit set to 0
+        return localMemLineAddrToAddr({ pack(set), pack(way), 1'b0 });
+    endfunction
+
+
+    //
+    // getMetadataAddr --
+    //     Convert set and way into a local memory address.
+    //
+    function LOCAL_MEM_ADDR getMetadataIdx(t_CACHE_SET_IDX set);
+        t_CACHE_WAY_IDX dummy = 0;
+        return localMemLineAddrToAddr({ pack(set), pack(dummy), 1'b1 });
+    endfunction
+
+
+    // ====================================================================
+    //
+    // Initialization
+    //
+    // ====================================================================
+
+    Reg#(Bool) initialized <- mkReg(False);
+    Reg#(RL_SA_CACHE_SET_IDX#(nSets)) initIdx <- mkReg(0);
+    
+    rule initMetaData (! initialized);
+        t_SET_METADATA mInit = RL_SA_CACHE_SET_METADATA { lru: Vector::genWith(fromInteger),
+                                                          ways: Vector::replicate(tagged Invalid) };
+        memory.writeLine(getMetadataIdx(initIdx), zeroExtend(pack(mInit)));
+
+        if (initIdx == maxBound)
+        begin
+            initialized <= True;
+        end
+
+        initIdx <= initIdx + 1;
+    endrule
+
+
+    // ====================================================================
+    //
+    // Read request FIFOs.  Read requests are buffered through FIFOs in
+    // order to break scheduling dependence between data and metadata
+    // reads and between reads and writes.  The cache may deadlock
+    // without it.  Relaxed read/write ordering is fine here since the
+    // cache already guarantees to handle at most one reference at 
+    // a time per set.
+    //
+    // ====================================================================
+
+    FIFO#(RL_SA_CACHE_SET_IDX#(nSets)) readMetadataReqQ <- mkFIFO();
+    FIFO#(Tuple3#(Bit#(TLog#(t_N_READ_PORTS)), RL_SA_CACHE_SET_IDX#(nSets), RL_SA_CACHE_WAY_IDX#(nWays))) readDataReqQ <- mkFIFO();
+
+    rule forwardMetadataReq (initialized);
+        let set = readMetadataReqQ.first();
+        readMetadataReqQ.deq();
+
+        memory.readPorts[valueOf(t_METADATA_READ_PORT)].readLineReq(getMetadataIdx(set));
+    endrule
+
+    rule forwardDataReq (initialized);
+        match {.port, .set, .way} = readDataReqQ.first();
+        readDataReqQ.deq();
+
+        memory.readPorts[port].readLineReq(getDataIdx(set, way));
+    endrule
+
+
+    //
+    // Metadata access methods
+    //
+
+    interface MEMORY_IFC metaData;
+        method Action readReq(RL_SA_CACHE_SET_IDX#(nSets) set);
+            readMetadataReqQ.enq(set);
+        endmethod
+
+        method ActionValue#(t_SET_METADATA) readRsp();
+            let d <- memory.readPorts[valueOf(t_METADATA_READ_PORT)].readLineRsp();
+            return unpack(truncate(pack(d)));
+        endmethod
+
+        method Action write(RL_SA_CACHE_SET_IDX#(nSets) set, t_SET_METADATA mData) if (initialized);
+            memory.writeLine(getMetadataIdx(set), zeroExtend(pack(mData)));
+        endmethod
+    endinterface
+
+
+    //
+    // Data access methods
+    //
+
+    // Read all words in a line
+    method Action dataReadReq(Integer readPort,
+                              RL_SA_CACHE_SET_IDX#(nSets) set,
+                              RL_SA_CACHE_WAY_IDX#(nWays) way);
+        readDataReqQ.enq(tuple3(fromInteger(readPort), set, way));
+    endmethod
+
+    method ActionValue#(Vector#(LOCAL_MEM_WORDS_PER_LINE, t_CACHE_WORD)) dataReadRsp(Integer readPort);
+        let d <- memory.readPorts[readPort].readLineRsp();
+        return unpack(d);
+    endmethod
+
+
+    method Action dataWrite(RL_SA_CACHE_SET_IDX#(nSets) set,
+                            RL_SA_CACHE_WAY_IDX#(nWays) way,
+                            Vector#(LOCAL_MEM_WORDS_PER_LINE, Bool) wordMask,
+                            Vector#(LOCAL_MEM_WORDS_PER_LINE, t_CACHE_WORD) val) if (initialized);
+
+        memory.writeLineMasked(getDataIdx(set, way), pack(val), wordMask);
+    endmethod
+
+    method Action dataWriteWord(RL_SA_CACHE_SET_IDX#(nSets) set,
+                                RL_SA_CACHE_WAY_IDX#(nWays) way,
+                                Bit#(TLog#(LOCAL_MEM_WORDS_PER_LINE)) wordIdx,
+                                t_CACHE_WORD val) if (initialized);
+
+        memory.writeWord(getDataIdx(set, way) | zeroExtendNP(wordIdx), pack(val));
+    endmethod
+
 endmodule

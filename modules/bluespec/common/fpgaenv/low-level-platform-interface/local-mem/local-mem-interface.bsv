@@ -53,6 +53,10 @@ typedef TSub#(LOCAL_MEM_ADDR_SZ, LOCAL_MEM_WORD_IDX_SZ) LOCAL_MEM_LINE_ADDR_SZ;
 typedef Bit#(LOCAL_MEM_LINE_ADDR_SZ) LOCAL_MEM_LINE_ADDR;
 
 
+// Mask words within a line
+typedef Vector#(LOCAL_MEM_WORDS_PER_LINE, Bool) LOCAL_MEM_LINE_MASK;
+
+
 interface LOCAL_MEM;
     //
     // The implementation of reading words and lines may use a shared FIFO.
@@ -70,6 +74,9 @@ interface LOCAL_MEM;
     //
     method Action writeWord(LOCAL_MEM_ADDR addr, LOCAL_MEM_WORD data);
     method Action writeLine(LOCAL_MEM_ADDR addr, LOCAL_MEM_LINE data);
+
+    // Only write words in a line with corresponding True in mask
+    method Action writeLineMasked(LOCAL_MEM_ADDR addr, LOCAL_MEM_LINE data, LOCAL_MEM_LINE_MASK mask);
 endinterface: LOCAL_MEM
 
 

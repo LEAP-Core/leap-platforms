@@ -6,7 +6,7 @@
 %public local-mem-interface.bsv
 %public local-mem-bram.bsv
 
-%param LOCAL_MEM_ADDR_BITS      26  "Local memory address size (address indexes words)"
+%param LOCAL_MEM_ADDR_BITS      21  "Local memory address size (address indexes words)"
 %param LOCAL_MEM_WORD_BITS      64  "Local memory word size"
 %param LOCAL_MEM_WORDS_PER_LINE  4  "Local memory words per line (must be power of 2)"
 

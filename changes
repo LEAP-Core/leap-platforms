@@ -5630,3 +5630,41 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/centr
 
 Local memory central cache is a set-associative cache.  For now it allocates
 the storage in BRAM.  Using local RAM is next.
+
+----------
+mcadler     Date: Tue Apr  7 17:29:39 EDT 2009  CSN: CSN-platforms-188
+                  Tue Apr  7 21:29:39 UTC 2009
+
+
+Directory modules/bluespec/librl/storage/cache
+ fpga-set-assoc-cache.bsv  Locally Modified          187 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/central-cache
+ local-mem-central-cache.bsv Locally Modified          187 
+ central-cache-backing-store.bsv Locally Modified          187 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices
+ std-virtual-device-interfaces.bsv Locally Modified          187 
+
+Directory modules/bluespec/common/fpgaenv/low-level-platform-interface/local-mem
+ local-mem-ddr2.bsv        Locally Modified          186 
+ local-mem-interface.bsv   Locally Modified          186 
+ local-mem-bram.awb        Locally Modified          186 
+ local-mem-bram.bsv        Locally Modified          186 
+
+- Set associative cache changes:
+  - Merge all metadata into one structure so it can be stored in a single memory
+    line or BRAM.
+  - Encapsulate cache's local storage in a module.  Provide a standard BRAM-
+    based implementation.
+  - Rename all data structions from HASIM_CACHE to RL_SA_CACHE.
+
+- Use local memory for central cache storage.
+
+- Local memory:
+  - Add a word-masked line write method for specifying which words in a line
+    should be written.  The DDR controller implements this to avoid read-modify-
+    write updates.
+  - Make the array smaller in the BRAM version of local memory.  Initialization
+    of the cache tags was too slow in Bluesim.  The downside is the default cache
+    behavior no longer matches our hardware.

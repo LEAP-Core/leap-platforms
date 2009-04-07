@@ -41,7 +41,7 @@ import SpecialFIFOs::*;
 
 interface CENTRAL_CACHE_BACKING_CONNECTION;
     interface CENTRAL_CACHE_BACKING_PORT backingPort;
-    interface HASIM_CACHE_SOURCE_DATA#(CENTRAL_CACHE_ADDR,
+    interface RL_SA_CACHE_SOURCE_DATA#(CENTRAL_CACHE_ADDR,
                                        CENTRAL_CACHE_LINE,
                                        CENTRAL_CACHE_WORDS_PER_LINE,
                                        CENTRAL_CACHE_REF_INFO) cacheSourceData;
@@ -117,7 +117,7 @@ module mkCentralCacheBackingConnection#(Integer port, DEBUG_FILE debugLog)
     //
     // Cache backing storage interface.
     //
-    interface HASIM_CACHE_SOURCE_DATA cacheSourceData;
+    interface RL_SA_CACHE_SOURCE_DATA cacheSourceData;
         method Action readReq(CENTRAL_CACHE_ADDR addr, CENTRAL_CACHE_REF_INFO refInfo);
             readReqQ.enq(CENTRAL_CACHE_BACKING_READ_REQ { addr: addr, refInfo: refInfo });
             debugLog.record($format("port %0d: BACKING readReq addr=0x%x, refInfo=0x%x", port, addr, refInfo));

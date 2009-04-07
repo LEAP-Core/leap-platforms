@@ -21,7 +21,7 @@
 //
 // A generic cache class (n-way set associative) for caching data in BRAM.
 // Classes building a cache must provide an interface class to the source
-// data of type HASIM_CACHE_SOURCE_DATA (defined below).  The cache
+// data of type RL_SA_CACHE_SOURCE_DATA (defined below).  The cache
 // takes a number of parameters: the address and data types, the number of
 // sets and the number of ways within each set.
 //
@@ -62,7 +62,7 @@ typedef struct
     t_CACHE_ADDR addr;
     t_CACHE_REF_INFO refInfo;
 }
-HASIM_CACHE_LOAD_RESP#(type t_CACHE_ADDR,
+RL_SA_CACHE_LOAD_RESP#(type t_CACHE_ADDR,
                        type t_CACHE_WORD,
                        numeric type nWordsPerLine,
                        type t_CACHE_REF_INFO)
@@ -70,21 +70,18 @@ HASIM_CACHE_LOAD_RESP#(type t_CACHE_ADDR,
 
 
 //
-// HAsim cache interface.  nTagExtraLowBits is used just for debugging.
-// This specified number of low bits are prepanded to cache tags so
-// addresses match those seen in other modules.
+// Set associative cache interface.  nTagExtraLowBits is used just for
+// debugging.  This specified number of low bits are prepanded to cache
+// tags so addresses match those seen in other modules.
 //
 // t_CACHE_REF_INFO is metadata associated with a reference.  Metadata is
 // passed to the backing store for fills.  The metadata is not stored in
 // the cache.
 //
-interface HASIM_CACHE#(type t_CACHE_ADDR,
-                       type t_CACHE_LINE,
+interface RL_SA_CACHE#(type t_CACHE_ADDR,
                        type t_CACHE_WORD,
                        numeric type nWordsPerLine,
                        type t_CACHE_REF_INFO,
-                       numeric type nSets,
-                       numeric type nWays,
                        numeric type nTagExtraLowBits);
 
     // Read up to a full line.  Read from backing store if not already cached.
@@ -95,7 +92,7 @@ interface HASIM_CACHE#(type t_CACHE_ADDR,
                           Bit#(TLog#(nWordsPerLine)) wordIdx,
                           t_CACHE_REF_INFO refInfo);
 
-    method ActionValue#(HASIM_CACHE_LOAD_RESP#(t_CACHE_ADDR, t_CACHE_WORD, nWordsPerLine, t_CACHE_REF_INFO)) readResp();
+    method ActionValue#(RL_SA_CACHE_LOAD_RESP#(t_CACHE_ADDR, t_CACHE_WORD, nWordsPerLine, t_CACHE_REF_INFO)) readResp();
 
     // Predicate to test whether a read response is ready this cycle.
     method Bool readRespReady();
@@ -114,10 +111,6 @@ interface HASIM_CACHE#(type t_CACHE_ADDR,
     method Action invalReq(t_CACHE_ADDR addr, Bool sendAck, t_CACHE_REF_INFO refInfo);
     method Action flushReq(t_CACHE_ADDR addr, Bool sendAck, t_CACHE_REF_INFO refInfo);
     method Action invalOrFlushWait();
-
-    // Invalidate entire cache.
-    method Action invalAllReq(t_CACHE_REF_INFO refInfo);
-    method Action invalAllWait();
     
     // Write back or write through cache?  Default is write back.
     // NOTE:  Turning off writeback does NOT cause the cache to write through
@@ -127,16 +120,16 @@ interface HASIM_CACHE#(type t_CACHE_ADDR,
     //        outside of this interface.
     method Action setModeWriteBack(Bool isWriteBack);
 
-endinterface: HASIM_CACHE
+endinterface: RL_SA_CACHE
 
 
 //
-// The caller must provide an instance of the HASIM_CACHE_SOURCE_DATA interface
+// The caller must provide an instance of the RL_SA_CACHE_SOURCE_DATA interface
 // so the cache can read and write data from the next level in the hierarchy.
 //
-// See HASIM_CACHE interface for description of refInfo.
+// See RL_SA_CACHE interface for description of refInfo.
 //
-interface HASIM_CACHE_SOURCE_DATA#(type t_CACHE_ADDR,
+interface RL_SA_CACHE_SOURCE_DATA#(type t_CACHE_ADDR,
                                    type t_CACHE_LINE,
                                    numeric type nWordsPerLine,
                                    type t_CACHE_REF_INFO);
@@ -158,16 +151,63 @@ interface HASIM_CACHE_SOURCE_DATA#(type t_CACHE_ADDR,
                                t_CACHE_REF_INFO refInfo);
     method Action writeSyncWait();
 
-endinterface: HASIM_CACHE_SOURCE_DATA
+endinterface: RL_SA_CACHE_SOURCE_DATA
+
+//
+// Number of read ports required by the cache code.
+typedef 3 RL_SA_CACHE_DATA_READ_PORTS;
+
+//
+// The caller must also provide storage for the cache's local data.  Local
+// data includes both cache metadata and the cached values.
+//
+// A standard BRAM-based implementation of local data is provided in this
+// module (mkBRAMCacheLocalData).
+//
+interface RL_SA_CACHE_LOCAL_DATA#(numeric type t_CACHE_ADDR_SZ,
+                                  type t_CACHE_WORD,
+                                  numeric type nWordsPerLine,
+                                  numeric type nSets,
+                                  numeric type nWays);
+
+    //
+    // Metadata access methods
+    //
+    interface MEMORY_IFC#(RL_SA_CACHE_SET_IDX#(nSets),
+                          RL_SA_CACHE_SET_METADATA#(t_CACHE_ADDR_SZ, nWordsPerLine, nSets, nWays)) metaData;
+    
+    //
+    // Data access methods.  The methods are expected to merge the set and way
+    // values into a linear address space.
+    //
+    method Action dataReadReq(Integer readPort,
+                              RL_SA_CACHE_SET_IDX#(nSets) set,
+                              RL_SA_CACHE_WAY_IDX#(nWays) way);
+
+    method ActionValue#(Vector#(nWordsPerLine, t_CACHE_WORD)) dataReadRsp(Integer readPort);
+
+    // Write up to an entire line, writing only the words with bits set in
+    // wordMask.
+    method Action dataWrite(RL_SA_CACHE_SET_IDX#(nSets) set,
+                            RL_SA_CACHE_WAY_IDX#(nWays) way,
+                            Vector#(nWordsPerLine, Bool) wordMask,
+                            Vector#(nWordsPerLine, t_CACHE_WORD) val);
+
+    // Write only a single word in a line.
+    method Action dataWriteWord(RL_SA_CACHE_SET_IDX#(nSets) set,
+                                RL_SA_CACHE_WAY_IDX#(nWays) way,
+                                Bit#(TLog#(nWordsPerLine)) wordIdx,
+                                t_CACHE_WORD val);
+endinterface: RL_SA_CACHE_LOCAL_DATA
 
 
 //
-// The caller must provide an instance of the HASIM_CACHE_STATS interface to
+// The caller must provide an instance of the RL_SA_CACHE_STATS interface to
 // the cache code.  This allows each instance of the cache to have its own
-// statistics.  mkNullHAsimCacheStats is provided in this package for callers
+// statistics.  mkNullRLCacheStats is provided in this package for callers
 // not interested in statistics.
 //
-interface HASIM_CACHE_STATS;
+interface RL_SA_CACHE_STATS;
     method Action readHit();
     method Action readMiss();
     method Action writeHit();
@@ -175,7 +215,7 @@ interface HASIM_CACHE_STATS;
     method Action invalLine();             // Invalidate due to capacity
     method Action dirtyLineFlush();
     method Action forceInvalLine();        // Invalidate forced by external request
-endinterface: HASIM_CACHE_STATS
+endinterface: RL_SA_CACHE_STATS
 
 
 // ===================================================================
@@ -185,27 +225,13 @@ endinterface: HASIM_CACHE_STATS
 // ===================================================================
 
 //
-// States in the cache manager FSM
-//
-typedef enum
-{
-    HCST_NORMAL,
-
-    // Invalidating all sets
-    HCST_INVAL_ALL,
-    HCST_INVAL_ALL_DONE
-}
-HASIM_CACHE_STATE
-    deriving (Eq, Bits);
-
-//
 // Data to be written to the cache.
 //
 typedef struct
 {
     t_CACHE_WORD val;
 }
-HASIM_CACHE_WRITE_INFO#(type t_CACHE_WORD, type t_CACHE_WRITE_WORD_IDX)
+RL_SA_CACHE_WRITE_INFO#(type t_CACHE_WORD, type t_CACHE_WRITE_WORD_IDX)
     deriving (Eq, Bits);
 
 //
@@ -224,26 +250,41 @@ typedef struct
     Bit#(WRITE_DATA_HEAP_IDX_SZ) dataIdx;
     Bit#(TLog#(nWordsPerLine)) wordIdx;
 }
-HASIM_CACHE_WRITE_REQ#(numeric type nWordsPerLine)
+RL_SA_CACHE_WRITE_REQ#(numeric type nWordsPerLine)
     deriving (Eq, Bits);
 
 
-typedef UInt#(TLog#(nSets)) HASIM_CACHE_SET_IDX#(numeric type nSets);
-typedef UInt#(TLog#(nWays)) HASIM_CACHE_WAY_IDX#(numeric type nWays);
+typedef UInt#(TLog#(nSets)) RL_SA_CACHE_SET_IDX#(numeric type nSets);
+typedef UInt#(TLog#(nWays)) RL_SA_CACHE_WAY_IDX#(numeric type nWays);
 
 
 //
-// Cache metadata (tag and a dirty bit). It is the responsibility of the
+// Cache way metadata (tag and a dirty bit). It is the responsibility of the
 // package using this cache to drop insignificant low bits from the address
 // size before addresses reach here.
 //
+
+typedef Bit#(TSub#(t_CACHE_ADDR_SZ, TLog#(nSets))) RL_SA_CACHE_TAG#(numeric type t_CACHE_ADDR_SZ, numeric type nSets);
+
 typedef struct
 {
-    t_CACHE_TAG tag;
+    RL_SA_CACHE_TAG#(t_CACHE_ADDR_SZ, nSets) tag;
     Bool dirty;
     Vector#(nWordsPerLine, Bool) wordValid;
 }
-HASIM_CACHE_METADATA#(type t_CACHE_TAG, numeric type nWordsPerLine)
+RL_SA_CACHE_WAY_METADATA#(numeric type t_CACHE_ADDR_SZ, numeric type nWordsPerLine, numeric type nSets)
+    deriving(Bits, Eq);
+
+//
+// Cache set metadata includes LRU chain and the metadata for each way.  The
+// way metadata is wrapped in a Maybe#() to permit invalid (unallocated) ways.
+//
+typedef struct
+{
+    Vector#(nWays, RL_SA_CACHE_WAY_IDX#(nWays)) lru;
+    Vector#(nWays, Maybe#(RL_SA_CACHE_WAY_METADATA#(t_CACHE_ADDR_SZ, nWordsPerLine, nSets))) ways;
+}
+RL_SA_CACHE_SET_METADATA#(numeric type t_CACHE_ADDR_SZ, numeric type nWordsPerLine, numeric type nSets, numeric type nWays)
     deriving(Bits, Eq);
 
 //
@@ -256,9 +297,9 @@ HASIM_CACHE_METADATA#(type t_CACHE_TAG, numeric type nWordsPerLine)
 typedef struct
 {
     t_CACHE_SET_IDX set;
-    HASIM_CACHE_WAY_IDX#(nWays) way;
+    RL_SA_CACHE_WAY_IDX#(nWays) way;
 }
-HASIM_CACHE_DATA_IDX#(numeric type nWays, type t_CACHE_SET_IDX)
+RL_SA_CACHE_DATA_IDX#(numeric type nWays, type t_CACHE_SET_IDX)
     deriving(Bits, Eq);
 
 
@@ -267,18 +308,18 @@ HASIM_CACHE_DATA_IDX#(numeric type nWays, type t_CACHE_SET_IDX)
 // guarantee consistent state.  The number of entries in the scoreboard
 // limits the number of requests in flight.
 //
-typedef 16 HASIM_CACHE_MAX_INVAL;
-typedef Bit#(TLog#(HASIM_CACHE_MAX_INVAL)) HASIM_CACHE_INVAL_IDX;
+typedef 16 RL_SA_CACHE_MAX_INVAL;
+typedef Bit#(TLog#(RL_SA_CACHE_MAX_INVAL)) RL_SA_CACHE_INVAL_IDX;
 
 //
 // Cache reads may be returned either in order or out of order depending
-// on the permitOOOReadResp argument to mkCachesetAssoc.  When response
+// on the permitOOOReadResp argument to mkCacheSetAssoc.  When response
 // must be ordered the size of the read response FIFO limits the number
 // of requests in flight.  Data can be large, so there is more of a space
 // tradeoff for reads than flush requests.
 //
-typedef 4 HASIM_CACHE_MAX_READ;
-typedef Bit#(TLog#(HASIM_CACHE_MAX_READ)) HASIM_CACHE_READ_FIFO_IDX;
+typedef 4 RL_SA_CACHE_MAX_READ;
+typedef Bit#(TLog#(RL_SA_CACHE_MAX_READ)) RL_SA_CACHE_READ_FIFO_IDX;
 
 //
 // Meta-data associated with a read request.
@@ -286,9 +327,9 @@ typedef Bit#(TLog#(HASIM_CACHE_MAX_READ)) HASIM_CACHE_READ_FIFO_IDX;
 typedef struct
 {
     Bit#(TLog#(nWordsPerLine)) wordIdx;
-    HASIM_CACHE_READ_FIFO_IDX readFifoIdx;
+    RL_SA_CACHE_READ_FIFO_IDX readFifoIdx;
 }
-HASIM_CACHE_READ_REQ#(numeric type nWordsPerLine)
+RL_SA_CACHE_READ_REQ#(numeric type nWordsPerLine)
     deriving (Eq, Bits);
 
 
@@ -308,7 +349,7 @@ typedef struct
     // caller.
     t_CACHE_REF_INFO refInfo;
 }
-HASIM_CACHE_REQ_BASE#(type t_CACHE_TAG,
+RL_SA_CACHE_REQ_BASE#(type t_CACHE_TAG,
                       type t_CACHE_SET_IDX,
                       type t_CACHE_WAY_IDX,
                       type t_CACHE_REF_INFO)
@@ -316,19 +357,18 @@ HASIM_CACHE_REQ_BASE#(type t_CACHE_TAG,
 
 typedef union tagged
 {
-    // Reads have no extra data (beyond HASIM_CACHE_REQ_BASE above)
-    HASIM_CACHE_READ_REQ#(nWordsPerLine) HCOP_READ;
+    // Reads have no extra data (beyond RL_SA_CACHE_REQ_BASE above)
+    RL_SA_CACHE_READ_REQ#(nWordsPerLine) HCOP_READ;
 
     // Writes have pointer to data to be written
-    HASIM_CACHE_WRITE_REQ#(nWordsPerLine) HCOP_WRITE;
+    RL_SA_CACHE_WRITE_REQ#(nWordsPerLine) HCOP_WRITE;
 
     // Inval and flush have a bool indicating whether an ACK is needed
-    Maybe#(HASIM_CACHE_INVAL_IDX) HCOP_INVAL;
-    Maybe#(HASIM_CACHE_INVAL_IDX) HCOP_FLUSH_DIRTY;
+    Maybe#(RL_SA_CACHE_INVAL_IDX) HCOP_INVAL;
+    Maybe#(RL_SA_CACHE_INVAL_IDX) HCOP_FLUSH_DIRTY;
 }
-HASIM_CACHE_REQ#(numeric type nWordsPerLine)
+RL_SA_CACHE_REQ#(numeric type nWordsPerLine)
     deriving(Bits, Eq);
-
 
 
 // ========================================================================
@@ -343,12 +383,13 @@ HASIM_CACHE_REQ#(numeric type nWordsPerLine)
 //
 // ========================================================================
 
-module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_LINE, nWordsPerLine, t_CACHE_REF_INFO) sourceData,
-                        HASIM_CACHE_STATS stats,
+module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_LINE, nWordsPerLine, t_CACHE_REF_INFO) sourceData,
+                        RL_SA_CACHE_LOCAL_DATA#(t_CACHE_ADDR_SZ, t_CACHE_WORD, nWordsPerLine, nSets, nWays) localData,
+                        RL_SA_CACHE_STATS stats,
                         Bool permitOOOReadResp,
                         DEBUG_FILE debugLog)
     // interface:
-        (HASIM_CACHE#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_LINE, t_CACHE_WORD, nWordsPerLine, t_CACHE_REF_INFO, nSets, nWays, nTagExtraLowBits))
+        (RL_SA_CACHE#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_WORD, nWordsPerLine, t_CACHE_REF_INFO, nTagExtraLowBits))
     provisos (Bits#(t_CACHE_LINE, t_CACHE_LINE_SZ),
               Bits#(t_CACHE_REF_INFO, t_CACHE_REF_INFO_SZ),
               Bits#(t_CACHE_WORD, t_CACHE_WORD_SZ),
@@ -366,50 +407,38 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
               Add#(t_CACHE_ADDR_SZ, a__, 64),
 
               // Set index and tag.  Set index size + tag size == address size.
-              Alias#(HASIM_CACHE_SET_IDX#(nSets), t_CACHE_SET_IDX),
+              Alias#(RL_SA_CACHE_SET_IDX#(nSets), t_CACHE_SET_IDX),
               Bits#(t_CACHE_SET_IDX, t_CACHE_SET_IDX_SZ),
-              Add#(t_CACHE_TAG_SZ, t_CACHE_SET_IDX_SZ, t_CACHE_ADDR_SZ),
-              Alias#(Bit#(t_CACHE_TAG_SZ), t_CACHE_TAG),
+              Alias#(RL_SA_CACHE_TAG#(t_CACHE_ADDR_SZ, nSets), t_CACHE_TAG),
 
               // Set size must be no longer than 32 bits (for set filter)
               Add#(t_CACHE_SET_IDX_SZ, b__, 32),
 
               Alias#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_ADDR),
-              Alias#(HASIM_CACHE_WAY_IDX#(nWays), t_CACHE_WAY_IDX),
-              Alias#(Vector#(nWays, HASIM_CACHE_WAY_IDX#(nWays)), t_LRU_LIST),
-              Alias#(HASIM_CACHE_DATA_IDX#(nWays, t_CACHE_SET_IDX), t_CACHE_DATA_IDX),
-              Alias#(HASIM_CACHE_METADATA#(t_CACHE_TAG, nWordsPerLine), t_METADATA),
-              Alias#(HASIM_CACHE_LOAD_RESP#(t_CACHE_ADDR, t_CACHE_WORD, nWordsPerLine, t_CACHE_REF_INFO), t_CACHE_LOAD_RESP),
-              Alias#(Vector#(nWays, Maybe#(HASIM_CACHE_METADATA#(t_CACHE_TAG, nWordsPerLine))), t_METADATA_VECTOR),
-              Alias#(HASIM_CACHE_REQ_BASE#(t_CACHE_TAG, t_CACHE_SET_IDX, t_CACHE_WAY_IDX, t_CACHE_REF_INFO), t_CACHE_REQ_BASE),
-              Alias#(HASIM_CACHE_REQ#(nWordsPerLine), t_CACHE_REQ),
+              Alias#(RL_SA_CACHE_WAY_IDX#(nWays), t_CACHE_WAY_IDX),
+              Alias#(RL_SA_CACHE_DATA_IDX#(nWays, t_CACHE_SET_IDX), t_CACHE_DATA_IDX),
+              Alias#(RL_SA_CACHE_WAY_METADATA#(t_CACHE_ADDR_SZ, nWordsPerLine, nSets), t_METADATA),
+              Alias#(RL_SA_CACHE_LOAD_RESP#(t_CACHE_ADDR, t_CACHE_WORD, nWordsPerLine, t_CACHE_REF_INFO), t_CACHE_LOAD_RESP),
+              Alias#(Vector#(nWays, RL_SA_CACHE_WAY_IDX#(nWays)), t_LRU_LIST),
+              Alias#(Vector#(nWays, Maybe#(t_METADATA)), t_METADATA_VECTOR),
+              Alias#(RL_SA_CACHE_SET_METADATA#(t_CACHE_ADDR_SZ, nWordsPerLine, nSets, nWays), t_SET_METADATA),
+              Alias#(RL_SA_CACHE_REQ_BASE#(t_CACHE_TAG, t_CACHE_SET_IDX, t_CACHE_WAY_IDX, t_CACHE_REF_INFO), t_CACHE_REQ_BASE),
+              Alias#(RL_SA_CACHE_REQ#(nWordsPerLine), t_CACHE_REQ),
               Alias#(Bit#(TLog#(nWordsPerLine)), t_CACHE_WRITE_WORD_IDX),
-              Alias#(HASIM_CACHE_WRITE_INFO#(t_CACHE_WORD, t_CACHE_WRITE_WORD_IDX), t_CACHE_WRITE_INFO),
+              Alias#(RL_SA_CACHE_WRITE_INFO#(t_CACHE_WORD, t_CACHE_WRITE_WORD_IDX), t_CACHE_WRITE_INFO),
               Alias#(Vector#(nWordsPerLine, Bool), t_CACHE_WORD_VALID_MASK),
        
               Bits#(t_CACHE_REQ, t_CACHE_REQ_SZ),
 
               // Unbelievably ugly tautologies required by the compiler:
+              Add#(TSub#(t_CACHE_ADDR_SZ, TLog#(nSets)), TLog#(nSets), t_CACHE_ADDR_SZ),
               Add#(t_CACHE_ADDR_SZ, nTagExtraLowBits, TAdd#(t_CACHE_ADDR_SZ, nTagExtraLowBits)),
               Log#(nWays, TLog#(nWays)),
               Add#(TLog#(TExp#(TLog#(nSets))), 0, TLog#(nSets)),
               Add#(TLog#(TDiv#(TExp#(TLog#(nSets)), 2)), x__, TLog#(nSets)));
 
 
-    // ***** Cache data *****
-
-    // Tags & dirty bits
-    BRAM#(t_CACHE_SET_IDX, t_METADATA_VECTOR) cacheMeta <- mkBRAMInitialized(Vector::replicate(tagged Invalid));
-
-    // Values
-    Vector#(nWordsPerLine, BRAM_MULTI_READ#(4, t_CACHE_DATA_IDX, t_CACHE_WORD)) cacheData <- replicateM(mkBRAMPseudoMultiRead());
-
-    // LRU hint
-    BRAM#(t_CACHE_SET_IDX, t_LRU_LIST) cacheLRU <- mkBRAMInitialized(Vector::genWith(fromInteger));
-
     // ***** Internal state *****
-
-    Reg#(HASIM_CACHE_STATE) curState <- mkReg(HCST_NORMAL);
 
     Reg#(Bool) cacheIsEmpty <- mkReg(True);
 
@@ -425,8 +454,6 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
     COUNTING_FILTER#(t_CACHE_SET_IDX) setFilter <- mkCountingFilter(debugLog);
     COUNTER#(t_CACHE_SET_IDX_SZ) nBusySets <- mkLCounter(0);
 
-    Reg#(Bool) invalidateAllReq <- mkReg(False);
-
     // ***** Queues between internal pipeline stages *****
 
     // Incoming requests
@@ -437,14 +464,10 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
 
     // Hit path for operations that read the cache (read and flush)
     FIFO#(Tuple3#(t_CACHE_REQ_BASE, t_CACHE_REQ, t_CACHE_WORD_VALID_MASK)) readHitQ <- mkFIFO();
-    // Side paths, also for read and flush hit.
-    FIFO#(t_CACHE_DATA_IDX) cacheReadForHitQ <- mkFIFO();
-    FIFO#(t_CACHE_DATA_IDX) cacheReadForFlushReqQ <- mkFIFO();
 
     // Queues on miss path
-    FIFO#(Tuple4#(t_CACHE_REQ_BASE, t_CACHE_REQ, t_LRU_LIST, t_METADATA_VECTOR)) lineMissQ <- mkFIFO();
+    FIFO#(Tuple3#(t_CACHE_REQ_BASE, t_CACHE_REQ, t_SET_METADATA)) lineMissQ <- mkFIFO();
     FIFO#(Tuple3#(t_CACHE_REQ_BASE, t_CACHE_REQ, t_CACHE_WORD_VALID_MASK)) wordMissQ <- mkFIFO();
-    FIFO#(t_CACHE_DATA_IDX) cacheReadForEvictDirtyQ <- mkFIFO();
     FIFO#(Tuple3#(t_CACHE_REQ_BASE, t_CACHE_REQ, t_METADATA)) evictDirtyForFillQ <- mkFIFO1();
 
     // Fill for read path
@@ -452,10 +475,10 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
     FIFO#(Tuple3#(t_CACHE_REQ_BASE, t_CACHE_REQ, t_CACHE_WORD_VALID_MASK)) fillLineQ <- mkSizedFIFO(16);
 
     // Write data to an allocated queue entry
-    FIFO#(Tuple2#(t_CACHE_REQ_BASE, HASIM_CACHE_WRITE_REQ#(nWordsPerLine))) writeDataQ <- mkFIFO();
+    FIFO#(Tuple2#(t_CACHE_REQ_BASE, RL_SA_CACHE_WRITE_REQ#(nWordsPerLine))) writeDataQ <- mkFIFO();
 
     // Wait for ACK from backing store that flush was received
-    FIFO#(Tuple2#(t_CACHE_SET_IDX, Maybe#(HASIM_CACHE_INVAL_IDX))) flushAckQ <- mkFIFO();
+    FIFO#(Tuple2#(t_CACHE_SET_IDX, Maybe#(RL_SA_CACHE_INVAL_IDX))) flushAckQ <- mkFIFO();
 
     // Exit from all paths
     FIFO#(t_CACHE_SET_IDX) doneQ <- mkFIFO();
@@ -464,11 +487,11 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
     // on the value of permitOOOReadResp.  Define both queues but only one will
     // actually be used.
     FIFOF#(Tuple3#(t_CACHE_REQ_BASE, t_CACHE_LINE, t_CACHE_WORD_VALID_MASK)) readRespToClientQ_OOO <- mkBypassFIFOF();
-    SCOREBOARD_FIFO#(HASIM_CACHE_MAX_READ, Tuple3#(t_CACHE_REQ_BASE, t_CACHE_LINE, t_CACHE_WORD_VALID_MASK)) readRespToClientQ_InOrder <- mkScoreboardFIFO();
+    SCOREBOARD_FIFO#(RL_SA_CACHE_MAX_READ, Tuple3#(t_CACHE_REQ_BASE, t_CACHE_LINE, t_CACHE_WORD_VALID_MASK)) readRespToClientQ_InOrder <- mkScoreboardFIFO();
 
     // Invalidate and flush requests are always returned in the order they
     // were requested.
-    SCOREBOARD_FIFO#(HASIM_CACHE_MAX_INVAL, Bool) invalReqDoneQ <- mkScoreboardFIFO();
+    SCOREBOARD_FIFO#(RL_SA_CACHE_MAX_INVAL, Bool) invalReqDoneQ <- mkScoreboardFIFO();
 
     // ***** Indexing functions *****
 
@@ -512,47 +535,6 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
     endfunction
 
 
-    // ***** Cache data read requests *****
-
-    //
-    // Cache lines may be separated into multiple BRAM words.  These functions
-    // access all words in a line.
-    //
-
-    function Action cacheDataReadReq(Integer port, t_CACHE_DATA_IDX idx);
-    action
-        for (Integer b = 0; b < valueOf(nWordsPerLine); b = b + 1)
-        begin
-            cacheData[b].readPorts[port].readReq(idx);
-        end
-    endaction
-    endfunction
-
-    function ActionValue#(t_CACHE_LINE) cacheDataReadRsp(Integer port);
-    actionvalue
-        Vector#(nWordsPerLine, t_CACHE_WORD) lineVal;
-        for (Integer b = 0; b < valueOf(nWordsPerLine); b = b + 1)
-        begin
-            let v <- cacheData[b].readPorts[port].readRsp();
-            lineVal[b] = v;
-        end
-
-        return unpack(pack(lineVal));
-    endactionvalue
-    endfunction
-
-    function Action cacheDataWrite(t_CACHE_DATA_IDX idx, t_CACHE_LINE v);
-    action
-        Vector#(nWordsPerLine, t_CACHE_WORD) lineVal = unpack(pack(v));
-
-        for (Integer b = 0; b < valueOf(nWordsPerLine); b = b + 1)
-        begin
-            cacheData[b].write(idx, lineVal[b]);
-        end
-    endaction
-    endfunction
-
-
     // ***** Meta data searches *****
 
     function t_METADATA metaData(t_CACHE_TAG tag,
@@ -567,12 +549,12 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
     endfunction
 
 
-    function Maybe#(Tuple2#(t_CACHE_WAY_IDX, t_METADATA)) findWayMatch(t_CACHE_TAG tag, t_METADATA_VECTOR meta);
+    function Maybe#(Tuple2#(t_CACHE_WAY_IDX, t_METADATA)) findWayMatch(t_CACHE_TAG tag, t_SET_METADATA meta);
         Vector#(nWays, Bool) way_match = replicate(False);
 
         for (Integer w = 0; w < valueOf(nWays); w = w + 1)
         begin
-            way_match[w] = case (meta[w]) matches
+            way_match[w] = case (meta.ways[w]) matches
                                tagged Valid .m: (m.tag == tag);
                                default: False;
                            endcase;
@@ -580,7 +562,7 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
 
         let way = findElem(True, way_match);
         if (way matches tagged Valid .w)
-            return tagged Valid tuple2(w, validValue(meta[w]));
+            return tagged Valid tuple2(w, validValue(meta.ways[w]));
         else
             return tagged Invalid;
     endfunction
@@ -644,12 +626,11 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
 
 
 
-    function Action cacheLRUUpdate(t_CACHE_SET_IDX set,
-                                   t_CACHE_WAY_IDX way,
-                                   t_LRU_LIST cur_lru);
-    action
+    function ActionValue#(t_LRU_LIST) cacheLRUUpdate(t_CACHE_SET_IDX set,
+                                                     t_CACHE_WAY_IDX way,
+                                                     t_LRU_LIST cur_lru);
+        actionvalue
         let new_lru = pushMRU(cur_lru, way);
-        cacheLRU.write(set, new_lru);
 
         if ((getMRU(cur_lru) != way) || (cur_lru != new_lru))
         begin
@@ -659,7 +640,9 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
         begin
             debugLog.record($format("    ***ERROR*** expected MRU to be 0x%x but it is 0x%x", way, getMRU(new_lru)));
         end
-    endaction
+
+        return new_lru;
+        endactionvalue
     endfunction
 
 
@@ -677,7 +660,7 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
     //     active requests to also non-conflicting requests to proceed.
     //
     (* conservative_implicit_conditions *)
-    rule handleIncomingReq (curState == HCST_NORMAL && ! invalidateAllReq);
+    rule handleIncomingReq (True);
         match {.req_base, .req} = newReqQ.first();
 
         let success <- setFilter.insert(req_base.set);
@@ -688,8 +671,7 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
             newReqQ.deq();
 
             // Read meta data and LRU hints
-            cacheMeta.readReq(req_base.set);
-            cacheLRU.readReq(req_base.set);
+            localData.metaData.readReq(req_base.set);
             
             processReqQ0.enq(tuple2(req_base, req));
         end
@@ -721,19 +703,17 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
     //     in the cache.
     //
     (* conservative_implicit_conditions *)
-    rule handleInvalOrFlush (curState == HCST_NORMAL &&
-                             reqIsInvalOrFlush(tpl_2(processReqQ0.first())));
+    rule handleInvalOrFlush (reqIsInvalOrFlush(tpl_2(processReqQ0.first())));
 
         match {.req_base_in, .req} = processReqQ0.first();
         processReqQ0.deq();
 
-        let meta <- cacheMeta.readRsp();
-        let cur_lru <- cacheLRU.readRsp();
+        let meta <- localData.metaData.readRsp();
 
         let tag = req_base_in.tag;
         let set = req_base_in.set;
 
-        Maybe#(HASIM_CACHE_INVAL_IDX) need_ack = ?;
+        Maybe#(RL_SA_CACHE_INVAL_IDX) need_ack = ?;
         Bool is_inval = ?;
 
         case (req) matches
@@ -756,11 +736,13 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
 
         if (findWayMatch(tag, meta) matches tagged Valid {.way, .way_meta})
         begin
+            let meta_upd = meta;
+
             if (way_meta.dirty)
             begin
                 // Found dirty line.  Prepare for write back.
                 req_base_out.way = way;
-                cacheReadForFlushReqQ.enq(getDataIdx(set, way));
+                localData.dataReadReq(0, set, way);
                 readHitQ.enq(tuple3(req_base_out, req, way_meta.wordValid));
                 found_dirty_line = True;
 
@@ -769,18 +751,18 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
                     // FLUSH:  Line no longer dirty.  Update meta data.
                     let new_meta = way_meta;
                     new_meta.dirty = False;
-                    meta[way] = tagged Valid new_meta;
+                    meta_upd.ways[way] = tagged Valid new_meta;
                 end
             end
 
             if (is_inval)
             begin
                 // Invalidate line
-                meta[way] = tagged Invalid;
+                meta_upd.ways[way] = tagged Invalid;
                 stats.forceInvalLine();
             end
 
-            cacheMeta.write(set, meta);
+            localData.metaData.write(set, meta_upd);
 
             debugLog.record($format("  FLUSH/INVAL HIT %s: addr=0x%x, set=0x%x, way=%0d", (found_dirty_line ? "dirty" : "clean"), debugAddrFromTag(tag, set), set, way));
         end
@@ -796,47 +778,33 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
 
 
     //
-    // readCacheDataForFlushReq --
-    //     There isn't enough time to request the cache data read during way
-    //     hit detection in handleInvalOrFlush.  The cache read is requested
-    //     here for use in flushDirtyLine.
-    //    
-    rule readCacheDataForFlushReq (curState == HCST_NORMAL);
-        let idx = cacheReadForFlushReqQ.first();
-        cacheReadForFlushReqQ.deq();
-
-        cacheDataReadReq(0, idx);
-    endrule
-
-
-    //
     // flushDirtyLine --
     //   Flush a dirty line and continue on to fill, if appropriate.
     //
-    rule flushDirtyLine (curState == HCST_NORMAL &&
-                         reqIsInvalOrFlush(tpl_2(readHitQ.first())));
+    rule flushDirtyLine (reqIsInvalOrFlush(tpl_2(readHitQ.first())));
 
         match {.req_base, .req, .word_valid_mask} = readHitQ.first();
         readHitQ.deq();
 
-        let flushData <- cacheDataReadRsp(0);
+        let v <- localData.dataReadRsp(0);
+        t_CACHE_LINE flush_data = unpack(pack(v));
 
         let tag = req_base.tag;
         let set = req_base.set;
         let way = req_base.way;
 
-        Maybe#(HASIM_CACHE_INVAL_IDX) need_ack =
+        Maybe#(RL_SA_CACHE_INVAL_IDX) need_ack =
             case (req) matches
                 tagged HCOP_INVAL .needAck: needAck;
                 tagged HCOP_FLUSH_DIRTY .needAck: needAck;
             endcase;
 
         stats.dirtyLineFlush();
-        debugLog.record($format("  Write back DIRTY: addr=0x%x, set=0x%x, mask=0x%x, data=0x%x", debugAddrFromTag(tag, set), set, word_valid_mask, flushData));
+        debugLog.record($format("  Write back DIRTY: addr=0x%x, set=0x%x, mask=0x%x, data=0x%x", debugAddrFromTag(tag, set), set, word_valid_mask, flush_data));
 
         // Flush for invalidate request.  Use sync method to know the
         // data arrived.
-        sourceData.writeSyncReq(cacheAddr(tag, set), word_valid_mask, flushData, req_base.refInfo);
+        sourceData.writeSyncReq(cacheAddr(tag, set), word_valid_mask, flush_data, req_base.refInfo);
         flushAckQ.enq(tuple2(set, need_ack));
     endrule
 
@@ -878,14 +846,12 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
     //     First unique stage of cache READ path.
     //
     (* conservative_implicit_conditions *)
-    rule handleRead (curState == HCST_NORMAL &&&
-                     tpl_2(processReqQ0.first()) matches tagged HCOP_READ .rReq);
+    rule handleRead (tpl_2(processReqQ0.first()) matches tagged HCOP_READ .rReq);
 
         match {.req_base_in, .req} = processReqQ0.first();
         processReqQ0.deq();
 
-        let meta <- cacheMeta.readRsp();
-        let cur_lru <- cacheLRU.readRsp();
+        let meta <- localData.metaData.readRsp();
 
         let tag = req_base_in.tag;
         let set = req_base_in.set;
@@ -902,13 +868,21 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
             req_base_out.way = way;
 
             // Update LRU
-            cacheLRUUpdate(set, way, cur_lru);
+            let meta_upd = meta;
+            meta_upd.lru <- cacheLRUUpdate(set, way, meta.lru);
 
             if (way_meta.wordValid[rReq.wordIdx])
             begin
                 // Word hit!
-                cacheReadForHitQ.enq(getDataIdx(set, way));
+                stats.readHit();
+                localData.dataReadReq(1, set, way);
                 readHitQ.enq(tuple3(req_base_out, req, way_meta.wordValid));
+
+                if (meta_upd.lru != meta.lru)
+                begin
+                    // LRU changed.  Update metadata.
+                    localData.metaData.write(set, meta_upd);
+                end
             end
             else
             begin
@@ -917,15 +891,15 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
 
                 // Mark all words valid in the line.  They will be after
                 // the fill completes.
-                let meta_upd = meta;
-                meta_upd[way] = tagged Valid metaData(tag, way_meta.dirty, replicate(True));
-                cacheMeta.write(set, meta_upd);
+                meta_upd.ways[way] = tagged Valid metaData(tag, way_meta.dirty, replicate(True));
+
+                localData.metaData.write(set, meta_upd);
             end
         end
         else
         begin
             // Miss.
-            lineMissQ.enq(tuple4(req_base_out, req, cur_lru, meta));
+            lineMissQ.enq(tuple3(req_base_out, req, meta));
         end
     endrule
 
@@ -935,14 +909,12 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
     //     First unique stage of cache WRITE path.
     //
     (* conservative_implicit_conditions *)
-    rule handleWrite (curState == HCST_NORMAL &&&
-                      tpl_2(processReqQ0.first()) matches tagged HCOP_WRITE .wReq);
+    rule handleWrite (tpl_2(processReqQ0.first()) matches tagged HCOP_WRITE .wReq);
 
         match {.req_base_in, .req} = processReqQ0.first();
         processReqQ0.deq();
 
-        let meta <- cacheMeta.readRsp();
-        let cur_lru <- cacheLRU.readRsp();
+        let meta <- localData.metaData.readRsp();
 
         let tag = req_base_in.tag;
         let set = req_base_in.set;
@@ -960,7 +932,8 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
             req_base_out.way = way;
 
             // Update LRU
-            cacheLRUUpdate(set, way, cur_lru);
+            let meta_upd = meta;
+            meta_upd.lru <- cacheLRUUpdate(set, way, meta.lru);
 
             stats.writeHit();
 
@@ -968,9 +941,16 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
             let new_word_valid = way_meta.wordValid;
             new_word_valid[wReq.wordIdx] = True;
 
-            let meta_upd = meta;
-            meta_upd[way] = tagged Valid metaData(tag, writeBackCache, new_word_valid);
-            cacheMeta.write(set, meta_upd);
+            meta_upd.ways[way] = tagged Valid metaData(tag, writeBackCache, new_word_valid);
+
+            // Update metadata if it is changed.  Skip the write otherwise, since
+            // DDR writes are costly.
+            if ((meta_upd.lru != meta.lru) ||
+                (new_word_valid != way_meta.wordValid) ||
+                ! way_meta.dirty)
+            begin
+                localData.metaData.write(set, meta_upd);
+            end
 
             // Request write to cache
             writeDataQ.enq(tuple2(req_base_out, wReq));
@@ -979,7 +959,7 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
         else
         begin
             // Miss.
-            lineMissQ.enq(tuple4(req_base_out, req, cur_lru, meta));
+            lineMissQ.enq(tuple3(req_base_out, req, meta));
         end
     endrule
 
@@ -992,31 +972,16 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
     // ====================================================================
 
     //
-    // readCacheDataForReadHit --
-    //     There isn't enough time to request the cache data read during way
-    //     hit detection in handleRead.  The cache read is requested here
-    //     for use in handleReadCacheHit.
-    //    
-    rule readCacheDataForReadHit (curState == HCST_NORMAL);
-        let idx = cacheReadForHitQ.first();
-        cacheReadForHitQ.deq();
-
-        stats.readHit();
-        cacheDataReadReq(1, idx);
-    endrule
-
-
-    //
     // handleReadCacheHit --
     //   Forward data coming from cache BRAM from handleRead to back to the requester.
     //
-    rule handleReadCacheHit (curState == HCST_NORMAL &&&
-                             tpl_2(readHitQ.first()) matches tagged HCOP_READ .rReq);
+    rule handleReadCacheHit (tpl_2(readHitQ.first()) matches tagged HCOP_READ .rReq);
 
         match {.req_base, .req, .word_valid_mask} = readHitQ.first();
         readHitQ.deq();
 
-        let v <- cacheDataReadRsp(1);
+        let d <- localData.dataReadRsp(1);
+        t_CACHE_LINE v = unpack(pack(d));
 
         let tag = req_base.tag;
         let set = req_base.set;
@@ -1038,7 +1003,7 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
     // writeCacheData --
     //   All cache writes terminate here, including the line miss path.
     //
-    rule writeCacheData (curState == HCST_NORMAL);
+    rule writeCacheData (True);
         match {.req_base, .w_req} = writeDataQ.first();
         writeDataQ.deq();
 
@@ -1048,7 +1013,7 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
         let set = req_base.set;
         let way = req_base.way;
 
-        cacheData[w_req.wordIdx].write(getDataIdx(set, way), w_data.val);
+        localData.dataWriteWord(set, way, w_req.wordIdx, w_data.val);
 
         debugLog.record($format("  WRITE Word: addr=0x%x, set=0x%x, way=%0d, word=%0d, data=0x%x", debugAddrFromTag(tag, set), set, way, w_req.wordIdx, w_data.val));
 
@@ -1077,8 +1042,7 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
     //     Line is present in the cache but incomplete.  Request the full line
     //     from backing storage and merge it into the line.
     //
-    rule handleWordMissForRead (curState == HCST_NORMAL &&&
-                                tpl_2(wordMissQ.first()) matches tagged HCOP_READ .rReq);
+    rule handleWordMissForRead (tpl_2(wordMissQ.first()) matches tagged HCOP_READ .rReq);
 
         match {.req_base, .req, .word_valid_mask} = wordMissQ.first();
         wordMissQ.deq();
@@ -1105,10 +1069,9 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
     //     Pick a victim and prepare to fill a way from backing storage.
     //
     (* conservative_implicit_conditions *)
-    rule handleMissForRead (curState == HCST_NORMAL &&&
-                            tpl_2(lineMissQ.first()) matches tagged HCOP_READ .rReq);
+    rule handleMissForRead (tpl_2(lineMissQ.first()) matches tagged HCOP_READ .rReq);
 
-        match {.req_base_in, .req, .cur_lru, .meta} = lineMissQ.first();
+        match {.req_base_in, .req, .meta} = lineMissQ.first();
         lineMissQ.deq();
 
         let tag = req_base_in.tag;
@@ -1119,8 +1082,8 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
         //
         // Pick a fill victim:  either the first invalid or the LRU entry.
         // 
-        t_CACHE_WAY_IDX fill_way = getLRU(cur_lru);
-        if (findFirstInvalid(meta) matches tagged Valid .inval_way)
+        t_CACHE_WAY_IDX fill_way = getLRU(meta.lru);
+        if (findFirstInvalid(meta.ways) matches tagged Valid .inval_way)
         begin
             fill_way = inval_way;
         end
@@ -1129,14 +1092,14 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
         req_base_out.way = fill_way;
 
         // Update LRU
-        cacheLRUUpdate(set, fill_way, cur_lru);
+        let meta_upd = meta;
+        meta_upd.lru <- cacheLRUUpdate(set, fill_way, meta.lru);
 
         //
         // Update metadata here for the filled line since we have the details.
         //
-        let meta_upd = meta;
-        meta_upd[fill_way] = tagged Valid metaData(tag, False, replicate(True));
-        cacheMeta.write(set, meta_upd);
+        meta_upd.ways[fill_way] = tagged Valid metaData(tag, False, replicate(True));
+        localData.metaData.write(set, meta_upd);
 
         //
         // Now must figure out the next state...
@@ -1144,14 +1107,14 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
 
         // Is victim dirty?
         Bool flushed_dirty = False;
-        if (meta[fill_way] matches tagged Valid .m)
+        if (meta.ways[fill_way] matches tagged Valid .m)
         begin
             stats.invalLine();
             if (m.dirty)
             begin
                 // Victim is dirty.  Flush data.
                 flushed_dirty = True;
-                cacheReadForEvictDirtyQ.enq(getDataIdx(set, fill_way));
+                localData.dataReadReq(2, set, fill_way);
                 evictDirtyForFillQ.enq(tuple3(req_base_out, req, m));
 
                 debugLog.record($format("  READ MISS (FLUSH): addr=0x%x, set=0x%x, way=%0d", debugAddrFromTag(m.tag, set), set, fill_way));
@@ -1174,10 +1137,9 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
     //     Pick a victim and write back the dirty data, if needed.
     //
     (* conservative_implicit_conditions *)
-    rule handleMissForWrite (curState == HCST_NORMAL &&&
-                             tpl_2(lineMissQ.first()) matches tagged HCOP_WRITE .wReq);
+    rule handleMissForWrite (tpl_2(lineMissQ.first()) matches tagged HCOP_WRITE .wReq);
 
-        match {.req_base_in, .req, .cur_lru, .meta} = lineMissQ.first();
+        match {.req_base_in, .req, .meta} = lineMissQ.first();
         lineMissQ.deq();
 
         let tag = req_base_in.tag;
@@ -1188,8 +1150,8 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
         //
         // Pick a fill victim:  either the first invalid or the LRU entry.
         // 
-        t_CACHE_WAY_IDX fill_way = getLRU(cur_lru);
-        if (findFirstInvalid(meta) matches tagged Valid .inval_way)
+        t_CACHE_WAY_IDX fill_way = getLRU(meta.lru);
+        if (findFirstInvalid(meta.ways) matches tagged Valid .inval_way)
         begin
             fill_way = inval_way;
         end
@@ -1198,7 +1160,8 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
         req_base_out.way = fill_way;
 
         // Update LRU
-        cacheLRUUpdate(set, fill_way, cur_lru);
+        let meta_upd = meta;
+        meta_upd.lru <- cacheLRUUpdate(set, fill_way, meta.lru);
 
         //
         // Update metadata here for the filled line since we have the details.
@@ -1210,9 +1173,8 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
         word_valid_mask[wReq.wordIdx] = True;
 
         // Update tag and write metadata
-        let meta_upd = meta;
-        meta_upd[fill_way] = tagged Valid metaData(tag, writeBackCache, word_valid_mask);
-        cacheMeta.write(set, meta_upd);
+        meta_upd.ways[fill_way] = tagged Valid metaData(tag, writeBackCache, word_valid_mask);
+        localData.metaData.write(set, meta_upd);
 
         //
         // Now must figure out the next state...
@@ -1220,14 +1182,14 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
 
         // Is victim dirty?
         Bool flushed_dirty = False;
-        if (meta[fill_way] matches tagged Valid .m)
+        if (meta.ways[fill_way] matches tagged Valid .m)
         begin
             stats.invalLine();
             if (m.dirty)
             begin
                 // Victim is dirty.  Flush data.
                 flushed_dirty = True;
-                cacheReadForEvictDirtyQ.enq(getDataIdx(set, fill_way));
+                localData.dataReadReq(2, set, fill_way);
                 evictDirtyForFillQ.enq(tuple3(req_base_out, req, m));
 
                 debugLog.record($format("  WRITE MISS (FLUSH): addr=0x%x, set=0x%x, way=%0d", debugAddrFromTag(m.tag, set), set, fill_way));
@@ -1244,28 +1206,15 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
 
 
     //
-    // readCacheDataForEvict --
-    //     There isn't enough time to request the cache data read during way
-    //     victim selection in flushDirtyForRead and flushDirtyForWrite.  The
-    //     cache read is requested here for use in flushDirtyForFill.
-    //    
-    rule readCacheDataForEvict (curState == HCST_NORMAL);
-        let idx = cacheReadForEvictDirtyQ.first();
-        cacheReadForEvictDirtyQ.deq();
-
-        cacheDataReadReq(2, idx);
-    endrule
-
-
-    //
     // evictDirtyForFill --
     //   Flush a dirty line and continue on to fill, if appropriate.
     //
-    rule evictDirtyForFill (curState == HCST_NORMAL);
+    rule evictDirtyForFill (True);
         match {.req_base, .req, .flush_meta} = evictDirtyForFillQ.first();
         evictDirtyForFillQ.deq();
 
-        let flush_data <- cacheDataReadRsp(2);
+        let v <- localData.dataReadRsp(2);
+        t_CACHE_LINE flush_data = unpack(pack(v));
 
         let set = req_base.set;
         let way = req_base.way;
@@ -1289,7 +1238,7 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
     endrule
 
 
-    rule sendFillRequest (curState == HCST_NORMAL);
+    rule sendFillRequest (True);
         match {.req_base, .req} = fillLineRequestQ.first();
         fillLineRequestQ.deq();
 
@@ -1307,8 +1256,7 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
     // handleFillForRead --
     //    Update the cache with requested data coming back from memory.
     //
-    rule handleFillForRead (curState == HCST_NORMAL &&&
-                            tpl_2(fillLineQ.first()) matches tagged HCOP_READ .rReq);
+    rule handleFillForRead (tpl_2(fillLineQ.first()) matches tagged HCOP_READ .rReq);
 
         match {.req_base, .req, .cur_word_valid_mask} = fillLineQ.first();
         fillLineQ.deq();
@@ -1319,22 +1267,16 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
         let set = req_base.set;
         let way = req_base.way;
 
+        //
         // Cache the new values.  Don't overwrite entries that are currently
         // valid, since they may be dirty.
-        t_CACHE_WORD_VALID_MASK ret_valid_words;
-        Vector#(nWordsPerLine, t_CACHE_WORD) lineWords = unpack(pack(v));
-        for (Integer w = 0; w < valueOf(nWordsPerLine); w = w + 1)
-        begin
-            if (! cur_word_valid_mask[w])
-            begin
-                cacheData[w].write(getDataIdx(set, way), lineWords[w]);
-            end
-            
-            // On return only claim that the newly filled lines are valid.
-            // We could retrieve the entire line but that would take another
-            // stage and more wires to read the dirty data from the cache.
-            ret_valid_words[w] = ! cur_word_valid_mask[w];
-        end
+        //
+        // On return only claim that the newly filled lines are valid.
+        // We could retrieve the entire line but that would take another
+        // stage and more wires to read the dirty data from the cache.
+        //
+        t_CACHE_WORD_VALID_MASK ret_valid_words = unpack(~pack(cur_word_valid_mask));
+        localData.dataWrite(set, way, ret_valid_words, unpack(pack(v)));
 
         if (permitOOOReadResp)
         begin
@@ -1357,137 +1299,19 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
     //
     // ====================================================================
 
+    // Not required for correctness: get rid of warning messages...
+    (* descending_urgency = "writeCacheData, handleFlushACK, flushDirtyLine, sendFillRequest, handleFillForRead, evictDirtyForFill, handleWordMissForRead, handleMissForRead, handleMissForWrite, handleReadCacheHit, handleRead, handleWrite, handleInvalOrFlush" *)
+
     //
     // doneWithRef --
     //     All access paths terminate here.
     //
-    rule doneWithRef (curState == HCST_NORMAL);
+    rule doneWithRef (True);
         let set = doneQ.first();
         doneQ.deq();
 
         nBusySets.down();
         setFilter.remove(set);
-    endrule
-
-
-    // ====================================================================
-    //
-    //   Invalidate ALL support (clear entire cache).
-    //
-    // ====================================================================
-
-    FIFO#(Tuple3#(t_CACHE_SET_IDX, t_METADATA_VECTOR, Bool)) invalAllFlushSetQ <- mkFIFO();
-    FIFO#(Tuple3#(t_CACHE_TAG, t_CACHE_SET_IDX, t_CACHE_WORD_VALID_MASK)) invalAllFlushLineQ <- mkFIFO();
-
-    // State for invalidate all
-    Reg#(Bool)             invalidatingAllLastSet  <- mkReg(False);
-    Reg#(t_CACHE_SET_IDX)  invalidateAllSet <- mkReg(0);
-    Reg#(t_CACHE_WAY_IDX)  invalidateFlushWay <- mkReg(0);
-
-    Reg#(t_CACHE_REF_INFO) invalidateAll_refInfo <- mkRegU();
-
-    //
-    // invalAllWait --
-    //     Wait for cache to be idle before starting an invalidate all.
-    //
-    rule handleInvalAllReq (invalidateAllReq &&
-                            curState == HCST_NORMAL &&
-                            (nBusySets.value() == 0));
-
-        debugLog.record($format("  Start INVAL ALL"));
-
-        invalidateAllReq <= False;
-        invalidatingAllLastSet <= False;
-
-        if (cacheIsEmpty)
-        begin
-            curState <= HCST_INVAL_ALL_DONE;
-        end
-        else
-        begin
-            curState <= HCST_INVAL_ALL;
-            cacheMeta.readReq(0);
-            cacheIsEmpty <= True;
-        end
-    endrule
-
-
-    //
-    // handleInvalidateAll --
-    //     Memory system may request invalidation of the entire cache if it
-    //     doesn't know which lines may need to be flushed.
-    //
-    rule handleInvalidateAll ((curState == HCST_INVAL_ALL) && ! invalidatingAllLastSet);
-        cacheLRU.write(invalidateAllSet, Vector::genWith(fromInteger));
-        cacheMeta.write(invalidateAllSet, Vector::replicate(tagged Invalid));
-
-        // Flush dirty lines
-        let meta <- cacheMeta.readRsp();
-        let done = (invalidateAllSet == maxBound);
-        invalAllFlushSetQ.enq(tuple3(invalidateAllSet, meta, done));
-
-        if (done)
-        begin
-            invalidatingAllLastSet <= True;
-        end
-        else
-        begin
-            cacheMeta.readReq(invalidateAllSet);
-        end
-
-        invalidateAllSet <= invalidateAllSet + 1;
-    endrule
-
-
-    // Not required for correctness: get rid of warning messages...
-    (* descending_urgency = "writeCacheData, handleFlushACK, flushDirtyLine, handleFillForRead, evictDirtyForFill, handleWordMissForRead, handleMissForRead, handleMissForWrite, handleReadCacheHit, readCacheDataForEvict, readCacheDataForReadHit, readCacheDataForFlushReq, handleRead, handleWrite, handleInvalOrFlush, handleIncomingReq, flushDirtyLineForInvalAll, invalSetForInvalAll, handleInvalidateAll, handleInvalAllReq" *)
-
-
-    //
-    // invalSetForInvalAll --
-    //   Invalidate an entire set (requested by handleInvalidateAll).
-    //
-    (* conservative_implicit_conditions *)
-    rule invalSetForInvalAll (curState == HCST_INVAL_ALL);
-        match {.set, .meta, .last_set} = invalAllFlushSetQ.first();
-        
-        if (meta[invalidateFlushWay] matches tagged Valid .m &&& m.dirty)
-        begin
-            invalAllFlushLineQ.enq(tuple3(m.tag, set, m.wordValid));
-            cacheDataReadReq(3, getDataIdx(set, invalidateFlushWay));
-        end
-
-        // Done with the set?
-        if (invalidateFlushWay == maxBound)
-        begin
-            // Done.  Pass the request on to the fill stage, if appropriate.
-            invalAllFlushSetQ.deq();
-            
-            // Done with invalidateingAll?
-            if (last_set)
-            begin
-                curState <= HCST_INVAL_ALL_DONE;
-                debugLog.record($format("  Request done: INVAL ALL"));
-            end
-        end
-
-        invalidateFlushWay <= invalidateFlushWay + 1;
-    endrule
-
-
-    //
-    // flushDirtyLineForInvalAll --
-    //     Flush one dirty line, requested by invalSetForInvalAll.
-    //
-    rule flushDirtyLineForInvalAll (True);
-        match { .tag, .set, .word_valid_mask } = invalAllFlushLineQ.first();
-        invalAllFlushLineQ.deq();
-
-        let flush_data <- cacheDataReadRsp(3);
-        sourceData.write(cacheAddr(tag, set), word_valid_mask, flush_data, invalidateAll_refInfo);
-
-        stats.dirtyLineFlush();
-        debugLog.record($format("  Write back DIRTY: addr=0x%x, set=0x%x, mask=0x%x, data=0x%x", debugAddrFromTag(tag, set), set, word_valid_mask, flush_data));
     endrule
 
 
@@ -1527,18 +1351,18 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
     //
     method Action readReq(t_CACHE_ADDR addr,
                           Bit#(TLog#(nWordsPerLine)) wordIdx,
-                          t_CACHE_REF_INFO refInfo) if (curState == HCST_NORMAL);
+                          t_CACHE_REF_INFO refInfo);
         //
         // If resonses are supposed to be returned in order than allocate a slot
         // in the response queue.
         //
-        HASIM_CACHE_READ_FIFO_IDX readIdx = ?;
+        RL_SA_CACHE_READ_FIFO_IDX readIdx = ?;
         if (! permitOOOReadResp)
         begin
             readIdx <- readRespToClientQ_InOrder.enq();
         end
 
-        HASIM_CACHE_READ_REQ#(nWordsPerLine) req;
+        RL_SA_CACHE_READ_REQ#(nWordsPerLine) req;
         req.wordIdx = wordIdx;
         req.readFifoIdx = readIdx;
     
@@ -1594,14 +1418,14 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
     //
     // write -- Write a word to a line.
     //
-    method Action write(t_CACHE_ADDR addr, t_CACHE_WORD val, t_CACHE_WRITE_WORD_IDX wordIdx, t_CACHE_REF_INFO refInfo) if (curState == HCST_NORMAL);
+    method Action write(t_CACHE_ADDR addr, t_CACHE_WORD val, t_CACHE_WRITE_WORD_IDX wordIdx, t_CACHE_REF_INFO refInfo);
         t_CACHE_WRITE_INFO w_info;
         w_info.val = val;
 
         let h <- reqInfo_writeData.malloc();
         reqInfo_writeData.upd(h, w_info);
 
-        HASIM_CACHE_WRITE_REQ#(nWordsPerLine) w_req;
+        RL_SA_CACHE_WRITE_REQ#(nWordsPerLine) w_req;
         w_req.wordIdx = wordIdx;    
         w_req.dataIdx = h;
 
@@ -1614,7 +1438,7 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
     //
     // invalReq -- Invalidate (remove) a line from the cache
     //
-    method Action invalReq(t_CACHE_ADDR addr, Bool sendAck, t_CACHE_REF_INFO refInfo) if (curState == HCST_NORMAL);
+    method Action invalReq(t_CACHE_ADDR addr, Bool sendAck, t_CACHE_REF_INFO refInfo);
         if (sendAck)
         begin
             let idx <- invalReqDoneQ.enq();
@@ -1635,7 +1459,7 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
     // flushReq --
     //     Flush (write back) a line from the cache but keep the line cached.
     //
-    method Action flushReq(t_CACHE_ADDR addr, Bool sendAck, t_CACHE_REF_INFO refInfo) if (curState == HCST_NORMAL);
+    method Action flushReq(t_CACHE_ADDR addr, Bool sendAck, t_CACHE_REF_INFO refInfo);
         if (sendAck)
         begin
             let idx <- invalReqDoneQ.enq();
@@ -1661,19 +1485,6 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
 
 
     //
-    // invalAllReq -- Invalidate entire cache.  Write back dirty lines.
-    //
-    method Action invalAllReq(t_CACHE_REF_INFO refInfo) if (! invalidateAllReq);
-        debugLog.record($format("  New request: INVAL ALL"));
-        invalidateAll_refInfo <= refInfo;
-        invalidateAllReq <= True;
-    endmethod
-
-    method Action invalAllWait() if (curState == HCST_INVAL_ALL_DONE);
-        curState <= HCST_NORMAL;
-    endmethod
-
-    //
     // setModeWriteBack -- Write back or write through cache config.
     //
     method Action setModeWriteBack(Bool isWriteBack);
@@ -1686,16 +1497,138 @@ module mkCacheSetAssoc#(HASIM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
 endmodule
 
 
+
 // ===================================================================
 //
-// Null version of HASIM_CACHE_STATS interface for clients not interested in
+// BRAM-based local data implementation.
+//
+// ===================================================================
+
+module mkBRAMCacheLocalData
+    // interface:
+    (RL_SA_CACHE_LOCAL_DATA#(t_CACHE_ADDR_SZ, t_CACHE_WORD, nWordsPerLine, nSets, nWays))
+    provisos (Bits#(t_CACHE_WORD, t_CACHE_WORD_SZ),
+              Alias#(RL_SA_CACHE_SET_METADATA#(t_CACHE_ADDR_SZ, nWordsPerLine, nSets, nWays), t_SET_METADATA),
+              Bits#(t_SET_METADATA, t_SET_METADATA_SZ),
+              Alias#(RL_SA_CACHE_SET_IDX#(nSets), t_CACHE_SET_IDX),
+              Alias#(RL_SA_CACHE_WAY_IDX#(nWays), t_CACHE_WAY_IDX),
+              Alias#(Tuple2#(t_CACHE_SET_IDX, t_CACHE_WAY_IDX), t_CACHE_DATA_IDX));
+    
+    // Metadata
+    BRAM#(RL_SA_CACHE_SET_IDX#(nSets), t_SET_METADATA) meta <- mkBRAMInitialized(RL_SA_CACHE_SET_METADATA { lru: Vector::genWith(fromInteger),
+                                                                                                            ways: Vector::replicate(tagged Invalid) });
+
+    // Values
+    Vector#(nWordsPerLine, BRAM_MULTI_READ#(RL_SA_CACHE_DATA_READ_PORTS, t_CACHE_DATA_IDX, t_CACHE_WORD)) data <- replicateM(mkBRAMPseudoMultiRead());
+
+    //
+    // getDataIdx --
+    //     Convert set and way into a linear address.
+    //
+    function t_CACHE_DATA_IDX getDataIdx (t_CACHE_SET_IDX set, t_CACHE_WAY_IDX way);
+        return tuple2(set, way);
+    endfunction
+
+
+    // ====================================================================
+    //
+    // Read request FIFOs.  Read requests are buffered through FIFOs in
+    // order to break scheduling dependence between reads and writes.
+    // They also introduce delay that is needed to meet timing between
+    // metadata lookups and data reads.
+    //
+    // ====================================================================
+
+    FIFO#(Tuple3#(Bit#(TLog#(RL_SA_CACHE_DATA_READ_PORTS)), t_CACHE_SET_IDX, t_CACHE_WAY_IDX)) readDataReqQ <- mkFIFO();
+
+    rule forwardDataReq (True);
+        match {.port, .set, .way} = readDataReqQ.first();
+        readDataReqQ.deq();
+
+        for (Integer b = 0; b < valueOf(nWordsPerLine); b = b + 1)
+        begin
+            data[b].readPorts[port].readReq(getDataIdx(set, way));
+        end
+    endrule
+
+
+    //
+    // Metadata access methods
+    //
+
+    interface MEMORY_IFC metaData;
+        method Action readReq(RL_SA_CACHE_SET_IDX#(nSets) set);
+            meta.readReq(set);
+        endmethod
+
+        method ActionValue#(t_SET_METADATA) readRsp();
+            let d <- meta.readRsp();
+            return d;
+        endmethod
+
+        method Action write(RL_SA_CACHE_SET_IDX#(nSets) set, t_SET_METADATA mData);
+            meta.write(set, mData);
+        endmethod
+    endinterface
+
+
+    //
+    // Data access methods
+    //
+
+    // Read all words in a line
+    method Action dataReadReq(Integer readPort,
+                              RL_SA_CACHE_SET_IDX#(nSets) set,
+                              RL_SA_CACHE_WAY_IDX#(nWays) way);
+        readDataReqQ.enq(tuple3(fromInteger(readPort), set, way));
+    endmethod
+
+    method ActionValue#(Vector#(nWordsPerLine, t_CACHE_WORD)) dataReadRsp(Integer readPort);
+        Vector#(nWordsPerLine, t_CACHE_WORD) lineVal;
+        for (Integer b = 0; b < valueOf(nWordsPerLine); b = b + 1)
+        begin
+            let v <- data[b].readPorts[readPort].readRsp();
+            lineVal[b] = v;
+        end
+
+        return lineVal;
+    endmethod
+
+
+    method Action dataWrite(RL_SA_CACHE_SET_IDX#(nSets) set,
+                            RL_SA_CACHE_WAY_IDX#(nWays) way,
+                            Vector#(nWordsPerLine, Bool) wordMask,
+                            Vector#(nWordsPerLine, t_CACHE_WORD) val);
+        for (Integer b = 0; b < valueOf(nWordsPerLine); b = b + 1)
+        begin
+            // Only write the word if the mask bit is set
+            if (wordMask[b])
+            begin
+                data[b].write(getDataIdx(set, way), val[b]);
+            end
+        end
+    endmethod
+
+    method Action dataWriteWord(RL_SA_CACHE_SET_IDX#(nSets) set,
+                                RL_SA_CACHE_WAY_IDX#(nWays) way,
+                                Bit#(TLog#(nWordsPerLine)) wordIdx,
+                                t_CACHE_WORD val);
+        data[wordIdx].write(getDataIdx(set, way), val);
+    endmethod
+
+endmodule
+
+
+// ===================================================================
+//
+// Null version of RL_SA_CACHE_STATS interface for clients not interested in
 // statistics.
 //
 // ===================================================================
 
-module mkNullHAsimCacheStats
+module mkNullRLCacheStats
     // interface:
-        (HASIM_CACHE_STATS);
+        (RL_SA_CACHE_STATS);
     
     method Action readHit();
     endmethod

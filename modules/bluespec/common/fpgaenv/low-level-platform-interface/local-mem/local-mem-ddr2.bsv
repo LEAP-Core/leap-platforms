@@ -193,4 +193,19 @@ module mkLocalMem#(PHYSICAL_DRIVERS drivers)
         dramDriver.writeReq(addr);
         writeDataQ.enq(LOCAL_MEM_WRITE_REQ { data: unpack(data), mask: unpack(0) });
     endmethod
+
+    method Action writeLineMasked(LOCAL_MEM_ADDR addr, LOCAL_MEM_LINE data, LOCAL_MEM_LINE_MASK mask) if (readReqQ.notFull());
+        dramDriver.writeReq(addr);
+
+        // Convert incoming mask with 1 bit per word to DRAM mask.  Incoming
+        // mask indicates write with 1.  Outgoing mask indicates write with 0.
+        Vector#(LOCAL_MEM_WORDS_PER_LINE, Bit#(TDiv#(SizeOf#(DRAM_FULL_LINE_MASK), LOCAL_MEM_WORDS_PER_LINE))) ddr_mask = newVector();
+        for (Integer w = 0; w < valueOf(LOCAL_MEM_WORDS_PER_LINE); w = w + 1)
+        begin
+            // 0 means write the data!
+            ddr_mask[w] = mask[w] ? 0 : -1;
+        end
+
+        writeDataQ.enq(LOCAL_MEM_WRITE_REQ { data: unpack(data), mask: unpack(pack(ddr_mask)) });
+    endmethod
 endmodule

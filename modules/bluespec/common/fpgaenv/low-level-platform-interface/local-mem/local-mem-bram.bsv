@@ -166,4 +166,17 @@ module mkLocalMem#(PHYSICAL_DRIVERS drivers)
             mem[w].write(l_addr, l_data[w]);
         end
     endmethod
+
+    method Action writeLineMasked(LOCAL_MEM_ADDR addr, LOCAL_MEM_LINE data, LOCAL_MEM_LINE_MASK mask) if (readReqQ.notFull());
+        match {.l_addr, .w_idx} = localMemBurstAddr(addr);
+
+        Vector#(LOCAL_MEM_WORDS_PER_LINE, LOCAL_MEM_WORD) l_data = unpack(data);
+        for (Integer w = 0; w < valueOf(LOCAL_MEM_WORDS_PER_LINE); w = w + 1)
+        begin
+            if (mask[w])
+            begin
+                mem[w].write(l_addr, l_data[w]);
+            end
+        end
+    endmethod
 endmodule
