@@ -543,6 +543,11 @@ module mkLocalMemCacheData#(LowLevelPlatformInterface llpi, DEBUG_FILE debugLog)
         memory.readPorts[valueOf(t_METADATA_READ_PORT)].readLineReq(getMetadataIdx(set));
     endrule
 
+    //
+    // Reading data must have higher priority than reading metadata to avoid
+    // deadlocks in the cache.
+    //
+    (* descending_urgency = "forwardDataReq, forwardMetadataReq" *)
     rule forwardDataReq (initialized);
         match {.port, .set, .way} = readDataReqQ.first();
         readDataReqQ.deq();

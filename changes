@@ -5668,3 +5668,14 @@ Directory modules/bluespec/common/fpgaenv/low-level-platform-interface/local-mem
   - Make the array smaller in the BRAM version of local memory.  Initialization
     of the cache tags was too slow in Bluesim.  The downside is the default cache
     behavior no longer matches our hardware.
+
+----------
+mcadler     Date: Thu Apr  9 13:49:39 EDT 2009  CSN: CSN-platforms-189
+                  Thu Apr  9 17:49:39 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/central-cache
+ local-mem-central-cache.bsv Locally Modified          188 
+
+Resolve a race between reading cache data and metadata.  Resolution in the wrong
+direction can cause deadlocks.
