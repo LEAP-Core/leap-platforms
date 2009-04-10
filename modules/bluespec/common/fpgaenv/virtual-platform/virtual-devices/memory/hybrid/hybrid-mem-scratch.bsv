@@ -38,16 +38,17 @@ import Vector::*;
 
 
 //
-// Scratchpad memory address and value.
+// Scratchpad memory address and value.  Value size and words per line must
+// match local memory and the central cache.
 //
 typedef Bit#(`SCRATCHPAD_MEMORY_ADDR_BITS) SCRATCHPAD_MEM_ADDRESS;
-// For now we support only 64 bit words
-typedef Bit#(64) SCRATCHPAD_MEM_VALUE;
+
+typedef LOCAL_MEM_WORD SCRATCHPAD_MEM_VALUE;
 
 // Number of scratchpad words in a line.  The line is the basic I/O size
 // for RRR messages and caching of scratchpad values.
-typedef 4 SCRATCHPAD_WORDS_PER_LINE;
-typedef Bit#(TLog#(SCRATCHPAD_WORDS_PER_LINE)) SCRATCHPAD_WORD_IDX;
+typedef LOCAL_MEM_WORDS_PER_LINE SCRATCHPAD_WORDS_PER_LINE;
+typedef LOCAL_MEM_WORD_IDX SCRATCHPAD_WORD_IDX;
 
 
 // Host scratchpad addresses are 64 bits

@@ -406,7 +406,7 @@ module mkDDR2SDRAMDevice#(Clock topLevelClock, Reset topLevelReset)
 
     MERGE_FIFOF#(2, FPGA_DRAM_REQUEST) mergeReqQ <- mkMergeFIFOF();
     
-    rule forwardIncomingReq (True);
+    rule forwardIncomingReq (state == STATE_ready);
         let r = mergeReqQ.first();
         mergeReqQ.deq();
 

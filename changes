@@ -5679,3 +5679,17 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/centr
 
 Resolve a race between reading cache data and metadata.  Resolution in the wrong
 direction can cause deadlocks.
+
+----------
+mcadler     Date: Fri Apr 10 09:32:16 EDT 2009  CSN: CSN-platforms-190
+                  Fri Apr 10 13:32:16 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-mem-scratch.bsv    Locally Modified          188 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr2-sdram
+ ddr2-sdram-device.bsv     Locally Modified          188 
+
+- Clean up scheduling precedence for DDR2 initialization.
+- Derive hybrid memory sizes from local memory.
