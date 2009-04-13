@@ -34,6 +34,7 @@ import Vector::*;
 `include "asim/provides/fpga_components.bsh"
 
 `include "asim/rrr/remote_client_stub_SCRATCHPAD_MEMORY.bsh"
+`include "asim/rrr/remote_server_stub_SCRATCHPAD_MEMORY.bsh"
 `include "asim/dict/VDEV_CACHE.bsh"
 
 
@@ -76,10 +77,30 @@ module [HASIM_MODULE] mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
 
     DEBUG_FILE debugLog <- mkDebugFile("memory_scrathpad.out");
 
+    ClientStub_SCRATCHPAD_MEMORY scratchpad_rrr <- mkClientStub_SCRATCHPAD_MEMORY();
+    ServerStub_SCRATCHPAD_MEMORY scratchpad_resp_rrr <- mkServerStub_SCRATCHPAD_MEMORY();
+
     //
     // Scratchpad's central cache port
     //
     let centralCachePort = centralCache.clientPorts[`VDEV_CACHE_SCRATCH - `VDEV_CACHE__BASE];
+
+
+    // ====================================================================
+    //
+    // Initialization.
+    //
+    // ====================================================================
+    
+    // FIFO1 because it isn't worth the space to pipeline initialization.
+    FIFO#(Tuple2#(t_PORT_ID, SCRATCHPAD_MEM_ADDRESS)) initQ <- mkFIFO1();
+
+    rule initRegion (True);
+        match {.port, .alloc_last_word_idx} = initQ.first();
+        initQ.deq();
+
+        scratchpad_rrr.makeRequest_InitRegion(zeroExtend(port), alloc_last_word_idx);
+    endrule
 
 
     // ====================================================================
@@ -89,30 +110,40 @@ module [HASIM_MODULE] mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
     //
     // ====================================================================
 
-    ClientStub_SCRATCHPAD_MEMORY scratchpad_rrr <- mkClientStub_SCRATCHPAD_MEMORY();
     let centralCacheBackingPort = centralCache.backingPorts[`VDEV_CACHE_SCRATCH - `VDEV_CACHE__BASE];
 
     rule backingReadReq (True);
         let r <- centralCacheBackingPort.getReadReq();
         debugLog.record($format("backingReadReq: addr=0x%x", r.addr));
 
-        scratchpad_rrr.makeRequest_Load(zeroExtend(r.addr));
+        scratchpad_rrr.makeRequest_LoadLine(zeroExtend(r.addr));
     endrule
 
     rule backingReadResp (True);
-        let d <- scratchpad_rrr.getResponse_Load();
-        Vector#(SCRATCHPAD_WORDS_PER_LINE, SCRATCHPAD_MEM_VALUE) v = unpack(pack(d));
+        let v <- scratchpad_resp_rrr.acceptRequest_LoadData();
 
         debugLog.record($format("backingReadResp: val=0x%x", pack(v)));
         centralCacheBackingPort.sendReadResp(pack(v));
     endrule
 
-    rule backingWriteReq (True);
+    //
+    // Writes are pipelined.  First with a control message and then with data.
+    // The cache guarantees they messages come in the right order, so just
+    // forward them when available.
+    //
+    rule backingWriteCtrlReq (True);
         let r <- centralCacheBackingPort.getWriteReq();
-        debugLog.record($format("backingWriteReq: addr=0x%x, wMask=0x%x val=0x%x", r.addr, r.wordValidMask, r.val));
+        debugLog.record($format("backingWriteReq: addr=0x%x, wMask=0x%x", r.addr, r.wordValidMask));
 
-        Vector#(SCRATCHPAD_WORDS_PER_LINE, SCRATCHPAD_MEM_VALUE) v = unpack(pack(r.val));
-        scratchpad_rrr.makeRequest_Store(zeroExtend(r.addr), zeroExtend(pack(r.wordValidMask)), v[3], v[2], v[1], v[0]);
+        scratchpad_rrr.makeRequest_StoreCtrl(zeroExtend(r.addr), zeroExtend(pack(r.wordValidMask)));
+    endrule
+
+    (* descending_urgency = "initRegion, backingWriteDataReq, backingWriteCtrlReq, backingReadReq" *)
+    rule backingWriteDataReq (True);
+        let v <- centralCacheBackingPort.getWriteData();
+        debugLog.record($format("backingWriteData: val=0x%x", v));
+
+        scratchpad_rrr.makeRequest_StoreData(v);
     endrule
 
 
@@ -224,7 +255,7 @@ module [HASIM_MODULE] mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
                 method ActionValue#(Bool) init(SCRATCHPAD_MEM_ADDRESS allocLastWordIdx);
                     debugLog.record($format("port %0d: init lastWordIdx=0x%x", p, allocLastWordIdx));
 
-                    scratchpad_rrr.makeRequest_InitRegion(fromInteger(p), allocLastWordIdx);
+                    initQ.enq(tuple2(fromInteger(p), allocLastWordIdx));
                     return True;
                 endmethod
 

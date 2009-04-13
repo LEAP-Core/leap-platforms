@@ -62,9 +62,19 @@ module mkCentralCacheBackingConnection#(Integer port, DEBUG_FILE debugLog)
     
     // Internal communication
     FIFO#(CENTRAL_CACHE_BACKING_READ_REQ) readReqQ <- mkBypassFIFO();
-    FIFO#(CENTRAL_CACHE_LINE) readRespQ <- mkBypassFIFO();
-    FIFO#(CENTRAL_CACHE_BACKING_WRITE_REQ) writeQ <- mkBypassFIFO();
     FIFOF#(Bool) writeAckQ <- mkBypassFIFOF();
+
+    // FIFO1 to save space.  Throughput isn't terribly important here
+    // since the call will go through RRR.
+    FIFOF#(CENTRAL_CACHE_BACKING_WRITE_REQ) writeCtrlQ <- mkFIFOF1();
+    FIFO#(CENTRAL_CACHE_LINE) writeDataQ <- mkFIFO1();
+    Reg#(Bit#(TLog#(CENTRAL_CACHE_WORDS_PER_LINE))) writeWordIdx <- mkReg(0);
+
+    // Read response logic.  Combine pipelined read response (words) into a single
+    // line-sized register.
+    Reg#(Vector#(CENTRAL_CACHE_WORDS_PER_LINE, CENTRAL_CACHE_WORD)) readData <- mkRegU();
+    Reg#(Bit#(TLog#(CENTRAL_CACHE_WORDS_PER_LINE))) readWordIdx <- mkReg(0);
+    Reg#(Bool) readDataReady <- mkReg(False);
 
     //
     // Central cache interface.
@@ -84,11 +94,20 @@ module mkCentralCacheBackingConnection#(Integer port, DEBUG_FILE debugLog)
 
 
         //
-        // Provide read data in response to getReadReq.
+        // Provide read data in response to getReadReq.  This method is called
+        // multiple times for each getReadReq.
         //
-        method Action sendReadResp(CENTRAL_CACHE_LINE val);
-            readRespQ.enq(val);
-            debugLog.record($format("port %0d: BACKING sendReadResp val=0x%x", port, val));
+        method Action sendReadResp(CENTRAL_CACHE_WORD val) if (! readDataReady);
+            readData[readWordIdx] <= val;
+
+            debugLog.record($format("port %0d: BACKING sendReadResp idx=%0d, val=0x%x", port, readWordIdx, val));
+
+            if (readWordIdx == maxBound)
+            begin
+                readDataReady <= True;
+            end
+    
+            readWordIdx <= readWordIdx + 1;
         endmethod
 
     
@@ -96,12 +115,31 @@ module mkCentralCacheBackingConnection#(Integer port, DEBUG_FILE debugLog)
         // Poll for request from cache to write to backing storage.
         //
         method ActionValue#(CENTRAL_CACHE_BACKING_WRITE_REQ) getWriteReq();
-            let w = writeQ.first();
-            writeQ.deq();
+            let w = writeCtrlQ.first();
+            writeCtrlQ.deq();
 
-            debugLog.record($format("port %0d: BACKING getWriteReq addr=0x%x, wMask=0x%x, refInfo=0x%x, ack=%d, val=0x%x", port, w.addr, w.wordValidMask, w.refInfo, w.sendAck, w.val));
+            debugLog.record($format("port %0d: BACKING getWriteReq addr=0x%x, wMask=0x%x, refInfo=0x%x, ack=%d", port, w.addr, w.wordValidMask, w.refInfo, w.sendAck));
     
             return w;
+        endmethod
+
+        //
+        // Poll for write data following a getWriteReq().
+        //
+        method ActionValue#(CENTRAL_CACHE_WORD) getWriteData() if (! writeCtrlQ.notEmpty());
+            debugLog.record($format("port %0d: BACKING getWriteData idx=%0d", port, writeWordIdx));
+
+            Vector#(CENTRAL_CACHE_WORDS_PER_LINE, CENTRAL_CACHE_WORD) v = unpack(pack(writeDataQ.first()));
+            if (writeWordIdx == maxBound)
+            begin
+                // Sent entire line
+                writeDataQ.deq();
+            end
+
+            let r = v[writeWordIdx];
+            writeWordIdx <= writeWordIdx + 1;
+
+            return r;
         endmethod
 
         //
@@ -123,9 +161,9 @@ module mkCentralCacheBackingConnection#(Integer port, DEBUG_FILE debugLog)
             debugLog.record($format("port %0d: BACKING readReq addr=0x%x, refInfo=0x%x", port, addr, refInfo));
         endmethod
 
-        method ActionValue#(CENTRAL_CACHE_LINE) readResp();
-            let v = readRespQ.first();
-            readRespQ.deq();
+        method ActionValue#(CENTRAL_CACHE_LINE) readResp() if (readDataReady);
+            CENTRAL_CACHE_LINE v = unpack(pack(readData));
+            readDataReady <= False;
 
             debugLog.record($format("port %0d: BACKING readResp val=0x%x", port, v));
     
@@ -142,12 +180,12 @@ module mkCentralCacheBackingConnection#(Integer port, DEBUG_FILE debugLog)
             CENTRAL_CACHE_BACKING_WRITE_REQ w;
             w.addr = addr;
             w.wordValidMask = wordValidMask;
-            w.val = val;
             w.refInfo = refInfo;
             w.sendAck = False;
 
-            writeQ.enq(w);
-            debugLog.record($format("port %0d: BACKING write addr=0x%x, wMask=0x%x, refInfo=0x%x, ack=%d, val=0x%x", port, w.addr, w.wordValidMask, w.refInfo, w.sendAck, w.val));
+            writeCtrlQ.enq(w);
+            writeDataQ.enq(val);
+            debugLog.record($format("port %0d: BACKING write addr=0x%x, wMask=0x%x, refInfo=0x%x, ack=%d, val=0x%x", port, w.addr, w.wordValidMask, w.refInfo, w.sendAck, val));
         endmethod
     
         // Synchronous write.  writeSyncWait() blocks until the response arrives.
@@ -159,12 +197,12 @@ module mkCentralCacheBackingConnection#(Integer port, DEBUG_FILE debugLog)
             CENTRAL_CACHE_BACKING_WRITE_REQ w;
             w.addr = addr;
             w.wordValidMask = wordValidMask;
-            w.val = val;
             w.refInfo = refInfo;
             w.sendAck = True;
 
-            writeQ.enq(w);
-            debugLog.record($format("port %0d: BACKING write addr=0x%x, wMask=0x%x, refInfo=0x%x, ack=%d, val=0x%x", port, w.addr, w.wordValidMask, w.refInfo, w.sendAck, w.val));
+            writeCtrlQ.enq(w);
+            writeDataQ.enq(val);
+            debugLog.record($format("port %0d: BACKING write addr=0x%x, wMask=0x%x, refInfo=0x%x, ack=%d, val=0x%x", port, w.addr, w.wordValidMask, w.refInfo, w.sendAck, val));
         endmethod
 
         method Action writeSyncWait() if (writeAckQ.notEmpty());

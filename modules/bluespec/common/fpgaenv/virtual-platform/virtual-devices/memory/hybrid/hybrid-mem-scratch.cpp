@@ -48,6 +48,7 @@ SCRATCHPAD_MEMORY_SERVER_CLASS::SCRATCHPAD_MEMORY_SERVER_CLASS()
 
     // instantiate stubs
     serverStub = new SCRATCHPAD_MEMORY_SERVER_STUB_CLASS(this);
+    clientStub = new SCRATCHPAD_MEMORY_CLIENT_STUB_CLASS(this);
 
     for (UINT32 r = 0; r < nRegions(); r++)
     {
@@ -149,8 +150,8 @@ void SCRATCHPAD_MEMORY_SERVER_CLASS::InitRegion(
 //
 // Load --
 //
-OUT_TYPE_Load
-SCRATCHPAD_MEMORY_SERVER_CLASS::Load(
+void
+SCRATCHPAD_MEMORY_SERVER_CLASS::LoadLine(
     SCRATCHPAD_MEMORY_ADDR addr)
 {
     // Burst the incoming address into a region ID and a pointer to the line.
@@ -162,79 +163,52 @@ SCRATCHPAD_MEMORY_SERVER_CLASS::Load(
     ASSERTX(regionBase[region] != NULL);
     ASSERTX(regionOffset(addr) < regionWords[region]);
 
-    OUT_TYPE_Load r;
-    r.data3 = *(line + 3);
-    r.data2 = *(line + 2);
-    r.data1 = *(line + 1);
-    r.data0 = *(line + 0);
+    for (UINT32 i = 0; i < SCRATCHPAD_WORDS_PER_LINE; i++)
+    {
+        SCRATCHPAD_MEMORY_WORD r = *(line + i);
 
-    T1("\t\t3:\t" << fmt_data(r.data3));
-    T1("\t\t2:\t" << fmt_data(r.data2));
-    T1("\t\t1:\t" << fmt_data(r.data1));
-    T1("\t\t0:\t" << fmt_data(r.data0));
+        T1("\t\tL " << i << ":\t" << fmt_data(r));
 
-    return r;
+        clientStub->LoadData(r);
+    }
 }
+
 
 //
 // Store --
 //
 void
-SCRATCHPAD_MEMORY_SERVER_CLASS::Store(
+SCRATCHPAD_MEMORY_SERVER_CLASS::StoreCtrl(
     SCRATCHPAD_MEMORY_ADDR addr,
-    UINT8 wordMask,
-    SCRATCHPAD_MEMORY_WORD data0,
-    SCRATCHPAD_MEMORY_WORD data1,
-    SCRATCHPAD_MEMORY_WORD data2,
-    SCRATCHPAD_MEMORY_WORD data3)
+    UINT8 wordMask)
 {
     // Burst the incoming address into a region ID and a pointer to the line.
     UINT32 region = regionID(addr);
-    SCRATCHPAD_MEMORY_WORD* line = regionBase[region] + regionOffset(addr);
+    storeLine = regionBase[region] + regionOffset(addr);
     
-    T1("\tSCRATCHPAD store region " << region << ": r_addr " << fmt_addr(regionOffset(addr)));
+    T1("\tSCRATCHPAD store region " << region
+                                    << ": r_addr " << fmt_addr(regionOffset(addr))
+                                    << ", mask " << UINT32(wordMask));
 
     ASSERTX(regionBase[region] != NULL);
     ASSERTX(regionOffset(addr) < regionWords[region]);
 
-    if (wordMask & 8)
-    {
-        *(line + 3) = data3;
-        T1("\t\t3:\t" << fmt_data(data3));
-    }
-
-    if (wordMask & 4)
-    {
-        *(line + 2) = data2;
-        T1("\t\t2:\t" << fmt_data(data2));
-    }
-
-    if (wordMask & 2)
-    {
-        *(line + 1) = data1;
-        T1("\t\t1:\t" << fmt_data(data1));
-    }
-
-    if (wordMask & 1)
-    {
-        *(line + 0) = data0;
-        T1("\t\t0:\t" << fmt_data(data0));
-    }
+    storeWordMask = wordMask;
+    storeWordIdx = 0;
 }
 
 void
-SCRATCHPAD_MEMORY_SERVER_CLASS::StoreWord(
-    SCRATCHPAD_MEMORY_ADDR addr,
+SCRATCHPAD_MEMORY_SERVER_CLASS::StoreData(
     SCRATCHPAD_MEMORY_WORD data)
 {
-    // Burst the incoming address into a region ID and a pointer to the word.
-    UINT32 region = regionID(addr);
-    SCRATCHPAD_MEMORY_WORD* m = regionBase[region] + regionOffset(addr);
+    ASSERTX(storeWordIdx < SCRATCHPAD_WORDS_PER_LINE);
 
-    T1("\tSCRATCHPAD store region " << region << ": r_addr " << fmt_addr(regionOffset(addr)) << ", value " << fmt_data(data));
+    if (storeWordMask & 1)
+    {
+        *(storeLine + storeWordIdx) = data;
+        T1("\t\tS " << UINT32(storeWordIdx) << ":\t" << fmt_data(data));
+    }
 
-    ASSERTX(regionBase[region] != NULL);
-    ASSERTX(regionOffset(addr) < regionWords[region]);
-
-    *m = data;
+    storeWordMask >>= 1;
+    storeWordIdx += 1;
 }

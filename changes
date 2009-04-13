@@ -5693,3 +5693,42 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr
 
 - Clean up scheduling precedence for DDR2 initialization.
 - Derive hybrid memory sizes from local memory.
+
+----------
+mcadler     Date: Mon Apr 13 09:22:20 EDT 2009  CSN: CSN-platforms-191
+                  Mon Apr 13 13:22:20 UTC 2009
+
+
+Directory modules/bluespec/librl/storage/cache
+ fpga-set-assoc-cache.bsv  Locally Modified          190 
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ bram.bsv                  Locally Modified          190 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices
+ std-virtual-device-interfaces.bsv Locally Modified          190 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-mem-scratch.cpp    Locally Modified          190 
+ hybrid-mem-scratch.rrr    Locally Modified          190 
+ hybrid-mem-scratch.h      Locally Modified          190 
+ hybrid-mem-scratch.bsv    Locally Modified          190 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/central-cache
+ local-mem-central-cache.bsv Locally Modified          190 
+ central-cache-backing-store.bsv Locally Modified          190 
+
+- Space diet for central cache:
+  - Central cache communication with backing storage is pipelined.  Writes send
+    a control message followed by the line's data broken into word-sized chunks.
+    Read responses are similar.  The old code sent the entire line and control
+    in a single message.
+  - Embed write-through and disabled cache modes in the cache itself.  The cache
+    is now disabled by forcing all tag comparisons to fail instead of having
+    to MUX the connection between client and source data outside the cache.
+  - Remove the in-order read response path.  Clients wishing in-order returns
+    must handle that by building their own ROB (a ScoreboardFIFO would work).
+
+- BRAM now guarantees read/write ordering by blocking writes when the read
+  response buffer is full.  The read response side is still single cycle, using
+  a chained pair of BypassFIFOs.

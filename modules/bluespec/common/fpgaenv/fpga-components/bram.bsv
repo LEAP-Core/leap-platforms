@@ -40,10 +40,10 @@ typedef MEMORY_IFC#(t_ADDR, t_DATA) BRAM#(type t_ADDR, type t_DATA);
 
 
 //
-// mkBRAM_BVI --
+// mkBRAMUnguardedNonZero --
 //     Wrapper for the Verilog module that actually turns into a block RAM.
 //
-import "BVI" Bram = module mkBRAM_BVI
+import "BVI" Bram = module mkBRAMUnguardedNonZero
     // interface:
         (BRAM#(Bit#(addr_SZ), Bit#(data_SZ)));
 
@@ -60,61 +60,6 @@ import "BVI" Bram = module mkBRAM_BVI
     schedule write C write;
     schedule readReq CF (readRsp, write);
     schedule readRsp CF write;
-
-endmodule
-
-
-//
-// mkBRAMUnguardedNonZero --
-//     Pass requests to the Verilog wrapper.  Continue to hold the read request
-//     address of the last request.  This allows us to reduce the output FIFO
-//     size by one entry and save FPGA area since addr_SZ is typically
-//     smaller than data_SZ.  It also lets us use a generic bypass FIFO instead
-//     of having to write a new 2-entry bypass FIFO.
-//
-module mkBRAMUnguardedNonZero
-    // interface:
-        (BRAM#(Bit#(addr_SZ), Bit#(data_SZ)));
-
-    BRAM#(Bit#(addr_SZ), Bit#(data_SZ)) ram <- mkBRAM_BVI();
-
-    // Address from last read request    
-    Reg#(Bit#(addr_SZ)) holdAddr <- mkRegU();
-    // Pass new addresses from readReq() method to updateAddr() rule.
-    RWire#(Bit#(addr_SZ)) newAddr <- mkRWire();
-
-    //
-    // Read request is asserted every cycle using either a new address if it
-    // arrives via readReq() below or the cached address from the last request.
-    //
-    rule updateAddr (True);
-        Bit#(addr_SZ) addr;
-
-        if (newAddr.wget() matches tagged Valid .new_a)
-        begin
-            holdAddr <= new_a;
-            addr = new_a;
-        end
-        else
-        begin
-            addr = holdAddr;
-        end
-
-        ram.readReq(addr);
-    endrule
-
-    method Action readReq(Bit#(addr_SZ) a);
-        newAddr.wset(a);
-    endmethod
-
-    method ActionValue#(Bit#(data_SZ)) readRsp();
-        let v <- ram.readRsp();
-        return v;
-    endmethod
-
-    method Action write(Bit#(addr_SZ) a, Bit#(data_SZ) v);
-        ram.write(a, v);
-    endmethod
 
 endmodule
 
@@ -205,8 +150,12 @@ module mkBRAM
     BRAM#(Bit#(addr_SZ), Bit#(data_SZ)) ram <- mkBRAMUnguarded();
 
     // Buffer the responses so nothing is dropped.  Bypass FIFO has 0 cycle
-    // latency for enq -> deq.
-    FIFO#(Bit#(data_SZ)) buffer <- mkBypassFIFO();
+    // latency for enq -> deq.  A bypass FIFO has only a single buffer slot,
+    // so we chain two together in order to get two slots.  This gives us
+    // single cycle read latency on BRAMs and the same buffering as a normal
+    // FIFO.
+    FIFO#(Bit#(data_SZ)) buffer0 <- mkBypassFIFO();
+    FIFO#(Bit#(data_SZ)) buffer1 <- mkBypassFIFO();
 
     // Is there a response coming from the unguarded RAM?
     COUNTER#(1) readReqMade <- mkLCounter(0);
@@ -222,9 +171,16 @@ module mkBRAM
     rule enqIntoFIFO(readReqMade.value() == 1);
         readReqMade.down();
         Bit#(data_SZ) data <- ram.readRsp();
-        buffer.enq(data);
+        buffer0.enq(data);
     endrule
     
+    // Forward data between the two outgoing read buffers
+    rule forwardReadData (True);
+        let data = buffer0.first();
+        buffer0.deq();
+        buffer1.enq(data);
+    endrule
+
     // readReq
     
     // When:   Any time that sufficient buffering is available.
@@ -243,8 +199,8 @@ module mkBRAM
 
     method ActionValue#(t_DATA) readRsp();
         bufferingAvailable.up();
-        let v = buffer.first();
-        buffer.deq();
+        let v = buffer1.first();
+        buffer1.deq();
         return unpack(v);
     endmethod
    
@@ -252,9 +208,8 @@ module mkBRAM
     
     // When:   Any time.
     // Effect: Just update the RAM.
-    // TODO:   Check that there is not a write to the same address as a simultaneous read.
 
-    method Action write(t_ADDR a, t_DATA d);
+    method Action write(t_ADDR a, t_DATA d) if (bufferingAvailable.value() > 0);
         ram.write(pack(a), pack(d));
     endmethod
 

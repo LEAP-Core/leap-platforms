@@ -165,13 +165,13 @@ CENTRAL_CACHE_BACKING_READ_REQ
     deriving (Eq, Bits);
 
 //
-// Backing storage write request
+// Backing storage write request.  A write request has two phases:  control
+// and data.  This request is the control phase.
 //
 typedef struct
 {
     CENTRAL_CACHE_ADDR addr;
     Vector#(CENTRAL_CACHE_WORDS_PER_LINE, Bool) wordValidMask;
-    CENTRAL_CACHE_LINE val;
     CENTRAL_CACHE_REF_INFO refInfo;
     Bool sendAck;
 }
@@ -188,12 +188,23 @@ CENTRAL_CACHE_BACKING_WRITE_REQ
 // respond to requests for backing storage I/O.
 //
 interface CENTRAL_CACHE_BACKING_PORT;
-    // Read request and response with data
+    // Read request and response with data.  The read response is pipelined.
+    // For every getReadReq there must be one sendReadResp for every word in
+    // the requested line.  Low bits of the line are received first.
     method ActionValue#(CENTRAL_CACHE_BACKING_READ_REQ) getReadReq();
-    method Action sendReadResp(CENTRAL_CACHE_LINE val);
+    method Action sendReadResp(CENTRAL_CACHE_WORD val);
     
-    // Write to backing storage.
+    // Write to backing storage.  A write begins with a write request.
+    // It is followed by multiple write data calls, one call per word
+    // in a cache line.
     method ActionValue#(CENTRAL_CACHE_BACKING_WRITE_REQ) getWriteReq();
+
+    // Called multiple times after a write request is received -- once for
+    // each word in a line.  THIS METHOD MUST BE CALLED FOR A WORD EVEN
+    // IF THE CONTROL INFORMATION SAYS THE WORD IS NOT VALID.  Low bits
+    // of the line are sent first.
+    method ActionValue#(CENTRAL_CACHE_WORD) getWriteData();
+
     // Ack from write request when sendAck is True
     method Action sendWriteAck();
 endinterface: CENTRAL_CACHE_BACKING_PORT
@@ -212,5 +223,5 @@ interface CENTRAL_CACHE_VIRTUAL_DEVICE;
     interface Vector#(CENTRAL_CACHE_N_CLIENTS,
                       CENTRAL_CACHE_BACKING_PORT) backingPorts;
 
-    method Action init(Bool enableCache, Bool cacheIsWriteBack);
+    method Action init(RL_SA_CACHE_MODE mode);
 endinterface: CENTRAL_CACHE_VIRTUAL_DEVICE

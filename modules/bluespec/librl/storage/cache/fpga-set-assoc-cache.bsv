@@ -70,6 +70,20 @@ RL_SA_CACHE_LOAD_RESP#(type t_CACHE_ADDR,
 
 
 //
+// Cache mode can set the write policy or completely disable hits in the cache.
+// This is mostly useful for debugging.
+//
+typedef enum
+{
+    RL_SA_MODE_WRITE_BACK,
+    RL_SA_MODE_WRITE_THROUGH,
+    RL_SA_MODE_DISABLED
+}
+RL_SA_CACHE_MODE
+    deriving (Eq, Bits);
+
+
+//
 // Set associative cache interface.  nTagExtraLowBits is used just for
 // debugging.  This specified number of low bits are prepanded to cache
 // tags so addresses match those seen in other modules.
@@ -112,13 +126,10 @@ interface RL_SA_CACHE#(type t_CACHE_ADDR,
     method Action flushReq(t_CACHE_ADDR addr, Bool sendAck, t_CACHE_REF_INFO refInfo);
     method Action invalOrFlushWait();
     
-    // Write back or write through cache?  Default is write back.
-    // NOTE:  Turning off writeback does NOT cause the cache to write through
-    //        as stores arrive.  All it does is keep the dirty bit from being
-    //        set on writes.  If a caller turns off write back it becomes the
-    //        responsibility of the caller to write data to the storage device
-    //        outside of this interface.
-    method Action setModeWriteBack(Bool isWriteBack);
+    //
+    // Set cache mode.  Mostly useful for debugging.
+    //
+    method Action setCacheMode(RL_SA_CACHE_MODE mode);
 
 endinterface: RL_SA_CACHE
 
@@ -311,15 +322,6 @@ RL_SA_CACHE_DATA_IDX#(numeric type nWays, type t_CACHE_SET_IDX)
 typedef 16 RL_SA_CACHE_MAX_INVAL;
 typedef Bit#(TLog#(RL_SA_CACHE_MAX_INVAL)) RL_SA_CACHE_INVAL_IDX;
 
-//
-// Cache reads may be returned either in order or out of order depending
-// on the permitOOOReadResp argument to mkCacheSetAssoc.  When response
-// must be ordered the size of the read response FIFO limits the number
-// of requests in flight.  Data can be large, so there is more of a space
-// tradeoff for reads than flush requests.
-//
-typedef 4 RL_SA_CACHE_MAX_READ;
-typedef Bit#(TLog#(RL_SA_CACHE_MAX_READ)) RL_SA_CACHE_READ_FIFO_IDX;
 
 //
 // Meta-data associated with a read request.
@@ -327,7 +329,6 @@ typedef Bit#(TLog#(RL_SA_CACHE_MAX_READ)) RL_SA_CACHE_READ_FIFO_IDX;
 typedef struct
 {
     Bit#(TLog#(nWordsPerLine)) wordIdx;
-    RL_SA_CACHE_READ_FIFO_IDX readFifoIdx;
 }
 RL_SA_CACHE_READ_REQ#(numeric type nWordsPerLine)
     deriving (Eq, Bits);
@@ -386,7 +387,6 @@ RL_SA_CACHE_REQ#(numeric type nWordsPerLine)
 module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_LINE, nWordsPerLine, t_CACHE_REF_INFO) sourceData,
                         RL_SA_CACHE_LOCAL_DATA#(t_CACHE_ADDR_SZ, t_CACHE_WORD, nWordsPerLine, nSets, nWays) localData,
                         RL_SA_CACHE_STATS stats,
-                        Bool permitOOOReadResp,
                         DEBUG_FILE debugLog)
     // interface:
         (RL_SA_CACHE#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_WORD, nWordsPerLine, t_CACHE_REF_INFO, nTagExtraLowBits))
@@ -448,7 +448,9 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
 
     // Is the cache write back?  If not, never set a dirty bit.  It is then the
     // responsibility of the caller to write values to backing storage.
-    Reg#(Bool) writeBackCache <- mkReg(True);
+    Reg#(RL_SA_CACHE_MODE) cacheMode <- mkReg(RL_SA_MODE_WRITE_BACK);
+    function Bool writeBackCache() = (cacheMode == RL_SA_MODE_WRITE_BACK);
+    function Bool cacheEnabled() = (cacheMode != RL_SA_MODE_DISABLED);
 
     // Filter for allowing one live operation per cache set.
     COUNTING_FILTER#(t_CACHE_SET_IDX) setFilter <- mkCountingFilter(debugLog);
@@ -483,11 +485,8 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
     // Exit from all paths
     FIFO#(t_CACHE_SET_IDX) doneQ <- mkFIFO();
 
-    // Read responses may be returned either OOO or in request order, depending
-    // on the value of permitOOOReadResp.  Define both queues but only one will
-    // actually be used.
+    // Read responses may be returned out of order relative to request order!
     FIFOF#(Tuple3#(t_CACHE_REQ_BASE, t_CACHE_LINE, t_CACHE_WORD_VALID_MASK)) readRespToClientQ_OOO <- mkBypassFIFOF();
-    SCOREBOARD_FIFO#(RL_SA_CACHE_MAX_READ, Tuple3#(t_CACHE_REQ_BASE, t_CACHE_LINE, t_CACHE_WORD_VALID_MASK)) readRespToClientQ_InOrder <- mkScoreboardFIFO();
 
     // Invalidate and flush requests are always returned in the order they
     // were requested.
@@ -561,7 +560,7 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
         end
 
         let way = findElem(True, way_match);
-        if (way matches tagged Valid .w)
+        if (cacheEnabled() &&& way matches tagged Valid .w)
             return tagged Valid tuple2(w, validValue(meta.ways[w]));
         else
             return tagged Invalid;
@@ -941,7 +940,7 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
             let new_word_valid = way_meta.wordValid;
             new_word_valid[wReq.wordIdx] = True;
 
-            meta_upd.ways[way] = tagged Valid metaData(tag, writeBackCache, new_word_valid);
+            meta_upd.ways[way] = tagged Valid metaData(tag, writeBackCache(), new_word_valid);
 
             // Update metadata if it is changed.  Skip the write otherwise, since
             // DDR writes are costly.
@@ -987,10 +986,7 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
         let set = req_base.set;
         let way = req_base.way;
 
-        if (permitOOOReadResp)
-            readRespToClientQ_OOO.enq(tuple3(req_base, v, word_valid_mask));
-        else
-            readRespToClientQ_InOrder.setValue(rReq.readFifoIdx, tuple3(req_base, v, word_valid_mask));
+        readRespToClientQ_OOO.enq(tuple3(req_base, v, word_valid_mask));
 
         // Done with this read request
         doneQ.enq(set);
@@ -1017,7 +1013,7 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
 
         debugLog.record($format("  WRITE Word: addr=0x%x, set=0x%x, way=%0d, word=%0d, data=0x%x", debugAddrFromTag(tag, set), set, way, w_req.wordIdx, w_data.val));
 
-        if (! writeBackCache)
+        if (! writeBackCache())
         begin
             // Send all writes to backing storage if in write-through mode.
             Vector#(nWordsPerLine, Bool) mask = replicate(False);
@@ -1173,7 +1169,7 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
         word_valid_mask[wReq.wordIdx] = True;
 
         // Update tag and write metadata
-        meta_upd.ways[fill_way] = tagged Valid metaData(tag, writeBackCache, word_valid_mask);
+        meta_upd.ways[fill_way] = tagged Valid metaData(tag, writeBackCache(), word_valid_mask);
         localData.metaData.write(set, meta_upd);
 
         //
@@ -1278,16 +1274,8 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
         t_CACHE_WORD_VALID_MASK ret_valid_words = unpack(~pack(cur_word_valid_mask));
         localData.dataWrite(set, way, ret_valid_words, unpack(pack(v)));
 
-        if (permitOOOReadResp)
-        begin
-            readRespToClientQ_OOO.enq(tuple3(req_base, v, ret_valid_words));
-            debugLog.record($format("  Read FILL: addr=0x%x, set=0x%x, way=%0d, mask=0x%x, data=0x%x", debugAddrFromTag(tag, set), set, way, ret_valid_words, v));
-        end
-        else
-        begin
-            readRespToClientQ_InOrder.setValue(rReq.readFifoIdx, tuple3(req_base, v, ret_valid_words));
-            debugLog.record($format("  Read FILL: addr=0x%x, set=0x%x, way=%0d, mask=0x%x, idx=%d, data=0x%x", debugAddrFromTag(tag, set), set, way, ret_valid_words, rReq.readFifoIdx, v));
-        end
+        readRespToClientQ_OOO.enq(tuple3(req_base, v, ret_valid_words));
+        debugLog.record($format("  Read FILL: addr=0x%x, set=0x%x, way=%0d, mask=0x%x, data=0x%x", debugAddrFromTag(tag, set), set, way, ret_valid_words, v));
 
         doneQ.enq(set);
     endrule
@@ -1352,52 +1340,18 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
     method Action readReq(t_CACHE_ADDR addr,
                           Bit#(TLog#(nWordsPerLine)) wordIdx,
                           t_CACHE_REF_INFO refInfo);
-        //
-        // If resonses are supposed to be returned in order than allocate a slot
-        // in the response queue.
-        //
-        RL_SA_CACHE_READ_FIFO_IDX readIdx = ?;
-        if (! permitOOOReadResp)
-        begin
-            readIdx <- readRespToClientQ_InOrder.enq();
-        end
 
         RL_SA_CACHE_READ_REQ#(nWordsPerLine) req;
         req.wordIdx = wordIdx;
-        req.readFifoIdx = readIdx;
     
         let set <- genRequest(tagged HCOP_READ req, addr, refInfo);
-        if (permitOOOReadResp)
-            debugLog.record($format("  New request: READ addr=0x%x, set=0x%x, word=%0d", debugAddr(addr), set, wordIdx));
-        else
-            debugLog.record($format("  New request: READ addr=0x%x, set=0x%x, word=%0d, readIdx=%0d", debugAddr(addr), set, wordIdx, readIdx));
+        debugLog.record($format("  New request: READ addr=0x%x, set=0x%x, word=%0d", debugAddr(addr), set, wordIdx));
     endmethod
 
     method ActionValue#(t_CACHE_LOAD_RESP) readResp();
-        //
-        // Only one read response queue is actually used, depending on the
-        // value of permitOOOReadResp.
-        //
-        t_CACHE_REQ_BASE req_base;
-        Vector#(nWordsPerLine, t_CACHE_WORD) value;
-        t_CACHE_WORD_VALID_MASK valid_words;    
-
-        if (permitOOOReadResp)
-        begin
-            match {.rb, .v, .word_mask} = readRespToClientQ_OOO.first();
-            readRespToClientQ_OOO.deq();
-            req_base = rb;
-            value = unpack(pack(v));
-            valid_words = word_mask;
-        end
-        else
-        begin
-            match {.rb, .v, .word_mask} = readRespToClientQ_InOrder.first();
-            readRespToClientQ_InOrder.deq();
-            req_base = rb;
-            value = unpack(pack(v));
-            valid_words = word_mask;
-        end
+        match {.req_base, .v, .valid_words} = readRespToClientQ_OOO.first();
+        readRespToClientQ_OOO.deq();
+        Vector#(nWordsPerLine, t_CACHE_WORD) value = unpack(pack(v));
 
         t_CACHE_LOAD_RESP rsp;
         for (Integer w = 0; w < valueOf(nWordsPerLine); w = w + 1)
@@ -1409,10 +1363,7 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
     endmethod
 
     method Bool readRespReady();
-        if (permitOOOReadResp)
-            return readRespToClientQ_OOO.notEmpty();
-        else
-            return readRespToClientQ_InOrder.notEmpty();
+        return readRespToClientQ_OOO.notEmpty();
     endmethod
 
     //
@@ -1485,13 +1436,13 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
 
 
     //
-    // setModeWriteBack -- Write back or write through cache config.
+    // setCacheMode -- Configure cache behavior.
     //
-    method Action setModeWriteBack(Bool isWriteBack);
-        if (writeBackCache != isWriteBack)
-            debugLog.record($format("Cache mode: WRITE %s", (isWriteBack ? "BACK" : "THROUGH")));
+    method Action setCacheMode(RL_SA_CACHE_MODE mode);
+        if (cacheMode != mode)
+            debugLog.record($format("Cache mode: %0d", mode));
 
-        writeBackCache <= isWriteBack;
+        cacheMode <= mode;    
     endmethod
 
 endmodule

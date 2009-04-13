@@ -26,6 +26,8 @@
 #include "asim/provides/rrr.h"
 #include "asim/dict/VDEV.h"
 
+#include "asim/rrr/client_stub_SCRATCHPAD_MEMORY.h"
+
 // Get the data types from the scratchpad RRR definition
 #define TYPES_ONLY
 #include "asim/rrr/server_stub_SCRATCHPAD_MEMORY.h"
@@ -35,6 +37,8 @@
 #ifndef __VDEV_SCRATCH_DICT_H__
 #define VDEV_SCRATCH__NENTRIES 0
 #endif
+
+#define SCRATCHPAD_WORDS_PER_LINE 4
 
 typedef UINT64 SCRATCHPAD_MEMORY_ADDR;
 typedef UINT64 SCRATCHPAD_MEMORY_WORD;
@@ -52,11 +56,17 @@ class SCRATCHPAD_MEMORY_SERVER_CLASS: public RRR_SERVER_CLASS,
 
     // stubs
     RRR_SERVER_STUB serverStub;
+    SCRATCHPAD_MEMORY_CLIENT_STUB clientStub;
 
     // internal data
     SCRATCHPAD_MEMORY_WORD *regionBase[VDEV_SCRATCH__NENTRIES + 1];
     SCRATCHPAD_MEMORY_ADDR regionWords[VDEV_SCRATCH__NENTRIES + 1];
     size_t regionSize[VDEV_SCRATCH__NENTRIES + 1];
+
+    // Pipelined store state
+    SCRATCHPAD_MEMORY_WORD *storeLine;
+    UINT8 storeWordIdx;
+    UINT8 storeWordMask;
 
     Format fmt_addr;
     Format fmt_data;
@@ -89,17 +99,10 @@ class SCRATCHPAD_MEMORY_SERVER_CLASS: public RRR_SERVER_CLASS,
     // RRR request methods
     void InitRegion(UINT32 regionID, UINT32 regionEndIdx);
 
-    OUT_TYPE_Load Load(SCRATCHPAD_MEMORY_ADDR addr);
+    void LoadLine(SCRATCHPAD_MEMORY_ADDR addr);
 
-    void Store(
-        SCRATCHPAD_MEMORY_ADDR addr,
-        UINT8 wordMask,
-        SCRATCHPAD_MEMORY_WORD data0,
-        SCRATCHPAD_MEMORY_WORD data1,
-        SCRATCHPAD_MEMORY_WORD data2,
-        SCRATCHPAD_MEMORY_WORD data3);
-
-    void StoreWord(SCRATCHPAD_MEMORY_ADDR addr, SCRATCHPAD_MEMORY_WORD data);
+    void StoreCtrl(SCRATCHPAD_MEMORY_ADDR addr, UINT8 wordMask);
+    void StoreData(SCRATCHPAD_MEMORY_WORD data);
 };
 
 // Now that the server class is defined the RRR wrapper can be loaded.
