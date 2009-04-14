@@ -150,7 +150,7 @@ module mkRRRClient#(CHANNEL_IO channel) (RRR_CLIENT);
         Bit#(`NUM_SERVICES) request = '0;
         for (Integer s = 0; s < `NUM_SERVICES; s = s + 1)
         begin
-            request[s] = pack((requestChunksRemaining == 0) && (requestQueues[s].notEmpty()));
+            request[s] = pack(requestQueues[s].notEmpty());
         end
 
         newMsgQIdx <= arbiter.arbitrate(request);
@@ -165,7 +165,8 @@ module mkRRRClient#(CHANNEL_IO channel) (RRR_CLIENT);
     for (Integer s = 0; s < `NUM_SERVICES; s = s + 1)
     begin
         rule write_request_newmsg2 (newMsgQIdx matches tagged Valid .idx &&&
-                                     fromInteger(s) == idx);
+                                    fromInteger(s) == idx &&&
+                                    requestChunksRemaining == 0);
 
             // get header packet
             UMF_PACKET packet = requestQueues[s].first();

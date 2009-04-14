@@ -100,6 +100,17 @@ PACK_REQ_INFO#(numeric type t_DATA_SZ, numeric type t_CONTAINER_DATA_SZ)
     deriving (Bits, Eq);
 
 
+//
+// Maintain load store order.
+//
+typedef enum
+{
+    MEM_PACK_READ_REQ,
+    MEM_PACK_WRITE_REQ
+}
+MEM_PACK_RW_REQ
+    deriving (Bits, Eq);
+
 
 //
 // mkMemPack --
@@ -243,14 +254,11 @@ module mkMemPackManyTo1#(MEMORY_IFC#(t_CONTAINER_ADDR, t_CONTAINER_DATA) contain
               // spaced to make packed values easier to read while debugging.
               Alias#(Vector#(TExp#(t_OBJ_IDX_SZ), Bit#(TDiv#(t_CONTAINER_DATA_SZ, TExp#(t_OBJ_IDX_SZ)))), t_PACKED_CONTAINER));
 
-    // Incoming read and write requests go into queues so they can be processed
-    // in rules with defined order and flow control instead of in the base
-    // methods.
-    FIFOF#(t_ADDR) readReqQ <- mkFIFOF();
+    // Sort incoming requests
+    MERGE_FIFOF#(2, Tuple2#(MEM_PACK_RW_REQ, t_ADDR)) incomingReqQ <- mkMergeBypassFIFOF();
 
-    // Save space for writeQ with a FIFO1 since the pipelines will continue
-    // to be blocked until the read-modify-write completes.
-    FIFOF#(Tuple2#(t_ADDR, t_DATA)) writeQ <- mkFIFOF1();
+    // Write data
+    FIFO#(t_DATA) writeDataQ <- mkBypassFIFO();
 
     // Shared read request queue directs responses either to the readRsp method
     // or to the doRMW rule.
@@ -267,19 +275,8 @@ module mkMemPackManyTo1#(MEMORY_IFC#(t_CONTAINER_ADDR, t_CONTAINER_DATA) contain
     Reg#(t_CONTAINER_ADDR) rmwContainerAddr <- mkRegU();
     Reg#(t_DATA) rmwData <- mkRegU();
 
-
-    //
-    // Functions that govern new requests.
-    //
-
-    function Bool isBusyForRead();
-        return (doingRMW || writeQ.notEmpty());
-    endfunction
-
-    function Bool isBusyForWrite();
-        return (doingRMW || writeQ.notEmpty() || readReqQ.notEmpty());
-    endfunction
-
+    // See method readRsp
+    Wire#(Bool) schedHack <- mkDWire(False);
 
     //
     // addrSplit --
@@ -293,11 +290,31 @@ module mkMemPackManyTo1#(MEMORY_IFC#(t_CONTAINER_ADDR, t_CONTAINER_DATA) contain
 
 
     //
-    // doRMW --
+    // Writes
+    //
+
+    rule processWriteReq (! doingRMW && (tpl_1(incomingReqQ.first()) == MEM_PACK_WRITE_REQ));
+        let addr = tpl_2(incomingReqQ.first());
+        let val = writeDataQ.first();
+        incomingReqQ.deq();
+        writeDataQ.deq();
+
+        match {.c_addr, .o_idx} = addrSplit(addr);
+        containerMem.readReq(c_addr);
+        sharedReadReqQ.enq(PACK_REQ_INFO {isReadForWrite: True, objIdx: o_idx});
+    
+        doingRMW <= True;
+        rmwContainerAddr <= c_addr;
+        rmwData <= val;
+    endrule
+
+    //
+    // finishRMW --
     //     Process read response for a write.  Update the object within the
     //     container and write it back.
     //
-    rule doRMW (doingRMW && sharedReadReqQ.first().isReadForWrite && ! readReqQ.notEmpty());
+    (* descending_urgency = "finishRMW, processWriteReq" *)
+    rule finishRMW (sharedReadReqQ.first().isReadForWrite && ! schedHack);
         let o_idx = sharedReadReqQ.first().objIdx;
         sharedReadReqQ.deq();
 
@@ -316,65 +333,41 @@ module mkMemPackManyTo1#(MEMORY_IFC#(t_CONTAINER_ADDR, t_CONTAINER_DATA) contain
 
 
     //
-    // Process requests
+    // Reads
     //
-    rule processWriteReq (! doingRMW);
-        match {.addr, .val} = writeQ.first();
-        writeQ.deq();
 
-        match {.c_addr, .o_idx} = addrSplit(addr);
-        containerMem.readReq(c_addr);
-        sharedReadReqQ.enq(PACK_REQ_INFO {isReadForWrite: True, objIdx: o_idx});
-    
-        doingRMW <= True;
-        rmwContainerAddr <= c_addr;
-        rmwData <= val;
-    endrule
-
-    // Writes go before reads to begin the read-modify-write.  A predicate
-    // on doRMW guarantees read requests fire at the right time.
-    (* descending_urgency = "processWriteReq, processReadReq" *)
-    rule processReadReq (True);
-        let addr = readReqQ.first();
-        readReqQ.deq();
+    rule processReadReq (! doingRMW &&  (tpl_1(incomingReqQ.first()) == MEM_PACK_READ_REQ));
+        let addr = tpl_2(incomingReqQ.first());
+        incomingReqQ.deq();
 
         match {.c_addr, .o_idx} = addrSplit(addr);
         containerMem.readReq(c_addr);
         sharedReadReqQ.enq(PACK_REQ_INFO {isReadForWrite: False, objIdx: o_idx});
     endrule
 
-    //
-    // processReadRsp --
-    //     In theory the body of this rule could all go in the readRsp method
-    //     below.  In practice, the Bluespec scheduler can get confused and
-    //     introduce conflicts between callers of readRsp and doRMW above,
-    //     causing deadlocks.  Putting the code here is a rule and forwarding
-    //     through a 0-latency FIFO seems to solve the problem.
-    //
-    rule processReadRsp (! sharedReadReqQ.first().isReadForWrite);
+
+    method Action readReq(t_ADDR addr);
+        incomingReqQ.ports[0].enq(tuple2(MEM_PACK_READ_REQ, addr));
+    endmethod
+
+    method ActionValue#(t_DATA) readRsp() if (! sharedReadReqQ.first().isReadForWrite);
         let o_idx = sharedReadReqQ.first().objIdx;
         sharedReadReqQ.deq();
     
+        // The compiler ought to be able to detect that this method and rule
+        // finishRMW are mutually exclusive due to their predicates.  For some
+        // reason it does not.  The schedHack wire seems to quiet the warnings.
+        schedHack <= True;
+
         // Receive the data and return the desired object from the container.
         let d <- containerMem.readRsp();
         t_PACKED_CONTAINER pack_data = unpack(truncateNP(pack(d)));
-        readRspQ.enq(unpack(truncateNP(pack_data[o_idx])));
-    endrule
-
-
-    method Action readReq(t_ADDR addr) if (! isBusyForRead);
-        readReqQ.enq(addr);
+        return unpack(truncateNP(pack_data[o_idx]));
     endmethod
 
-    method ActionValue#(t_DATA) readRsp();
-        let d = readRspQ.first();
-        readRspQ.deq();
-
-        return d;
-    endmethod
-
-    method Action write(t_ADDR addr, t_DATA val) if (! isBusyForWrite);
-        writeQ.enq(tuple2(addr, val));
+    method Action write(t_ADDR addr, t_DATA val);
+        incomingReqQ.ports[1].enq(tuple2(MEM_PACK_WRITE_REQ, addr));
+        writeDataQ.enq(val);
     endmethod
 endmodule
 
@@ -397,19 +390,20 @@ module mkMemPack1ToMany#(MEMORY_IFC#(t_CONTAINER_ADDR, t_CONTAINER_DATA) contain
               // Vector of multiple containers holding one object
               Alias#(Vector#(TExp#(t_OBJ_IDX_SZ), t_CONTAINER_DATA), t_PACKED_CONTAINER));
 
+    // Sort incoming requests
+    MERGE_FIFOF#(2, Tuple2#(MEM_PACK_RW_REQ, t_ADDR)) incomingReqQ <- mkMergeBypassFIFOF();
+
+    // Shared read/write state
+    Reg#(Bool) busy <- mkReg(False);
+    Reg#(t_OBJ_IDX) reqIdx <- mkRegU();
+
     // Write state
-    Reg#(Bool) doingWrite <- mkReg(False);
-    Reg#(t_PACKED_CONTAINER) writeData <- mkRegU();
+    FIFO#(t_PACKED_CONTAINER) writeDataQ <- mkBypassFIFO();
 
     // Read state
-    Reg#(Bool) doingReadReq <- mkReg(False);
     Reg#(t_OBJ_IDX) readIdx <- mkReg(0);
     Reg#(t_PACKED_CONTAINER) readData <- mkRegU();
     FIFO#(t_DATA) readRspQ <- mkBypassFIFO();
-
-    // Shared read/write state
-    Reg#(t_ADDR) reqAddr <- mkRegU();
-    Reg#(t_OBJ_IDX) reqIdx <- mkRegU();
 
 
     //
@@ -423,37 +417,70 @@ module mkMemPack1ToMany#(MEMORY_IFC#(t_CONTAINER_ADDR, t_CONTAINER_DATA) contain
 
 
     //
-    // doWrite --
-    //     Multi-stage write.
+    // startNewRead --
+    //     First stage handling a new read request.
     //
-    rule doWrite (doingWrite);
-        let obj_idx = reqIdx + 1;
-        let c_addr = addrContainer(reqAddr, obj_idx);
+    rule startNewReadReq (! busy && (tpl_1(incomingReqQ.first()) == MEM_PACK_READ_REQ));
+        let addr = tpl_2(incomingReqQ.first());
+        let c_addr = addrContainer(addr, 0);
+        containerMem.readReq(c_addr);
 
-        containerMem.write(c_addr, writeData[obj_idx]);
-
-        reqIdx <= obj_idx;
-        if (obj_idx == maxBound)
-        begin
-            doingWrite <= False;
-        end
+        busy <= True;
+        reqIdx <= 1;
     endrule
 
     //
-    // doReadReq --
+    // completeReadReq --
     //     Multi-stage read request.
     //
-    rule doReadReq (doingReadReq);
-        let obj_idx = reqIdx + 1;
-        let c_addr = addrContainer(reqAddr, obj_idx);
+    rule completeReadReq (busy && (tpl_1(incomingReqQ.first()) == MEM_PACK_READ_REQ));
+        let addr = tpl_2(incomingReqQ.first());
+        let c_addr = addrContainer(addr, reqIdx);
 
         containerMem.readReq(c_addr);
 
-        reqIdx <= obj_idx;
-        if (obj_idx == maxBound)
+        if (reqIdx == maxBound)
         begin
-            doingReadReq <= False;
+            incomingReqQ.deq();
+            busy <= False;
         end
+
+        reqIdx <= reqIdx + 1;
+    endrule
+
+    //
+    // startNewWrite --
+    //     First stage handling a new write request.
+    //
+    rule startNewWriteReq (! busy && (tpl_1(incomingReqQ.first()) == MEM_PACK_WRITE_REQ));
+        let addr = tpl_2(incomingReqQ.first());
+        let c_addr = addrContainer(addr, 0);
+        let write_data = writeDataQ.first();
+        containerMem.write(c_addr, write_data[0]);
+
+        busy <= True;
+        reqIdx <= 1;
+    endrule
+
+    //
+    // completeWrite --
+    //     Multi-stage write.
+    //
+    rule completeWrite (busy && (tpl_1(incomingReqQ.first()) == MEM_PACK_WRITE_REQ));
+        let addr = tpl_2(incomingReqQ.first());
+        let c_addr = addrContainer(addr, reqIdx);
+
+        let write_data = writeDataQ.first();
+        containerMem.write(c_addr, write_data[reqIdx]);
+
+        if (reqIdx == maxBound)
+        begin
+            incomingReqQ.deq();
+            writeDataQ.deq();
+            busy <= False;
+        end
+
+        reqIdx <= reqIdx + 1;
     endrule
 
     //
@@ -478,13 +505,8 @@ module mkMemPack1ToMany#(MEMORY_IFC#(t_CONTAINER_ADDR, t_CONTAINER_DATA) contain
     endrule
 
 
-    method Action readReq(t_ADDR addr) if (! doingWrite && ! doingReadReq);
-        let c_addr = addrContainer(addr, 0);
-        containerMem.readReq(c_addr);
-
-        doingReadReq <= True;
-        reqAddr <= addr;
-        reqIdx <= 0;
+    method Action readReq(t_ADDR addr);
+        incomingReqQ.ports[0].enq(tuple2(MEM_PACK_READ_REQ, addr));
     endmethod
 
     method ActionValue#(t_DATA) readRsp();
@@ -494,15 +516,9 @@ module mkMemPack1ToMany#(MEMORY_IFC#(t_CONTAINER_ADDR, t_CONTAINER_DATA) contain
         return v;
     endmethod
 
-    method Action write(t_ADDR addr, t_DATA val) if (! doingWrite && ! doingReadReq);
-        let c_addr = addrContainer(addr, 0);
-
+    method Action write(t_ADDR addr, t_DATA val);
         t_PACKED_CONTAINER write_data = unpack(zeroExtendNP(pack(val)));
-        containerMem.write(c_addr, write_data[0]);
-
-        doingWrite <= True;
-        reqAddr <= addr;
-        reqIdx <= 0;
-        writeData <= write_data;
+        incomingReqQ.ports[1].enq(tuple2(MEM_PACK_WRITE_REQ, addr));
+        writeDataQ.enq(write_data);
     endmethod
 endmodule

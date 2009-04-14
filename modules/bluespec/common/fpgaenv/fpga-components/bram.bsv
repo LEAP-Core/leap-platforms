@@ -97,7 +97,7 @@ module mkBRAMUnguardedSim
     // interface:
         (BRAM#(Bit#(addr_SZ), Bit#(data_SZ)));
 
-    RegFile#(Bit#(addr_SZ), Bit#(data_SZ))       ram <- mkRegFileFull();
+    RegFile#(Bit#(addr_SZ), Bit#(data_SZ))       ram <- mkRegFileWCF(minBound, maxBound);
     Reg#(Bit#(data_SZ))                      outputR <- mkRegU();
 
     method Action readReq(Bit#(addr_SZ) a);
@@ -209,7 +209,15 @@ module mkBRAM
     // When:   Any time.
     // Effect: Just update the RAM.
 
-    method Action write(t_ADDR a, t_DATA d) if (bufferingAvailable.value() > 0);
+    // ***
+    // Do NOT make "if (bufferingAvailable.value() > 0)" a requirement for
+    // all writes.  There are some algorithms (such as in the central cache)
+    // where write/read order slips prevent deadlocks.  Code that needs
+    // absolute read/write orders when reads block will need to manage
+    // the order on its own.
+    // ***
+
+    method Action write(t_ADDR a, t_DATA d);
         ram.write(pack(a), pack(d));
     endmethod
 

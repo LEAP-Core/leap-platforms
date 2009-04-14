@@ -41,14 +41,14 @@ import Vector::*;
 // ===================================================================
 
 //
-// HAsim tiny cache interface.  nTagExtraLowBits is used just for debugging.
+// Tiny cache interface.  nTagExtraLowBits is used just for debugging.
 // This specified number of low bits are prepanded to cache tags so
 // addresses match those seen in other modules.
 //
-interface HASIM_TINY_CACHE#(type t_CACHE_ADDR,
-                            type t_CACHE_DATA,
-                            numeric type nEntries,
-                            numeric type nTagExtraLowBits);
+interface RL_TINY_CACHE#(type t_CACHE_ADDR,
+                         type t_CACHE_DATA,
+                         numeric type nEntries,
+                         numeric type nTagExtraLowBits);
 
     // Read a line, returns invalid if not found.
     method ActionValue#(Maybe#(t_CACHE_DATA)) read(t_CACHE_ADDR addr);
@@ -65,7 +65,7 @@ interface HASIM_TINY_CACHE#(type t_CACHE_ADDR,
     // Invalidate entire cache
     method Action invalAll();
 
-endinterface: HASIM_TINY_CACHE
+endinterface: RL_TINY_CACHE
 
 
 // ===================================================================
@@ -75,22 +75,22 @@ endinterface: HASIM_TINY_CACHE
 // ===================================================================
 
 typedef UInt#(TLog#(nEntries))
-    HASIM_TINY_CACHE_IDX#(numeric type nEntries);
+    RL_TINY_CACHE_IDX#(numeric type nEntries);
 
-typedef Vector#(nEntries, HASIM_TINY_CACHE_IDX#(nEntries))
-    HASIM_TINY_CACHE_LRU#(numeric type nEntries);
+typedef Vector#(nEntries, RL_TINY_CACHE_IDX#(nEntries))
+    RL_TINY_CACHE_LRU#(numeric type nEntries);
 
 module mkTinyCache#(DEBUG_FILE debugLog)
     // interface:
-        (HASIM_TINY_CACHE#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_DATA, nEntries, nTagExtraLowBits))
+    (RL_TINY_CACHE#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_DATA, nEntries, nTagExtraLowBits))
     provisos (Bits#(t_CACHE_DATA, t_CACHE_DATA_SZ),
               Log#(nEntries, TLog#(nEntries)),
               // Silly, but required by compiler...
               Add#(t_CACHE_ADDR_SZ, nTagExtraLowBits, TAdd#(t_CACHE_ADDR_SZ, nTagExtraLowBits)),
 
               Alias#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_ADDR),
-              Alias#(HASIM_TINY_CACHE_IDX#(nEntries), t_IDX),
-              Alias#(HASIM_TINY_CACHE_LRU#(nEntries), t_LRU));
+              Alias#(RL_TINY_CACHE_IDX#(nEntries), t_IDX),
+              Alias#(RL_TINY_CACHE_LRU#(nEntries), t_LRU));
 
     Reg#(Vector#(nEntries, Bool)) cacheValid <- mkReg(Vector::replicate(False));
     Reg#(Vector#(nEntries, t_CACHE_ADDR)) cacheTag <- mkRegU();
@@ -249,7 +249,7 @@ endmodule
 //
 module mkTinyCache1#(DEBUG_FILE debugLog)
     // interface:
-        (HASIM_TINY_CACHE#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_DATA, 1, nTagExtraLowBits))
+    (RL_TINY_CACHE#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_DATA, 1, nTagExtraLowBits))
     provisos (Bits#(t_CACHE_DATA, t_CACHE_DATA_SZ),
               // Silly, but required by compiler...
               Add#(t_CACHE_ADDR_SZ, nTagExtraLowBits, TAdd#(t_CACHE_ADDR_SZ, nTagExtraLowBits)),

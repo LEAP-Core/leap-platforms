@@ -4,5 +4,6 @@
 
 %attributes librl
 
-%public fpga-set-assoc-cache.bsv
-%public fpga-tiny-cache.bsv
+%public rl-direct-mapped-cache.bsv
+%public rl-set-assoc-cache.bsv
+%public rl-tiny-cache.bsv

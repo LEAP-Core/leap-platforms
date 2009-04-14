@@ -124,6 +124,7 @@ module mkMemoryHeap#(MEMORY_HEAP_DATA#(t_INDEX, t_DATA) heap)
     // manageFreeListPop --
     //     Populate the mallocQ, consuming reads from fillFreeList.
     //
+    (* descending_urgency = "manageFreeListPop, fillFreeList" *)
     rule manageFreeListPop (initialized &&&
                             mallocReqQ.notEmpty() &&&
                             freeListHead matches tagged Valid .f);
@@ -480,12 +481,23 @@ module mkMemoryHeapUnionLUTRAMStorage
     // Union storage
     LUTRAM#(t_INDEX, Bit#(t_UNION_SZ)) pool <- mkLUTRAMU();
 
+    //
+    // Scheduling hints like descending_urgency don't work on methods.  We use
+    // wires instead.
+    //
+    Wire#(Bool) dataWriteFired <- mkDWire(False);
+
     interface MEMORY_HEAP_IMM_BACKING_STORE data;
         method t_DATA sub(t_INDEX addr);
+            // This method conflicts with freeList.sub below and, because the
+            // type of the method isn't an action there is no way to resolve
+            // the conflict inside this module or the heap manager module.
+            // The compiler may generate a warning but will not deadlock.
             return unpack(truncateNP(pool.sub(addr)));
         endmethod
 
         method Action upd(t_INDEX addr, t_DATA value);
+            dataWriteFired <= True;
             pool.upd(addr, zeroExtendNP(pack(value)));
         endmethod
     endinterface
@@ -495,7 +507,7 @@ module mkMemoryHeapUnionLUTRAMStorage
             return unpack(truncateNP(pool.sub(addr)));
         endmethod
 
-        method Action upd(t_INDEX addr, t_INDEX value);
+        method Action upd(t_INDEX addr, t_INDEX value) if (! dataWriteFired);
             pool.upd(addr, zeroExtendNP(pack(value)));
         endmethod
     endinterface

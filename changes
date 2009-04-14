@@ -5732,3 +5732,42 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/centr
 - BRAM now guarantees read/write ordering by blocking writes when the read
   response buffer is full.  The read response side is still single cycle, using
   a chained pair of BypassFIFOs.
+
+----------
+mcadler     Date: Tue Apr 14 19:41:26 EDT 2009  CSN: CSN-platforms-192
+                  Tue Apr 14 23:41:26 UTC 2009
+
+
+Directory modules/bluespec/librl/storage/cache
+ librl-cache.awb           Locally Modified          190 
+ rl-direct-mapped-cache.bsv Locally Added               0 
+ fpga-set-assoc-cache.bsv  Locally Removed           191 
+ rl-set-assoc-cache.bsv    Locally Added               - 
+ fpga-tiny-cache.bsv       Locally Removed           190 
+ rl-tiny-cache.bsv         Locally Added               - 
+
+Directory modules/bluespec/librl/storage
+ memory-heap.bsv           Locally Modified          190 
+
+Directory modules/bluespec/librl/base
+ memory-pack.bsv           Locally Modified          190 
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ bram.bsv                  Locally Modified          191 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/central-cache
+ local-mem-central-cache.bsv Locally Modified          191 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ basic-rrr-server.bsv      Locally Modified          190 
+ basic-rrr-client.bsv      Locally Modified          190 
+
+- Switch to R/W conflict-free RegFile in simulation mode so simulated BRAM
+  has the same timing as on hardware.
+- Add interface stub for direct mapped cache.  The code is fully functional
+  as a pass through.  No cache, yet.
+- Clean up the memory-pack module to eliminate scheduling ambiguity.  Switched
+  to the new MergeFIFOs module instead of ad-hoc logic to govern read/write
+  request arrival.
+- Add explicit scheduling for a number of warnings in various modules, including
+  RRR.
