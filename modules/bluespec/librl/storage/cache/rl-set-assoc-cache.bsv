@@ -453,8 +453,7 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
     function Bool cacheEnabled() = (cacheMode != RL_SA_MODE_DISABLED);
 
     // Filter for allowing one live operation per cache set.
-    COUNTING_FILTER#(t_CACHE_SET_IDX) setFilter <- mkCountingFilter(debugLog);
-    COUNTER#(t_CACHE_SET_IDX_SZ) nBusySets <- mkLCounter(0);
+    COUNTING_FILTER#(t_CACHE_SET_IDX) setFilter <- mkCountingFilter(True, debugLog);
 
     // ***** Queues between internal pipeline stages *****
 
@@ -666,7 +665,6 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
 
         if (success)
         begin
-            nBusySets.up();
             newReqQ.deq();
 
             // Read meta data and LRU hints
@@ -1298,7 +1296,6 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
         let set = doneQ.first();
         doneQ.deq();
 
-        nBusySets.down();
         setFilter.remove(set);
     endrule
 

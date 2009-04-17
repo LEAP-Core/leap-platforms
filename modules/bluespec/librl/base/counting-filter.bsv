@@ -57,9 +57,14 @@ endinterface
 
 //
 // mkCountingFilter --
-//   Pick a reasonable filter based on the entry set size.
+//   Pick a reasonable filter based on the entry set size.  Uses a Bloom filter
+//   for large sets and a simple decode filter for smaller sets.
 //
-module mkCountingFilter#(DEBUG_FILE debugLog)
+//   If allowComplexFilters is true then larger filters, such as Bloom filters,
+//   may be allocated.  If allowComplexFilters is false then only decode filters
+//   will be allocated.
+//
+module mkCountingFilter#(Bool allowComplexFilters, DEBUG_FILE debugLog)
     // interface:
     (COUNTING_FILTER#(t_ENTRY))
     provisos (Bits#(t_ENTRY, t_ENTRY_SZ),
@@ -70,7 +75,7 @@ module mkCountingFilter#(DEBUG_FILE debugLog)
 
     let filter = ?;
 
-    if (valueOf(t_ENTRY_SZ) > 10)
+    if ((valueOf(t_ENTRY_SZ) > 10) && allowComplexFilters)
     begin
         // Large sets use Bloom filters
         COUNTING_BLOOM_FILTER#(t_ENTRY, 128, 2) bloomFilter <- mkCountingBloomFilter(debugLog);
@@ -79,20 +84,18 @@ module mkCountingFilter#(DEBUG_FILE debugLog)
     else if (valueOf(t_ENTRY_SZ) > 7)
     begin
         // Medium sized sets share 2 bits per entry
-        COUNTING_DECODE_FILTER#(t_ENTRY, TDiv#(TExp#(t_ENTRY_SZ), 2)) decodeFilterL <- mkCountingDecodeFilter(debugLog);
+        DECODE_FILTER#(t_ENTRY, TDiv#(TExp#(t_ENTRY_SZ), 2)) decodeFilterL <- mkSizedDecodeFilter(debugLog);
         filter = decodeFilterL.countingFilterIfc;
     end
     else
     begin
         // Small sets get unique bits per entry
-        COUNTING_DECODE_FILTER#(t_ENTRY, TExp#(t_ENTRY_SZ)) decodeFilterS <- mkCountingDecodeFilter(debugLog);
+        DECODE_FILTER#(t_ENTRY, TExp#(t_ENTRY_SZ)) decodeFilterS <- mkSizedDecodeFilter(debugLog);
         filter = decodeFilterS.countingFilterIfc;
     end
 
     return filter;
 endmodule
-
-
 
 
 // ========================================================================
@@ -102,9 +105,11 @@ endmodule
 // ========================================================================
 
 //
-// nFilterBits should be a power of 2!
+// nFilterBits should be a power of 2!  Decode filter exposes
+// a counting filter interface for compatibility with the Bloom
+// filter.
 //
-interface COUNTING_DECODE_FILTER#(type t_ENTRY, numeric type nFilterBits);
+interface DECODE_FILTER#(type t_ENTRY, numeric type nFilterBits);
     interface COUNTING_FILTER#(t_ENTRY) countingFilterIfc;
 endinterface
 
@@ -112,9 +117,9 @@ endinterface
 // Decode filter with one bit corresponding to one or more entries.
 // Insert and remove methods may both be called in the same cycle.
 //
-module mkCountingDecodeFilter#(DEBUG_FILE debugLog)
+module mkSizedDecodeFilter#(DEBUG_FILE debugLog)
     // interface:
-    (COUNTING_DECODE_FILTER#(t_ENTRY, nFilterBits))
+    (DECODE_FILTER#(t_ENTRY, nFilterBits))
     provisos (Bits#(t_ENTRY, t_ENTRY_SZ),
 
               // nFilterBits must be <= (2 ^ t_ENTRY_SZ)

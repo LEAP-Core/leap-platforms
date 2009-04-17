@@ -5771,3 +5771,19 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
   request arrival.
 - Add explicit scheduling for a number of warnings in various modules, including
   RRR.
+
+----------
+mcadler     Date: Fri Apr 17 09:05:24 EDT 2009  CSN: CSN-platforms-193
+                  Fri Apr 17 13:05:24 UTC 2009
+
+
+Directory modules/bluespec/librl/storage/cache
+ rl-direct-mapped-cache.bsv Locally Modified          192 
+ rl-set-assoc-cache.bsv    Locally Modified          192 
+
+Directory modules/bluespec/librl/base
+ counting-filter.bsv       Locally Modified          192 
+
+- Implement the direct mapped cache.
+- Add a flag to counting filters to force allocation of only simple filters.
+  (E.g. no Bloom filters.)
