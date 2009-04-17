@@ -45,6 +45,9 @@ endinterface: MERGE_FIFOF_IN_PORT
 interface MERGE_FIFOF#(numeric type n_INPUTS, type t_DATA);
     interface Vector#(n_INPUTS, MERGE_FIFOF_IN_PORT#(n_INPUTS, t_DATA)) ports;
     
+    // The read port ID corresponding to the current first() value.
+    method Bit#(TLog#(n_INPUTS)) firstPortID();
+
     method t_DATA first();
     method Action deq();
     method Bool notEmpty();
@@ -125,6 +128,61 @@ module mkMergeFIFOFImpl#(Bool useBypassFIFO)
     endrule
 
     //
+    // findValidPort --
+    //     Find the first port in the head of dataQ that is valid and
+    //     has not been dequeued, according to the didDeq bit mask parameter.
+    //
+    function Maybe#(Bit#(TLog#(n_INPUTS))) findValidPort(Vector#(n_INPUTS, Bool) didDeq);
+        let d = dataQ.first();
+
+        // Find the lowest number input port with data that hasn't been dequeued.
+        Maybe#(Bit#(TLog#(n_INPUTS))) idx = tagged Invalid;
+        for (Integer p = 0; p < valueOf(n_INPUTS); p = p + 1)
+        begin
+            if (isValid(d[p]) && ! didDeq[p] && ! isValid(idx))
+            begin
+                idx = tagged Valid fromInteger(p);
+            end
+        end
+    
+        return idx;
+    endfunction
+
+
+    //
+    // Rules to compute the output state of the merged FIFO.  We put this
+    // computation in rules and write the value to wires in order to keep
+    // the complex computation and vector reads out of the scheduling
+    // predictes for the first() and deq() methods.
+    //
+    Wire#(Maybe#(Bit#(TLog#(n_INPUTS)))) firstIndex <- mkDWire(tagged Invalid);
+    (* fire_when_enabled *)
+    rule findFirstValidPort (True);
+        // Compute the index of the next output value
+        firstIndex <= findValidPort(alreadyDeq);
+    endrule
+
+    // If output is available write the value to a wire for consumption by first().
+    Wire#(Maybe#(t_DATA)) firstValue <- mkDWire(tagged Invalid);
+    (* fire_when_enabled *)
+    rule findFirstValue (firstIndex matches tagged Valid .idx);
+        firstValue <= dataQ.first()[idx];
+    endrule
+
+    // Is first() element the last valid value in the head of the data queue?
+    Wire#(Bool) firstIsLastInDataQ <- mkDWire(False);
+    (* fire_when_enabled *)
+    rule readyForDataDeq (firstIndex matches tagged Valid .idx);
+        let did_deq = alreadyDeq;
+        did_deq[idx] = True;
+
+        // Any more valid entries from this set of data?
+        if (findValidPort(did_deq) matches tagged Invalid)
+            firstIsLastInDataQ <= True;
+    endrule
+
+
+    //
     // Define the methods for incoming ports.
     //
     for (Integer p = 0; p < valueOf(n_INPUTS); p = p + 1)
@@ -142,42 +200,19 @@ module mkMergeFIFOFImpl#(Bool useBypassFIFO)
         );
     end
 
-    //
-    // findFirstValidPort --
-    //     Find the first port in the head of dataQ that is valid and
-    //     has not been dequeued, according to the didDeq bit mask parameter.
-    //
-    function Maybe#(Integer) findFirstValidPort(Vector#(n_INPUTS, Bool) didDeq);
-        let d = dataQ.first();
 
-        // Find the lowest number input port with data that hasn't been dequeued.
-        Maybe#(Integer) idx = tagged Invalid;
-        for (Integer p = 0; p < valueOf(n_INPUTS); p = p + 1)
-        begin
-            if (isValid(d[p]) && ! didDeq[p] && ! isValid(idx))
-            begin
-                idx = tagged Valid p;
-            end
-        end
-    
+    method Bit#(TLog#(n_INPUTS)) firstPortID() if (firstIndex matches tagged Valid .idx);
         return idx;
-    endfunction
-
-
-    method t_DATA first();
-        // Based on the algorithm, findFirstValidPort must return a valid value.
-        let idx = findFirstValidPort(alreadyDeq);
-        return validValue(dataQ.first()[validValue(idx)]);
     endmethod
 
-    method Action deq();
+    method t_DATA first() if (firstValue matches tagged Valid .v);
+        return v;
+    endmethod
+
+    method Action deq() if (firstIndex matches tagged Valid .idx);
         // Mark current first element dequeued
-        let idx = findFirstValidPort(alreadyDeq);
-        let did_deq = alreadyDeq;
-        did_deq[validValue(idx)] = True;
-    
         // Any more valid entries from this set of data?
-        if (findFirstValidPort(did_deq) matches tagged Invalid)
+        if (firstIsLastInDataQ)
         begin
             // No more
             dataQ.deq();
@@ -186,7 +221,7 @@ module mkMergeFIFOFImpl#(Bool useBypassFIFO)
         else
         begin
             // There are still more
-            alreadyDeq <= did_deq;
+            alreadyDeq[idx] <= True;
         end
     endmethod
 

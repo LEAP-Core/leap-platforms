@@ -5787,3 +5787,16 @@ Directory modules/bluespec/librl/base
 - Implement the direct mapped cache.
 - Add a flag to counting filters to force allocation of only simple filters.
   (E.g. no Bloom filters.)
+
+----------
+mcadler     Date: Fri Apr 17 15:59:53 EDT 2009  CSN: CSN-platforms-194
+                  Fri Apr 17 19:59:53 UTC 2009
+
+
+Directory modules/bluespec/librl/base
+ fifo-merge.bsv            Locally Modified          192 
+ memory-pack.bsv           Locally Modified          192 
+
+- Add firstPortID() method so the source port number corresponding to the head
+  of the FIFO can be known.
+- Move logic to rules to reduce Bluespec scheduler complexity.

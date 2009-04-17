@@ -101,18 +101,6 @@ PACK_REQ_INFO#(numeric type t_DATA_SZ, numeric type t_CONTAINER_DATA_SZ)
 
 
 //
-// Maintain load store order.
-//
-typedef enum
-{
-    MEM_PACK_READ_REQ,
-    MEM_PACK_WRITE_REQ
-}
-MEM_PACK_RW_REQ
-    deriving (Bits, Eq);
-
-
-//
 // mkMemPack --
 //     The general wrapper to use for all allocations.  Map an array indexed
 //     by t_ADDR_SZ bits of Bit#(t_DATA_SZ) objects onto backing storage
@@ -255,7 +243,7 @@ module mkMemPackManyTo1#(MEMORY_IFC#(t_CONTAINER_ADDR, t_CONTAINER_DATA) contain
               Alias#(Vector#(TExp#(t_OBJ_IDX_SZ), Bit#(TDiv#(t_CONTAINER_DATA_SZ, TExp#(t_OBJ_IDX_SZ)))), t_PACKED_CONTAINER));
 
     // Sort incoming requests
-    MERGE_FIFOF#(2, Tuple2#(MEM_PACK_RW_REQ, t_ADDR)) incomingReqQ <- mkMergeBypassFIFOF();
+    MERGE_FIFOF#(2, t_ADDR) incomingReqQ <- mkMergeBypassFIFOF();
 
     // Write data
     FIFO#(t_DATA) writeDataQ <- mkBypassFIFO();
@@ -293,8 +281,8 @@ module mkMemPackManyTo1#(MEMORY_IFC#(t_CONTAINER_ADDR, t_CONTAINER_DATA) contain
     // Writes
     //
 
-    rule processWriteReq (! doingRMW && (tpl_1(incomingReqQ.first()) == MEM_PACK_WRITE_REQ));
-        let addr = tpl_2(incomingReqQ.first());
+    rule processWriteReq (! doingRMW && (incomingReqQ.firstPortID() == 1));
+        let addr = incomingReqQ.first();
         let val = writeDataQ.first();
         incomingReqQ.deq();
         writeDataQ.deq();
@@ -336,8 +324,8 @@ module mkMemPackManyTo1#(MEMORY_IFC#(t_CONTAINER_ADDR, t_CONTAINER_DATA) contain
     // Reads
     //
 
-    rule processReadReq (! doingRMW &&  (tpl_1(incomingReqQ.first()) == MEM_PACK_READ_REQ));
-        let addr = tpl_2(incomingReqQ.first());
+    rule processReadReq (! doingRMW &&  (incomingReqQ.firstPortID() == 0));
+        let addr = incomingReqQ.first();
         incomingReqQ.deq();
 
         match {.c_addr, .o_idx} = addrSplit(addr);
@@ -347,7 +335,7 @@ module mkMemPackManyTo1#(MEMORY_IFC#(t_CONTAINER_ADDR, t_CONTAINER_DATA) contain
 
 
     method Action readReq(t_ADDR addr);
-        incomingReqQ.ports[0].enq(tuple2(MEM_PACK_READ_REQ, addr));
+        incomingReqQ.ports[0].enq(addr);
     endmethod
 
     method ActionValue#(t_DATA) readRsp() if (! sharedReadReqQ.first().isReadForWrite);
@@ -366,7 +354,7 @@ module mkMemPackManyTo1#(MEMORY_IFC#(t_CONTAINER_ADDR, t_CONTAINER_DATA) contain
     endmethod
 
     method Action write(t_ADDR addr, t_DATA val);
-        incomingReqQ.ports[1].enq(tuple2(MEM_PACK_WRITE_REQ, addr));
+        incomingReqQ.ports[1].enq(addr);
         writeDataQ.enq(val);
     endmethod
 endmodule
@@ -391,7 +379,7 @@ module mkMemPack1ToMany#(MEMORY_IFC#(t_CONTAINER_ADDR, t_CONTAINER_DATA) contain
               Alias#(Vector#(TExp#(t_OBJ_IDX_SZ), t_CONTAINER_DATA), t_PACKED_CONTAINER));
 
     // Sort incoming requests
-    MERGE_FIFOF#(2, Tuple2#(MEM_PACK_RW_REQ, t_ADDR)) incomingReqQ <- mkMergeBypassFIFOF();
+    MERGE_FIFOF#(2, t_ADDR) incomingReqQ <- mkMergeBypassFIFOF();
 
     // Shared read/write state
     Reg#(Bool) busy <- mkReg(False);
@@ -420,8 +408,8 @@ module mkMemPack1ToMany#(MEMORY_IFC#(t_CONTAINER_ADDR, t_CONTAINER_DATA) contain
     // startNewRead --
     //     First stage handling a new read request.
     //
-    rule startNewReadReq (! busy && (tpl_1(incomingReqQ.first()) == MEM_PACK_READ_REQ));
-        let addr = tpl_2(incomingReqQ.first());
+    rule startNewReadReq (! busy && (incomingReqQ.firstPortID() == 0));
+        let addr = incomingReqQ.first();
         let c_addr = addrContainer(addr, 0);
         containerMem.readReq(c_addr);
 
@@ -433,8 +421,8 @@ module mkMemPack1ToMany#(MEMORY_IFC#(t_CONTAINER_ADDR, t_CONTAINER_DATA) contain
     // completeReadReq --
     //     Multi-stage read request.
     //
-    rule completeReadReq (busy && (tpl_1(incomingReqQ.first()) == MEM_PACK_READ_REQ));
-        let addr = tpl_2(incomingReqQ.first());
+    rule completeReadReq (busy && (incomingReqQ.firstPortID() == 0));
+        let addr = incomingReqQ.first();
         let c_addr = addrContainer(addr, reqIdx);
 
         containerMem.readReq(c_addr);
@@ -452,8 +440,8 @@ module mkMemPack1ToMany#(MEMORY_IFC#(t_CONTAINER_ADDR, t_CONTAINER_DATA) contain
     // startNewWrite --
     //     First stage handling a new write request.
     //
-    rule startNewWriteReq (! busy && (tpl_1(incomingReqQ.first()) == MEM_PACK_WRITE_REQ));
-        let addr = tpl_2(incomingReqQ.first());
+    rule startNewWriteReq (! busy && (incomingReqQ.firstPortID() == 1));
+        let addr = incomingReqQ.first();
         let c_addr = addrContainer(addr, 0);
         let write_data = writeDataQ.first();
         containerMem.write(c_addr, write_data[0]);
@@ -466,8 +454,8 @@ module mkMemPack1ToMany#(MEMORY_IFC#(t_CONTAINER_ADDR, t_CONTAINER_DATA) contain
     // completeWrite --
     //     Multi-stage write.
     //
-    rule completeWrite (busy && (tpl_1(incomingReqQ.first()) == MEM_PACK_WRITE_REQ));
-        let addr = tpl_2(incomingReqQ.first());
+    rule completeWrite (busy && (incomingReqQ.firstPortID() == 1));
+        let addr = incomingReqQ.first();
         let c_addr = addrContainer(addr, reqIdx);
 
         let write_data = writeDataQ.first();
@@ -506,7 +494,7 @@ module mkMemPack1ToMany#(MEMORY_IFC#(t_CONTAINER_ADDR, t_CONTAINER_DATA) contain
 
 
     method Action readReq(t_ADDR addr);
-        incomingReqQ.ports[0].enq(tuple2(MEM_PACK_READ_REQ, addr));
+        incomingReqQ.ports[0].enq(addr);
     endmethod
 
     method ActionValue#(t_DATA) readRsp();
@@ -518,7 +506,7 @@ module mkMemPack1ToMany#(MEMORY_IFC#(t_CONTAINER_ADDR, t_CONTAINER_DATA) contain
 
     method Action write(t_ADDR addr, t_DATA val);
         t_PACKED_CONTAINER write_data = unpack(zeroExtendNP(pack(val)));
-        incomingReqQ.ports[1].enq(tuple2(MEM_PACK_WRITE_REQ, addr));
+        incomingReqQ.ports[1].enq(addr);
         writeDataQ.enq(write_data);
     endmethod
 endmodule
