@@ -5800,3 +5800,35 @@ Directory modules/bluespec/librl/base
 - Add firstPortID() method so the source port number corresponding to the head
   of the FIFO can be known.
 - Move logic to rules to reduce Bluespec scheduler complexity.
+
+----------
+mcadler     Date: Tue Apr 21 16:42:17 EDT 2009  CSN: CSN-platforms-195
+                  Tue Apr 21 20:42:17 UTC 2009
+
+
+Directory modules/bluespec/librl/base
+ memory-interface.bsv      Locally Modified          193 
+ memory-pack.bsv           Locally Modified          194 
+
+Directory modules/bluespec/librl/storage/cache
+ rl-direct-mapped-cache.bsv Locally Modified          193 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices
+ std-virtual-device-interfaces.bsv Locally Modified          193 
+ std-virtual-devices.awb   Locally Modified          193 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-mem-scratch.bsv    Locally Modified          193 
+
+- Add modules for conversion between a standard MEMORY_IFC and a single-reader
+  version of MEMORY_MULTI_READ_IFC.  This allows us to implement a module
+  that supports either interface by writing the implementation as a multi-reader
+  and converting it, when needed, to a MEMORY_IFC using a wrapper.
+
+- Converted the memory packer to true multi-reader implementations.
+
+- Change the hybrid scratchpad to return the address as part of a read result.
+  Also enlarge the refInfo passed through a scratchpad request so clients can
+  add more tags, such as the read-port associated with a reference.  Returning
+  these values along with a read result eliminates the need for private FIFOs
+  in clients to track the metadata.

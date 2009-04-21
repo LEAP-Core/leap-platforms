@@ -84,6 +84,8 @@ interface RL_DM_CACHE#(type t_CACHE_ADDR,
     method Action readReq(t_CACHE_ADDR addr, t_CACHE_REF_INFO refInfo);
 
     method ActionValue#(RL_DM_CACHE_LOAD_RESP#(t_CACHE_WORD, t_CACHE_REF_INFO)) readResp();
+    // Read the head of the response queue
+    method RL_DM_CACHE_LOAD_RESP#(t_CACHE_WORD, t_CACHE_REF_INFO) peekResp();
     
 
     // Write a word to a cache line.  Word index 0 corresponds to the
@@ -130,8 +132,8 @@ interface RL_DM_CACHE_SOURCE_DATA#(type t_CACHE_ADDR,
                                    type t_CACHE_WORD,
                                    type t_CACHE_REF_INFO);
 
-    // Fill request and response with data.  The source server must respond
-    // in order.
+    // Fill request and response with data.  Since the response is tagged with
+    // the details of the request, responses may be returned in any order.
     method Action readReq(t_CACHE_ADDR addr, t_CACHE_REF_INFO refInfo);
     method ActionValue#(RL_DM_CACHE_FILL_RESP#(t_CACHE_ADDR,
                                                t_CACHE_WORD,
@@ -391,7 +393,8 @@ module mkCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CA
 
     //
     // fillResp --
-    //     Fill response.  Fills must return in order.
+    //     Fill response.  Fill responses may return out of order relative to
+    //     requests.
     //
     rule fillResp (True);
         let f <- sourceData.readResp();
@@ -553,6 +556,10 @@ module mkCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CA
         readRespQ.deq();
 
         return r;
+    endmethod
+    
+    method RL_DM_CACHE_LOAD_RESP#(t_CACHE_WORD, t_CACHE_REF_INFO) peekResp();
+        return readRespQ.first();
     endmethod
 
 

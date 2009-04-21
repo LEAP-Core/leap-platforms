@@ -9,5 +9,7 @@
 %public std-virtual-devices.dic
 %public std-virtual-device-interfaces.bsv
 
+%param --global SCRATCHPAD_CLIENT_REF_INFO_BITS   7 "Bits available to clients to tag a reference."
+
 %param --global CENTRAL_CACHE_ADDR_BITS    36 "Address size of entries in the central cache.  Must be at least as large as the largest client."
 %param --global CENTRAL_CACHE_REFINFO_BITS 64 "Reference metadata size.  Must be large enough for the largest client's metadata."

@@ -48,26 +48,69 @@ import Vector::*;
 typedef `VDEV_SCRATCH__NENTRIES SCRATCHPAD_N_CLIENTS;
 
 //
-// Interface to a single scratchpad port.  By having separate ports defined
-// for each scratchpad, instead of adding a port argument to the methods,
-// this module is capable of defining the relative priority of the ports.
+// Scratchpad port number.  Add 1 to the number of clients in case there is
+// only one client.  Bit#(0) is not a valid array index.
 //
-interface SCRATCHPAD_MEMORY_PORT#(type t_ADDR, type t_DATA);
-    interface MEMORY_IFC#(t_ADDR, t_DATA) mem;
+typedef Bit#(TLog#(TAdd#(1, SCRATCHPAD_N_CLIENTS))) SCRATCHPAD_PORT_NUM;
+
+//
+// Scratpads are not required to return read results in order.  Clients
+// are expected to use the SCRATCHPAD_CLIENT_REF_INFO type to tag read requests
+// with information to route them correctly.
+//
+typedef `SCRATCHPAD_CLIENT_REF_INFO_BITS SCRATCHPAD_CLIENT_REF_INFO_SZ;
+typedef Bit#(SCRATCHPAD_CLIENT_REF_INFO_SZ) SCRATCHPAD_CLIENT_REF_INFO;
+
+//
+// Scratchpad reference ID.  Used for directing requests to the right
+// ports and reordering cache reads.
+//
+typedef struct
+{
+    SCRATCHPAD_PORT_NUM portNum;
+    SCRATCHPAD_CLIENT_REF_INFO clientRefInfo;
+}
+SCRATCHPAD_REF_INFO
+    deriving (Eq, Bits);
+
+//
+// Scratchpad read response returns metadata along with the value.  The
+// refInfo field contains tags to direct the response to the correct port
+// and to sort responses chronologically.  (The scratchpad memory may return
+// results out of order due to cache effects.)
+//
+// The address of the value is returned because some clients with private
+// caches need the address to insert the value into a cache.  Returning
+// the address eliminates the need for private FIFOs in the clients to track
+// addresses.
+//
+typedef struct
+{
+    t_DATA val;
+    t_ADDR addr;
+    SCRATCHPAD_REF_INFO refInfo;
+}
+SCRATCHPAD_READ_RESP#(type t_ADDR, type t_DATA)
+    deriving (Eq, Bits);
+
+
+//
+// All scratchpad requests flow through a single request/response interface.
+// The platform interface module may fan out connections to clients of the
+// scratchpad using, for example, multiple soft connections.
+//
+// The REF_INFO is used to determine address spaces and route reponses back
+// to the corresponding requester.
+//
+interface SCRATCHPAD_MEMORY_VIRTUAL_DEVICE#(type t_ADDR, type t_DATA);
+    method Action readReq(t_ADDR addr, SCRATCHPAD_REF_INFO refInfo);
+    method ActionValue#(SCRATCHPAD_READ_RESP#(t_ADDR, t_DATA)) readRsp();
+ 
+    method Action write(t_ADDR addr, t_DATA val, SCRATCHPAD_PORT_NUM portNum);
 
     // Initialize a port, requesting an allocation of allocLastWordIdx + 1
     // SCRATCHPAD_MEM_VALUE sized words.
-    method ActionValue#(Bool) init(t_ADDR allocLastWordIdx);
-endinterface: SCRATCHPAD_MEMORY_PORT
-
-//
-// A scratchpad interface has one memory interface for each client.  Using
-// a vector of MEMORY_IFCs instead of adding a port parameter to a
-// MEMORY_IFC-like interface makes the scratchpad interchangeable with
-// other memories in the clients.
-//
-interface SCRATCHPAD_MEMORY_VIRTUAL_DEVICE#(type t_ADDR, type t_DATA);
-    interface Vector#(SCRATCHPAD_N_CLIENTS, SCRATCHPAD_MEMORY_PORT#(t_ADDR, t_DATA)) ports;
+    method ActionValue#(Bool) init(t_ADDR allocLastWordIdx, SCRATCHPAD_PORT_NUM portNum);
 endinterface: SCRATCHPAD_MEMORY_VIRTUAL_DEVICE
 
 
