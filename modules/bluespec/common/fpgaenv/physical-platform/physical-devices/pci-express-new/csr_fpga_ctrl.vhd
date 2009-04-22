@@ -200,6 +200,7 @@ begin  -- rtl
             end if;
           when CSR_READ_ACK =>
             if (csr_in_rd_ack_c = '1') then
+              csr_out_rd_done_c <= '0';  
               if (do_write = '1') then
                 bram_addr_c <= csr_wr_index;
                 bram_din_c  <= csr_wr_data;
