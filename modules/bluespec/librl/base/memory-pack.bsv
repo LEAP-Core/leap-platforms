@@ -210,18 +210,20 @@ module mkMemPack1To1#(MEMORY_MULTI_READ_IFC#(n_READERS, t_CONTAINER_ADDR, t_CONT
     //
     Vector#(n_READERS, MEMORY_READER_IFC#(t_ADDR, t_DATA)) portsLocal = newVector();
 
-    for(Integer i = 0; i < valueOf(n_READERS); i = i + 1)
+    for(Integer p = 0; p < valueOf(n_READERS); p = p + 1)
     begin
-        portsLocal[i] =
+        portsLocal[p] =
             interface MEMORY_READER_IFC#(t_ADDR, t_DATA);
-                method Action readReq(t_ADDR addr);
-                    containerMem.readPorts[i].readReq(unpack(zeroExtendNP(pack(addr))));
-                endmethod
+                method Action readReq(t_ADDR addr) = containerMem.readPorts[p].readReq(unpack(zeroExtendNP(pack(addr))));
 
                 method ActionValue#(t_DATA) readRsp();
-                    let v <- containerMem.readPorts[i].readRsp();
+                    let v <- containerMem.readPorts[p].readRsp();
                     return unpack(truncateNP(pack(v)));
                 endmethod
+
+                method t_DATA peek() = unpack(truncateNP(pack(containerMem.readPorts[p].peek())));
+                method Bool notEmpty() = containerMem.readPorts[p].notEmpty();
+                method Bool notFull() = containerMem.readPorts[p].notFull();
             endinterface;
     end
 
@@ -233,6 +235,8 @@ module mkMemPack1To1#(MEMORY_MULTI_READ_IFC#(n_READERS, t_CONTAINER_ADDR, t_CONT
     method Action write(t_ADDR addr, t_DATA val);
         containerMem.write(unpack(zeroExtendNP(pack(addr))), unpack(zeroExtendNP(pack(val))));
     endmethod
+
+    method Bool writeNotFull() = containerMem.writeNotFull();
 endmodule
 
 
@@ -265,7 +269,10 @@ module mkMemPackManyTo1#(MEMORY_MULTI_READ_IFC#(n_READERS, t_CONTAINER_ADDR, t_C
     // Read request info holds the address of the requested data within the
     // container.  It is also used to route reads to either the RMW path or
     // back to the client.  Separate FIFOs are allocated for each read port.
-    Vector#(n_READERS, FIFO#(PACK_REQ_INFO#(t_DATA_SZ, t_CONTAINER_DATA_SZ))) readReqInfoQ <- replicateM(mkSizedFIFO(4));
+    //
+    // Beware!  The FIFOs are unguarded so there can be no predicates on methods
+    // below such as the memory's notEmpty method.
+    Vector#(n_READERS, FIFOF#(PACK_REQ_INFO#(t_DATA_SZ, t_CONTAINER_DATA_SZ))) readReqInfoQ <- replicateM(mkUGSizedFIFOF(4));
 
     // Writes must be read-modify-write.  Read the full container, update the
     // object, and write it back.  We must be careful of read/write ordering
@@ -293,7 +300,9 @@ module mkMemPackManyTo1#(MEMORY_MULTI_READ_IFC#(n_READERS, t_CONTAINER_ADDR, t_C
     //
 
     // Write port ID is last in the merge FIFO (nREADERS since it is 0 based).
-    rule processWriteReq (! doingRMW && (incomingReqQ.firstPortID() == fromInteger(valueOf(n_READERS))));
+    rule processWriteReq (! doingRMW &&
+                          readReqInfoQ[0].notFull() &&
+                          (incomingReqQ.firstPortID() == fromInteger(valueOf(n_READERS))));
         let addr = incomingReqQ.first();
         incomingReqQ.deq();
 
@@ -312,7 +321,9 @@ module mkMemPackManyTo1#(MEMORY_MULTI_READ_IFC#(n_READERS, t_CONTAINER_ADDR, t_C
     //     container and write it back.
     //
     (* descending_urgency = "finishRMW, processWriteReq" *)
-    rule finishRMW (readReqInfoQ[0].first().isReadForWrite && ! schedHack);
+    rule finishRMW (readReqInfoQ[0].notEmpty() &&
+                    readReqInfoQ[0].first().isReadForWrite &&
+                    ! schedHack);
         let o_idx = readReqInfoQ[0].first().objIdx;
         readReqInfoQ[0].deq();
 
@@ -336,17 +347,20 @@ module mkMemPackManyTo1#(MEMORY_MULTI_READ_IFC#(n_READERS, t_CONTAINER_ADDR, t_C
     // processReadReq --
     //     Forward read requests to the container memory.
     //
-    rule processReadReq (! doingRMW &&  (incomingReqQ.firstPortID() < fromInteger(valueOf(n_READERS))));
-        let addr = incomingReqQ.first();
-        incomingReqQ.deq();
+    for(Integer p = 0; p < valueOf(n_READERS); p = p + 1)
+    begin
+        rule processReadReq (! doingRMW &&
+                             readReqInfoQ[p].notFull() &&
+                             (incomingReqQ.firstPortID() == fromInteger(p)));
+            let addr = incomingReqQ.first();
+            incomingReqQ.deq();
 
-        match {.c_addr, .o_idx} = addrSplit(addr);
-        let port = incomingReqQ.firstPortID();
+            match {.c_addr, .o_idx} = addrSplit(addr);
+            containerMem.readPorts[p].readReq(c_addr);
 
-        containerMem.readPorts[port].readReq(c_addr);
-
-        readReqInfoQ[port].enq(PACK_REQ_INFO {isReadForWrite: False, objIdx: o_idx});
-    endrule
+            readReqInfoQ[p].enq(PACK_REQ_INFO {isReadForWrite: False, objIdx: o_idx});
+        endrule
+    end
 
 
     //
@@ -354,29 +368,50 @@ module mkMemPackManyTo1#(MEMORY_MULTI_READ_IFC#(n_READERS, t_CONTAINER_ADDR, t_C
     //
     Vector#(n_READERS, MEMORY_READER_IFC#(t_ADDR, t_DATA)) portsLocal = newVector();
 
-    for(Integer i = 0; i < valueOf(n_READERS); i = i + 1)
+    for(Integer p = 0; p < valueOf(n_READERS); p = p + 1)
     begin
-        portsLocal[i] =
+        portsLocal[p] =
             interface MEMORY_READER_IFC#(t_ADDR, t_DATA);
                 method Action readReq(t_ADDR addr);
-                    incomingReqQ.ports[i].enq(addr);
+                    incomingReqQ.ports[p].enq(addr);
                 endmethod
 
-                method ActionValue#(t_DATA) readRsp() if (! readReqInfoQ[i].first().isReadForWrite);
-                    let o_idx = readReqInfoQ[i].first().objIdx;
-                    readReqInfoQ[i].deq();
+                method ActionValue#(t_DATA) readRsp() if (readReqInfoQ[p].notEmpty() &&
+                                                          ! readReqInfoQ[p].first().isReadForWrite);
+                    let o_idx = readReqInfoQ[p].first().objIdx;
+                    readReqInfoQ[p].deq();
     
                     // The compiler ought to be able to detect that this method and rule
                     // finishRMW are mutually exclusive due to their predicates.  For some
                     // reason it does not.  The schedHack wire seems to quiet the warnings.
-                    if (i == 0)
+                    if (p == 0)
                         schedHack <= True;
 
                     // Receive the data and return the desired object from the container.
-                    let d <- containerMem.readPorts[i].readRsp();
+                    let d <- containerMem.readPorts[p].readRsp();
                     t_PACKED_CONTAINER pack_data = unpack(truncateNP(pack(d)));
                     return unpack(truncateNP(pack_data[o_idx]));
                 endmethod
+
+                method t_DATA peek() if (readReqInfoQ[p].notEmpty() &&
+                                         ! readReqInfoQ[p].first().isReadForWrite);
+                    let o_idx = readReqInfoQ[p].first().objIdx;
+    
+                    // Receive the data and return the desired object from the container.
+                    let d = containerMem.readPorts[p].peek();
+                    t_PACKED_CONTAINER pack_data = unpack(truncateNP(pack(d)));
+                    return unpack(truncateNP(pack_data[o_idx]));
+                endmethod
+
+                method Bool notEmpty();
+                    // Verify that the queue has data and that the response isn't
+                    // part of a RMW.
+                    return containerMem.readPorts[p].notEmpty() &&
+                           readReqInfoQ[p].notEmpty &&
+                           ! readReqInfoQ[p].first().isReadForWrite;
+                endmethod
+
+                method Bool notFull() = incomingReqQ.ports[p].notFull();
             endinterface;
     end
 
@@ -387,6 +422,8 @@ module mkMemPackManyTo1#(MEMORY_MULTI_READ_IFC#(n_READERS, t_CONTAINER_ADDR, t_C
         incomingReqQ.ports[valueOf(n_READERS)].enq(addr);
         writeDataQ.enq(val);
     endmethod
+
+    method Bool writeNotFull() = incomingReqQ.ports[valueOf(n_READERS)].notFull();
 endmodule
 
 
@@ -421,7 +458,7 @@ module mkMemPack1ToMany#(MEMORY_MULTI_READ_IFC#(n_READERS, t_CONTAINER_ADDR, t_C
     // Read response state.  One per read port.
     Vector#(n_READERS, Reg#(t_OBJ_IDX)) readIdx <- replicateM(mkReg(0));
     Vector#(n_READERS, Reg#(t_PACKED_CONTAINER)) readData <- replicateM(mkRegU());
-    Vector#(n_READERS, FIFO#(t_DATA)) readRspQ <- replicateM(mkBypassFIFO());
+    Vector#(n_READERS, FIFOF#(t_DATA)) readRspQ <- replicateM(mkBypassFIFOF());
 
 
     //
@@ -534,20 +571,24 @@ module mkMemPack1ToMany#(MEMORY_MULTI_READ_IFC#(n_READERS, t_CONTAINER_ADDR, t_C
 
     Vector#(n_READERS, MEMORY_READER_IFC#(t_ADDR, t_DATA)) portsLocal = newVector();
 
-    for(Integer i = 0; i < valueOf(n_READERS); i = i + 1)
+    for(Integer p = 0; p < valueOf(n_READERS); p = p + 1)
     begin
-        portsLocal[i] =
+        portsLocal[p] =
             interface MEMORY_READER_IFC#(t_ADDR, t_DATA);
                 method Action readReq(t_ADDR addr);
-                    incomingReqQ.ports[i].enq(addr);
+                    incomingReqQ.ports[p].enq(addr);
                 endmethod
 
                 method ActionValue#(t_DATA) readRsp();
-                    let v = readRspQ[i].first();
-                    readRspQ[i].deq();
+                    let v = readRspQ[p].first();
+                    readRspQ[p].deq();
 
                     return v;
                 endmethod
+
+                method t_DATA peek() = readRspQ[p].first();
+                method Bool notEmpty() = readRspQ[p].notEmpty();
+                method Bool notFull() = incomingReqQ.ports[p].notFull();
             endinterface;
     end
 
@@ -560,4 +601,6 @@ module mkMemPack1ToMany#(MEMORY_MULTI_READ_IFC#(n_READERS, t_CONTAINER_ADDR, t_C
         t_PACKED_CONTAINER write_data = unpack(zeroExtendNP(pack(val)));
         writeDataQ.enq(write_data);
     endmethod
+
+    method Bool writeNotFull() = incomingReqQ.ports[valueOf(n_READERS)].notFull();
 endmodule

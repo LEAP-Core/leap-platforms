@@ -24,6 +24,7 @@
 
 import Vector::*;
 import FIFO::*;
+import FIFOF::*;
 import SpecialFIFOs::*;
 
 `include "asim/provides/librl_bsv_base.bsh"
@@ -65,11 +66,14 @@ module mkBRAMMultiRead
     
     // The vector of read ports is just the read ports of the BRAMs.
 
-    for(Integer i = 0; i < valueOf(n_READERS); i = i + 1)
+    for (Integer p = 0; p < valueOf(n_READERS); p = p + 1)
     begin
-        portsLocal[i] = (interface BROM#(t_ADDR, t_DATA);
-                             method readReq = rams[i].readReq;
-                             method readRsp = rams[i].readRsp;
+        portsLocal[p] = (interface BROM#(t_ADDR, t_DATA);
+                             method readReq = rams[p].readReq;
+                             method readRsp = rams[p].readRsp;
+                             method t_DATA peek() = rams[p].peek;
+                             method Bool notEmpty() = rams[p].notEmpty;
+                             method Bool notFull() = rams[p].notFull;
                          endinterface);
     end
 
@@ -82,10 +86,21 @@ module mkBRAMMultiRead
     // Effect: Replicate the writes to all the RAMs. 
  
     method Action write(t_ADDR a, t_DATA d);
-        for(Integer i = 0; i < valueOf(n_READERS); i = i + 1)
+        for (Integer p = 0; p < valueOf(n_READERS); p = p + 1)
         begin
-            rams[i].write(a, d);
+            rams[p].write(a, d);
         end
+    endmethod
+
+    method Bool writeNotFull();
+        Bool not_full = True;
+
+        for (Integer p = 0; p < valueOf(n_READERS); p = p + 1)
+        begin
+            not_full = not_full && rams[p].notFull();
+        end
+    
+        return not_full;
     endmethod
 endmodule
 
@@ -154,7 +169,7 @@ module mkBRAMBufferedPseudoMultiRead
     // Two stage output buffering, one entry in each stage for each read port.
     // See buffer0 and buffer1 in mkBRAM for more details.
     Vector#(n_READERS, FIFO#(Bit#(t_DATA_SZ))) buffer0 <- replicateM(mkBypassFIFO());
-    Vector#(n_READERS, FIFO#(Bit#(t_DATA_SZ))) buffer1 <- replicateM(mkBypassFIFO());
+    Vector#(n_READERS, FIFOF#(Bit#(t_DATA_SZ))) buffer1 <- replicateM(mkBypassFIFOF());
 
     //
     // processWriteReq --
@@ -219,7 +234,7 @@ module mkBRAMBufferedPseudoMultiRead
 
     Vector#(n_READERS, BROM#(t_ADDR, t_DATA)) portsLocal = newVector();
 
-    for(Integer p = 0; p < valueOf(n_READERS); p = p + 1)
+    for (Integer p = 0; p < valueOf(n_READERS); p = p + 1)
     begin
         portsLocal[p] =
             interface BROM#(t_ADDR, t_DATA);
@@ -235,6 +250,10 @@ module mkBRAMBufferedPseudoMultiRead
 
                     return unpack(v);
                 endmethod
+
+                method t_DATA peek() = unpack(buffer1[p].first());
+                method Bool notEmpty() = buffer1[p].notEmpty();
+                method Bool notFull() = incomingReqQ.ports[p].notFull();
             endinterface;
     end
 
@@ -245,6 +264,8 @@ module mkBRAMBufferedPseudoMultiRead
         incomingReqQ.ports[valueOf(n_READERS)].enq(addr);
         writeDataQ.enq(val);
     endmethod
+
+    method Bool writeNotFull = incomingReqQ.ports[valueOf(n_READERS)].notFull();
 endmodule
 
 
@@ -284,7 +305,12 @@ module mkBRAMPseudoMultiRead
               Bits#(t_DATA, t_DATA_SZ));
 
     BRAM#(t_ADDR, t_DATA) ram <- mkBRAM();
-    FIFO#(Bit#(TLog#(n_READERS))) readReqPort <- mkFIFO();
+
+    //
+    // Beware the unguarded FIFO!  It is unguarded so notEmpty() for read ports
+    // below has no predicates.
+    //
+    FIFOF#(Bit#(TLog#(n_READERS))) readReqPort <- mkUGFIFOF();
 
     //
     // readPorts
@@ -292,19 +318,36 @@ module mkBRAMPseudoMultiRead
 
     Vector#(n_READERS, BROM#(t_ADDR, t_DATA)) portsLocal = newVector();
 
-    for(Integer p = 0; p < valueOf(n_READERS); p = p + 1)
+    for (Integer p = 0; p < valueOf(n_READERS); p = p + 1)
     begin
         portsLocal[p] =
             interface BROM#(t_ADDR, t_DATA);
-                method Action readReq(t_ADDR a);
+                method Action readReq(t_ADDR a) if (readReqPort.notFull());
                     readReqPort.enq(fromInteger(p));
                     ram.readReq(a);
                 endmethod
 
-                method ActionValue#(t_DATA) readRsp() if (readReqPort.first() == fromInteger(p));
+                method ActionValue#(t_DATA) readRsp() if (readReqPort.notEmpty() &&
+                                                          (readReqPort.first() == fromInteger(p)));
                     readReqPort.deq();
                     let rsp <- ram.readRsp();
                     return rsp;
+                endmethod
+
+                method t_DATA peek() if (readReqPort.notEmpty() &&
+                                         readReqPort.first() == fromInteger(p));
+                    return ram.peek();
+                endmethod
+
+                method Bool notEmpty();
+                    return ram.notEmpty() &&
+                           readReqPort.notEmpty &&
+                           (readReqPort.first() == fromInteger(p));
+                endmethod
+
+                method Bool notFull();
+                    return ram.notFull() &&
+                           readReqPort.notFull();
                 endmethod
             endinterface;
     end
@@ -313,6 +356,7 @@ module mkBRAMPseudoMultiRead
 
  
     method write = ram.write;
+    method writeNotFull = ram.writeNotFull;
 endmodule
 
 //

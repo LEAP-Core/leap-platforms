@@ -39,7 +39,7 @@ import SpecialFIFOs::*;
 
 typedef Bit#(TLog#(t_NUM_ENTRIES)) SCOREBOARD_FIFO_ENTRY_ID#(numeric type t_NUM_ENTRIES);
 
-interface SCOREBOARD_FIFO#(numeric type t_NUM_ENTRIES, type t_DATA);
+interface SCOREBOARD_FIFOF#(numeric type t_NUM_ENTRIES, type t_DATA);
     method ActionValue#(SCOREBOARD_FIFO_ENTRY_ID#(t_NUM_ENTRIES)) enq();
     method Action setValue(SCOREBOARD_FIFO_ENTRY_ID#(t_NUM_ENTRIES) id, t_DATA data);
     method t_DATA first();
@@ -53,12 +53,12 @@ endinterface
 
 
 //
-// mkScoreboardFIFO --
+// mkScoreboardFIFOF --
 //     A scoreboard FIFO with data stores in LUTs.
 //
-module mkScoreboardFIFO
+module mkScoreboardFIFOF
     // Interface:
-    (SCOREBOARD_FIFO#(t_NUM_ENTRIES, t_DATA))
+    (SCOREBOARD_FIFOF#(t_NUM_ENTRIES, t_DATA))
     provisos(
         Bits#(t_DATA, t_DATA_SZ),
         Alias#(SCOREBOARD_FIFO_ENTRY_ID#(t_NUM_ENTRIES), t_SCOREBOARD_FIFO_ENTRY_ID));
@@ -150,14 +150,14 @@ endmodule
 
 
 //
-// mkBRAMScoreboardFIFO --
+// mkBRAMScoreboardFIFOF --
 //     A scoreboard FIFO with data stores in BRAM.  The code bypasses the
 //     BRAM when first() and deq() are blocked waiting for incoming data,
 //     so the timing should be similar to mkScoreboardFIFO.
 //
-module mkBRAMScoreboardFIFO
+module mkBRAMScoreboardFIFOF
     // Interface:
-    (SCOREBOARD_FIFO#(t_NUM_ENTRIES, t_DATA))
+    (SCOREBOARD_FIFOF#(t_NUM_ENTRIES, t_DATA))
     provisos(
         Bits#(t_DATA, t_DATA_SZ),
         Alias#(SCOREBOARD_FIFO_ENTRY_ID#(t_NUM_ENTRIES), t_SCOREBOARD_FIFO_ENTRY_ID));

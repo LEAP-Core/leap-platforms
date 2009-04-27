@@ -267,8 +267,8 @@ module mkCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CA
     // The heap size limits the number of writes in flight.
     MEMORY_HEAP_IMM#(RL_DM_WRITE_DATA_HEAP_IDX, t_CACHE_WORD) reqInfo_writeData <- mkMemoryHeapUnionLUTRAM();
 
-    // Incoming data.  Merge FIFO controls the order.
-    MERGE_FIFOF#(3, t_CACHE_REQ) newReqQ <- mkMergeBypassFIFOF();
+    // Incoming data.  One method may fire at a time.
+    FIFO#(t_CACHE_REQ) newReqQ <- mkBypassFIFO();
 
     // Pipelines
     FIFO#(t_CACHE_REQ) cacheLookupQ <- mkFIFO();
@@ -548,7 +548,7 @@ module mkCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CA
         r.act = DM_CACHE_READ;
         r.addr = addr;
         r.refInfo = refInfo;
-        newReqQ.ports[1].enq(r);
+        newReqQ.enq(r);
     endmethod
 
     method ActionValue#(RL_DM_CACHE_LOAD_RESP#(t_CACHE_WORD, t_CACHE_REF_INFO)) readResp();
@@ -573,7 +573,7 @@ module mkCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CA
         r.addr = addr;
         r.refInfo = refInfo;
         r.writeDataIdx = data_idx;
-        newReqQ.ports[2].enq(r);
+        newReqQ.enq(r);
 
         debugLog.record($format("  New request: WRITE addr=0x%x, wData heap=%0d, val=0x%x", debugAddr(addr), data_idx, val));
     endmethod
@@ -587,7 +587,7 @@ module mkCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CA
         r.addr = addr;
         r.refInfo = refInfo;
         r.sendAck = sendAck;
-        newReqQ.ports[0].enq(r);
+        newReqQ.enq(r);
     endmethod
 
     method Action flushReq(t_CACHE_ADDR addr, Bool sendAck, t_CACHE_REF_INFO refInfo);
@@ -598,7 +598,7 @@ module mkCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CA
         r.addr = addr;
         r.refInfo = refInfo;
         r.sendAck = sendAck;
-        newReqQ.ports[0].enq(r);
+        newReqQ.enq(r);
     endmethod
 
     method Action invalOrFlushWait();

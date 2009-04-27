@@ -489,7 +489,7 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
 
     // Invalidate and flush requests are always returned in the order they
     // were requested.
-    SCOREBOARD_FIFO#(RL_SA_CACHE_MAX_INVAL, Bool) invalReqDoneQ <- mkScoreboardFIFO();
+    SCOREBOARD_FIFOF#(RL_SA_CACHE_MAX_INVAL, Bool) invalReqDoneQ <- mkScoreboardFIFOF();
 
     // ***** Indexing functions *****
 
@@ -1503,21 +1503,7 @@ module mkBRAMCacheLocalData
     //
     // Metadata access methods
     //
-
-    interface MEMORY_IFC metaData;
-        method Action readReq(RL_SA_CACHE_SET_IDX#(nSets) set);
-            meta.readReq(set);
-        endmethod
-
-        method ActionValue#(t_SET_METADATA) readRsp();
-            let d <- meta.readRsp();
-            return d;
-        endmethod
-
-        method Action write(RL_SA_CACHE_SET_IDX#(nSets) set, t_SET_METADATA mData);
-            meta.write(set, mData);
-        endmethod
-    endinterface
+    interface MEMORY_IFC metaData = meta;
 
 
     //

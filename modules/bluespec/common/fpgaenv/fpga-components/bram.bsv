@@ -21,6 +21,7 @@
 //
 
 import FIFO::*;
+import FIFOF::*;
 import SpecialFIFOs::*;
 import Vector::*;
 import RegFile::*;
@@ -40,12 +41,24 @@ typedef MEMORY_IFC#(t_ADDR, t_DATA) BRAM#(type t_ADDR, type t_DATA);
 
 
 //
+// Internal, HW level BRAM interface.  This level has the minimum needed
+// to read/write data.
+//
+
+interface BRAM_INTERNAL_IFC#(type t_ADDR, type t_DATA);
+    method Action readReq(t_ADDR addr);
+    method ActionValue#(t_DATA) readRsp();
+    method Action write(t_ADDR addr, t_DATA val);
+endinterface
+
+
+//
 // mkBRAMUnguardedNonZero --
 //     Wrapper for the Verilog module that actually turns into a block RAM.
 //
 import "BVI" Bram = module mkBRAMUnguardedNonZero
     // interface:
-        (BRAM#(Bit#(addr_SZ), Bit#(data_SZ)));
+    (BRAM_INTERNAL_IFC#(Bit#(addr_SZ), Bit#(data_SZ)));
 
     parameter addrSize = valueOf(addr_SZ);
     parameter dataSize = valueOf(data_SZ);
@@ -71,7 +84,7 @@ endmodule
 //
 module mkBRAMUnguardedZero
     // interface:
-        (BRAM#(Bit#(addr_SZ), Bit#(data_SZ)));
+    (BRAM_INTERNAL_IFC#(Bit#(addr_SZ), Bit#(data_SZ)));
 
     method Action readReq(Bit#(addr_SZ) a);
         noAction;
@@ -95,7 +108,7 @@ endmodule
 //
 module mkBRAMUnguardedSim
     // interface:
-        (BRAM#(Bit#(addr_SZ), Bit#(data_SZ)));
+    (BRAM_INTERNAL_IFC#(Bit#(addr_SZ), Bit#(data_SZ)));
 
     RegFile#(Bit#(addr_SZ), Bit#(data_SZ))       ram <- mkRegFileWCF(minBound, maxBound);
     Reg#(Bit#(data_SZ))                      outputR <- mkRegU();
@@ -121,15 +134,22 @@ endmodule
 //
 module mkBRAMUnguarded
     // interface:
-        (BRAM#(Bit#(addr_SZ), Bit#(data_SZ)));
+    (BRAM#(Bit#(addr_SZ), Bit#(data_SZ)));
 
     `ifdef SYNTH
     let mem <- (valueOf(addr_SZ) == 0 || valueOf(data_SZ) == 0)? mkBRAMUnguardedZero(): mkBRAMUnguardedNonZero();
     `else
     let mem <- mkBRAMUnguardedSim();
     `endif
-    return mem;
 
+    method Action readReq(Bit#(addr_SZ) addr) = mem.readReq(addr);
+    method ActionValue#(Bit#(data_SZ)) readRsp() = mem.readRsp();
+    method t_DATA peek() = ?;     // Don't use this method
+    method Bool notEmpty() = ?;   // Don't use this method
+    method Bool notFull() = True;
+
+    method Action write(Bit#(addr_SZ) addr, Bit#(data_SZ) val) = mem.write(addr, val);
+    method Bool writeNotFull() = True;
 endmodule
 
 
@@ -155,7 +175,7 @@ module mkBRAM
     // single cycle read latency on BRAMs and the same buffering as a normal
     // FIFO.
     FIFO#(Bit#(data_SZ)) buffer0 <- mkBypassFIFO();
-    FIFO#(Bit#(data_SZ)) buffer1 <- mkBypassFIFO();
+    FIFOF#(Bit#(data_SZ)) buffer1 <- mkBypassFIFOF();
 
     // Is there a response coming from the unguarded RAM?
     COUNTER#(1) readReqMade <- mkLCounter(0);
@@ -204,6 +224,10 @@ module mkBRAM
         return unpack(v);
     endmethod
    
+    method t_DATA peek() = unpack(buffer1.first());
+    method Bool notEmpty() = buffer1.notEmpty();
+    method Bool notFull() = (bufferingAvailable.value() > 0);
+
     // write
     
     // When:   Any time.
@@ -221,6 +245,7 @@ module mkBRAM
         ram.write(pack(a), pack(d));
     endmethod
 
+    method Bool writeNotFull() = True;
 endmodule
 
 

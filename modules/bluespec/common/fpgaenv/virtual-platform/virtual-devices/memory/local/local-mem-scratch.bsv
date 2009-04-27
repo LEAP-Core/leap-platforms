@@ -34,6 +34,7 @@ import Vector::*;
 `include "asim/provides/local_mem.bsh"
 `include "asim/provides/physical_platform.bsh"
 `include "asim/provides/virtual_devices.bsh"
+`include "asim/provides/central_cache.bsh"
 `include "asim/provides/fpga_components.bsh"
 
 //
@@ -49,21 +50,17 @@ typedef LOCAL_MEM_LINE SCRATCHPAD_MEM_VALUE;
 `endif
 
 typedef SCRATCHPAD_MEMORY_VIRTUAL_DEVICE#(SCRATCHPAD_MEM_ADDRESS, SCRATCHPAD_MEM_VALUE) SCRATCHPAD_MEMORY_IFC;
-typedef SCRATCHPAD_MEMORY_PORT#(SCRATCHPAD_MEM_ADDRESS, SCRATCHPAD_MEM_VALUE) SCRATCHPAD_MEMORY_PORT_IFC;
 
 
 //
 // mkMemoryVirtualDevice --
 //     Build a device interface with the requested number of ports.
 //
-module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi)
+module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
+                              CENTRAL_CACHE_IFC centralCache)
     // interface:
     (SCRATCHPAD_MEMORY_IFC)
-    provisos (Bits#(SCRATCHPAD_MEM_ADDRESS, t_SCRATCHPAD_MEM_ADDRESS_SZ),
-
-              // LUTRAM breaks with 0-sized index
-              Max#(2, SCRATCHPAD_N_CLIENTS, t_SAFE_N_CLIENTS),
-              Alias#(Bit#(TLog#(t_SAFE_N_CLIENTS)), t_PORT_ID));
+    provisos (Bits#(SCRATCHPAD_MEM_ADDRESS, t_SCRATCHPAD_MEM_ADDRESS_SZ));
 
     DEBUG_FILE debugLog <- mkDebugFile("memory_scrathpad.out");
 
@@ -72,10 +69,10 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi)
 
     // Port base-address within global memory.  Assigned dynamically as
     // allocation requests arrive.
-    LUTRAM#(t_PORT_ID, Maybe#(SCRATCHPAD_MEM_ADDRESS)) portSegmentBase <- mkLUTRAM(tagged Invalid);
+    LUTRAM#(SCRATCHPAD_PORT_NUM, Maybe#(SCRATCHPAD_MEM_ADDRESS)) portSegmentBase <- mkLUTRAM(tagged Invalid);
 
     // Direct read responses to the correct port
-    FIFOF#(t_PORT_ID) readQ <- mkSizedFIFOF(8);
+    FIFOF#(Tuple2#(SCRATCHPAD_MEM_ADDRESS, SCRATCHPAD_REF_INFO)) readQ <- mkSizedFIFOF(8);
 
 
     // ====================================================================
@@ -85,9 +82,9 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi)
     //
     // ====================================================================
 
-    FIFO#(Tuple3#(t_PORT_ID, SCRATCHPAD_MEM_ADDRESS, SCRATCHPAD_MEM_ADDRESS)) initQ <- mkFIFO1();
+    FIFO#(Tuple3#(SCRATCHPAD_PORT_NUM, SCRATCHPAD_MEM_ADDRESS, SCRATCHPAD_MEM_ADDRESS)) initQ <- mkFIFO1();
     Reg#(Bool) initBusy <- mkReg(False);
-    Reg#(t_PORT_ID) initPort <- mkRegU();
+    Reg#(SCRATCHPAD_PORT_NUM) initPort <- mkRegU();
     Reg#(SCRATCHPAD_MEM_ADDRESS) initAddrBase <- mkRegU();
     Reg#(SCRATCHPAD_MEM_ADDRESS) initAddr <- mkRegU();
     Reg#(SCRATCHPAD_MEM_ADDRESS) initCnt <- mkRegU();
@@ -139,90 +136,85 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi)
     //
     // ====================================================================
 
+    method Action readReq(SCRATCHPAD_MEM_ADDRESS addr, SCRATCHPAD_REF_INFO refInfo) if (! initBusy);
+        if (portSegmentBase.sub(refInfo.portNum) matches tagged Valid .segment_base)
+        begin
+            let p_addr = addr + segment_base;
+            debugLog.record($format("readReq port %0d: addr 0x%x, p_addr 0x%x", refInfo.portNum, addr, p_addr));
+
+            readQ.enq(tuple2(addr, refInfo));
+
+`ifdef LOCAL_MEM_USE_LINES_Z
+            llpi.localMem.readWordReq(p_addr);
+`else
+            llpi.localMem.readLineReq(localMemLineAddrToAddr(p_addr));
+`endif
+        end
+    endmethod
+
+    method ActionValue#(SCRATCHPAD_READ_RESP#(SCRATCHPAD_MEM_ADDRESS, SCRATCHPAD_MEM_VALUE)) readRsp();
+        match {.addr, .ref_info} = readQ.first();
+        readQ.deq();
+
+`ifdef LOCAL_MEM_USE_LINES_Z
+        let d <- llpi.localMem.readWordRsp();
+`else
+        let d <- llpi.localMem.readLineRsp();
+`endif
+
+        debugLog.record($format("readRsp port %0d: 0x%x", ref_info.portNum, d));
+
+        SCRATCHPAD_READ_RESP#(SCRATCHPAD_MEM_ADDRESS, SCRATCHPAD_MEM_VALUE) r;
+        r.val = d;
+        r.addr = addr;
+        r.refInfo = ref_info;
+
+        return r;
+    endmethod
+
     //
-    // Allocate the memory interfaces.
+    // write --
+    //     write method is predicated by readQ.notFull() to ensure
+    //     synchronization of read and write requests.
     //
-    Vector#(SCRATCHPAD_N_CLIENTS, SCRATCHPAD_MEMORY_PORT_IFC) portsLocal = newVector();
-    
-    for (Integer p = 0; p < valueOf(SCRATCHPAD_N_CLIENTS); p = p + 1)
-    begin
-        portsLocal[p] = (
-            interface SCRATCHPAD_MEMORY_PORT;
-                interface MEMORY_IFC mem;
-                    method Action readReq(SCRATCHPAD_MEM_ADDRESS addr) if (! initBusy &&& portSegmentBase.sub(fromInteger(p)) matches tagged Valid .segment_base);
-                        let p_addr = addr + segment_base;
-                        debugLog.record($format("readReq port %0d: addr 0x%x, p_addr 0x%x", p, addr, p_addr));
-
-                        readQ.enq(fromInteger(p));
+    method Action write(SCRATCHPAD_MEM_ADDRESS addr, SCRATCHPAD_MEM_VALUE val, SCRATCHPAD_PORT_NUM portNum) if (! initBusy &&& readQ.notFull());
+        if (portSegmentBase.sub(portNum) matches tagged Valid .segment_base)
+        begin
+            let p_addr = addr + segment_base;
+            debugLog.record($format("write port %0d: addr 0x%x, p_addr 0x%x, 0x%x", portNum, addr, p_addr, val));
 
 `ifdef LOCAL_MEM_USE_LINES_Z
-                        llpi.localMem.readWordReq(p_addr);
+            llpi.localMem.writeWord(p_addr, val);
 `else
-                        llpi.localMem.readLineReq(localMemLineAddrToAddr(p_addr));
+            llpi.localMem.writeLine(localMemLineAddrToAddr(p_addr), val);
 `endif
-                    endmethod
-
-                    method ActionValue#(SCRATCHPAD_MEM_VALUE) readRsp() if (readQ.first() == fromInteger(p));
-                        readQ.deq();
-
-`ifdef LOCAL_MEM_USE_LINES_Z
-                        let d <- llpi.localMem.readWordRsp();
-`else
-                        let d <- llpi.localMem.readLineRsp();
-`endif
-
-                        debugLog.record($format("readRsp port %0d: 0x%x", p, d));
-
-                        return d;
-                    endmethod
-
-                    //
-                    // write --
-                    //     write method is predicated by readQ.notFull() to ensure
-                    //     synchronization of read and write requests.
-                    //
-                    method Action write(SCRATCHPAD_MEM_ADDRESS addr, SCRATCHPAD_MEM_VALUE val) if (! initBusy &&& readQ.notFull() &&& portSegmentBase.sub(fromInteger(p)) matches tagged Valid .segment_base);
-                        let p_addr = addr + segment_base;
-                        debugLog.record($format("write port %0d: addr 0x%x, p_addr 0x%x, 0x%x", p, addr, p_addr, val));
-
-`ifdef LOCAL_MEM_USE_LINES_Z
-                        llpi.localMem.writeWord(p_addr, val);
-`else
-                        llpi.localMem.writeLine(localMemLineAddrToAddr(p_addr), val);
-`endif
-                    endmethod
-                endinterface
+        end
+    endmethod
 
 
-                //
-                // Initialization
-                //
-                method ActionValue#(Bool) init(SCRATCHPAD_MEM_ADDRESS allocLastWordIdx);
-                    SCRATCHPAD_MEM_ADDRESS last_word = totalAlloc + allocLastWordIdx;
+    //
+    // Initialization
+    //
+    method ActionValue#(Bool) init(SCRATCHPAD_MEM_ADDRESS allocLastWordIdx, SCRATCHPAD_PORT_NUM portNum);
+        SCRATCHPAD_MEM_ADDRESS last_word = totalAlloc + allocLastWordIdx;
 
-                    // Arithmetic for debug (includes overflow bit)
-                    Bit#(TAdd#(1, t_SCRATCHPAD_MEM_ADDRESS_SZ)) dbg_alloc_last_word_idx = zeroExtend(allocLastWordIdx) + 1;
-                    Bit#(TAdd#(1, t_SCRATCHPAD_MEM_ADDRESS_SZ)) dbg_last_word = zeroExtend(last_word) + 1;
-                    debugLog.record($format("INIT port %0d: 0x%x words, base 0x%x, next 0x%x", p, dbg_alloc_last_word_idx, totalAlloc, dbg_last_word));
+        // Arithmetic for debug (includes overflow bit)
+        Bit#(TAdd#(1, t_SCRATCHPAD_MEM_ADDRESS_SZ)) dbg_alloc_last_word_idx = zeroExtend(allocLastWordIdx) + 1;
+        Bit#(TAdd#(1, t_SCRATCHPAD_MEM_ADDRESS_SZ)) dbg_last_word = zeroExtend(last_word) + 1;
+        debugLog.record($format("INIT port %0d: 0x%x words, base 0x%x, next 0x%x", portNum, dbg_alloc_last_word_idx, totalAlloc, dbg_last_word));
 
-                    Bool ok = True;
-                    if (last_word > totalAlloc)
-                    begin
-                        initQ.enq(tuple3(fromInteger(p), totalAlloc, allocLastWordIdx));
-                    end
-                    else
-                    begin
-                        debugLog.record($format("INIT port %0d: OUT OF MEMORY", p));
-                        ok = False;
-                    end
+        Bool ok = True;
+        if (last_word > totalAlloc)
+        begin
+            initQ.enq(tuple3(portNum, totalAlloc, allocLastWordIdx));
+        end
+        else
+        begin
+            debugLog.record($format("INIT port %0d: OUT OF MEMORY", portNum));
+            ok = False;
+        end
 
-                    totalAlloc <= last_word + 1;
-                    return ok;
-                endmethod
-
-            endinterface
-        );
-    end
-    
-    interface ports = portsLocal;
+        totalAlloc <= last_word + 1;
+        return ok;
+    endmethod
 endmodule

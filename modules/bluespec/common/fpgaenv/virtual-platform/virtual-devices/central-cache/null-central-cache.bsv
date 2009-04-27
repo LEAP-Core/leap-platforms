@@ -158,7 +158,7 @@ module mkCentralCache#(LowLevelPlatformInterface llpi)
     interface clientPorts = clientPortsLocal;
     interface backingPorts = backingPortsLocal;
     
-    method Action init(Bool enableCache, Bool cacheIsWriteBack);
+    method Action init(RL_SA_CACHE_MODE mode);
         noAction;
     endmethod
 endmodule

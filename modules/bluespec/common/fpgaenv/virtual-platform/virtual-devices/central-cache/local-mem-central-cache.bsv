@@ -495,6 +495,18 @@ module mkLocalMemCacheData#(LowLevelPlatformInterface llpi, DEBUG_FILE debugLog)
         method Action write(RL_SA_CACHE_SET_IDX#(nSets) set, t_SET_METADATA mData) if (initialized);
             memory.writeLine(getMetadataIdx(set), zeroExtend(pack(mData)));
         endmethod
+    
+        // Required for memory interface but don't make sense for local memory
+        method t_SET_METADATA peek() if (False);
+            return ?;
+        endmethod
+    
+        method Bool notEmpty() if (False);
+            return ?;
+        endmethod
+    
+        method Bool notFull() = True;
+        method Bool writeNotFull() = True;
     endinterface
 
 

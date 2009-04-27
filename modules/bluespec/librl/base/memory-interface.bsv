@@ -35,7 +35,20 @@ interface MEMORY_IFC#(type t_ADDR, type t_DATA);
     method Action readReq(t_ADDR addr);
     method ActionValue#(t_DATA) readRsp();
 
+    // Look at the read response value without popping it
+    method t_DATA peek();
+
+    // Read response ready
+    method Bool notEmpty();
+
+    // Read request possible?
+    method Bool notFull();
+
+
     method Action write(t_ADDR addr, t_DATA val);
+    
+    // Write request possible?
+    method Bool writeNotFull();
 endinterface
 
 
@@ -47,12 +60,16 @@ endinterface
 interface MEMORY_READER_IFC#(type t_ADDR, type t_DATA);
     method Action readReq(t_ADDR addr);
     method ActionValue#(t_DATA) readRsp();
+    method t_DATA peek();
+    method Bool notEmpty();
+    method Bool notFull();
 endinterface
 
 interface MEMORY_MULTI_READ_IFC#(numeric type n_READERS, type t_ADDR, type t_DATA);
     interface Vector#(n_READERS, MEMORY_READER_IFC#(t_ADDR, t_DATA)) readPorts;
 
     method Action write(t_ADDR addr, t_DATA val);
+    method Bool writeNotFull();
 endinterface
 
 
@@ -74,18 +91,19 @@ module mkMultiMemIfcToMemIfc#(MEMORY_MULTI_READ_IFC#(1, t_ADDR, t_DATA) multiMem
     provisos (Bits#(t_ADDR, t_ADDR_SZ),
               Bits#(t_DATA, t_DATA_SZ));
 
-    method Action readReq(t_ADDR addr);
-        multiMem.readPorts[0].readReq(addr);
-    endmethod
+    method Action readReq(t_ADDR addr) = multiMem.readPorts[0].readReq(addr);
 
     method ActionValue#(t_DATA) readRsp();
         let v <- multiMem.readPorts[0].readRsp();
         return v;
     endmethod
 
-    method Action write(t_ADDR addr, t_DATA val);
-        multiMem.write(addr, val);
-    endmethod
+    method t_DATA peek() = multiMem.readPorts[0].peek();
+    method Bool notEmpty() = multiMem.readPorts[0].notEmpty();
+    method Bool notFull() = multiMem.readPorts[0].notFull();
+
+    method Action write(t_ADDR addr, t_DATA val) = multiMem.write(addr, val);
+    method Bool writeNotFull() = multiMem.writeNotFull();
 endmodule
 
 
@@ -103,21 +121,22 @@ module mkMemIfcToMultiMemIfc#(MEMORY_IFC#(t_ADDR, t_DATA) mem)
     Vector#(1, MEMORY_READER_IFC#(t_ADDR, t_DATA)) portsLocal = newVector();
     portsLocal[0] =
         interface MEMORY_READER_IFC#(t_ADDR, t_DATA);
-            method Action readReq(t_ADDR addr);
-                mem.readReq(addr);
-            endmethod
+            method Action readReq(t_ADDR addr) = mem.readReq(addr);
 
             method ActionValue#(t_DATA) readRsp();
                 let v <- mem.readRsp();
                 return v;
             endmethod
+
+            method t_DATA peek() = mem.peek();
+            method Bool notEmpty() = mem.notEmpty();
+            method Bool notFull() = mem.notFull();
         endinterface;
 
     interface readPorts = portsLocal;
 
-    method Action write(t_ADDR addr, t_DATA val);
-        mem.write(addr, val);
-    endmethod
+    method Action write(t_ADDR addr, t_DATA val) = mem.write(addr, val);
+    method Bool writeNotFull() = mem.writeNotFull();
 endmodule
 
 
@@ -178,6 +197,13 @@ module mkMultiMemInitializedWith#(MEMORY_MULTI_READ_IFC#(n_READERS, t_ADDR, t_DA
                     let v <- mem.readPorts[p].readRsp();
                     return v;
                 endmethod
+
+                method t_DATA peek() = mem.readPorts[p].peek();
+                method Bool notEmpty() = mem.readPorts[p].notEmpty();
+
+                method Bool notFull();
+                    return !initializing && mem.readPorts[p].notFull();
+                endmethod
             endinterface;
     end
 
@@ -185,6 +211,10 @@ module mkMultiMemInitializedWith#(MEMORY_MULTI_READ_IFC#(n_READERS, t_ADDR, t_DA
 
     method Action write(t_ADDR a, t_DATA d) if (!initializing);
         mem.write(a, d);
+    endmethod
+
+    method Bool writeNotFull();
+        return !initializing && mem.writeNotFull();
     endmethod
 endmodule
 

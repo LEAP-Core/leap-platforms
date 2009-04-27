@@ -5859,3 +5859,36 @@ Directory modules/bluespec/common/fpgaenv/fpga-components
 - Clean up the replication of code to support initialized memory.  Added standard
   initialization wrapper modules in the memory interface.  The BRAM implementations
   now use these.
+
+----------
+mcadler     Date: Mon Apr 27 19:48:03 EDT 2009  CSN: CSN-platforms-198
+                  Mon Apr 27 23:48:03 UTC 2009
+
+
+Directory modules/bluespec/librl/base
+ memory-interface.bsv      Locally Modified          197 
+ memory-pack.bsv           Locally Modified          197 
+
+Directory modules/bluespec/librl/storage
+ fifos.bsv                 Locally Modified          196 
+
+Directory modules/bluespec/librl/storage/cache
+ rl-direct-mapped-cache.bsv Locally Modified          196 
+ rl-set-assoc-cache.bsv    Locally Modified          196 
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ bram.bsv                  Locally Modified          197 
+ bram-multi-read.bsv       Locally Modified          197 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/local
+ local-mem-scratch.bsv     Locally Modified          196 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/central-cache
+ local-mem-central-cache.bsv Locally Modified          196 
+ null-central-cache.bsv    Locally Modified          196 
+
+- Update NULL central cache and local mem scratchpad implementations to current
+  interface version.
+- Rename SCOREBOARD_FIFO to SCOREBOARD_FIFOF since it has notFull, etc.
+- Add notFull, notEmpty, peek and writeNotFull methods to MEMORY_IFC.  Update
+  all modules implementing a memory.
