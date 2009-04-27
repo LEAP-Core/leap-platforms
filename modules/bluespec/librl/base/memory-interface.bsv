@@ -18,6 +18,13 @@
 
 import Vector::*;
 
+
+// ========================================================================
+//
+// Memory interface definition
+//
+// ========================================================================
+
 //
 // This is a general interface to a multi-cycle memory.  By making it common we
 // hope that code can switch between different memories changing only the
@@ -42,16 +49,18 @@ interface MEMORY_READER_IFC#(type t_ADDR, type t_DATA);
     method ActionValue#(t_DATA) readRsp();
 endinterface
 
-interface MEMORY_MULTI_READ_IFC#(numeric type nReaders, type t_ADDR, type t_DATA);
-    interface Vector#(nReaders, MEMORY_READER_IFC#(t_ADDR, t_DATA)) readPorts;
+interface MEMORY_MULTI_READ_IFC#(numeric type n_READERS, type t_ADDR, type t_DATA);
+    interface Vector#(n_READERS, MEMORY_READER_IFC#(t_ADDR, t_DATA)) readPorts;
 
     method Action write(t_ADDR addr, t_DATA val);
 endinterface
 
 
+// ========================================================================
 //
-// Abstract memory modules
+// Memory interface conversion
 //
+// ========================================================================
 
 //
 // mkMultiMemIfcToMemIfc --
@@ -109,4 +118,143 @@ module mkMemIfcToMultiMemIfc#(MEMORY_IFC#(t_ADDR, t_DATA) mem)
     method Action write(t_ADDR addr, t_DATA val);
         mem.write(addr, val);
     endmethod
+endmodule
+
+
+// ========================================================================
+//
+// Memory initialization
+//
+// ========================================================================
+
+
+//
+// mkMultiMemInitializedWith --
+//     Initializes a memory using an FSM and provide a memory interface to
+//     the initialized storage.  The memory cannot be accessed until the
+//     FSM is done.   Uses an ADDR->VAL function to determine the
+//     initial values.
+//
+module mkMultiMemInitializedWith#(MEMORY_MULTI_READ_IFC#(n_READERS, t_ADDR, t_DATA) mem,
+                                  function t_DATA init(t_ADDR x))
+    // interface:
+    (MEMORY_MULTI_READ_IFC#(n_READERS, t_ADDR, t_DATA))
+    provisos (Bits#(t_ADDR, t_ADDR_SZ),
+              Bits#(t_DATA, t_DATA_SZ));
+
+    // The current adddress we're updating.
+    Reg#(Bit#(t_ADDR_SZ)) cur <- mkReg(0);
+    
+    // Are we initializing?
+    Reg#(Bool) initializing <- mkReg(True);
+
+
+    // initialize --
+    //     When:   After a reset until every value is initialized.
+    //     Effect: Update the RAM with the user-provided initial value.
+    //
+    rule initialize (initializing);
+        t_ADDR cur_a = unpack(cur);
+        mem.write(cur_a, init(cur_a));
+        cur <= cur + 1;
+
+        if (cur + 1 == 0)
+        begin
+            initializing <= False;
+        end
+    endrule
+
+
+    Vector#(n_READERS, MEMORY_READER_IFC#(t_ADDR, t_DATA)) portsLocal = newVector();
+    for (Integer p = 0; p < valueOf(n_READERS); p = p + 1)
+    begin
+        portsLocal[p] =
+            interface MEMORY_READER_IFC#(t_ADDR, t_DATA);
+                method Action readReq(t_ADDR addr) if (!initializing);
+                    mem.readPorts[p].readReq(addr);
+                endmethod
+
+                method ActionValue#(t_DATA) readRsp();
+                    let v <- mem.readPorts[p].readRsp();
+                    return v;
+                endmethod
+            endinterface;
+    end
+
+    interface readPorts = portsLocal;
+
+    method Action write(t_ADDR a, t_DATA d) if (!initializing);
+        mem.write(a, d);
+    endmethod
+endmodule
+
+
+//
+// mkMultiMemInitialized --
+//     A convenience-wrapper of mkMultiMemInitializedWith where the value is
+//     constant.
+//
+module mkMultiMemInitialized#(MEMORY_MULTI_READ_IFC#(n_READERS, t_ADDR, t_DATA) mem,
+                              t_DATA initVal)
+    // interface:
+    (MEMORY_MULTI_READ_IFC#(n_READERS, t_ADDR, t_DATA))
+    provisos (Bits#(t_ADDR, t_ADDR_SZ),
+              Bits#(t_DATA, t_DATA_SZ));
+
+    // Wrap the data value in a dummy function.
+    function t_DATA initFunc(t_ADDR a);
+        return initVal;
+    endfunction
+
+    MEMORY_MULTI_READ_IFC#(n_READERS, t_ADDR, t_DATA) m <- mkMultiMemInitializedWith(mem, initFunc);
+
+    return m;
+endmodule
+
+
+//
+// mkMemInitializedWith --
+//     Initializes a memory using an FSM and provide a memory interface to
+//     the initialized storage.  The memory cannot be accessed until the
+//     FSM is done.   Uses an ADDR->VAL function to determine the
+//     initial values.
+//
+module mkMemInitializedWith#(MEMORY_IFC#(t_ADDR, t_DATA) mem,
+                             function t_DATA init(t_ADDR x))
+    // interface:
+    (MEMORY_IFC#(t_ADDR, t_DATA))
+    provisos (Bits#(t_ADDR, t_ADDR_SZ),
+              Bits#(t_DATA, t_DATA_SZ));
+
+    // Convert to a multi-reader interface and use the initialization module.
+    MEMORY_MULTI_READ_IFC#(1, t_ADDR, t_DATA) multi_m <- mkMemIfcToMultiMemIfc(mem);
+    MEMORY_MULTI_READ_IFC#(1, t_ADDR, t_DATA) init_m <- mkMultiMemInitializedWith(multi_m, init);
+
+    // Convert back to single reader interface.
+    MEMORY_IFC#(t_ADDR, t_DATA) m <- mkMultiMemIfcToMemIfc(init_m);
+
+    return m;
+endmodule
+
+
+//
+// mkMemInitialized --
+//     A convenience-wrapper of mkMemInitializedWith where the value is
+//     constant.
+//
+module mkMemInitialized#(MEMORY_IFC#(t_ADDR, t_DATA) mem,
+                         t_DATA initVal)
+    // interface:
+    (MEMORY_IFC#(t_ADDR, t_DATA))
+    provisos (Bits#(t_ADDR, t_ADDR_SZ),
+              Bits#(t_DATA, t_DATA_SZ));
+
+    // Wrap the data value in a dummy function.
+    function t_DATA initFunc(t_ADDR a);
+        return initVal;
+    endfunction
+
+    MEMORY_IFC#(t_ADDR, t_DATA) m <- mkMemInitializedWith(mem, initFunc);
+
+    return m;
 endmodule

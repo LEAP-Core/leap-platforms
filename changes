@@ -5832,3 +5832,30 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memor
   add more tags, such as the read-port associated with a reference.  Returning
   these values along with a read result eliminates the need for private FIFOs
   in clients to track the metadata.
+
+----------
+mcadler     Date: Mon Apr 27 13:19:06 EDT 2009  CSN: CSN-platforms-197
+                  Mon Apr 27 17:19:06 UTC 2009
+
+
+Directory modules/bluespec/librl/base
+ memory-interface.bsv      Locally Modified          196 
+ memory-pack.bsv           Locally Modified          196 
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ bram.bsv                  Locally Modified          196 
+ bram-multi-read.bsv       Locally Modified          196 
+
+- Add a new flavor of multi-reader BRAM (buffered pseudo).  Now there are 3 kinds:
+  - Large & Fast: replicated BRAM structure.  One BRAM per read port.
+  - Medium: single, shared BRAM.  Private 2-stage output buffers on each
+      read port prevent deadlocks.  Read/write order is preserved at the
+      cost of never doing a read and a write in the same cycle.
+  - Small: single, shared BRAM.  All read ports share a common output FIFO.
+      There is, thus, the chance of deadlock if the client is waiting on
+      a read-port whose request is not the oldest.  This flavor is useful
+      if all the client needs is a tag to connect read requests and responses.
+
+- Clean up the replication of code to support initialized memory.  Added standard
+  initialization wrapper modules in the memory interface.  The BRAM implementations
+  now use these.

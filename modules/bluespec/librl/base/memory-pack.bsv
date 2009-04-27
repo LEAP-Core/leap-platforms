@@ -383,7 +383,7 @@ module mkMemPackManyTo1#(MEMORY_MULTI_READ_IFC#(n_READERS, t_CONTAINER_ADDR, t_C
     interface readPorts = portsLocal;
 
     method Action write(t_ADDR addr, t_DATA val);
-        // Write port is the last of the imcomingReqQ ports.
+        // Write port is the last of the incomingReqQ ports.
         incomingReqQ.ports[valueOf(n_READERS)].enq(addr);
         writeDataQ.enq(val);
     endmethod

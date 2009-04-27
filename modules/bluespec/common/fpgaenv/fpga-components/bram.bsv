@@ -240,68 +240,25 @@ module mkBRAMInitializedWith#(function t_DATA init(t_ADDR x))
     // The primitive RAM.
     BRAM#(t_ADDR, t_DATA) mem <- mkBRAM();
     
-    // The current adddress we're updating.
-    Reg#(Bit#(addr_SZ))   cur <- mkReg(0);
-    
-    // Are we initializing?
-    Reg#(Bool) initializing <- mkReg(True);
-
-
-    // initialize --
-    //     When:   After a reset until every value is initialized.
-    //     Effect: Update the RAM with the user-provided initial value.
-    //
-    rule initialize (initializing);
-        t_ADDR cur_a = unpack(cur);
-        mem.write(cur_a, init(cur_a));
-        cur <= cur + 1;
-
-        if (cur + 1 == 0)
-        begin
-            initializing <= False;
-        end
-    endrule
-
-
-    // readReq, readRsp, write
-    //     When:   Any time we're not initializing.
-    //     Effect: Just do the request.
-
-    method Action readReq(t_ADDR a) if (!initializing);
-        mem.readReq(a);
-    endmethod
-
-    method ActionValue#(t_DATA) readRsp();
-        t_DATA rsp <- mem.readRsp();
-        return rsp;
-    endmethod
-
-    method Action write(t_ADDR a, t_DATA d) if (!initializing);
-        mem.write(a, d);
-    endmethod
-
+    BRAM#(t_ADDR, t_DATA) m <- mkMemInitializedWith(mem, init);
+    return m;
 endmodule
 
 
 //
 // mkBRAMInitialized --
-//     A convenience-wrapper of mkBRAMInitializedWith where the value is
-//     constant.
+//     Initialize with a constant value.
 //
-module mkBRAMInitialized#(t_DATA initval)
+module mkBRAMInitialized#(t_DATA initVal)
     // interface:
         (BRAM#(t_ADDR, t_DATA))
     provisos
         (Bits#(t_ADDR, addr_SZ),
          Bits#(t_DATA, data_SZ));
 
-    // Wrap the data value in a dummy function.
-    function t_DATA initfunc(t_ADDR a);
-        return initval;
-    endfunction
-
-    // Just instantiate the RAM.
-    BRAM#(t_ADDR, t_DATA) m <- mkBRAMInitializedWith(initfunc);
+    // The primitive RAM.
+    BRAM#(t_ADDR, t_DATA) mem <- mkBRAM();
     
+    BRAM#(t_ADDR, t_DATA) m <- mkMemInitialized(mem, initVal);
     return m;
 endmodule
