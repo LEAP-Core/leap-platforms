@@ -29,9 +29,7 @@ verilog work "@BLUESPECDIR@/Verilog/McpRegUN.v"
 verilog work "@BLUESPECDIR@/Verilog/RegAligned.v"
 verilog work "@BLUESPECDIR@/Verilog/RegA.v"
 verilog work "@BLUESPECDIR@/Verilog/RegFileLoad.v"
-## Removed because ISE sometimes synthesizes RegFile as BRAM even when it is
-## access in the same cycle.  Replaced with lutram.v in fpga-components.
-## verilog work "@BLUESPECDIR@/Verilog/RegFile.v"
+verilog work "@BLUESPECDIR@/Verilog/RegFile.v"
 verilog work "@BLUESPECDIR@/Verilog/RegN.v"
 verilog work "@BLUESPECDIR@/Verilog/RegTwoA.v"
 verilog work "@BLUESPECDIR@/Verilog/RegTwoN.v"

@@ -19,6 +19,7 @@
 
 import FIFO::*;
 import FIFOF::*;
+import SpecialFIFOs::*;
 import Vector::*;
 
 `include "asim/provides/librl_bsv_base.bsh"
@@ -40,26 +41,16 @@ typedef CENTRAL_CACHE_VIRTUAL_DEVICE CENTRAL_CACHE_IFC;
 module mkCentralCache#(LowLevelPlatformInterface llpi)
     // interface:
     (CENTRAL_CACHE_IFC)
-    provisos (Bits#(CENTRAL_CACHE_ADDR, t_CENTRAL_CACHE_ADDR_SZ),
-              // Central cache addresses are the concetenation of a client's
-              // port number and client addresses.  Compute the size of the
-              // central cache's internal addresses.  The Max#() function
-              // guarantees that the port ID is at least 1 bit.
-              Max#(1, TLog#(CENTRAL_CACHE_N_CLIENTS), t_CENTRAL_CACHE_PORT_ID_SZ),
-              Add#(t_CENTRAL_CACHE_PORT_ID_SZ, t_CENTRAL_CACHE_ADDR_SZ, t_CENTRAL_CACHE_INTERNAL_ADDR_SZ),
+    provisos (Bits#(CENTRAL_CACHE_LINE_ADDR, t_CENTRAL_CACHE_LINE_ADDR_SZ),
+              Bits#(CENTRAL_CACHE_PORT_NUM, t_CENTRAL_CACHE_PORT_NUM_SZ),
+              Add#(t_CENTRAL_CACHE_PORT_NUM_SZ, t_CENTRAL_CACHE_LINE_ADDR_SZ, t_CENTRAL_CACHE_INTERNAL_ADDR_SZ),
 
-              Alias#(Bit#(t_CENTRAL_CACHE_PORT_ID_SZ), t_CENTRAL_CACHE_PORT_ID),
-              Alias#(Tuple2#(t_CENTRAL_CACHE_PORT_ID, CENTRAL_CACHE_ADDR), t_CENTRAL_CACHE_INTERNAL_ADDR),
+              Alias#(Tuple2#(CENTRAL_CACHE_PORT_NUM, CENTRAL_CACHE_LINE_ADDR), t_CENTRAL_CACHE_INTERNAL_ADDR),
 
               // Compute the number of sets in the cache based on the size of local
-              // memory.  Assumptions:
-              //   - Cache data uses half of the available memory, reserving the
-              //     reset for tags.  In reality tags would take less than 25%
-              //     of the memory, but the current cache algorithm requires the
-              //     number of sets to be a power of 2.
-              //   - 4 ways per set.
-              Alias#(Bit#(TSub#(TSub#(LOCAL_MEM_LINE_ADDR_SZ, 1),  // Half the memory
-                                2)),   // 4 ways per set
+              // memory.  The memory is broken down into 4 equal chunks:
+              // 3 for the 3 ways in each set and one for a set's tag.
+              Alias#(Bit#(TSub#(LOCAL_MEM_LINE_ADDR_SZ, 2)),  // 4 regions per set
                      t_CENTRAL_CACHE_SET_IDX),
               Bits#(t_CENTRAL_CACHE_SET_IDX, t_CENTRAL_CACHE_SET_IDX_SZ));
 
@@ -94,7 +85,7 @@ module mkCentralCache#(LowLevelPlatformInterface llpi)
                             CENTRAL_CACHE_WORD,
                             CENTRAL_CACHE_WORDS_PER_LINE,
                             TExp#(t_CENTRAL_CACHE_SET_IDX_SZ),
-                            4) cacheLocalData <- mkLocalMemCacheData(llpi, debugLog);
+                            3) cacheLocalData <- mkLocalMemCacheData(llpi, debugLog);
 
     RL_SA_CACHE#(Bit#(t_CENTRAL_CACHE_INTERNAL_ADDR_SZ),
                  CENTRAL_CACHE_WORD,
@@ -104,7 +95,9 @@ module mkCentralCache#(LowLevelPlatformInterface llpi)
                                              cacheLocalData,
                                              stats,
                                              debugLog);
-    
+
+    // Manage routing of flush/inval ACK back to requesting port
+    FIFO#(CENTRAL_CACHE_PORT_NUM) flushAckRespQ <- mkFIFO();
 
     // ====================================================================
     //
@@ -119,7 +112,7 @@ module mkCentralCache#(LowLevelPlatformInterface llpi)
     // These vectors will be the central cache ports.
     Vector#(CENTRAL_CACHE_N_CLIENTS, CENTRAL_CACHE_CLIENT_PORT) clientPortsLocal = newVector();
     Vector#(CENTRAL_CACHE_N_CLIENTS, CENTRAL_CACHE_BACKING_PORT) backingPortsLocal = newVector();
-    
+
 
     //
     // addPortToAddr --
@@ -127,12 +120,74 @@ module mkCentralCache#(LowLevelPlatformInterface llpi)
     //     cache address space by concatenating the port ID and the client
     //     address.
     //
-    function Bit#(t_CENTRAL_CACHE_INTERNAL_ADDR_SZ) addPortToAddr(Integer port,
-                                                                  CENTRAL_CACHE_ADDR addr);
-        t_CENTRAL_CACHE_PORT_ID p = fromInteger(port);
-        return pack(tuple2(p, addr));
+    function Bit#(t_CENTRAL_CACHE_INTERNAL_ADDR_SZ) addPortToAddr(CENTRAL_CACHE_PORT_NUM port,
+                                                                  CENTRAL_CACHE_LINE_ADDR addr);
+        return pack(tuple2(port, addr));
     endfunction
+
+
+    //
+    // Merge incoming requests into a single FIFO.  This is both fair and
+    // eliminates compiler warnings about rule schedule conflicts.
+    //
+    MERGE_FIFOF#(CENTRAL_CACHE_N_CLIENTS, CENTRAL_CACHE_REQ) reqQ <- mkMergeBypassFIFOF();
+
+    rule processReq (initialized);
+        CENTRAL_CACHE_PORT_NUM port = zeroExtend(reqQ.firstPortID());
+        let req = reqQ.first();
+        reqQ.deq();
+
+        case (req) matches
+            tagged CENTRAL_CACHE_READ .r:
+            begin
+                debugLog.record($format("port %0d: readReq addr=0x%x, wordIdx=0x%x, refInfo=0x%x", port, r.addr, r.wordIdx, r.refInfo));
+                cache.readReq(addPortToAddr(port, r.addr), r.wordIdx, r.refInfo);
+            end
+
+            tagged CENTRAL_CACHE_WRITE .r:
+            begin
+                debugLog.record($format("port %0d: write addr=0x%x, refInfo=0x%x, wIdx=%d, val=0x%x", port, r.addr, r.refInfo, r.wordIdx, r.val));
+                cache.write(addPortToAddr(port, r.addr), r.val, r.wordIdx, r.refInfo);
+            end
+
+            tagged CENTRAL_CACHE_INVAL .r:
+            begin
+                debugLog.record($format("port %0d: inval addr=0x%x, refInfo=0x%x, ack=%d", port, r.addr, r.refInfo, r.sendAck));
+                cache.invalReq(addPortToAddr(port, r.addr), r.sendAck, r.refInfo);
+
+                if (r.sendAck)
+                begin
+                    // Keep track of ACK requests for routing back to the port
+                    flushAckRespQ.enq(port);
+                end
+            end
+
+            tagged CENTRAL_CACHE_FLUSH .r:
+            begin
+                debugLog.record($format("port %0d: flush addr=0x%x, refInfo=0x%x, ack=%d", port, r.addr, r.refInfo, r.sendAck));
+                cache.flushReq(addPortToAddr(port, r.addr), r.sendAck, r.refInfo);
+
+                if (r.sendAck)
+                begin
+                    // Keep track of ACK requests for routing back to the port
+                    flushAckRespQ.enq(port);
+                end
+            end
+        endcase
+    endrule
+
+
+    //
+    // Route read responses back to the correct port.
+    //
+    FIFO#(CENTRAL_CACHE_PORT_NUM) respReadyQ <- mkBypassFIFO();
     
+    rule routeReadResp (True);
+        // The central cache port number is encoded in the address.
+        t_CENTRAL_CACHE_INTERNAL_ADDR i_addr = unpack(cache.peekRespAddr());
+        respReadyQ.enq(tpl_1(i_addr));
+    endrule
+
 
     //
     // Allocate an interface for each port.
@@ -143,17 +198,13 @@ module mkCentralCache#(LowLevelPlatformInterface llpi)
 
         clientPortsLocal[p] = (
             interface CENTRAL_CACHE_CLIENT_PORT;
-                method Action readReq(CENTRAL_CACHE_ADDR addr,
-                                      Bit#(TLog#(CENTRAL_CACHE_WORDS_PER_LINE)) wordIdx,
-                                      CENTRAL_CACHE_REF_INFO refInfo) if (initialized);
-                    debugLog.record($format("port %0d: readReq addr=0x%x, wordIdx=0x%x, refInfo=0x%x", p, addr, wordIdx, refInfo));
-
-                    cache.readReq(addPortToAddr(p, addr), wordIdx, refInfo);
+                method Action newReq(CENTRAL_CACHE_REQ req);
+                    // Add request to the FIFO.  Requests will be processed in
+                    // order across all ports.
+                    reqQ.ports[p].enq(req);
                 endmethod
 
-                method ActionValue#(CENTRAL_CACHE_READ_RESP) readResp();
-                    CENTRAL_CACHE_READ_RESP r;
-
+                method ActionValue#(CENTRAL_CACHE_READ_LINE_RESP) readResp() if (respReadyQ.first() == fromInteger(p));
                     let d <- cache.readResp();
 
                     //
@@ -161,39 +212,19 @@ module mkCentralCache#(LowLevelPlatformInterface llpi)
                     // The only change is dropping the port ID from the address.
                     //
                     t_CENTRAL_CACHE_INTERNAL_ADDR i_addr = unpack(d.addr);
-                    r.addr = tpl_2(i_addr);
-                    r.refInfo = d.refInfo;
+                    CENTRAL_CACHE_READ_LINE_RESP r;
                     r.words = d.words;
+                    r.addr = tpl_2(i_addr);
+                    r.reqWordIdx = d.reqWordIdx;
+                    r.refInfo = d.refInfo;
 
                     debugLog.record($format("port %0d: readResp addr=0x%x, refInfo=0x%x", p, r.addr, r.refInfo));
                     return r;
                 endmethod
 
-                method Action write(CENTRAL_CACHE_ADDR addr,
-                                    CENTRAL_CACHE_WORD val,
-                                    Bit#(TLog#(CENTRAL_CACHE_WORDS_PER_LINE)) wordIdx,
-                                    CENTRAL_CACHE_REF_INFO refInfo) if (initialized);
-
-                    debugLog.record($format("port %0d: write addr=0x%x, refInfo=0x%x, wIdx=%d, val=0x%x", p, addr, refInfo, wordIdx, val));
-
-                    cache.write(addPortToAddr(p, addr), val, wordIdx, refInfo);
-                endmethod
-    
-
-                method Action invalReq(CENTRAL_CACHE_ADDR addr, Bool sendAck, CENTRAL_CACHE_REF_INFO refInfo) if (initialized);
-                    debugLog.record($format("port %0d: inval addr=0x%x, refInfo=0x%x, ack=%d", p, addr, refInfo, sendAck));
-
-                    cache.invalReq(addPortToAddr(p, addr), sendAck, refInfo);
-                endmethod
-
-                method Action flushReq(CENTRAL_CACHE_ADDR addr, Bool sendAck, CENTRAL_CACHE_REF_INFO refInfo) if (initialized);
-                    debugLog.record($format("port %0d: flush addr=0x%x, refInfo=0x%x, ack=%d", p, addr, refInfo, sendAck));
-
-                    cache.flushReq(addPortToAddr(p, addr), sendAck, refInfo);
-                endmethod
-
-                method Action invalOrFlushWait();
-                    debugLog.record($format("port %0d: inval/flush done"));
+                method Action invalOrFlushWait() if (flushAckRespQ.first() == fromInteger(p));
+                    flushAckRespQ.deq();
+                    debugLog.record($format("port %0d: inval/flush done", p));
 
                     cache.invalOrFlushWait();
                 endmethod
@@ -225,16 +256,14 @@ module mkCentralCacheBacking#(Vector#(CENTRAL_CACHE_N_CLIENTS, CENTRAL_CACHE_BAC
                               CENTRAL_CACHE_LINE,
                               CENTRAL_CACHE_WORDS_PER_LINE,
                               CENTRAL_CACHE_REF_INFO))
-    provisos (Bits#(CENTRAL_CACHE_ADDR, t_CENTRAL_CACHE_ADDR_SZ),
-              // See mkCentralCache above for a description.
-              Max#(1, TLog#(CENTRAL_CACHE_N_CLIENTS), t_CENTRAL_CACHE_PORT_ID_SZ),
-              Add#(t_CENTRAL_CACHE_PORT_ID_SZ, t_CENTRAL_CACHE_ADDR_SZ, t_CENTRAL_CACHE_INTERNAL_ADDR_SZ),
+    provisos (Bits#(CENTRAL_CACHE_LINE_ADDR, t_CENTRAL_CACHE_LINE_ADDR_SZ),
+              Bits#(CENTRAL_CACHE_PORT_NUM, t_CENTRAL_CACHE_PORT_NUM_SZ),
+              Add#(t_CENTRAL_CACHE_PORT_NUM_SZ, t_CENTRAL_CACHE_LINE_ADDR_SZ, t_CENTRAL_CACHE_INTERNAL_ADDR_SZ),
 
-              Alias#(Bit#(t_CENTRAL_CACHE_PORT_ID_SZ), t_CENTRAL_CACHE_PORT_ID),
-              Alias#(Tuple2#(t_CENTRAL_CACHE_PORT_ID, CENTRAL_CACHE_ADDR), t_CENTRAL_CACHE_INTERNAL_ADDR));
+              Alias#(Tuple2#(CENTRAL_CACHE_PORT_NUM, CENTRAL_CACHE_LINE_ADDR), t_CENTRAL_CACHE_INTERNAL_ADDR));
 
-    FIFO#(t_CENTRAL_CACHE_PORT_ID) readQ <- mkSizedFIFO(16);
-    FIFO#(t_CENTRAL_CACHE_PORT_ID) writeSyncQ <- mkSizedFIFO(16);
+    FIFO#(CENTRAL_CACHE_PORT_NUM) readQ <- mkSizedFIFO(16);
+    FIFO#(CENTRAL_CACHE_PORT_NUM) writeSyncQ <- mkSizedFIFO(16);
 
 
     //
@@ -248,12 +277,18 @@ module mkCentralCacheBacking#(Vector#(CENTRAL_CACHE_N_CLIENTS, CENTRAL_CACHE_BAC
 
 
     method Action readReq(Bit#(t_CENTRAL_CACHE_INTERNAL_ADDR_SZ) addr, CENTRAL_CACHE_REF_INFO refInfo);
+        // Figure out from which central cache port to request the data and
+        // forward the request.
         match {.i_port, .i_addr} = splitInternalAddr(addr);
         backingStore[i_port].cacheSourceData.readReq(i_addr, refInfo);
+
+        // Note read request port ID
         readQ.enq(i_port);
     endmethod
 
     method ActionValue#(CENTRAL_CACHE_LINE) readResp();
+        // The cache expects readReq/readResp in order.  Forward the response from
+        // the appropriate central cache port.
         let r <- backingStore[readQ.first()].cacheSourceData.readResp();
         readQ.deq();
         return r;
@@ -264,6 +299,7 @@ module mkCentralCacheBacking#(Vector#(CENTRAL_CACHE_N_CLIENTS, CENTRAL_CACHE_BAC
                         Vector#(CENTRAL_CACHE_WORDS_PER_LINE, Bool) wordValidMask,
                         CENTRAL_CACHE_LINE val,
                         CENTRAL_CACHE_REF_INFO refInfo);
+        // Figure out to which central cache port the write should be sent.
         match {.i_port, .i_addr} = splitInternalAddr(addr);
         backingStore[i_port].cacheSourceData.write(i_addr, wordValidMask, val, refInfo);
     endmethod
@@ -275,9 +311,13 @@ module mkCentralCacheBacking#(Vector#(CENTRAL_CACHE_N_CLIENTS, CENTRAL_CACHE_BAC
                                CENTRAL_CACHE_REF_INFO refInfo);
         match {.i_port, .i_addr} = splitInternalAddr(addr);
         backingStore[i_port].cacheSourceData.writeSyncReq(i_addr, wordValidMask, val, refInfo);
+
+        // Note sync request port ID
+        writeSyncQ.enq(i_port);
     endmethod
 
     method Action writeSyncWait();
+        // Tell cache when write syncs send an ACK
         backingStore[writeSyncQ.first()].cacheSourceData.writeSyncWait();
         writeSyncQ.deq();
     endmethod
@@ -316,7 +356,7 @@ module mkMultiReaderLocalMem#(LowLevelPlatformInterface llpi, DEBUG_FILE debugLo
     // interface:
     (LOCAL_MEMORY_MULTI_READ_CACHE_IFC#(nReadPorts));
 
-    FIFOF#(Bit#(TLog#(nReadPorts))) readQ <- mkSizedFIFOF(16);
+    FIFOF#(Bit#(TLog#(nReadPorts))) readQ <- mkSizedFIFOF(8);
 
     Vector#(nReadPorts, LOCAL_MEMORY_CACHE_IFC) portsLocal = newVector;
     for (Integer p = 0; p < valueOf(nReadPorts); p = p + 1)
@@ -377,8 +417,7 @@ module mkLocalMemCacheData#(LowLevelPlatformInterface llpi, DEBUG_FILE debugLog)
               // Assert size relationship of number of sets & ways to address
               Bits#(t_CACHE_SET_IDX, t_CACHE_SET_IDX_SZ),
               Bits#(t_CACHE_WAY_IDX, t_CACHE_WAY_IDX_SZ),
-              Add#(t_CACHE_SET_IDX_SZ, TAdd#(t_CACHE_WAY_IDX_SZ, 1), LOCAL_MEM_LINE_ADDR_SZ),
-              Add#(t_CACHE_WAY_IDX_SZ, 1, TAdd#(t_CACHE_WAY_IDX_SZ, 1)),
+              Add#(t_CACHE_SET_IDX_SZ, t_CACHE_WAY_IDX_SZ, LOCAL_MEM_LINE_ADDR_SZ),
 
               // Assert size of data relative to local memory
               Add#(t_SET_METADATA_SZ, t_UNUSED_META_BIT_SZ, LOCAL_MEM_LINE_SZ),
@@ -406,8 +445,8 @@ module mkLocalMemCacheData#(LowLevelPlatformInterface llpi, DEBUG_FILE debugLog)
     //     Convert set and way into a local memory address.
     //
     function LOCAL_MEM_ADDR getDataIdx(t_CACHE_SET_IDX set, t_CACHE_WAY_IDX way);
-        // Data is in memory with high bit set to 0
-        return localMemLineAddrToAddr({ pack(set), pack(way), 1'b0 });
+        // Way must not be 3!  Cache only has 3 ways, so that shouldn't happen.
+        return localMemLineAddrToAddr({ pack(set), pack(way) });
     endfunction
 
 
@@ -416,8 +455,9 @@ module mkLocalMemCacheData#(LowLevelPlatformInterface llpi, DEBUG_FILE debugLog)
     //     Convert set and way into a local memory address.
     //
     function LOCAL_MEM_ADDR getMetadataIdx(t_CACHE_SET_IDX set);
-        t_CACHE_WAY_IDX dummy = 0;
-        return localMemLineAddrToAddr({ pack(set), pack(dummy), 1'b1 });
+        // Last way slot is the metadata
+        t_CACHE_WAY_IDX metaWay = maxBound;
+        return localMemLineAddrToAddr({ pack(set), pack(metaWay) });
     endfunction
 
 
@@ -455,8 +495,8 @@ module mkLocalMemCacheData#(LowLevelPlatformInterface llpi, DEBUG_FILE debugLog)
     //
     // ====================================================================
 
-    FIFO#(RL_SA_CACHE_SET_IDX#(nSets)) readMetadataReqQ <- mkFIFO();
-    FIFO#(Tuple3#(Bit#(TLog#(t_N_READ_PORTS)), RL_SA_CACHE_SET_IDX#(nSets), RL_SA_CACHE_WAY_IDX#(nWays))) readDataReqQ <- mkFIFO();
+    FIFO#(RL_SA_CACHE_SET_IDX#(nSets)) readMetadataReqQ <- mkBypassFIFO();
+    FIFO#(Tuple3#(Bit#(TLog#(t_N_READ_PORTS)), RL_SA_CACHE_SET_IDX#(nSets), RL_SA_CACHE_WAY_IDX#(nWays))) readDataReqQ <- mkBypassFIFO();
 
     rule forwardMetadataReq (initialized);
         let set = readMetadataReqQ.first();
@@ -478,18 +518,40 @@ module mkLocalMemCacheData#(LowLevelPlatformInterface llpi, DEBUG_FILE debugLog)
     endrule
 
 
+    // ====================================================================
+    //
+    // Metadata read response buffer.  Avoid deadlock between metadata and
+    // data reads by providing output buffer space for all outstanding
+    // metdata read requests.
+    //
+    // ====================================================================
+
+    FIFO#(t_SET_METADATA) readMetadataRespQ <- mkSizedFIFO(4);
+    COUNTER#(3) readMetadataCnt <- mkLCounter(4);
+
+    rule forwardMetadataResp (True);
+        let d <- memory.readPorts[valueOf(t_METADATA_READ_PORT)].readLineRsp();
+        readMetadataRespQ.enq(unpack(truncate(pack(d))));
+    endrule
+
+
     //
     // Metadata access methods
     //
 
     interface MEMORY_IFC metaData;
-        method Action readReq(RL_SA_CACHE_SET_IDX#(nSets) set);
+        method Action readReq(RL_SA_CACHE_SET_IDX#(nSets) set) if (readMetadataCnt.value != 0);
+            readMetadataCnt.down();
             readMetadataReqQ.enq(set);
         endmethod
 
         method ActionValue#(t_SET_METADATA) readRsp();
-            let d <- memory.readPorts[valueOf(t_METADATA_READ_PORT)].readLineRsp();
-            return unpack(truncate(pack(d)));
+            let d = readMetadataRespQ.first();
+            readMetadataRespQ.deq();
+    
+            readMetadataCnt.up();
+
+            return d;
         endmethod
 
         method Action write(RL_SA_CACHE_SET_IDX#(nSets) set, t_SET_METADATA mData) if (initialized);

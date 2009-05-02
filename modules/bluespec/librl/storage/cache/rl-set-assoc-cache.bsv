@@ -60,6 +60,8 @@ typedef struct
     // The requested word is guaranteed valid.
     Vector#(nWordsPerLine, Maybe#(t_CACHE_WORD)) words;
     t_CACHE_ADDR addr;
+    // Word index requested by read.
+    Bit#(TLog#(nWordsPerLine)) reqWordIdx;
     t_CACHE_REF_INFO refInfo;
 }
 RL_SA_CACHE_LOAD_RESP#(type t_CACHE_ADDR,
@@ -107,6 +109,10 @@ interface RL_SA_CACHE#(type t_CACHE_ADDR,
                           t_CACHE_REF_INFO refInfo);
 
     method ActionValue#(RL_SA_CACHE_LOAD_RESP#(t_CACHE_ADDR, t_CACHE_WORD, nWordsPerLine, t_CACHE_REF_INFO)) readResp();
+
+    // Some clients need the address to route responses.  Having a peek method
+    // for response addresses avoids extra buffering in these clients.
+    method t_CACHE_ADDR peekRespAddr();
 
     // Predicate to test whether a read response is ready this cycle.
     method Bool readRespReady();
@@ -394,11 +400,9 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
               Bits#(t_CACHE_REF_INFO, t_CACHE_REF_INFO_SZ),
               Bits#(t_CACHE_WORD, t_CACHE_WORD_SZ),
 
-              // The interface allows for numbers of sets and ways that aren't
-              // powers of 2, but the implementation currently does not.  Enforce
-              // powers of 2 here.
+              // The interface allows for a number of sets that isn't a
+              // power of 2, but the implementation currently does not.
               Add#(nSets, 0, TExp#(TLog#(nSets))),
-              Add#(nWays, 0, TExp#(TLog#(nWays))),
 
               // Write word size must tile into cache line
               Bits#(Vector#(nWordsPerLine, t_CACHE_WORD), t_CACHE_LINE_SZ),
@@ -485,7 +489,7 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
     FIFO#(t_CACHE_SET_IDX) doneQ <- mkFIFO();
 
     // Read responses may be returned out of order relative to request order!
-    FIFOF#(Tuple3#(t_CACHE_REQ_BASE, t_CACHE_LINE, t_CACHE_WORD_VALID_MASK)) readRespToClientQ_OOO <- mkBypassFIFOF();
+    FIFOF#(Tuple4#(t_CACHE_REQ_BASE, RL_SA_CACHE_READ_REQ#(nWordsPerLine), t_CACHE_LINE, t_CACHE_WORD_VALID_MASK)) readRespToClientQ_OOO <- mkBypassFIFOF();
 
     // Invalidate and flush requests are always returned in the order they
     // were requested.
@@ -607,16 +611,24 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
         //
         if (findElem(mru, curLRU) matches tagged Valid .mru_pos)
         begin
+            // mru_shift holds shifted MRU list.  The list is accurate from
+            // position 0 to the old MRU position.
+            let mru_shift = shiftInAt0(curLRU, mru);
+
+            // Figure out which of the new mru_shift slots are needed.
+            Bit#(nWays) mask = 0;
+            mask[mru_pos] = 1;    // 1 in old MRU position
+            mask = mask - 1;      // 1 in all slots lower than old MRU position
+            mask[mru_pos] = 1;    // 1 in all slots up to and including old MRU position
+
             //
             // Shift older references out of the MRU slot
             //
-            for (t_CACHE_WAY_IDX w = 0; w < mru_pos; w = w + 1)
+            for (Integer w = 0; w < valueOf(nWays); w = w + 1)
             begin
-                new_list[w + 1] = curLRU[w];
+                if (mask[w] == 1)
+                    new_list[w] = mru_shift[w];
             end
-
-            // MRU is slot 0
-            new_list[0] = mru;
         end
 
         return new_list;
@@ -984,7 +996,7 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
         let set = req_base.set;
         let way = req_base.way;
 
-        readRespToClientQ_OOO.enq(tuple3(req_base, v, word_valid_mask));
+        readRespToClientQ_OOO.enq(tuple4(req_base, rReq, v, word_valid_mask));
 
         // Done with this read request
         doneQ.enq(set);
@@ -1272,7 +1284,7 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
         t_CACHE_WORD_VALID_MASK ret_valid_words = unpack(~pack(cur_word_valid_mask));
         localData.dataWrite(set, way, ret_valid_words, unpack(pack(v)));
 
-        readRespToClientQ_OOO.enq(tuple3(req_base, v, ret_valid_words));
+        readRespToClientQ_OOO.enq(tuple4(req_base, rReq, v, ret_valid_words));
         debugLog.record($format("  Read FILL: addr=0x%x, set=0x%x, way=%0d, mask=0x%x, data=0x%x", debugAddrFromTag(tag, set), set, way, ret_valid_words, v));
 
         doneQ.enq(set);
@@ -1346,7 +1358,7 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
     endmethod
 
     method ActionValue#(t_CACHE_LOAD_RESP) readResp();
-        match {.req_base, .v, .valid_words} = readRespToClientQ_OOO.first();
+        match {.req_base, .r_req, .v, .valid_words} = readRespToClientQ_OOO.first();
         readRespToClientQ_OOO.deq();
         Vector#(nWordsPerLine, t_CACHE_WORD) value = unpack(pack(v));
 
@@ -1354,9 +1366,15 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
         for (Integer w = 0; w < valueOf(nWordsPerLine); w = w + 1)
             rsp.words[w] = valid_words[w] ? tagged Valid value[w] : tagged Invalid;
         rsp.addr = cacheAddr(req_base.tag, req_base.set);
+        rsp.reqWordIdx = r_req.wordIdx;
         rsp.refInfo = req_base.refInfo;
 
         return rsp;
+    endmethod
+
+    method t_CACHE_ADDR peekRespAddr();
+        match {.req_base, .r_req, .v, .valid_words} = readRespToClientQ_OOO.first();
+        return cacheAddr(req_base.tag, req_base.set);
     endmethod
 
     method Bool readRespReady();

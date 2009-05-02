@@ -134,14 +134,24 @@ endinterface: SCRATCHPAD_MEMORY_VIRTUAL_DEVICE
 typedef `VDEV_CACHE__NENTRIES CENTRAL_CACHE_N_CLIENTS;
 
 //
+// Central cache port number.  Add 1 to the number of clients in case there is
+// only one client.  Bit#(0) is not a valid array index.
+//
+typedef Bit#(TLog#(TAdd#(1, CENTRAL_CACHE_N_CLIENTS))) CENTRAL_CACHE_PORT_NUM;
+
+//
 // Standard basic types for all central cache implementations
 //
-typedef Bit#(`CENTRAL_CACHE_ADDR_BITS) CENTRAL_CACHE_ADDR;
+
+// Word-based address
+typedef Bit#(`CENTRAL_CACHE_LINE_ADDR_BITS) CENTRAL_CACHE_LINE_ADDR;
 
 // Cache line & word sizes match the local memory
 typedef LOCAL_MEM_LINE CENTRAL_CACHE_LINE;
 typedef LOCAL_MEM_WORD CENTRAL_CACHE_WORD;
 typedef LOCAL_MEM_WORDS_PER_LINE CENTRAL_CACHE_WORDS_PER_LINE;
+
+typedef Bit#(TLog#(CENTRAL_CACHE_WORDS_PER_LINE)) CENTRAL_CACHE_WORD_IDX;
 
 
 // Reference info is a private metadata structure passed to the cache with a
@@ -156,41 +166,74 @@ typedef LOCAL_MEM_WORDS_PER_LINE CENTRAL_CACHE_WORDS_PER_LINE;
 //
 typedef Bit#(`CENTRAL_CACHE_REFINFO_BITS) CENTRAL_CACHE_REF_INFO;
 
-// Cache read response
-typedef RL_SA_CACHE_LOAD_RESP#(CENTRAL_CACHE_ADDR,
-                               CENTRAL_CACHE_WORD,
-                               CENTRAL_CACHE_WORDS_PER_LINE,
-                               CENTRAL_CACHE_REF_INFO) CENTRAL_CACHE_READ_RESP;
-
 
 //
-// Interface to a single central cache client port.
+// Central cache requests
+//
+
+typedef struct
+{
+    CENTRAL_CACHE_LINE_ADDR addr;
+    CENTRAL_CACHE_WORD_IDX wordIdx;
+    CENTRAL_CACHE_REF_INFO refInfo;
+}
+CENTRAL_CACHE_READ_REQ
+    deriving (Eq, Bits);
+
+// Write a word to a cache line.  Word index 0 corresponds to the
+// low bits of a cache line.
+typedef struct
+{
+    CENTRAL_CACHE_LINE_ADDR addr;
+    CENTRAL_CACHE_WORD_IDX wordIdx;
+    CENTRAL_CACHE_WORD val;
+    CENTRAL_CACHE_REF_INFO refInfo;
+}
+CENTRAL_CACHE_WRITE_REQ
+    deriving (Eq, Bits);
+
+// Invalidate & flush requests.  Both write dirty lines back.  Invalidate drops
+// the line from the cache.  Flush keeps the line in the cache.  A response
+// is returned for invalOrFlushWait iff sendAck is true.
+typedef struct
+{
+    CENTRAL_CACHE_LINE_ADDR addr;
+    Bool sendAck;
+    CENTRAL_CACHE_REF_INFO refInfo;
+}
+CENTRAL_CACHE_INVAL_REQ
+    deriving (Eq, Bits);
+
+typedef union tagged
+{
+    CENTRAL_CACHE_READ_REQ  CENTRAL_CACHE_READ;
+    CENTRAL_CACHE_WRITE_REQ CENTRAL_CACHE_WRITE;
+    CENTRAL_CACHE_INVAL_REQ CENTRAL_CACHE_INVAL;
+    CENTRAL_CACHE_INVAL_REQ CENTRAL_CACHE_FLUSH;
+}
+CENTRAL_CACHE_REQ
+    deriving (Eq, Bits);
+
+
+// Cache read response
+typedef RL_SA_CACHE_LOAD_RESP#(CENTRAL_CACHE_LINE_ADDR,
+                               CENTRAL_CACHE_WORD,
+                               CENTRAL_CACHE_WORDS_PER_LINE,
+                               CENTRAL_CACHE_REF_INFO) CENTRAL_CACHE_READ_LINE_RESP;
+
+//
+// Interface to each central cache client.
 //
 interface CENTRAL_CACHE_CLIENT_PORT;
 
-    // Read up to a full line.  Read from backing store if not already cached.
-    // The read response is guaranteed to return at least the requested
-    // word in the line.  If more of the line is already available it will
-    // be returned as well.
-    method Action readReq(CENTRAL_CACHE_ADDR addr,
-                          Bit#(TLog#(CENTRAL_CACHE_WORDS_PER_LINE)) wordIdx,
-                          CENTRAL_CACHE_REF_INFO refInfo);
+    method Action newReq(CENTRAL_CACHE_REQ req);
 
-    method ActionValue#(CENTRAL_CACHE_READ_RESP) readResp();
+    // Respond with up to a full line.  Read from backing store if not
+    // already cached.  The read response is guaranteed to return at least
+    // the requested word in the line.  If more of the line is already
+    // available it will be returned as well.
+    method ActionValue#(CENTRAL_CACHE_READ_LINE_RESP) readResp();
 
-
-    // Write a word to a cache line.  Word index 0 corresponds to the
-    // low bits of a cache line.
-    method Action write(CENTRAL_CACHE_ADDR addr,
-                        CENTRAL_CACHE_WORD val,
-                        Bit#(TLog#(CENTRAL_CACHE_WORDS_PER_LINE)) wordIdx,
-                        CENTRAL_CACHE_REF_INFO refInfo);
-    
-    // Invalidate & flush requests.  Both write dirty lines back.  Invalidate drops
-    // the line from the cache.  Flush keeps the line in the cache.  A response
-    // is returned for invalOrFlushWait iff sendAck is true.
-    method Action invalReq(CENTRAL_CACHE_ADDR addr, Bool sendAck, CENTRAL_CACHE_REF_INFO refInfo);
-    method Action flushReq(CENTRAL_CACHE_ADDR addr, Bool sendAck, CENTRAL_CACHE_REF_INFO refInfo);
     method Action invalOrFlushWait();
 
 endinterface: CENTRAL_CACHE_CLIENT_PORT
@@ -201,7 +244,7 @@ endinterface: CENTRAL_CACHE_CLIENT_PORT
 //
 typedef struct
 {
-    CENTRAL_CACHE_ADDR addr;
+    CENTRAL_CACHE_LINE_ADDR addr;
     CENTRAL_CACHE_REF_INFO refInfo;
 }
 CENTRAL_CACHE_BACKING_READ_REQ
@@ -213,7 +256,7 @@ CENTRAL_CACHE_BACKING_READ_REQ
 //
 typedef struct
 {
-    CENTRAL_CACHE_ADDR addr;
+    CENTRAL_CACHE_LINE_ADDR addr;
     Vector#(CENTRAL_CACHE_WORDS_PER_LINE, Bool) wordValidMask;
     CENTRAL_CACHE_REF_INFO refInfo;
     Bool sendAck;

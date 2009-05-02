@@ -41,7 +41,7 @@ import SpecialFIFOs::*;
 
 interface CENTRAL_CACHE_BACKING_CONNECTION;
     interface CENTRAL_CACHE_BACKING_PORT backingPort;
-    interface RL_SA_CACHE_SOURCE_DATA#(CENTRAL_CACHE_ADDR,
+    interface RL_SA_CACHE_SOURCE_DATA#(CENTRAL_CACHE_LINE_ADDR,
                                        CENTRAL_CACHE_LINE,
                                        CENTRAL_CACHE_WORDS_PER_LINE,
                                        CENTRAL_CACHE_REF_INFO) cacheSourceData;
@@ -156,7 +156,7 @@ module mkCentralCacheBackingConnection#(Integer port, DEBUG_FILE debugLog)
     // Cache backing storage interface.
     //
     interface RL_SA_CACHE_SOURCE_DATA cacheSourceData;
-        method Action readReq(CENTRAL_CACHE_ADDR addr, CENTRAL_CACHE_REF_INFO refInfo);
+        method Action readReq(CENTRAL_CACHE_LINE_ADDR addr, CENTRAL_CACHE_REF_INFO refInfo);
             readReqQ.enq(CENTRAL_CACHE_BACKING_READ_REQ { addr: addr, refInfo: refInfo });
             debugLog.record($format("port %0d: BACKING readReq addr=0x%x, refInfo=0x%x", port, addr, refInfo));
         endmethod
@@ -172,7 +172,7 @@ module mkCentralCacheBackingConnection#(Integer port, DEBUG_FILE debugLog)
 
     
         // Asynchronous write (no response)
-        method Action write(CENTRAL_CACHE_ADDR addr,
+        method Action write(CENTRAL_CACHE_LINE_ADDR addr,
                             Vector#(CENTRAL_CACHE_WORDS_PER_LINE, Bool) wordValidMask,
                             CENTRAL_CACHE_LINE val,
                             CENTRAL_CACHE_REF_INFO refInfo);
@@ -189,7 +189,7 @@ module mkCentralCacheBackingConnection#(Integer port, DEBUG_FILE debugLog)
         endmethod
     
         // Synchronous write.  writeSyncWait() blocks until the response arrives.
-        method Action writeSyncReq(CENTRAL_CACHE_ADDR addr,
+        method Action writeSyncReq(CENTRAL_CACHE_LINE_ADDR addr,
                                    Vector#(CENTRAL_CACHE_WORDS_PER_LINE, Bool) wordValidMask,
                                    CENTRAL_CACHE_LINE val,
                                    CENTRAL_CACHE_REF_INFO refInfo);

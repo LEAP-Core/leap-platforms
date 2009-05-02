@@ -109,7 +109,7 @@ module [HASIM_MODULE] mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
     //     Host scratchpad addresses are word-based, so adding low bits to the
     //     cache line address converts to the proper address.
     //
-    function Bit#(64) hostScratchpadAddr(CENTRAL_CACHE_ADDR cAddr)
+    function Bit#(64) hostScratchpadAddr(CENTRAL_CACHE_LINE_ADDR cAddr)
         provisos(Log#(SCRATCHPAD_WORDS_PER_LINE, t_WORD_IDX_SZ),
                  Add#(t_WORD_IDX_SZ, t_LINE_ADDR_SZ, `SCRATCHPAD_MEMORY_ADDR_BITS));
         Bit#(t_WORD_IDX_SZ) w_zero = 0;
@@ -164,7 +164,7 @@ module [HASIM_MODULE] mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
     // makeCacheAddr --
     //     Compute the cache line given a port and address within a region.
     //
-    function Tuple2#(CENTRAL_CACHE_ADDR, SCRATCHPAD_WORD_IDX) makeCacheAddr(SCRATCHPAD_PORT_NUM port, SCRATCHPAD_MEM_ADDRESS addr)
+    function Tuple2#(CENTRAL_CACHE_LINE_ADDR, SCRATCHPAD_WORD_IDX) makeCacheAddr(SCRATCHPAD_PORT_NUM port, SCRATCHPAD_MEM_ADDRESS addr)
         provisos(Log#(SCRATCHPAD_WORDS_PER_LINE, t_WORD_IDX_SZ),
                  Add#(t_WORD_IDX_SZ, t_LINE_ADDR_SZ, `SCRATCHPAD_MEMORY_ADDR_BITS));
 
@@ -174,7 +174,7 @@ module [HASIM_MODULE] mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
 
         // Host address is the concatenation of the port ID and the line
         // address within the region.
-        CENTRAL_CACHE_ADDR c_addr = zeroExtend({port, l_addr});
+        CENTRAL_CACHE_LINE_ADDR c_addr = zeroExtend({port, l_addr});
     
         return tuple2(c_addr, w_idx);
     endfunction
@@ -184,7 +184,7 @@ module [HASIM_MODULE] mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
     //     The inverse of makeCacheAddr.  Compute a scratchpad word address given
     //     a cache line address and word index.
     //
-    function SCRATCHPAD_MEM_ADDRESS makeScratchpadAddr(CENTRAL_CACHE_ADDR cAddr, Bit#(t_WORD_IDX_SZ) wIdx)
+    function SCRATCHPAD_MEM_ADDRESS makeScratchpadAddr(CENTRAL_CACHE_LINE_ADDR cAddr, Bit#(t_WORD_IDX_SZ) wIdx)
         provisos(Log#(SCRATCHPAD_WORDS_PER_LINE, t_WORD_IDX_SZ),
                  Add#(t_WORD_IDX_SZ, t_LINE_ADDR_SZ, `SCRATCHPAD_MEMORY_ADDR_BITS));
 
@@ -205,7 +205,10 @@ module [HASIM_MODULE] mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
         Tuple2#(SCRATCHPAD_REF_INFO, SCRATCHPAD_WORD_IDX) local_ref_info = tuple2(refInfo, word_idx);
 
         // Look for the value in the central cache
-        centralCachePort.readReq(line_addr, word_idx, zeroExtend(pack(local_ref_info)));
+        let req = CENTRAL_CACHE_READ_REQ { addr: line_addr,
+                                           wordIdx: word_idx,
+                                           refInfo: zeroExtend(pack(local_ref_info)) };
+        centralCachePort.newReq(tagged CENTRAL_CACHE_READ req);
     endmethod
 
     method ActionValue#(SCRATCHPAD_READ_RESP#(SCRATCHPAD_MEM_ADDRESS, SCRATCHPAD_MEM_VALUE)) readRsp();
@@ -236,7 +239,11 @@ module [HASIM_MODULE] mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
 
         // Store the value in the central cache.  Don't bother constructing
         // a useful refInfo for the cache since nothing will ever see it.
-        centralCachePort.write(line_addr, val, word_idx, ?);
+        let req = CENTRAL_CACHE_WRITE_REQ { addr: line_addr,
+                                            wordIdx: word_idx,
+                                            val: val,
+                                            refInfo: ? };
+        centralCachePort.newReq(tagged CENTRAL_CACHE_WRITE req);
     endmethod
 
     //

@@ -5892,3 +5892,41 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/centr
 - Rename SCOREBOARD_FIFO to SCOREBOARD_FIFOF since it has notFull, etc.
 - Add notFull, notEmpty, peek and writeNotFull methods to MEMORY_IFC.  Update
   all modules implementing a memory.
+
+----------
+mcadler     Date: Sat May  2 08:14:29 EDT 2009  CSN: CSN-platforms-199
+                  Sat May  2 12:14:29 UTC 2009
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ hasim-fpgaenv-hybrid-sim.apm Locally Modified          198 
+
+Directory modules/bluespec/librl/storage/cache
+ rl-set-assoc-cache.bsv    Locally Modified          198 
+
+Directory modules/bluespec/librl/base
+ bluespec-common.prj       Locally Modified          198 
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ lutram.bsv                Locally Modified          198 
+ software-fpga-components.awb Locally Modified          198 
+ hardware-fpga-components.awb Locally Modified          198 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices
+ std-virtual-device-interfaces.bsv Locally Modified          198 
+ std-virtual-devices.awb   Locally Modified          198 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-mem-scratch.bsv    Locally Modified          198 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/central-cache
+ local-mem-central-cache.bsv Locally Modified          198 
+ central-cache-backing-store.bsv Locally Modified          198 
+
+- Xilinx LUTRAM Xst error workaround (see the previous lutram.bsv check-in)
+  does not work.  Reverted to the ugly, but effective, mapping to 1-bit RegFiles.
+- Set associate cache no longer requires ways to be a power of 2.  Using 3 ways
+  for the central cache uses memory more efficiently, dividing memory into
+  4 equal regions: three regions of ways, one of tags.
+- Expose the central cache for clients coming through the platform interface.
+- Reduce local memory for Bluesim to 1K words so we see spills during simulation.

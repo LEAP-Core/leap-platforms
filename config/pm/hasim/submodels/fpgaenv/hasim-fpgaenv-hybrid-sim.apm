@@ -109,7 +109,9 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid/hybrid-mem-scratch.awb
 Packagehint=platforms
 
-
 [Local Memory Central Cache]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/central-cache/local-mem-central-cache.awb
 Packagehint=platforms
+
+[Local Memory Interface using BRAM/Params]
+LOCAL_MEM_ADDR_BITS=10
