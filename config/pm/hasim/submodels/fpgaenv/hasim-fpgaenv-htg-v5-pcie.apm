@@ -57,6 +57,8 @@ pci_express_device=PCI Express Physical Device (mmap-based)
 led_device=General LED Device
 switch_device=General Switch Device
 ddr2_sdram_device=DDR2 SDRAM Physical Device
+clocks_device=Single-Ended Crystal Clocks Device
+physical_platform_utils=Common Physical Platform Utilities
 
 [General Switch Device]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/switches/general-switch-device.awb
@@ -111,16 +113,8 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/pcie-csr/pcie-physical-channel.awb
 Packagehint=platforms
 
-[Null Physical Platform Debugger]
-File=modules/bluespec/common/fpgaenv/physical-platform/debuggers/null/null-debugger.awb
-Packagehint=platforms
-
 [DDR2 SDRAM Physical Device]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr2-sdram/ddr2-sdram-device.awb
-Packagehint=platforms
-
-[Local Memory Interface using DDR2 Memory]
-File=modules/bluespec/common/fpgaenv/low-level-platform-interface/local-mem/local-mem-ddr2.awb
 Packagehint=platforms
 
 [RL Bluespec Library]
@@ -131,7 +125,23 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid/hybrid-mem-scratch.awb
 Packagehint=platforms
 
-
 [Local Memory Central Cache]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/central-cache/local-mem-central-cache.awb
+Packagehint=platforms
+
+[Single-Ended Crystal Clocks Device]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/single-ended/single-ended-clocks-device.awb
+Packagehint=platforms
+
+[Common Physical Platform Utilities]
+File=modules/bluespec/common/fpgaenv/physical-platform/utils/utils.awb
+Packagehint=platforms
+
+[Local Memory Interface using DDR2 Memory]
+File=modules/bluespec/common/fpgaenv/low-level-platform-interface/local-mem/local-mem-ddr2.awb
+Packagehint=platforms
+
+
+[Null Physical Platform Debugger]
+File=modules/bluespec/common/fpgaenv/physical-platform/debuggers/null/null-debugger.awb
 Packagehint=platforms

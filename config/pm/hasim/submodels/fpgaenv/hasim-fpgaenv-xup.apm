@@ -64,6 +64,8 @@ Packagehint=platforms
 led_device=General LED Device
 button_device=General Button Device
 switch_device=General Switch Device
+physical_platform_utils=Common Physical Platform Utilities
+clocks_device=Single-Ended Crystal Clocks Device
 
 [General Switch Device]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/switches/general-switch-device.awb
@@ -112,7 +114,14 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/local/local-mem-scratch.awb
 Packagehint=platforms
 
-
 [NULL Central Cache]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/central-cache/null-central-cache.awb
+Packagehint=platforms
+
+[Common Physical Platform Utilities]
+File=modules/bluespec/common/fpgaenv/physical-platform/utils/utils.awb
+Packagehint=platforms
+
+[Single-Ended Crystal Clocks Device]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/single-ended/single-ended-clocks-device.awb
 Packagehint=platforms

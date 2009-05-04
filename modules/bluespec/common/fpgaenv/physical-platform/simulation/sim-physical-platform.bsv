@@ -1,6 +1,28 @@
+//
+// Copyright (C) 2008 Intel Corporation
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
+
 // Simulation Physical Platform
 
+import Clocks::*;
+
+`include "clocks_device.bsh"
 `include "unix_pipe_device.bsh"
+`include "physical_platform_utils.bsh"
 
 // PHYSICAL_DRIVERS
 
@@ -10,10 +32,8 @@
 
 interface PHYSICAL_DRIVERS;
 
+    interface CLOCKS_DRIVER    clocksDriver;
     interface UNIX_PIPE_DRIVER unixPipeDriver;
-
-    // each set of physical drivers must support a soft reset method
-    method Action soft_reset();
 
 endinterface
 
@@ -25,7 +45,8 @@ endinterface
 // These wires are defined in the individual devices.
 
 interface TOP_LEVEL_WIRES;
-
+    
+    interface CLOCKS_WIRES    clocksWires;
     interface UNIX_PIPE_WIRES unixPipeWires;
     
 endinterface
@@ -35,7 +56,7 @@ endinterface
 // The platform is the aggregation of wires and drivers.
 
 interface PHYSICAL_PLATFORM;
-
+    
     interface PHYSICAL_DRIVERS physicalDrivers;
     interface TOP_LEVEL_WIRES  topLevelWires;
 
@@ -46,24 +67,34 @@ endinterface
 // This is a convenient way for the outside world to instantiate all the devices
 // and an aggregation of all the wires.
 
-module mkPhysicalPlatform#(Clock topLevelClock, Reset topLevelReset)
-       //interface: 
-                    (PHYSICAL_PLATFORM);
+module mkPhysicalPlatform
+    // interface:
+    (PHYSICAL_PLATFORM);
     
-    // Submodules
+    // The Platform is instantiated inside a NULL clock domain. Our first course of
+    // action should be to instantiate the Clocks Physical Device and obtain interfaces
+    // to clock and reset the other devices with.
     
-    UNIX_PIPE_DEVICE unix_pipe_device  <- mkUNIXPipeDevice();
+    CLOCKS_DEVICE clocks_device <- mkClocksDevice();
     
+    Clock clk = clocks_device.driver.clock;
+    Reset rst = clocks_device.driver.reset;
+    
+    // Next, create the physical device that can trigger a soft reset. Pass along the
+    // interface to the trigger module that the clocks device has given us.
+
+    UNIX_PIPE_DEVICE unix_pipe_device  <- mkUNIXPipeDevice(clocks_device.softResetTrigger,
+                                                           clocked_by clk,
+                                                           reset_by rst);
+
+    // Finally, instantiate all other physical devices
+
     // Aggregate the drivers
     
     interface PHYSICAL_DRIVERS physicalDrivers;
     
+        interface clocksDriver   = clocks_device.driver;
         interface unixPipeDriver = unix_pipe_device.driver;
-
-        // Soft Reset
-        method Action soft_reset() if (unix_pipe_device.driver.soft_reset_requested());
-            unix_pipe_device.driver.soft_reset_received();
-        endmethod
 
     endinterface
     
@@ -71,6 +102,7 @@ module mkPhysicalPlatform#(Clock topLevelClock, Reset topLevelReset)
     
     interface TOP_LEVEL_WIRES topLevelWires;
     
+        interface clocksWires    = clocks_device.wires;
         interface unixPipeWires  = unix_pipe_device.wires;
 
     endinterface

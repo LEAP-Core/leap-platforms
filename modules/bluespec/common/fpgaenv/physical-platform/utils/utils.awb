@@ -1,0 +1,8 @@
+
+%name Common Physical Platform Utilities
+%desc Common Utilities shared by multiple Platforms
+
+%provides physical_platform_utils
+
+%sources -t BSV -v PUBLIC  soft-reset.bsv
+

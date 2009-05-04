@@ -4,7 +4,7 @@
 
 %provides physical_platform
 
-%requires unix_pipe_device
+%requires clocks_device unix_pipe_device physical_platform_utils
 
 %sources -t BSV -v PUBLIC  sim-physical-platform.bsv
 %sources -t H   -v PUBLIC  sim-physical-platform.h

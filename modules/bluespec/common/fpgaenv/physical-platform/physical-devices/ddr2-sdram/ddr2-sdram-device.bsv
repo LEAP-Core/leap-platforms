@@ -180,18 +180,18 @@ module mkDDR2SDRAMDevice#(Clock topLevelClock, Reset topLevelReset)
     Reset modelReset <- exposeCurrentReset();
     
     DDR2_PLL pll <- mkDDR2PLL(clocked_by topLevelClock, reset_by topLevelReset);
-    
+
     // The PLL gets its Reset from the toplevel, so OR it with the Model Reset to get Soft Resets
     // Soft reset doesn't seem to play nice with the VHDL. For now, we'll use the raw PLL reset
     // for the controller, but we'll leave the softPLLReset signal available for now.
-    Reset transReset   <- mkAsyncReset(0, modelReset, pll.clk_150);
-    Reset softPLLReset <- mkResetEither(transReset, pll.rst, clocked_by pll.clk_150);
+    //Reset transReset   <- mkAsyncReset(0, modelReset, pll.clk_150);
+    //Reset softPLLReset <- mkResetEither(transReset, pll.rst, clocked_by pll.clk_150);
 
     //
     // Instantiate the Xilinx Memory Controller
     //
     XILINX_DRAM_CONTROLLER dramController <- mkXilinxDRAMController(pll.clk_150, pll.clk_200, pll.rst);
-
+    
     // Clock the glue logic with the Controller's clock
     Clock controllerClock = dramController.clk_out;
     Reset controllerReset = dramController.rst_out;
@@ -320,7 +320,7 @@ module mkDDR2SDRAMDevice#(Clock topLevelClock, Reset topLevelReset)
     //
     // ====================================================================
 
-    Reg#(Bit#(1)) initPhase <- mkReg(0);
+    Reg#(Bit#(2)) initPhase <- mkReg(0);
     Reg#(Bit#(2)) initLoop <- mkReg(0);
     Reg#(Bit#(1)) datasink  <- mkReg(0);
 
@@ -329,7 +329,9 @@ module mkDDR2SDRAMDevice#(Clock topLevelClock, Reset topLevelReset)
     // the Sync FIFOs don't get optimized away by the synthesis tools. If the
     // Sync FIFOs get optimized away, then the TIG constraints in the UCF
     // file become invalid and ngdbuild complains.
+    
     rule initPhase0 ((state == STATE_init) && (initPhase == 0));
+
         case (initLoop) matches
             0: syncRequestQ.enq(tagged DRAM_READ 0);
             1: begin
@@ -350,16 +352,16 @@ module mkDDR2SDRAMDevice#(Clock topLevelClock, Reset topLevelReset)
         endcase
 
         initLoop <= initLoop + 1;
+
     endrule
 
     //
     // initPhase1 --
     //     Write a constant pattern to initialize memory.
     //
-
     Reg#(FPGA_DRAM_ADDRESS) initAddr <- mkReg(0);
     Reg#(Bit#(1)) initPart <- mkReg(0);
-
+    
     rule initPhase1 ((state == STATE_init) && (initPhase == 1));
         // Data to write
         Vector#(TDiv#(FPGA_DRAM_DUALEDGE_DATA_SZ, 8), Bit#(8)) init_data = replicate('haa);
@@ -389,7 +391,6 @@ module mkDDR2SDRAMDevice#(Clock topLevelClock, Reset topLevelReset)
 
         initPart <= initPart + 1;
     endrule
-
 
     // ====================================================================
     //

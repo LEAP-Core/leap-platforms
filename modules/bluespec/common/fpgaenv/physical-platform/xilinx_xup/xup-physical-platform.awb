@@ -10,7 +10,7 @@
 %desc XUP Physical Platform
 
 %provides physical_platform
-%requires led_device button_device switch_device
+%requires clocks_device led_device button_device switch_device physical_platform_utils
 
 %public xup-physical-platform.bsv
 %private xup.ucf xilinx.ut xilinx.xst

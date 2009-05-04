@@ -244,6 +244,8 @@ PHYSICAL_PLATFORM_DEBUGGER_CLASS::PrintHelp_Inst()
     // printf("           1B: CSR[sys]     := status_flags\n");
     // printf("           1C: CSR[sys]     := status_pointers\n");
     // printf("           1D: CSR[sys]     := status_VHDL\n");
+    printf("           20: CSR[sys]     := DRAM[index]_\n");
+    printf("           21: DRAM[index]_ := imm\n");
     printf("\n");
 }
 

@@ -1,0 +1,8 @@
+
+%name Simulation Clocks Device
+%desc Simulation Clocks Device
+
+%provides clocks_device
+
+%sources -t BSV -v PUBLIC  sim-clocks-device.bsv
+

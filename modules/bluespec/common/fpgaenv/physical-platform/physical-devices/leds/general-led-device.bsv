@@ -50,7 +50,7 @@ endinterface
 
 // An LED Device generalized to any bit width.
 
-module mkLEDsDevice#(Clock topLevelClock, Reset topLevelReset)
+module mkLEDsDevice
     // interface:
                  (LEDS_DEVICE#(number_leds_T));
     
@@ -60,7 +60,7 @@ module mkLEDsDevice#(Clock topLevelClock, Reset topLevelReset)
     // the register visible in the top level clock domain.
     //
     Reg#(Bit#(number_leds_T))      led_reg_intern <- mkReg(0);
-    ReadOnly#(Bit#(number_leds_T)) led_reg_extern <- mkNullCrossingWire(topLevelClock, led_reg_intern);
+    ReadOnly#(Bit#(number_leds_T)) led_reg_extern <- mkNullCrossingWire(noClock(), led_reg_intern);
 
     // Interface used by the rest of the FPGA.
 

@@ -6,7 +6,7 @@
 -- Author     : Wang, Liang  <liang.wang@intel.com>
 -- Company    : CTL Beijing
 -- Created    : 2008-05-29
--- Last update: 2008-06-16
+-- Last update: 2009-04-29
 -- Platform   : Xilinx ISE9.2(IP update4), ModelSim SE 6.2e
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -616,7 +616,7 @@ begin
 
   ---------------- exported clock -------------------------
   clk   <= trn_clk_c;
-  rst_n <= channel_rst_n; -- and hw_chnl_rst_c;
+  rst_n <= channel_rst_n and not hw_chnl_rst_c;  -- hw_chnl_rst_c == soft reset
 
   ---------------- regular CSR signals --------------------
   csr_out_rd_ready <= csr_rd_ready_c;

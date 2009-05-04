@@ -19,8 +19,10 @@
 import FIFOF::*;
 
 `include "pci_express_device.bsh"
+`include "clocks_device.bsh"
 `include "led_device.bsh"
 `include "switch_device.bsh"
+`include "ddr2_sdram_device.bsh"
 `include "physical_platform.bsh"
 
 // === machine states ===
@@ -38,7 +40,10 @@ typedef enum
     DEBUGGER_STATE_ready,
     DEBUGGER_STATE_readingCSR,
     DEBUGGER_STATE_appReadingCSR,
-    DEBUGGER_STATE_seqWrite
+    DEBUGGER_STATE_seqWrite,
+    DEBUGGER_STATE_readingDRAM_0,
+    DEBUGGER_STATE_readingDRAM_1,
+    DEBUGGER_STATE_writingDRAM
 }
 DEBUGGER_STATE
     deriving (Bits, Eq);
@@ -65,6 +70,9 @@ module mkPhysicalPlatformDebugger#(PHYSICAL_DRIVERS drivers)
     Reg#(PCIE_CSR_DATA)      buffer  <- mkReg(0);
     Reg#(Bit#(8))            leds    <- mkReg(0);
     
+    Reg#(FPGA_DRAM_DUALEDGE_DATA) dramBuffer <- mkReg(0);
+    Reg#(Bit#(4))                 dramCount  <- mkReg(0);
+
     Reg#(Bit#(`PCIE_CSR_IDX_SIZE)) seqWriteIndex <- mkReg(0);
     Reg#(Bit#(`PCIE_CSR_IDX_SIZE)) seqWriteCount <- mkReg(0);
     
@@ -161,6 +169,22 @@ module mkPhysicalPlatformDebugger#(PHYSICAL_DRIVERS drivers)
                 // stop application
                 'h1F: appState <= APP_STATE_stopped;
                 
+                // CSR[7:0] := DRAM[index]
+                'h20: begin
+                          drivers.ddr2SDRAMDriver.readReq(zeroExtend(inst_index));
+                          dramBuffer <= 0;
+                          dramCount <= 0;
+                          debuggerState <= DEBUGGER_STATE_readingDRAM_0;
+                      end
+                
+                // DRAM[index] := CSR[7:0]
+                'h21: begin
+                          drivers.ddr2SDRAMDriver.writeReq(zeroExtend(inst_index));
+                          dramBuffer <= 0;
+                          dramCount <= 0;
+                          debuggerState <= DEBUGGER_STATE_writingDRAM;
+                      end
+                
                 // ignore invalid instructions
                 default: noAction;
 
@@ -194,10 +218,139 @@ module mkPhysicalPlatformDebugger#(PHYSICAL_DRIVERS drivers)
 
     endrule
     
+    // read first dword of DRAM data into buffer
+    rule read_dram_data_0 (debuggerState == DEBUGGER_STATE_readingDRAM_0);
+        
+        FPGA_DRAM_DUALEDGE_DATA data <- drivers.ddr2SDRAMDriver.readRsp();
+        dramBuffer <= data;
+        dramCount <= 0;
+        debuggerState <= DEBUGGER_STATE_readingDRAM_1;
+        
+    endrule
+    
+    // read DRAM data into CSRs
+    rule read_dram_data_1 (debuggerState == DEBUGGER_STATE_readingDRAM_1);
+        
+        case (dramCount)
+            
+            0: drivers.pciExpressDriver.commonCSRs.write(0, dramBuffer[31:0]);
+            
+            1: drivers.pciExpressDriver.commonCSRs.write(1, dramBuffer[63:32]);
+            
+            2: drivers.pciExpressDriver.commonCSRs.write(2, dramBuffer[95:64]);
+            
+            3: begin
+                   drivers.pciExpressDriver.commonCSRs.write(3, dramBuffer[127:96]);
+                   FPGA_DRAM_DUALEDGE_DATA data <- drivers.ddr2SDRAMDriver.readRsp();
+                   dramBuffer <= data;
+               end
+            
+            4: drivers.pciExpressDriver.commonCSRs.write(4, dramBuffer[31:0]);
+            
+            5: drivers.pciExpressDriver.commonCSRs.write(5, dramBuffer[63:32]);
+            
+            6: drivers.pciExpressDriver.commonCSRs.write(6, dramBuffer[95:64]);
+            
+            7: begin
+                   drivers.pciExpressDriver.commonCSRs.write(7, dramBuffer[127:96]);
+                   debuggerState <= DEBUGGER_STATE_ready;
+               end
+            
+        endcase
+                   
+        dramCount <= dramCount + 1;
+        
+    endrule
+        
+    // accumulate write data into CSRs and write to DRAM
+    rule write_dram_data (debuggerState == DEBUGGER_STATE_writingDRAM);
+        
+        case (dramCount)
+            
+            0: drivers.pciExpressDriver.commonCSRs.readRequest(0);
+            
+            1: begin
+                   PCIE_CSR_DATA csr_data <- drivers.pciExpressDriver.commonCSRs.readResponse();
+                   dramBuffer[31:0] <= csr_data;
+               end
+            
+            2: drivers.pciExpressDriver.commonCSRs.readRequest(1);
+            
+            3: begin
+                   PCIE_CSR_DATA csr_data <- drivers.pciExpressDriver.commonCSRs.readResponse();
+                   dramBuffer[63:32] <= csr_data;
+               end
+            
+            4: drivers.pciExpressDriver.commonCSRs.readRequest(2);
+            
+            5: begin
+                   PCIE_CSR_DATA csr_data <- drivers.pciExpressDriver.commonCSRs.readResponse();
+                   dramBuffer[95:64] <= csr_data;
+               end
+            
+            6: drivers.pciExpressDriver.commonCSRs.readRequest(3);
+            
+            7: begin
+
+                   PCIE_CSR_DATA csr_data <- drivers.pciExpressDriver.commonCSRs.readResponse();
+                   
+                   FPGA_DRAM_DUALEDGE_DATA data = 0;
+                   
+                   data[127:96] = csr_data;
+                   data[95:0]   = dramBuffer[95:0];
+
+                   drivers.ddr2SDRAMDriver.writeData(data, '0);
+
+               end
+
+            8: drivers.pciExpressDriver.commonCSRs.readRequest(4);
+            
+            9: begin
+                   PCIE_CSR_DATA csr_data <- drivers.pciExpressDriver.commonCSRs.readResponse();
+                   dramBuffer[31:0] <= csr_data;
+               end
+            
+           10: drivers.pciExpressDriver.commonCSRs.readRequest(5);
+            
+           11: begin
+                   PCIE_CSR_DATA csr_data <- drivers.pciExpressDriver.commonCSRs.readResponse();
+                   dramBuffer[63:32] <= csr_data;
+               end
+            
+           12: drivers.pciExpressDriver.commonCSRs.readRequest(6);
+            
+           13: begin
+                   PCIE_CSR_DATA csr_data <- drivers.pciExpressDriver.commonCSRs.readResponse();
+                   dramBuffer[95:64] <= csr_data;
+               end
+            
+           14: drivers.pciExpressDriver.commonCSRs.readRequest(7);
+            
+           15: begin
+                    
+                   PCIE_CSR_DATA csr_data <- drivers.pciExpressDriver.commonCSRs.readResponse();
+                   
+                   FPGA_DRAM_DUALEDGE_DATA data = 0;
+                   
+                   data[95:0]   = dramBuffer[95:0];
+                   data[127:96] = csr_data;
+
+                   drivers.ddr2SDRAMDriver.writeData(data, '0);
+                   
+                   debuggerState <= DEBUGGER_STATE_ready;
+                   
+               end
+            
+        endcase
+                   
+        dramCount <= dramCount + 1;
+        
+    endrule    
+    
     // update LEDs
     rule update_leds (True);
         
-        drivers.ledsDriver.setLEDs(leds);
+        drivers.ledsDriver.setLEDs(truncate(dramBuffer)); // -- DEBUG -- leds);
         
     endrule
     
@@ -272,19 +425,48 @@ module mkPhysicalPlatformDebugger#(PHYSICAL_DRIVERS drivers)
         //
         
         method interruptHost = drivers.pciExpressDriver.interruptHost;
-            
-        method softReset = drivers.pciExpressDriver.softReset;
         
     endinterface
     
-    // pass-through LEDs and Switches interfaces
+    //
+    // DDR2 SDRAM: TEMPORARY HACK: completely disable these methods
+    //
     
-    interface LEDS_DRIVER ledsDriver = drivers.ledsDriver;
+    interface DDR2_SDRAM_DRIVER ddr2SDRAMDriver;
         
-    interface SWITCHES_DRIVER switchesDriver = drivers.switchesDriver;
+        method Action readReq(FPGA_DRAM_ADDRESS addr);
+            
+            noAction;
+                
+        endmethod
 
-    // pass-through soft reset signal
-        
-    method soft_reset = drivers.soft_reset;
+        method ActionValue#(FPGA_DRAM_DUALEDGE_DATA) readRsp();
+            
+            noAction;
+            return 0;
+            
+        endmethod
+
+        method Action writeReq(FPGA_DRAM_ADDRESS addr);
+            
+            noAction;
+            
+        endmethod
+
+        method Action writeData(FPGA_DRAM_DUALEDGE_DATA data, FPGA_DRAM_DUALEDGE_DATA_MASK mask);
+            
+            noAction;
+            
+        endmethod
+    
+    endinterface
+    
+    //
+    // pass-through all other interfaces
+    //
+    
+    interface CLOCKS_DRIVER   clocksDriver   = drivers.clocksDriver;
+    interface LEDS_DRIVER     ledsDriver     = drivers.ledsDriver;
+    interface SWITCHES_DRIVER switchesDriver = drivers.switchesDriver;
 
 endmodule

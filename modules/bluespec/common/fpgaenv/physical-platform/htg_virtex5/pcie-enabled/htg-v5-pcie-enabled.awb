@@ -4,12 +4,13 @@
 
 %provides physical_platform
 
-%requires led_device switch_device pci_express_device ddr2_sdram_device
+%requires clocks_device led_device switch_device pci_express_device ddr2_sdram_device physical_platform_utils
 
 %sources -t BSV -v PUBLIC  htg-v5-pcie-enabled.bsv
 %sources -t H   -v PUBLIC  htg-v5-pcie-enabled.h
 %sources -t CPP -v PRIVATE htg-v5-pcie-enabled.cpp
 %sources -t UCF -v PRIVATE htg-v5-pcie-enabled.ucf
+
 %sources -t UT  -v PRIVATE xilinx.ut
 %sources -t XST -v PRIVATE xilinx.xst
 %sources -t DOWNLOAD -v PRIVATE xilinx.download

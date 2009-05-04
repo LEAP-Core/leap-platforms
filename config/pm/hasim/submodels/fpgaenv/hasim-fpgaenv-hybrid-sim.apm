@@ -80,6 +80,8 @@ Packagehint=platforms
 
 [Simulation Physical Platform/Requires]
 unix_pipe_device=UNIX Pipe Physical Device
+clocks_device=Simulation Clocks Device
+physical_platform_utils=Common Physical Platform Utilities
 
 [Simulation Physical Platform]
 File=modules/bluespec/common/fpgaenv/physical-platform/simulation/sim-physical-platform.awb
@@ -111,6 +113,14 @@ Packagehint=platforms
 
 [Local Memory Central Cache]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/central-cache/local-mem-central-cache.awb
+Packagehint=platforms
+
+[Simulation Clocks Device]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/simulation/sim-clocks-device.awb
+Packagehint=platforms
+
+[Common Physical Platform Utilities]
+File=modules/bluespec/common/fpgaenv/physical-platform/utils/utils.awb
 Packagehint=platforms
 
 [Local Memory Interface using BRAM/Params]

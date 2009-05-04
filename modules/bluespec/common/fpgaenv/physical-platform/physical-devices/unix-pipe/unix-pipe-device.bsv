@@ -1,7 +1,26 @@
+//
+// Copyright (C) 2008 Intel Corporation
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
+
 import FIFOF::*;
 import Vector::*;
 
 `include "umf.bsh"
+`include "physical_platform_utils.bsh"
 
 `define PIPE_NULL       'hFFFFFFFF00000000
 `define POLL_INTERVAL   32
@@ -30,8 +49,6 @@ interface UNIX_PIPE_DRIVER;
 
     method ActionValue#(UMF_CHUNK) read();
     method Action                  write(UMF_CHUNK chunk);
-    method Bool                    soft_reset_requested();
-    method Action                  soft_reset_received();
         
 endinterface
 
@@ -50,7 +67,7 @@ interface UNIX_PIPE_DEVICE;
 endinterface
                   
 // UNIX pipe module
-module mkUNIXPipeDevice
+module mkUNIXPipeDevice#(SOFT_RESET_TRIGGER softResetTrigger)
     // interface
                   (UNIX_PIPE_DEVICE);
     
@@ -103,6 +120,12 @@ module mkUNIXPipeDevice
         pipe_write(handle, chunk);
     endrule
 
+    // trigger soft reset
+    rule trigger_soft_reset (pipe_receive_reset());
+        pipe_clear_reset();
+        softResetTrigger.reset();
+    endrule
+
     // ==============================================================
     //                          Methods
     // ==============================================================
@@ -122,17 +145,6 @@ module mkUNIXPipeDevice
             writeBuffer.enq(chunk);
         endmethod
         
-        // pass on soft reset request
-        method Bool soft_reset_requested();
-            return pipe_receive_reset();
-        endmethod
-
-        // ack soft reset request
-        method Action soft_reset_received();
-            pipe_clear_reset();
-        endmethod
-
-        // write
     endinterface
     
     // wires interface

@@ -1,3 +1,20 @@
+//
+// Copyright (C) 2008 Intel Corporation
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
 
 // ******* general-switch-device *******
 
@@ -25,9 +42,8 @@ endinterface
 
 interface SWITCHES_WIRES#(parameter numeric type n);
 
-    (* always_ready, always_enabled *)
     (* prefix = "" *)
-    method Action  switches((* port = "SWITCH" *) Bit#(n) sw);
+    method Action switches_wire((* port = "SWITCH" *) Bit#(n) sw);
 
 endinterface
 
@@ -49,51 +65,28 @@ endinterface
 // A switch device generalized to any bit width.
 // Uses a Wire to return the current value of the switches.
 
-module mkSwitchesDevice#(Clock topLevelClock, Reset topLevelReset)
+module mkSwitchesDevice
     // interface:
                  (SWITCHES_DEVICE#(number_switches_T));
 
-    // Model clock and reset
-    Clock modelClock <- exposeCurrentClock();
-    Reset modelReset <- exposeCurrentReset();
+    // Create a primitive device
     
-    // A wire used to communicate the switches from the outside
-    // world to our BSV model
-    Wire#(Bit#(number_switches_T)) switch_wire <- mkWire(clocked_by topLevelClock, reset_by topLevelReset);
-    
-    // A sync register used to synchronize the above wire with the model clock
-    Reg#(Bit#(number_switches_T)) switch_reg <- mkSyncReg(0, topLevelClock, topLevelReset, modelClock);
+    PRIMITIVE_SWITCHES_DEVICE#(number_switches_T) primSwitches <- mkPrimitiveSwitchesDevice();
 
-    // Copy the current value on the wire into the Sync register
-    rule wire_to_reg (True);
-        
-        switch_reg <= switch_wire;
-        
-    endrule
 
     // The interface used by the rest of the FPGA
   
     interface SWITCHES_DRIVER driver;
 
-        // getSwitches
-        // Return the current value of the reg.
-
-        method  Bit#(number_switches_T) getSwitches();
-            return switch_reg;
-        endmethod
-
+        method getSwitches = primSwitches.getSwitches;
+            
     endinterface
 
     // The wires which are tied to the switches by the UCF
 
     interface SWITCHES_WIRES wires;
         
-        // switches
-        // Set the wire to whatever the switches are.
-        
-        method Action switches(Bit#(number_switches_T) sw);
-            switch_wire <= sw;
-        endmethod
+        method switches_wire = primSwitches.switches_wire;
   
     endinterface
  

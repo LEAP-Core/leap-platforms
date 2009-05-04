@@ -4,4 +4,6 @@
 
 %provides switch_device
 
-%public general-switch-device.bsv
+%public  general-switch-vhdl-import.bsv
+%public  general-switch-device.bsv
+%private general-switch-device.vhd

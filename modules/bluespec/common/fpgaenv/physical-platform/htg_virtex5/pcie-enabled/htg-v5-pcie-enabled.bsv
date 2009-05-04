@@ -27,6 +27,8 @@ import Clocks::*;
 `include "switch_device.bsh"
 `include "pci_express_device.bsh"
 `include "ddr2_sdram_device.bsh"
+`include "clocks_device.bsh"
+`include "physical_platform_utils.bsh"
 
 // 8 switches and leds
 
@@ -40,14 +42,12 @@ import Clocks::*;
 // We use other modules to actually do the work.
 
 interface PHYSICAL_DRIVERS;
-
+    
+    interface CLOCKS_DRIVER                      clocksDriver;
     interface LEDS_DRIVER#(`NUMBER_LEDS)         ledsDriver;
     interface SWITCHES_DRIVER#(`NUMBER_SWITCHES) switchesDriver;
     interface PCI_EXPRESS_DRIVER                 pciExpressDriver;
     interface DDR2_SDRAM_DRIVER                  ddr2SDRAMDriver;
-        
-    // each set of physical drivers must support a soft reset method
-    method Action soft_reset();
         
 endinterface
 
@@ -60,6 +60,9 @@ endinterface
 
 interface TOP_LEVEL_WIRES;
 
+    // wires from devices
+    (* prefix = "" *)
+    interface CLOCKS_WIRES                       clocksWires;
     interface LEDS_WIRES#(`NUMBER_LEDS)          ledsWires;
     interface SWITCHES_WIRES#(`NUMBER_SWITCHES)  switchesWires;
     interface PCI_EXPRESS_WIRES                  pciExpressWires;
@@ -83,35 +86,68 @@ endinterface
 // This is a convenient way for the outside world to instantiate all the devices
 // and an aggregation of all the wires.
 
-module mkPhysicalPlatform#(Clock topLevelClock, Reset topLevelReset)
+module mkPhysicalPlatform
        //interface: 
                     (PHYSICAL_PLATFORM);
     
-    // Submodules
+    // The Platform is instantiated inside a NULL clock domain. Our first course of
+    // action should be to instantiate the Clocks Physical Device and obtain interfaces
+    // to clock and reset the other devices with.
     
-    LEDS_DEVICE#(`NUMBER_LEDS)         leds_device         <- mkLEDsDevice(topLevelClock, topLevelReset);
-    SWITCHES_DEVICE#(`NUMBER_SWITCHES) switches_device     <- mkSwitchesDevice(topLevelClock, topLevelReset);
-    PCI_EXPRESS_DEVICE                 pci_express_device  <- mkPCIExpressDevice();
-    DDR2_SDRAM_DEVICE                  ddr2_sdram_device   <- mkDDR2SDRAMDevice(topLevelClock, topLevelReset);
+    CLOCKS_DEVICE clocks_device <- mkClocksDevice();
+    
+    Clock clk = clocks_device.driver.clock;
+    Reset rst = clocks_device.driver.reset;
+
+    // Next, create the physical device that can trigger a soft reset. Pass along the
+    // interface to the trigger module that the clocks device has given us.
+
+    PCI_EXPRESS_DEVICE pci_express_device <- mkPCIExpressDevice(clocks_device.softResetTrigger,
+                                                                clocked_by clk,
+                                                                reset_by rst);
+
+    // Finally, instantiate all other physical devices
+    
+    LEDS_DEVICE#(`NUMBER_LEDS)         leds_device       <- mkLEDsDevice(clocked_by clk, reset_by rst);
+    SWITCHES_DEVICE#(`NUMBER_SWITCHES) switches_device   <- mkSwitchesDevice(clocked_by clk, reset_by rst);
+    DDR2_SDRAM_DEVICE                  ddr2_sdram_device <- mkDDR2SDRAMDevice(clocks_device.driver.rawClock,
+                                                                              clocks_device.driver.rawReset,
+                                                                              clocked_by clk,
+                                                                              reset_by   rst);
+    
+    /*
+    // Bugfix for Xilinx tools: if the LEDs and Switches are not used at all in the
+    // design, map sometimes gets confused and crashes. Reading the switches and
+    // writing them into the LEDs once on reset makes sure the wires don't get
+    // optimized away and confuse map.
+    
+    Reg#(Bool) fixDone <- mkReg(False, clocked_by clk, reset_by rst);
+    
+    rule fix_xilinx_bug (fixDone == False);
+        
+        leds_device.driver.setLEDs(switches_device.driver.getSwitches);
+        fixDone <= True;
+        
+    endrule
+    */
 
     // Aggregate the drivers
     
     interface PHYSICAL_DRIVERS physicalDrivers;
     
+        interface clocksDriver     = clocks_device.driver;
         interface ledsDriver       = leds_device.driver;
         interface switchesDriver   = switches_device.driver;
         interface pciExpressDriver = pci_express_device.driver;
         interface ddr2SDRAMDriver  = ddr2_sdram_device.driver;
-    
-        // Soft Reset method
-        method soft_reset = pci_express_device.driver.softReset;
     
     endinterface
     
     // Aggregate the wires
     
     interface TOP_LEVEL_WIRES topLevelWires;
-    
+
+        interface clocksWires      = clocks_device.wires;
         interface ledsWires        = leds_device.wires;
         interface switchesWires    = switches_device.wires;
         interface pciExpressWires  = pci_express_device.wires;

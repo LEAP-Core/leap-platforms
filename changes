@@ -5930,3 +5930,132 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/centr
   4 equal regions: three regions of ways, one of tags.
 - Expose the central cache for clients coming through the platform interface.
 - Reduce local memory for Bluesim to 1K words so we see spills during simulation.
+
+----------
+aparasha    Date: Mon May  4 15:22:52 EDT 2009  CSN: CSN-platforms-200
+                  Mon May  4 19:22:52 UTC 2009
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-htg-hwonly.apm    Locally Modified          199 
+ hasim-fpgaenv-hybrid-sim.apm Locally Modified          199 
+ hasim-fpgaenv-htg-v5-pcie.apm Locally Modified          199 
+ hasim-fpgaenv-xup.apm     Locally Modified          199 
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ user-clock.bsv            Locally Modified          199 
+ software-fpga-components.awb Locally Modified          199 
+ hardware-fpga-components.awb Locally Modified          199 
+
+Directory modules/bluespec/common/fpgaenv/low-level-platform-interface
+ llpi.bsv                  Locally Modified          199 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform
+ utils/                    Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/utils
+ soft-reset.bsv            Locally Added               0 
+ utils.awb                 Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/simulation
+ sim-physical-platform.awb Locally Modified          199 
+ sim-physical-platform.bsv Locally Modified          199 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/debuggers/htg-virtex5
+ htg-debugger.cpp          Locally Modified          199 
+ htg-debugger.bsv          Locally Modified          199 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup
+ xup-physical-platform.awb Locally Modified          199 
+ xup-physical-platform.bsv Locally Modified          199 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-disabled
+ htg-v5-pcie-disabled.awb  Locally Modified          199 
+ htg-v5-pcie-disabled.bsv  Locally Modified          199 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled
+ htg-v5-pcie-enabled.awb   Locally Modified          199 
+ htg-v5-pcie-enabled.bsv   Locally Modified          199 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr2-sdram
+ ddr2-sdram-device.bsv     Locally Modified          199 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express
+ pci-express-device.bsv    Locally Modified          199 
+ pci-express-vhdl-import.bsv Locally Modified          199 
+ Channel_top.vhd           Locally Modified          199 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/leds
+ general-led-device.bsv    Locally Modified          199 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/switches
+ general-switch-device.awb Locally Modified          199 
+ general-switch-device.bsv Locally Modified          199 
+ general-switch-vhdl-import.bsv Locally Added               0 
+ general-switch-device.vhd Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe
+ unix-pipe-device.h        Locally Modified          199 
+ unix-pipe-device.bsv      Locally Modified          199 
+ unix-pipe-device-bdpi.c   Locally Modified          199 
+ unix-pipe-device.cpp      Locally Modified          199 
+ unix-pipe-device-bdpi.h   Locally Modified          199 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices
+ clocks/                   Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks
+ simulation/               Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/simulation
+ sim-clocks-device.awb     Locally Added               0 
+ sim-clocks-device.bsv     Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks
+ differential/             Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/differential
+ differential-clocks-vhdl-import.bsv Locally Added               0 
+ differential-clocks-device.vhd Locally Added               0 
+ differential-clocks-device.awb Locally Added               0 
+ differential-clocks-device.bsv Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks
+ single-ended/             Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/single-ended
+ single-ended-clocks-device.awb Locally Added               0 
+ single-ended-clocks-device.bsv Locally Added               0 
+ single-ended-clocks-vhdl-import.bsv Locally Added               0 
+ single-ended-clocks-device.vhd Locally Added               0 
+
+Updated clocking methodology for all FPGA designs. "Clocks" is now a new
+physical device exported by each Physical Platform. Three implementations
+of clocks device have been provided:
+
+  - a single-ended device that derives a Clock object from a single top-level
+    wire CLK,
+  - a differential device that derives a Clock object from a pair of wires
+    CLK_P and CLK_N, and
+  - a simulation device that instantiates a simulated oscillator.
+
+For real hardware platforms, the wires are *not* bound to UCF pins within
+the device implementation; the binding happens at the Physical Platform
+layer, so that multiple Physical Platforms can share the same single-ended
+and differential clock modules.
+
+Clock-multiplication for the model clock is now part of the Clocks device.
+The crystal clock frequency is a local AWB parameter, but the multiplication
+and division factors are exported as global parameters so that different
+models can use different factors.
+
+Each Clocks implementation also exports a Reset object. The Clock and Reset
+objects together form the "driver" part of the physical device.
+
+The Clocks device also internally implements the logic for generating a soft
+reset, and ties the effect of the soft reset into the main Reset signal it
+exports as part of the driver. However, the soft reset needs to be explicitly
+*triggered* elsewhere. The clocks device therefore also exports a
+SOFT_RESET_IFC interface up to the Platform, which can then pass it into
+whichever Physical Device is capable of actually triggering the Soft Reset on
+the particular platform.

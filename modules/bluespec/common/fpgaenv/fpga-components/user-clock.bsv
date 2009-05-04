@@ -132,10 +132,10 @@ endmodule
 //   Generate a user clock based on the on-board crystal that is multiplied
 //   by clockMultiplier and divided by clockDivider.
 //
-module mkUserClockFromCrystal#(Integer clockMultiplier, Integer clockDivider)
-        (UserClock);
+// module mkUserClockFromCrystal#(Integer clockMultiplier, Integer clockDivider)
+//         (UserClock);
 
-    let clk <- mkUserClock(`CRYSTAL_CLOCK_FREQ, clockMultiplier, clockDivider);
-    return clk;
+//     let clk <- mkUserClock(`CRYSTAL_CLOCK_FREQ, clockMultiplier, clockDivider);
+//     return clk;
 
-endmodule
+// endmodule

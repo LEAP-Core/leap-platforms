@@ -21,6 +21,7 @@
 `include "asim/provides/channelio.bsh"
 `include "asim/provides/physical_platform.bsh"
 `include "asim/provides/physical_platform_debugger.bsh"
+`include "asim/provides/clocks_device.bsh"
 
 // LowLevelPlatformInterface
 
@@ -41,23 +42,31 @@ endinterface
 
 // Instantiate the subcomponents in one module.
 
-module mkLowLevelPlatformInterface#(Clock topLevelClock, Reset topLevelReset)
+module mkLowLevelPlatformInterface
     //interface:
     (LowLevelPlatformInterface);
 
     // instantiate physical platform
-    PHYSICAL_PLATFORM phys_plat <- mkPhysicalPlatform(topLevelClock, topLevelReset);
+    
+    PHYSICAL_PLATFORM phys_plat <- mkPhysicalPlatform();
+    
+    // LLPI is instantiated in a NULL clock domain, so first get some clocks
+    // from the physical platform, which we'll pass down into the debugger
+    // and virtual platform
+    
+    Clock clk = phys_plat.physicalDrivers.clocksDriver.clock;
+    Reset rst = phys_plat.physicalDrivers.clocksDriver.reset;
     
     // instantiate physical platform debugger and obtain gated drivers from it
-    PHYSICAL_DRIVERS  drivers   <- mkPhysicalPlatformDebugger(phys_plat.physicalDrivers);
+    PHYSICAL_DRIVERS  drivers   <- mkPhysicalPlatformDebugger(phys_plat.physicalDrivers, clocked_by clk, reset_by rst);
     
     // instantiate local memory
-    LOCAL_MEM         locMem    <- mkLocalMem(drivers);
+    LOCAL_MEM         locMem    <- mkLocalMem(drivers, clocked_by clk, reset_by rst);
 
     // instantiate layers of virtual platform
-    CHANNEL_IO        cio       <- mkChannelIO(drivers);
-    RRR_CLIENT        rrrc      <- mkRRRClient(cio);
-    RRR_SERVER        rrrs      <- mkRRRServer(cio);
+    CHANNEL_IO        cio       <- mkChannelIO(drivers, clocked_by clk, reset_by rst);
+    RRR_CLIENT        rrrc      <- mkRRRClient(cio, clocked_by clk, reset_by rst);
+    RRR_SERVER        rrrs      <- mkRRRServer(cio, clocked_by clk, reset_by rst);
 
     // plumb interfaces
 

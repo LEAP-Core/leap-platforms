@@ -2,6 +2,8 @@ import Vector::*;
 import Clocks::*;
 import LevelFIFO::*;
 
+`include "physical_platform_utils.bsh"
+
 // Subinterfaces
 
 interface COMMON_CSR_ARRAY;
@@ -45,9 +47,6 @@ interface PCI_EXPRESS_DRIVER;
     // interrupt
     method Action interruptHost();
         
-    // soft reset
-    method Action softReset();
-    
 endinterface
 
 // PCI_EXPRESS_WIRES
@@ -109,7 +108,7 @@ endinterface
 
 // Take the primitive PCI Express import and cross the clock domains into the default bluespec domain.
 
-module mkPCIExpressDevice
+module mkPCIExpressDevice#(SOFT_RESET_TRIGGER softResetTrigger)
     // interface:
                  (PCI_EXPRESS_DEVICE);
 
@@ -120,9 +119,11 @@ module mkPCIExpressDevice
     Clock bsv_clk <- exposeCurrentClock();
     Reset bsv_rst <- exposeCurrentReset();
     
-    // translate our reset (bst_rst) to the PCIe clock domain. Note that this is
+    // translate our reset (bsv_rst) to the PCIe clock domain. Note that this is
     // different from the PCIe's native reset.
-    Reset trans_rst <- mkAsyncResetFromCR(0, prim_pci.pcie_clk);
+    // WE DON'T USE THIS ANYMORE, WE SIMPLY USE PCIE'S EXPORTED RESET (WHICH IS
+    // ANDED WITH THE SOFT RESET SIGNAL IN THE VHDL)
+    // Reset trans_rst <- mkAsyncResetFromCR(0, prim_pci.pcie_clk);
     
     // Device state
     Reg#(PCIE_DEVICE_STATE) state <- mkReg(PCIE_DEVICE_STATE_init);
@@ -135,20 +136,20 @@ module mkPCIExpressDevice
 
     // Synchronizers from PCIE to Bluespec.    
     Reg#(PCIE_CSR_DATA)          sync_csr_h2f_reg0_read_r
-                              <- mkSyncReg(?, prim_pci.pcie_clk, trans_rst, bsv_clk);
+                              <- mkSyncReg(?, prim_pci.pcie_clk, prim_pci.pcie_rst, bsv_clk);
     
     SyncFIFOIfc#(PCIE_CSR_DATA)  sync_csr_read_resp_q
-                              <- mkSyncFIFO(2, prim_pci.pcie_clk, trans_rst, bsv_clk);
-
-    SyncFIFOIfc#(Bool)           sync_reset_req_q
-                              <- mkSyncFIFO(2, prim_pci.pcie_clk, trans_rst, bsv_clk);
+                              <- mkSyncFIFO(2, prim_pci.pcie_clk, prim_pci.pcie_rst, bsv_clk);
     
+    SyncFIFOIfc#(Bool)           sync_reset_req_q
+                              <- mkSyncFIFO(2, prim_pci.pcie_clk, prim_pci.pcie_rst, bsv_clk);
     SyncFIFOIfc#(Bool)           sync_init_resp_q
-                              <- mkSyncFIFO(2, prim_pci.pcie_clk, trans_rst, bsv_clk);
+                              <- mkSyncFIFO(2, prim_pci.pcie_clk, prim_pci.pcie_rst, bsv_clk);
 
     SyncFIFOIfc#(PCIE_DMA_DATA)  sync_dma_read_data_q
-                              <- mkSyncFIFO(2, prim_pci.pcie_clk, trans_rst, bsv_clk);
-    
+                              <- mkSyncFIFO(2, prim_pci.pcie_clk, prim_pci.pcie_rst, bsv_clk);
+    // END DEBUG
+
     // Synchronizers from BSV to PCIe
     SyncFIFOIfc#(PCIE_CSR_INDEX) sync_csr_read_req_q
                               <- mkSyncFIFO(2, bsv_clk, bsv_rst, prim_pci.pcie_clk);
@@ -229,6 +230,17 @@ module mkPCIExpressDevice
     
     endrule
     
+    // actually trigger the reset
+    rule trigger_soft_reset (True);
+        
+        // dequeue from the reset request queue
+        sync_reset_req_q.deq();
+        
+        // trigger!
+        softResetTrigger.reset();
+
+    endrule
+
     //
     // Rules for synchronizing from PCIe to Bluespec
     //
@@ -435,14 +447,6 @@ module mkPCIExpressDevice
 
             sync_interrupt_host_q.enq(?);
 
-        endmethod
-
-        // Reset interface
-
-        method Action softReset() if (ready);
-
-            sync_reset_req_q.deq();
-            
         endmethod
 
     endinterface
