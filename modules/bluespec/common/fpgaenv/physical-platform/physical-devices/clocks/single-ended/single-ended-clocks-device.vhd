@@ -41,7 +41,15 @@ architecture rtl of single_ended_clocks_device is
 
 begin
 
-  clk_out   <= clk;
-  rst_n_out <= rst_n;
+  -- clk_out   <= clk;
+  -- rst_n_out <= rst_n;
 
+  refclk_ibuf : IBUF port map (
+    O  => clk_out,
+    I  => clk);
+
+  sys_reset_n_ibuf : IBUF port map (
+    O => rst_n_out,
+    I => rst_n);
+  
 end;

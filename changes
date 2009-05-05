@@ -6059,3 +6059,15 @@ exports as part of the driver. However, the soft reset needs to be explicitly
 SOFT_RESET_IFC interface up to the Platform, which can then pass it into
 whichever Physical Device is capable of actually triggering the Soft Reset on
 the particular platform.
+
+----------
+aparasha    Date: Tue May  5 03:39:54 EDT 2009  CSN: CSN-platforms-201
+                  Tue May  5 07:39:54 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/single-ended
+ single-ended-clocks-device.vhd Locally Modified          200 
+
+Added input buffers to global clock and reset signal for single-ended
+clocks device. The alpha model was showing a weird tiny timing glitch
+in the memory controller that went away once these buffers were added.
