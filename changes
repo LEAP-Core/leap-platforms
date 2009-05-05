@@ -6071,3 +6071,34 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clo
 Added input buffers to global clock and reset signal for single-ended
 clocks device. The alpha model was showing a weird tiny timing glitch
 in the memory controller that went away once these buffers were added.
+
+----------
+mcadler     Date: Tue May  5 10:18:34 EDT 2009  CSN: CSN-platforms-202
+                  Tue May  5 14:18:34 UTC 2009
+
+
+Directory modules/bluespec/librl/storage/cache
+ rl-direct-mapped-cache.bsv Locally Modified          201 
+ rl-set-assoc-cache.bsv    Locally Modified          201 
+ rl-cache.bsv              Locally Added               0 
+ librl-cache.awb           Locally Modified          201 
+
+Directory modules/bluespec/librl/base
+ counting-filter.bsv       Locally Modified          201 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/central-cache
+ local-mem-central-cache.bsv Locally Modified          201 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr2-sdram
+ ddr2-sdram-device.bsv     Locally Modified          201 
+
+- Try to make the DDR initialization more robust, understanding that the
+  DDR domain doesn't get a soft reset.  Initialization now drains the sync
+  FIFOs between DDR and the model domain.  There still seem to be some lurking
+  problems, but soft reset works more often now.
+- Move cache statistics interface definition to common code.
+- Add statistics option to direct mapped cache.
+- Drop unneeded writeSyncReq/Wait from direct mapped cache.
+- Add NULL direct mapped cache that is just a pass-through to the backing
+  storage interface.  This allows modules to code to a direct mapped cache
+  while keeping the option of not allocating a cache.

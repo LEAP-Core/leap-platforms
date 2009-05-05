@@ -38,7 +38,8 @@ typedef CENTRAL_CACHE_VIRTUAL_DEVICE CENTRAL_CACHE_IFC;
 //     Central cache using local memory.  One port is created for each
 //     client.
 //
-module mkCentralCache#(LowLevelPlatformInterface llpi)
+module mkCentralCache#(LowLevelPlatformInterface llpi,
+                       RL_CACHE_STATS stats)
     // interface:
     (CENTRAL_CACHE_IFC)
     provisos (Bits#(CENTRAL_CACHE_LINE_ADDR, t_CENTRAL_CACHE_LINE_ADDR_SZ),
@@ -79,8 +80,6 @@ module mkCentralCache#(LowLevelPlatformInterface llpi)
     //
     // The cache
     //
-    RL_SA_CACHE_STATS stats <- mkNullRLCacheStats();
-
     RL_SA_CACHE_LOCAL_DATA#(t_CENTRAL_CACHE_INTERNAL_ADDR_SZ,
                             CENTRAL_CACHE_WORD,
                             CENTRAL_CACHE_WORDS_PER_LINE,

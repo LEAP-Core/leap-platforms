@@ -218,23 +218,6 @@ interface RL_SA_CACHE_LOCAL_DATA#(numeric type t_CACHE_ADDR_SZ,
 endinterface: RL_SA_CACHE_LOCAL_DATA
 
 
-//
-// The caller must provide an instance of the RL_SA_CACHE_STATS interface to
-// the cache code.  This allows each instance of the cache to have its own
-// statistics.  mkNullRLCacheStats is provided in this package for callers
-// not interested in statistics.
-//
-interface RL_SA_CACHE_STATS;
-    method Action readHit();
-    method Action readMiss();
-    method Action writeHit();
-    method Action writeMiss();
-    method Action invalLine();             // Invalidate due to capacity
-    method Action dirtyLineFlush();
-    method Action forceInvalLine();        // Invalidate forced by external request
-endinterface: RL_SA_CACHE_STATS
-
-
 // ===================================================================
 //
 // PRIVATE DATA STRUCTURES
@@ -392,7 +375,7 @@ RL_SA_CACHE_REQ#(numeric type nWordsPerLine)
 
 module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_LINE, nWordsPerLine, t_CACHE_REF_INFO) sourceData,
                         RL_SA_CACHE_LOCAL_DATA#(t_CACHE_ADDR_SZ, t_CACHE_WORD, nWordsPerLine, nSets, nWays) localData,
-                        RL_SA_CACHE_STATS stats,
+                        RL_CACHE_STATS stats,
                         DEBUG_FILE debugLog)
     // interface:
         (RL_SA_CACHE#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_WORD, nWordsPerLine, t_CACHE_REF_INFO, nTagExtraLowBits))
@@ -808,7 +791,7 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
                 tagged HCOP_FLUSH_DIRTY .needAck: needAck;
             endcase;
 
-        stats.dirtyLineFlush();
+        stats.dirtyEntryFlush();
         debugLog.record($format("  Write back DIRTY: addr=0x%x, set=0x%x, mask=0x%x, data=0x%x", debugAddrFromTag(tag, set), set, word_valid_mask, flush_data));
 
         // Flush for invalidate request.  Use sync method to know the
@@ -1115,7 +1098,7 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
         Bool flushed_dirty = False;
         if (meta.ways[fill_way] matches tagged Valid .m)
         begin
-            stats.invalLine();
+            stats.invalEntry();
             if (m.dirty)
             begin
                 // Victim is dirty.  Flush data.
@@ -1190,7 +1173,7 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
         Bool flushed_dirty = False;
         if (meta.ways[fill_way] matches tagged Valid .m)
         begin
-            stats.invalLine();
+            stats.invalEntry();
             if (m.dirty)
             begin
                 // Victim is dirty.  Flush data.
@@ -1225,7 +1208,7 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
         let set = req_base.set;
         let way = req_base.way;
 
-        stats.dirtyLineFlush();
+        stats.dirtyEntryFlush();
         debugLog.record($format("  Write back DIRTY: addr=0x%x, set=0x%x, way=%0d, mask=0x%x, data=0x%x", debugAddrFromTag(flush_meta.tag, set), set, way, flush_meta.wordValid, flush_data));
 
         // Normal flush before a fill
@@ -1566,41 +1549,6 @@ module mkBRAMCacheLocalData
                                 Bit#(TLog#(nWordsPerLine)) wordIdx,
                                 t_CACHE_WORD val);
         data[wordIdx].write(getDataIdx(set, way), val);
-    endmethod
-
-endmodule
-
-
-// ===================================================================
-//
-// Null version of RL_SA_CACHE_STATS interface for clients not interested in
-// statistics.
-//
-// ===================================================================
-
-module mkNullRLCacheStats
-    // interface:
-        (RL_SA_CACHE_STATS);
-    
-    method Action readHit();
-    endmethod
-
-    method Action readMiss();
-    endmethod
-
-    method Action writeHit();
-    endmethod
-
-    method Action writeMiss();
-    endmethod
-
-    method Action invalLine();
-    endmethod
-
-    method Action dirtyLineFlush();
-    endmethod
-
-    method Action forceInvalLine();
     endmethod
 
 endmodule

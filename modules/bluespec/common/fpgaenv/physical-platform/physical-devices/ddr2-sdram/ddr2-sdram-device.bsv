@@ -212,6 +212,9 @@ module mkDDR2SDRAMDevice#(Clock topLevelClock, Reset topLevelReset)
     // Synchronizers from Model to Controller
     //
 
+    // Model requests a reset
+    SyncFIFOIfc#(Bool) syncResetQ <- mkSyncFIFO(2, modelClock, modelReset, controllerClock);
+
     // Request queue
     SyncFIFOIfc#(FPGA_DRAM_REQUEST) syncRequestQ <- mkSyncFIFO(2, modelClock, modelReset, controllerClock);
 
@@ -244,6 +247,7 @@ module mkDDR2SDRAMDevice#(Clock topLevelClock, Reset topLevelReset)
     //
     
     rule processReadRequest (dramController.init_done() &&&
+                             ! syncResetQ.notEmpty() &&&
                              syncRequestQ.first() matches tagged DRAM_READ .address);
         syncRequestQ.deq();
         dramController.enqueue_address(READ, zeroExtend(address));
@@ -266,7 +270,8 @@ module mkDDR2SDRAMDevice#(Clock topLevelClock, Reset topLevelReset)
     // copyWriteData --
     //     Copy incoming write data from the sync FIFO to local registers.
     //
-    rule copyWriteData (writeBurstIdx != fromInteger(valueOf(FPGA_DRAM_BURST_LENGTH)));
+    rule copyWriteData (writeBurstIdx != fromInteger(valueOf(FPGA_DRAM_BURST_LENGTH)) &&
+                        ! syncResetQ.notEmpty());
         match {.data, .mask} = syncWriteDataQ.first();
         syncWriteDataQ.deq();        
 
@@ -282,9 +287,10 @@ module mkDDR2SDRAMDevice#(Clock topLevelClock, Reset topLevelReset)
     //     to the memory controller.
     //
     rule processWriteRequest0 (dramController.init_done() &&&
-                              ! writePending &&&
-                              (writeBurstIdx == fromInteger(valueOf(FPGA_DRAM_BURST_LENGTH))) &&&
-                              syncRequestQ.first() matches tagged DRAM_WRITE .address);
+                               ! syncResetQ.notEmpty() &&&
+                               ! writePending &&&
+                               (writeBurstIdx == fromInteger(valueOf(FPGA_DRAM_BURST_LENGTH))) &&&
+                               syncRequestQ.first() matches tagged DRAM_WRITE .address);
 
         syncRequestQ.deq();
 
@@ -294,6 +300,7 @@ module mkDDR2SDRAMDevice#(Clock topLevelClock, Reset topLevelReset)
         // Data + mask
         dramController.enqueue_data(writeValue[0], writeValueMask[0]);
                     
+        writeBurstIdx <= 0;
         writePending <= True;
     endrule
     
@@ -304,14 +311,29 @@ module mkDDR2SDRAMDevice#(Clock topLevelClock, Reset topLevelReset)
     //
     (* fire_when_enabled *)
     rule processWriteRequest1 (dramController.init_done() &&
-                               (writeBurstIdx == fromInteger(valueOf(FPGA_DRAM_BURST_LENGTH))) &&
                                writePending);
         // data + mask
         dramController.enqueue_data(writeValue[1], writeValueMask[1]);
         
         writePending <= False;
-        writeBurstIdx <= 0;
     endrule    
+
+
+    //
+    // processModelReset --
+    //     Model reset needs to clear out partial writes.
+    //
+    rule processModelReset (dramController.init_done());
+        syncResetQ.deq();
+
+        writeBurstIdx <= 0;
+
+        if (syncRequestQ.notEmpty())
+            syncRequestQ.deq();
+
+        if (syncWriteDataQ.notEmpty())
+            syncWriteDataQ.deq();
+    endrule
 
 
     // ====================================================================
@@ -321,7 +343,34 @@ module mkDDR2SDRAMDevice#(Clock topLevelClock, Reset topLevelReset)
     // ====================================================================
 
     Reg#(Bit#(2)) initPhase <- mkReg(0);
-    Reg#(Bit#(2)) initLoop <- mkReg(0);
+
+    Reg#(Bit#(10)) init0Loop <- mkReg(0);
+
+    //
+    // initPhase0 --
+    //     A delay loop to make sure reset settles.  Also, the DDR2 low level
+    //     driver is not reset by a soft reset.  There may be some reads left
+    //     over from the last run.  Sync them.
+    //
+    rule initPhase0 ((state == STATE_init) && (initPhase == 0));
+        if (syncReadDataQ.notEmpty())
+        begin
+            syncReadDataQ.deq();
+        end
+
+        // Reset partial store state in the DDR clock domain.  Send a few times
+        // so the incoming request queue is guaranteed empty.
+        if (init0Loop < 8)
+            syncResetQ.enq(?);
+
+        if (init0Loop == maxBound)
+            initPhase <= 1;
+        
+        init0Loop <= init0Loop + 1;
+    endrule
+
+
+    Reg#(Bit#(2)) init1Loop <- mkReg(0);
     Reg#(Bit#(1)) datasink  <- mkReg(0);
 
     // UGLY HACK
@@ -329,10 +378,8 @@ module mkDDR2SDRAMDevice#(Clock topLevelClock, Reset topLevelReset)
     // the Sync FIFOs don't get optimized away by the synthesis tools. If the
     // Sync FIFOs get optimized away, then the TIG constraints in the UCF
     // file become invalid and ngdbuild complains.
-    
-    rule initPhase0 ((state == STATE_init) && (initPhase == 0));
-
-        case (initLoop) matches
+    rule initPhase1 ((state == STATE_init) && (initPhase == 1));
+        case (init1Loop) matches
             0: syncRequestQ.enq(tagged DRAM_READ 0);
             1: begin
                    datasink <= syncReadDataQ.first()[0];
@@ -347,22 +394,21 @@ module mkDDR2SDRAMDevice#(Clock topLevelClock, Reset topLevelReset)
                end
             3: begin
                    syncWriteDataQ.enq(tuple2(zeroExtend(datasink), 0));
-                   initPhase <= 1;
+                   initPhase <= 2;
                end
         endcase
 
-        initLoop <= initLoop + 1;
-
+        init1Loop <= init1Loop + 1;
     endrule
 
     //
-    // initPhase1 --
+    // initPhase2 --
     //     Write a constant pattern to initialize memory.
     //
     Reg#(FPGA_DRAM_ADDRESS) initAddr <- mkReg(0);
     Reg#(Bit#(1)) initPart <- mkReg(0);
     
-    rule initPhase1 ((state == STATE_init) && (initPhase == 1));
+    rule initPhase2 ((state == STATE_init) && (initPhase == 2));
         // Data to write
         Vector#(TDiv#(FPGA_DRAM_DUALEDGE_DATA_SZ, 8), Bit#(8)) init_data = replicate('haa);
 
@@ -391,6 +437,7 @@ module mkDDR2SDRAMDevice#(Clock topLevelClock, Reset topLevelReset)
 
         initPart <= initPart + 1;
     endrule
+
 
     // ====================================================================
     //

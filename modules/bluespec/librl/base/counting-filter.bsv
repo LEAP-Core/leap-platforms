@@ -67,11 +67,7 @@ endinterface
 module mkCountingFilter#(Bool allowComplexFilters, DEBUG_FILE debugLog)
     // interface:
     (COUNTING_FILTER#(t_ENTRY))
-    provisos (Bits#(t_ENTRY, t_ENTRY_SZ),
-
-              // Tautologies required by the compiler:
-              Add#(TLog#(TExp#(t_ENTRY_SZ)), b__, t_ENTRY_SZ),
-              Add#(TLog#(TDiv#(TExp#(t_ENTRY_SZ), 2)), a__, t_ENTRY_SZ));
+    provisos (Bits#(t_ENTRY, t_ENTRY_SZ));
 
     let filter = ?;
 
@@ -89,7 +85,7 @@ module mkCountingFilter#(Bool allowComplexFilters, DEBUG_FILE debugLog)
     end
     else
     begin
-        // Small sets get unique bits per entry
+        // Small sets get unique bit per entry
         DECODE_FILTER#(t_ENTRY, TExp#(t_ENTRY_SZ)) decodeFilterS <- mkSizedDecodeFilter(debugLog);
         filter = decodeFilterS.countingFilterIfc;
     end
@@ -121,9 +117,6 @@ module mkSizedDecodeFilter#(DEBUG_FILE debugLog)
     // interface:
     (DECODE_FILTER#(t_ENTRY, nFilterBits))
     provisos (Bits#(t_ENTRY, t_ENTRY_SZ),
-
-              // nFilterBits must be <= (2 ^ t_ENTRY_SZ)
-              Add#(TLog#(nFilterBits), a__, t_ENTRY_SZ),
        
               Alias#(Bit#(TLog#(nFilterBits)), t_FILTER_IDX));
 
@@ -133,7 +126,7 @@ module mkSizedDecodeFilter#(DEBUG_FILE debugLog)
     RWire#(t_FILTER_IDX) removeId <- mkRWire();
 
     function t_FILTER_IDX filterIdx(t_ENTRY e);
-        return truncate(pack(e));
+        return truncateNP(pack(e));
     endfunction
 
     (* fire_when_enabled *)

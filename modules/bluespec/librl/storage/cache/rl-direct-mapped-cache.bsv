@@ -65,9 +65,9 @@ RL_DM_CACHE_MODE
     deriving (Eq, Bits);
 
 //
-// Direct mapped cache interface.  nTagExtraLowBits is used just for
-// debugging.  This specified number of low bits are prepanded to cache
-// tags so addresses match those seen in other modules.
+// Direct mapped cache interface.  n_ENTRIES defines the number of entries
+// in the cache.  The true number of entries will be rounded up to
+// a power of 2.
 //
 // t_CACHE_REF_INFO is metadata associated with a reference.  Metadata is
 // passed to the backing store for fills.  The metadata is not stored in
@@ -76,8 +76,7 @@ RL_DM_CACHE_MODE
 interface RL_DM_CACHE#(type t_CACHE_ADDR,
                        type t_CACHE_WORD,
                        type t_CACHE_REF_INFO,
-                       numeric type nTagExtraLowBits,
-                       numeric type nEntries);
+                       numeric type n_ENTRIES);
 
     // Read a word.  Read from backing store if not already cached.
     // *** Read responses are NOT guaranteed to be in the order of requests. ***
@@ -144,14 +143,6 @@ interface RL_DM_CACHE_SOURCE_DATA#(type t_CACHE_ADDR,
                         t_CACHE_WORD val,
                         t_CACHE_REF_INFO refInfo);
     
-    // Synchronous write.  writeSyncWait() blocks until the response arrives.
-    method Action writeSyncReq(t_CACHE_ADDR addr,
-                               t_CACHE_WORD val,
-                               t_CACHE_REF_INFO refInfo);
-
-    // Wait for writeSyncReq to complete.
-    method Action writeSyncWait();
-
     // Pass invalidate and flush requests down the hierarchy.  The semantics
     // are the same as the methods on the cache.
     method Action invalReq(t_CACHE_ADDR addr, Bool sendAck, t_CACHE_REF_INFO refInfo);
@@ -210,7 +201,7 @@ RL_DM_CACHE_REQ#(type t_CACHE_ADDR, type t_CACHE_REF_INFO)
 
 
 // Cache index
-typedef UInt#(TLog#(nEntries)) RL_DM_CACHE_IDX#(numeric type nEntries);
+typedef UInt#(n_ENTRY_IDX_BITS) RL_DM_CACHE_IDX#(numeric type n_ENTRY_IDX_BITS);
 
 
 typedef struct
@@ -229,18 +220,18 @@ RL_DM_CACHE_ENTRY#(type t_CACHE_WORD, type t_CACHE_TAG)
 //
 // ===================================================================
 
-module mkCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_WORD, t_CACHE_REF_INFO) sourceData,
+module mkCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(t_CACHE_ADDR, t_CACHE_WORD, t_CACHE_REF_INFO) sourceData,
+                            RL_CACHE_STATS stats,
                             DEBUG_FILE debugLog)
     // interface:
-    (RL_DM_CACHE#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_WORD, t_CACHE_REF_INFO, nTagExtraLowBits, nEntries))
-    provisos (Bits#(t_CACHE_REF_INFO, t_CACHE_REF_INFO_SZ),
+    (RL_DM_CACHE#(t_CACHE_ADDR, t_CACHE_WORD, t_CACHE_REF_INFO, n_ENTRIES))
+    provisos (Bits#(t_CACHE_ADDR, t_CACHE_ADDR_SZ),
               Bits#(t_CACHE_WORD, t_CACHE_WORD_SZ),
-              Alias#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_ADDR),
+              Bits#(t_CACHE_REF_INFO, t_CACHE_REF_INFO_SZ),
 
-              // Entries must be a power of 2 and smaller than the address.
-              Add#(nEntries, 0, TExp#(TLog#(nEntries))),
-              Alias#(RL_DM_CACHE_IDX#(nEntries), t_CACHE_IDX),
-              Bits#(t_CACHE_IDX, t_CACHE_IDX_SZ),
+              // Entry index.  Round n_ENTRIES request up to a power of 2.
+              Log#(n_ENTRIES, t_CACHE_IDX_SZ),
+              Alias#(RL_DM_CACHE_IDX#(t_CACHE_IDX_SZ), t_CACHE_IDX),
 
               // Tag is the address bits other than the entry index
               Alias#(Bit#(TSub#(t_CACHE_ADDR_SZ, t_CACHE_IDX_SZ)), t_CACHE_TAG),
@@ -251,9 +242,7 @@ module mkCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CA
        
               // Required by the compiler:
               Bits#(t_CACHE_LOAD_RESP, t_CACHE_LOAD_RESP_SZ),
-              Bits#(t_CACHE_TAG, t_CACHE_TAG_SZ),
-              Add#(TLog#(TExp#(TLog#(nEntries))), 0, TLog#(nEntries)),
-              Add#(TLog#(TDiv#(TExp#(TLog#(nEntries)), 2)), x__, TLog#(nEntries)));
+              Bits#(t_CACHE_TAG, t_CACHE_TAG_SZ));
     
     Reg#(RL_DM_CACHE_MODE) cacheMode <- mkReg(RL_DM_MODE_WRITE_BACK);
 
@@ -273,21 +262,9 @@ module mkCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CA
     // Pipelines
     FIFO#(t_CACHE_REQ) cacheLookupQ <- mkFIFO();
     FIFO#(t_CACHE_REQ) fillReqQ <- mkFIFO();
-    FIFO#(Tuple2#(t_CACHE_REQ, Bool)) invalQ <- mkFIFO();
+    FIFO#(t_CACHE_REQ) invalQ <- mkFIFO();
 
     FIFO#(t_CACHE_LOAD_RESP) readRespQ <- mkBypassFIFO();
-
-
-    //
-    // debugAddr --
-    //     Pretty printer for converting cache addresses to system addresses.
-    //     Adds trailing 0's that were dropped from cache addresses because they
-    //     are inside a cache line.
-    //
-    function Bit#(TAdd#(t_CACHE_ADDR_SZ, nTagExtraLowBits)) debugAddr(t_CACHE_ADDR addr);
-        Bit#(nTagExtraLowBits) zero = 0;
-        return zeroExtendNP({ addr, zero });
-    endfunction
 
 
     //
@@ -295,11 +272,11 @@ module mkCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CA
     //
 
     function Tuple2#(t_CACHE_TAG, t_CACHE_IDX) cacheEntryFromAddr(t_CACHE_ADDR addr);
-        return unpack(truncateNP(addr));
+        return unpack(truncateNP(pack(addr)));
     endfunction
 
     function t_CACHE_ADDR cacheAddrFromEntry(t_CACHE_TAG tag, t_CACHE_IDX idx);
-        return zeroExtendNP({tag, pack(idx)});
+        return unpack(zeroExtendNP({tag, pack(idx)}));
     endfunction
 
 
@@ -317,7 +294,7 @@ module mkCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CA
         let success <- entryFilter.insert(entryIdx);
         if (success)
         begin
-            debugLog.record($format("    startNewReq: addr=0x%x, entry=0x%x", debugAddr(r.addr), entryIdx));
+            debugLog.record($format("    startNewReq: addr=0x%x, entry=0x%x", r.addr, entryIdx));
 
             // Read the entry either to return the value (READ) or to see whether
             // the entry is dirty and flush it.
@@ -351,7 +328,8 @@ module mkCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CA
             if (e.tag == r_tag)
             begin
                 // Hit!
-                debugLog.record($format("    lookupRead: HIT addr=0x%x, entry=0x%x, val=0x%x", debugAddr(r.addr), entryIdx, e.val));
+                debugLog.record($format("    lookupRead: HIT addr=0x%x, entry=0x%x, val=0x%x", r.addr, entryIdx, e.val));
+                stats.readHit();
 
                 t_CACHE_LOAD_RESP resp;
                 resp.val = e.val;
@@ -365,9 +343,10 @@ module mkCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CA
             begin
                 // Miss.  Need to flush old data?
                 let old_addr = cacheAddrFromEntry(e.tag, entryIdx);
-                debugLog.record($format("    doWrite: FLUSH addr=0x%x, entry=0x%x, val=0x%x", debugAddr(old_addr), entryIdx, e.val));
+                debugLog.record($format("    doWrite: FLUSH addr=0x%x, entry=0x%x, val=0x%x", old_addr, entryIdx, e.val));
 
                 sourceData.write(old_addr, e.val, r.refInfo);
+                stats.dirtyEntryFlush();
             end
         end
 
@@ -385,8 +364,9 @@ module mkCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CA
         let r = fillReqQ.first();
         fillReqQ.deq();
 
-        debugLog.record($format("    fillReq: addr=0x%x", debugAddr(r.addr)));
+        debugLog.record($format("    fillReq: addr=0x%x", r.addr));
 
+        stats.readMiss();
         sourceData.readReq(r.addr, r.refInfo);
     endrule
     
@@ -401,7 +381,7 @@ module mkCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CA
         
         match {.tag, .entryIdx} = cacheEntryFromAddr(f.addr);
 
-        debugLog.record($format("    fillResp: FILL addr=0x%x, entry=0x%x, val=0x%x", debugAddr(f.addr), entryIdx, f.val));
+        debugLog.record($format("    fillResp: FILL addr=0x%x, entry=0x%x, val=0x%x", f.addr, entryIdx, f.val));
 
         t_CACHE_LOAD_RESP resp;
         resp.val = f.val;
@@ -439,7 +419,7 @@ module mkCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CA
         if (cacheMode != RL_DM_MODE_WRITE_BACK)
         begin
             // Caching writes is disabled.  Write through.
-            debugLog.record($format("    doWrite: WRITE THROUGH addr=0x%x, entry=0x%x, val=0x%x", debugAddr(r.addr), entryIdx, w_data));
+            debugLog.record($format("    doWrite: WRITE THROUGH addr=0x%x, entry=0x%x, val=0x%x", r.addr, entryIdx, w_data));
             sourceData.write(r.addr, w_data, r.refInfo);
         end
         else if (cur_entry matches tagged Valid .e &&&
@@ -448,14 +428,16 @@ module mkCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CA
         begin
             // Dirty data must be flushed
             let old_addr = cacheAddrFromEntry(e.tag, entryIdx);
-            debugLog.record($format("    doWrite: FLUSH addr=0x%x, entry=0x%x, val=0x%x", debugAddr(old_addr), entryIdx, e.val));
+            debugLog.record($format("    doWrite: FLUSH addr=0x%x, entry=0x%x, val=0x%x", old_addr, entryIdx, e.val));
 
             sourceData.write(old_addr, e.val, r.refInfo);
+            stats.dirtyEntryFlush();
         end
 
         // Now do the write.
-        debugLog.record($format("    doWrite: WRITE addr=0x%x, entry=0x%x, val=0x%x", debugAddr(r.addr), entryIdx, w_data));
+        debugLog.record($format("    doWrite: WRITE addr=0x%x, entry=0x%x, val=0x%x", r.addr, entryIdx, w_data));
 
+        stats.writeHit();
         cache.write(entryIdx, tagged Valid RL_DM_CACHE_ENTRY { dirty: (cacheMode == RL_DM_MODE_WRITE_BACK),
                                                                tag: r_tag,
                                                                val: w_data });
@@ -480,45 +462,35 @@ module mkCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CA
 
         match {.r_tag, .entryIdx} = cacheEntryFromAddr(r.addr);
 
-        Bool was_dirty = False;
         if (cur_entry matches tagged Valid .e &&& (e.tag == r_tag))
         begin
+            stats.forceInvalLine();
+
             if (e.dirty)
             begin
                 // Dirty data must be flushed
                 let old_addr = cacheAddrFromEntry(e.tag, entryIdx);
-                debugLog.record($format("    evictForInval: FLUSH addr=0x%x, entry=0x%x, sync=%0d, val=0x%x", debugAddr(old_addr), entryIdx, r.sendAck, e.val));
+                debugLog.record($format("    evictForInval: FLUSH addr=0x%x, entry=0x%x, sync=%0d, val=0x%x", old_addr, entryIdx, r.sendAck, e.val));
 
-                was_dirty = True;
-
-                if (r.sendAck)
-                    sourceData.writeSyncReq(old_addr, e.val, r.refInfo);
-                else
-                    sourceData.write(old_addr, e.val, r.refInfo);
+                sourceData.write(old_addr, e.val, r.refInfo);
             end
 
             // Clear the entry if invalidating
             if (r.act == DM_CACHE_INVAL)
             begin
-                debugLog.record($format("    evictForInval: INVAL addr=0x%x, entry=0x%x", debugAddr(r.addr), entryIdx));
+                debugLog.record($format("    evictForInval: INVAL addr=0x%x, entry=0x%x", r.addr, entryIdx));
                 cache.write(entryIdx, tagged Invalid);
             end
         end
 
-        invalQ.enq(tuple2(r, was_dirty));
+        invalQ.enq(r);
     endrule
 
 
     (* descending_urgency = "fillResp, fillReq, lookupRead, doWrite, finishInval, evictForInval" *)
     rule finishInval (True);
-        match {.r, .was_dirty} = invalQ.first();
+        let r = invalQ.first();
         invalQ.deq();
-
-        // Wait for an ACK that the value reached the next level down, if required.
-        if (was_dirty && r.sendAck)
-        begin
-            sourceData.writeSyncWait();
-        end
 
         match {.r_tag, .entryIdx} = cacheEntryFromAddr(r.addr);
 
@@ -542,7 +514,7 @@ module mkCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CA
     // ====================================================================
 
     method Action readReq(t_CACHE_ADDR addr, t_CACHE_REF_INFO refInfo);
-        debugLog.record($format("  New request: READ addr=0x%x", debugAddr(addr)));
+        debugLog.record($format("  New request: READ addr=0x%x", addr));
 
         t_CACHE_REQ r = ?;
         r.act = DM_CACHE_READ;
@@ -575,12 +547,12 @@ module mkCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CA
         r.writeDataIdx = data_idx;
         newReqQ.enq(r);
 
-        debugLog.record($format("  New request: WRITE addr=0x%x, wData heap=%0d, val=0x%x", debugAddr(addr), data_idx, val));
+        debugLog.record($format("  New request: WRITE addr=0x%x, wData heap=%0d, val=0x%x", addr, data_idx, val));
     endmethod
     
 
     method Action invalReq(t_CACHE_ADDR addr, Bool sendAck, t_CACHE_REF_INFO refInfo);
-        debugLog.record($format("  New request: INVAL addr=0x%x, ack=%d", debugAddr(addr), sendAck));
+        debugLog.record($format("  New request: INVAL addr=0x%x, ack=%d", addr, sendAck));
 
         t_CACHE_REQ r = ?;
         r.act = DM_CACHE_INVAL;
@@ -591,7 +563,7 @@ module mkCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CA
     endmethod
 
     method Action flushReq(t_CACHE_ADDR addr, Bool sendAck, t_CACHE_REF_INFO refInfo);
-        debugLog.record($format("  New request: FLUSH addr=0x%x, ack=%d", debugAddr(addr), sendAck));
+        debugLog.record($format("  New request: FLUSH addr=0x%x, ack=%d", addr, sendAck));
 
         t_CACHE_REQ r = ?;
         r.act = DM_CACHE_FLUSH;
@@ -611,4 +583,72 @@ module mkCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CA
     method Action setCacheMode(RL_DM_CACHE_MODE mode);
         cacheMode <= mode;
     endmethod
+endmodule
+
+
+// ===================================================================
+//
+// Null cache implementation.  Use this to write a module that might
+// have a cache without having to write two versions of the module.
+//
+// ===================================================================
+
+//
+// mkNullCacheDirectMapped --
+//     Pass requests through directly to the source data.
+//
+module mkNullCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(t_CACHE_ADDR, t_CACHE_WORD, t_CACHE_REF_INFO) sourceData,
+                                DEBUG_FILE debugLog)
+    // interface:
+    (RL_DM_CACHE#(t_CACHE_ADDR, t_CACHE_WORD, t_CACHE_REF_INFO, n_ENTRIES))
+    provisos (Bits#(t_CACHE_ADDR, t_CACHE_ADDR_SZ),
+              Bits#(t_CACHE_WORD, t_CACHE_WORD_SZ),
+              Bits#(t_CACHE_REF_INFO, t_CACHE_REF_INFO_SZ));
+
+    //
+    // Consume read responses to a FIFO, mostly to support peekResp().
+    //
+    FIFO#(RL_DM_CACHE_LOAD_RESP#(t_CACHE_WORD, t_CACHE_REF_INFO)) readRespQ <- mkBypassFIFO();
+
+    rule getReadResp (True);
+        let r <- sourceData.readResp();
+        readRespQ.enq(RL_DM_CACHE_LOAD_RESP { val: r.val, refInfo: r.refInfo });
+    endrule
+
+
+    method Action readReq(t_CACHE_ADDR addr, t_CACHE_REF_INFO refInfo);
+        sourceData.readReq(addr, refInfo);
+    endmethod
+
+    method ActionValue#(RL_DM_CACHE_LOAD_RESP#(t_CACHE_WORD, t_CACHE_REF_INFO)) readResp();
+        let r = readRespQ.first();
+        readRespQ.deq();
+
+        return r;
+    endmethod
+
+    method RL_DM_CACHE_LOAD_RESP#(t_CACHE_WORD, t_CACHE_REF_INFO) peekResp();
+        return readRespQ.first();
+    endmethod
+
+    method Action write(t_CACHE_ADDR addr, t_CACHE_WORD val, t_CACHE_REF_INFO refInfo);
+        sourceData.write(addr, val, refInfo);
+    endmethod
+    
+    method Action invalReq(t_CACHE_ADDR addr, Bool sendAck, t_CACHE_REF_INFO refInfo);
+        sourceData.invalReq(addr, sendAck, refInfo);
+    endmethod
+
+    method Action flushReq(t_CACHE_ADDR addr, Bool sendAck, t_CACHE_REF_INFO refInfo);
+        sourceData.flushReq(addr, sendAck, refInfo);
+    endmethod
+
+    method Action invalOrFlushWait();
+        sourceData.invalOrFlushWait();
+    endmethod
+    
+    method Action setCacheMode(RL_DM_CACHE_MODE mode);
+        noAction;
+    endmethod
+
 endmodule
