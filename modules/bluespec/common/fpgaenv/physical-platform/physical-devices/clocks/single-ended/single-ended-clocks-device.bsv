@@ -108,7 +108,7 @@ module mkClocksDevice
     // startInRst flag set to true, which will cause it to automatically trigger when
     // the hard reset is triggered.
     
-    MakeResetIfc soft_reset_wrapper <- mkReset(128, True, userClock,
+    MakeResetIfc soft_reset_wrapper <- mkReset(0, True, userClock,
                                                clocked_by userClock,
                                                reset_by   userReset);
     

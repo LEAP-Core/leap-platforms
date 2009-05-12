@@ -52,6 +52,9 @@ interface COUNTING_FILTER#(type t_ENTRY);
     method ActionValue#(Bool) insert(t_ENTRY newEntry);
 
     method Action remove(t_ENTRY oldEntry);
+
+    // Test whether entry is busy
+    method Bool notSet(t_ENTRY entry);
 endinterface
 
 
@@ -125,6 +128,8 @@ module mkSizedDecodeFilter#(DEBUG_FILE debugLog)
     RWire#(t_FILTER_IDX) insertId <- mkRWire();
     RWire#(t_FILTER_IDX) removeId <- mkRWire();
 
+    Reg#(Maybe#(t_ENTRY)) lastFailMsg <- mkReg(tagged Invalid);
+
     function t_FILTER_IDX filterIdx(t_ENTRY e);
         return truncateNP(pack(e));
     endfunction
@@ -153,12 +158,19 @@ module mkSizedDecodeFilter#(DEBUG_FILE debugLog)
             if (fv[id] == 0)
             begin
                 insertId.wset(id);
+                lastFailMsg <= tagged Invalid;
                 debugLog.record($format("    Decode filter INSERT %0d OK, idx=%0d", newEntry, id));
                 return True;
             end
             else
             begin
-                debugLog.record($format("    Decode filter INSERT %0d FAIL, idx=%0d", newEntry, id));
+                // Only print insert FAIL message once
+                if (! isValid(lastFailMsg) || (pack(newEntry) != pack(validValue(lastFailMsg))))
+                begin
+                    lastFailMsg <= tagged Valid newEntry;
+                    debugLog.record($format("    Decode filter INSERT %0d FAIL, idx=%0d", newEntry, id));
+                end
+
                 return False;
             end
         endmethod
@@ -167,6 +179,11 @@ module mkSizedDecodeFilter#(DEBUG_FILE debugLog)
             let id = filterIdx(oldEntry);
             removeId.wset(id);
             debugLog.record($format("    Decode filter REMOVE %0d, idx=%0d", oldEntry, id));
+        endmethod
+
+        method Bool notSet(t_ENTRY entry);
+            let id = filterIdx(entry);
+            return (fv[id] == 0);
         endmethod
     endinterface
 endmodule
@@ -219,6 +236,7 @@ module mkCountingBloomFilter#(DEBUG_FILE debugLog)
     RWire#(t_ENTRY) removeId <- mkRWire();
     RWire#(Tuple2#(Bit#(nFilterBits), Bit#(nFilterBits))) updateBits <- mkRWire();
 
+    Reg#(Maybe#(t_ENTRY)) lastFailMsg <- mkReg(tagged Invalid);
 
     //
     // computeHashes --
@@ -383,13 +401,19 @@ module mkCountingBloomFilter#(DEBUG_FILE debugLog)
 
             if (all_set || overflow)
             begin
-                // Can't insert
-                debugLog.record($format("    Bloom filter INSERT FAIL"));
+                // Can't insert.  Only print insert FAIL message once.
+                if (! isValid(lastFailMsg) || (pack(newEntry) != pack(validValue(lastFailMsg))))
+                begin
+                    lastFailMsg <= tagged Valid newEntry;
+                    debugLog.record($format("    Bloom filter INSERT FAIL"));
+                end
+
                 return False;
             end
             else
             begin
                 debugLog.record($format("    Bloom filter INSERT OK"));
+                lastFailMsg <= tagged Invalid;
                 insertVec.wset(hash);
                 return True;
             end
@@ -398,6 +422,21 @@ module mkCountingBloomFilter#(DEBUG_FILE debugLog)
 
         method Action remove(t_ENTRY oldEntry);
             removeId.wset(oldEntry);
+        endmethod
+
+
+        method Bool notSet(t_ENTRY entry);
+            let hash = computeHashes(entry);
+
+            Bool all_set = True;
+            for (Integer i = 0; i < valueOf(BLOOM_COUNTING_HASHES); i = i + 1)
+            begin
+                let bucket = hash[i];
+                all_set = all_set && (bf[bucket] != 0);
+            end
+
+            // Entry is busy iff all hash bits are set
+            return ! all_set;
         endmethod
     endinterface
 endmodule

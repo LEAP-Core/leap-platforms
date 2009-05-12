@@ -218,17 +218,15 @@ module [HASIM_MODULE] mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
         Tuple2#(SCRATCHPAD_REF_INFO, SCRATCHPAD_WORD_IDX) local_ref_info = unpack(truncate(d.refInfo));
         match {.ref_info, .word_idx} = local_ref_info;
 
-        let v = validValue(d.words[word_idx]);
-
         SCRATCHPAD_READ_RESP#(SCRATCHPAD_MEM_ADDRESS, SCRATCHPAD_MEM_VALUE) r;
-        r.val = v;
+        r.val = d.val;
         // Reconstruct the scratchpad word address from the line address and
         // the word index.  This will fail if the central cache address space
         // is too small for the scratchpad address space:
         r.addr = makeScratchpadAddr(d.addr, word_idx);
         r.refInfo = ref_info;
 
-        debugLog.record($format("port %0d: readRsp addr=0x%x, val=0x%x", ref_info.portNum, r.addr, v));
+        debugLog.record($format("port %0d: readRsp addr=0x%x, val=0x%x", ref_info.portNum, r.addr, r.val));
 
         return r;
     endmethod

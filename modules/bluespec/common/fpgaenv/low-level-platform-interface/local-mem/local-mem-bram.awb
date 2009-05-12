@@ -10,4 +10,5 @@
 %param LOCAL_MEM_WORD_BITS      64  "Local memory word size"
 %param LOCAL_MEM_WORDS_PER_LINE  4  "Local memory words per line (must be power of 2)"
 
-%param LOCAL_MEM_ADD_LATENCY     0  "Additional latency to add to reads (for debugging)"
+%param LOCAL_MEM_READ_LATENCY    0  "Additional latency to add to reads (for debugging)"
+%param LOCAL_MEM_WRITE_LATENCY   0  "Additional latency to add to writes (for debugging)"

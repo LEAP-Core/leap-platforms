@@ -215,11 +215,18 @@ CENTRAL_CACHE_REQ
     deriving (Eq, Bits);
 
 
+//
 // Cache read response
-typedef RL_SA_CACHE_LOAD_RESP#(CENTRAL_CACHE_LINE_ADDR,
-                               CENTRAL_CACHE_WORD,
-                               CENTRAL_CACHE_WORDS_PER_LINE,
-                               CENTRAL_CACHE_REF_INFO) CENTRAL_CACHE_READ_LINE_RESP;
+//
+typedef struct
+{
+    CENTRAL_CACHE_WORD val;
+    CENTRAL_CACHE_LINE_ADDR addr;
+    CENTRAL_CACHE_WORD_IDX wordIdx;
+    CENTRAL_CACHE_REF_INFO refInfo;
+}
+CENTRAL_CACHE_READ_RESP
+    deriving (Eq, Bits);
 
 //
 // Interface to each central cache client.
@@ -232,7 +239,7 @@ interface CENTRAL_CACHE_CLIENT_PORT;
     // already cached.  The read response is guaranteed to return at least
     // the requested word in the line.  If more of the line is already
     // available it will be returned as well.
-    method ActionValue#(CENTRAL_CACHE_READ_LINE_RESP) readResp();
+    method ActionValue#(CENTRAL_CACHE_READ_RESP) readResp();
 
     method Action invalOrFlushWait();
 
@@ -309,5 +316,19 @@ interface CENTRAL_CACHE_VIRTUAL_DEVICE;
     interface Vector#(CENTRAL_CACHE_N_CLIENTS,
                       CENTRAL_CACHE_BACKING_PORT) backingPorts;
 
-    method Action init(RL_SA_CACHE_MODE mode);
+    method Action init(RL_SA_CACHE_MODE mode, Bool enableRecentLineCache);
 endinterface: CENTRAL_CACHE_VIRTUAL_DEVICE
+
+
+//
+// Central cache statistics interface
+//
+interface CENTRAL_CACHE_RECENT_LINE_STATS;
+    method Action readHit();
+    method Action readMiss();
+endinterface: CENTRAL_CACHE_RECENT_LINE_STATS
+
+interface CENTRAL_CACHE_STATS;
+    interface RL_CACHE_STATS cacheStats;
+    interface CENTRAL_CACHE_RECENT_LINE_STATS recentLineStats;
+endinterface:  CENTRAL_CACHE_STATS

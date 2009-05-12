@@ -1281,7 +1281,7 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
     // ====================================================================
 
     // Not required for correctness: get rid of warning messages...
-    (* descending_urgency = "writeCacheData, handleFlushACK, flushDirtyLine, sendFillRequest, handleFillForRead, evictDirtyForFill, handleWordMissForRead, handleMissForRead, handleMissForWrite, handleReadCacheHit, handleRead, handleWrite, handleInvalOrFlush" *)
+    (* descending_urgency = "writeCacheData, flushDirtyLine, handleWordMissForRead, sendFillRequest, handleMissForWrite, handleMissForRead, handleRead, handleWrite, handleFillForRead, handleFlushACK, handleInvalOrFlush, evictDirtyForFill, handleReadCacheHit" *)
 
     //
     // doneWithRef --

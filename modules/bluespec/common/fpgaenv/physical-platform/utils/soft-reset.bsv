@@ -27,9 +27,7 @@ import Clocks::*;
 // triggers a soft reset
 
 interface SOFT_RESET_TRIGGER;
-
     method Action reset();
-
 endinterface
 
 
@@ -39,38 +37,24 @@ module mkSoftResetTrigger#(MakeResetIfc softReset)
     // interface:
     (SOFT_RESET_TRIGGER);
     
-    /* THIS CODE IS OBSOLETE. THE TRIGGER IS NOW A TRIVIAL
-       METHOD THAT ASSERTS THE RESET INTERFACE'S TRIGGER
-       METHOD. THE SOFT RESET IFC IS INSTANTIATED IN THE
-       CLOCKS DEVICE CODE WITH THE 128-CYCLE RESET PERIOD.
-
     // Timer to hold reset
-    Reg#(Bool)    do_reset      <- mkReg(False);
-    Reg#(Bit#(8)) reset_counter <- mkReg(0);
+    Reg#(Bool)    doReset      <- mkReg(False);
+    Reg#(Bit#(8)) resetCounter <- mkReg(0);
     
     // Hold reset for 128 cycles.  May be overkill but seems safer than 1.
-    rule pull_reset (do_reset);
-
+    rule pullReset (doReset);
         // trigger!
         softReset.assertReset();
         
-        reset_counter <= reset_counter + 1;
-        if (reset_counter[7] == 1)
-            do_reset <= False;
-
+        resetCounter <= resetCounter + 1;
+        if (resetCounter[7] == 1)
+            doReset <= False;
     endrule
-    */
     
     // method called to trigger reset
-    method Action reset();
-    
-        softReset.assertReset();
-        
-        /* SEE COMMENT ABOVE
+    method Action reset() if (! doReset);
         // trigger the soft reset
-        do_reset <= True;
-        reset_counter <= 0;
-        */    
+        doReset <= True;
+        resetCounter <= 0;
     endmethod
-
 endmodule

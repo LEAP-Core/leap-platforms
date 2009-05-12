@@ -124,4 +124,6 @@ File=modules/bluespec/common/fpgaenv/physical-platform/utils/utils.awb
 Packagehint=platforms
 
 [Local Memory Interface using BRAM/Params]
+LOCAL_MEM_WRITE_LATENCY=4
+LOCAL_MEM_READ_LATENCY=8
 LOCAL_MEM_ADDR_BITS=10

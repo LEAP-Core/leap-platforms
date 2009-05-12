@@ -50,7 +50,7 @@ module mkLCounter#(Bit#(nBits) initial_value)
     (* fire_when_enabled, no_implicit_conditions *)
     rule update_counter;
         if (setc_called.wget() matches tagged Valid .v)
-            ctr <= v;
+            ctr <= v + up_by - down_by;
         else
             ctr <= ctr + up_by - down_by;
     endrule

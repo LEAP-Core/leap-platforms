@@ -29,3 +29,10 @@ NET "m_pi_llpint_phys_plat_ddr2_sdram_device_syncWriteDataQ/dGDeqPtr[*]"  TIG;
 NET "m_pi_llpint_phys_plat_ddr2_sdram_device_syncWriteDataQ/dGDeqPtr1[*]" TIG;
 NET "m_pi_llpint_phys_plat_ddr2_sdram_device_syncWriteDataQ/sGEnqPtr[*]"  TIG;
 NET "m_pi_llpint_phys_plat_ddr2_sdram_device_syncWriteDataQ/sGEnqPtr1[*]" TIG;
+
+# SyncFIFOLevel: syncResetQ
+
+NET "m_pi_llpint_phys_plat_ddr2_sdram_device_syncResetQ/dGDeqPtr[*]"  TIG;
+NET "m_pi_llpint_phys_plat_ddr2_sdram_device_syncResetQ/dGDeqPtr1[*]" TIG;
+NET "m_pi_llpint_phys_plat_ddr2_sdram_device_syncResetQ/sGEnqPtr[*]"  TIG;
+NET "m_pi_llpint_phys_plat_ddr2_sdram_device_syncResetQ/sGEnqPtr1[*]" TIG;

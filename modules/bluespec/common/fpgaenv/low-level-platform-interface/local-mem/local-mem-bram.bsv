@@ -24,11 +24,11 @@
 // local memory interface by providing methods to read/write either words
 // or entire lines.
 //
-// The LOCAL_MEM_ADD_LATENCY parameter can be used for debugging to increase
-// the read latency.  The parameter can be used to make this BRAM act more
-// like longer latency memory, such as DDR2.  Note that the timing of the
-// BRAM with latency isn't quite like DDR due to the short pipelines in
-// the BRAM compared to DDR.  Attempts to work around the pipelines
+// The LOCAL_MEM_READ/WRITE_LATENCY parameters can be used for debugging to
+// increase the read and write latencies.  The parameters can be used to make
+// this BRAM act more like longer latency memory, such as DDR2.  Note that the
+// timing of the BRAM with latency isn't quite like DDR due to the short
+// pipelines in the BRAM compared to DDR.  Attempts to work around the pipelines
 // could affect load/store ordering, so the code has been kept simple.
 //
 // NOTE: if reads are allowed to back up due to long latency it is possible
@@ -74,8 +74,9 @@ module mkLocalMem#(PHYSICAL_DRIVERS drivers)
     //
     Vector#(LOCAL_MEM_WORDS_PER_LINE, BRAM#(LOCAL_MEM_LINE_ADDR, LOCAL_MEM_WORD)) mem <- replicateM(mkBRAM());
 
-    // Record read requests (either full line or a word index)
-    FIFOF#(READ_REQ) readReqQ <- mkSizedFIFOF(4);
+    // Record read requests (either full line or a word index).  If simulating
+    // latency then only permit one operation at a time.
+    FIFOF#(READ_REQ) readReqQ <- mkFIFOF();
 
     //
     // Count cycle for imposing delay
@@ -87,6 +88,16 @@ module mkLocalMem#(PHYSICAL_DRIVERS drivers)
         cycle <= cycle + 1;
     endrule
 
+    //
+    // Busy count for limiting write bandwidth
+    //
+    Reg#(Bit#(TLog#(TAdd#(1, `LOCAL_MEM_WRITE_LATENCY)))) writeBusyCnt <- mkReg(0);
+
+    (* fire_when_enabled *)
+    rule busyCount (writeBusyCnt != 0);
+        writeBusyCnt <= writeBusyCnt - 1;
+    endrule
+
 
     //
     // checkLatency --
@@ -96,14 +107,27 @@ module mkLocalMem#(PHYSICAL_DRIVERS drivers)
     //     unpredictable latencies, but won't cause long delays.
     //
     function Bool checkLatency(READ_REQ req);
-        if (`LOCAL_MEM_ADD_LATENCY == 0)
+        if (`LOCAL_MEM_READ_LATENCY == 0)
             return True;
         else
-            return ((cycle - req.reqCycle) > `LOCAL_MEM_ADD_LATENCY);
+            return ((cycle - req.reqCycle) > `LOCAL_MEM_READ_LATENCY);
+    endfunction
+
+    //
+    // notBusy --
+    //     Validate that simulated memory bus is available.  notBusy may return
+    //     False due to an in-flight memory write when LOCAL_MEM_WRITE_LATENCY
+    //     is non-zero.
+    //
+    function Bool notBusy();
+        // readReqQ check is always required for correctness in order to keep
+        // reads and writes ordered.
+        return readReqQ.notFull() &&
+               ((`LOCAL_MEM_WRITE_LATENCY == 0) || (writeBusyCnt == 0));
     endfunction
 
 
-    method Action readWordReq(LOCAL_MEM_ADDR addr);
+    method Action readWordReq(LOCAL_MEM_ADDR addr) if (notBusy());
         match {.l_addr, .w_idx} = localMemBurstAddr(addr);
         mem[w_idx].readReq(l_addr);
 
@@ -121,7 +145,7 @@ module mkLocalMem#(PHYSICAL_DRIVERS drivers)
     endmethod
 
 
-    method Action readLineReq(LOCAL_MEM_ADDR addr);
+    method Action readLineReq(LOCAL_MEM_ADDR addr) if (notBusy());
         match {.l_addr, .w_idx} = localMemBurstAddr(addr);
 
         for (Integer w = 0; w < valueOf(LOCAL_MEM_WORDS_PER_LINE); w = w + 1)
@@ -152,12 +176,14 @@ module mkLocalMem#(PHYSICAL_DRIVERS drivers)
     // synchronization of read and write requests.
     //
 
-    method Action writeWord(LOCAL_MEM_ADDR addr, LOCAL_MEM_WORD data) if (readReqQ.notFull());
+    method Action writeWord(LOCAL_MEM_ADDR addr, LOCAL_MEM_WORD data) if (notBusy());
         match {.l_addr, .w_idx} = localMemBurstAddr(addr);
         mem[w_idx].write(l_addr, data);
+
+        writeBusyCnt <= `LOCAL_MEM_WRITE_LATENCY;
     endmethod
 
-    method Action writeLine(LOCAL_MEM_ADDR addr, LOCAL_MEM_LINE data) if (readReqQ.notFull());
+    method Action writeLine(LOCAL_MEM_ADDR addr, LOCAL_MEM_LINE data) if (notBusy());
         match {.l_addr, .w_idx} = localMemBurstAddr(addr);
 
         Vector#(LOCAL_MEM_WORDS_PER_LINE, LOCAL_MEM_WORD) l_data = unpack(data);
@@ -165,9 +191,11 @@ module mkLocalMem#(PHYSICAL_DRIVERS drivers)
         begin
             mem[w].write(l_addr, l_data[w]);
         end
+
+        writeBusyCnt <= `LOCAL_MEM_WRITE_LATENCY;
     endmethod
 
-    method Action writeLineMasked(LOCAL_MEM_ADDR addr, LOCAL_MEM_LINE data, LOCAL_MEM_LINE_MASK mask) if (readReqQ.notFull());
+    method Action writeLineMasked(LOCAL_MEM_ADDR addr, LOCAL_MEM_LINE data, LOCAL_MEM_LINE_MASK mask) if (notBusy());
         match {.l_addr, .w_idx} = localMemBurstAddr(addr);
 
         Vector#(LOCAL_MEM_WORDS_PER_LINE, LOCAL_MEM_WORD) l_data = unpack(data);
@@ -178,5 +206,7 @@ module mkLocalMem#(PHYSICAL_DRIVERS drivers)
                 mem[w].write(l_addr, l_data[w]);
             end
         end
+
+        writeBusyCnt <= `LOCAL_MEM_WRITE_LATENCY;
     endmethod
 endmodule

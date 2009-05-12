@@ -6102,3 +6102,59 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr
 - Add NULL direct mapped cache that is just a pass-through to the backing
   storage interface.  This allows modules to code to a direct mapped cache
   while keeping the option of not allocating a cache.
+
+----------
+mcadler     Date: Tue May 12 07:24:42 EDT 2009  CSN: CSN-platforms-203
+                  Tue May 12 11:24:42 UTC 2009
+
+
+Directory modules/bluespec/librl/storage/cache
+ rl-set-assoc-cache.bsv    Locally Modified          202 
+
+Directory modules/bluespec/librl/base
+ counters.bsv              Locally Modified          201 
+ counting-filter.bsv       Locally Modified          202 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/central-cache
+ local-mem-central-cache.bsv Locally Modified          202 
+ local-mem-central-cache.awb Locally Modified          201 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices
+ std-virtual-device-interfaces.bsv Locally Modified          201 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-mem-scratch.bsv    Locally Modified          201 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr2-sdram
+ ddr2-sdram-sync-tig.ucf   Locally Modified          201 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/single-ended
+ single-ended-clocks-device.awb Locally Modified          201 
+ single-ended-clocks-device.bsv Locally Modified          201 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/utils
+ soft-reset.bsv            Locally Modified          201 
+
+Directory modules/bluespec/common/fpgaenv/low-level-platform-interface/local-mem
+ local-mem-bram.awb        Locally Modified          201 
+ local-mem-bram.bsv        Locally Modified          201 
+
+Directory config/pm/hasim/submodels/fpgaenv
+ hasim-fpgaenv-hybrid-sim.apm Locally Modified          201 
+
+- Central cache now buffers recently read lines.  New read requests may return
+  early by hitting in the recently read lines cache.  New write requests simply
+  invalidate their associated recently read line cache entry.
+- Central cache platform interface internal code no longer sees read results
+  as lines.  Only the requested word is returned.
+- Improve BRAM-based local memory latency simulation, with the goal of making it
+  behave a little more like DDR.  The default simulation model configuration now
+  has added latency.
+- Add notSet() method to counting filters to test whether an entry is set.
+- Counter no longer ignores up/down requests in the same cycle as setC.
+  Ignoring the up request could drop statistics increments while statistics
+  are being scanned out.
+- Get rid of the long (128 entry) reset chain for soft resets and revert to
+  a counter to pull the reset wire.
+- Restore 75MHz HTG model default frequency.
+- Add TIG (timing ignore) tags for syncResetQ sync-FIFO in DDR2 driver.
