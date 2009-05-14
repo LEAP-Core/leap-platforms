@@ -6158,3 +6158,17 @@ Directory config/pm/hasim/submodels/fpgaenv
   a counter to pull the reset wire.
 - Restore 75MHz HTG model default frequency.
 - Add TIG (timing ignore) tags for syncResetQ sync-FIFO in DDR2 driver.
+
+----------
+aparasha    Date: Thu May 14 17:26:21 EDT 2009  CSN: CSN-platforms-204
+                  Thu May 14 21:26:21 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/low-level-platform-interface/local-mem
+ local-mem-interface.bsv   Locally Modified          203 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/single-ended
+ single-ended-clocks-device.bsv Locally Modified          203 
+
+- Removed gratuitous ddr2_sdram include from clocks device
+- Added an import to local-mem-interface.bsv

@@ -21,6 +21,8 @@
 // are in the local-mem subdirectory.
 //
 
+import Vector::*;
+
 //
 // Local memory is the interface between a single local memory device (e.g.
 // the DDR2 driver) and one or more clients of the local memory.  All of local

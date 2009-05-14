@@ -23,9 +23,6 @@ import Clocks::*;
 `include "physical_platform_utils.bsh"
 `include "fpga_components.bsh"
 
-// TEMPORARY: -- DEBUG --
-`include "ddr2_sdram_device.bsh"
-
 //
 // CLOCKS_DRIVER: clocks exported to the model
 //
