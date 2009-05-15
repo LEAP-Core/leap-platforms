@@ -122,10 +122,11 @@ module mkCentralCache#(LowLevelPlatformInterface llpi,
 
     // Storage for recent line cache.  Each entry has a global valid bit,
     // a tag and the line.  The line has individual valid bits for each word.
+    LUTRAM#(t_RECENT_READ_CACHE_IDX, Bool) recentReadCacheValid <- mkLUTRAM(False);
     BRAM#(t_RECENT_READ_CACHE_IDX,
-          Maybe#(Tuple2#(t_RECENT_READ_CACHE_TAG,
-                         Vector#(CENTRAL_CACHE_WORDS_PER_LINE, Maybe#(CENTRAL_CACHE_WORD)))))
-        recentReadCache <- mkBRAMInitialized(tagged Invalid);
+          Tuple2#(t_RECENT_READ_CACHE_TAG,
+                  Vector#(CENTRAL_CACHE_WORDS_PER_LINE, Maybe#(CENTRAL_CACHE_WORD))))
+        recentReadCache <- mkBRAM();
 
     //
     // Line filter to make sure that reads and writes stay ordered in
@@ -153,7 +154,7 @@ module mkCentralCache#(LowLevelPlatformInterface llpi,
 
         if (readReqFilter.notSet(idx))
         begin
-            recentReadCache.write(idx, tagged Invalid);
+            recentReadCacheValid.upd(idx, False);
             return True;
         end
         else
@@ -184,7 +185,7 @@ module mkCentralCache#(LowLevelPlatformInterface llpi,
     //
     // ====================================================================
 
-    MERGE_FIFOF#(CENTRAL_CACHE_N_CLIENTS, CENTRAL_CACHE_REQ) reqQ <- mkMergeBypassFIFOF();
+    MERGE_FIFOF#(CENTRAL_CACHE_N_CLIENTS, CENTRAL_CACHE_REQ) reqQ <- mkMergeFIFOF();
 
     (* conservative_implicit_conditions *)
     rule processWriteReq (initialized &&&
@@ -255,7 +256,7 @@ module mkCentralCache#(LowLevelPlatformInterface llpi,
     //
     // ====================================================================
 
-    FIFO#(Tuple2#(CENTRAL_CACHE_PORT_NUM, CENTRAL_CACHE_READ_REQ)) recentLineCheckQ <- mkFIFO();
+    FIFO#(Tuple3#(CENTRAL_CACHE_PORT_NUM, CENTRAL_CACHE_READ_REQ, Bool)) recentLineCheckQ <- mkFIFO();
 
     // Route read responses back to the correct port.
     FIFO#(Tuple2#(CENTRAL_CACHE_PORT_NUM, CENTRAL_CACHE_READ_RESP)) readRespQ <- mkBypassFIFO();
@@ -285,8 +286,9 @@ module mkCentralCache#(LowLevelPlatformInterface llpi,
 
             debugLog.record($format("port %0d: readReq addr=0x%x, wordIdx=0x%x, refInfo=0x%x", port, r.addr, r.wordIdx, r.refInfo));
 
+            let valid = recentReadCacheValid.sub(idx);
             recentReadCache.readReq(idx);
-            recentLineCheckQ.enq(tuple2(port, r));
+            recentLineCheckQ.enq(tuple3(port, r, valid));
         end
     endrule
     
@@ -297,20 +299,20 @@ module mkCentralCache#(LowLevelPlatformInterface llpi,
     (* conservative_implicit_conditions *)
     rule checkRecentLine (True);
         // Incoming request
-        match {.port, .req} = recentLineCheckQ.first();
+        match {.port, .req, .read_cache_valid} = recentLineCheckQ.first();
         recentLineCheckQ.deq();
         
         // Recently read cache value
-        let d <- recentReadCache.readRsp();
+        match {.recent_tag, .recent_line} <- recentReadCache.readRsp();
         
         let addr = addPortToAddr(port, req.addr);
         match {.desired_tag, .idx} = recentReadTagAndIdx(addr);
 
         // Check that entry is valid, tag matches and word is valid.
         if (enableLineCache &&&
-            d matches tagged Valid {.tag, .line} &&&
-            desired_tag == tag &&&
-            line[req.wordIdx] matches tagged Valid .val)
+            read_cache_valid &&&
+            desired_tag == recent_tag &&&
+            recent_line[req.wordIdx] matches tagged Valid .val)
         begin
             // Hit!  Skip the main cache and return the value.
             stats.recentLineStats.readHit();
@@ -351,7 +353,8 @@ module mkCentralCache#(LowLevelPlatformInterface llpi,
         // Cache read result for this line locally in case other words will be
         // read soon.
         match {.tag, .idx} = recentReadTagAndIdx(d.addr);
-        recentReadCache.write(idx, tagged Valid tuple2(tag, d.words));
+        recentReadCacheValid.upd(idx, True);
+        recentReadCache.write(idx, tuple2(tag, d.words));
 
         // Done with line.  Release it.
         if (enableLineCache)
@@ -455,8 +458,8 @@ module mkCentralCacheBacking#(Vector#(CENTRAL_CACHE_N_CLIENTS, CENTRAL_CACHE_BAC
 
               Alias#(Tuple2#(CENTRAL_CACHE_PORT_NUM, CENTRAL_CACHE_LINE_ADDR), t_CENTRAL_CACHE_INTERNAL_ADDR));
 
-    FIFO#(CENTRAL_CACHE_PORT_NUM) readQ <- mkSizedFIFO(16);
-    FIFO#(CENTRAL_CACHE_PORT_NUM) writeSyncQ <- mkSizedFIFO(16);
+    FIFO#(CENTRAL_CACHE_PORT_NUM) readQ <- mkSizedFIFO(8);
+    FIFO#(CENTRAL_CACHE_PORT_NUM) writeSyncQ <- mkSizedFIFO(8);
 
 
     //
@@ -719,8 +722,8 @@ module mkLocalMemCacheData#(LowLevelPlatformInterface llpi, DEBUG_FILE debugLog)
     //
     // ====================================================================
 
-    FIFO#(t_SET_METADATA) readMetadataRespQ <- mkSizedFIFO(4);
-    COUNTER#(3) readMetadataCnt <- mkLCounter(4);
+    FIFO#(t_SET_METADATA) readMetadataRespQ <- mkFIFO();
+    COUNTER#(2) readMetadataCnt <- mkLCounter(2);
 
     rule forwardMetadataResp (True);
         let d <- memory.readPorts[valueOf(t_METADATA_READ_PORT)].readLineRsp();

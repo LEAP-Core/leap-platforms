@@ -6,4 +6,4 @@
 %public local-mem-central-cache.bsv
 %public central-cache-backing-store.bsv
 
-%param CENTRAL_CACHE_LINE_RESP_CACHE_IDX_BITS  8  "Index bits for a BRAM-based cache of recently accessed lines"
+%param CENTRAL_CACHE_LINE_RESP_CACHE_IDX_BITS  10  "Index bits for a BRAM-based cache of recently accessed lines"

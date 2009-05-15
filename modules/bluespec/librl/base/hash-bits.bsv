@@ -31,7 +31,7 @@
 //
 //
 // The first function, hashBits, tries to pick the best hash available for
-// input sizes up to 64 bits.  The remaining functions hash specific sizes.
+// input sizes up to 128 bits.  The remaining functions hash specific sizes.
 //
 //
 //
@@ -50,13 +50,11 @@
 //     base hash function's reach.  The assumption is that the low bits of the
 //     result will be used as a set index and the remainder may be the tag.
 //
-function Bit#(n) hashBits(Bit#(n) x)
-    provisos (Add#(n, a__, 64));
-
+function Bit#(n) hashBits(Bit#(n) x);
     let n_bits = valueOf(n);
-    // Work at 64 bits, maximum.  Assume some optimization phase will drop
+    // Work at 128 bits, maximum.  Assume some optimization phase will drop
     // high zero bits.
-    Bit#(64) h = zeroExtend(x);
+    Bit#(128) h = zeroExtendNP(x);
 
     //
     // Pick the hash function nearest in size to the input.
@@ -110,16 +108,14 @@ function Bit#(n) hashBits(Bit#(n) x)
         h[3:0] = hash4(h[3:0]);
     end
     
-    return truncate(h);
+    return truncateNP(h);
 endfunction
 
 
 // Inverse of hashBits
-function Bit#(n) hashBits_inv(Bit#(n) x)
-    provisos (Add#(n, a__, 64));
-
+function Bit#(n) hashBits_inv(Bit#(n) x);
     let n_bits = valueOf(n);
-    Bit#(64) h = zeroExtend(x);
+    Bit#(128) h = zeroExtendNP(x);
 
     if (n_bits >= 32)
     begin
@@ -166,7 +162,7 @@ function Bit#(n) hashBits_inv(Bit#(n) x)
         h[3:0] = hash4_inv(h[3:0]);
     end
     
-    return truncate(h);
+    return truncateNP(h);
 endfunction
 
 

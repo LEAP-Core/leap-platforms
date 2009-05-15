@@ -221,6 +221,7 @@ RL_DM_CACHE_ENTRY#(type t_CACHE_WORD, type t_CACHE_TAG)
 // ===================================================================
 
 module mkCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(t_CACHE_ADDR, t_CACHE_WORD, t_CACHE_REF_INFO) sourceData,
+                            Bool hashAddresses,
                             RL_CACHE_STATS stats,
                             DEBUG_FILE debugLog)
     // interface:
@@ -272,11 +273,21 @@ module mkCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(t_CACHE_ADDR, t_CACHE_WORD,
     //
 
     function Tuple2#(t_CACHE_TAG, t_CACHE_IDX) cacheEntryFromAddr(t_CACHE_ADDR addr);
-        return unpack(truncateNP(pack(addr)));
+        let a = hashAddresses ? hashBits(pack(addr)) : pack(addr);
+
+        // The truncateNP avoids having to assert a tautology about the relative
+        // sizes.  All objects are actually the same size.
+        return unpack(truncateNP(a));
     endfunction
 
     function t_CACHE_ADDR cacheAddrFromEntry(t_CACHE_TAG tag, t_CACHE_IDX idx);
-        return unpack(zeroExtendNP({tag, pack(idx)}));
+        t_CACHE_ADDR a = unpack(zeroExtendNP({tag, pack(idx)}));
+
+        // Are addresses hashed or direct?  The original hash is reversible.
+        if (hashAddresses)
+            a = unpack(hashBits_inv(pack(a)));
+
+        return a;
     endfunction
 
 

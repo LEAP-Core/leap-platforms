@@ -6172,3 +6172,27 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clo
 
 - Removed gratuitous ddr2_sdram include from clocks device
 - Added an import to local-mem-interface.bsv
+
+----------
+mcadler     Date: Fri May 15 14:43:52 EDT 2009  CSN: CSN-platforms-205
+                  Fri May 15 18:43:52 UTC 2009
+
+
+Directory modules/bluespec/librl/storage/cache
+ rl-direct-mapped-cache.bsv Locally Modified          204 
+
+Directory modules/bluespec/librl/base
+ hash-bits.bsv             Locally Modified          204 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/central-cache
+ local-mem-central-cache.awb Locally Modified          204 
+ local-mem-central-cache.bsv Locally Modified          204 
+
+- Direct mapped cache optionally hashes addresses.
+- hash-bits module now accepts input up to 128 bits, though everything above
+  64 is just copied through.  The optimizer should remove unused bits.  This
+  was done to avoid a proviso to set the maximum permitted size.
+- Change the filter being used on the central cache's recent read cache so the
+  filter is a function of the index into the cache.  Our Block RAM gives
+  unpredictable results when reading and writing the same address in a cycle.
+  The old filter allowed that to happen.
