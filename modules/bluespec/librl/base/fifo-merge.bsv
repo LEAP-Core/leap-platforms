@@ -51,6 +51,9 @@ interface MERGE_FIFOF#(numeric type n_INPUTS, type t_DATA);
     method t_DATA first();
     method Action deq();
     method Bool notEmpty();
+
+    // True iff current first() entry is the last in the oldest group if inputs.
+    method Bool lastInGroup();
 endinterface: MERGE_FIFOF
 
 
@@ -227,6 +230,10 @@ module mkMergeFIFOFImpl#(Bool useBypassFIFO)
 
     method Bool notEmpty();
         return dataQ.notEmpty();
+    endmethod
+
+    method Bool lastInGroup();
+        return firstIsLastInDataQ;
     endmethod
 
     interface ports = portsLocal;

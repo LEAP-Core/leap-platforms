@@ -176,13 +176,34 @@ module mkBRAMScoreboardFIFOF
     Reg#(Vector#(t_NUM_ENTRIES, Bool)) readyVec <- mkReg(replicate(False));
 
     // Value flowing out from the FIFO to first() / deq().
-    FIFOF#(t_DATA) exitVal <- mkBypassFIFOF();
-    FIFOF#(t_SCOREBOARD_FIFO_ENTRY_ID) exitEntryId <- mkFIFOF();
+    FIFOF#(Tuple2#(t_DATA, t_SCOREBOARD_FIFO_ENTRY_ID)) exitValQ <- mkBypassFIFOF();
+    FIFOF#(t_SCOREBOARD_FIFO_ENTRY_ID) exitEntryIdQ <- mkFIFOF();
+
+    FIFO#(Tuple2#(t_SCOREBOARD_FIFO_ENTRY_ID, t_DATA)) setValueQ <- mkBypassFIFO();
+    RWire#(Tuple2#(t_SCOREBOARD_FIFO_ENTRY_ID, t_DATA)) bypassValue <- mkRWire();
 
     Wire#(Bool) oldestIsReady <- mkDWire(False);
 
     function isNotFull() = (nEntries.value() != fromInteger(valueOf(t_NUM_ENTRIES)));
     function isNotEmpty() = (nEntries.value() != 0);
+
+
+    //
+    // Receive values.  This code could be in the setValue method but putting
+    // it in a rule allows for more local scheduling control.
+    //
+    rule recieveValues (True);
+        match {.id, .data} = setValueQ.first();
+        setValueQ.deq();
+
+        // Write value to buffer
+        values.write(id, data);
+        // Mark slot data ready
+        readyVec[id] <= reqVec[id];
+    
+        // Forward value to bypass logic.
+        bypassValue.wset(tuple2(id, data));
+    endrule
 
 
     //
@@ -199,21 +220,40 @@ module mkBRAMScoreboardFIFOF
     endrule
 
     //
+    // Did the value for the oldest entry just arrive?  Bypass BRAM and forward
+    // directly to the client.
+    //
+    rule bypassOldest if (! oldestIsReady &&&
+                          ! exitEntryIdQ.notEmpty() &&&
+                          bypassValue.wget() matches tagged Valid {.id, .data} &&&
+                          id == nextDeq);
+        nextDeq <= nextDeq + 1;
+        nEntries.down();
+
+        exitValQ.enq(tuple2(data, nextDeq));
+    endrule
+
+    //
     // Request outgoing value from BRAM when it is ready.
     //
     rule readReqOldest if (oldestIsReady);
         values.readReq(nextDeq);
-        exitEntryId.enq(nextDeq);
+        exitEntryIdQ.enq(nextDeq);
         nextDeq <= nextDeq + 1;
         nEntries.down();
     endrule
 
     //
-    // Forward outgoing value from BRAM to the outgoing exitVal FIFO.
+    // Forward outgoing value from BRAM to the outgoing exitValQ FIFO.
     //
-    rule readRespOldest (exitEntryId.notEmpty());
+    (* descending_urgency = "readRespOldest, bypassOldest" *)
+    rule readRespOldest (True);
         let v <- values.readRsp();
-        exitVal.enq(v);
+
+        let id = exitEntryIdQ.first();
+        exitEntryIdQ.deq();
+
+        exitValQ.enq(tuple2(v, id));
     endrule
 
 
@@ -231,29 +271,15 @@ module mkBRAMScoreboardFIFOF
     endmethod
 
     method Action setValue(t_SCOREBOARD_FIFO_ENTRY_ID id, t_DATA data);
-        // Write value to buffer
-        values.write(id, data);
-        // Mark slot data ready
-        readyVec[id] <= reqVec[id];
-    
-        // Bypass BRAM if incoming value is the oldest and the outgoing
-        // pipelines are empty.
-        if (! oldestIsReady && ! exitEntryId.notEmpty() && (id == nextDeq))
-        begin
-            exitVal.enq(data);
-            exitEntryId.enq(nextDeq);
-            nextDeq <= nextDeq + 1;
-            nEntries.down();
-        end
+        setValueQ.enq(tuple2(id, data));
     endmethod
 
     method t_DATA first();
-        return exitVal.first();
+        return tpl_1(exitValQ.first());
     endmethod
 
     method Action deq();
-        exitVal.deq();
-        exitEntryId.deq();
+        exitValQ.deq();
     endmethod
 
     method Bool notFull();
@@ -261,10 +287,10 @@ module mkBRAMScoreboardFIFOF
     endmethod
 
     method Bool notEmpty();
-        return exitVal.notEmpty();
+        return exitValQ.notEmpty();
     endmethod
 
     method SCOREBOARD_FIFO_ENTRY_ID#(t_NUM_ENTRIES) deqEntryId();
-        return exitEntryId.first();
+        return tpl_2(exitValQ.first());
     endmethod
 endmodule

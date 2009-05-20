@@ -6196,3 +6196,19 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/centr
   filter is a function of the index into the cache.  Our Block RAM gives
   unpredictable results when reading and writing the same address in a cycle.
   The old filter allowed that to happen.
+
+----------
+mcadler     Date: Tue May 19 23:04:01 EDT 2009  CSN: CSN-platforms-206
+                  Wed May 20 03:04:01 UTC 2009
+
+
+Directory modules/bluespec/librl/storage
+ fifos.bsv                 Locally Modified          204 
+
+Directory modules/bluespec/librl/base
+ fifo-merge.bsv            Locally Modified          204 
+
+- Add lastInGroup() test to Merge FIFO as a test that the oldest entry
+  is the last from the set queued in its cycle.
+- Eliminate scheduling warnings caused by code in a method of the BRAM-based
+  Scoreboard FIFO.
