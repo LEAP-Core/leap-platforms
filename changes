@@ -6212,3 +6212,20 @@ Directory modules/bluespec/librl/base
   is the last from the set queued in its cycle.
 - Eliminate scheduling warnings caused by code in a method of the BRAM-based
   Scoreboard FIFO.
+
+----------
+pellauer    Date: Thu May 21 13:49:27 EDT 2009  CSN: CSN-platforms-207
+                  Thu May 21 17:49:27 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ lutram.bsv                Locally Modified          206 
+
+
+* Added a nice abstraction: instead of initializing a LUTRAM with all indices
+  getting the same value, use a function from index to value. The old case is
+  now just a wrapper which calls the new case trivially. This really helps
+  A-Port initialization.
+
+
+Michael P.

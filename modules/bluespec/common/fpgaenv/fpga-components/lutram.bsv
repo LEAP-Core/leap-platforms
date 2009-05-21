@@ -150,9 +150,9 @@ endmodule
 
 
 //
-// Initialized LUTRAM
+// LUTRAM Initialized with a function :: idx -> data
 //
-module mkLUTRAM#(data_t init)
+module mkLUTRAMWith#(function data_t initfunc(index_t idx))
     // interface:
         (LUTRAM#(index_t, data_t))
     provisos(Bits#(data_t, data_SZ),
@@ -169,7 +169,7 @@ module mkLUTRAM#(data_t init)
     Reg#(index_t) init_idx <- mkReg(minBound);
 
     rule initializing (!initialized);
-        mem.upd(init_idx, init);
+        mem.upd(init_idx, initfunc(init_idx));
 
         // Hack to avoid needing Eq proviso for comparison
         index_t max = maxBound;
@@ -190,5 +190,28 @@ module mkLUTRAM#(data_t init)
     method data_t sub(index_t addr) if (initialized);
         return mem.sub(addr);
     endmethod
+
+endmodule
+
+
+//
+// Initialized LUTRAM
+//
+module mkLUTRAM#(data_t init)
+    // interface:
+        (LUTRAM#(index_t, data_t))
+    provisos(Bits#(data_t, data_SZ),
+             Bits#(index_t, index_SZ),
+             Bounded#(index_t));
+
+
+    // A dummy function which returns the same value for any index.
+    function data_t const_func(index_t idx);
+        return init;
+    endfunction
+
+    LUTRAM#(index_t, data_t) mem <- mkLUTRAMWith(const_func);
+
+    return mem;
 
 endmodule
