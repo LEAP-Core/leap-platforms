@@ -6229,3 +6229,17 @@ Directory modules/bluespec/common/fpgaenv/fpga-components
 
 
 Michael P.
+
+----------
+mcadler     Date: Thu May 21 16:50:37 EDT 2009  CSN: CSN-platforms-208
+                  Thu May 21 20:50:37 UTC 2009
+
+
+Directory modules/bluespec/librl/base
+ memory-interface.bsv      Locally Modified          207 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/simulation
+ sim-clocks-device.bsv     Locally Modified          207 
+
+- Change simulation clock period so cycles match the clock period in waveform dumps.
+- Add predicate to memory interface peek() method to eliminate scheduler warnings.

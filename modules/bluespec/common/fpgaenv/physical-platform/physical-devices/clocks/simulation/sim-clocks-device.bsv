@@ -71,7 +71,7 @@ module mkClocksDevice
     // STAGE 1: create a simulated oscillator and a NULL reset
     //
     
-    Clock rawClock <- mkAbsoluteClock(0, 5);
+    Clock rawClock <- mkAbsoluteClock(0, 1);
     Reset rawReset = noReset();
 
     //

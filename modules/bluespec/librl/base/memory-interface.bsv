@@ -198,7 +198,10 @@ module mkMultiMemInitializedWith#(MEMORY_MULTI_READ_IFC#(n_READERS, t_ADDR, t_DA
                     return v;
                 endmethod
 
-                method t_DATA peek() = mem.readPorts[p].peek();
+                method t_DATA peek() if (!initializing);
+                    return mem.readPorts[p].peek();
+                endmethod
+
                 method Bool notEmpty() = mem.readPorts[p].notEmpty();
 
                 method Bool notFull();
