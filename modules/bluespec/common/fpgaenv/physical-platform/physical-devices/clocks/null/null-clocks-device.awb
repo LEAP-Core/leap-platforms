@@ -1,0 +1,8 @@
+
+%name Null Clocks Device
+%desc Exports required Clocks interfaces but does not provide any functionalities
+
+%provides clocks_device
+
+%sources -t BSV -v PUBLIC  null-clocks-device.bsv
+

@@ -6243,3 +6243,21 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clo
 
 - Change simulation clock period so cycles match the clock period in waveform dumps.
 - Add predicate to memory interface peek() method to eliminate scheduler warnings.
+
+----------
+aparasha    Date: Fri May 22 17:12:08 EDT 2009  CSN: CSN-platforms-209
+                  Fri May 22 21:12:08 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/central-cache
+ local-mem-central-cache.bsv Locally Modified          208 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks
+ null/                     Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/null
+ null-clocks-device.awb    Locally Added               0 
+ null-clocks-device.bsv    Locally Added               0 
+
+- added a NULL clocks device
+- [mcadler] fixed a bug in the BRAM-based central cache

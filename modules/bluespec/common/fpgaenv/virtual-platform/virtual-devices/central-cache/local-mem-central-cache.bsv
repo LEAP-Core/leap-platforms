@@ -346,7 +346,7 @@ module mkCentralCache#(LowLevelPlatformInterface llpi,
     //     Optional 3rd stage of read request.  Forward main cache response to
     //     the client port and write the line to the recently read cache.
     //
-    (* descending_urgency = "cacheReadResp, checkRecentLine, processFlushReq, processInvalReq, processWriteReq" *)
+    (* descending_urgency = "checkRecentLine, processFlushReq, processInvalReq, processWriteReq, cacheReadResp" *)
     rule cacheReadResp (True);
         let d <- cache.readResp();
 
