@@ -93,9 +93,15 @@ interface RL_DM_CACHE#(type t_CACHE_ADDR,
     
     // Invalidate & flush requests.  Both write dirty lines back.  Invalidate drops
     // the line from the cache.  Flush keeps the line in the cache.
-    // invalOrFlushWait is used iff sendAck is true.
-    method Action invalReq(t_CACHE_ADDR addr, Bool sendAck, t_CACHE_REF_INFO refInfo);
-    method Action flushReq(t_CACHE_ADDR addr, Bool sendAck, t_CACHE_REF_INFO refInfo);
+    //
+    // If fullHierarchy is True then the request is propagated down the full
+    // cache hierarchy and the caller must receive a confirmation that the
+    // operation is complete by waiting for invalOrFlushWait to fire.
+    //
+    // If fullHierarchy is False the request is local to this cache and
+    // invalOrFlushWait should NOT be checked.
+    method Action invalReq(t_CACHE_ADDR addr, Bool fullHierarchy, t_CACHE_REF_INFO refInfo);
+    method Action flushReq(t_CACHE_ADDR addr, Bool fullHierarchy, t_CACHE_REF_INFO refInfo);
     method Action invalOrFlushWait();
     
     //
@@ -143,8 +149,9 @@ interface RL_DM_CACHE_SOURCE_DATA#(type t_CACHE_ADDR,
                         t_CACHE_WORD val,
                         t_CACHE_REF_INFO refInfo);
     
-    // Pass invalidate and flush requests down the hierarchy.  The semantics
-    // are the same as the methods on the cache.
+    // Pass invalidate and flush requests down the hierarchy.  If sendAck is
+    // true then invalOrFlushWait must block until the operation is complete.
+    // If sendAck is false invalOrflushWait will not be called.
     method Action invalReq(t_CACHE_ADDR addr, Bool sendAck, t_CACHE_REF_INFO refInfo);
     method Action flushReq(t_CACHE_ADDR addr, Bool sendAck, t_CACHE_REF_INFO refInfo);
     method Action invalOrFlushWait();
@@ -194,7 +201,7 @@ typedef struct
    RL_DM_WRITE_DATA_HEAP_IDX writeDataIdx;
  
    // Flush / inval info
-   Bool sendAck;
+   Bool fullHierarchy;
 }
 RL_DM_CACHE_REQ#(type t_CACHE_ADDR, type t_CACHE_REF_INFO)
     deriving (Eq, Bits);
@@ -481,7 +488,7 @@ module mkCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(t_CACHE_ADDR, t_CACHE_WORD,
             begin
                 // Dirty data must be flushed
                 let old_addr = cacheAddrFromEntry(e.tag, entryIdx);
-                debugLog.record($format("    evictForInval: FLUSH addr=0x%x, entry=0x%x, sync=%0d, val=0x%x", old_addr, entryIdx, r.sendAck, e.val));
+                debugLog.record($format("    evictForInval: FLUSH addr=0x%x, entry=0x%x, sync=%0d, val=0x%x", old_addr, entryIdx, r.fullHierarchy, e.val));
 
                 sourceData.write(old_addr, e.val, r.refInfo);
             end
@@ -491,6 +498,13 @@ module mkCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(t_CACHE_ADDR, t_CACHE_WORD,
             begin
                 debugLog.record($format("    evictForInval: INVAL addr=0x%x, entry=0x%x", r.addr, entryIdx));
                 cache.write(entryIdx, tagged Invalid);
+            end
+            else
+            begin
+                // Just ensure dirty bit is clear for flush
+                let upd_entry = e;
+                upd_entry.dirty = False;
+                cache.write(entryIdx, tagged Valid upd_entry);
             end
         end
 
@@ -509,10 +523,13 @@ module mkCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(t_CACHE_ADDR, t_CACHE_WORD,
         // Pass the message down the hierarchy.  There might be another cache
         // below this one.
         //
-        if (r.act == DM_CACHE_INVAL)
-            sourceData.invalReq(r.addr, r.sendAck, r.refInfo);
-        else
-            sourceData.flushReq(r.addr, r.sendAck, r.refInfo);
+        if (r.fullHierarchy)
+        begin
+            if (r.act == DM_CACHE_INVAL)
+                sourceData.invalReq(r.addr, True, r.refInfo);
+            else
+                sourceData.flushReq(r.addr, True, r.refInfo);
+        end
 
         entryFilter.remove(entryIdx);
     endrule
@@ -562,25 +579,25 @@ module mkCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(t_CACHE_ADDR, t_CACHE_WORD,
     endmethod
     
 
-    method Action invalReq(t_CACHE_ADDR addr, Bool sendAck, t_CACHE_REF_INFO refInfo);
-        debugLog.record($format("  New request: INVAL addr=0x%x, ack=%d", addr, sendAck));
+    method Action invalReq(t_CACHE_ADDR addr, Bool fullHierarchy, t_CACHE_REF_INFO refInfo);
+        debugLog.record($format("  New request: INVAL addr=0x%x, full=%d", addr, fullHierarchy));
 
         t_CACHE_REQ r = ?;
         r.act = DM_CACHE_INVAL;
         r.addr = addr;
         r.refInfo = refInfo;
-        r.sendAck = sendAck;
+        r.fullHierarchy = fullHierarchy;
         newReqQ.enq(r);
     endmethod
 
-    method Action flushReq(t_CACHE_ADDR addr, Bool sendAck, t_CACHE_REF_INFO refInfo);
-        debugLog.record($format("  New request: FLUSH addr=0x%x, ack=%d", addr, sendAck));
+    method Action flushReq(t_CACHE_ADDR addr, Bool fullHierarchy, t_CACHE_REF_INFO refInfo);
+        debugLog.record($format("  New request: FLUSH addr=0x%x, full=%d", addr, fullHierarchy));
 
         t_CACHE_REQ r = ?;
         r.act = DM_CACHE_FLUSH;
         r.addr = addr;
         r.refInfo = refInfo;
-        r.sendAck = sendAck;
+        r.fullHierarchy = fullHierarchy;
         newReqQ.enq(r);
     endmethod
 
@@ -646,12 +663,14 @@ module mkNullCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(t_CACHE_ADDR, t_CACHE_W
         sourceData.write(addr, val, refInfo);
     endmethod
     
-    method Action invalReq(t_CACHE_ADDR addr, Bool sendAck, t_CACHE_REF_INFO refInfo);
-        sourceData.invalReq(addr, sendAck, refInfo);
+    method Action invalReq(t_CACHE_ADDR addr, Bool fullHierarchy, t_CACHE_REF_INFO refInfo);
+        if (fullHierarchy)
+            sourceData.invalReq(addr, True, refInfo);
     endmethod
 
-    method Action flushReq(t_CACHE_ADDR addr, Bool sendAck, t_CACHE_REF_INFO refInfo);
-        sourceData.flushReq(addr, sendAck, refInfo);
+    method Action flushReq(t_CACHE_ADDR addr, Bool fullHierarchy, t_CACHE_REF_INFO refInfo);
+        if (fullHierarchy)
+            sourceData.flushReq(addr, True, refInfo);
     endmethod
 
     method Action invalOrFlushWait();

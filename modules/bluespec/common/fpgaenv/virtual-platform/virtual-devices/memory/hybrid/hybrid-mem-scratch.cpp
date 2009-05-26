@@ -48,7 +48,6 @@ SCRATCHPAD_MEMORY_SERVER_CLASS::SCRATCHPAD_MEMORY_SERVER_CLASS()
 
     // instantiate stubs
     serverStub = new SCRATCHPAD_MEMORY_SERVER_STUB_CLASS(this);
-    clientStub = new SCRATCHPAD_MEMORY_CLIENT_STUB_CLASS(this);
 
     for (UINT32 r = 0; r < nRegions(); r++)
     {
@@ -150,7 +149,7 @@ void SCRATCHPAD_MEMORY_SERVER_CLASS::InitRegion(
 //
 // Load --
 //
-void
+OUT_TYPE_LoadLine
 SCRATCHPAD_MEMORY_SERVER_CLASS::LoadLine(
     SCRATCHPAD_MEMORY_ADDR addr)
 {
@@ -165,12 +164,15 @@ SCRATCHPAD_MEMORY_SERVER_CLASS::LoadLine(
 
     for (UINT32 i = 0; i < SCRATCHPAD_WORDS_PER_LINE; i++)
     {
-        SCRATCHPAD_MEMORY_WORD r = *(line + i);
-
-        T1("\t\tL " << i << ":\t" << fmt_data(r));
-
-        clientStub->LoadData(r);
+        T1("\t\tL " << i << ":\t" << fmt_data(*(line + i)));
     }
+
+    OUT_TYPE_LoadLine v;
+    v.data0 = *(line + 0);
+    v.data1 = *(line + 1);
+    v.data2 = *(line + 2);
+    v.data3 = *(line + 3);
+    return v;
 }
 
 
@@ -178,13 +180,17 @@ SCRATCHPAD_MEMORY_SERVER_CLASS::LoadLine(
 // Store --
 //
 void
-SCRATCHPAD_MEMORY_SERVER_CLASS::StoreCtrl(
+SCRATCHPAD_MEMORY_SERVER_CLASS::StoreLine(
     SCRATCHPAD_MEMORY_ADDR addr,
-    UINT8 wordMask)
+    UINT8 wordMask,
+    SCRATCHPAD_MEMORY_WORD data0,
+    SCRATCHPAD_MEMORY_WORD data1,
+    SCRATCHPAD_MEMORY_WORD data2,
+    SCRATCHPAD_MEMORY_WORD data3)
 {
     // Burst the incoming address into a region ID and a pointer to the line.
     UINT32 region = regionID(addr);
-    storeLine = regionBase[region] + regionOffset(addr);
+    SCRATCHPAD_MEMORY_WORD *store_line = regionBase[region] + regionOffset(addr);
     
     T1("\tSCRATCHPAD store region " << region
                                     << ": r_addr " << fmt_addr(regionOffset(addr))
@@ -193,22 +199,24 @@ SCRATCHPAD_MEMORY_SERVER_CLASS::StoreCtrl(
     ASSERTX(regionBase[region] != NULL);
     ASSERTX(regionOffset(addr) < regionWords[region]);
 
-    storeWordMask = wordMask;
-    storeWordIdx = 0;
-}
-
-void
-SCRATCHPAD_MEMORY_SERVER_CLASS::StoreData(
-    SCRATCHPAD_MEMORY_WORD data)
-{
-    ASSERTX(storeWordIdx < SCRATCHPAD_WORDS_PER_LINE);
-
-    if (storeWordMask & 1)
+    if (wordMask & 1)
     {
-        *(storeLine + storeWordIdx) = data;
-        T1("\t\tS " << UINT32(storeWordIdx) << ":\t" << fmt_data(data));
+        *(store_line + 0) = data0;
+        T1("\t\tS 0:\t" << fmt_data(data0));
     }
-
-    storeWordMask >>= 1;
-    storeWordIdx += 1;
+    if (wordMask & 2)
+    {
+        *(store_line + 1) = data1;
+        T1("\t\tS 1:\t" << fmt_data(data1));
+    }
+    if (wordMask & 4)
+    {
+        *(store_line + 2) = data2;
+        T1("\t\tS 2:\t" << fmt_data(data2));
+    }
+    if (wordMask & 8)
+    {
+        *(store_line + 3) = data3;
+        T1("\t\tS 3:\t" << fmt_data(data3));
+    }
 }

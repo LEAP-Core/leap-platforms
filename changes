@@ -6261,3 +6261,34 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clo
 
 - added a NULL clocks device
 - [mcadler] fixed a bug in the BRAM-based central cache
+
+----------
+mcadler     Date: Mon May 25 22:36:17 EDT 2009  CSN: CSN-platforms-210
+                  Tue May 26 02:36:17 UTC 2009
+
+
+Directory modules/bluespec/librl/storage/cache
+ rl-direct-mapped-cache.bsv Locally Modified          209 
+ rl-set-assoc-cache.bsv    Locally Modified          209 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-mem-scratch.cpp    Locally Modified          209 
+ hybrid-mem-scratch.rrr    Locally Modified          209 
+ hybrid-mem-scratch.h      Locally Modified          209 
+ hybrid-mem-scratch.bsv    Locally Modified          209 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/central-cache
+ local-mem-central-cache.bsv Locally Modified          209 
+
+- Direct mapped cache:
+  - Flushed dirty line wasn't marked clean after flush
+  - Change protocol for inval/flush ACK.  Old protocol was causing write-backs
+    to be allowed to go out after the ACK that was supposed to confirm the
+    data reached the host.
+
+- Fix central cache deadlock by changing rule priority.
+
+- Stop breaking line-sized RRR scratchpad load/store into word-sized chunks.
+  Loss of performance wasn't worth the area.
+
+    

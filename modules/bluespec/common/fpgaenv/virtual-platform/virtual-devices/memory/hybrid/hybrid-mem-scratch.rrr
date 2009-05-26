@@ -12,32 +12,29 @@ service SCRATCHPAD_MEMORY
         method InitRegion (in UINT32[32] regionID, in UINT32[32] regionEndIdx);
 
         //
-        // Pipelined Load --
-        //     The client hardware makes a single load request.  The host server
-        //     responds with multiple messages to its LoadData client.  One
-        //     message is sent for every word in a line.  The low bits of the
-        //     line are sent first.
+        // Load Line --
+        //     Assume 4 words per line until RRR types are more general.
         //
-        method LoadLine (in UINT64[64] addr);
+        method LoadLine (in UINT64[64] addr,
+                         out UINT64[64] data0,
+                         out UINT64[64] data1,
+                         out UINT64[64] data2,
+                         out UINT64[64] data3);
 
         //
-        // Pipelined Store --
-        //     A line-sized store is pipelined.  It begins with a control message
-        //     and is followed by word-sized data messages.  There is always
-        //     one word message for every word in the line, even when wordMask
-        //     indicates an invalid word.
+        // Store Line --
+        //     Line sized store.
         //
         //     wordMask indicates which data elements are valid and should be
         //     written.  Bit 0 of wordMask corresponds to data0.
         //
         //     Address requirements are the same as load.
         //
-        method StoreCtrl (in UINT64[64] addr, in UINT8[8] wordMask);
-        method StoreData (in UINT64[64] data);
-    };
-
-    server hw (bsv, connection) <- sw (cpp, method)
-    {
-        method LoadData (in UINT64[64] data);
+        method StoreLine (in UINT64[64] addr,
+                          in UINT8[8] wordMask,
+                          in UINT64[64] data0,
+                          in UINT64[64] data1,
+                          in UINT64[64] data2,
+                          in UINT64[64] data3);
     };
 };

@@ -472,7 +472,7 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
     FIFO#(t_CACHE_SET_IDX) doneQ <- mkFIFO();
 
     // Read responses may be returned out of order relative to request order!
-    FIFOF#(Tuple4#(t_CACHE_REQ_BASE, RL_SA_CACHE_READ_REQ#(nWordsPerLine), t_CACHE_LINE, t_CACHE_WORD_VALID_MASK)) readRespToClientQ_OOO <- mkBypassFIFOF();
+    FIFOF#(Tuple4#(t_CACHE_REQ_BASE, RL_SA_CACHE_READ_REQ#(nWordsPerLine), t_CACHE_LINE, t_CACHE_WORD_VALID_MASK)) readRespToClientQ_OOO <- mkFIFOF();
 
     // Invalidate and flush requests are always returned in the order they
     // were requested.
@@ -1281,7 +1281,7 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
     // ====================================================================
 
     // Not required for correctness: get rid of warning messages...
-    (* descending_urgency = "writeCacheData, flushDirtyLine, handleWordMissForRead, sendFillRequest, handleMissForWrite, handleMissForRead, handleRead, handleWrite, handleFillForRead, handleFlushACK, handleInvalOrFlush, evictDirtyForFill, handleReadCacheHit" *)
+    (* descending_urgency = "writeCacheData, handleFlushACK, flushDirtyLine, sendFillRequest, handleFillForRead, evictDirtyForFill, handleWordMissForRead, handleMissForRead, handleMissForWrite, handleReadCacheHit, handleRead, handleWrite, handleInvalOrFlush" *)
 
     //
     // doneWithRef --

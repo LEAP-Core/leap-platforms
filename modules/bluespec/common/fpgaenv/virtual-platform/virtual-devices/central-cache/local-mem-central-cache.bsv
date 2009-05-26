@@ -341,12 +341,15 @@ module mkCentralCache#(LowLevelPlatformInterface llpi,
         end
     endrule
 
+    // Descending urgency for sub-components that can't see each other
+    (* descending_urgency = "cache.handleWrite, cacheLocalData.forwardDataReq" *)
+
     //
     // cacheReadResp --
     //     Optional 3rd stage of read request.  Forward main cache response to
     //     the client port and write the line to the recently read cache.
     //
-    (* descending_urgency = "checkRecentLine, processFlushReq, processInvalReq, processWriteReq, cacheReadResp" *)
+    (* descending_urgency = "cacheReadResp, checkRecentLine, processFlushReq, processInvalReq, processWriteReq" *)
     rule cacheReadResp (True);
         let d <- cache.readResp();
 
@@ -376,6 +379,8 @@ module mkCentralCache#(LowLevelPlatformInterface llpi,
 
         // Forward data to the correct port
         readRespQ.enq(tuple2(port, r));
+
+        debugLog.record($format("port %0d: queue readResp addr=0x%x, wordIdx=0x%x, refInfo=0x%x", port, r.addr, r.wordIdx, r.refInfo));
     endrule
 
 

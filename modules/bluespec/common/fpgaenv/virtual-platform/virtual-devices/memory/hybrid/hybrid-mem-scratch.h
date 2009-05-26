@@ -56,17 +56,11 @@ class SCRATCHPAD_MEMORY_SERVER_CLASS: public RRR_SERVER_CLASS,
 
     // stubs
     RRR_SERVER_STUB serverStub;
-    SCRATCHPAD_MEMORY_CLIENT_STUB clientStub;
 
     // internal data
     SCRATCHPAD_MEMORY_WORD *regionBase[VDEV_SCRATCH__NENTRIES + 1];
     SCRATCHPAD_MEMORY_ADDR regionWords[VDEV_SCRATCH__NENTRIES + 1];
     size_t regionSize[VDEV_SCRATCH__NENTRIES + 1];
-
-    // Pipelined store state
-    SCRATCHPAD_MEMORY_WORD *storeLine;
-    UINT8 storeWordIdx;
-    UINT8 storeWordMask;
 
     Format fmt_addr;
     Format fmt_data;
@@ -99,10 +93,14 @@ class SCRATCHPAD_MEMORY_SERVER_CLASS: public RRR_SERVER_CLASS,
     // RRR request methods
     void InitRegion(UINT32 regionID, UINT32 regionEndIdx);
 
-    void LoadLine(SCRATCHPAD_MEMORY_ADDR addr);
+    OUT_TYPE_LoadLine LoadLine(SCRATCHPAD_MEMORY_ADDR addr);
 
-    void StoreCtrl(SCRATCHPAD_MEMORY_ADDR addr, UINT8 wordMask);
-    void StoreData(SCRATCHPAD_MEMORY_WORD data);
+    void StoreLine(SCRATCHPAD_MEMORY_ADDR addr,
+                   UINT8 wordMask,
+                   SCRATCHPAD_MEMORY_WORD data0,
+                   SCRATCHPAD_MEMORY_WORD data1,
+                   SCRATCHPAD_MEMORY_WORD data2,
+                   SCRATCHPAD_MEMORY_WORD data3);
 };
 
 // Now that the server class is defined the RRR wrapper can be loaded.

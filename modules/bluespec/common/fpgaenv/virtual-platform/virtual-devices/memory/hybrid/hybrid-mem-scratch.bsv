@@ -22,6 +22,7 @@
 //
 
 import FIFO::*;
+import Vector::*;
 
 `include "asim/provides/librl_bsv_base.bsh"
 `include "asim/provides/low_level_platform_interface.bsh"
@@ -69,7 +70,6 @@ module [HASIM_MODULE] mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
     DEBUG_FILE debugLog <- mkDebugFile("memory_scrathpad.out");
 
     ClientStub_SCRATCHPAD_MEMORY scratchpad_rrr <- mkClientStub_SCRATCHPAD_MEMORY();
-    ServerStub_SCRATCHPAD_MEMORY scratchpad_resp_rrr <- mkServerStub_SCRATCHPAD_MEMORY();
 
     //
     // Scratchpad's central cache port
@@ -125,8 +125,25 @@ module [HASIM_MODULE] mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
         scratchpad_rrr.makeRequest_LoadLine(h_addr);
     endrule
 
+    Reg#(Bit#(TLog#(SCRATCHPAD_WORDS_PER_LINE))) readWordIdx <- mkReg(0);
+
     rule backingReadResp (True);
-        let v <- scratchpad_resp_rrr.acceptRequest_LoadData();
+        // Pick a word from the current incoming value.  Pop the entry if on
+        // the last word.
+        OUT_TYPE_LoadLine r;
+        if (readWordIdx == maxBound)
+            r <- scratchpad_rrr.getResponse_LoadLine();
+        else
+            r = scratchpad_rrr.peekResponse_LoadLine();
+
+        Vector#(SCRATCHPAD_WORDS_PER_LINE, SCRATCHPAD_MEM_VALUE) line;
+        line[0] = r.data0;
+        line[1] = r.data1;
+        line[2] = r.data2;
+        line[3] = r.data3;
+
+        let v = line[readWordIdx];
+        readWordIdx <= readWordIdx + 1;
 
         debugLog.record($format("backingReadResp: val=0x%x", pack(v)));
         centralCacheBackingPort.sendReadResp(pack(v));
@@ -134,15 +151,18 @@ module [HASIM_MODULE] mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
 
     //
     // Writes are pipelined.  First with a control message and then with data.
-    // The cache guarantees they messages come in the right order, so just
-    // forward them when available.
+    // The cache guarantees they messages come in the right order.
     //
+    FIFO#(CENTRAL_CACHE_BACKING_WRITE_REQ) writeCtrlQ <- mkFIFO();
+    Reg#(Vector#(SCRATCHPAD_WORDS_PER_LINE, SCRATCHPAD_MEM_VALUE)) writeData <- mkRegU();
+    Reg#(Bit#(TLog#(SCRATCHPAD_WORDS_PER_LINE))) writeWordIdx <- mkReg(0);
+
     rule backingWriteCtrlReq (True);
         let r <- centralCacheBackingPort.getWriteReq();
         let h_addr = hostScratchpadAddr(r.addr);
         debugLog.record($format("backingWriteReq: addr=0x%x, wMask=0x%x", h_addr, r.wordValidMask));
 
-        scratchpad_rrr.makeRequest_StoreCtrl(h_addr, zeroExtend(pack(r.wordValidMask)));
+        writeCtrlQ.enq(r);
     endrule
 
     (* descending_urgency = "initRegion, backingWriteDataReq, backingWriteCtrlReq, backingReadReq" *)
@@ -150,7 +170,25 @@ module [HASIM_MODULE] mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
         let v <- centralCacheBackingPort.getWriteData();
         debugLog.record($format("backingWriteData: val=0x%x", v));
 
-        scratchpad_rrr.makeRequest_StoreData(v);
+        if (writeWordIdx != maxBound)
+        begin
+            writeData[writeWordIdx] <= v;
+        end
+        else
+        begin
+            let ctrl = writeCtrlQ.first();
+            writeCtrlQ.deq();
+
+            let h_addr = hostScratchpadAddr(ctrl.addr);
+            scratchpad_rrr.makeRequest_StoreLine(h_addr,
+                                                 zeroExtend(pack(ctrl.wordValidMask)),
+                                                 writeData[0],
+                                                 writeData[1],
+                                                 writeData[2],
+                                                 v);
+        end
+
+        writeWordIdx <= writeWordIdx + 1;
     endrule
 
 
