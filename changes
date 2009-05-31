@@ -6292,3 +6292,26 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/centr
   Loss of performance wasn't worth the area.
 
     
+
+----------
+mcadler     Date: Sun May 31 09:26:07 EDT 2009  CSN: CSN-platforms-211
+                  Sun May 31 13:26:07 UTC 2009
+
+
+Directory modules/bluespec/librl/storage/cache
+ rl-set-assoc-cache.bsv    Locally Modified          210 
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ lutram.bsv                Locally Modified          210 
+ hardware-fpga-components.awb Locally Modified          210 
+
+- Changes to Xst LUTRAM (RegFile) bug work-around:
+  - Figured out a better way to guarantee storage in LUTs by inverting the low
+    bit of the address.  The old code broke all storage into sets of single-bit-
+    wide arrays.  The new code allocates a single array but ensures that the
+    incoming address is not a register by inverting the low bit.  This
+    "asynchronous source," as Xilinx Virtex 5's user manual describes it,
+    causes Xst to infer LUT-based storage.
+  - Add an AWB parameter for enabling the work-around.
+
+- Tweak rule order in SA cache.

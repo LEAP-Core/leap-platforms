@@ -55,62 +55,38 @@ module mkLUTRAMU_RegFile
     //
     // Access methods
     //
-
-    method Action upd(index_t addr, data_t d);
-        mem.upd(addr, d);
-    endmethod
-
-    method data_t sub(index_t addr);
-        return mem.sub(addr);
-    endmethod
-
+    method Action upd(index_t addr, data_t d) = mem.upd(addr, d);
+    method data_t sub(index_t addr) = mem.sub(addr);
 endmodule
 
 
 //
 // Internal only --
-//   LUTRAMU_Vector is used when LUT registers don't work due to bugs.
+//   LUTRAMU_Async is used when LUT registers don't work due to bugs.
 //
-//   Xilinx seems to have bugs with Verilog registers that look almost like
+//   Xilinx Xst seems to have bugs with Verilog registers that look almost like
 //   block RAM but have readers needing results in the same cycle when the
-//   data size is greater than 1 bit.  This function breaks down a larger
-//   data type into separate 1 bit arrays and spreads the bits for the data
-//   across multiple arrays.  We thus get nearly the same storage efficiency
-//   with some extra logic for moving data.
+//   data size is greater than 1 bit.  The failed Xst inference seems to happen
+//   only when the index source is a register.  This function inverts the low
+//   bit of the index, guaranteeing that the index source is logic.
 //
-module mkLUTRAMU_Vector
+module mkLUTRAMU_Async
     // interface:
         (LUTRAM#(index_t, data_t))
     provisos(Bits#(data_t, data_SZ),
              Bits#(index_t, index_SZ),
              Bounded#(index_t));
 
-    Vector#(data_SZ, RegFile#(index_t, Bit#(1))) mem <- replicateM(mkRegFileWCF(minBound, maxBound));
+    RegFile#(index_t, data_t) mem <- mkRegFileWCF(minBound, maxBound);
 
-    //
-    // Access methods
-    //
+    function tweakAddr(index_t addr);
+        let t = pack(addr);
+        t[0] = t[0] ^ 1;
+        return unpack(t);
+    endfunction
 
-    method Action upd(index_t addr, data_t d);
-        Bit#(data_SZ) r = pack(d);
-
-        for (Integer x = 0; x < valueOf(data_SZ); x = x + 1)
-        begin
-            mem[x].upd(addr, r[x]);
-        end
-    endmethod
-
-    method data_t sub(index_t addr);
-        Bit#(data_SZ) r = 0;
-
-        for (Integer x = 0; x < valueOf(data_SZ); x = x + 1)
-        begin
-            r[x] = mem[x].sub(addr);
-        end
-
-        return unpack(r);
-    endmethod
-
+    method Action upd(index_t addr, data_t d) = mem.upd(tweakAddr(addr), d);
+    method data_t sub(index_t addr) = mem.sub(tweakAddr(addr));
 endmodule
 
 
@@ -127,22 +103,22 @@ module mkLUTRAMU
     LUTRAM#(index_t, data_t) mem;
 
     //
-    // RegFile and Vector versions have the same timing, so we always use the
+    // RegFile and Async versions have the same timing, so we always use the
     // RegFile version for simulation since it compiles more quickly.
     //
 
     Bool use_regfile = True;
 
     `ifdef SYNTH
-    if (valueOf(data_SZ) > 1)
+    if ((`BROKEN_REGFILE != 0) && (valueOf(data_SZ) > 1))
     begin
-        // Use vector of regs for large structures.  There is a bug in Xilinx
-        // tools.  See the comment on mkLUTRAMU_Vector().
+        // There is a bug in some versions of Xilinx.  See the comment
+        // on mkLUTRAMU_Async().
         use_regfile = False;
     end
     `endif
 
-    mem <- use_regfile ? mkLUTRAMU_RegFile() : mkLUTRAMU_Vector();
+    mem <- use_regfile ? mkLUTRAMU_RegFile() : mkLUTRAMU_Async();
 
     return mem;
 
