@@ -6315,3 +6315,13 @@ Directory modules/bluespec/common/fpgaenv/fpga-components
   - Add an AWB parameter for enabling the work-around.
 
 - Tweak rule order in SA cache.
+
+----------
+mcadler     Date: Thu Jun  4 19:58:17 EDT 2009  CSN: CSN-platforms-212
+                  Thu Jun  4 23:58:17 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-mem-scratch.bsv    Locally Modified          211 
+
+Fix typo (spelled debug log file name wrong).
