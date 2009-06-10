@@ -314,7 +314,11 @@ module mkMemoryHeapImm#(MEMORY_HEAP_IMM_DATA#(t_INDEX, t_DATA) heap)
     //
 
     method t_DATA sub(t_INDEX addr) = heap.data.sub(addr);
-    method Action upd(t_INDEX addr, t_DATA value) = heap.data.upd(addr, value);
+
+    // Don't allow writes while freeQ is busy to avoid deadlocks.
+    method Action upd(t_INDEX addr, t_DATA value) if (! freeQ.notEmpty());
+        heap.data.upd(addr, value);
+    endmethod
 endmodule
 
 

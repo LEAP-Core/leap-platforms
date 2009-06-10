@@ -6325,3 +6325,27 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memor
  hybrid-mem-scratch.bsv    Locally Modified          211 
 
 Fix typo (spelled debug log file name wrong).
+
+----------
+mcadler     Date: Tue Jun  9 22:43:07 EDT 2009  CSN: CSN-platforms-213
+                  Wed Jun 10 02:43:07 UTC 2009
+
+
+Directory modules/bluespec/librl/storage/cache
+ rl-set-assoc-cache.bsv    Locally Modified          212 
+
+Directory modules/bluespec/librl/storage
+ memory-heap.bsv           Locally Modified          212 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices
+ std-virtual-device-interfaces.bsv Locally Modified          212 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/central-cache
+ local-mem-central-cache.bsv Locally Modified          212 
+
+- Fix a deadlock in the central cache caused by the write-data heap's free list
+  queue filling and not being allowed to drain.  Fixed two ways:  give priority
+  for union LUTRAM heaps to the freeQ over data writes.  Also changed the
+  set-associative cache to use a heap with separate data and free list.
+
+- Add more debug scan state for the central cache.

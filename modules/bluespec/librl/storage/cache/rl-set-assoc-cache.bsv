@@ -86,6 +86,34 @@ RL_SA_CACHE_MODE
 
 
 //
+// DEBUG_SCAN data available for set associative caches.
+//
+typedef struct
+{
+    Bool doneQNotEmpty;
+    Bool fillLineQNotEmpty;
+    Bool newReqNotEmpty;
+
+    Bool fillLineRequestQNotEmpty;
+    Bool evictDirtyForFillQNotEmpty;
+    Bool wordMissQNotEmpty;
+    Bool lineMissQNotEmpty;
+
+    Bool readHitQNotEmpty;
+    Bool processReqQ0NotEmpty;
+    Bool writeDataQNotFull;
+    Bool writeDataQNotEmpty;
+
+    Bool localData_Data2NotEmpty;
+    Bool localData_Data1NotEmpty;
+    Bool localData_Data0NotEmpty;
+    Bool localData_MetaNotEmpty;
+}
+RL_SA_DEBUG_SCAN_DATA
+    deriving (Eq, Bits);
+
+
+//
 // Set associative cache interface.  nTagExtraLowBits is used just for
 // debugging.  This specified number of low bits are prepanded to cache
 // tags so addresses match those seen in other modules.
@@ -136,6 +164,11 @@ interface RL_SA_CACHE#(type t_CACHE_ADDR,
     // Set cache mode.  Mostly useful for debugging.
     //
     method Action setCacheMode(RL_SA_CACHE_MODE mode);
+
+    //
+    // Debug scan state.
+    //
+    method RL_SA_DEBUG_SCAN_DATA debugScanState();
 
 endinterface: RL_SA_CACHE
 
@@ -202,6 +235,8 @@ interface RL_SA_CACHE_LOCAL_DATA#(numeric type t_CACHE_ADDR_SZ,
                               RL_SA_CACHE_WAY_IDX#(nWays) way);
 
     method ActionValue#(Vector#(nWordsPerLine, t_CACHE_WORD)) dataReadRsp(Integer readPort);
+
+    method Bool dataReadNotEmpty(Integer readPort);
 
     // Write up to an entire line, writing only the words with bits set in
     // wordMask.
@@ -431,7 +466,7 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
 
     // Write data is kept in a heap to avoid passing it around through FIFOs.
     // The heap size limits the number of writes in flight.
-    MEMORY_HEAP_IMM#(Bit#(WRITE_DATA_HEAP_IDX_SZ), t_CACHE_WRITE_INFO) reqInfo_writeData <- mkMemoryHeapUnionLUTRAM();
+    MEMORY_HEAP_IMM#(Bit#(WRITE_DATA_HEAP_IDX_SZ), t_CACHE_WRITE_INFO) reqInfo_writeData <- mkMemoryHeapLUTRAM();
 
     // Is the cache write back?  If not, never set a dirty bit.  It is then the
     // responsibility of the caller to write values to backing storage.
@@ -445,31 +480,31 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
     // ***** Queues between internal pipeline stages *****
 
     // Incoming requests
-    FIFO#(Tuple2#(t_CACHE_REQ_BASE, t_CACHE_REQ)) newReqQ <- mkFIFO();
+    FIFOF#(Tuple2#(t_CACHE_REQ_BASE, t_CACHE_REQ)) newReqQ <- mkFIFOF();
 
     // First stage coming out of handleIncomingReq
-    FIFO#(Tuple2#(t_CACHE_REQ_BASE, t_CACHE_REQ)) processReqQ0 <- mkFIFO();
+    FIFOF#(Tuple2#(t_CACHE_REQ_BASE, t_CACHE_REQ)) processReqQ0 <- mkFIFOF();
 
     // Hit path for operations that read the cache (read and flush)
-    FIFO#(Tuple3#(t_CACHE_REQ_BASE, t_CACHE_REQ, t_CACHE_WORD_VALID_MASK)) readHitQ <- mkFIFO();
+    FIFOF#(Tuple3#(t_CACHE_REQ_BASE, t_CACHE_REQ, t_CACHE_WORD_VALID_MASK)) readHitQ <- mkFIFOF();
 
     // Queues on miss path
-    FIFO#(Tuple3#(t_CACHE_REQ_BASE, t_CACHE_REQ, t_SET_METADATA)) lineMissQ <- mkFIFO();
-    FIFO#(Tuple3#(t_CACHE_REQ_BASE, t_CACHE_REQ, t_CACHE_WORD_VALID_MASK)) wordMissQ <- mkFIFO();
-    FIFO#(Tuple3#(t_CACHE_REQ_BASE, t_CACHE_REQ, t_METADATA)) evictDirtyForFillQ <- mkFIFO1();
+    FIFOF#(Tuple3#(t_CACHE_REQ_BASE, t_CACHE_REQ, t_SET_METADATA)) lineMissQ <- mkFIFOF();
+    FIFOF#(Tuple3#(t_CACHE_REQ_BASE, t_CACHE_REQ, t_CACHE_WORD_VALID_MASK)) wordMissQ <- mkFIFOF();
+    FIFOF#(Tuple3#(t_CACHE_REQ_BASE, t_CACHE_REQ, t_METADATA)) evictDirtyForFillQ <- mkFIFOF1();
 
     // Fill for read path
-    FIFO#(Tuple2#(t_CACHE_REQ_BASE, t_CACHE_REQ)) fillLineRequestQ <- mkFIFO();
-    FIFO#(Tuple3#(t_CACHE_REQ_BASE, t_CACHE_REQ, t_CACHE_WORD_VALID_MASK)) fillLineQ <- mkSizedFIFO(16);
+    FIFOF#(Tuple2#(t_CACHE_REQ_BASE, t_CACHE_REQ)) fillLineRequestQ <- mkFIFOF();
+    FIFOF#(Tuple3#(t_CACHE_REQ_BASE, t_CACHE_REQ, t_CACHE_WORD_VALID_MASK)) fillLineQ <- mkSizedFIFOF(16);
 
     // Write data to an allocated queue entry
-    FIFO#(Tuple2#(t_CACHE_REQ_BASE, RL_SA_CACHE_WRITE_REQ#(nWordsPerLine))) writeDataQ <- mkFIFO();
+    FIFOF#(Tuple2#(t_CACHE_REQ_BASE, RL_SA_CACHE_WRITE_REQ#(nWordsPerLine))) writeDataQ <- mkFIFOF();
 
     // Wait for ACK from backing store that flush was received
     FIFO#(Tuple2#(t_CACHE_SET_IDX, Maybe#(RL_SA_CACHE_INVAL_IDX))) flushAckQ <- mkFIFO();
 
     // Exit from all paths
-    FIFO#(t_CACHE_SET_IDX) doneQ <- mkFIFO();
+    FIFOF#(t_CACHE_SET_IDX) doneQ <- mkFIFOF();
 
     // Read responses may be returned out of order relative to request order!
     FIFOF#(Tuple4#(t_CACHE_REQ_BASE, RL_SA_CACHE_READ_REQ#(nWordsPerLine), t_CACHE_LINE, t_CACHE_WORD_VALID_MASK)) readRespToClientQ_OOO <- mkFIFOF();
@@ -1297,6 +1332,45 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
 
     // ====================================================================
     //
+    //   Debug scan state
+    //
+    // ====================================================================
+
+    //
+    // Compute debug scan state in a rule to simplify scheduling.
+    //
+
+    Wire#(RL_SA_DEBUG_SCAN_DATA) debugScanData <- mkBypassWire();
+
+    (* no_implicit_conditions *)
+    rule computeDebugScanState (True);
+        RL_SA_DEBUG_SCAN_DATA d = ?;
+
+        d.doneQNotEmpty = doneQ.notEmpty();
+        d.fillLineQNotEmpty = fillLineQ.notEmpty();
+        d.newReqNotEmpty = newReqQ.notEmpty();
+
+        d.fillLineRequestQNotEmpty = fillLineRequestQ.notEmpty();
+        d.evictDirtyForFillQNotEmpty = evictDirtyForFillQ.notEmpty();
+        d.wordMissQNotEmpty = wordMissQ.notEmpty();
+        d.lineMissQNotEmpty = lineMissQ.notEmpty();
+
+        d.readHitQNotEmpty = readHitQ.notEmpty();
+        d.processReqQ0NotEmpty = processReqQ0.notEmpty();    
+        d.writeDataQNotFull = writeDataQ.notFull();
+        d.writeDataQNotEmpty = writeDataQ.notEmpty();
+
+        d.localData_Data2NotEmpty = localData.dataReadNotEmpty(2);
+        d.localData_Data1NotEmpty = localData.dataReadNotEmpty(1);
+        d.localData_Data0NotEmpty = localData.dataReadNotEmpty(0);
+        d.localData_MetaNotEmpty = localData.metaData.notEmpty();
+
+        debugScanData <= d;
+    endrule
+
+
+    // ====================================================================
+    //
     //   Incoming cache requests (methods)
     //
     // ====================================================================
@@ -1443,6 +1517,12 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
         cacheMode <= mode;    
     endmethod
 
+    //
+    // debugScanState -- Return cache state for DEBUG_SCAN.
+    //
+    method RL_SA_DEBUG_SCAN_DATA debugScanState();
+        return debugScanData;
+    endmethod    
 endmodule
 
 
@@ -1527,6 +1607,16 @@ module mkBRAMCacheLocalData
         end
 
         return lineVal;
+    endmethod
+
+    method Bool dataReadNotEmpty(Integer readPort);
+        Bool notEmpty = True;
+        for (Integer b = 0; b < valueOf(nWordsPerLine); b = b + 1)
+        begin
+            notEmpty = notEmpty && data[b].readPorts[readPort].notEmpty();
+        end
+
+        return notEmpty;
     endmethod
 
 
