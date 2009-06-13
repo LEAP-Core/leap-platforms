@@ -59,6 +59,7 @@ typedef enum
 {
     RL_DM_MODE_WRITE_BACK,
     RL_DM_MODE_WRITE_THROUGH,
+    RL_DM_MODE_WRITE_NO_ALLOC,
     RL_DM_MODE_DISABLED
 }
 RL_DM_CACHE_MODE
@@ -436,7 +437,7 @@ module mkCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(t_CACHE_ADDR, t_CACHE_WORD,
 
         if (cacheMode != RL_DM_MODE_WRITE_BACK)
         begin
-            // Caching writes is disabled.  Write through.
+            // Caching writes is disabled.  Write through or around.
             debugLog.record($format("    doWrite: WRITE THROUGH addr=0x%x, entry=0x%x, val=0x%x", r.addr, entryIdx, w_data));
             sourceData.write(r.addr, w_data, r.refInfo);
         end
@@ -452,13 +453,18 @@ module mkCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(t_CACHE_ADDR, t_CACHE_WORD,
             stats.dirtyEntryFlush();
         end
 
-        // Now do the write.
-        debugLog.record($format("    doWrite: WRITE addr=0x%x, entry=0x%x, val=0x%x", r.addr, entryIdx, w_data));
+        // Now do the write.  The write may be skipped in NO ALLOC mode as long
+        // as the current cache entry isn't for the address being written.
+        if ((cacheMode != RL_DM_MODE_WRITE_NO_ALLOC) ||
+            (isValid(cur_entry) && (validValue(cur_entry).tag == r_tag)))
+        begin
+            debugLog.record($format("    doWrite: WRITE addr=0x%x, entry=0x%x, val=0x%x", r.addr, entryIdx, w_data));
 
-        stats.writeHit();
-        cache.write(entryIdx, tagged Valid RL_DM_CACHE_ENTRY { dirty: (cacheMode == RL_DM_MODE_WRITE_BACK),
-                                                               tag: r_tag,
-                                                               val: w_data });
+            stats.writeHit();
+            cache.write(entryIdx, tagged Valid RL_DM_CACHE_ENTRY { dirty: (cacheMode == RL_DM_MODE_WRITE_BACK),
+                                                                   tag: r_tag,
+                                                                   val: w_data });
+        end
 
         entryFilter.remove(entryIdx);
     endrule

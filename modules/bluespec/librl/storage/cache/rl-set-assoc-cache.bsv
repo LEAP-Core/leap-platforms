@@ -79,7 +79,8 @@ typedef enum
 {
     RL_SA_MODE_WRITE_BACK,
     RL_SA_MODE_WRITE_THROUGH,
-    RL_SA_MODE_DISABLED
+    RL_SA_MODE_DISABLED0,
+    RL_SA_MODE_DISABLED1
 }
 RL_SA_CACHE_MODE
     deriving (Eq, Bits);
@@ -472,7 +473,7 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
     // responsibility of the caller to write values to backing storage.
     Reg#(RL_SA_CACHE_MODE) cacheMode <- mkReg(RL_SA_MODE_WRITE_BACK);
     function Bool writeBackCache() = (cacheMode == RL_SA_MODE_WRITE_BACK);
-    function Bool cacheEnabled() = (cacheMode != RL_SA_MODE_DISABLED);
+    function Bool cacheEnabled() = (pack(cacheMode)[1] == 0);
 
     // Filter for allowing one live operation per cache set.
     COUNTING_FILTER#(t_CACHE_SET_IDX) setFilter <- mkCountingFilter(True, debugLog);

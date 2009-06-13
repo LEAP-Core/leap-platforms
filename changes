@@ -6349,3 +6349,23 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/centr
   set-associative cache to use a heap with separate data and free list.
 
 - Add more debug scan state for the central cache.
+
+----------
+mcadler     Date: Fri Jun 12 23:10:21 EDT 2009  CSN: CSN-platforms-214
+                  Sat Jun 13 03:10:21 UTC 2009
+
+
+Directory modules/bluespec/librl/storage/cache
+ rl-direct-mapped-cache.bsv Locally Modified          213 
+ rl-set-assoc-cache.bsv    Locally Modified          213 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-mem-scratch.bsv    Locally Modified          213 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/local
+ local-mem-scratch.bsv     Locally Modified          213 
+
+- Mode 2 in direct mapped cache now bypasses the cache for writes and preserves
+  the existing data unless, of course, the address being written is already in
+  the cache.
+- Mode 3 in caches is now the disabled mode.
