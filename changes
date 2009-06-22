@@ -6369,3 +6369,26 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memor
   the existing data unless, of course, the address being written is already in
   the cache.
 - Mode 3 in caches is now the disabled mode.
+
+----------
+keflemin    Date: Mon Jun 22 15:25:32 EDT 2009  CSN: CSN-platforms-215
+                  Mon Jun 22 19:25:32 UTC 2009
+
+
+Directory modules/bluespec/librl/base
+ debug-file.bsv            Locally Modified          214 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-mem-scratch.awb    Locally Modified          214 
+ hybrid-mem-scratch.bsv    Locally Modified          214 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/local
+ local-mem-scratch.awb     Locally Modified          214 
+ local-mem-scratch.bsv     Locally Modified          214 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/central-cache
+ local-mem-central-cache.awb Locally Modified          214 
+ local-mem-central-cache.bsv Locally Modified          214 
+
+
+Added support for eliminating extra memory subsystem print outs

@@ -62,7 +62,9 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
     (SCRATCHPAD_MEMORY_VDEV)
     provisos (Bits#(SCRATCHPAD_MEM_ADDRESS, t_SCRATCHPAD_MEM_ADDRESS_SZ));
 
-    DEBUG_FILE debugLog <- mkDebugFile("memory_scrathpad.out");
+    DEBUG_FILE debugLog <- (`LOCAL_MEM_DEBUG_ENABLE == 1)?
+                           mkDebugFile("memory_scrathpad.out"):
+                           mkDebugFileNull("memory_scrathpad.out");
 
     // Total memory allocated
     Reg#(SCRATCHPAD_MEM_ADDRESS) totalAlloc <- mkReg(0);

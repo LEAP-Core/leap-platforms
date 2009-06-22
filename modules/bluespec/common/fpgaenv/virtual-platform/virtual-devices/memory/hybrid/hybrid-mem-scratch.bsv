@@ -66,8 +66,9 @@ module [HASIM_MODULE] mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
     // interface:
     (SCRATCHPAD_MEMORY_VDEV)
     provisos (Bits#(SCRATCHPAD_MEM_ADDRESS, t_SCRATCHPAD_MEM_ADDRESS_SZ));
-
-    DEBUG_FILE debugLog <- mkDebugFile("memory_scratchpad.out");
+    DEBUG_FILE debugLog <- (`SRATCHPAD_MEMORY_DEBUG_ENABLE == 1)?
+                           mkDebugFile("memory_scrathpad.out"):
+                           mkDebugFileNull("memory_scrathpad.out");  
 
     ClientStub_SCRATCHPAD_MEMORY scratchpad_rrr <- mkClientStub_SCRATCHPAD_MEMORY();
 

@@ -6,3 +6,5 @@
 %public local-mem-scratch.bsv
 
 %param LOCAL_MEM_USE_LINES  0  "0 or 1: use word (0) or line (1) accesses to local memory."
+
+%param LOCAL_MEM_DEBUG_ENABLE  1  "Enables the local memory debug"

@@ -7,3 +7,4 @@
 %public central-cache-backing-store.bsv
 
 %param CENTRAL_CACHE_LINE_RESP_CACHE_IDX_BITS  10  "Index bits for a BRAM-based cache of recently accessed lines"
+%param --global CENTRAL_CACHE_DEBUG_ENABLE  1  "Enables the central cache debug"

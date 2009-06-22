@@ -10,3 +10,5 @@
 %public   hybrid-mem-scratch.dic
 
 %param SCRATCHPAD_MEMORY_ADDR_BITS 32  "Word-level address bits per private scratchpad region"
+ 
+%param --global SRATCHPAD_MEMORY_DEBUG_ENABLE 1 "Enables the scratchpad memory debug"

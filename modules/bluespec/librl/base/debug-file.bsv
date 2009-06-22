@@ -72,3 +72,13 @@ module mkDebugFile#(String fname)
     endmethod
 
 endmodule
+
+//
+// mkDebugFileNull --
+//     Null debug file, will drop everything on the floor. 
+//
+module mkDebugFileNull#(String fname)
+    // interface:
+        (DEBUG_FILE);
+    method record = ?;
+endmodule

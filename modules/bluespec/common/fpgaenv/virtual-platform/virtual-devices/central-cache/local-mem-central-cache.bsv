@@ -77,14 +77,20 @@ module mkCentralCache#(LowLevelPlatformInterface llpi,
               Alias#(Bit#(`CENTRAL_CACHE_LINE_RESP_CACHE_IDX_BITS), t_RECENT_READ_CACHE_IDX),
               Alias#(Bit#(TSub#(t_CENTRAL_CACHE_INTERNAL_ADDR_SZ, `CENTRAL_CACHE_LINE_RESP_CACHE_IDX_BITS)), t_RECENT_READ_CACHE_TAG));
 
-    DEBUG_FILE debugLog <- mkDebugFile("memory_central_cache.out");
-    DEBUG_FILE debugLogInt <- mkDebugFile("memory_central_cache_internal.out");
+    DEBUG_FILE debugLog <- (`CENTRAL_CACHE_DEBUG_ENABLE == 1)?
+                           mkDebugFile("memory_central_cache.out"):
+                           mkDebugFileNull("memory_central_cache.out"); 
+    DEBUG_FILE debugLogInt <- (`CENTRAL_CACHE_DEBUG_ENABLE == 1)?
+                             mkDebugFile("memory_central_cache_internal.out"):
+                             mkDebugFileNull("memory_central_cache_internal.out"); 
+   
 
     // Debug state
     COUNTER#(5) dbgCacheReadsInFlight <- mkLCounter(0);
     Wire#(Bool) dbgCacheReadRespReady <- mkBypassWire();
     Wire#(Bool) dbgReqLineLocked <- mkDWire(False);
     Wire#(Bit#(2)) dbgReqRuleFired <- mkDWire(0);
+
 
     Reg#(Bool) initialized <- mkReg(False);
 
