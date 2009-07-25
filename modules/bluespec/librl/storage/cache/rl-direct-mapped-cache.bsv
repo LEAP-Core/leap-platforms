@@ -52,18 +52,32 @@ RL_DM_CACHE_LOAD_RESP#(type t_CACHE_WORD,
     deriving (Eq, Bits);
 
 //
+// Store Request
+//
+typedef struct
+{
+    t_CACHE_ADDRESS addr;
+    t_CACHE_WORD val;
+}
+RL_DM_CACHE_STORE_REQ#(type t_CACHE_WORD,
+                       type t_CACHE_ADDRESS)
+    deriving (Eq, Bits);
+
+//
 // Cache mode can set the write policy or completely disable hits in the cache.
 // This is mostly useful for debugging.
 //
 typedef enum
 {
-    RL_DM_MODE_WRITE_BACK,
-    RL_DM_MODE_WRITE_THROUGH,
-    RL_DM_MODE_WRITE_NO_ALLOC,
-    RL_DM_MODE_DISABLED
+    RL_DM_MODE_WRITE_BACK = 0,
+    RL_DM_MODE_WRITE_THROUGH = 1,
+    RL_DM_MODE_WRITE_NO_ALLOC = 2,
+    RL_DM_MODE_DISABLED = 3
 }
 RL_DM_CACHE_MODE
     deriving (Eq, Bits);
+
+
 
 //
 // Direct mapped cache interface.  n_ENTRIES defines the number of entries
@@ -74,10 +88,10 @@ RL_DM_CACHE_MODE
 // passed to the backing store for fills.  The metadata is not stored in
 // the cache.
 //
+// This should be refactored -- looks an awful lot like SOURCE_DATA below.
 interface RL_DM_CACHE#(type t_CACHE_ADDR,
                        type t_CACHE_WORD,
-                       type t_CACHE_REF_INFO,
-                       numeric type n_ENTRIES);
+                       type t_CACHE_REF_INFO);
 
     // Read a word.  Read from backing store if not already cached.
     // *** Read responses are NOT guaranteed to be in the order of requests. ***
@@ -113,6 +127,15 @@ interface RL_DM_CACHE#(type t_CACHE_ADDR,
 
 endinterface: RL_DM_CACHE
 
+typedef RL_DM_CACHE#(t_CACHE_ADDR,
+                     t_CACHE_WORD,
+                     t_CACHE_REF_INFO) 
+
+        RL_DM_CACHE_SIZED#(type t_CACHE_ADDR,
+                           type t_CACHE_WORD,
+                           type t_CACHE_REF_INFO,
+                           numeric type n_ENTRIES);
+
 
 //
 // Source data fill response
@@ -144,6 +167,9 @@ interface RL_DM_CACHE_SOURCE_DATA#(type t_CACHE_ADDR,
     method ActionValue#(RL_DM_CACHE_FILL_RESP#(t_CACHE_ADDR,
                                                t_CACHE_WORD,
                                                t_CACHE_REF_INFO)) readResp();
+    method RL_DM_CACHE_FILL_RESP#(t_CACHE_ADDR,
+                                  t_CACHE_WORD,
+                                  t_CACHE_REF_INFO) peekResp();
     
     // Asynchronous write (no response)
     method Action write(t_CACHE_ADDR addr,
@@ -158,6 +184,26 @@ interface RL_DM_CACHE_SOURCE_DATA#(type t_CACHE_ADDR,
     method Action invalOrFlushWait();
 
 endinterface: RL_DM_CACHE_SOURCE_DATA
+
+//
+// mkRLDMCacheToRLDMCacheSourceData 
+
+/*module mkRLDMCacheToRLDMCacheSourceData#(RL_DM_CACHE#(t_CACHE_ADDR,
+                                                      t_CACHE_WORD,
+                                                      t_CACHE_REF_INFO,
+                                                      n_ENTRIES) cache)
+     (RL_DM_CACHE_SOURCE_DATA#(t_CACHE_ADDR,t_CACHE_WORD,t_CACHE_REF_INFO));
+   RL_DM_CACHE_SOURCE_DATA#(t_CACHE_ADDR,t_CACHE_WORD,t_CACHE_REF_INFO) sourceData = 
+      interface RL_DM_CACHE_SOURCE_DATA
+          method readResp = cache.readResp;
+          method readReq = cache.readReq;
+          method peekResp = cache.peekResp;
+          method write = cache.write;
+          method invalReq = cache.invalReq;
+          method flushReq = cache.flushReq;
+          method invalOrFlushWait = cache.invalOrFlushWait;
+      endinterface;
+endmodule*/
 
 
 
@@ -233,7 +279,7 @@ module mkCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(t_CACHE_ADDR, t_CACHE_WORD,
                             RL_CACHE_STATS stats,
                             DEBUG_FILE debugLog)
     // interface:
-    (RL_DM_CACHE#(t_CACHE_ADDR, t_CACHE_WORD, t_CACHE_REF_INFO, n_ENTRIES))
+    (RL_DM_CACHE_SIZED#(t_CACHE_ADDR, t_CACHE_WORD, t_CACHE_REF_INFO, n_ENTRIES))
     provisos (Bits#(t_CACHE_ADDR, t_CACHE_ADDR_SZ),
               Bits#(t_CACHE_WORD, t_CACHE_WORD_SZ),
               Bits#(t_CACHE_REF_INFO, t_CACHE_REF_INFO_SZ),
@@ -634,7 +680,7 @@ endmodule
 module mkNullCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(t_CACHE_ADDR, t_CACHE_WORD, t_CACHE_REF_INFO) sourceData,
                                 DEBUG_FILE debugLog)
     // interface:
-    (RL_DM_CACHE#(t_CACHE_ADDR, t_CACHE_WORD, t_CACHE_REF_INFO, n_ENTRIES))
+    (RL_DM_CACHE_SIZED#(t_CACHE_ADDR, t_CACHE_WORD, t_CACHE_REF_INFO, n_ENTRIES))
     provisos (Bits#(t_CACHE_ADDR, t_CACHE_ADDR_SZ),
               Bits#(t_CACHE_WORD, t_CACHE_WORD_SZ),
               Bits#(t_CACHE_REF_INFO, t_CACHE_REF_INFO_SZ));
@@ -666,6 +712,7 @@ module mkNullCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(t_CACHE_ADDR, t_CACHE_W
     endmethod
 
     method Action write(t_CACHE_ADDR addr, t_CACHE_WORD val, t_CACHE_REF_INFO refInfo);
+        debugLog.record($format("  Write: WRITE addr=0x%x, val=0x%x", addr, val));      
         sourceData.write(addr, val, refInfo);
     endmethod
     
@@ -688,3 +735,4 @@ module mkNullCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(t_CACHE_ADDR, t_CACHE_W
     endmethod
 
 endmodule
+

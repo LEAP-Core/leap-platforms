@@ -65,6 +65,15 @@ interface MEMORY_READER_IFC#(type t_ADDR, type t_DATA);
     method Bool notFull();
 endinterface
 
+// Single writer interface
+// This might initially seem counter-intuitive, but we'll use this function
+// to manipulate vectorized interfaces later.
+interface MEMORY_WRITER_IFC#(type t_ADDR, type t_DATA);
+    method Action write(t_ADDR addr, t_DATA val);
+    // Write request possible?
+    method Bool writeNotFull();
+endinterface
+
 interface MEMORY_MULTI_READ_IFC#(numeric type n_READERS, type t_ADDR, type t_DATA);
     interface Vector#(n_READERS, MEMORY_READER_IFC#(t_ADDR, t_DATA)) readPorts;
 
@@ -78,6 +87,42 @@ endinterface
 // Memory interface conversion
 //
 // ========================================================================
+
+//
+//  mkMemIfcToMemReaderIfc
+//  Converts a memory interface down into a reader
+//
+
+module mkMemIfcToMemReaderIfc#(MEMORY_IFC#(t_ADDR, t_DATA) memory)
+    // interface:
+    (MEMORY_READER_IFC#(t_ADDR, t_DATA))
+    provisos (Bits#(t_ADDR, t_ADDR_SZ),
+              Bits#(t_DATA, t_DATA_SZ));
+
+    method Action readReq(t_ADDR addr) = memory.readReq(addr);
+
+    method ActionValue#(t_DATA) readRsp();
+        let v <- memory.readRsp();
+        return v;
+    endmethod
+
+    method t_DATA peek() = memory.peek();
+    method Bool notEmpty() = memory.notEmpty();
+    method Bool notFull() = memory.notFull();
+endmodule
+
+//
+//  mkMemIfcToMemWriterIfc
+//  Converts a memory interface down into a writer
+//
+module mkMemIfcToMemWriterIfc#(MEMORY_IFC#(t_ADDR, t_DATA) memory)
+    // interface:
+    (MEMORY_WRITER_IFC#(t_ADDR, t_DATA))
+    provisos (Bits#(t_ADDR, t_ADDR_SZ),
+              Bits#(t_DATA, t_DATA_SZ));
+    method Action write(t_ADDR addr, t_DATA val) = memory.write(addr, val);
+    method Bool writeNotFull() = memory.writeNotFull();
+endmodule
 
 //
 // mkMultiMemIfcToMemIfc --
@@ -139,6 +184,131 @@ module mkMemIfcToMultiMemIfc#(MEMORY_IFC#(t_ADDR, t_DATA) mem)
     method Bool writeNotFull() = mem.writeNotFull();
 endmodule
 
+//
+// mkMultiReadMemToVectorMemIfc --
+//     Converts a MEMORY_MULTI_READ_IFC to a Vector of MEMORY_IFC each of which 
+//     share the write port.  Used to split up the memory interfaces in the multicache.
+
+module mkMultiReadMemIfcToVectorMemIfc#(MEMORY_MULTI_READ_IFC#(n_Readers, 
+                                                               t_ADDR, 
+                                                               t_DATA) multiMem)
+    (Vector#(n_Readers, MEMORY_IFC#(t_ADDR, t_DATA)))
+    provisos (Bits#(t_ADDR, t_ADDR_SZ),
+              Bits#(t_DATA, t_DATA_SZ));
+    Vector#(n_Readers, MEMORY_IFC#(t_ADDR, t_DATA)) memories = newVector();
+ 
+    for(Integer i = 0; i < valueof(n_Readers); i = i + 1) 
+    begin
+        MEMORY_IFC#(t_ADDR, t_DATA) memory = interface MEMORY_IFC
+            method readReq = multiMem.readPorts[i].readReq;
+            method readRsp =multiMem.readPorts[i].readRsp;
+            method peek = multiMem.readPorts[i].peek;
+            method notEmpty = multiMem.readPorts[i].notEmpty;
+            method notFull = multiMem.readPorts[i].notFull;
+            method write = multiMem.write;
+            method writeNotFull = multiMem.writeNotFull;
+        endinterface;
+        memories[i] = memory;
+    end
+
+    return memories;
+endmodule
+
+
+//
+//  mkVectorMemIfcToMultiReadMemIfc --
+//     Converts a Vector of MEMORY_IFC to a each MEMORY_MULTI_READ_IFC.  
+//     Each of the write functions are tied to the single write function of
+//     the MEMORY_MULTI_READ_IFC. 
+
+module mkVectorMemIfcToMultiReadMemIfc#(Vector#(n_Readers, MEMORY_IFC#(t_ADDR, t_DATA)) memories)
+    (MEMORY_MULTI_READ_IFC#(n_Readers, t_ADDR, t_DATA))
+    provisos (Bits#(t_ADDR, t_ADDR_SZ),
+              Bits#(t_DATA, t_DATA_SZ));
+
+    Vector#(n_Readers, MEMORY_READER_IFC#(t_ADDR, t_DATA)) readPortsLocal = newVector();  
+    
+    for(Integer i = 0; i < valueof(n_Readers); i = i + 1) 
+    begin
+        MEMORY_READER_IFC#(t_ADDR, t_DATA) reader = interface MEMORY_READER_IFC
+            method readReq = memories[i].readReq;
+            method readRsp = memories[i].readRsp;
+            method peek    = memories[i].peek;
+            method notEmpty= memories[i].notEmpty;
+            method notFull = memories[i].notFull;
+        endinterface;
+        readPortsLocal[i] = reader;
+    end
+    
+    MEMORY_MULTI_READ_IFC#(n_Readers, t_ADDR, t_DATA) multiMem = interface MEMORY_MULTI_READ_IFC
+        interface readPorts = readPortsLocal;    
+
+        // One write to touch them all, one write to bind them.
+        method Action write(t_ADDR addr, t_DATA data);
+            for(Integer i = 0; i < valueof(n_Readers); i = i + 1) 
+            begin            
+              memories[i].write(addr,data);
+            end
+        endmethod
+
+        // If any of the memories are full, they are all full.
+        method Bool writeNotFull;
+            Bool notFull = True;
+            for(Integer i = 0; i < valueof(n_Readers); i = i + 1) 
+            begin            
+              notFull = notFull && memories[i].writeNotFull();
+            end
+
+            return notFull;
+        endmethod
+    endinterface;
+
+    return multiMem;
+endmodule
+
+//
+//  mkVectorMemIfcToMultiReadMemIfc --
+//     Converts a Vector of MEMORY_IFC to a each MEMORY_MULTI_READ_IFC.  
+//     Each of the write functions are tied to the single write function of
+//     the MEMORY_MULTI_READ_IFC. 
+
+module mkMemWriterAndVectorMemReaderIfcToMultiReadMemIfc#(
+    MEMORY_WRITER_IFC#(t_ADDR, t_DATA) writer,
+    Vector#(n_Readers, MEMORY_READER_IFC#(t_ADDR, t_DATA)) readers)
+    (MEMORY_MULTI_READ_IFC#(n_Readers, t_ADDR, t_DATA))
+    provisos (Bits#(t_ADDR, t_ADDR_SZ),
+              Bits#(t_DATA, t_DATA_SZ));
+
+    Vector#(n_Readers, MEMORY_READER_IFC#(t_ADDR, t_DATA)) readPortsLocal = newVector();  
+    
+    for(Integer i = 0; i < valueof(n_Readers); i = i + 1) 
+    begin
+        MEMORY_READER_IFC#(t_ADDR, t_DATA) reader = interface MEMORY_READER_IFC
+            method readReq = readers[i].readReq;
+            method readRsp = readers[i].readRsp;
+            method peek    = readers[i].peek;
+            method notEmpty= readers[i].notEmpty;
+            method notFull = readers[i].notFull;
+        endinterface;
+        readPortsLocal[i] = reader;
+    end
+    
+    MEMORY_MULTI_READ_IFC#(n_Readers, t_ADDR, t_DATA) multiMem = interface MEMORY_MULTI_READ_IFC
+        interface readPorts = readPortsLocal;    
+ 
+         // One write to touch them all, one write to bind them.
+         method Action write(t_ADDR addr, t_DATA data);
+             writer.write(addr,data);
+         endmethod
+
+         // If any of the memories are full, they are all full.
+         method Bool writeNotFull;
+             return writer.writeNotFull();
+         endmethod
+    endinterface;
+
+    return multiMem;
+endmodule
 
 // ========================================================================
 //

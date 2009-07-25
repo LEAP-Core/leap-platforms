@@ -80,6 +80,11 @@ module mkCentralCache#(LowLevelPlatformInterface llpi,
     DEBUG_FILE debugLog <- (`CENTRAL_CACHE_DEBUG_ENABLE == 1)?
                            mkDebugFile("memory_central_cache.out"):
                            mkDebugFileNull("memory_central_cache.out"); 
+
+    DEBUG_FILE debugLogBacking <- (`CENTRAL_CACHE_DEBUG_ENABLE == 1)?
+                           mkDebugFile("memory_central_cache_backing.out"):
+                           mkDebugFileNull("memory_central_cache_backing.out"); 
+
     DEBUG_FILE debugLogInt <- (`CENTRAL_CACHE_DEBUG_ENABLE == 1)?
                              mkDebugFile("memory_central_cache_internal.out"):
                              mkDebugFileNull("memory_central_cache_internal.out"); 
@@ -99,7 +104,7 @@ module mkCentralCache#(LowLevelPlatformInterface llpi,
     Vector#(CENTRAL_CACHE_N_CLIENTS, CENTRAL_CACHE_BACKING_CONNECTION) backingStore = newVector();
     for (Integer p = 0; p < valueOf(CENTRAL_CACHE_N_CLIENTS); p = p + 1)
     begin
-        backingStore[p] <- mkCentralCacheBackingConnection(p, debugLog);
+        backingStore[p] <- mkCentralCacheBackingConnection(p, debugLogBacking);
     end
 
     //

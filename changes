@@ -6392,3 +6392,21 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/centr
 
 
 Added support for eliminating extra memory subsystem print outs
+
+----------
+keflemin    Date: Sat Jul 25 16:13:21 EDT 2009  CSN: CSN-platforms-216
+                  Sat Jul 25 20:13:21 UTC 2009
+
+
+Directory modules/bluespec/librl/storage/cache
+ rl-direct-mapped-cache.bsv Locally Modified          215 
+
+Directory modules/bluespec/librl/base
+ memory-interface.bsv      Locally Modified          215 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/central-cache
+ local-mem-central-cache.bsv Locally Modified          215 
+
+DO NOT DELETE THIS LINE! ADD COMMENTS BELOW
+
+Changed interface of source data to have a peek
