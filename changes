@@ -6497,3 +6497,16 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ser
 small typo in umb-little-32.cpp
 small typo in xilinx-serial-xup.bsv
 
+
+----------
+emer        Date: Wed Jul 29 16:46:50 EDT 2009  CSN: CSN-platforms-220
+                  Wed Jul 29 20:46:50 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/serial/ublaze-serial
+ serial-device-ublaze.awb  Locally Modified          219 
+ serial-device.bsv         Locally Modified          219 
+
+Eliminate extraneous %requires.
+Add NL at end of file serial-device.bsv.
+

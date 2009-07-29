@@ -4,8 +4,6 @@
 
 %provides serial_device
 
-%requires serial_driver_header
-
 %sources -t BSV -v PUBLIC serial-device.bsv
 
 %sources -t V   -v PRIVATE serial_top.v
