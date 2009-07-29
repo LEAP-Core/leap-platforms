@@ -1,0 +1,26 @@
+
+%name Serial Physical Device (uBlaze-based)
+%desc Serial Physical Device (uBlaze-based)
+
+%provides serial_device
+
+%requires serial_driver_header
+
+%sources -t BSV -v PUBLIC serial-device.bsv
+
+%sources -t V   -v PRIVATE serial_top.v
+
+%sources -t NGC -v PRIVATE bramfeeder_0_wrapper.ngc
+%sources -t NGC -v PRIVATE clock_generator_0_wrapper.ngc
+%sources -t NGC -v PRIVATE debug_module_wrapper.ngc
+%sources -t NGC -v PRIVATE dlmb_cntlr_wrapper.ngc
+%sources -t NGC -v PRIVATE dlmb_wrapper.ngc
+%sources -t NGC -v PRIVATE ilmb_cntlr_wrapper.ngc
+%sources -t NGC -v PRIVATE ilmb_wrapper.ngc 
+%sources -t NGC -v PRIVATE mb_plb_wrapper.ngc 
+%sources -t NGC -v PRIVATE microblaze_0_wrapper.ngc
+%sources -t NGC -v PRIVATE proc_sys_reset_0_wrapper.ngc
+%sources -t NGC -v PRIVATE rs232_uart_1_wrapper.ngc
+%sources -t NGC -v PRIVATE system.ngc
+%sources -t NGC -v PRIVATE xps_bram_if_cntlr_1_bram_wrapper.ngc
+%sources -t NGC -v PRIVATE xps_bram_if_cntlr_1_wrapper.ngc

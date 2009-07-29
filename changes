@@ -6410,3 +6410,49 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/centr
 DO NOT DELETE THIS LINE! ADD COMMENTS BELOW
 
 Changed interface of source data to have a peek
+
+----------
+kfleming    Date: Wed Jul 29 15:31:57 EDT 2009  CSN: CSN-platforms-218
+                  Wed Jul 29 19:31:57 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup
+ serial/                   Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup/serial
+ xilinx.download           Locally Added               0 
+ xilinx.ut                 Locally Added               0 
+ xilinx-xup-serial.cpp     Locally Added               0 
+ xilinx.xst                Locally Added               0 
+ xilinx-xup-serial.h       Locally Added               0 
+ xilinx-xup-serial.awb     Locally Added               0 
+ xilinx-xup-serial.bsv     Locally Added               0 
+ xilinx-xup-serial.ucf     Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices
+ serial/                   Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/serial
+ ublaze-serial/            Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/serial/ublaze-serial
+ xps_bram_if_cntlr_1_wrapper.ngc Locally Added               0 
+ bramfeeder_0_wrapper.ngc  Locally Added               0 
+ lmb_bram_wrapper.ngc      Locally Added               0 
+ xps_bram_if_cntlr_1_bram_wrapper.ngc Locally Added               0 
+ dlmb_wrapper.ngc          Locally Added               0 
+ clock_generator_0_wrapper.ngc Locally Added               0 
+ dlmb_cntlr_wrapper.ngc    Locally Added               0 
+ proc_sys_reset_0_wrapper.ngc Locally Added               0 
+ system.v                  Locally Added               0 
+ ilmb_wrapper.ngc          Locally Added               0 
+ system.ngc                Locally Added               0 
+ ilmb_cntlr_wrapper.ngc    Locally Added               0 
+ rs232_uart_1_wrapper.ngc  Locally Added               0 
+ debug_module_wrapper.ngc  Locally Added               0 
+ mb_plb_wrapper.ngc        Locally Added               0 
+ serial-device-ublaze.awb  Locally Added               0 
+ serial-device.bsv         Locally Added               0 
+ microblaze_0_wrapper.ngc  Locally Added               0 
+
+Added ublaze-based serial device.
