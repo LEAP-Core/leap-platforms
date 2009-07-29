@@ -31,25 +31,13 @@ class PHYSICAL_CHANNEL_CLASS: public PLATFORMS_MODULE_CLASS
 {
   private:
 
-    // links to useful physical devices
-    PCIE_DEVICE pciExpressDevice;
-    
-    // physical channel state
-    CSR_INDEX f2hHead;
-    CSR_INDEX f2hTailCache;
-    CSR_INDEX h2fHeadCache;
-    CSR_INDEX h2fTail;
-    
-    // incomplete incoming read message
-    UMF_MESSAGE incomingMessage;
-    
-    // instruction ID
-    CSR_DATA iid;
-    
-    // internal methods
-    void     readCSR();
-    CSR_DATA genIID();
-    
+  // open file descriptor. 
+  int serial_fd;
+  // incomplete incoming read message
+  UMF_MESSAGE incomingMessage;
+
+  void attemptRead();
+
   public:
 
     PHYSICAL_CHANNEL_CLASS(PLATFORMS_MODULE, PHYSICAL_DEVICES);

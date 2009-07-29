@@ -26,6 +26,7 @@ import Clocks::*;
 `include "led_device.bsh"
 `include "switch_device.bsh"
 `include "clocks_device.bsh"
+`include "serial_device.bsh"
 `include "physical_platform_utils.bsh"
 
 // 4 switches and leds
@@ -105,7 +106,7 @@ module mkPhysicalPlatform
     SERIAL_DEVICE serial_device <- mkSerialDevice(clocks_device.driver.rawClock, 
                                                   clocks_device.driver.rawReset, 
                                                   clocked_by clk, 
-                                                  reset_by reset);    
+                                                  reset_by   rst);    
     
     /*
     // Bugfix for Xilinx tools: if the LEDs and Switches are not used at all in the
@@ -141,7 +142,7 @@ module mkPhysicalPlatform
         interface clocksWires      = clocks_device.wires;
         interface ledsWires        = leds_device.wires;
         interface switchesWires    = switches_device.wires;
-        interface serialDriver     = serial_device.wires;
+        interface serialWires      = serial_device.wires;
  
     endinterface
                

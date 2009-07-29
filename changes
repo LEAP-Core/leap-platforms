@@ -6456,3 +6456,44 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ser
  microblaze_0_wrapper.ngc  Locally Added               0 
 
 Added ublaze-based serial device.
+
+----------
+ndave       Date: Wed Jul 29 16:41:14 EDT 2009  CSN: CSN-platforms-219
+                  Wed Jul 29 20:41:14 UTC 2009
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-hybrid-xupv2-serial.apm Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/serial
+ serial-physical-channel.cpp Locally Modified          218 
+ serial-physical-channel.h Locally Modified          218 
+ serial-physical-channel.bsv Locally Modified          218 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/little-32
+ umf-little-32.cpp         Locally Modified          218 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup/serial
+ xilinx-xup-serial.bsv     Locally Modified          218 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/serial
+ loopback-serial/          Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/serial/loopback-serial
+ loopback-serial-device.awb Locally Added               0 
+ loopback-serial-device.bsv Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/serial
+ general-serial/           Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/serial/general-serial
+ general-serial-device.awb Locally Added               0 
+ general-serial-device.bsv Locally Added               0 
+
+* Created XUP v2 hybrid platform with a serial channel. 
+
+* Setup a loopback serial device and skeleton for a general one
+
+small typo in umb-little-32.cpp
+small typo in xilinx-serial-xup.bsv
+

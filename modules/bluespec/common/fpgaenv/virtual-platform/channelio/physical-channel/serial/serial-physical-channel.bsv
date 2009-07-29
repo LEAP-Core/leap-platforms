@@ -17,6 +17,7 @@
 //
 
 `include "physical_platform.bsh"
+`include "serial_device.bsh"
 `include "umf.bsh"
 
 // ============== Physical Channel ===============
@@ -37,7 +38,7 @@ module mkPhysicalChannel#(PHYSICAL_DRIVERS drivers)
     // shortcut to drivers
     SERIAL_DRIVER serialDriver = drivers.serialDriver;
 
-    method read = serialDriver.receive;
+    method read  = serialDriver.receive;
     method write = serialDriver.send;
 
 endmodule

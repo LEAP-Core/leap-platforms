@@ -1,0 +1,7 @@
+
+%name General Serial Device
+%desc General Serial Device
+
+%provides serial_device
+
+%public general-serial-device.bsv

@@ -1,0 +1,7 @@
+
+%name Loopback Serial Device
+%desc Loopback Serial Device
+
+%provides serial_device
+
+%public loopback-serial-device.bsv

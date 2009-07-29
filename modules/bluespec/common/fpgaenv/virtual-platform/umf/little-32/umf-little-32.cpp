@@ -183,7 +183,7 @@ UMF_MESSAGE_CLASS::AppendBytes(
     
     if ((writeIndex + nbytes) > length)
     {
-        cerr << "umf: messsage write overflow" << endl;
+        cerr << "umf: message write overflow" << endl;
         exit(1);
     }
 

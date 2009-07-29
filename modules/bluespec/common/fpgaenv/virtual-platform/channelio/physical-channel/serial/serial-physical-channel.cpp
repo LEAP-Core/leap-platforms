@@ -27,6 +27,7 @@
 #include <signal.h>
 #include <string.h>
 #include <iostream>
+#include <termios.h>
 
 #include "asim/provides/physical_channel.h"
 
@@ -47,104 +48,66 @@ PHYSICAL_CHANNEL_CLASS::PHYSICAL_CHANNEL_CLASS(
     PHYSICAL_DEVICES d) :
         PLATFORMS_MODULE_CLASS(p)
 {
-    // cache links to useful physical devices
-    pciExpressDevice = d->GetPCIExpressDevice();
+  incomingMessage = NULL;
 
-    // initialize pointers
-    f2hHead      = CSR_F2H_BUF_START;
-    f2hTailCache = CSR_F2H_BUF_START;
-    h2fHeadCache = CSR_H2F_BUF_START;
-    h2fTail      = CSR_H2F_BUF_START;
+  // open serial device. As it's non-blocking we should hold until we
+  // have a physical connection
 
-    CSR_DATA data;
-    do
-    {
-        // other initialization
-        iid = 0;
+  serial_fd = open( "/dev/ttyS0", O_RDWR | O_NOCTTY | O_NDELAY); 
+    
+  if (serial_fd != 0){
+    
+  }
 
-        // give green signal to FPGA
-        pciExpressDevice->WriteSystemCSR(genIID() | (OP_START << 16));
+  // get serial_fd attribute and set effective i/o speed
+  tcgetattr(serial_fd, &attrib);
+  
+  cfsetospeed(&attrib, B115200); //YYY ndave: this may be too fast. 
+  cfsetispeed(&attrib, B115200); 
 
-        // wait for green signal from FPGA
-        UINT32 trips = 0;
-        do
-        {
-            data = pciExpressDevice->ReadSystemCSR();
-            trips = trips + 1;
-        }
-        while ((data != SIGNAL_GREEN) && (trips < 1000000));
-
-        if (data != SIGNAL_GREEN)
-        {
-            // Gave up on green.  Reset again and restart the sequence.
-            pciExpressDevice->ResetFPGA();
-        }
-    }
-    while (data != SIGNAL_GREEN);
-
-    // update pointers
-    pciExpressDevice->WriteSystemCSR(genIID() | (OP_UPDATE_F2HHEAD << 16) | (f2hHead << 8));
-    pciExpressDevice->WriteSystemCSR(genIID() | (OP_UPDATE_H2FTAIL << 16) | (h2fTail << 8));
+  // Things should be set now. 
 }
 
 // destructor
 PHYSICAL_CHANNEL_CLASS::~PHYSICAL_CHANNEL_CLASS()
 {
+  // ndave: We should probably kill the serial fd, but termination should do this for us. 
 }
 
 // blocking read
 UMF_MESSAGE
 PHYSICAL_CHANNEL_CLASS::Read()
 {
-    // blocking loop
-    while (true)
-    {
-        // check if message is ready
-        if (incomingMessage && !incomingMessage->CanAppend())
-        {
-            // message is ready!
-            UMF_MESSAGE msg = incomingMessage;
-            incomingMessage = NULL;
-            return msg;
-        }
-
-        // if CSRs are empty, then poll pointers till some data is available
-        while (f2hHead == f2hTailCache)
-        {
-            f2hTailCache = pciExpressDevice->ReadCommonCSR(CSR_F2H_TAIL);
-        }
-
-        // read some data from CSRs
-        readCSR();
+  //blocking loop
+  while(true){
+    //do we have a complete message
+    if (incomingMessage != NULL && !incomingMessage->CanAppend()){
+      // message is ready!
+      UMF_MESSAGE msg = incomingMessage;
+      incomingMessage = NULL;
+      return msg;
     }
+    //if not, do a step of reading
+    attemptRead();
+  }
 
-    // shouldn't be here
-    return NULL;
+  // shouldn't be here
+  return NULL;
 }
 
 // non-blocking read
 UMF_MESSAGE
 PHYSICAL_CHANNEL_CLASS::TryRead()
 {
-    // if CSRs are empty, then poll pointers (OPTIONAL)
-    if (f2hHead == f2hTailCache)
-    {
-        f2hTailCache = pciExpressDevice->ReadCommonCSR(CSR_F2H_TAIL);
-    }
-
-    // now attempt read 
-    readCSR();
-
-    // now see if we have a complete message
-    if (incomingMessage && !incomingMessage->CanAppend())
-    {
-        UMF_MESSAGE msg = incomingMessage;
-        incomingMessage = NULL;
-        return msg;
-    }
-
-    // message not yet ready
-    return NULL;
+  // now see if we have a complete message
+  if (incomingMessage && !incomingMessage->CanAppend()){
+    UMF_MESSAGE msg = incomingMessage;
+    incomingMessage = NULL;
+    return msg;
+  }
+  // message not yet ready... see if we can grab more. 
+  attemptRead();
+  return NULL;
 }
 
 // write
@@ -152,100 +115,58 @@ void
 PHYSICAL_CHANNEL_CLASS::Write(
     UMF_MESSAGE message)
 {
-    // block until buffer has sufficient space
-    CSR_INDEX h2fTailPlusOne = (h2fTail == CSR_H2F_BUF_END) ? CSR_H2F_BUF_START : (h2fTail + 1);
-    while (h2fTailPlusOne == h2fHeadCache)
-    {
-        h2fHeadCache = pciExpressDevice->ReadCommonCSR(CSR_H2F_HEAD);
-    }
+  int msglength = message -> GetLength();
+  unsigned char data[1024];
 
-    // construct header
-    UMF_CHUNK header = message->EncodeHeader();
-    CSR_DATA csr_data = CSR_DATA(header);
+  while (msglength > 0){
+    // we're just going to dump the data through the serial line. 
+    message -> StartExtract();
+    int chunklength = (msglength < 1024) ? msglength : 1024;
+    message -> ExtractBytes(chunklength, data);
+    int x = 0; 
+    while (x < chunklength){
+      int length =  write(serial_fd, message -> GetMessage(), chunklength - x);
+      if (length == -1){
+	// error
+      }
+      x += length;
+    } // passed the chunk
+    msglength -= chunklength; // reduce amount left to send. 
+  }
 
-    // write header to physical channel
-    pciExpressDevice->WriteCommonCSR(h2fTail, csr_data);
-    h2fTail = h2fTailPlusOne;
-    h2fTailPlusOne = (h2fTail == CSR_H2F_BUF_END) ? CSR_H2F_BUF_START : (h2fTail + 1);
-
-    // write message data to physical channel
-    // NOTE: hardware demarshaller expects chunk pattern to start from most
-    //       significant chunk and end at least significant chunk, so we will
-    //       send chunks in reverse order
-    message->StartReverseExtract();
-    while (message->CanReverseExtract())
-    {
-        // this gets ugly - we need to block until space is available
-        while (h2fTailPlusOne == h2fHeadCache)
-        {
-            h2fHeadCache = pciExpressDevice->ReadCommonCSR(CSR_H2F_HEAD);
-        }
-
-        // space is available, write
-        UMF_CHUNK chunk = message->ReverseExtractChunk();
-        csr_data = CSR_DATA(chunk);
-
-        pciExpressDevice->WriteCommonCSR(h2fTail, csr_data);
-        h2fTail = h2fTailPlusOne;
-        h2fTailPlusOne = (h2fTail == CSR_H2F_BUF_END) ? CSR_H2F_BUF_START : (h2fTail + 1);
-    }
-
-    // sync h2fTail pointer. It is OPTIONAL to do this immediately, but we will do it
-    // since this is probably the response to a request the hardware might be blocked on
-    pciExpressDevice->WriteSystemCSR(genIID() | (OP_UPDATE_H2FTAIL << 16) | (h2fTail << 8));
-
-    // de-allocate message
     message->Delete();
 }
 
-// read one CSR's worth of unread data
 void
-PHYSICAL_CHANNEL_CLASS::readCSR()
-{
-    UMF_CHUNK chunk;
-    CSR_DATA csr_data;
+PHYSICAL_CHANNEL_CLASS::attemptRead(){
 
-    // check cached pointers to see if we can actually read anything
-    if (f2hHead == f2hTailCache)
-    {
-        return;
-    }
+  if (incomingMessage != NULL){
+    //partial message
+    unsigned char chunk[1024]; 
+    int readAmount = (message->BytesUnwritten() > 1024) ? message->BytesUnwritten() : 1024;
+    int length     = read(serial_fd, &chunk, readAmount);
+    message->AppendBytes(length, chunk);
+  } else { // no current message
+      //try an initial read, to get the initial block  
+      UINT32 chunk; 
+      int length = read(serial_fd, &chunk, sizeof(UINT32));
+      if (length == 0){
+	return NULL; // there's not enoguh to make progress. don't bother making a new message
+      }
+      else if (length == sizeof(UINT32)){
+        //got enough to make progress
+	incomingMessage = UMF_MESSAGE_CLASS::New();
+	incomingMessage->DecodeHeader(data);
+      }
+      else { 
+        // we appear to have read a partial value. Bad. 
+      }
+  }
 
-    // read in one CSR
-    csr_data = pciExpressDevice->ReadCommonCSR(f2hHead);
-    chunk = UMF_CHUNK(csr_data);
 
-    // update head pointer
-    f2hHead = (f2hHead == CSR_F2H_BUF_END) ? CSR_F2H_BUF_START : (f2hHead + 1);
 
-    // sync head pointer (OPTIONAL)
-    pciExpressDevice->WriteSystemCSR(genIID() | (OP_UPDATE_F2HHEAD << 16) | (f2hHead << 8));
+  csr_data = pciExpressDevice->ReadCommonCSR(f2hHead);
+  chunk = UMF_CHUNK(csr_data);
+  
 
-    // determine if we are starting a new message
-    if (incomingMessage == NULL)
-    {
-        // new message
-        incomingMessage = UMF_MESSAGE_CLASS::New();
-        incomingMessage->DecodeHeader(chunk);
-    }
-    else if (!incomingMessage->CanAppend())
-    {
-        // uh-oh.. we already have a full message, but it hasn't been
-        // asked for yet. We will simply not read the pipe, but in
-        // future, we might want to include a read buffer.
-    }
-    else
-    {
-        // read in some more bytes for the current message
-        incomingMessage->AppendChunk(chunk);
-    }
-}
-
-// generate a new Instruction ID
-CSR_DATA
-PHYSICAL_CHANNEL_CLASS::genIID()
-{
-    assert(sizeof(CSR_DATA) >= 4);
-    iid = (iid + 1) % 256;
-    return (iid << 24);
 }
