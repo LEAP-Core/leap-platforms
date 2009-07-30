@@ -24,7 +24,7 @@ endinterface
 interface SERIAL_WIRES;
 
     // (* always_enabled *) // , always_ready *)
-    method Action serial_rx((* port="pci_exp_rxn" *) Bit#(1) rx);
+    method Action serial_rx((* port="serial_rx" *) Bit#(1) rx);
 
     (* always_ready *)
     (* result="serial_tx" *)
@@ -45,7 +45,7 @@ endinterface
 
 // Primitive interface for importing the device 
 
-interface PRIMITIVE_SERIAL_INTERFACE;
+interface PRIMITIVE_SERIAL_DEVICE;
 
     method Action send(SerialWord word);
 
@@ -60,17 +60,14 @@ interface PRIMITIVE_SERIAL_INTERFACE;
 
 endinterface
 
-import "BVI" Channel_top = module mkPrimitiveSerialDevice
+// Deal with reset polarity
+import "BVI" serial = module mkPrimitiveSerialDevice
     // interface:
                  (PRIMITIVE_SERIAL_DEVICE);
-
+    
     // Clocks and reset are handled by the UCF for now
-    default_clock sys_clk_pin;
-    default_reset sys_rst_pin;
-
-    output_clock pcie_clk(clk);
-
-    output_reset pcie_rst(rst_n) clocked_by(pcie_clk);
+    default_clock clk(sys_clk_pin);
+    default_reset rst(sys_rst_pin);
 
 
     method send(bramfeeder_0_ppcMessageInput_put_pin)
@@ -81,9 +78,9 @@ import "BVI" Channel_top = module mkPrimitiveSerialDevice
                       ready(bramfeeder_0_RDY_ppcMessageOutput_get_pin)
                       enable(bramfeeder_0_EN_ppcMessageOutput_get_pin);
    
-    method serial_rx(fpga_0_RS232_Uart_1_RX_pin);
+    method serial_rx(fpga_0_RS232_Uart_1_RX_pin) enable(dummy_enable) clocked_by(no_clock) reset_by(no_reset);
 
-    method serial_tx(fpga_0_RS232_Uart_1_TX_pin);
+    method fpga_0_RS232_Uart_1_TX_pin serial_tx() clocked_by(no_clock) reset_by(no_reset); 
  
     schedule send SBR     (send);
     schedule send CF      (receive,serial_rx,serial_tx);
@@ -91,11 +88,9 @@ import "BVI" Channel_top = module mkPrimitiveSerialDevice
     schedule receive SBR     (receive);
     schedule receive CF      (send,serial_rx,serial_tx);
 
-    schedule serial_tx SBR     (serial_tx);
-    schedule serial_tx CF      (receive,send,serial_rx);
+    schedule serial_tx CF      (receive,send,serial_rx,serial_tx);
 
-    schedule serial_rx SBR     (serial_rx);
-    schedule serial_rx CF      (receive,send,serial_tx);
+    schedule serial_rx CF      (receive,send,serial_tx,serial_rx);
 
 endmodule
 
@@ -124,7 +119,7 @@ module mkSerialDevice#(Clock rawClock, Reset rawReset) (SERIAL_DEVICE);
             sendfifo.enq(data);
         endmethod
 
-        method ActionValue#(SerialDat) receive();
+        method ActionValue#(SerialWord) receive();
             receivefifo.deq;
             return receivefifo.first;
         endmethod

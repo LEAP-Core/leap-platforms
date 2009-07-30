@@ -78,10 +78,6 @@ Packagehint=platforms
 File=config/pm/hasim/submodels/fpgaenv/librl-bsv.apm
 Packagehint=platforms
 
-[Hybrid Scratchpad Memory Device]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid/hybrid-mem-scratch.awb
-Packagehint=platforms
-
 [Single-Ended Crystal Clocks Device]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/single-ended/single-ended-clocks-device.awb
 Packagehint=platforms
@@ -89,7 +85,6 @@ Packagehint=platforms
 [Common Physical Platform Utilities]
 File=modules/bluespec/common/fpgaenv/physical-platform/utils/utils.awb
 Packagehint=platforms
-
 
 [Null Physical Platform Debugger]
 File=modules/bluespec/common/fpgaenv/physical-platform/debuggers/null/null-debugger.awb
@@ -115,13 +110,9 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/switches/general-switch-device.awb
 Packagehint=platforms
 
-[Loopback Serial Device]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/serial/loopback-serial/loopback-serial-device.awb
-Packagehint=platforms
-
 [XUP Virtex 2 Serial/Requires]
 clocks_device=Single-Ended Crystal Clocks Device
-serial_device=Loopback Serial Device
+serial_device=Serial Physical Device (uBlaze-based)
 physical_platform_utils=Common Physical Platform Utilities
 led_device=General LED Device
 switch_device=General Switch Device
@@ -141,4 +132,13 @@ LOCAL_MEM_ADDR_BITS=26
 
 [NULL Local Memory Interface]
 File=modules/bluespec/common/fpgaenv/low-level-platform-interface/local-mem/local-mem-null.awb
+Packagehint=platforms
+
+[Serial Physical Device (uBlaze-based)]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/serial/ublaze-serial/serial-device-ublaze.awb
+Packagehint=platforms
+
+
+[Hybrid Scratchpad Memory Device]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid/hybrid-mem-scratch.awb
 Packagehint=platforms

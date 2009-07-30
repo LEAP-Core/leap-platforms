@@ -34,11 +34,12 @@ import Vector::*;
 
 typedef CENTRAL_CACHE_VIRTUAL_DEVICE CENTRAL_CACHE_IFC;
 
-module mkCentralCache#(LowLevelPlatformInterface llpi)
+module mkCentralCache#(LowLevelPlatformInterface llpi,
+                       CENTRAL_CACHE_STATS stats)
     // interface:
     (CENTRAL_CACHE_IFC);
     
-    DEBUG_FILE debugLog <- mkDebugFile("memory_central_cache.out");
+/*    DEBUG_FILE debugLog <- mkDebugFile("memory_central_cache.out");
 
     //
     // Internal communication
@@ -77,9 +78,7 @@ module mkCentralCache#(LowLevelPlatformInterface llpi)
 
         clientPortsLocal[p] = (
             interface CENTRAL_CACHE_CLIENT_PORT;
-                method Action readReq(CENTRAL_CACHE_ADDR addr,
-                                      Bit#(TLog#(CENTRAL_CACHE_WORDS_PER_LINE)) wordIdx,
-                                      CENTRAL_CACHE_REF_INFO refInfo);
+                method Action newReq(CENTRAL_CACHE_REQ req);
                     debugLog.record($format("port %0d: readReq addr=0x%x, wordIdx=0x%x, refInfo=0x%x", p, addr, wordIdx, refInfo));
 
                     backing_source.readReq(addr, refInfo);
@@ -160,5 +159,7 @@ module mkCentralCache#(LowLevelPlatformInterface llpi)
     
     method Action init(RL_SA_CACHE_MODE mode);
         noAction;
-    endmethod
+    endmethod*/
+
+  return ?;
 endmodule

@@ -6510,3 +6510,23 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ser
 Eliminate extraneous %requires.
 Add NL at end of file serial-device.bsv.
 
+
+----------
+keflemin    Date: Thu Jul 30 19:13:19 EDT 2009  CSN: CSN-platforms-221
+                  Thu Jul 30 23:13:19 UTC 2009
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-hybrid-xupv2-serial.apm Locally Modified          220 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/central-cache
+ null-central-cache.bsv    Locally Modified          220 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/serial/ublaze-serial
+ serial.v                  Locally Added               0 
+ serial-device-ublaze.awb  Locally Modified          220 
+ serial-device.bsv         Locally Modified          220 
+
+
+
+Updates to serial

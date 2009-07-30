@@ -6,7 +6,8 @@
 
 %sources -t BSV -v PUBLIC serial-device.bsv
 
-%sources -t V   -v PRIVATE serial_top.v
+%sources -t VERILOG   -v PRIVATE system.v
+%sources -t VERILOG   -v PRIVATE serial.v
 
 %sources -t NGC -v PRIVATE bramfeeder_0_wrapper.ngc
 %sources -t NGC -v PRIVATE clock_generator_0_wrapper.ngc
