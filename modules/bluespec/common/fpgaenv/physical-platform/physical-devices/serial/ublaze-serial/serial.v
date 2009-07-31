@@ -9,6 +9,8 @@ module serial( fpga_0_RS232_Uart_1_RX_pin,
     bramfeeder_0_RDY_ppcMessageInput_put_pin, 
     bramfeeder_0_EN_ppcMessageInput_put_pin,
     dummy_enable);
+
+/* synthesis syn_black_box black_box_pad_pin="fpga_0_RS232_Uart_1_RX_pin,fpga_0_RS232_Uart_1_TX_pin" */
    
 
     input  fpga_0_RS232_Uart_1_RX_pin;
