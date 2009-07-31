@@ -6530,3 +6530,17 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ser
 
 
 Updates to serial
+
+----------
+mcadler     Date: Fri Jul 31 14:44:58 EDT 2009  CSN: CSN-platforms-224
+                  Fri Jul 31 18:44:58 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/local
+ local-mem-scratch.awb     Locally Modified          223 
+ local-mem-scratch.bsv     Locally Modified          223 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/central-cache
+ null-central-cache.bsv    Locally Modified          223 
+
+Update NULL central cache and local memory scratchpads to current interfaces.

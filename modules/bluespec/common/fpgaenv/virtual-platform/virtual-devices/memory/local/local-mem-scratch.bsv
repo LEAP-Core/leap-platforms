@@ -41,7 +41,7 @@ import Vector::*;
 // Scratchpad memory address and value.  awb parameter controls whether accesses
 // are to local memory words or lines.
 //
-`ifdef LOCAL_MEM_USE_LINES_Z
+`ifdef SCRATCHPAD_MEMORY_USE_LINES_Z
 typedef LOCAL_MEM_ADDR SCRATCHPAD_MEM_ADDRESS;
 typedef LOCAL_MEM_WORD SCRATCHPAD_MEM_VALUE;
 `else
@@ -62,7 +62,7 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
     (SCRATCHPAD_MEMORY_VDEV)
     provisos (Bits#(SCRATCHPAD_MEM_ADDRESS, t_SCRATCHPAD_MEM_ADDRESS_SZ));
 
-    DEBUG_FILE debugLog <- (`LOCAL_MEM_DEBUG_ENABLE == 1)?
+    DEBUG_FILE debugLog <- (`SCRATCHPAD_MEMORY_DEBUG_ENABLE == 1)?
                            mkDebugFile("memory_scrathpad.out"):
                            mkDebugFileNull("memory_scrathpad.out");
 
@@ -111,7 +111,7 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
     //     Main initialization loop.  Write 0 to a scratchpad.
     //
     rule doInit (initBusy);
-`ifdef LOCAL_MEM_USE_LINES_Z
+`ifdef SCRATCHPAD_MEMORY_USE_LINES_Z
         llpi.localMem.writeWord(initAddr, 0);
 `else
         llpi.localMem.writeLine(localMemLineAddrToAddr(initAddr), 0);
@@ -146,7 +146,7 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
 
             readQ.enq(tuple2(addr, refInfo));
 
-`ifdef LOCAL_MEM_USE_LINES_Z
+`ifdef SCRATCHPAD_MEMORY_USE_LINES_Z
             llpi.localMem.readWordReq(p_addr);
 `else
             llpi.localMem.readLineReq(localMemLineAddrToAddr(p_addr));
@@ -158,7 +158,7 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
         match {.addr, .ref_info} = readQ.first();
         readQ.deq();
 
-`ifdef LOCAL_MEM_USE_LINES_Z
+`ifdef SCRATCHPAD_MEMORY_USE_LINES_Z
         let d <- llpi.localMem.readWordRsp();
 `else
         let d <- llpi.localMem.readLineRsp();
@@ -185,7 +185,7 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
             let p_addr = addr + segment_base;
             debugLog.record($format("write port %0d: addr 0x%x, p_addr 0x%x, 0x%x", portNum, addr, p_addr, val));
 
-`ifdef LOCAL_MEM_USE_LINES_Z
+`ifdef SCRATCHPAD_MEMORY_USE_LINES_Z
             llpi.localMem.writeWord(p_addr, val);
 `else
             llpi.localMem.writeLine(localMemLineAddrToAddr(p_addr), val);

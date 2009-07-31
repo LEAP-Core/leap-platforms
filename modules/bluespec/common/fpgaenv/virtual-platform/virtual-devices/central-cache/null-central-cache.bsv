@@ -39,12 +39,13 @@ module mkCentralCache#(LowLevelPlatformInterface llpi,
     // interface:
     (CENTRAL_CACHE_IFC);
     
-/*    DEBUG_FILE debugLog <- mkDebugFile("memory_central_cache.out");
+    DEBUG_FILE debugLog <- mkDebugFile("memory_central_cache.out");
 
     //
     // Internal communication
     //
-    Vector#(CENTRAL_CACHE_N_CLIENTS, FIFOF#(Tuple2#(CENTRAL_CACHE_ADDR,
+    Vector#(CENTRAL_CACHE_N_CLIENTS, FIFOF#(Tuple3#(CENTRAL_CACHE_LINE_ADDR,
+                                                    CENTRAL_CACHE_WORD_IDX,
                                                     CENTRAL_CACHE_REF_INFO))) readQ <- replicateM(mkFIFOF());
     Vector#(CENTRAL_CACHE_N_CLIENTS, FIFO#(Bool)) invalAckQ <- replicateM(mkFIFO());
 
@@ -79,71 +80,77 @@ module mkCentralCache#(LowLevelPlatformInterface llpi,
         clientPortsLocal[p] = (
             interface CENTRAL_CACHE_CLIENT_PORT;
                 method Action newReq(CENTRAL_CACHE_REQ req);
-                    debugLog.record($format("port %0d: readReq addr=0x%x, wordIdx=0x%x, refInfo=0x%x", p, addr, wordIdx, refInfo));
+                    case (req) matches
+                        tagged CENTRAL_CACHE_READ .rd:
+                        begin
+                            debugLog.record($format("port %0d: readReq addr=0x%x, wordIdx=0x%x, refInfo=0x%x", p, rd.addr, rd.wordIdx, rd.refInfo));
 
-                    backing_source.readReq(addr, refInfo);
-                    readQ[p].enq(tuple2(addr, refInfo));
+                            backing_source.readReq(rd.addr, rd.refInfo);
+                            readQ[p].enq(tuple3(rd.addr, rd.wordIdx, rd.refInfo));
+                        end
+
+                        tagged CENTRAL_CACHE_WRITE .wr:
+                        begin
+                            debugLog.record($format("port %0d: write addr=0x%x, refInfo=0x%x, wIdx=%d, val=0x%x", p, wr.addr, wr.refInfo, wr.wordIdx, wr.val));
+
+                            //
+                            // Backing storage write takes a line and a mask to indicate
+                            // which words are valid in the line.  Build the line and mask.
+                            //
+                            Vector#(CENTRAL_CACHE_WORDS_PER_LINE, CENTRAL_CACHE_WORD) v = ?;
+                            v[wr.wordIdx] = wr.val;
+
+                            Vector#(CENTRAL_CACHE_WORDS_PER_LINE, Bool) mask = replicate(False);
+                            mask[wr.wordIdx] = True;
+           
+                            backing_source.write(wr.addr, mask, pack(v), wr.refInfo);
+                        end
+
+                        tagged CENTRAL_CACHE_INVAL .inv:
+                        begin
+                            debugLog.record($format("port %0d: inval addr=0x%x, refInfo=0x%x, ack=%d", p, inv.addr, inv.refInfo, inv.sendAck));
+
+                            if (inv.sendAck)
+                            begin
+                                invalAckQ[p].enq(True);
+                            end
+                        end
+
+                        tagged CENTRAL_CACHE_FLUSH .fl:
+                        begin
+                            debugLog.record($format("port %0d: flush addr=0x%x, refInfo=0x%x, ack=%d", p, fl.addr, fl.refInfo, fl.sendAck));
+
+                            if (fl.sendAck)
+                            begin
+                                invalAckQ[p].enq(True);
+                            end
+                        end
+                    endcase
                 endmethod
+
 
                 method ActionValue#(CENTRAL_CACHE_READ_RESP) readResp();
                     let d <- backing_source.readResp();
 
-                    match {.addr, .ref_info} = readQ[p].first();
+                    match {.addr, .word_idx, .ref_info} = readQ[p].first();
                     readQ[p].deq();
            
                     debugLog.record($format("port %0d: readResp addr=0x%x, refInfo=0x%x, val=0x%x", p, addr, ref_info, d));
 
                     Vector#(CENTRAL_CACHE_WORDS_PER_LINE, CENTRAL_CACHE_WORD) v = unpack(d);
                     CENTRAL_CACHE_READ_RESP r;
+                    r.val = v[word_idx];
                     r.addr = addr;
+                    r.wordIdx = word_idx;
                     r.refInfo = ref_info;
-                    for (Integer w = 0; w < valueOf(CENTRAL_CACHE_WORDS_PER_LINE); w = w + 1)
-                        r.words[w] = tagged Valid v[w];
 
                     return r;
                 endmethod
 
-                method Action write(CENTRAL_CACHE_ADDR addr,
-                                    CENTRAL_CACHE_WORD val,
-                                    Bit#(TLog#(CENTRAL_CACHE_WORDS_PER_LINE)) wordIdx,
-                                    CENTRAL_CACHE_REF_INFO refInfo) if (readQ[p].notFull());
-
-                    debugLog.record($format("port %0d: write addr=0x%x, refInfo=0x%x, wIdx=%d, val=0x%x", p, addr, refInfo, wordIdx, val));
-
-                    //
-                    // Backing storage write takes a line and a mask to indicate
-                    // which words are valid in the line.  Build the line and mask.
-                    //
-                    Vector#(CENTRAL_CACHE_WORDS_PER_LINE, CENTRAL_CACHE_WORD) v = ?;
-                    v[wordIdx] = val;
-
-                    Vector#(CENTRAL_CACHE_WORDS_PER_LINE, Bool) mask = replicate(False);
-                    mask[wordIdx] = True;
-           
-                    backing_source.write(addr, mask, pack(v), refInfo);
-                endmethod
     
                 //
                 // Inval / flush don't need to do anything (no cache).
                 //
-                method Action invalReq(CENTRAL_CACHE_ADDR addr, Bool sendAck, CENTRAL_CACHE_REF_INFO refInfo);
-                    debugLog.record($format("port %0d: inval addr=0x%x, refInfo=0x%x, ack=%d", p, addr, refInfo, sendAck));
-
-                    if (sendAck)
-                    begin
-                        invalAckQ[p].enq(True);
-                    end
-                endmethod
-
-                method Action flushReq(CENTRAL_CACHE_ADDR addr, Bool sendAck, CENTRAL_CACHE_REF_INFO refInfo);
-                    debugLog.record($format("port %0d: flush addr=0x%x, refInfo=0x%x, ack=%d", p, addr, refInfo, sendAck));
-
-                    if (sendAck)
-                    begin
-                        invalAckQ[p].enq(True);
-                    end
-                endmethod
-
                 method Action invalOrFlushWait();
                     debugLog.record($format("port %0d: inval/flush done"));
                     invalAckQ[p].deq();
@@ -157,9 +164,12 @@ module mkCentralCache#(LowLevelPlatformInterface llpi,
     interface clientPorts = clientPortsLocal;
     interface backingPorts = backingPortsLocal;
     
-    method Action init(RL_SA_CACHE_MODE mode);
-        noAction;
-    endmethod*/
+    method CENTRAL_CACHE_DEBUG_SCAN debugScanState();
+        CENTRAL_CACHE_DEBUG_SCAN state = unpack(0);
+        return state;
+    endmethod
 
-  return ?;
+    method Action init(RL_SA_CACHE_MODE mode, Bool enableRecentLineCache);
+        noAction;
+    endmethod
 endmodule
