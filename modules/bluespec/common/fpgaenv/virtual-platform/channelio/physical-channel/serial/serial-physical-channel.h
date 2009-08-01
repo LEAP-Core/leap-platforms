@@ -20,7 +20,6 @@
 #define __PHYSICAL_CHANNEL__
 
 #include "asim/provides/umf.h"
-#include "asim/provides/pci_express_device.h"
 #include "asim/provides/physical_platform.h"
 
 // ============================================

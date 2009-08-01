@@ -8,36 +8,36 @@ NET "CLK" LOC = "AJ15" | IOSTANDARD = LVCMOS25;
 
 // LEDS
 
-NET "ledsWires_leds[0]" LOC="AC4" | IOSTANDARD=LVTTL | DRIVE=12 | SLEW=SLOW;
-NET "ledsWires_leds[1]" LOC="AC3" | IOSTANDARD=LVTTL | DRIVE=12 | SLEW=SLOW;
-NET "ledsWires_leds[2]" LOC="AA6" | IOSTANDARD=LVTTL | DRIVE=12 | SLEW=SLOW; 
-NET "ledsWires_leds[3]" LOC="AA5" | IOSTANDARD=LVTTL | DRIVE=12 | SLEW=SLOW;
+NET "ledsWires_LED[0]" LOC="AC4" | IOSTANDARD=LVTTL | DRIVE=12 | SLEW=SLOW;
+NET "ledsWires_LED[1]" LOC="AC3" | IOSTANDARD=LVTTL | DRIVE=12 | SLEW=SLOW;
+NET "ledsWires_LED[2]" LOC="AA6" | IOSTANDARD=LVTTL | DRIVE=12 | SLEW=SLOW; 
+NET "ledsWires_LED[3]" LOC="AA5" | IOSTANDARD=LVTTL | DRIVE=12 | SLEW=SLOW;
 
 // SWITCHES
 
-NET "switchesWires_switches_1[0]" LOC="AC11" | IOSTANDARD=LVCMOS25;
-NET "switchesWires_switches_1[1]" LOC="AD11" | IOSTANDARD=LVCMOS25;
-NET "switchesWires_switches_1[2]" LOC="AF8"  | IOSTANDARD=LVCMOS25;
-NET "switchesWires_switches_1[3]" LOC="AF9"  | IOSTANDARD=LVCMOS25;
+NET "switchesWires_SWITCH[0]" LOC="AC11" | IOSTANDARD=LVCMOS25;
+NET "switchesWires_SWITCH[1]" LOC="AD11" | IOSTANDARD=LVCMOS25;
+NET "switchesWires_SWITCH[2]" LOC="AF8"  | IOSTANDARD=LVCMOS25;
+NET "switchesWires_SWITCH[3]" LOC="AF9"  | IOSTANDARD=LVCMOS25;
 
 // PUSHBUTTONS
 
 // Left
-NET "buttonsWires_buttons_1[0]" LOC="AH1"   | IOSTANDARD=LVTTL;
+//NET "buttonsWires_buttons_1[0]" LOC="AH1"   | IOSTANDARD=LVTTL;
 // Right
-NET "buttonsWires_buttons_1[1]" LOC="AH2"  | IOSTANDARD=LVTTL;
+//NET "buttonsWires_buttons_1[1]" LOC="AH2"  | IOSTANDARD=LVTTL;
 // Up
-NET "buttonsWires_buttons_1[2]" LOC="AH4"     | IOSTANDARD=LVTTL;
+//NET "buttonsWires_buttons_1[2]" LOC="AH4"     | IOSTANDARD=LVTTL;
 // Down
-NET "buttonsWires_buttons_1[3]" LOC="AG3"   | IOSTANDARD=LVTTL;
+//NET "buttonsWires_buttons_1[3]" LOC="AG3"   | IOSTANDARD=LVTTL;
 // Center
-NET "buttonsWires_buttons_1[4]" LOC="AG5" | IOSTANDARD=LVTTL;
+//NET "buttonsWires_buttons_1[4]" LOC="AG5" | IOSTANDARD=LVTTL;
 
 // SERIAL LINES
 
-Net serialWires_serial_rx_serial_rx LOC=AJ8;
-Net serialWires_serial_rx_serial_rx IOSTANDARD = LVCMOS25;
-Net serialWires_serial_tx LOC=AE7;
-Net serialWires_serial_tx IOSTANDARD = LVCMOS25;
-Net serialWires_serial_tx SLEW = SLOW;
-Net serialWires_serial_tx DRIVE = 12;
+NET serialWires_serial_rx_serial_rx LOC=AJ8;
+NET serialWires_serial_rx_serial_rx IOSTANDARD = LVCMOS25;
+NET serialWires_serial_tx LOC=AE7;
+NET serialWires_serial_tx IOSTANDARD = LVCMOS25;
+NET serialWires_serial_tx SLEW = SLOW;
+NET serialWires_serial_tx DRIVE = 12;

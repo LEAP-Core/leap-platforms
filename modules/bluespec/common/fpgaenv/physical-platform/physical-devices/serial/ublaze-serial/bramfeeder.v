@@ -26,7 +26,7 @@ Author: Nirav Dave
 */
 
 module bramfeeder(CLK,
-		    RST,
+                  RST,
 
 		    ppcMessageInput_put,
 		    EN_ppcMessageInput_put,
@@ -42,7 +42,7 @@ module bramfeeder(CLK,
 		    bramInitiatorWires_bramWEN,
 		    bramInitiatorWires_bramEN,
 		    bramInitiatorWires_bramCLK,
-		  bramInitiatorWires_bramDin);
+  		    bramInitiatorWires_bramDin);
    
 
   input  CLK;

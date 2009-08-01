@@ -6,20 +6,25 @@
 
 %sources -t BSV -v PUBLIC serial-device.bsv
 
-%sources -t VERILOG   -v PRIVATE system.v
+%sources -t VERILOG   -v PRIVATE mkBRAMFeeder.v
+%sources -t VERILOG   -v PRIVATE bramfeeder.v
 %sources -t VERILOG   -v PRIVATE serial.v
+%sources -t VERILOG   -v PRIVATE system.v
+%sources -t VERILOG   -v PRIVATE bramfeeder_0_wrapper.v
 
-%sources -t NGC -v PRIVATE bramfeeder_0_wrapper.ngc
 %sources -t NGC -v PRIVATE clock_generator_0_wrapper.ngc
 %sources -t NGC -v PRIVATE debug_module_wrapper.ngc
 %sources -t NGC -v PRIVATE dlmb_cntlr_wrapper.ngc
 %sources -t NGC -v PRIVATE dlmb_wrapper.ngc
 %sources -t NGC -v PRIVATE ilmb_cntlr_wrapper.ngc
 %sources -t NGC -v PRIVATE ilmb_wrapper.ngc 
+%sources -t NGC -v PRIVATE lmb_bram_wrapper.ngc 
 %sources -t NGC -v PRIVATE mb_plb_wrapper.ngc 
 %sources -t NGC -v PRIVATE microblaze_0_wrapper.ngc
 %sources -t NGC -v PRIVATE proc_sys_reset_0_wrapper.ngc
 %sources -t NGC -v PRIVATE rs232_uart_1_wrapper.ngc
-%sources -t NGC -v PRIVATE system.ngc
 %sources -t NGC -v PRIVATE xps_bram_if_cntlr_1_bram_wrapper.ngc
 %sources -t NGC -v PRIVATE xps_bram_if_cntlr_1_wrapper.ngc
+
+%sources -t H   -v PUBLIC  serial-device.h
+%sources -t CPP -v PUBLIC  serial-device.cpp

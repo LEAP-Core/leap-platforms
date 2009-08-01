@@ -58,6 +58,8 @@ interface PRIMITIVE_SERIAL_DEVICE;
     (* result="serial_tx" *)
     method Bit#(1) serial_tx();
 
+    interface Clock serial_clk;
+    interface Reset serial_rst;
 endinterface
 
 // Deal with reset polarity
@@ -66,22 +68,27 @@ import "BVI" serial = module mkPrimitiveSerialDevice
                  (PRIMITIVE_SERIAL_DEVICE);
     
     // Clocks and reset are handled by the UCF for now
-    default_clock clk(sys_clk_pin);
-    default_reset rst(sys_rst_pin);
+    default_clock no_clock;
+    default_reset no_reset;
 
+    output_clock serial_clk(serial_clk_pin);
+    output_reset serial_rst(serial_rst_pin) clocked_by (serial_clk);
 
     method send(bramfeeder_0_ppcMessageInput_put_pin)
                       ready(bramfeeder_0_RDY_ppcMessageInput_put_pin)
-                      enable(bramfeeder_0_EN_ppcMessageInput_put_pin);
+                      enable(bramfeeder_0_EN_ppcMessageInput_put_pin) 
+                      clocked_by (serial_clk) reset_by (serial_rst);
     
     method bramfeeder_0_ppcMessageOutput_get_pin receive()
                       ready(bramfeeder_0_RDY_ppcMessageOutput_get_pin)
-                      enable(bramfeeder_0_EN_ppcMessageOutput_get_pin);
+                      enable(bramfeeder_0_EN_ppcMessageOutput_get_pin)
+                      clocked_by (serial_clk) reset_by (serial_rst);
    
     method serial_rx(fpga_0_RS232_Uart_1_RX_pin) enable(dummy_enable) clocked_by(no_clock) reset_by(no_reset);
 
     method fpga_0_RS232_Uart_1_TX_pin serial_tx() clocked_by(no_clock) reset_by(no_reset); 
  
+
     schedule send SBR     (send);
     schedule send CF      (receive,serial_rx,serial_tx);
    
@@ -100,8 +107,8 @@ module mkSerialDevice#(Clock rawClock, Reset rawReset) (SERIAL_DEVICE);
                                                                              reset_by rawReset);
   
     //Create the syncfifos
-    SyncFIFOIfc#(SerialWord) sendfifo <- mkSyncFIFOFromCC(16,rawClock);
-    SyncFIFOIfc#(SerialWord) receivefifo <- mkSyncFIFOToCC(16,rawClock,rawReset);
+    SyncFIFOIfc#(SerialWord) sendfifo <- mkSyncFIFOFromCC(16,primitiveSerialDevice.serial_clk);
+    SyncFIFOIfc#(SerialWord) receivefifo <- mkSyncFIFOToCC(16,primitiveSerialDevice.serial_clk,primitiveSerialDevice.serial_rst);
 
     rule sendConnect;
         primitiveSerialDevice.send(sendfifo.first);

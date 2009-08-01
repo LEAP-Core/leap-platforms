@@ -32,8 +32,7 @@ class PHYSICAL_DEVICES_CLASS: public PLATFORMS_MODULE_CLASS
 {
   private:
 
-    // PCI Express Device
-    SERIAL_CLASS serialDevice;
+  //SERIAL_CLASS serialDevice;
 
   public:
 
@@ -42,7 +41,7 @@ class PHYSICAL_DEVICES_CLASS: public PLATFORMS_MODULE_CLASS
     ~PHYSICAL_DEVICES_CLASS();
 
     // accessors to individual devices
-    SERIAL_DEVICE GetSerialDevice() { return &serialDevice; }
+    //SERIAL_DEVICE GetSerialDevice() { return &serialDevice; }
 };
 
 #endif

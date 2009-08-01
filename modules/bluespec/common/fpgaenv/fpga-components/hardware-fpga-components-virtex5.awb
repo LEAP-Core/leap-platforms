@@ -1,5 +1,5 @@
-%name Hardware FPGA Components
-%desc Hardware FPGA Components
+%name Hardware FPGA Components for Virtex 5
+%desc Hardware FPGA Components for Virtex 5
 
 %provides fpga_components
 

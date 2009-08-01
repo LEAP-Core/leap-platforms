@@ -1,0 +1,19 @@
+%name Hardware FPGA Components for Virtex 2
+%desc Hardware FPGA Components for Virtex 2
+
+%provides fpga_components
+
+%attributes hasim
+
+%public bram.bsv bram-multi-read.bsv
+%public lutram.bsv
+%public alu-support.bsv
+%public user-clock.bsv
+
+%private Bram.v
+%private user-clock-xilinx-virtex2.v
+
+%param --global COST_TABLE 1 "Xilinx place and route cost table"
+
+%param SYNTH 1            "Synthesize it to FPGAs"
+%param BROKEN_REGFILE 1   "0 if RegFile synthesizes correctly.  Nonzero for Xilinx Xst < version 11."
