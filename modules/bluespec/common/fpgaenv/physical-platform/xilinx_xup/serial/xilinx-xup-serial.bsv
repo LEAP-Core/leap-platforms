@@ -23,11 +23,13 @@ import Clocks::*;
 
 // The Physical Platform for the XUP Virtex 2 with serial.
 
+`include "led_device.bsh"
+`include "switch_device.bsh"
 `include "clocks_device.bsh"
 `include "serial_device.bsh"
 `include "physical_platform_utils.bsh"
 
-// 4 switches and leds
+// 4 switches and leds, no buttons
 
 `define NUMBER_LEDS 4
 `define NUMBER_SWITCHES 4
@@ -42,6 +44,8 @@ import Clocks::*;
 interface PHYSICAL_DRIVERS;
     
     interface CLOCKS_DRIVER                      clocksDriver;
+    interface LEDS_DRIVER#(`NUMBER_LEDS)         ledsDriver;
+    interface SWITCHES_DRIVER#(`NUMBER_SWITCHES) switchesDriver;
     interface SERIAL_DRIVER                      serialDriver;
         
 endinterface
@@ -58,6 +62,8 @@ interface TOP_LEVEL_WIRES;
     // wires from devices
     (* prefix = "" *)
     interface CLOCKS_WIRES                       clocksWires;
+    interface LEDS_WIRES#(`NUMBER_LEDS)          ledsWires;
+    interface SWITCHES_WIRES#(`NUMBER_SWITCHES)  switchesWires;
     interface SERIAL_WIRES                       serialWires;
     
 endinterface
@@ -93,6 +99,9 @@ module mkPhysicalPlatform
       
     // Finally, instantiate all other physical devices
     
+    LEDS_DEVICE#(`NUMBER_LEDS)         leds_device       <- mkLEDsDevice(clocked_by clk, reset_by rst);
+    SWITCHES_DEVICE#(`NUMBER_SWITCHES) switches_device   <- mkSwitchesDevice(clocked_by clk, reset_by rst);
+
     //This must be clocked by the raw clock 
     SERIAL_DEVICE serial_device <- mkSerialDevice(clocks_device.driver.rawClock, 
                                                   clocks_device.driver.rawReset, 
@@ -120,6 +129,8 @@ module mkPhysicalPlatform
     interface PHYSICAL_DRIVERS physicalDrivers;
     
         interface clocksDriver     = clocks_device.driver;
+        interface ledsDriver       = leds_device.driver;
+        interface switchesDriver   = switches_device.driver;
         interface serialDriver     = serial_device.driver;
     
     endinterface
@@ -129,6 +140,8 @@ module mkPhysicalPlatform
     interface TOP_LEVEL_WIRES topLevelWires;
 
         interface clocksWires      = clocks_device.wires;
+        interface ledsWires        = leds_device.wires;
+        interface switchesWires    = switches_device.wires;
         interface serialWires      = serial_device.wires;
  
     endinterface
