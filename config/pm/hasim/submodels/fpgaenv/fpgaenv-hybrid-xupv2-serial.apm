@@ -35,7 +35,7 @@ File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/std-virtua
 Packagehint=platforms
 
 [Hardware FPGA Components]
-File=modules/bluespec/common/fpgaenv/fpga-components/hardware-fpga-components.awb
+File=modules/bluespec/common/fpgaenv/fpga-components/hardware-fpga-components-virtex2.awb
 Packagehint=platforms
 
 [Standard Virtual Devices/Requires]
@@ -78,10 +78,6 @@ Packagehint=platforms
 File=config/pm/hasim/submodels/fpgaenv/librl-bsv.apm
 Packagehint=platforms
 
-[Single-Ended Crystal Clocks Device]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/single-ended/single-ended-clocks-device.awb
-Packagehint=platforms
-
 [Common Physical Platform Utilities]
 File=modules/bluespec/common/fpgaenv/physical-platform/utils/utils.awb
 Packagehint=platforms
@@ -111,7 +107,7 @@ File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/switches
 Packagehint=platforms
 
 [XUP Virtex 2 Serial/Requires]
-clocks_device=Single-Ended Crystal Clocks Device
+clocks_device=Single-Ended Crystal Clocks Device For V5
 serial_device=Serial Physical Device (uBlaze-based)
 physical_platform_utils=Common Physical Platform Utilities
 led_device=General LED Device
@@ -122,7 +118,6 @@ File=modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup/serial/xilinx-
 Packagehint=platforms
 
 [XUP Virtex 2 Serial/Params]
-FPGA_PART="xc5vlx110tff1136-1"
 FPGA_POSITION=2
 
 [NULL Local Memory Interface/Params]
@@ -138,7 +133,10 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/serial/ublaze-serial/serial-device-ublaze.awb
 Packagehint=platforms
 
-
 [Hybrid Scratchpad Memory Device]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid/hybrid-mem-scratch.awb
+Packagehint=platforms
+
+[Single-Ended Crystal Clocks Device For V5]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/single-ended/single-ended-clocks-device.awb
 Packagehint=platforms
