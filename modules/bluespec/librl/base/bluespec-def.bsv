@@ -25,3 +25,24 @@ endtypeclass
 
 instance Alias#(a,a);
 endinstance
+
+
+//
+// NumTypeParam is useful for passing a numeric type as a parameter to a
+// module when the type is not part of the module's interface.  Ideally,
+// Bluespec would permit type parameters to modules.  This is an
+// intermediate step.
+//
+// Usage:
+//
+//   module mkMod0#(NumTypeParam#(n_ENTRIES) p) (BASE);
+//       Vector#(n_ENTRIES, Bit#(1)) v = ?;
+//   endmodule
+//
+//   module mkMod1 ();
+//       NumTypeParam#(1024) p = ?;
+//       BASE b <- mkMod0(p);
+//   endmodule
+//
+
+typedef Bit#(n) NumTypeParam#(numeric type n);

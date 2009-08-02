@@ -5,7 +5,7 @@
 
 %attributes librl
 
-%public alias_def.bsv
+%public bluespec-def.bsv
 %public counters.bsv
 %public counting-filter.bsv
 %public debug-file.bsv

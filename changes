@@ -6544,3 +6544,25 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/centr
  null-central-cache.bsv    Locally Modified          223 
 
 Update NULL central cache and local memory scratchpads to current interfaces.
+
+----------
+mcadler     Date: Sun Aug  2 10:56:31 EDT 2009  CSN: CSN-platforms-234
+                  Sun Aug  2 14:56:31 UTC 2009
+
+
+Directory modules/bluespec/librl/storage/cache
+ rl-direct-mapped-cache.bsv Locally Modified          233 
+
+Directory modules/bluespec/librl/base
+ alias_def.bsv             Locally Removed           233 
+ bluespec-def.bsv          Locally Added               - 
+ librl-bsv-base.awb        Locally Modified          233 
+
+- Add NumTypeParam#() to bluespec-def as a way to pass a numeric type as
+  a module parameter without adding the type to the interface.
+- Rename alias_def.bsv to bluespec-def.bsv.  File now holds base Bluespec
+  language extensions.
+- Use NumTypeParam for direct mapped cache sizing.  The old method (too
+  complicated to describe here) isn't supported by the compiler, especially
+  in combination with ModuleCollect.
+

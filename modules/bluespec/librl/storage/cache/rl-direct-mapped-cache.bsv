@@ -80,9 +80,7 @@ RL_DM_CACHE_MODE
 
 
 //
-// Direct mapped cache interface.  n_ENTRIES defines the number of entries
-// in the cache.  The true number of entries will be rounded up to
-// a power of 2.
+// Direct mapped cache interface.
 //
 // t_CACHE_REF_INFO is metadata associated with a reference.  Metadata is
 // passed to the backing store for fills.  The metadata is not stored in
@@ -126,15 +124,6 @@ interface RL_DM_CACHE#(type t_CACHE_ADDR,
     method Action setCacheMode(RL_DM_CACHE_MODE mode);
 
 endinterface: RL_DM_CACHE
-
-typedef RL_DM_CACHE#(t_CACHE_ADDR,
-                     t_CACHE_WORD,
-                     t_CACHE_REF_INFO) 
-
-        RL_DM_CACHE_SIZED#(type t_CACHE_ADDR,
-                           type t_CACHE_WORD,
-                           type t_CACHE_REF_INFO,
-                           numeric type n_ENTRIES);
 
 
 //
@@ -184,26 +173,6 @@ interface RL_DM_CACHE_SOURCE_DATA#(type t_CACHE_ADDR,
     method Action invalOrFlushWait();
 
 endinterface: RL_DM_CACHE_SOURCE_DATA
-
-//
-// mkRLDMCacheToRLDMCacheSourceData 
-
-/*module mkRLDMCacheToRLDMCacheSourceData#(RL_DM_CACHE#(t_CACHE_ADDR,
-                                                      t_CACHE_WORD,
-                                                      t_CACHE_REF_INFO,
-                                                      n_ENTRIES) cache)
-     (RL_DM_CACHE_SOURCE_DATA#(t_CACHE_ADDR,t_CACHE_WORD,t_CACHE_REF_INFO));
-   RL_DM_CACHE_SOURCE_DATA#(t_CACHE_ADDR,t_CACHE_WORD,t_CACHE_REF_INFO) sourceData = 
-      interface RL_DM_CACHE_SOURCE_DATA
-          method readResp = cache.readResp;
-          method readReq = cache.readReq;
-          method peekResp = cache.peekResp;
-          method write = cache.write;
-          method invalReq = cache.invalReq;
-          method flushReq = cache.flushReq;
-          method invalOrFlushWait = cache.invalOrFlushWait;
-      endinterface;
-endmodule*/
 
 
 
@@ -274,12 +243,18 @@ RL_DM_CACHE_ENTRY#(type t_CACHE_WORD, type t_CACHE_TAG)
 //
 // ===================================================================
 
+//
+// mkCacheDirectMapped --
+//   n_ENTRIES parameter defines the number of entries in the cache.  The true
+//   number of entries will be rounded up to a power of 2.
+//
 module mkCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(t_CACHE_ADDR, t_CACHE_WORD, t_CACHE_REF_INFO) sourceData,
+                            NumTypeParam#(n_ENTRIES) dummy,
                             Bool hashAddresses,
                             RL_CACHE_STATS stats,
                             DEBUG_FILE debugLog)
     // interface:
-    (RL_DM_CACHE_SIZED#(t_CACHE_ADDR, t_CACHE_WORD, t_CACHE_REF_INFO, n_ENTRIES))
+    (RL_DM_CACHE#(t_CACHE_ADDR, t_CACHE_WORD, t_CACHE_REF_INFO))
     provisos (Bits#(t_CACHE_ADDR, t_CACHE_ADDR_SZ),
               Bits#(t_CACHE_WORD, t_CACHE_WORD_SZ),
               Bits#(t_CACHE_REF_INFO, t_CACHE_REF_INFO_SZ),
@@ -680,7 +655,7 @@ endmodule
 module mkNullCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(t_CACHE_ADDR, t_CACHE_WORD, t_CACHE_REF_INFO) sourceData,
                                 DEBUG_FILE debugLog)
     // interface:
-    (RL_DM_CACHE_SIZED#(t_CACHE_ADDR, t_CACHE_WORD, t_CACHE_REF_INFO, n_ENTRIES))
+    (RL_DM_CACHE#(t_CACHE_ADDR, t_CACHE_WORD, t_CACHE_REF_INFO))
     provisos (Bits#(t_CACHE_ADDR, t_CACHE_ADDR_SZ),
               Bits#(t_CACHE_WORD, t_CACHE_WORD_SZ),
               Bits#(t_CACHE_REF_INFO, t_CACHE_REF_INFO_SZ));
@@ -735,4 +710,3 @@ module mkNullCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(t_CACHE_ADDR, t_CACHE_W
     endmethod
 
 endmodule
-
