@@ -14,7 +14,7 @@ model=FPGA Environment
 
 [FPGA Environment/Requires]
 virtual_platform=Standard Virtual Platform
-fpga_components=Hardware FPGA Components
+fpga_components=Hardware FPGA Components for Virtex 5
 librl_bsv=RL Bluespec Library
 
 [Standard Virtual Platform]
@@ -32,10 +32,6 @@ Packagehint=platforms
 
 [Standard Virtual Devices]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/std-virtual-devices.awb
-Packagehint=platforms
-
-[Hardware FPGA Components]
-File=modules/bluespec/common/fpgaenv/fpga-components/hardware-fpga-components.awb
 Packagehint=platforms
 
 [Standard Virtual Devices/Requires]
@@ -141,7 +137,10 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/low-level-platform-interface/local-mem/local-mem-ddr2.awb
 Packagehint=platforms
 
-
 [Null Physical Platform Debugger]
 File=modules/bluespec/common/fpgaenv/physical-platform/debuggers/null/null-debugger.awb
+Packagehint=platforms
+
+[Hardware FPGA Components for Virtex 5]
+File=modules/bluespec/common/fpgaenv/fpga-components/hardware-fpga-components-virtex5.awb
 Packagehint=platforms

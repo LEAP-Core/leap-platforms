@@ -2,7 +2,7 @@
 %name XUP Virtex 2 Serial
 %desc XUP Virtex 2 Serial
 
-%provides physical_platform
+%provides physical_platform	
 
 %requires clocks_device led_device switch_device serial_device physical_platform_utils
 
@@ -15,6 +15,9 @@
 %sources -t XST -v PRIVATE xilinx.xst
 %sources -t DOWNLOAD -v PRIVATE xilinx.download
 
+
 %param FPGA_PART     "xc2vp30-7-ff896" "FPGA Part ID"
 %param FPGA_POSITION 3                 "FPGA Position (in Xilinx iMPACT)"
+%param MAP_OPTIONS   ""                "Extra Map Options"
+
 

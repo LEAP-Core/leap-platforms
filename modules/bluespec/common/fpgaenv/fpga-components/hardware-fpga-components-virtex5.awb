@@ -11,7 +11,7 @@
 %public user-clock.bsv
 
 %private Bram.v
-%private user-clock-xilinx.v
+%private user-clock-xilinx-virtex5.v
 
 %param --global COST_TABLE 1 "Xilinx place and route cost table"
 

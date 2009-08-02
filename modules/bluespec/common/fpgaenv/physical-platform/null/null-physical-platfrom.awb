@@ -9,3 +9,4 @@
 
 %param FPGA_PART     "NULL-SIMULATION-ONLY" "FPGA Part ID"
 %param FPGA_POSITION 3                  "FPGA Position (in Xilinx iMPACT)"
+%param MAP_OPTIONS   ""    "Extra Map Options"

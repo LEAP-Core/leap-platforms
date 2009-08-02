@@ -6566,3 +6566,34 @@ Directory modules/bluespec/librl/base
   complicated to describe here) isn't supported by the compiler, especially
   in combination with ModuleCollect.
 
+
+----------
+keflemin    Date: Sun Aug  2 19:35:18 EDT 2009  CSN: CSN-platforms-235
+                  Sun Aug  2 23:35:18 UTC 2009
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ hasim-fpgaenv-htg-v5-pcie.apm Locally Modified          234 
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ hardware-fpga-components-virtex5.awb Locally Modified          234 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup/serial
+ xilinx-xup-serial.awb     Locally Modified          234 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-disabled
+ htg-v5-pcie-disabled.awb  Locally Modified          234 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled
+ htg-v5-pcie-enabled.awb   Locally Modified          234 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/null
+ null-physical-platfrom.awb Locally Modified          234 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/serial/ublaze-serial
+ system.bmm                Locally Modified          234 
+ bramfeeder.v              Locally Modified          234 
+ serial-device-ublaze.awb  Locally Modified          234 
+
+
+Added support for bmm and elf for serial

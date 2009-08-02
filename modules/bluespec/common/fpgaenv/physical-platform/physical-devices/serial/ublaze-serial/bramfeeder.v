@@ -84,6 +84,7 @@ mkBRAMFeeder  m(
 		.EN_ppcMessageInput_put(EN_ppcMessageInput_put),
 		.RDY_ppcMessageInput_put(RDY_ppcMessageInput_put),
 		.EN_ppcMessageOutput_get(EN_ppcMessageOutput_get),
+
 		.ppcMessageOutput_get(ppcMessageOutput_get),
 		.RDY_ppcMessageOutput_get(RDY_ppcMessageOutput_get),
 		.bramInitiatorWires_bramAddr(bramInitiatorWires_bramAddr_our),

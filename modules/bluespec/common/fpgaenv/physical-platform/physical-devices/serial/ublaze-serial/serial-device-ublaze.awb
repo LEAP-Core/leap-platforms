@@ -28,3 +28,6 @@
 
 %sources -t H   -v PUBLIC  serial-device.h
 %sources -t CPP -v PUBLIC  serial-device.cpp
+
+%sources -t BMM -v PRIVATE system.bmm
+%sources -t ELF -v PRIVATE firmware.elf
