@@ -1,0 +1,28 @@
+// File: /home/kfleming/korea_serial_modified/implementation/system.bmm
+
+ADDRESS_MAP microblaze_0 MICROBLAZE 100
+	ADDRESS_SPACE lmb_bram_combined COMBINED [0x00000000:0x00003fff]
+		ADDRESS_RANGE RAMB16
+		BUS_BLOCK
+			lmb_bram/lmb_bram/ramb16_s4_s4_0 [31:28] ;
+			lmb_bram/lmb_bram/ramb16_s4_s4_1 [27:24] ;
+			lmb_bram/lmb_bram/ramb16_s4_s4_2 [23:20] ;
+			lmb_bram/lmb_bram/ramb16_s4_s4_3 [19:16] ;
+			lmb_bram/lmb_bram/ramb16_s4_s4_4 [15:12] ;
+			lmb_bram/lmb_bram/ramb16_s4_s4_5 [11:8] ;
+			lmb_bram/lmb_bram/ramb16_s4_s4_6 [7:4] ;
+			lmb_bram/lmb_bram/ramb16_s4_s4_7 [3:0] ;
+		END_BUS_BLOCK;
+		END_ADDRESS_RANGE;
+	END_ADDRESS_SPACE;
+	ADDRESS_SPACE xps_bram_if_cntlr_1_bram_combined COMBINED [0x84018000:0x84019fff]
+		ADDRESS_RANGE RAMB16
+		BUS_BLOCK
+			xps_bram_if_cntlr_1_bram/xps_bram_if_cntlr_1_bram/ramb16_s9_s9_0 [31:24] ;
+			xps_bram_if_cntlr_1_bram/xps_bram_if_cntlr_1_bram/ramb16_s9_s9_1 [23:16] ;
+			xps_bram_if_cntlr_1_bram/xps_bram_if_cntlr_1_bram/ramb16_s9_s9_2 [15:8] ;
+			xps_bram_if_cntlr_1_bram/xps_bram_if_cntlr_1_bram/ramb16_s9_s9_3 [7:0] ;
+		END_BUS_BLOCK;
+		END_ADDRESS_RANGE;
+	END_ADDRESS_SPACE;
+END_ADDRESS_MAP;

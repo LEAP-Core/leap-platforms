@@ -1,0 +1,55 @@
+// BMM LOC annotation file.
+//
+// Release 10.1i - Data2MEM K.39, build 1.5.7 Nov 8, 2007
+// Copyright (c) 1995-2009 Xilinx, Inc.  All rights reserved.
+//
+// Created on 08/01/09 12:24 am
+//
+
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// Processor 'microblaze_0', ID 100, memory map.
+//
+///////////////////////////////////////////////////////////////////////////////
+
+ADDRESS_MAP microblaze_0 MICROBLAZE 100
+
+
+    ///////////////////////////////////////////////////////////////////////////////
+    //
+    // Processor 'microblaze_0' address space 'lmb_bram_combined' 0x00000000:0x2B2300003FFF (16 KB).
+    //
+    ///////////////////////////////////////////////////////////////////////////////
+
+    ADDRESS_SPACE lmb_bram_combined RAMB16 [0x00000000:0x00003FFF]
+        BUS_BLOCK
+            lmb_bram/lmb_bram/ramb16_s4_s4_0 [31:28] PLACED = X6Y14;
+            lmb_bram/lmb_bram/ramb16_s4_s4_1 [27:24] PLACED = X5Y14;
+            lmb_bram/lmb_bram/ramb16_s4_s4_2 [23:20] PLACED = X5Y13;
+            lmb_bram/lmb_bram/ramb16_s4_s4_3 [19:16] PLACED = X6Y13;
+            lmb_bram/lmb_bram/ramb16_s4_s4_4 [15:12] PLACED = X6Y16;
+            lmb_bram/lmb_bram/ramb16_s4_s4_5 [11:8] PLACED = X6Y15;
+            lmb_bram/lmb_bram/ramb16_s4_s4_6 [7:4] PLACED = X5Y16;
+            lmb_bram/lmb_bram/ramb16_s4_s4_7 [3:0] PLACED = X4Y16;
+        END_BUS_BLOCK;
+    END_ADDRESS_SPACE;
+
+
+    ///////////////////////////////////////////////////////////////////////////////
+    //
+    // Processor 'microblaze_0' address space 'xps_bram_if_cntlr_1_bram_combined' 0x84018000:0x2B2384019FFF (8 KB).
+    //
+    ///////////////////////////////////////////////////////////////////////////////
+
+    ADDRESS_SPACE xps_bram_if_cntlr_1_bram_combined RAMB16 [0x84018000:0x84019FFF]
+        BUS_BLOCK
+            xps_bram_if_cntlr_1_bram/xps_bram_if_cntlr_1_bram/ramb16_s9_s9_0 [31:24] PLACED = X4Y14;
+            xps_bram_if_cntlr_1_bram/xps_bram_if_cntlr_1_bram/ramb16_s9_s9_1 [23:16] PLACED = X4Y13;
+            xps_bram_if_cntlr_1_bram/xps_bram_if_cntlr_1_bram/ramb16_s9_s9_2 [15:8] PLACED = X5Y15;
+            xps_bram_if_cntlr_1_bram/xps_bram_if_cntlr_1_bram/ramb16_s9_s9_3 [7:0] PLACED = X4Y15;
+        END_BUS_BLOCK;
+    END_ADDRESS_SPACE;
+
+END_ADDRESS_MAP;
+
