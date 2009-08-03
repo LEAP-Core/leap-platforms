@@ -13,4 +13,4 @@
 %public  htg-v5-pcie-disabled.bsv
 %private htg-v5-pcie-disabled.ucf
 
-%param MAP_OPTIONS   "-global_opt on"    "Extra Map Options"
+%param MAP_OPTIONS   "-global_opt on"    "Extra Xilinx Map Options"

@@ -6597,3 +6597,16 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ser
 
 
 Added support for bmm and elf for serial
+
+----------
+mcadler     Date: Mon Aug  3 07:47:00 EDT 2009  CSN: CSN-platforms-236
+                  Mon Aug  3 11:47:00 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-disabled
+ htg-v5-pcie-disabled.awb  Locally Modified          235 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled
+ htg-v5-pcie-enabled.awb   Locally Modified          235 
+
+Spaces no longer needed around MAP_OPTIONS.
