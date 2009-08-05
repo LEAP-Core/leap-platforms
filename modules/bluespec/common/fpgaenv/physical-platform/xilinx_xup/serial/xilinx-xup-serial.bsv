@@ -33,7 +33,7 @@ import Clocks::*;
 
 `define NUMBER_LEDS 4
 `define NUMBER_SWITCHES 4
-`define NUMBER_BUTTONS 6
+`define NUMBER_BUTTONS 5
 
 // PHYSICAL_DRIVERS
 
