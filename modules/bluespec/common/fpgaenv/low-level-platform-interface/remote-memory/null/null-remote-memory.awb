@@ -1,0 +1,8 @@
+%name Null Remote Memory
+%desc Null Remote Memory
+
+%provides remote_memory
+
+%public  null-remote-memory.bsv
+%public  null-remote-memory.h
+

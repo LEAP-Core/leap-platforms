@@ -4,7 +4,7 @@
 
 %provides virtual_devices
 
-%requires front_panel central_cache scratchpad_memory streams
+%requires front_panel central_cache scratchpad_memory shared_memory streams
 
 %public std-virtual-devices.dic
 %public std-virtual-device-interfaces.bsv

@@ -1,5 +1,7 @@
 - Makefile
-  makefile for driver. 
+  Makefile for driver. Before building, update the environment as follows:
+      unsetenv ARCH
+      setenv PATH /usr/bin:$PATH
 
 - pchnl_if.h
   PCIe Hardware Channel interface declaration

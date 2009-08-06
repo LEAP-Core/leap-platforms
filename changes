@@ -6610,3 +6610,124 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-ena
  htg-v5-pcie-enabled.awb   Locally Modified          235 
 
 Spaces no longer needed around MAP_OPTIONS.
+
+----------
+aparasha    Date: Thu Aug  6 17:19:27 EDT 2009  CSN: CSN-platforms-242
+                  Thu Aug  6 21:19:27 UTC 2009
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ hasim-fpgaenv-hybrid-sim.apm Locally Modified          241 
+ hasim-fpgaenv-htg-v5-pcie.apm Locally Modified          241 
+ hasim-fpgaenv-null.apm    Locally Modified          241 
+
+Directory modules/bluespec/common/fpgaenv/low-level-platform-interface
+ llpi.cpp                  Locally Modified          241 
+ remote-memory/            Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/low-level-platform-interface/remote-memory
+ pci-express-dma/          Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/low-level-platform-interface/remote-memory/pci-express-dma
+ remote-memory-pcie-dma.cpp Locally Added               0 
+ remote-memory-pcie-dma.h  Locally Added               0 
+ remote-memory-pcie-dma.awb Locally Added               0 
+ remote-memory-pcie-dma.bsv Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/low-level-platform-interface/remote-memory
+ null/                     Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/low-level-platform-interface/remote-memory/null
+ null-remote-memory.h      Locally Added               0 
+ null-remote-memory.awb    Locally Added               0 
+ null-remote-memory.bsv    Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/low-level-platform-interface
+ llpi.h                    Locally Modified          241 
+ hybrid-llpi.awb           Locally Modified          241 
+ llpi.bsv                  Locally Modified          241 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/pcie-dma
+ dma-physical-channel.cpp  Locally Modified          241 
+ dma-physical-channel.awb  Locally Modified          241 
+ dma-physical-channel.bsv  Locally Modified          241 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices
+ std-virtual-devices.awb   Locally Modified          241 
+ shared-memory/            Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/shared-memory
+ standard/                 Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/shared-memory/standard
+ standard-shared-memory-server.cpp Locally Added               0 
+ standard-shared-memory.h  Locally Added               0 
+ standard-shared-memory.awb Locally Added               0 
+ standard-shared-memory.bsv Locally Added               0 
+ standard-shared-memory-server.h Locally Added               0 
+ standard-shared-memory.cpp Locally Added               0 
+ standard-shared-memory.rrr Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/shared-memory
+ null/                     Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/shared-memory/null
+ null-shared-memory.h      Locally Added               0 
+ null-shared-memory.awb    Locally Added               0 
+ null-shared-memory.bsv    Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/debuggers/htg-virtex5
+ htg-debugger.bsv          Locally Modified          241 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express
+ pci-express-device-ioctl.awb Locally Modified          241 
+ pci-express-device.bsv    Locally Modified          241 
+ pci-express-device-mmap.awb Locally Modified          241 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express-new
+ pci-express-device.bsv    Locally Modified          241 
+ pci-express-vhdl-import.bsv Locally Modified          241 
+ pci-express-device-mmap.awb Locally Modified          241 
+ pci-express-c-import-mmap.cpp Locally Modified          241 
+ dma_ctrl.vhd              Locally Modified          241 
+ pci-express-c-import-mmap.h Locally Modified          241 
+ channel_ctrl.vhd          Locally Modified          241 
+
+Directory drivers/linux/hasim/kernel
+ pchnl_if.h                Locally Modified          241 
+ pchnl_main.c              Locally Modified          241 
+ README                    Locally Modified          241 
+ pchnl_main.h              Locally Modified          241 
+
+- Updated the PCI-Express kernel driver to support page address translation and locking
+  for DMA.
+
+- Updated the PCI-Express physical device to support DMA. The firmware code appears
+  to be buggy and crashes the system if the flow of data is not continuous once a
+  DMA has started. To work around this, the physical device layer uses a BRAM buffer
+  to buffer the entire DMA transaction before sending it out.
+
+- Added a DMA-based Physical Channel. This is primarily a proof-of-concept module and is
+  not being used in any platform configuration. The CSR-based channel is going to be
+  used for ChannelIO and value-based RRR. DMA is going to be exposed via the Remote/
+  Shared memory interface (see below).
+
+- Added a new Remote Memory module to the set of Physical Platform Interfaces (alongside
+  ChannelIO and Local Memory). The module supports line- and burst-mode accesses to "remote"
+  host memory. Also added a Null implementation for physical platforms that currently do
+  not allow access to host memory. In future, a Simulation version could be created.
+
+  The software side of this module has methods to obtain the address translations from
+  the underlying physical platform driver.
+
+- Added a new Shared Memory virtual device. This module also supports line- and
+  burst-mode accesses. Clients of this device use "virtual" addresses. The host-side
+  virtual address is simply the C++ pointer to the memory region. The FPGA-side virtual
+  address is the offset from the start of the region (starting at 0). The current
+  implementation only supports a single client, and a single page-sized transfer region.
+  Client software calls sharedMemory.Allocate() to allocate the region and obtain a
+  virtual address. Following this, the hardware can simply use addresses in the [0, 4KB]
+  range to access this region.
+
+  Also added a Null implementation of shared memory. A Simulation version will be added
+  in the near future.

@@ -26,7 +26,7 @@
 //               PCI-Express Device
 // ===============================================
 
-// types for CSR indices and data
+// types
 #if   (PCIE_CSR_DATA_SIZE == 8)
 typedef unsigned char      CSR_DATA;
 #elif (PCIE_CSR_DATA_SIZE == 32)
@@ -47,7 +47,16 @@ typedef unsigned long long CSR_INDEX;
 #error "invalid PCIE_CSR_IDX_SIZE"
 #endif    
 
-// =========== The actual Device Class ===========
+#if (PCIE_PHYS_ADDR_SIZE == 32)
+typedef unsigned int       PCIE_PHYSICAL_ADDRESS;
+#elif (PCIE_PHYS_ADDR_SIZE == 64)
+typedef unsigned long long PCIE_PHYSICAL_ADDRESS;
+#else
+#error "invalid PCIE_PHYSICAL_ADDRESS_SIZE"
+#endif
+
+// =========== The Device Class ===========
+
 typedef class PCIE_DEVICE_CLASS* PCIE_DEVICE;
 class PCIE_DEVICE_CLASS: public PLATFORMS_MODULE_CLASS
 {
@@ -58,6 +67,10 @@ class PCIE_DEVICE_CLASS: public PLATFORMS_MODULE_CLASS
     // device mmap
     unsigned char *deviceMap;
     
+    // DMA buffer pointers
+    unsigned char *dmaBuffer_H2F;
+    unsigned char *dmaBuffer_F2H;
+
     // helper pointers
     CSR_DATA* systemCSR_Read;
     CSR_DATA* systemCSR_Write;
@@ -78,6 +91,12 @@ class PCIE_DEVICE_CLASS: public PLATFORMS_MODULE_CLASS
     void     WriteSystemCSR(CSR_DATA);
     CSR_DATA ReadCommonCSR(CSR_INDEX);
     void     WriteCommonCSR(CSR_INDEX, CSR_DATA);
+
+    // DMA buffers
+    unsigned char* GetDMABuffer_H2F()   { return dmaBuffer_H2F; }
+    unsigned char* GetDMABuffer_F2H()   { return dmaBuffer_F2H; }
+    UINT64         GetDMABufferPA_H2F();
+    UINT64         GetDMABufferPA_F2H();
 
     // Memory translation
     // TODO: make this more general

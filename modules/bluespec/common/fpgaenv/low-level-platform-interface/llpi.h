@@ -21,6 +21,7 @@
 
 #include "platforms-module.h"
 #include "asim/provides/physical_platform.h"
+#include "asim/provides/remote_memory.h"
 #include "asim/provides/channelio.h"
 #include "asim/provides/rrr.h"
 #include "asim/provides/physical_platform_debugger.h"
@@ -36,6 +37,7 @@ class LLPI_CLASS: public PLATFORMS_MODULE_CLASS
     // LLPI stack layers
     PHYSICAL_DEVICES_CLASS           physicalDevices;
     PHYSICAL_PLATFORM_DEBUGGER_CLASS debugger;
+    REMOTE_MEMORY_CLASS              remoteMemory;
     CHANNELIO_CLASS                  channelio;
     RRR_CLIENT_CLASS                 rrrClient;
     RRR_SERVER_MONITOR_CLASS         rrrServer;
@@ -51,6 +53,7 @@ class LLPI_CLASS: public PLATFORMS_MODULE_CLASS
     
     // accessors
     PHYSICAL_DEVICES   GetPhysicalDevices() { return &physicalDevices; }
+    REMOTE_MEMORY      GetRemoteMemory()    { return &remoteMemory; }
     CHANNELIO          GetChannelIO()       { return &channelio; }
     RRR_CLIENT         GetRRRClient()       { return &rrrClient; }
     RRR_SERVER_MONITOR GetRRRServer()       { return &rrrServer; }

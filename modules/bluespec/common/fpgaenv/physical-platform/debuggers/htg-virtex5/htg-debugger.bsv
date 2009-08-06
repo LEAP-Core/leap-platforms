@@ -348,11 +348,13 @@ module mkPhysicalPlatformDebugger#(PHYSICAL_DRIVERS drivers)
     endrule    
     
     // update LEDs
+    /*
     rule update_leds (True);
         
         drivers.ledsDriver.setLEDs(truncate(dramBuffer)); // -- DEBUG -- leds);
         
     endrule
+    */
     
     // ============== Interface Methods ==============
     

@@ -30,6 +30,9 @@ PHYSICAL_CHANNEL_CLASS::PHYSICAL_CHANNEL_CLASS(
     PHYSICAL_DEVICES d) :
         PLATFORMS_MODULE_CLASS(p)
 {
+    // cache links to useful physical devices
+    pciExpressDevice = d->GetPCIExpressDevice();
+
     // all of this module's code assumes UMF_CHUNK fits within 64 bits
     if (sizeof(UMF_CHUNK) > 8)
     {
@@ -46,38 +49,48 @@ PHYSICAL_CHANNEL_CLASS::PHYSICAL_CHANNEL_CLASS(
         ASIMERROR("page size mismatch");
         CallbackExit(1);
     }
-
+ 
     if (posix_memalign((void **)&h2fBuffer, page_size, page_size) != 0)
     {
         perror("posix_memalign");
         CallbackExit(1);
     }
 
-    bzero((void *)h2fBuffer, page_size);
+    // h2fBuffer = (UINT64*) pciExpressDevice->GetDMABuffer_H2F();
 
-    /*
-    if (mlock((const void *)h2fBuffer, page_size) != 0)
-    {
-        perror("mlock");
-        CallbackExit(1);
-    }
-    */
-    
+    bzero((void *)h2fBuffer, page_size);    
+
+    // if (mlock((const void *)h2fBuffer, page_size) != 0)
+    // {
+    //     perror("mlock");
+    //     CallbackExit(1);
+    // }
+
     if (posix_memalign((void **)&f2hBuffer, page_size, page_size) != 0)
     {
         perror("posix_memalign");
         CallbackExit(1);
     }
 
+    // f2hBuffer = (UINT64*) pciExpressDevice->GetDMABuffer_F2H();
+
     bzero((void *)f2hBuffer, page_size);
 
-    /*
-    if (mlock((const void *)f2hBuffer, page_size) != 0)
-    {
-        perror("mlock");
-        CallbackExit(1);
-    }
-    */
+    // if (mlock((const void *)f2hBuffer, page_size) != 0)
+    // {
+    //     perror("mlock");
+    //     CallbackExit(1);
+    // }
+
+    //
+    // Address Translation
+    //
+
+    UINT64 h2fBufferPA = pciExpressDevice->TranslateV2P(UINT64(h2fBuffer));
+    UINT64 f2hBufferPA = pciExpressDevice->TranslateV2P(UINT64(f2hBuffer));
+
+    // UINT64 h2fBufferPA = pciExpressDevice->GetDMABufferPA_H2F();
+    // UINT64 f2hBufferPA = pciExpressDevice->GetDMABufferPA_F2H();
 
     //
     // set common buffer size
@@ -92,57 +105,54 @@ PHYSICAL_CHANNEL_CLASS::PHYSICAL_CHANNEL_CLASS(
     h2fHeadCache = 0;
     h2fTail      = 0;
 
-    // other initialization
-    iid = 0;
-
-    // cache links to useful physical devices
-    pciExpressDevice = d->GetPCIExpressDevice();
-
-    // bootstrap: first write indices that I control
-    pciExpressDevice->WriteCommonCSR(CSR_F2H_HEAD, f2hHead);
-    pciExpressDevice->WriteCommonCSR(CSR_H2F_TAIL, h2fTail);
-
-    // send buffer size, physical addresses, etc. to hardware
-    // FIXME: all addresses are hard-wired UINT64
-    UINT64 h2fBufferPA = pciExpressDevice->TranslateV2P(UINT64(h2fBuffer));
-    UINT64 f2hBufferPA = pciExpressDevice->TranslateV2P(UINT64(f2hBuffer));
-
-    cout << "h2f PA = " << hex << h2fBufferPA << endl;
-    cout << "f2h PA = " << hex << f2hBufferPA << endl;
-
-    UINT64 lo_mask = 0x0FFFFFFFF;
-
-    pciExpressDevice->WriteCommonCSR(CSR_H2F_ADDR_LO, UINT32(h2fBufferPA & lo_mask));
-    pciExpressDevice->WriteCommonCSR(CSR_H2F_ADDR_HI, UINT32(h2fBufferPA >> 32));
-
-    pciExpressDevice->WriteCommonCSR(CSR_F2H_ADDR_LO, UINT32(f2hBufferPA & lo_mask));
-    pciExpressDevice->WriteCommonCSR(CSR_F2H_ADDR_HI, UINT32(f2hBufferPA >> 32));
-
-    cout << "sent to f2h LO: " << hex << UINT32(f2hBufferPA & lo_mask) << endl;
-    cout << "sent to f2h HI: " << hex << UINT32(f2hBufferPA >> 32) << endl;    
-
-    cout << "wrote address CSRs\n";
-
-    // give green signal to FPGA
-    pciExpressDevice->WriteSystemCSR(GenIID() | 0x50000);
-
-    cout << "sent green signal\n";
-
-    // CallbackExit(0);
-
-    // wait for green signal from FPGA
-    CSR_DATA data = 0;
+    // try to initialize FPGA. If necessary, reset the FPGA, rinse and repeat
+    CSR_DATA data;
     do
     {
-        sleep(2);
-        data = pciExpressDevice->ReadSystemCSR();
-        cout << "waiting for green signal " << data << endl;
+        // initialize unique IID
+        iid = 0;
+
+        // first write indices that I control
+        pciExpressDevice->WriteCommonCSR(CSR_F2H_HEAD, f2hHead);
+        pciExpressDevice->WriteCommonCSR(CSR_H2F_TAIL, h2fTail);
+
+        // send buffer size, physical addresses, etc. to hardware
+        // FIXME: all addresses are hard-wired UINT64
+        UINT64 lo_mask = 0x0FFFFFFFF;
+
+        pciExpressDevice->WriteCommonCSR(CSR_H2F_ADDR_LO, UINT32(h2fBufferPA & lo_mask));
+        pciExpressDevice->WriteCommonCSR(CSR_H2F_ADDR_HI, UINT32(h2fBufferPA >> 32));
+
+        pciExpressDevice->WriteCommonCSR(CSR_F2H_ADDR_LO, UINT32(f2hBufferPA & lo_mask));
+        pciExpressDevice->WriteCommonCSR(CSR_F2H_ADDR_HI, UINT32(f2hBufferPA >> 32));
+
+        // give green signal to FPGA
+        pciExpressDevice->WriteSystemCSR(GenIID() | (OP_START << 16));
+
+        // wait for green signal from FPGA
+        UINT32 trips = 0;
+        do
+        {
+            data = pciExpressDevice->ReadSystemCSR();
+            trips = trips + 1;
+        }
+        while ((data != SIGNAL_GREEN) && (trips < 1000000));
+
+        if (data != SIGNAL_GREEN)
+        {
+            // Gave up on green.  Reset again and restart the sequence.
+            pciExpressDevice->ResetFPGA();
+        }
     }
     while (data != SIGNAL_GREEN);
 
-    cout << "ready to go!\n";
+    // update pointers
+    pciExpressDevice->WriteSystemCSR(GenIID() | (OP_UPDATE_F2HHEAD << 16) | (f2hHead));
+    pciExpressDevice->WriteSystemCSR(GenIID() | (OP_UPDATE_H2FTAIL << 16) | (h2fTail));
 
-//    CallbackExit(0);
+    // set leaky bucket parameters
+    pciExpressDevice->WriteSystemCSR(GenIID() | (OP_SET_MAX_BUCKET   << 16) | 5);
+    pciExpressDevice->WriteSystemCSR(GenIID() | (OP_SET_MAX_THROTTLE << 16) | 32);
 }
 
 // destructor
@@ -212,6 +222,7 @@ PHYSICAL_CHANNEL_CLASS::TryRead()
     if (f2hHead == f2hTailCache)
     {
         f2hTailCache = pciExpressDevice->ReadCommonCSR(CSR_F2H_TAIL);
+        UINT32 temp = pciExpressDevice->ReadSystemCSR();
     }
 
     // now attempt read 
@@ -270,8 +281,7 @@ PHYSICAL_CHANNEL_CLASS::Write(
 
     // sync h2fTail pointer. It is OPTIONAL to do this immediately, but we will do it
     // since this is probably the response to a request the hardware might be blocked on
-    pciExpressDevice->WriteCommonCSR(CSR_H2F_TAIL, h2fTail);
-    pciExpressDevice->WriteSystemCSR(GenIID() | 0x60000);
+    pciExpressDevice->WriteSystemCSR(GenIID() | (OP_UPDATE_H2FTAIL << 16) | (h2fTail));
 
     // de-allocate message
     message->Delete();
@@ -294,8 +304,7 @@ PHYSICAL_CHANNEL_CLASS::ReadF2HBuffer()
     f2hHead = (f2hHead + 1) % bufferSize;
 
     // sync head pointer (OPTIONAL)
-    pciExpressDevice->WriteCommonCSR(CSR_F2H_HEAD, f2hHead);
-    pciExpressDevice->WriteSystemCSR(GenIID() | 0x70000);
+    pciExpressDevice->WriteSystemCSR(GenIID() | (OP_UPDATE_F2HHEAD << 16) | (f2hHead));
 
     // determine if we are starting a new message
     if (incomingMessage == NULL)

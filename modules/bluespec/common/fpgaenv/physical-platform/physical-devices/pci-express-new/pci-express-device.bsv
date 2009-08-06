@@ -1,6 +1,40 @@
+//
+// Copyright (C) 2008 Intel Corporation
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
+
 import Vector::*;
 import Clocks::*;
 import LevelFIFO::*;
+import FIFO::*;
+
+`include "asim/provides/physical_platform_utils.bsh"
+`include "asim/provides/fpga_components.bsh"
+`include "asim/provides/librl_bsv_base.bsh"
+
+typedef Bit#(9) DMA_BURST_INDEX;
+
+typedef enum
+{
+    DMA_WRITE_STATE_idle,
+    DMA_WRITE_STATE_buffering,
+    DMA_WRITE_STATE_writing
+}
+DMA_WRITE_STATE
+    deriving (Bits, Eq);
 
 // Subinterfaces
 
@@ -45,9 +79,6 @@ interface PCI_EXPRESS_DRIVER;
     // interrupt
     method Action interruptHost();
         
-    // soft reset
-    method Action softReset();
-    
 endinterface
 
 // PCI_EXPRESS_WIRES
@@ -109,7 +140,7 @@ endinterface
 
 // Take the primitive PCI Express import and cross the clock domains into the default bluespec domain.
 
-module mkPCIExpressDevice
+module mkPCIExpressDevice#(SOFT_RESET_TRIGGER softResetTrigger)
     // interface:
                  (PCI_EXPRESS_DEVICE);
 
@@ -120,9 +151,11 @@ module mkPCIExpressDevice
     Clock bsv_clk <- exposeCurrentClock();
     Reset bsv_rst <- exposeCurrentReset();
     
-    // translate our reset (bst_rst) to the PCIe clock domain. Note that this is
+    // translate our reset (bsv_rst) to the PCIe clock domain. Note that this is
     // different from the PCIe's native reset.
-    Reset trans_rst <- mkAsyncResetFromCR(0, prim_pci.pcie_clk);
+    // WE DON'T USE THIS ANYMORE, WE SIMPLY USE PCIE'S EXPORTED RESET (WHICH IS
+    // ANDED WITH THE SOFT RESET SIGNAL IN THE VHDL)
+    // Reset trans_rst <- mkAsyncResetFromCR(0, prim_pci.pcie_clk);
     
     // Device state
     Reg#(PCIE_DEVICE_STATE) state <- mkReg(PCIE_DEVICE_STATE_init);
@@ -135,19 +168,19 @@ module mkPCIExpressDevice
 
     // Synchronizers from PCIE to Bluespec.    
     Reg#(PCIE_CSR_DATA)          sync_csr_h2f_reg0_read_r
-                              <- mkSyncReg(?, prim_pci.pcie_clk, trans_rst, bsv_clk);
+                              <- mkSyncReg(?, prim_pci.pcie_clk, prim_pci.pcie_rst, bsv_clk);
     
     SyncFIFOIfc#(PCIE_CSR_DATA)  sync_csr_read_resp_q
-                              <- mkSyncFIFO(2, prim_pci.pcie_clk, trans_rst, bsv_clk);
+                              <- mkSyncFIFO(2, prim_pci.pcie_clk, prim_pci.pcie_rst, bsv_clk);
 
     SyncFIFOIfc#(Bool)           sync_reset_req_q
-                              <- mkSyncFIFO(2, prim_pci.pcie_clk, trans_rst, bsv_clk);
+                              <- mkSyncFIFO(2, prim_pci.pcie_clk, prim_pci.pcie_rst, bsv_clk);
     
     SyncFIFOIfc#(Bool)           sync_init_resp_q
-                              <- mkSyncFIFO(2, prim_pci.pcie_clk, trans_rst, bsv_clk);
+                              <- mkSyncFIFO(2, prim_pci.pcie_clk, prim_pci.pcie_rst, bsv_clk);
 
-    SyncFIFOIfc#(PCIE_DMA_DATA)  sync_dma_read_data_q
-                              <- mkSyncFIFO(2, prim_pci.pcie_clk, trans_rst, bsv_clk);
+    SyncFIFOLevelIfc#(PCIE_DMA_DATA, 4) sync_dma_read_data_q
+                              <- mkSyncFIFOLevel(prim_pci.pcie_clk, prim_pci.pcie_rst, bsv_clk);
     
     // Synchronizers from BSV to PCIe
     SyncFIFOIfc#(PCIE_CSR_INDEX) sync_csr_read_req_q
@@ -177,6 +210,15 @@ module mkPCIExpressDevice
     SyncFIFOIfc#(PCIE_DMA_DATA)  sync_dma_write_data_q
                               <- mkSyncFIFO(2, bsv_clk, bsv_rst, prim_pci.pcie_clk);
 
+    /*
+    // temporary buffer for DMA write data 
+    FIFO#(Tuple2#(PCIE_PHYSICAL_ADDRESS, PCIE_LENGTH)) dma_write_start_buf
+                              <- mkFIFO(clocked_by prim_pci.pcie_clk, reset_by prim_pci.pcie_rst);
+
+    FIFOCountIfc#(PCIE_DMA_DATA, 15) dma_write_data_buf
+                              <- mkFIFOCount(clocked_by prim_pci.pcie_clk, reset_by prim_pci.pcie_rst);
+     */
+
     // function to swap endianness
     function t swapEndian(t inData)
         provisos(Bits#(t, nbits),
@@ -186,6 +228,19 @@ module mkPCIExpressDevice
         Vector#(nbytes, Bit#(8)) vec = unpack(pack(inData));
         Vector#(nbytes, Bit#(8)) rev = reverse(vec);
 
+        return unpack(pack(rev));
+
+    endfunction
+
+    // DMA data needs to be flipped at the 32-bit boundary
+    function t swapHalves(t inData)
+        provisos(Bits#(t, nbits),
+                 Div#(nbits, 2, nhalfbits),
+                 Bits#(Vector::Vector#(2, Bit#(nhalfbits)), nbits));
+    
+        Vector#(2, Bit#(nhalfbits)) vec = unpack(pack(inData));
+        Vector#(2, Bit#(nhalfbits)) rev = reverse(vec);
+        
         return unpack(pack(rev));
 
     endfunction
@@ -229,6 +284,17 @@ module mkPCIExpressDevice
     
     endrule
     
+    // actually trigger the reset
+    rule trigger_soft_reset (True);
+        
+        // dequeue from the reset request queue
+        sync_reset_req_q.deq();
+        
+        // trigger!
+        softResetTrigger.reset();
+
+    endrule
+
     //
     // Rules for synchronizing from PCIe to Bluespec
     //
@@ -259,11 +325,25 @@ module mkPCIExpressDevice
         sync_csr_read_resp_q.enq(swapEndian(x));
 
     endrule
-
+    
+    /*
+    // To read in the data, we need to issue a Read into the Xilinx FIFO
+    // one cycle before we can actually latch the data. We need to make
+    // sure there's space in the Sync FIFO before issuing the request.
+    // We'll spam read requests into the FIFO and if there's no data it'll
+    // simply underflow.
+    
+    rule issue_dma_read_data_req (sync_dma_read_data_q.sNotFull());
+        
+        prim_pci.dma_read_data_req();
+        
+    endrule
+    */
+    
     rule sync_dma_read_data (True);
         
         let x <- prim_pci.dma_read_data();
-        sync_dma_read_data_q.enq(swapEndian(x));
+        sync_dma_read_data_q.enq(swapHalves(swapEndian(x)));
         
     endrule
     
@@ -320,19 +400,102 @@ module mkPCIExpressDevice
 
     endrule
 
-    rule sync_dma_write_start (True);
+    //
+    // managed/buffered DMA write
+    //
+    
+    // 4KB DMA buffer (512 x 64-bit entries)
+    
+    BRAM#(DMA_BURST_INDEX, PCIE_DMA_DATA) dmaBuffer <- mkBRAM(clocked_by prim_pci.pcie_clk,
+                                                 reset_by prim_pci.pcie_rst);
 
+    Reg#(DMA_WRITE_STATE) dmaWriteState <- mkReg(DMA_WRITE_STATE_idle,
+                                                 clocked_by prim_pci.pcie_clk,
+                                                 reset_by prim_pci.pcie_rst);
+    
+    Reg#(DMA_BURST_INDEX) dmaBufferIndex <- mkReg(0,
+                                                 clocked_by prim_pci.pcie_clk,
+                                                 reset_by prim_pci.pcie_rst);
+
+    Reg#(DMA_BURST_INDEX) dmaBurstLengthMinusOne <- mkReg(0,
+                                                 clocked_by prim_pci.pcie_clk,
+                                                 reset_by prim_pci.pcie_rst);
+    
+    Reg#(PCIE_PHYSICAL_ADDRESS) dmaWriteAddr   <- mkReg(0,
+                                                 clocked_by prim_pci.pcie_clk,
+                                                 reset_by prim_pci.pcie_rst);
+
+    Reg#(PCIE_LENGTH)           dmaWriteLength <- mkReg(0,
+                                                 clocked_by prim_pci.pcie_clk,
+                                                 reset_by prim_pci.pcie_rst);
+    
+    Reg#(Bool) dmaEnqueueCmd <- mkReg(False,
+                                                 clocked_by prim_pci.pcie_clk,
+                                                 reset_by prim_pci.pcie_rst);
+
+    // transfer from sync FIFO into internal buffer
+    rule dma_write_start_buffering (dmaWriteState == DMA_WRITE_STATE_idle);
+
+        match { .address, .length } = sync_dma_write_start_q.first();
         sync_dma_write_start_q.deq();
-        match {.a, .l} = sync_dma_write_start_q.first();
-        prim_pci.dma_write_start(a, l);
+        
+        PCIE_LENGTH data_chunks = length >> `PCIE_LOG_DMA_DATA_BYTES;
+    
+        // store address and burst length for this request
+        dmaBurstLengthMinusOne <= truncate(data_chunks - 1);
+        dmaWriteAddr           <= address;
+        dmaWriteLength         <= length;
+        
+        // start buffering into BRAM
+        dmaBufferIndex <= 0;
+        dmaWriteState <= DMA_WRITE_STATE_buffering;
+
+    endrule
+    
+    rule dma_write_continue_buffering (dmaWriteState == DMA_WRITE_STATE_buffering);
+
+        sync_dma_write_data_q.deq();
+        let x = swapHalves(swapEndian(sync_dma_write_data_q.first()));
+
+        dmaBuffer.write(dmaBufferIndex, x);
+        
+        if (dmaBufferIndex == dmaBurstLengthMinusOne)
+        begin
+            dmaBufferIndex <= 0;
+            dmaWriteState <= DMA_WRITE_STATE_writing;
+            
+            prim_pci.dma_write_start(dmaWriteAddr, dmaWriteLength);
+        end
+        else
+        begin
+            dmaBufferIndex <= dmaBufferIndex + 1;
+        end
 
     endrule
 
-    rule sync_dma_write_data (True);
+    // issue the read into the BRAM
+    rule issue_bram_read (dmaWriteState == DMA_WRITE_STATE_writing);
+        
+        dmaBuffer.readReq(dmaBufferIndex);
+        
+        if (dmaBufferIndex == dmaBurstLengthMinusOne)
+        begin
+            dmaBufferIndex <= 0;
+            dmaWriteState <= DMA_WRITE_STATE_idle;
+        end
+        else
+        begin
+            dmaBufferIndex <= dmaBufferIndex + 1;
+        end
 
-        sync_dma_write_data_q.deq();
-        prim_pci.dma_write_data(swapEndian(sync_dma_write_data_q.first()));
+    endrule
+    
+    // stream data out of BRAM into DMA engine
+    rule dma_bram_to_engine (True); // dmaWriteState == DMA_WRITE_STATE_writing);
 
+        let x <- dmaBuffer.readRsp();
+        prim_pci.dma_write_data(x);
+        
     endrule
 
     // The wires are not domain-crossed because no one should ever look at them.
@@ -435,14 +598,6 @@ module mkPCIExpressDevice
 
             sync_interrupt_host_q.enq(?);
 
-        endmethod
-
-        // Reset interface
-
-        method Action softReset() if (ready);
-
-            sync_reset_req_q.deq();
-            
         endmethod
 
     endinterface

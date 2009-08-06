@@ -1,0 +1,12 @@
+
+%name Standard Shared Memory
+%desc Standard Shared Memory Virtual Device
+
+%provides shared_memory
+
+%sources -t BSV -v PUBLIC   standard-shared-memory.bsv
+%sources -t CPP -v PRIVATE  standard-shared-memory.cpp
+%sources -t H   -v PUBLIC   standard-shared-memory.h
+%sources -t CPP -v PRIVATE  standard-shared-memory-server.cpp
+%sources -t H   -v PUBLIC   standard-shared-memory-server.h
+%sources -t RRR -v PRIVATE  standard-shared-memory.rrr

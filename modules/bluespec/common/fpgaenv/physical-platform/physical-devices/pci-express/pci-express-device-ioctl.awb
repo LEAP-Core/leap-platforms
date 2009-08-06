@@ -1,6 +1,6 @@
 
-%name PCI Express Physical Device (ioctl-based)
-%desc PCI Express Physical Device (ioctl-based)
+%name Obsolete PCI Express Physical Device (ioctl-based)
+%desc Obsolete PCI Express Physical Device (ioctl-based)
 
 %provides pci_express_device
 

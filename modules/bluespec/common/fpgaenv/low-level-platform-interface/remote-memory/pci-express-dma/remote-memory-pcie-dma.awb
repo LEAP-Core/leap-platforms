@@ -1,0 +1,9 @@
+%name Remote Memory using PCI Express DMA
+%desc Remote Memory using PCI Express DMA
+
+%provides remote_memory
+
+%public  remote-memory-pcie-dma.bsv
+%public  remote-memory-pcie-dma.h
+%private remote-memory-pcie-dma.cpp
+

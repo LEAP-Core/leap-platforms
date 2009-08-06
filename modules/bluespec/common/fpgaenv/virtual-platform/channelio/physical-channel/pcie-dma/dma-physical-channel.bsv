@@ -17,6 +17,7 @@
 //
 
 import FIFOF::*;
+import FIFOLevel::*;
 
 `include "physical_platform.bsh"
 `include "pci_express_device.bsh"
@@ -66,7 +67,8 @@ module mkPhysicalChannel#(PHYSICAL_DRIVERS drivers)
 
     // buffers
     FIFOF#(UMF_CHUNK) readBuffer  <- mkFIFOF();
-    FIFOF#(UMF_CHUNK) writeBuffer <- mkFIFOF();
+    // FIFOF#(UMF_CHUNK) writeBuffer <- mkFIFOF();
+    FIFOCountIfc#(UMF_CHUNK, 8) writeBuffer <- mkFIFOCount();
 
     // states
     Reg#(READ_STATE)    readState    <- mkReg(READ_STATE_ready);
@@ -119,7 +121,15 @@ module mkPhysicalChannel#(PHYSICAL_DRIVERS drivers)
     
     // shortcut to drivers
     PCI_EXPRESS_DRIVER pciExpressDriver = drivers.pciExpressDriver;
-
+    
+    // ============ Leaky Bucket Flow Control ============
+    
+    Reg#(Bit#(16)) maxBucket   <- mkReg(0);
+    Reg#(Bit#(16)) maxThrottle <- mkReg(0);
+    
+    Reg#(Bit#(16)) bucket   <- mkReg(0);
+    Reg#(Bit#(16)) throttle <- mkReg(0);
+    
     // ============== Rules =============
     
     // Control state machine
@@ -128,13 +138,15 @@ module mkPhysicalChannel#(PHYSICAL_DRIVERS drivers)
     //
     // field:   [IID]  [RESERVED] [OPCODE]  [INDEX] [IMMEDIATE]
     // bits :   31-24    23-20     19-16     15-8      7-0
-
+    
     // process a new instruction
-    rule process_inst (True);
+    rule process_inst (channelState != CHANNEL_STATE_init);
         
         // read current instruction and decode partially
         Bit#(8) iid    = pciExpressDriver.systemCSR[31:24];
         Bit#(4) opcode = pciExpressDriver.systemCSR[19:16];
+        Bit#(8) index  = pciExpressDriver.systemCSR[15:8];
+        Bit#(8) imm    = pciExpressDriver.systemCSR[7:0];
 
         // make sure this is a new instruction
         if (iid != lastIID)
@@ -151,13 +163,27 @@ module mkPhysicalChannel#(PHYSICAL_DRIVERS drivers)
                 `OP_START         : if (channelState == CHANNEL_STATE_idle)
                                         channelState <= CHANNEL_STATE_init;
                 
-                // invalidate H2F tail
-                `OP_INVAL_H2FTAIL : if (channelState == CHANNEL_STATE_active)
-                                        h2fTailValid <= False;
+                // update H2F tail
+                `OP_UPDATE_H2FTAIL : begin
+                                         h2fTail <= truncate({ index, imm });
+                                         h2fTailValid <= True;
+                                     end
                 
-                // invalidate F2H head
-                `OP_INVAL_F2HHEAD : if (channelState == CHANNEL_STATE_active)
-                                        f2hHeadValid <= False;
+                // update F2H head
+                `OP_UPDATE_F2HHEAD : begin
+                                         f2hHead <= truncate({ index, imm });
+                                         f2hHeadValid <= True;
+                                     end
+                
+                // update max bucket
+                `OP_SET_MAX_BUCKET:  begin
+                                         maxBucket <= { index, imm };
+                                     end
+
+                // update max throttle
+                `OP_SET_MAX_THROTTLE: begin
+                                          maxThrottle <= { index, imm };
+                                      end
 
                 default: noAction;
 
@@ -170,7 +196,7 @@ module mkPhysicalChannel#(PHYSICAL_DRIVERS drivers)
     // === initialization sequence ===
 
     rule do_channel_init (channelState == CHANNEL_STATE_init);
-
+        
         case (initStage)
             
             // read in F2H buffer base address (LO)
@@ -220,48 +246,10 @@ module mkPhysicalChannel#(PHYSICAL_DRIVERS drivers)
             
             // all set, activate channel
             11: channelState <= CHANNEL_STATE_active;
-
+            
         endcase
         
         initStage <= initStage + 1;
-        
-    endrule
-
-    // === pointer updates: READ ===
-
-    // read f2hHead pointer
-    rule make_f2hHead_read_req (channelActive && !f2hHeadValid && readState == READ_STATE_ready);
-
-        pciExpressDriver.commonCSRs.readRequest(`CSR_F2H_HEAD);
-        readState <= READ_STATE_busy_f2hHead;
-        f2hHeadValid <= True; // need this here, not at resp
-
-    endrule
-
-    // accept response for f2hHead request
-    rule recv_f2hHead_read_resp (channelActive && readState == READ_STATE_busy_f2hHead);
-        
-        PCIE_CSR_DATA data <- pciExpressDriver.commonCSRs.readResponse();
-        f2hHead <= truncate(data);
-        readState <= READ_STATE_ready;
-        
-    endrule
-
-    // read h2fTail pointer
-    rule make_h2fTail_read_req (channelActive && !h2fTailValid && readState == READ_STATE_ready);
-
-        pciExpressDriver.commonCSRs.readRequest(`CSR_H2F_TAIL);
-        readState <= READ_STATE_busy_h2fTail;
-        h2fTailValid <= True; // need this here, not at resp
-
-    endrule
-
-    // accept response for h2fTail request
-    rule recv_h2fTail_read_resp (channelActive && readState == READ_STATE_busy_h2fTail);
-
-        PCIE_CSR_DATA data <- pciExpressDriver.commonCSRs.readResponse();
-        h2fTail <= truncate(data);
-        readState <= READ_STATE_ready;
 
     endrule
 
@@ -286,7 +274,7 @@ module mkPhysicalChannel#(PHYSICAL_DRIVERS drivers)
     endrule
 
     // === data ===
-    
+
     //
     // start DMA read request. If the H2F buffer's head <= tail, then we initiate a
     // transfer for (tail - head) bytes. If head > tail, then we read from head till
@@ -304,7 +292,7 @@ module mkPhysicalChannel#(PHYSICAL_DRIVERS drivers)
         DMA_LINE_INDEX data_chunks;
         if (h2fHead < h2fTail)
         begin
-            data_chunks = h2fHead - h2fTail;
+            data_chunks = h2fTail - h2fHead;
         end
         else
         begin
@@ -313,20 +301,20 @@ module mkPhysicalChannel#(PHYSICAL_DRIVERS drivers)
         
         // each chunk is placed uniquely inside one DMA word
         PCIE_LENGTH data_bytes = zeroExtend(data_chunks) << `PCIE_LOG_DMA_DATA_BYTES;
-        
+
         pciExpressDriver.dmaDriver.startRead(h2fHeadAddr, data_bytes);
         
         readChunksRemaining <= data_chunks;
         
     endrule
-
+    
     // suck in DMA read data
     rule recv_read_resp (channelActive && readChunksRemaining != 0);
         
         PCIE_DMA_DATA data <- pciExpressDriver.dmaDriver.readData();
         
         // chop off MSBits and place data in read buffer
-        readBuffer.enq(truncate(data));        
+        readBuffer.enq(data[63:32]);// truncate(data));        
 
         // advance head
         h2fHead <= h2fHeadPlusOne;
@@ -336,46 +324,82 @@ module mkPhysicalChannel#(PHYSICAL_DRIVERS drivers)
                 
     endrule
 
-    //
-    // writes are handled very differently from reads. We start a DMA write transaction
-    // everytime the F2H tail pointer is 0 (i.e., the beginning of the page in
-    // memory). Then, we actually send data as and when it becomes available in
-    // our internal buffer, subject to availability of slots in the virtual
-    // circular FIFO (i.e. by looking at the head and tail pointers). I'm not 100%
-    // sure how the DMA controller works, but this protocol relies on the assumption
-    // that the controller doesn't lock down the PCIe bus once a transaction is
-    // initiated.
-    //
+    Bool readyToStartWrite = channelActive && !f2hFull && writeBuffer.notEmpty() && writeChunksRemaining == 0 && bucket != 0;
 
     // initiate DMA write transaction
-    rule start_data_write (channelActive && f2hTail == 0 && writeChunksRemaining == 0);
+    rule start_data_write (readyToStartWrite);
         
-        // I intend to send one full page of data (over time)
-        PCIE_LENGTH data_bytes = '0;
-        data_bytes[`PAGE_OFFSET_BITS] = 1;
-        
-        pciExpressDriver.dmaDriver.startWrite(f2hTailAddr, data_bytes);
- 
-        // setup internal state for the remainder of the transfer
-        writeChunksRemaining <= truncate(data_bytes >> `PCIE_LOG_DMA_DATA_BYTES);
+        bucket <= bucket - 1;
 
-    endrule
-    
-    // send out DMA write data
-    rule do_data_write(channelActive && !f2hFull && writeChunksRemaining != 0);
+        // just send 1 chunk
+        DMA_LINE_INDEX data_chunks = 1;
+        PCIE_LENGTH    data_bytes  = 8;
+
+        /*
+        UInt#(4)       count       = writeBuffer.count();
+        DMA_LINE_INDEX data_chunks = zeroExtend(pack(count));
+        PCIE_LENGTH    data_bytes  = zeroExtend(data_chunks) << `PCIE_LOG_DMA_DATA_BYTES;
+        */
+        pciExpressDriver.dmaDriver.startWrite(f2hTailAddr, data_bytes);
+        
+        // setup internal state for the remainder of the transfer
+        writeChunksRemaining <= data_chunks - 1;
         
         UMF_CHUNK data = writeBuffer.first();
         writeBuffer.deq();
+
+        PCIE_DMA_DATA dma_data = 0;
+        dma_data[63:32] = data;
+        pciExpressDriver.dmaDriver.writeData(dma_data); // zeroExtend(data));
+
+        f2hTail <= f2hTailPlusOne;
+
+        f2hTailDirty <= True;
+        /*
+        if (data_chunks == 1)
+            f2hTailDirty <= True;
+        */
         
-        pciExpressDriver.dmaDriver.writeData(zeroExtend(data));
+    endrule
+
+    Bool readyToContWrite = channelActive && !f2hFull && writeBuffer.notEmpty() && writeChunksRemaining != 0;// && bucket != 0;
+
+    // send out DMA write data
+    rule do_data_write(readyToContWrite);
+        
+        UMF_CHUNK data = writeBuffer.first();
+        writeBuffer.deq();
+
+        PCIE_DMA_DATA dma_data = 0;
+        dma_data[63:32] = data;
+        pciExpressDriver.dmaDriver.writeData(dma_data); // zeroExtend(data));
 
         f2hTail <= f2hTailPlusOne;
         f2hTailDirty <= True;
-        
+        /*
+        if (writeChunksRemaining == 1)
+            f2hTailDirty <= True;
+        */
         writeChunksRemaining <= writeChunksRemaining - 1;
         
     endrule
+
+    // ============ Injection Control ============
     
+    rule dec_throttle (throttle != 0);
+        
+        throttle <= throttle - 1;
+        
+    endrule
+    
+    rule inc_bucket (throttle == 0 && bucket != maxBucket && !readyToStartWrite && !readyToContWrite);
+        
+        bucket   <= bucket + 1;
+        throttle <= maxThrottle;
+        
+    endrule
+
+
     // ============= Methods =============
 
     // read
@@ -389,7 +413,7 @@ module mkPhysicalChannel#(PHYSICAL_DRIVERS drivers)
 
     // write
     method Action write(UMF_CHUNK data) if (channelActive);
-        
+
         writeBuffer.enq(data);
         
     endmethod

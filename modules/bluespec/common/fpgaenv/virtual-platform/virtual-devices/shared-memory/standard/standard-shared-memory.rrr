@@ -1,0 +1,12 @@
+service SHARED_MEMORY
+{
+    server sw (cpp, method) <- hw (bsv, method)
+    {
+        method GetTranslation(in UINT8[8] dummy, out UINT64[64] pa);
+    };
+
+    server hw (bsv, method) <- sw (cpp, method)
+    {
+        method UpdateTranslation(in UINT64[64] pa, out UINT64[64] ack);
+    };
+};

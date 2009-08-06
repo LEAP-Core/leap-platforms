@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2008 Intel Corporation
+// Copyright (C) 2009 Intel Corporation
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -16,42 +16,37 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+#ifndef __SHARED_MEMORY__
+#define __SHARED_MEMORY__
+
+#include "platforms-module.h"
 #include "asim/provides/low_level_platform_interface.h"
 
-LLPI_CLASS::LLPI_CLASS() :
-        PLATFORMS_MODULE_CLASS(NULL),
-        physicalDevices(this),
-        debugger(this, &physicalDevices),
-        remoteMemory(this, &physicalDevices),
-        channelio(this, &physicalDevices),
-        rrrClient(this, &channelio),
-        rrrServer(this, &channelio)
-{
-    // set global link to RRR client
-    // the service modules need this link since they
-    // are statically instantiated
-    RRRClient = &rrrClient;
-}
+#include "asim/rrr/client_stub_SHARED_MEMORY.h"
 
-LLPI_CLASS::~LLPI_CLASS()
-{
-}
+typedef UINT64 SHARED_MEMORY_DATA;
 
-void
-LLPI_CLASS::Main()
+typedef class SHARED_MEMORY_CLASS* SHARED_MEMORY;
+class SHARED_MEMORY_CLASS: public PLATFORMS_MODULE_CLASS
 {
-    // infinite scheduler loop
-    while (true)
-    {
-        Poll();
-    }
-}
+  private:
 
-void
-LLPI_CLASS::Poll()
-{
-    // poll channelio and RRR server
-    channelio.Poll();
-    rrrServer.Poll();
-    rrrClient.Poll();
-}
+    SHARED_MEMORY_CLIENT_STUB clientStub;    
+
+    // link to remote memory device
+    REMOTE_MEMORY remoteMemory;
+
+  public:
+
+    SHARED_MEMORY_CLASS(PLATFORMS_MODULE p, LLPI llpi);
+    ~SHARED_MEMORY_CLASS();
+
+    // standard infrastructure methods
+    void Cleanup();
+
+    // get pointer to shared region
+    SHARED_MEMORY_DATA* Allocate();
+    void DeAllocate(SHARED_MEMORY_DATA* mem);
+};
+
+#endif

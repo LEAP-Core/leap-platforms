@@ -7,6 +7,7 @@ Version=2.1
 Name=Hardware-Only Simulation Environment
 Type=HAsim
 Class=Asim::Model
+DefaultBenchmark=0
 
 [Model]
 DefaultAttributes=bluespec
@@ -35,8 +36,8 @@ Packagehint=platforms
 
 [FPGA Environment/Requires]
 virtual_platform=Standard Virtual Platform
-fpga_components=Hardware FPGA Components
 librl_bsv=RL Bluespec Library
+fpga_components=Software FPGA Components
 
 [Null RRR Module]
 File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/null/null-rrr.awb
@@ -51,6 +52,7 @@ front_panel=Console Front Panel
 streams=Simulation Streams
 scratchpad_memory=Local Memory Scratchpad Memory Device
 central_cache=NULL Central Cache
+shared_memory=Null Shared Memory
 
 [Null Physical Platform]
 File=modules/bluespec/common/fpgaenv/physical-platform/null/null-physical-platfrom.awb
@@ -75,10 +77,6 @@ local_mem=NULL Local Memory Interface
 File=modules/bluespec/common/fpgaenv/low-level-platform-interface/hwonly-llpi.awb
 Packagehint=platforms
 
-[Hardware FPGA Components]
-File=modules/bluespec/common/fpgaenv/fpga-components/hardware-fpga-components.awb
-Packagehint=platforms
-
 [Null Physical Platform Debugger]
 File=modules/bluespec/common/fpgaenv/physical-platform/debuggers/null/null-debugger.awb
 Packagehint=platforms
@@ -95,7 +93,14 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/local/local-mem-scratch.awb
 Packagehint=platforms
 
-
 [NULL Central Cache]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/central-cache/null-central-cache.awb
+Packagehint=platforms
+
+[Null Shared Memory]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/shared-memory/null/null-shared-memory.awb
+Packagehint=platforms
+
+[Software FPGA Components]
+File=modules/bluespec/common/fpgaenv/fpga-components/software-fpga-components.awb
 Packagehint=platforms

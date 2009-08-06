@@ -144,6 +144,7 @@ architecture rtl of channel_ctrl is
       dma_out_h2f_fifo_ready     : out std_logic;
       dma_in_h2f_en              : in  std_logic;
       dma_in_h2f_fifo_ack        : in  std_logic;
+      dma_out_h2f_fifo_empty     : out std_logic;
       dma_in_h2f_paddr           : in  std_logic_vector(63 downto 0);
       dma_in_h2f_len             : in  std_logic_vector(31 downto 0);
       dma_out_h2f_fifo_data      : out std_logic_vector(63 downto 0);
@@ -553,6 +554,7 @@ architecture rtl of channel_ctrl is
   signal dma_out_h2f_fifo_ready_c     : std_logic;
   signal dma_in_h2f_en_c              : std_logic;
   signal dma_in_h2f_fifo_ack_c        : std_logic;
+  signal dma_out_h2f_fifo_empty_c     : std_logic;
   signal dma_in_h2f_paddr_c           : std_logic_vector(63 downto 0);
   signal dma_in_h2f_len_c             : std_logic_vector(31 downto 0);
   signal dma_out_h2f_fifo_data_c      : std_logic_vector(63 downto 0);
@@ -802,6 +804,7 @@ begin  -- rtl
   dma_out_h2f_fifo_ready <= dma_out_h2f_fifo_ready_c;
   dma_in_h2f_en_c        <= dma_in_h2f_en;
   dma_in_h2f_fifo_ack_c  <= dma_in_h2f_fifo_ack;
+  -- dma_out_h2f_fifo_notempty <= not dma_out_h2f_fifo_empty_c;
   dma_in_h2f_paddr_c     <= dma_in_h2f_paddr;
   dma_in_h2f_len_c       <= dma_in_h2f_len;
   dma_out_h2f_fifo_data  <= dma_out_h2f_fifo_data_c;
@@ -819,6 +822,7 @@ begin  -- rtl
       dma_out_h2f_fifo_ready => dma_out_h2f_fifo_ready_c,
       dma_in_h2f_en          => dma_in_h2f_en_c,
       dma_in_h2f_fifo_ack    => dma_in_h2f_fifo_ack_c,
+      dma_out_h2f_fifo_empty => dma_out_h2f_fifo_empty_c,
       dma_in_h2f_paddr       => dma_in_h2f_paddr_c,
       dma_in_h2f_len         => dma_in_h2f_len_c,
       dma_out_h2f_fifo_data  => dma_out_h2f_fifo_data_c,

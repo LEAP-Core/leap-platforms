@@ -29,7 +29,7 @@ PCIE_DEVICE_CLASS::PCIE_DEVICE_CLASS(
 
     // mmap the CSRs into vm space
     deviceMap = (unsigned char*) mmap(0,
-                                      CSR_REGION_SIZE, 
+                                      PCHNL_MMAP_SIZE,
                                       PROT_READ | PROT_WRITE,
                                       MAP_SHARED,
                                       driverFD,
@@ -44,6 +44,9 @@ PCIE_DEVICE_CLASS::PCIE_DEVICE_CLASS(
     systemCSR_Write = (CSR_DATA*) (deviceMap + SYS_CSR_BASE_OFFSET);
     systemCSR_Read  = (CSR_DATA*) (deviceMap + SYS_CSR_BASE_OFFSET + sizeof(CSR_DATA));
     commonCSRs      = (CSR_DATA*) (deviceMap + COMM_CSR_BASE_OFFSET);
+
+    dmaBuffer_H2F = (unsigned char*) (deviceMap + PCHNL_DMA_H2F_OFFSET);
+    dmaBuffer_F2H = (unsigned char*) (deviceMap + PCHNL_DMA_F2H_OFFSET);
 
     // reset hardware
     ResetFPGA();
@@ -140,10 +143,39 @@ PCIE_DEVICE_CLASS::TranslateV2P(
     pchnl_req req;
     UINT64    physical_address;
 
-//    req.u.tranx_translate_v2p.va = &virtual_address;
-//    req.u.tranx_translate_v2p.pa = &physical_address;
+    req.u.tranx_translate_v2p.va = &virtual_address;
+    req.u.tranx_translate_v2p.pa = &physical_address;
 
-//    ioctl(driverFD, PCHNL_TRANSLATE_V2P, &req);
+    ioctl(driverFD, PCHNL_TRANSLATE_V2P, &req);
+    // physical_address = 0xDEADBEEF;
+
+    return physical_address;
+}
+
+// get H2F Buffer PA
+UINT64
+PCIE_DEVICE_CLASS::GetDMABufferPA_H2F()
+{
+    pchnl_req req;
+    UINT64    physical_address;
+
+    req.u.tranx_get_pa.pa = &physical_address;
+
+    ioctl(driverFD, PCHNL_GET_H2F_BUFFER_PA, &req);
+
+    return physical_address;
+}
+
+// get F2H Buffer PA
+UINT64
+PCIE_DEVICE_CLASS::GetDMABufferPA_F2H()
+{
+    pchnl_req req;
+    UINT64    physical_address;
+
+    req.u.tranx_get_pa.pa = &physical_address;
+
+    ioctl(driverFD, PCHNL_GET_F2H_BUFFER_PA, &req);
 
     return physical_address;
 }

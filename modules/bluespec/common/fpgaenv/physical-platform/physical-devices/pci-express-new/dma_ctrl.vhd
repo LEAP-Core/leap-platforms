@@ -36,9 +36,11 @@ entity dma_ctrl is
     dma_out_h2f_fifo_ready     : out std_logic;
     dma_in_h2f_en              : in  std_logic;
     dma_in_h2f_fifo_ack        : in  std_logic;
+    dma_out_h2f_fifo_empty     : out std_logic;
     dma_in_h2f_paddr           : in  std_logic_vector(63 downto 0);
     dma_in_h2f_len             : in  std_logic_vector(31 downto 0);
     dma_out_h2f_fifo_data      : out std_logic_vector(63 downto 0);
+
     ------ ports to high-level, f2h ports
     dma_out_f2h_ready          : out std_logic;
     dma_out_f2h_fifo_ready     : out std_logic;
@@ -168,7 +170,7 @@ begin
       clk   => clk_fifo,
       rd_en => dma_in_h2f_fifo_ack,
       dout  => dma_out_h2f_fifo_data,
-      empty => open,
+      empty => dma_out_h2f_fifo_empty,
       valid => dma_out_h2f_fifo_ready,
 
       din         => h2f_fifo_data,

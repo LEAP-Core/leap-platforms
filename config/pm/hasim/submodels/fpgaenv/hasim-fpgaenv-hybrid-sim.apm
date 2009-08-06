@@ -7,6 +7,7 @@ Version=2.1
 Type=HAsim
 Name=Hybrid Simulation Environment
 Class=Asim::Model
+DefaultBenchmark=0
 
 [Model]
 DefaultAttributes=bluespec
@@ -47,6 +48,7 @@ front_panel=Hybrid Front Panel
 streams=Hybrid Streams
 scratchpad_memory=Hybrid Scratchpad Memory Device
 central_cache=Local Memory Central Cache
+shared_memory=Null Shared Memory
 
 [Hybrid Streams]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/streams/hybrid-streams.awb
@@ -73,6 +75,7 @@ channelio=Basic Virtual Channel Multiplexer
 rrr=RRR Clients and Servers
 physical_platform_debugger=Null Physical Platform Debugger
 local_mem=Local Memory Interface using BRAM
+remote_memory=Null Remote Memory
 
 [UNIX Pipe Physical Device]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe/unix-pipe-device.awb
@@ -127,3 +130,11 @@ Packagehint=platforms
 LOCAL_MEM_WRITE_LATENCY=4
 LOCAL_MEM_READ_LATENCY=8
 LOCAL_MEM_ADDR_BITS=10
+
+[Null Remote Memory]
+File=modules/bluespec/common/fpgaenv/low-level-platform-interface/remote-memory/null/null-remote-memory.awb
+Packagehint=platforms
+
+[Null Shared Memory]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/shared-memory/null/null-shared-memory.awb
+Packagehint=platforms

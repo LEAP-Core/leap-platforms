@@ -1,0 +1,8 @@
+
+%name Null Shared Memory
+%desc Null Shared Memory Virtual Device
+
+%provides shared_memory
+
+%sources -t BSV -v PUBLIC   null-shared-memory.bsv
+%sources -t H   -v PUBLIC   null-shared-memory.h

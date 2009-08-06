@@ -1,3 +1,21 @@
+//
+// Copyright (C) 2008 Intel Corporation
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
+
 import Clocks::*;
 
 // pci-express-vhdl-import
@@ -41,6 +59,7 @@ interface PRIMITIVE_PCI_EXPRESS_DEVICE;
 
     // DMA
     method Action dma_read_start(PCIE_PHYSICAL_ADDRESS addr, PCIE_LENGTH len);
+    // method Action dma_read_data_req();
     method ActionValue#(PCIE_DMA_DATA) dma_read_data();
     method Action dma_write_start(PCIE_PHYSICAL_ADDRESS addr, PCIE_LENGTH len);
     method Action dma_write_data(PCIE_DMA_DATA data);
@@ -156,7 +175,13 @@ import "BVI" Channel_top = module mkPrimitivePCIExpressDevice
                       enable(dma_in_h2f_en)
                       clocked_by(pcie_clk)
                       reset_by(pcie_rst);
-        
+/*        
+    method dma_read_data_req()
+                      ready(dma_out_h2f_fifo_notempty)
+                      enable(dma_in_h2f_fifo_ack)
+                      clocked_by(pcie_clk)
+                      reset_by(pcie_rst);
+*/        
     method dma_out_h2f_fifo_data dma_read_data()
                       ready(dma_out_h2f_fifo_ready)
                       enable(dma_in_h2f_fifo_ack)
@@ -221,6 +246,7 @@ import "BVI" Channel_top = module mkPrimitivePCIExpressDevice
                                 csr_h2f_reg0_read,
                                 csr_f2h_reg0_write,
                                 dma_read_start,
+                                // dma_read_data_req,
                                 dma_read_data,
                                 dma_write_start,
                                 dma_write_data,
@@ -246,6 +272,7 @@ import "BVI" Channel_top = module mkPrimitivePCIExpressDevice
     schedule csr_read_resp CF  (csr_h2f_reg0_read,
                                 csr_f2h_reg0_write,
                                 dma_read_start,
+                                // dma_read_data_req,
                                 dma_read_data,
                                 dma_write_start,
                                 dma_write_data,
@@ -269,6 +296,7 @@ import "BVI" Channel_top = module mkPrimitivePCIExpressDevice
     schedule csr_write CF      (csr_h2f_reg0_read,
                                 csr_f2h_reg0_write,
                                 dma_read_start,
+                                // dma_read_data_req,
                                 dma_read_data,
                                 dma_write_start,
                                 dma_write_data,
@@ -290,6 +318,7 @@ import "BVI" Channel_top = module mkPrimitivePCIExpressDevice
     schedule csr_h2f_reg0_read CF   (csr_h2f_reg0_read,
                                      csr_f2h_reg0_write,
                                      dma_read_start,
+                                     // dma_read_data_req,
                                      dma_read_data,
                                      dma_write_start,
                                      dma_write_data,
@@ -311,6 +340,7 @@ import "BVI" Channel_top = module mkPrimitivePCIExpressDevice
     // CF with everything else (except itself)
     schedule csr_f2h_reg0_write SBR (csr_f2h_reg0_write);
     schedule csr_f2h_reg0_write CF  (dma_read_start,
+                                     // dma_read_data_req,
                                      dma_read_data,
                                      dma_write_start,
                                      dma_write_data,
@@ -331,7 +361,8 @@ import "BVI" Channel_top = module mkPrimitivePCIExpressDevice
     // SBR with itself (testing)
     // CF with everything else (except itself)
     schedule dma_read_start SBR  (dma_read_start);
-    schedule dma_read_start CF   (dma_read_data,
+    schedule dma_read_start CF   (// dma_read_data_req,
+                                  dma_read_data,
                                   dma_write_start,
                                   dma_write_data,
                                   interrupt_host,
@@ -346,7 +377,46 @@ import "BVI" Channel_top = module mkPrimitivePCIExpressDevice
                                   sys_clk_p,
                                   sys_clk_n,
                                   sys_reset_n);
-
+/*
+    // dma_read_data_req
+    // SBR with itself (testing)
+    // CF with everything else (except itself)
+    schedule dma_read_data_req SBR (dma_read_data_req);
+    schedule dma_read_data_req CF  (dma_read_data,
+                                    dma_write_start,
+                                    dma_write_data,
+                                    interrupt_host,
+                                    reset_req,
+                                    reset_resp,
+                                    init_req,
+                                    init_resp,
+                                    pci_exp_rxn,
+                                    pci_exp_rxp,
+                                    pci_exp_txn,
+                                    pci_exp_txp,
+                                    sys_clk_p,
+                                    sys_clk_n,
+                                    sys_reset_n);
+      
+    // dma_read_data
+    // CF with everything (including itself)
+    schedule dma_read_data CF    (dma_read_data,
+                                  dma_write_start,
+                                  dma_write_data,
+                                  interrupt_host,
+                                  reset_req,
+                                  reset_resp,
+                                  init_req,
+                                  init_resp,
+                                  pci_exp_rxn,
+                                  pci_exp_rxp,
+                                  pci_exp_txn,
+                                  pci_exp_txp,
+                                  sys_clk_p,
+                                  sys_clk_n,
+                                  sys_reset_n);
+*/
+ 
     // dma_read_data
     // SBR with itself (testing)
     // CF with everything else (except itself)
@@ -365,7 +435,7 @@ import "BVI" Channel_top = module mkPrimitivePCIExpressDevice
                                   sys_clk_p,
                                   sys_clk_n,
                                   sys_reset_n);
-
+        
     // dma_write_start
     // SBR with itself (testing)
     // CF with everything else (except itself)

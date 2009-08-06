@@ -1,3 +1,6 @@
+#include <linux/smp_lock.h>
+#include <asm/pgtable.h>
+
 #include "pchnl_main.h"
 #include "pchnl_if.h"
 
@@ -15,6 +18,8 @@ static struct pchnl_device* gpchnl_dev = NULL;
 //static unsigned int intr_count = 0;
 static DECLARE_WAIT_QUEUE_HEAD(wq);
 static int flag = 0;
+
+static int debug = 0;
 
 //static unsigned long mmio_start;
 
@@ -242,7 +247,7 @@ pchnl_probe(struct pci_dev *pdev,
           goto err_dev_init;
      }
      gpchnl_dev->dma_h2fp = page_address(gpchnl_dev->h2f_pg_base);
-     memset(gpchnl_dev->dma_h2fp, 0x00, BUF_SIZE);
+     memset(gpchnl_dev->dma_h2fp, 0xAB, BUF_SIZE);
 
      gpchnl_dev->f2h_pg_base = alloc_pages(GFP_KERNEL, order);
      if (gpchnl_dev->f2h_pg_base == NULL){
@@ -251,10 +256,8 @@ pchnl_probe(struct pci_dev *pdev,
           goto err_dev_init;
      }
      gpchnl_dev->dma_f2hp = page_address(gpchnl_dev->f2h_pg_base);
-     memset(gpchnl_dev->dma_f2hp, 0x00, BUF_SIZE);
+     memset(gpchnl_dev->dma_f2hp, 0xCD, BUF_SIZE);
      
-     
-
      PCHNL_DBG("pchnl_probe exit with success\n");
      return 0;
 err_dev_init:
@@ -440,6 +443,10 @@ pchnl_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigned l
      uint32_t offset;
      uint32_t ui32;
      uint64_t ui64;
+
+     unsigned long va;
+     struct page *page;
+
 //     unsigned int counter;
      struct pchnl_req req;
 //     int misc;
@@ -646,11 +653,114 @@ pchnl_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigned l
           */
           ret = 0;
           break;
+
+     case PCHNL_TRANSLATE_V2P:
+         
+         va = *(req.u.tranx_translate_v2p.va);
+
+         down_read(&current->mm->mmap_sem);
+         ret = get_user_pages(current,
+                              current->mm,
+                              (va & PAGE_MASK),
+                              1,
+                              1, // write
+                              1, // force
+                              &page,
+                              NULL);
+         up_read(&current->mm->mmap_sem);
+
+         if (ret != 1)
+         {
+             printk("pchnl: get_user_pages failed: %d\n", ret);
+             return ret < 0 ? ret : -EINVAL;
+         }
+
+         if (debug == 0)
+         {
+//             debug = 1;
+//             ui64 = (uint64_t) __pa(page_address(page));
+             flush_dcache_page(page);
+             ui64 = (uint64_t) pci_map_page(gpchnl_dev->pdev, page, 0, PAGE_SIZE, DMA_FROM_DEVICE);
+         }
+         else
+         {
+             flush_dcache_page(page);
+             ui64 = (uint64_t) pci_map_page(gpchnl_dev->pdev, page, 0, PAGE_SIZE, DMA_FROM_DEVICE);
+         }
+
+         if (copy_to_user(req.u.tranx_translate_v2p.pa, &ui64, sizeof(uint64_t)))
+         {
+             PCHNL_ERR("failed to copy to user\n");
+             ret = -EFAULT;
+         }          
+
+         // FIXME: release page via page_cache_release(page);
+
+         break;
+
+     case PCHNL_GET_H2F_BUFFER_PA:
+         ui64 = (uint64_t)__pa(gpchnl_dev->dma_h2fp);
+         printk("pchnl: get_h2f_buffer_pa: returning PA = 0x%llx\n", (unsigned long long)ui64);
+         if (copy_to_user(req.u.tranx_get_pa.pa, &ui64, sizeof(uint64_t)))
+         {
+             PCHNL_ERR("failed to copy to user\n");
+             ret = -EFAULT;
+         }          
+         break;
+
+     case PCHNL_GET_F2H_BUFFER_PA:
+         ui64 = (uint64_t)__pa(gpchnl_dev->dma_f2hp);
+         printk("pchnl: get_f2h_buffer_pa: returning PA = 0x%llx\n", (unsigned long long)ui64);
+         if (copy_to_user(req.u.tranx_get_pa.pa, &ui64, sizeof(uint64_t)))
+         {
+             PCHNL_ERR("failed to copy to user\n");
+             ret = -EFAULT;
+         }          
+         break;
      }
      PCHNL_DBG("ioctl: ret %d\n", ret);
      return ret;
 }
 
+static int
+pchnl_mmap(struct file *filp, struct vm_area_struct *vma)
+{
+    unsigned long va;
+    unsigned long pa;
+    unsigned long size;
+    int           ret;
+    
+    // check size of requested region
+    if ((vma->vm_end - vma->vm_start) != PCHNL_MMAP_SIZE)
+    {
+        return -EINVAL;
+    }
+
+    // define a macro to call kernel-specific remapping functions
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,9)
+#define PCHNL_REMAP_PAGES(va, pa, size) \
+    remap_pfn_range(vma, va, pa, size, vma->vm_page_prot)
+#else
+#define PCHNL_REMAP_PAGES(va, pa, size) \
+    remap_page_range(vma, va, pa << PAGE_SHIFT, size, vma->vm_page_prot)
+#endif
+
+    // map CSRs
+    pa   = ((u32)gpchnl_dev->io_base >> PAGE_SHIFT);
+    va   = vma->vm_start;
+    size = CSR_REGION_SIZE;
+
+    if ((ret = PCHNL_REMAP_PAGES(va, pa, size)) < 0)
+    {
+        printk("pchnl: failed to map CSR region\n");
+        return ret;
+    }
+
+    // done
+    return ret;
+}
+
+/*
 static int
 pchnl_mmap(struct file *filp, struct vm_area_struct *vma)
 {
@@ -661,12 +771,13 @@ pchnl_mmap(struct file *filp, struct vm_area_struct *vma)
 
      vma->vm_pgoff = ( (u32)gpchnl_dev->io_base >> PAGE_SHIFT);
      
+     
+
 
      if ( vsize > psize)
           return -EINVAL;
      printk("off: %ld, vsize: %ld, psize: %ld\n", off, vsize, psize);
      
-#if 1
 #if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,9)
      return remap_pfn_range(vma, vma->vm_start, vma->vm_pgoff,
                             vsize, vma->vm_page_prot);
@@ -674,9 +785,9 @@ pchnl_mmap(struct file *filp, struct vm_area_struct *vma)
      return remap_page_range(vma, vma->vm_start, vma->vm_pgoff << PAGE_SHIFT,
                              vsize, vma->vm_page_prot);
 #endif
-#endif
-}
 
+}
+*/
 
 static uint32_t big_endian(uint32_t little)
 {

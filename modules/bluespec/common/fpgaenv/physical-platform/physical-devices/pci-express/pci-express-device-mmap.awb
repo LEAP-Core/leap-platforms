@@ -1,6 +1,6 @@
 
-%name PCI Express Physical Device (mmap-based)
-%desc PCI Express Physical Device (mmap-based)
+%name Obsolete PCI Express Physical Device (mmap-based)
+%desc Obsolete PCI Express Physical Device (mmap-based)
 
 %provides pci_express_device
 

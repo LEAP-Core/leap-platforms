@@ -39,6 +39,7 @@ front_panel=Hybrid Front Panel
 streams=Hybrid Streams
 scratchpad_memory=Hybrid Scratchpad Memory Device
 central_cache=Local Memory Central Cache
+shared_memory=Standard Shared Memory
 
 [HTG Virtex 5 PCIE Enabled]
 File=modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled/htg-v5-pcie-enabled.awb
@@ -49,7 +50,7 @@ File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/leds/gen
 Packagehint=platforms
 
 [HTG Virtex 5 PCIE Enabled/Requires]
-pci_express_device=PCI Express Physical Device (mmap-based)
+pci_express_device=New (BROKEN) PCI Express Physical Device (mmap-based)
 led_device=General LED Device
 switch_device=General Switch Device
 ddr2_sdram_device=DDR2 SDRAM Physical Device
@@ -89,24 +90,14 @@ channelio=Basic Virtual Channel Multiplexer
 rrr=RRR Clients and Servers
 physical_platform_debugger=Null Physical Platform Debugger
 local_mem=Local Memory Interface using DDR2 Memory
+remote_memory=Remote Memory Interface using PCI Express DMA
 
 [Driver Header for PCIe Kernel Module]
 File=drivers/linux/hasim/kernel/pchnl_if.awb
 Packagehint=platforms
 
-[PCI Express Physical Device (mmap-based)/Requires]
-pci_express_driver_header=Driver Header for PCIe Kernel Module
-
-[PCI Express Physical Device (mmap-based)]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pci-express-device-mmap.awb
-Packagehint=platforms
-
 [Little-Endian 32-bit Unified Message Format]
 File=modules/bluespec/common/fpgaenv/virtual-platform/umf/little-32/umf-little-32.awb
-Packagehint=platforms
-
-[PCI-Express CSR-based Physical Channel]
-File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/pcie-csr/pcie-physical-channel.awb
 Packagehint=platforms
 
 [DDR2 SDRAM Physical Device]
@@ -137,8 +128,27 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/low-level-platform-interface/local-mem/local-mem-ddr2.awb
 Packagehint=platforms
 
+[New (BROKEN) PCI Express Physical Device (mmap-based)]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express-new/pci-express-device-mmap.awb
+Packagehint=platforms
+
+[New (BROKEN) PCI Express Physical Device (mmap-based)/Requires]
+pci_express_driver_header=Driver Header for PCIe Kernel Module
+
+[PCI-Express CSR-based Physical Channel]
+File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/pcie-csr/pcie-physical-channel.awb
+Packagehint=platforms
+
 [Null Physical Platform Debugger]
 File=modules/bluespec/common/fpgaenv/physical-platform/debuggers/null/null-debugger.awb
+Packagehint=platforms
+
+[Remote Memory Interface using PCI Express DMA]
+File=modules/bluespec/common/fpgaenv/low-level-platform-interface/remote-memory/pci-express-dma/remote-memory-pcie-dma.awb
+Packagehint=platforms
+
+[Standard Shared Memory]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/shared-memory/standard/standard-shared-memory.awb
 Packagehint=platforms
 
 [Hardware FPGA Components for Virtex 5]
