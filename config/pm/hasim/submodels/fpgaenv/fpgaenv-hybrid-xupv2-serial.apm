@@ -14,7 +14,7 @@ model=FPGA Environment
 
 [FPGA Environment/Requires]
 virtual_platform=Standard Virtual Platform
-fpga_components=Hardware FPGA Components
+fpga_components=Hardware FPGA Components for Virtex 2
 librl_bsv=RL Bluespec Library
 
 [Standard Virtual Platform]
@@ -34,9 +34,6 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/std-virtual-devices.awb
 Packagehint=platforms
 
-[Hardware FPGA Components]
-File=modules/bluespec/common/fpgaenv/fpga-components/hardware-fpga-components-virtex2.awb
-Packagehint=platforms
 
 [Standard Virtual Devices/Requires]
 front_panel=Hybrid Front Panel
@@ -107,7 +104,7 @@ File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/switches
 Packagehint=platforms
 
 [XUP Virtex 2 Serial/Requires]
-clocks_device=Single-Ended Crystal Clocks Device For V5
+clocks_device=Single-Ended Crystal Clocks Device
 serial_device=Serial Physical Device (uBlaze-based)
 physical_platform_utils=Common Physical Platform Utilities
 led_device=General LED Device
@@ -137,6 +134,15 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid/hybrid-mem-scratch.awb
 Packagehint=platforms
 
-[Single-Ended Crystal Clocks Device For V5]
+
+[Single-Ended Crystal Clocks Device]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/single-ended/single-ended-clocks-device.awb
+Packagehint=platforms
+
+[Single-Ended Crystal Clocks Device/Params]
+MODEL_CLOCK_MULTIPLIER=2
+CRYSTAL_CLOCK_FREQ=100
+
+[Hardware FPGA Components for Virtex 2]
+File=modules/bluespec/common/fpgaenv/fpga-components/hardware-fpga-components-virtex2.awb
 Packagehint=platforms
