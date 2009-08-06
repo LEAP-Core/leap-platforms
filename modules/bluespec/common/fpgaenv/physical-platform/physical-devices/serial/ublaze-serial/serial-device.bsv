@@ -68,8 +68,8 @@ import "BVI" serial = module mkPrimitiveSerialDevice
                  (PRIMITIVE_SERIAL_DEVICE);
     
     // Clocks and reset are handled by the UCF for now
-    default_clock no_clock;
-    default_reset no_reset;
+    default_clock clk(sys_clk_pin);
+    default_reset rst(sys_rst_pin);
 
     output_clock serial_clk(serial_clk_pin);
     output_reset serial_rst(serial_rst_pin) clocked_by (serial_clk);
