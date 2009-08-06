@@ -7,6 +7,7 @@ Version=2.1
 Type=HAsim
 Name=Hybrid XUPv2 Serial Environment
 Class=Asim::Model
+DefaultBenchmark=0
 
 [Model]
 DefaultAttributes=bluespec xupv2
@@ -34,12 +35,12 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/std-virtual-devices.awb
 Packagehint=platforms
 
-
 [Standard Virtual Devices/Requires]
 front_panel=Hybrid Front Panel
 streams=Hybrid Streams
 scratchpad_memory=Hybrid Scratchpad Memory Device
 central_cache=NULL Central Cache
+shared_memory=Null Shared Memory
 
 [RRR Clients and Servers]
 File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic/basic-rrr.awb
@@ -66,6 +67,7 @@ channelio=Basic Virtual Channel Multiplexer
 rrr=RRR Clients and Servers
 physical_platform_debugger=Null Physical Platform Debugger
 local_mem=NULL Local Memory Interface
+remote_memory=Null Remote Memory
 
 [Little-Endian 32-bit Unified Message Format]
 File=modules/bluespec/common/fpgaenv/virtual-platform/umf/little-32/umf-little-32.awb
@@ -134,7 +136,6 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid/hybrid-mem-scratch.awb
 Packagehint=platforms
 
-
 [Single-Ended Crystal Clocks Device]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/single-ended/single-ended-clocks-device.awb
 Packagehint=platforms
@@ -145,4 +146,12 @@ CRYSTAL_CLOCK_FREQ=100
 
 [Hardware FPGA Components for Virtex 2]
 File=modules/bluespec/common/fpgaenv/fpga-components/hardware-fpga-components-virtex2.awb
+Packagehint=platforms
+
+[Null Remote Memory]
+File=modules/bluespec/common/fpgaenv/low-level-platform-interface/remote-memory/null/null-remote-memory.awb
+Packagehint=platforms
+
+[Null Shared Memory]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/shared-memory/null/null-shared-memory.awb
 Packagehint=platforms
