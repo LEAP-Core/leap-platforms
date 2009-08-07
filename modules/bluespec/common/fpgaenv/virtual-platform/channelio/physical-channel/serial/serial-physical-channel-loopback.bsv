@@ -20,6 +20,8 @@
 `include "serial_device.bsh"
 `include "umf.bsh"
 
+import FIFO::*;
+
 // ============== Physical Channel ===============
 
 // interface
@@ -44,7 +46,7 @@ module mkPhysicalChannel#(PHYSICAL_DRIVERS drivers)
       loopfifo.enq(data);
     endrule
 
-    rule enqueue;
+    rule dequeue;
       serialDriver.send(loopfifo.first);
       loopfifo.deq;
     endrule
