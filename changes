@@ -6731,3 +6731,20 @@ Directory drivers/linux/hasim/kernel
 
   Also added a Null implementation of shared memory. A Simulation version will be added
   in the near future.
+
+----------
+aparasha    Date: Fri Aug  7 16:18:09 EDT 2009  CSN: CSN-platforms-247
+                  Fri Aug  7 20:18:09 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/shared-memory/standard
+ standard-shared-memory.bsv Locally Modified          246 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/shared-memory/null
+ null-shared-memory.bsv    Locally Modified          246 
+
+- Added some structs to the shared memory interface.
+
+- Fleshed out the Null shared memory to export the full standard interface
+  (sans functionality). This was required because Platform Interface attempts
+  to translate connection messages into method calls to the device.

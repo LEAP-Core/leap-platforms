@@ -39,6 +39,22 @@ typedef Bit#(9)                    SHARED_MEMORY_ADDRESS;
 typedef REMOTE_MEMORY_DATA         SHARED_MEMORY_DATA;
 typedef REMOTE_MEMORY_BURST_LENGTH SHARED_MEMORY_BURST_LENGTH;
 
+typedef struct
+{
+    SHARED_MEMORY_ADDRESS addr;
+    SHARED_MEMORY_BURST_LENGTH len;
+}
+SHARED_MEMORY_REQ_INFO
+    deriving (Bits, Eq);
+
+typedef union tagged
+{
+    SHARED_MEMORY_REQ_INFO SHARED_MEMORY_READ;
+    SHARED_MEMORY_REQ_INFO SHARED_MEMORY_WRITE;
+}
+SHARED_MEMORY_REQUEST
+    deriving (Bits, Eq);
+
 // ============== SHARED_MEMORY Interface ===============
 
 // This device should export the generic MEMORY_IFC interface, but for debugging
