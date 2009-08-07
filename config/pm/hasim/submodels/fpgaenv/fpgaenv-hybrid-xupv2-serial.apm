@@ -55,7 +55,7 @@ File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/basic/basic-chan
 Packagehint=platforms
 
 [Basic Virtual Channel Multiplexer/Requires]
-physical_channel=Serial Physical Channel
+physical_channel=Serial Physical Channel with loopback
 
 [Low Level Platform Interface Hybrid]
 File=modules/bluespec/common/fpgaenv/low-level-platform-interface/hybrid-llpi.awb
@@ -89,10 +89,6 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/central-cache/null-central-cache.awb
 Packagehint=platforms
 
-[Serial Physical Channel]
-File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/serial/serial-physical-channel.awb
-Packagehint=platforms
-
 [Hybrid Front Panel]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid/hybrid-fp.awb
 Packagehint=platforms
@@ -116,8 +112,6 @@ switch_device=General Switch Device
 File=modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup/serial/xilinx-xup-serial.awb
 Packagehint=platforms
 
-[XUP Virtex 2 Serial/Params]
-FPGA_POSITION=2
 
 [NULL Local Memory Interface/Params]
 LOCAL_MEM_WORDS_PER_LINE=4
@@ -154,4 +148,8 @@ Packagehint=platforms
 
 [Null Shared Memory]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/shared-memory/null/null-shared-memory.awb
+Packagehint=platforms
+
+[Serial Physical Channel with loopback]
+File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/serial/serial-physical-channel-loopback.awb
 Packagehint=platforms
