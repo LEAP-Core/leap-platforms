@@ -1,7 +1,7 @@
 run
 -ifmt mixed
 -register_balancing yes
--vlgincdir @BLUESPECDIR@/Verilog
+-vlgincdir {@BLUESPECDIR@/Verilog/}
 -ifn config/@APM_NAME@.prj
 -ofn @TMP_XILINX_DIR@/@APM_NAME@
 -ofmt NGC

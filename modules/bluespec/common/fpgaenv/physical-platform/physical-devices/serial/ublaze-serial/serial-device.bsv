@@ -89,10 +89,10 @@ import "BVI" serial = module mkPrimitiveSerialDevice
     method fpga_0_RS232_Uart_1_TX_pin serial_tx() clocked_by(no_clock) reset_by(no_reset); 
  
 
-    schedule send SBR     (send);
+    schedule send C       (send);
     schedule send CF      (receive,serial_rx,serial_tx);
    
-    schedule receive SBR     (receive);
+    schedule receive C       (receive);
     schedule receive CF      (send,serial_rx,serial_tx);
 
     schedule serial_tx CF      (receive,send,serial_rx,serial_tx);
@@ -107,8 +107,8 @@ module mkSerialDevice#(Clock rawClock, Reset rawReset) (SERIAL_DEVICE);
                                                                              reset_by rawReset);
   
     //Create the syncfifos
-    SyncFIFOIfc#(SerialWord) sendfifo <- mkSyncFIFOFromCC(16,primitiveSerialDevice.serial_clk);
-    SyncFIFOIfc#(SerialWord) receivefifo <- mkSyncFIFOToCC(16,primitiveSerialDevice.serial_clk,primitiveSerialDevice.serial_rst);
+    SyncFIFOIfc#(SerialWord) sendfifo <- mkSyncFIFOFromCC(8,primitiveSerialDevice.serial_clk);
+    SyncFIFOIfc#(SerialWord) receivefifo <- mkSyncFIFOToCC(8,primitiveSerialDevice.serial_clk,primitiveSerialDevice.serial_rst);
 
     rule sendConnect;
         primitiveSerialDevice.send(sendfifo.first);

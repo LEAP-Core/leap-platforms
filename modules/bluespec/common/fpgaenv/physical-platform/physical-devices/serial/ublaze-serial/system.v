@@ -21,8 +21,8 @@ module system
     bramfeeder_0_EN_ppcMessageOutput_get_pin,
     bramfeeder_0_RDY_ppcMessageInput_put_pin,
     bramfeeder_0_EN_ppcMessageInput_put_pin,
-    clock_generator_0_CLKOUT0_pin,
-    clock_generator_0_RSTOUT0_pin
+    clock_generator_0_RSTOUT0_pin,
+    clock_generator_0_CLKOUT0_pin
   );
   input fpga_0_RS232_Uart_1_RX_pin;
   output fpga_0_RS232_Uart_1_TX_pin;
@@ -41,8 +41,8 @@ module system
   input bramfeeder_0_EN_ppcMessageOutput_get_pin;
   output bramfeeder_0_RDY_ppcMessageInput_put_pin;
   input bramfeeder_0_EN_ppcMessageInput_put_pin;
-  output clock_generator_0_CLKOUT0_pin;
   output clock_generator_0_RSTOUT0_pin;
+  output clock_generator_0_CLKOUT0_pin;
 
   // Internal signals
 
@@ -197,6 +197,7 @@ module system
   wire [0:31] net_gnd32;
   wire [0:0] sys_bus_reset;
   wire sys_clk_s;
+  wire [0:0] sys_periph_reset;
   wire sys_rst_s;
   wire [0:31] xps_bram_if_cntlr_1_port_BRAM_Addr;
   wire xps_bram_if_cntlr_1_port_BRAM_Clk;
@@ -218,8 +219,8 @@ module system
   assign bramfeeder_0_EN_ppcMessageOutput_get = bramfeeder_0_EN_ppcMessageOutput_get_pin;
   assign bramfeeder_0_RDY_ppcMessageInput_put_pin = bramfeeder_0_RDY_ppcMessageInput_put;
   assign bramfeeder_0_EN_ppcMessageInput_put = bramfeeder_0_EN_ppcMessageInput_put_pin;
+  assign clock_generator_0_RSTOUT0_pin = sys_periph_reset[0];
   assign clock_generator_0_CLKOUT0_pin = sys_clk_s;
-  assign clock_generator_0_RSTOUT0_pin = Dcm_all_locked;
   assign net_gnd0 = 1'b0;
   assign fpga_0_net_gnd_pin = net_gnd0;
   assign fpga_0_net_gnd_1_pin = net_gnd0;
@@ -1089,13 +1090,13 @@ module system
       .RstcPPCresetsys_1 (  ),
       .MB_Reset ( mb_reset ),
       .Bus_Struct_Reset ( sys_bus_reset[0:0] ),
-      .Peripheral_Reset (  )
+      .Peripheral_Reset ( sys_periph_reset[0:0] )
     );
 
   bramfeeder_0_wrapper
     bramfeeder_0 (
       .CLK ( sys_clk_s ),
-      .RST ( sys_rst_s ),
+      .RST ( sys_periph_reset[0] ),
       .ppcMessageInput_put ( bramfeeder_0_ppcMessageInput_put ),
       .EN_ppcMessageInput_put ( bramfeeder_0_EN_ppcMessageInput_put ),
       .RDY_ppcMessageInput_put ( bramfeeder_0_RDY_ppcMessageInput_put ),
@@ -2809,7 +2810,6 @@ module proc_sys_reset_0_wrapper
   output [0:0] Peripheral_Reset;
 endmodule
 
-/*
 module bramfeeder_0_wrapper
   (
     CLK,
@@ -2843,5 +2843,5 @@ module bramfeeder_0_wrapper
   output [3:0] bramInitiatorWires_bramWEN;
   output bramInitiatorWires_bramEN;
   input [31:0] bramInitiatorWires_bramDin;
-endmodule*/
+endmodule
 

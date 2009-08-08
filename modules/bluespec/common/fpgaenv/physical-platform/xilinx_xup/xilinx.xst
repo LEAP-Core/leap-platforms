@@ -6,3 +6,4 @@ run
 -ofmt NGC
 -p @FPGA_PART@
 -top mk_model_Wrapper
+-vlgincdir {@BLUESPECDIR@/Verilog/}

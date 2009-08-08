@@ -39,14 +39,14 @@ module mkPhysicalChannel#(PHYSICAL_DRIVERS drivers)
     
     // shortcut to drivers
     SERIAL_DRIVER serialDriver = drivers.serialDriver;
-    FIFO#(UMF_CHUNK) loopfifo <- mkSizedFIFO(128);
+    FIFO#(UMF_CHUNK) loopfifo <- mkSizedFIFO(16);
     
     rule enqueue;
       let data <- serialDriver.receive;
       loopfifo.enq(data);
     endrule
 
-    rule dequeue;
+    rule dequeue ;
       serialDriver.send(loopfifo.first);
       loopfifo.deq;
     endrule

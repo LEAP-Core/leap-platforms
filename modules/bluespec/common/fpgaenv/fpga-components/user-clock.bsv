@@ -106,7 +106,7 @@ module mkUserClock#(Integer inFreq, Integer clockMultiplier, Integer clockDivide
 
     // FPGA synthesis...
 
-    if (clockMultiplier == 1 && clockDivider == 1)
+    if (clockMultiplier ==  clockDivider)
         clk <- mkUserClock_Same;
     else if (clockMultiplier == 2 && clockDivider == 1)
         clk <- mkUserClock_MultiplyByTwo(inFreq);

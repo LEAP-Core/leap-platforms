@@ -102,7 +102,7 @@ module mkPhysicalPlatform
     LEDS_DEVICE#(`NUMBER_LEDS)         leds_device       <- mkLEDsDevice(clocked_by clk, reset_by rst);
     SWITCHES_DEVICE#(`NUMBER_SWITCHES) switches_device   <- mkSwitchesDevice(clocked_by clk, reset_by rst);
 
-    //This must be clocked by the raw clock 
+    //This must be clocked by the raw  clock 
     SERIAL_DEVICE serial_device <- mkSerialDevice(clocks_device.driver.rawClock, 
                                                   clocks_device.driver.rawReset, 
                                                   clocked_by clk, 
