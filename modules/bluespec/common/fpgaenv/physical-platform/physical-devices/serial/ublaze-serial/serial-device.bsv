@@ -26,9 +26,15 @@ interface SERIAL_WIRES;
     // (* always_enabled *) // , always_ready *)
     method Action serial_rx((* port="serial_rx" *) Bit#(1) rx);
 
+    method Action serial_cts((* port="serial_cts" *) Bit#(1) cts);
+
     (* always_ready *)
     (* result="serial_tx" *)
     method Bit#(1) serial_tx();
+
+    (* always_ready *)
+    (* result="serial_rts" *)
+    method Bit#(1) serial_rts();
 
 endinterface
 
@@ -52,11 +58,15 @@ interface PRIMITIVE_SERIAL_DEVICE;
     method ActionValue#(SerialWord) receive();
 
     // (* always_enabled *) // , always_ready *)
-    method Action serial_rx((* port="pci_exp_rxn" *) Bit#(1) rx);
+    method Action serial_rx(Bit#(1) rx);
+
+    method Action serial_cts(Bit#(1) cts);
 
     (* always_ready *)
-    (* result="serial_tx" *)
     method Bit#(1) serial_tx();
+
+    (* always_ready *)
+    method Bit#(1) serial_rts();
 
     interface Clock serial_clk;
     interface Reset serial_rst;
@@ -84,20 +94,28 @@ import "BVI" serial = module mkPrimitiveSerialDevice
                       enable(bramfeeder_0_EN_ppcMessageOutput_get_pin)
                       clocked_by (serial_clk) reset_by (serial_rst);
    
-    method serial_rx(fpga_0_RS232_Uart_1_RX_pin) enable(dummy_enable) clocked_by(no_clock) reset_by(no_reset);
+    method serial_rx(fpga_0_RS232_Uart_1_sin) enable(dummy_enable_rx) clocked_by(no_clock) reset_by(no_reset);
 
-    method fpga_0_RS232_Uart_1_TX_pin serial_tx() clocked_by(no_clock) reset_by(no_reset); 
+    method fpga_0_RS232_Uart_1_sout serial_tx() clocked_by(no_clock) reset_by(no_reset); 
+
+    method serial_cts(fpga_0_RS232_Uart_1_ctsN) enable(dummy_enable_rts) clocked_by(no_clock) reset_by(no_reset);
+
+    method fpga_0_RS232_Uart_1_rtsN serial_rts() clocked_by(no_clock) reset_by(no_reset); 
  
 
     schedule send C       (send);
-    schedule send CF      (receive,serial_rx,serial_tx);
+    schedule send CF      (receive,serial_rx,serial_tx,serial_rts,serial_cts);
    
     schedule receive C       (receive);
-    schedule receive CF      (send,serial_rx,serial_tx);
+    schedule receive CF      (send,serial_rx,serial_tx,serial_rts,serial_cts);
 
-    schedule serial_tx CF      (receive,send,serial_rx,serial_tx);
+    schedule serial_tx CF      (receive,send,serial_rx,serial_tx,serial_rts,serial_cts);
 
-    schedule serial_rx CF      (receive,send,serial_tx,serial_rx);
+    schedule serial_rx CF      (receive,send,serial_tx,serial_rx,serial_rts,serial_cts);
+
+    schedule serial_rts CF      (receive,send,serial_tx,serial_rx,serial_rts,serial_cts);
+
+    schedule serial_cts CF      (receive,send,serial_tx,serial_rx,serial_rts,serial_cts);
 
 endmodule
 
@@ -136,6 +154,8 @@ module mkSerialDevice#(Clock rawClock, Reset rawReset) (SERIAL_DEVICE);
     interface SERIAL_WIRES  wires;
         method serial_rx = primitiveSerialDevice.serial_rx;
         method serial_tx = primitiveSerialDevice.serial_tx;
+        method serial_rts = primitiveSerialDevice.serial_rts;
+        method serial_cts = primitiveSerialDevice.serial_cts;
     endinterface
 
 endmodule

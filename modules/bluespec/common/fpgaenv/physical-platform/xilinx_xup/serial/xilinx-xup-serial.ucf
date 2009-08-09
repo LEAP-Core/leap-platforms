@@ -42,3 +42,10 @@ NET serialWires_serial_tx LOC=AE7;
 NET serialWires_serial_tx IOSTANDARD = LVCMOS25;
 NET serialWires_serial_tx SLEW = SLOW;
 NET serialWires_serial_tx DRIVE = 12;
+NET serialWires_serial_cts_serial_cts LOC=AE8;
+NET serialWires_serial_cts_serial_cts IOSTANDARD = LVCMOS25;
+NET serialWires_serial_cts_serial_cts SLEW = SLOW;
+NET serialWires_serial_cts_serial_cts DRIVE = 8;
+NET serialWires_serial_rts LOC=AK8;
+NET serialWires_serial_rts IOSTANDARD = LVCMOS25;
+

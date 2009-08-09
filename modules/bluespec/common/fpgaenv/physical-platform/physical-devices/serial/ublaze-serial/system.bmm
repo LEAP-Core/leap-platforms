@@ -15,7 +15,7 @@ ADDRESS_MAP microblaze_0 MICROBLAZE 100
 		END_BUS_BLOCK;
 		END_ADDRESS_RANGE;
 	END_ADDRESS_SPACE;
-	ADDRESS_SPACE xps_bram_if_cntlr_1_bram_combined COMBINED [0x84018000:0x84019fff]
+	ADDRESS_SPACE xps_bram_if_cntlr_1_bram_combined COMBINED [0x83e18000:0x83e19fff]
 		ADDRESS_RANGE RAMB16
 		BUS_BLOCK
 			m_pi_llpint_phys_plat_serial_device_primitiveSerialDevice/s/xps_bram_if_cntlr_1_bram/xps_bram_if_cntlr_1_bram/ramb16_s9_s9_0 [31:24] ;

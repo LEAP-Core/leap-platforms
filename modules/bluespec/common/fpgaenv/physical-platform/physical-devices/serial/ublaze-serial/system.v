@@ -4,8 +4,10 @@
 
 module system
   (
-    fpga_0_RS232_Uart_1_RX_pin,
-    fpga_0_RS232_Uart_1_TX_pin,
+    fpga_0_RS232_Uart_1_ctsN_pin,
+    fpga_0_RS232_Uart_1_rtsN_pin,
+    fpga_0_RS232_Uart_1_sin_pin,
+    fpga_0_RS232_Uart_1_sout_pin,
     fpga_0_net_gnd_pin,
     fpga_0_net_gnd_1_pin,
     fpga_0_net_gnd_2_pin,
@@ -24,8 +26,10 @@ module system
     clock_generator_0_RSTOUT0_pin,
     clock_generator_0_CLKOUT0_pin
   );
-  input fpga_0_RS232_Uart_1_RX_pin;
-  output fpga_0_RS232_Uart_1_TX_pin;
+  input fpga_0_RS232_Uart_1_ctsN_pin;
+  output fpga_0_RS232_Uart_1_rtsN_pin;
+  input fpga_0_RS232_Uart_1_sin_pin;
+  output fpga_0_RS232_Uart_1_sout_pin;
   output fpga_0_net_gnd_pin;
   output fpga_0_net_gnd_1_pin;
   output fpga_0_net_gnd_2_pin;
@@ -47,9 +51,6 @@ module system
   // Internal signals
 
   wire Dcm_all_locked;
-  wire Debug_SYS_Rst;
-  wire Ext_BRK;
-  wire Ext_NM_BRK;
   wire bramfeeder_0_EN_ppcMessageInput_put;
   wire bramfeeder_0_EN_ppcMessageOutput_get;
   wire [0:31] bramfeeder_0_PORTA_BRAM_Addr;
@@ -88,8 +89,10 @@ module system
   wire dlmb_port_BRAM_EN;
   wire dlmb_port_BRAM_Rst;
   wire [0:3] dlmb_port_BRAM_WEN;
-  wire fpga_0_RS232_Uart_1_RX;
-  wire fpga_0_RS232_Uart_1_TX;
+  wire fpga_0_RS232_Uart_1_ctsN;
+  wire fpga_0_RS232_Uart_1_rtsN;
+  wire fpga_0_RS232_Uart_1_sin;
+  wire fpga_0_RS232_Uart_1_sout;
   wire [0:31] ilmb_LMB_ABus;
   wire ilmb_LMB_AddrStrobe;
   wire [0:3] ilmb_LMB_BE;
@@ -156,7 +159,7 @@ module system
   wire mb_plb_PLB_rdBurst;
   wire [0:1] mb_plb_PLB_rdPendPri;
   wire mb_plb_PLB_rdPendReq;
-  wire [0:2] mb_plb_PLB_rdPrim;
+  wire [0:1] mb_plb_PLB_rdPrim;
   wire [0:1] mb_plb_PLB_reqPri;
   wire [0:3] mb_plb_PLB_size;
   wire [0:2] mb_plb_PLB_type;
@@ -164,35 +167,28 @@ module system
   wire [0:31] mb_plb_PLB_wrDBus;
   wire [0:1] mb_plb_PLB_wrPendPri;
   wire mb_plb_PLB_wrPendReq;
-  wire [0:2] mb_plb_PLB_wrPrim;
-  wire [0:2] mb_plb_SPLB_Rst;
-  wire [0:5] mb_plb_Sl_MBusy;
-  wire [0:5] mb_plb_Sl_MIRQ;
-  wire [0:5] mb_plb_Sl_MRdErr;
-  wire [0:5] mb_plb_Sl_MWrErr;
-  wire [0:5] mb_plb_Sl_SSize;
-  wire [0:2] mb_plb_Sl_addrAck;
-  wire [0:2] mb_plb_Sl_rdBTerm;
-  wire [0:2] mb_plb_Sl_rdComp;
-  wire [0:2] mb_plb_Sl_rdDAck;
-  wire [0:95] mb_plb_Sl_rdDBus;
-  wire [0:11] mb_plb_Sl_rdWdAddr;
-  wire [0:2] mb_plb_Sl_rearbitrate;
-  wire [0:2] mb_plb_Sl_wait;
-  wire [0:2] mb_plb_Sl_wrBTerm;
-  wire [0:2] mb_plb_Sl_wrComp;
-  wire [0:2] mb_plb_Sl_wrDAck;
+  wire [0:1] mb_plb_PLB_wrPrim;
+  wire [0:1] mb_plb_SPLB_Rst;
+  wire [0:3] mb_plb_Sl_MBusy;
+  wire [0:3] mb_plb_Sl_MIRQ;
+  wire [0:3] mb_plb_Sl_MRdErr;
+  wire [0:3] mb_plb_Sl_MWrErr;
+  wire [0:3] mb_plb_Sl_SSize;
+  wire [0:1] mb_plb_Sl_addrAck;
+  wire [0:1] mb_plb_Sl_rdBTerm;
+  wire [0:1] mb_plb_Sl_rdComp;
+  wire [0:1] mb_plb_Sl_rdDAck;
+  wire [0:63] mb_plb_Sl_rdDBus;
+  wire [0:7] mb_plb_Sl_rdWdAddr;
+  wire [0:1] mb_plb_Sl_rearbitrate;
+  wire [0:1] mb_plb_Sl_wait;
+  wire [0:1] mb_plb_Sl_wrBTerm;
+  wire [0:1] mb_plb_Sl_wrComp;
+  wire [0:1] mb_plb_Sl_wrDAck;
   wire mb_reset;
-  wire microblaze_0_dbg_Dbg_Capture;
-  wire microblaze_0_dbg_Dbg_Clk;
-  wire [0:4] microblaze_0_dbg_Dbg_Reg_En;
-  wire microblaze_0_dbg_Dbg_Shift;
-  wire microblaze_0_dbg_Dbg_TDI;
-  wire microblaze_0_dbg_Dbg_TDO;
-  wire microblaze_0_dbg_Dbg_Update;
-  wire microblaze_0_dbg_Debug_Rst;
   wire net_gnd0;
   wire [0:3] net_gnd4;
+  wire [0:4] net_gnd5;
   wire [0:9] net_gnd10;
   wire [0:31] net_gnd32;
   wire [0:0] sys_bus_reset;
@@ -209,8 +205,10 @@ module system
 
   // Internal assignments
 
-  assign fpga_0_RS232_Uart_1_RX = fpga_0_RS232_Uart_1_RX_pin;
-  assign fpga_0_RS232_Uart_1_TX_pin = fpga_0_RS232_Uart_1_TX;
+  assign fpga_0_RS232_Uart_1_ctsN = fpga_0_RS232_Uart_1_ctsN_pin;
+  assign fpga_0_RS232_Uart_1_rtsN_pin = fpga_0_RS232_Uart_1_rtsN;
+  assign fpga_0_RS232_Uart_1_sin = fpga_0_RS232_Uart_1_sin_pin;
+  assign fpga_0_RS232_Uart_1_sout_pin = fpga_0_RS232_Uart_1_sout;
   assign dcm_clk_s = sys_clk_pin;
   assign sys_rst_s = sys_rst_pin;
   assign bramfeeder_0_RDY_ppcMessageOutput_get_pin = bramfeeder_0_RDY_ppcMessageOutput_get;
@@ -232,6 +230,7 @@ module system
   assign net_gnd10[0:9] = 10'b0000000000;
   assign net_gnd32[0:31] = 32'b00000000000000000000000000000000;
   assign net_gnd4[0:3] = 4'b0000;
+  assign net_gnd5[0:4] = 5'b00000;
 
   microblaze_0_wrapper
     microblaze_0 (
@@ -239,8 +238,8 @@ module system
       .RESET ( dlmb_OPB_Rst ),
       .MB_RESET ( mb_reset ),
       .INTERRUPT ( net_gnd0 ),
-      .EXT_BRK ( Ext_BRK ),
-      .EXT_NM_BRK ( Ext_NM_BRK ),
+      .EXT_BRK ( net_gnd0 ),
+      .EXT_NM_BRK ( net_gnd0 ),
       .DBG_STOP ( net_gnd0 ),
       .MB_Halted (  ),
       .INSTR ( ilmb_LMB_ReadDBus ),
@@ -348,14 +347,14 @@ module system
       .IOPB_RETRY ( net_gnd0 ),
       .IOPB_TIMEOUT ( net_gnd0 ),
       .IOPB_XFERACK ( net_gnd0 ),
-      .DBG_CLK ( microblaze_0_dbg_Dbg_Clk ),
-      .DBG_TDI ( microblaze_0_dbg_Dbg_TDI ),
-      .DBG_TDO ( microblaze_0_dbg_Dbg_TDO ),
-      .DBG_REG_EN ( microblaze_0_dbg_Dbg_Reg_En ),
-      .DBG_SHIFT ( microblaze_0_dbg_Dbg_Shift ),
-      .DBG_CAPTURE ( microblaze_0_dbg_Dbg_Capture ),
-      .DBG_UPDATE ( microblaze_0_dbg_Dbg_Update ),
-      .DEBUG_RST ( microblaze_0_dbg_Debug_Rst ),
+      .DBG_CLK ( net_gnd0 ),
+      .DBG_TDI ( net_gnd0 ),
+      .DBG_TDO (  ),
+      .DBG_REG_EN ( net_gnd5 ),
+      .DBG_SHIFT ( net_gnd0 ),
+      .DBG_CAPTURE ( net_gnd0 ),
+      .DBG_UPDATE ( net_gnd0 ),
+      .DEBUG_RST ( net_gnd0 ),
       .Trace_Instruction (  ),
       .Trace_Valid_Instr (  ),
       .Trace_PC (  ),
@@ -776,21 +775,21 @@ module system
       .SPLB_Clk ( sys_clk_s ),
       .SPLB_Rst ( mb_plb_SPLB_Rst[0] ),
       .PLB_ABus ( mb_plb_PLB_ABus ),
-      .PLB_PAValid ( mb_plb_PLB_PAValid ),
-      .PLB_masterID ( mb_plb_PLB_masterID[0:0] ),
-      .PLB_RNW ( mb_plb_PLB_RNW ),
-      .PLB_BE ( mb_plb_PLB_BE ),
-      .PLB_size ( mb_plb_PLB_size ),
-      .PLB_type ( mb_plb_PLB_type ),
-      .PLB_wrDBus ( mb_plb_PLB_wrDBus ),
       .PLB_UABus ( mb_plb_PLB_UABus ),
+      .PLB_PAValid ( mb_plb_PLB_PAValid ),
       .PLB_SAValid ( mb_plb_PLB_SAValid ),
       .PLB_rdPrim ( mb_plb_PLB_rdPrim[0] ),
       .PLB_wrPrim ( mb_plb_PLB_wrPrim[0] ),
+      .PLB_masterID ( mb_plb_PLB_masterID[0:0] ),
       .PLB_abort ( mb_plb_PLB_abort ),
       .PLB_busLock ( mb_plb_PLB_busLock ),
+      .PLB_RNW ( mb_plb_PLB_RNW ),
+      .PLB_BE ( mb_plb_PLB_BE ),
       .PLB_MSize ( mb_plb_PLB_MSize ),
+      .PLB_size ( mb_plb_PLB_size ),
+      .PLB_type ( mb_plb_PLB_type ),
       .PLB_lockErr ( mb_plb_PLB_lockErr ),
+      .PLB_wrDBus ( mb_plb_PLB_wrDBus ),
       .PLB_wrBurst ( mb_plb_PLB_wrBurst ),
       .PLB_rdBurst ( mb_plb_PLB_rdBurst ),
       .PLB_wrPendReq ( mb_plb_PLB_wrPendReq ),
@@ -805,19 +804,35 @@ module system
       .Sl_rearbitrate ( mb_plb_Sl_rearbitrate[0] ),
       .Sl_wrDAck ( mb_plb_Sl_wrDAck[0] ),
       .Sl_wrComp ( mb_plb_Sl_wrComp[0] ),
+      .Sl_wrBTerm ( mb_plb_Sl_wrBTerm[0] ),
       .Sl_rdDBus ( mb_plb_Sl_rdDBus[0:31] ),
+      .Sl_rdWdAddr ( mb_plb_Sl_rdWdAddr[0:3] ),
       .Sl_rdDAck ( mb_plb_Sl_rdDAck[0] ),
       .Sl_rdComp ( mb_plb_Sl_rdComp[0] ),
+      .Sl_rdBTerm ( mb_plb_Sl_rdBTerm[0] ),
       .Sl_MBusy ( mb_plb_Sl_MBusy[0:1] ),
       .Sl_MWrErr ( mb_plb_Sl_MWrErr[0:1] ),
       .Sl_MRdErr ( mb_plb_Sl_MRdErr[0:1] ),
-      .Sl_wrBTerm ( mb_plb_Sl_wrBTerm[0] ),
-      .Sl_rdWdAddr ( mb_plb_Sl_rdWdAddr[0:3] ),
-      .Sl_rdBTerm ( mb_plb_Sl_rdBTerm[0] ),
       .Sl_MIRQ ( mb_plb_Sl_MIRQ[0:1] ),
-      .RX ( fpga_0_RS232_Uart_1_RX ),
-      .TX ( fpga_0_RS232_Uart_1_TX ),
-      .Interrupt (  )
+      .baudoutN (  ),
+      .ctsN ( fpga_0_RS232_Uart_1_ctsN ),
+      .dcdN ( net_gnd0 ),
+      .ddis (  ),
+      .dsrN ( net_gnd0 ),
+      .dtrN (  ),
+      .out1N (  ),
+      .out2N (  ),
+      .rclk ( net_gnd0 ),
+      .riN ( net_gnd0 ),
+      .rtsN ( fpga_0_RS232_Uart_1_rtsN ),
+      .rxrdyN (  ),
+      .sin ( fpga_0_RS232_Uart_1_sin ),
+      .sout ( fpga_0_RS232_Uart_1_sout ),
+      .IP2INTC_Irpt (  ),
+      .txrdyN (  ),
+      .xin ( net_gnd0 ),
+      .xout (  ),
+      .Freeze ( net_gnd0 )
     );
 
   xps_bram_if_cntlr_1_wrapper
@@ -916,165 +931,12 @@ module system
       .LOCKED ( Dcm_all_locked )
     );
 
-  debug_module_wrapper
-    debug_module (
-      .Interrupt (  ),
-      .Debug_SYS_Rst ( Debug_SYS_Rst ),
-      .Ext_BRK ( Ext_BRK ),
-      .Ext_NM_BRK ( Ext_NM_BRK ),
-      .SPLB_Clk ( sys_clk_s ),
-      .SPLB_Rst ( mb_plb_SPLB_Rst[2] ),
-      .PLB_ABus ( mb_plb_PLB_ABus ),
-      .PLB_UABus ( mb_plb_PLB_UABus ),
-      .PLB_PAValid ( mb_plb_PLB_PAValid ),
-      .PLB_SAValid ( mb_plb_PLB_SAValid ),
-      .PLB_rdPrim ( mb_plb_PLB_rdPrim[2] ),
-      .PLB_wrPrim ( mb_plb_PLB_wrPrim[2] ),
-      .PLB_masterID ( mb_plb_PLB_masterID[0:0] ),
-      .PLB_abort ( mb_plb_PLB_abort ),
-      .PLB_busLock ( mb_plb_PLB_busLock ),
-      .PLB_RNW ( mb_plb_PLB_RNW ),
-      .PLB_BE ( mb_plb_PLB_BE ),
-      .PLB_MSize ( mb_plb_PLB_MSize ),
-      .PLB_size ( mb_plb_PLB_size ),
-      .PLB_type ( mb_plb_PLB_type ),
-      .PLB_lockErr ( mb_plb_PLB_lockErr ),
-      .PLB_wrDBus ( mb_plb_PLB_wrDBus ),
-      .PLB_wrBurst ( mb_plb_PLB_wrBurst ),
-      .PLB_rdBurst ( mb_plb_PLB_rdBurst ),
-      .PLB_wrPendReq ( mb_plb_PLB_wrPendReq ),
-      .PLB_rdPendReq ( mb_plb_PLB_rdPendReq ),
-      .PLB_wrPendPri ( mb_plb_PLB_wrPendPri ),
-      .PLB_rdPendPri ( mb_plb_PLB_rdPendPri ),
-      .PLB_reqPri ( mb_plb_PLB_reqPri ),
-      .PLB_TAttribute ( mb_plb_PLB_TAttribute ),
-      .Sl_addrAck ( mb_plb_Sl_addrAck[2] ),
-      .Sl_SSize ( mb_plb_Sl_SSize[4:5] ),
-      .Sl_wait ( mb_plb_Sl_wait[2] ),
-      .Sl_rearbitrate ( mb_plb_Sl_rearbitrate[2] ),
-      .Sl_wrDAck ( mb_plb_Sl_wrDAck[2] ),
-      .Sl_wrComp ( mb_plb_Sl_wrComp[2] ),
-      .Sl_wrBTerm ( mb_plb_Sl_wrBTerm[2] ),
-      .Sl_rdDBus ( mb_plb_Sl_rdDBus[64:95] ),
-      .Sl_rdWdAddr ( mb_plb_Sl_rdWdAddr[8:11] ),
-      .Sl_rdDAck ( mb_plb_Sl_rdDAck[2] ),
-      .Sl_rdComp ( mb_plb_Sl_rdComp[2] ),
-      .Sl_rdBTerm ( mb_plb_Sl_rdBTerm[2] ),
-      .Sl_MBusy ( mb_plb_Sl_MBusy[4:5] ),
-      .Sl_MWrErr ( mb_plb_Sl_MWrErr[4:5] ),
-      .Sl_MRdErr ( mb_plb_Sl_MRdErr[4:5] ),
-      .Sl_MIRQ ( mb_plb_Sl_MIRQ[4:5] ),
-      .OPB_Clk ( net_gnd0 ),
-      .OPB_Rst ( net_gnd0 ),
-      .OPB_ABus ( net_gnd32 ),
-      .OPB_BE ( net_gnd4 ),
-      .OPB_RNW ( net_gnd0 ),
-      .OPB_select ( net_gnd0 ),
-      .OPB_seqAddr ( net_gnd0 ),
-      .OPB_DBus ( net_gnd32 ),
-      .MDM_DBus (  ),
-      .MDM_errAck (  ),
-      .MDM_retry (  ),
-      .MDM_toutSup (  ),
-      .MDM_xferAck (  ),
-      .Dbg_Clk_0 ( microblaze_0_dbg_Dbg_Clk ),
-      .Dbg_TDI_0 ( microblaze_0_dbg_Dbg_TDI ),
-      .Dbg_TDO_0 ( microblaze_0_dbg_Dbg_TDO ),
-      .Dbg_Reg_En_0 ( microblaze_0_dbg_Dbg_Reg_En ),
-      .Dbg_Capture_0 ( microblaze_0_dbg_Dbg_Capture ),
-      .Dbg_Shift_0 ( microblaze_0_dbg_Dbg_Shift ),
-      .Dbg_Update_0 ( microblaze_0_dbg_Dbg_Update ),
-      .Dbg_Rst_0 ( microblaze_0_dbg_Debug_Rst ),
-      .Dbg_Clk_1 (  ),
-      .Dbg_TDI_1 (  ),
-      .Dbg_TDO_1 ( net_gnd0 ),
-      .Dbg_Reg_En_1 (  ),
-      .Dbg_Capture_1 (  ),
-      .Dbg_Shift_1 (  ),
-      .Dbg_Update_1 (  ),
-      .Dbg_Rst_1 (  ),
-      .Dbg_Clk_2 (  ),
-      .Dbg_TDI_2 (  ),
-      .Dbg_TDO_2 ( net_gnd0 ),
-      .Dbg_Reg_En_2 (  ),
-      .Dbg_Capture_2 (  ),
-      .Dbg_Shift_2 (  ),
-      .Dbg_Update_2 (  ),
-      .Dbg_Rst_2 (  ),
-      .Dbg_Clk_3 (  ),
-      .Dbg_TDI_3 (  ),
-      .Dbg_TDO_3 ( net_gnd0 ),
-      .Dbg_Reg_En_3 (  ),
-      .Dbg_Capture_3 (  ),
-      .Dbg_Shift_3 (  ),
-      .Dbg_Update_3 (  ),
-      .Dbg_Rst_3 (  ),
-      .Dbg_Clk_4 (  ),
-      .Dbg_TDI_4 (  ),
-      .Dbg_TDO_4 ( net_gnd0 ),
-      .Dbg_Reg_En_4 (  ),
-      .Dbg_Capture_4 (  ),
-      .Dbg_Shift_4 (  ),
-      .Dbg_Update_4 (  ),
-      .Dbg_Rst_4 (  ),
-      .Dbg_Clk_5 (  ),
-      .Dbg_TDI_5 (  ),
-      .Dbg_TDO_5 ( net_gnd0 ),
-      .Dbg_Reg_En_5 (  ),
-      .Dbg_Capture_5 (  ),
-      .Dbg_Shift_5 (  ),
-      .Dbg_Update_5 (  ),
-      .Dbg_Rst_5 (  ),
-      .Dbg_Clk_6 (  ),
-      .Dbg_TDI_6 (  ),
-      .Dbg_TDO_6 ( net_gnd0 ),
-      .Dbg_Reg_En_6 (  ),
-      .Dbg_Capture_6 (  ),
-      .Dbg_Shift_6 (  ),
-      .Dbg_Update_6 (  ),
-      .Dbg_Rst_6 (  ),
-      .Dbg_Clk_7 (  ),
-      .Dbg_TDI_7 (  ),
-      .Dbg_TDO_7 ( net_gnd0 ),
-      .Dbg_Reg_En_7 (  ),
-      .Dbg_Capture_7 (  ),
-      .Dbg_Shift_7 (  ),
-      .Dbg_Update_7 (  ),
-      .Dbg_Rst_7 (  ),
-      .bscan_tdi (  ),
-      .bscan_reset (  ),
-      .bscan_shift (  ),
-      .bscan_update (  ),
-      .bscan_capture (  ),
-      .bscan_sel1 (  ),
-      .bscan_drck1 (  ),
-      .bscan_tdo1 ( net_gnd0 ),
-      .FSL0_S_CLK (  ),
-      .FSL0_S_READ (  ),
-      .FSL0_S_DATA ( net_gnd32 ),
-      .FSL0_S_CONTROL ( net_gnd0 ),
-      .FSL0_S_EXISTS ( net_gnd0 ),
-      .FSL0_M_CLK (  ),
-      .FSL0_M_WRITE (  ),
-      .FSL0_M_DATA (  ),
-      .FSL0_M_CONTROL (  ),
-      .FSL0_M_FULL ( net_gnd0 ),
-      .Ext_JTAG_DRCK (  ),
-      .Ext_JTAG_RESET (  ),
-      .Ext_JTAG_SEL (  ),
-      .Ext_JTAG_CAPTURE (  ),
-      .Ext_JTAG_SHIFT (  ),
-      .Ext_JTAG_UPDATE (  ),
-      .Ext_JTAG_TDI (  ),
-      .Ext_JTAG_TDO ( net_gnd0 )
-    );
-
   proc_sys_reset_0_wrapper
     proc_sys_reset_0 (
       .Slowest_sync_clk ( sys_clk_s ),
       .Ext_Reset_In ( sys_rst_s ),
       .Aux_Reset_In ( net_gnd0 ),
-      .MB_Debug_Sys_Rst ( Debug_SYS_Rst ),
+      .MB_Debug_Sys_Rst ( net_gnd0 ),
       .Core_Reset_Req_0 ( net_gnd0 ),
       .Chip_Reset_Req_0 ( net_gnd0 ),
       .System_Reset_Req_0 ( net_gnd0 ),
@@ -1125,7 +987,6 @@ endmodule
 // synthesis attribute BOX_TYPE of xps_bram_if_cntlr_1_wrapper is black_box;
 // synthesis attribute BOX_TYPE of xps_bram_if_cntlr_1_bram_wrapper is black_box;
 // synthesis attribute BOX_TYPE of clock_generator_0_wrapper is black_box;
-// synthesis attribute BOX_TYPE of debug_module_wrapper is black_box;
 // synthesis attribute BOX_TYPE of proc_sys_reset_0_wrapper is black_box;
 // synthesis attribute BOX_TYPE of bramfeeder_0_wrapper is black_box;
 
@@ -1891,7 +1752,7 @@ module mb_plb_wrapper
   input PLB_Clk;
   input SYS_Rst;
   output PLB_Rst;
-  output [0:2] SPLB_Rst;
+  output [0:1] SPLB_Rst;
   output [0:1] MPLB_Rst;
   output PLB_dcrAck;
   output [0:31] PLB_dcrDBus;
@@ -1915,22 +1776,22 @@ module mb_plb_wrapper
   input [0:5] M_type;
   input [0:1] M_wrBurst;
   input [0:63] M_wrDBus;
-  input [0:2] Sl_addrAck;
-  input [0:5] Sl_MRdErr;
-  input [0:5] Sl_MWrErr;
-  input [0:5] Sl_MBusy;
-  input [0:2] Sl_rdBTerm;
-  input [0:2] Sl_rdComp;
-  input [0:2] Sl_rdDAck;
-  input [0:95] Sl_rdDBus;
-  input [0:11] Sl_rdWdAddr;
-  input [0:2] Sl_rearbitrate;
-  input [0:5] Sl_SSize;
-  input [0:2] Sl_wait;
-  input [0:2] Sl_wrBTerm;
-  input [0:2] Sl_wrComp;
-  input [0:2] Sl_wrDAck;
-  input [0:5] Sl_MIRQ;
+  input [0:1] Sl_addrAck;
+  input [0:3] Sl_MRdErr;
+  input [0:3] Sl_MWrErr;
+  input [0:3] Sl_MBusy;
+  input [0:1] Sl_rdBTerm;
+  input [0:1] Sl_rdComp;
+  input [0:1] Sl_rdDAck;
+  input [0:63] Sl_rdDBus;
+  input [0:7] Sl_rdWdAddr;
+  input [0:1] Sl_rearbitrate;
+  input [0:3] Sl_SSize;
+  input [0:1] Sl_wait;
+  input [0:1] Sl_wrBTerm;
+  input [0:1] Sl_wrComp;
+  input [0:1] Sl_wrDAck;
+  input [0:3] Sl_MIRQ;
   output [0:1] PLB_MIRQ;
   output [0:31] PLB_ABus;
   output [0:31] PLB_UABus;
@@ -1962,13 +1823,13 @@ module mb_plb_wrapper
   output PLB_rdPendReq;
   output PLB_wrPendReq;
   output PLB_rdBurst;
-  output [0:2] PLB_rdPrim;
+  output [0:1] PLB_rdPrim;
   output [0:1] PLB_reqPri;
   output [0:3] PLB_size;
   output [0:2] PLB_type;
   output PLB_wrBurst;
   output [0:31] PLB_wrDBus;
-  output [0:2] PLB_wrPrim;
+  output [0:1] PLB_wrPrim;
   output PLB_SaddrAck;
   output [0:1] PLB_SMRdErr;
   output [0:1] PLB_SMWrErr;
@@ -2189,21 +2050,21 @@ module rs232_uart_1_wrapper
     SPLB_Clk,
     SPLB_Rst,
     PLB_ABus,
-    PLB_PAValid,
-    PLB_masterID,
-    PLB_RNW,
-    PLB_BE,
-    PLB_size,
-    PLB_type,
-    PLB_wrDBus,
     PLB_UABus,
+    PLB_PAValid,
     PLB_SAValid,
     PLB_rdPrim,
     PLB_wrPrim,
+    PLB_masterID,
     PLB_abort,
     PLB_busLock,
+    PLB_RNW,
+    PLB_BE,
     PLB_MSize,
+    PLB_size,
+    PLB_type,
     PLB_lockErr,
+    PLB_wrDBus,
     PLB_wrBurst,
     PLB_rdBurst,
     PLB_wrPendReq,
@@ -2218,38 +2079,54 @@ module rs232_uart_1_wrapper
     Sl_rearbitrate,
     Sl_wrDAck,
     Sl_wrComp,
+    Sl_wrBTerm,
     Sl_rdDBus,
+    Sl_rdWdAddr,
     Sl_rdDAck,
     Sl_rdComp,
+    Sl_rdBTerm,
     Sl_MBusy,
     Sl_MWrErr,
     Sl_MRdErr,
-    Sl_wrBTerm,
-    Sl_rdWdAddr,
-    Sl_rdBTerm,
     Sl_MIRQ,
-    RX,
-    TX,
-    Interrupt
+    baudoutN,
+    ctsN,
+    dcdN,
+    ddis,
+    dsrN,
+    dtrN,
+    out1N,
+    out2N,
+    rclk,
+    riN,
+    rtsN,
+    rxrdyN,
+    sin,
+    sout,
+    IP2INTC_Irpt,
+    txrdyN,
+    xin,
+    xout,
+    Freeze
   );
   input SPLB_Clk;
   input SPLB_Rst;
   input [0:31] PLB_ABus;
-  input PLB_PAValid;
-  input [0:0] PLB_masterID;
-  input PLB_RNW;
-  input [0:3] PLB_BE;
-  input [0:3] PLB_size;
-  input [0:2] PLB_type;
-  input [0:31] PLB_wrDBus;
   input [0:31] PLB_UABus;
+  input PLB_PAValid;
   input PLB_SAValid;
   input PLB_rdPrim;
   input PLB_wrPrim;
+  input [0:0] PLB_masterID;
   input PLB_abort;
   input PLB_busLock;
+  input PLB_RNW;
+  input [0:3] PLB_BE;
   input [0:1] PLB_MSize;
+  input [0:3] PLB_size;
+  input [0:2] PLB_type;
   input PLB_lockErr;
+  input [0:31] PLB_wrDBus;
   input PLB_wrBurst;
   input PLB_rdBurst;
   input PLB_wrPendReq;
@@ -2264,19 +2141,35 @@ module rs232_uart_1_wrapper
   output Sl_rearbitrate;
   output Sl_wrDAck;
   output Sl_wrComp;
+  output Sl_wrBTerm;
   output [0:31] Sl_rdDBus;
+  output [0:3] Sl_rdWdAddr;
   output Sl_rdDAck;
   output Sl_rdComp;
+  output Sl_rdBTerm;
   output [0:1] Sl_MBusy;
   output [0:1] Sl_MWrErr;
   output [0:1] Sl_MRdErr;
-  output Sl_wrBTerm;
-  output [0:3] Sl_rdWdAddr;
-  output Sl_rdBTerm;
   output [0:1] Sl_MIRQ;
-  input RX;
-  output TX;
-  output Interrupt;
+  output baudoutN;
+  input ctsN;
+  input dcdN;
+  output ddis;
+  input dsrN;
+  output dtrN;
+  output out1N;
+  output out2N;
+  input rclk;
+  input riN;
+  output rtsN;
+  output rxrdyN;
+  input sin;
+  output sout;
+  output IP2INTC_Irpt;
+  output txrdyN;
+  input xin;
+  output xout;
+  input Freeze;
 endmodule
 
 module xps_bram_if_cntlr_1_wrapper
@@ -2460,309 +2353,6 @@ module clock_generator_0_wrapper
   output CLKFBOUT;
   input RST;
   output LOCKED;
-endmodule
-
-module debug_module_wrapper
-  (
-    Interrupt,
-    Debug_SYS_Rst,
-    Ext_BRK,
-    Ext_NM_BRK,
-    SPLB_Clk,
-    SPLB_Rst,
-    PLB_ABus,
-    PLB_UABus,
-    PLB_PAValid,
-    PLB_SAValid,
-    PLB_rdPrim,
-    PLB_wrPrim,
-    PLB_masterID,
-    PLB_abort,
-    PLB_busLock,
-    PLB_RNW,
-    PLB_BE,
-    PLB_MSize,
-    PLB_size,
-    PLB_type,
-    PLB_lockErr,
-    PLB_wrDBus,
-    PLB_wrBurst,
-    PLB_rdBurst,
-    PLB_wrPendReq,
-    PLB_rdPendReq,
-    PLB_wrPendPri,
-    PLB_rdPendPri,
-    PLB_reqPri,
-    PLB_TAttribute,
-    Sl_addrAck,
-    Sl_SSize,
-    Sl_wait,
-    Sl_rearbitrate,
-    Sl_wrDAck,
-    Sl_wrComp,
-    Sl_wrBTerm,
-    Sl_rdDBus,
-    Sl_rdWdAddr,
-    Sl_rdDAck,
-    Sl_rdComp,
-    Sl_rdBTerm,
-    Sl_MBusy,
-    Sl_MWrErr,
-    Sl_MRdErr,
-    Sl_MIRQ,
-    OPB_Clk,
-    OPB_Rst,
-    OPB_ABus,
-    OPB_BE,
-    OPB_RNW,
-    OPB_select,
-    OPB_seqAddr,
-    OPB_DBus,
-    MDM_DBus,
-    MDM_errAck,
-    MDM_retry,
-    MDM_toutSup,
-    MDM_xferAck,
-    Dbg_Clk_0,
-    Dbg_TDI_0,
-    Dbg_TDO_0,
-    Dbg_Reg_En_0,
-    Dbg_Capture_0,
-    Dbg_Shift_0,
-    Dbg_Update_0,
-    Dbg_Rst_0,
-    Dbg_Clk_1,
-    Dbg_TDI_1,
-    Dbg_TDO_1,
-    Dbg_Reg_En_1,
-    Dbg_Capture_1,
-    Dbg_Shift_1,
-    Dbg_Update_1,
-    Dbg_Rst_1,
-    Dbg_Clk_2,
-    Dbg_TDI_2,
-    Dbg_TDO_2,
-    Dbg_Reg_En_2,
-    Dbg_Capture_2,
-    Dbg_Shift_2,
-    Dbg_Update_2,
-    Dbg_Rst_2,
-    Dbg_Clk_3,
-    Dbg_TDI_3,
-    Dbg_TDO_3,
-    Dbg_Reg_En_3,
-    Dbg_Capture_3,
-    Dbg_Shift_3,
-    Dbg_Update_3,
-    Dbg_Rst_3,
-    Dbg_Clk_4,
-    Dbg_TDI_4,
-    Dbg_TDO_4,
-    Dbg_Reg_En_4,
-    Dbg_Capture_4,
-    Dbg_Shift_4,
-    Dbg_Update_4,
-    Dbg_Rst_4,
-    Dbg_Clk_5,
-    Dbg_TDI_5,
-    Dbg_TDO_5,
-    Dbg_Reg_En_5,
-    Dbg_Capture_5,
-    Dbg_Shift_5,
-    Dbg_Update_5,
-    Dbg_Rst_5,
-    Dbg_Clk_6,
-    Dbg_TDI_6,
-    Dbg_TDO_6,
-    Dbg_Reg_En_6,
-    Dbg_Capture_6,
-    Dbg_Shift_6,
-    Dbg_Update_6,
-    Dbg_Rst_6,
-    Dbg_Clk_7,
-    Dbg_TDI_7,
-    Dbg_TDO_7,
-    Dbg_Reg_En_7,
-    Dbg_Capture_7,
-    Dbg_Shift_7,
-    Dbg_Update_7,
-    Dbg_Rst_7,
-    bscan_tdi,
-    bscan_reset,
-    bscan_shift,
-    bscan_update,
-    bscan_capture,
-    bscan_sel1,
-    bscan_drck1,
-    bscan_tdo1,
-    FSL0_S_CLK,
-    FSL0_S_READ,
-    FSL0_S_DATA,
-    FSL0_S_CONTROL,
-    FSL0_S_EXISTS,
-    FSL0_M_CLK,
-    FSL0_M_WRITE,
-    FSL0_M_DATA,
-    FSL0_M_CONTROL,
-    FSL0_M_FULL,
-    Ext_JTAG_DRCK,
-    Ext_JTAG_RESET,
-    Ext_JTAG_SEL,
-    Ext_JTAG_CAPTURE,
-    Ext_JTAG_SHIFT,
-    Ext_JTAG_UPDATE,
-    Ext_JTAG_TDI,
-    Ext_JTAG_TDO
-  );
-  output Interrupt;
-  output Debug_SYS_Rst;
-  output Ext_BRK;
-  output Ext_NM_BRK;
-  input SPLB_Clk;
-  input SPLB_Rst;
-  input [0:31] PLB_ABus;
-  input [0:31] PLB_UABus;
-  input PLB_PAValid;
-  input PLB_SAValid;
-  input PLB_rdPrim;
-  input PLB_wrPrim;
-  input [0:0] PLB_masterID;
-  input PLB_abort;
-  input PLB_busLock;
-  input PLB_RNW;
-  input [0:3] PLB_BE;
-  input [0:1] PLB_MSize;
-  input [0:3] PLB_size;
-  input [0:2] PLB_type;
-  input PLB_lockErr;
-  input [0:31] PLB_wrDBus;
-  input PLB_wrBurst;
-  input PLB_rdBurst;
-  input PLB_wrPendReq;
-  input PLB_rdPendReq;
-  input [0:1] PLB_wrPendPri;
-  input [0:1] PLB_rdPendPri;
-  input [0:1] PLB_reqPri;
-  input [0:15] PLB_TAttribute;
-  output Sl_addrAck;
-  output [0:1] Sl_SSize;
-  output Sl_wait;
-  output Sl_rearbitrate;
-  output Sl_wrDAck;
-  output Sl_wrComp;
-  output Sl_wrBTerm;
-  output [0:31] Sl_rdDBus;
-  output [0:3] Sl_rdWdAddr;
-  output Sl_rdDAck;
-  output Sl_rdComp;
-  output Sl_rdBTerm;
-  output [0:1] Sl_MBusy;
-  output [0:1] Sl_MWrErr;
-  output [0:1] Sl_MRdErr;
-  output [0:1] Sl_MIRQ;
-  input OPB_Clk;
-  input OPB_Rst;
-  input [0:31] OPB_ABus;
-  input [0:3] OPB_BE;
-  input OPB_RNW;
-  input OPB_select;
-  input OPB_seqAddr;
-  input [0:31] OPB_DBus;
-  output [0:31] MDM_DBus;
-  output MDM_errAck;
-  output MDM_retry;
-  output MDM_toutSup;
-  output MDM_xferAck;
-  output Dbg_Clk_0;
-  output Dbg_TDI_0;
-  input Dbg_TDO_0;
-  output [0:4] Dbg_Reg_En_0;
-  output Dbg_Capture_0;
-  output Dbg_Shift_0;
-  output Dbg_Update_0;
-  output Dbg_Rst_0;
-  output Dbg_Clk_1;
-  output Dbg_TDI_1;
-  input Dbg_TDO_1;
-  output [0:4] Dbg_Reg_En_1;
-  output Dbg_Capture_1;
-  output Dbg_Shift_1;
-  output Dbg_Update_1;
-  output Dbg_Rst_1;
-  output Dbg_Clk_2;
-  output Dbg_TDI_2;
-  input Dbg_TDO_2;
-  output [0:4] Dbg_Reg_En_2;
-  output Dbg_Capture_2;
-  output Dbg_Shift_2;
-  output Dbg_Update_2;
-  output Dbg_Rst_2;
-  output Dbg_Clk_3;
-  output Dbg_TDI_3;
-  input Dbg_TDO_3;
-  output [0:4] Dbg_Reg_En_3;
-  output Dbg_Capture_3;
-  output Dbg_Shift_3;
-  output Dbg_Update_3;
-  output Dbg_Rst_3;
-  output Dbg_Clk_4;
-  output Dbg_TDI_4;
-  input Dbg_TDO_4;
-  output [0:4] Dbg_Reg_En_4;
-  output Dbg_Capture_4;
-  output Dbg_Shift_4;
-  output Dbg_Update_4;
-  output Dbg_Rst_4;
-  output Dbg_Clk_5;
-  output Dbg_TDI_5;
-  input Dbg_TDO_5;
-  output [0:4] Dbg_Reg_En_5;
-  output Dbg_Capture_5;
-  output Dbg_Shift_5;
-  output Dbg_Update_5;
-  output Dbg_Rst_5;
-  output Dbg_Clk_6;
-  output Dbg_TDI_6;
-  input Dbg_TDO_6;
-  output [0:4] Dbg_Reg_En_6;
-  output Dbg_Capture_6;
-  output Dbg_Shift_6;
-  output Dbg_Update_6;
-  output Dbg_Rst_6;
-  output Dbg_Clk_7;
-  output Dbg_TDI_7;
-  input Dbg_TDO_7;
-  output [0:4] Dbg_Reg_En_7;
-  output Dbg_Capture_7;
-  output Dbg_Shift_7;
-  output Dbg_Update_7;
-  output Dbg_Rst_7;
-  output bscan_tdi;
-  output bscan_reset;
-  output bscan_shift;
-  output bscan_update;
-  output bscan_capture;
-  output bscan_sel1;
-  output bscan_drck1;
-  input bscan_tdo1;
-  output FSL0_S_CLK;
-  output FSL0_S_READ;
-  input [0:31] FSL0_S_DATA;
-  input FSL0_S_CONTROL;
-  input FSL0_S_EXISTS;
-  output FSL0_M_CLK;
-  output FSL0_M_WRITE;
-  output [0:31] FSL0_M_DATA;
-  output FSL0_M_CONTROL;
-  input FSL0_M_FULL;
-  output Ext_JTAG_DRCK;
-  output Ext_JTAG_RESET;
-  output Ext_JTAG_SEL;
-  output Ext_JTAG_CAPTURE;
-  output Ext_JTAG_SHIFT;
-  output Ext_JTAG_UPDATE;
-  output Ext_JTAG_TDI;
-  input Ext_JTAG_TDO;
 endmodule
 
 module proc_sys_reset_0_wrapper
