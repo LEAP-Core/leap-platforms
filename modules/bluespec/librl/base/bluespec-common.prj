@@ -1,4 +1,3 @@
-verilog work "@BLUESPECDIR@/Verilog/BRAM.v"
 verilog work "@BLUESPECDIR@/Verilog/BypassWire.v"
 verilog work "@BLUESPECDIR@/Verilog/ClockDiv.v"
 verilog work "@BLUESPECDIR@/Verilog/ClockGen.v"

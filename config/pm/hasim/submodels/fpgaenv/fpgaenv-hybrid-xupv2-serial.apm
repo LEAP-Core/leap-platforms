@@ -7,7 +7,8 @@ Version=2.1
 Type=HAsim
 Name=Hybrid XUPv2 Serial Environment
 Class=Asim::Model
-DefaultBenchmark=0
+DefaultBenchmark=
+DefaultRunOpts=
 
 [Model]
 DefaultAttributes=bluespec xupv2
@@ -55,7 +56,7 @@ File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/basic/basic-chan
 Packagehint=platforms
 
 [Basic Virtual Channel Multiplexer/Requires]
-physical_channel=Serial Physical Channel with loopback
+physical_channel=Serial Physical Channel
 
 [Low Level Platform Interface Hybrid]
 File=modules/bluespec/common/fpgaenv/low-level-platform-interface/hybrid-llpi.awb
@@ -112,7 +113,6 @@ switch_device=General Switch Device
 File=modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup/serial/xilinx-xup-serial.awb
 Packagehint=platforms
 
-
 [NULL Local Memory Interface/Params]
 LOCAL_MEM_WORDS_PER_LINE=4
 LOCAL_MEM_WORD_BITS=64
@@ -150,6 +150,7 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/shared-memory/null/null-shared-memory.awb
 Packagehint=platforms
 
-[Serial Physical Channel with loopback]
-File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/serial/serial-physical-channel-loopback.awb
+
+[Serial Physical Channel]
+File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/serial/serial-physical-channel.awb
 Packagehint=platforms

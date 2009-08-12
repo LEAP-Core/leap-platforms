@@ -35,7 +35,10 @@ class PHYSICAL_CHANNEL_CLASS: public PLATFORMS_MODULE_CLASS
   // incomplete incoming read message
   UMF_MESSAGE incomingMessage;
 
-  void attemptRead();
+  void readPipe();
+  void    serial_read(unsigned char *v, unsigned int numBytes);
+  void   serial_write(unsigned char *v, unsigned int numBytes);
+  bool  serial_hasdata();
 
   public:
 

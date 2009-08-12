@@ -34,11 +34,43 @@ endinterface
 module mkPhysicalChannel#(PHYSICAL_DRIVERS drivers)
     // interface
         (PHYSICAL_CHANNEL);
-    
-    // shortcut to drivers
-    SERIAL_DRIVER serialDriver = drivers.serialDriver;
+  
+  // shortcut to drivers
+  SERIAL_DRIVER serialDriver = drivers.serialDriver;
 
-    method read  = serialDriver.receive;
-    method write = serialDriver.send;
 
+  Reg#(Bool)    initialized <- mkReg(False);
+  Reg#(Bit#(12)) count      <- mkReg(0);
+  
+  //scheme is pos 0 0xF0 HW -> SW
+  //          pos 1 0xCA SW -> HW
+  //          pos 2 0x08 HW -> SW
+  
+  rule sendPulse(!initialized);
+    count <= count + 1;
+    if (count == 0)
+      begin
+	serialDriver.send(32'hDEADBEEF);
+      end
+  endrule
+
+
+  rule getResp(!initialized);
+    let x<- serialDriver.receive();
+    if (x == 32'h0505CAFE) // woo. A response Send a token and we're done 
+      begin
+	serialDriver.send(32'h08675309);
+	initialized <= True;
+      end   
+  endrule  
+ 
+  method ActionValue#(UMF_CHUNK) read() if (initialized);
+    let x <- serialDriver.receive();
+    return x;
+  endmethod
+
+  method Action write(UMF_CHUNK x) if (initialized);
+    serialDriver.send(x);
+  endmethod
+  
 endmodule
