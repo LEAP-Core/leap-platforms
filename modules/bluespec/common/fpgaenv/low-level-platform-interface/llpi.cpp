@@ -18,6 +18,14 @@
 
 #include "asim/provides/low_level_platform_interface.h"
 
+// *** trampolene function for LLPI's Main() ***
+void * LLPI_Main(void *argv)
+{
+    LLPI instance = LLPI(argv);
+    instance->Main();
+    return NULL;
+}
+
 LLPI_CLASS::LLPI_CLASS() :
         PLATFORMS_MODULE_CLASS(NULL),
         physicalDevices(this),
@@ -38,6 +46,24 @@ LLPI_CLASS::~LLPI_CLASS()
 }
 
 void
+LLPI_CLASS::Init()
+{
+
+    // spawn off Monitor/Service thread which calls LLPI's Main()
+    if (pthread_create(&monitorThreadID,
+                       NULL,
+                       LLPI_Main,
+                       (void *)this) != 0)
+    {
+        perror("pthread_create");
+        exit(1);
+    }
+    
+    // RRR needs to know the monitor thread ID
+    rrrClient.SetMonitorThreadID(monitorThreadID);
+    
+}
+void
 LLPI_CLASS::Main()
 {
     // infinite scheduler loop
@@ -46,6 +72,7 @@ LLPI_CLASS::Main()
         Poll();
     }
 }
+
 
 void
 LLPI_CLASS::Poll()

@@ -22,7 +22,9 @@ class RRR_CLIENT_CLASS: public PLATFORMS_MODULE_CLASS
     // multi-thread support
     pthread_mutex_t bufferLock;     // response buffer lock
     pthread_cond_t  bufferCond;     // response buffer condition variable
-
+    pthread_t monitorThreadID;      // thread ID of the service thread
+    int initialized;                // are we ready to start polling?
+    
   public:
 
     RRR_CLIENT_CLASS(PLATFORMS_MODULE, CHANNELIO);
@@ -30,6 +32,8 @@ class RRR_CLIENT_CLASS: public PLATFORMS_MODULE_CLASS
     
     UMF_MESSAGE MakeRequest(UMF_MESSAGE);
     void MakeRequestNoResponse(UMF_MESSAGE);
+    
+    void SetMonitorThreadID(pthread_t mon);
 
     void Poll();
 };

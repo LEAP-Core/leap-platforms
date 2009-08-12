@@ -1,0 +1,13 @@
+service STARTER_DEVICE
+{
+    server hw (bsv, method) <- sw (cpp, method)
+    {
+        method Start     (in UINT32[32] payload);
+    };
+
+    server sw (cpp, method) <- hw (bsv, method)
+    {
+        method End    (in UINT8[8] success);
+        method Heartbeat (in UINT64[64] fpga_cycles);
+    };
+};

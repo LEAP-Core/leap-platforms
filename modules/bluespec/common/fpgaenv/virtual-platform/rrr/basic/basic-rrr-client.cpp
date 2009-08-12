@@ -19,7 +19,7 @@
 #include <iostream>
 
 #include "asim/provides/rrr.h"
-#include "asim/provides/hasim_controller.h" // FIXME FIXME FIXME
+#include "asim/provides/model.h" // FIXME should be project
 
 #define CHANNEL_ID  1
 
@@ -32,7 +32,8 @@ RRR_CLIENT RRRClient;
 RRR_CLIENT_CLASS::RRR_CLIENT_CLASS(
     PLATFORMS_MODULE p,
     CHANNELIO    cio) :
-        PLATFORMS_MODULE_CLASS(p)
+        PLATFORMS_MODULE_CLASS(p),
+        initialized (0)
 {
     // set channelio link
     channelio = cio;
@@ -45,6 +46,15 @@ RRR_CLIENT_CLASS::RRR_CLIENT_CLASS(
 // destructor
 RRR_CLIENT_CLASS::~RRR_CLIENT_CLASS()
 {
+}
+
+// The monitor thread ID must be set before we start polling.
+void
+RRR_CLIENT_CLASS::SetMonitorThreadID(pthread_t mon)
+{ 
+    monitorThreadID = mon;
+    initialized = 1;
+    return;
 }
 
 // make request with response
@@ -163,6 +173,9 @@ RRR_CLIENT_CLASS::MakeRequestNoResponse(
 void
 RRR_CLIENT_CLASS::Poll()
 {
+    if (!initialized)
+        return;
+
     // this method can only be called from the Monitor/Service thread
     ASSERTX(pthread_self() == monitorThreadID);
 

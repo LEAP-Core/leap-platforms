@@ -3,6 +3,7 @@
 
 %provides scratchpad_memory
 
+%public   hybrid-mem-scratch-interfaces.bsv
 %public   hybrid-mem-scratch.bsv
 %private  hybrid-mem-scratch.cpp
 %public   hybrid-mem-scratch.h
@@ -12,3 +13,5 @@
 %param SCRATCHPAD_MEMORY_ADDR_BITS 32  "Word-level address bits per private scratchpad region"
  
 %param --global SRATCHPAD_MEMORY_DEBUG_ENABLE 1 "Enables the scratchpad memory debug"
+
+%param --global SCRATCHPAD_CLIENT_REF_INFO_BITS   7 "Bits available to clients to tag a reference."

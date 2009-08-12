@@ -33,23 +33,14 @@ File=modules/bluespec/common/fpgaenv/fpga-environment.awb
 Packagehint=platforms
 
 [Standard Virtual Devices]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/std-virtual-devices.awb
+File=config/pm/hasim/submodels/fpgaenv/std-virtual-devices.apm
 Packagehint=platforms
 
-[Standard Virtual Devices/Requires]
-front_panel=Hybrid Front Panel
-streams=Hybrid Streams
-scratchpad_memory=Hybrid Scratchpad Memory Device
-central_cache=NULL Central Cache
-shared_memory=Null Shared Memory
 
 [RRR Clients and Servers]
 File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic/basic-rrr.awb
 Packagehint=platforms
 
-[Hybrid Streams]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/streams/hybrid-streams.awb
-Packagehint=platforms
 
 [Basic Virtual Channel Multiplexer]
 File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/basic/basic-channelio.awb
@@ -86,13 +77,7 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/physical-platform/debuggers/null/null-debugger.awb
 Packagehint=platforms
 
-[NULL Central Cache]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/central-cache/null-central-cache.awb
-Packagehint=platforms
 
-[Hybrid Front Panel]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid/hybrid-fp.awb
-Packagehint=platforms
 
 [General LED Device]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/leds/general-led-device.awb
@@ -126,9 +111,6 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/serial/ublaze-serial/serial-device-ublaze.awb
 Packagehint=platforms
 
-[Hybrid Scratchpad Memory Device]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid/hybrid-mem-scratch.awb
-Packagehint=platforms
 
 [Single-Ended Crystal Clocks Device]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/single-ended/single-ended-clocks-device.awb
@@ -146,9 +128,6 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/low-level-platform-interface/remote-memory/null/null-remote-memory.awb
 Packagehint=platforms
 
-[Null Shared Memory]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/shared-memory/null/null-shared-memory.awb
-Packagehint=platforms
 
 
 [Serial Physical Channel]

@@ -26,7 +26,6 @@ import Vector::*;
 `include "asim/provides/fpga_components.bsh"
 `include "asim/provides/low_level_platform_interface.bsh"
 `include "asim/provides/physical_platform.bsh"
-`include "asim/provides/virtual_devices.bsh"
 `include "asim/provides/local_mem.bsh"
 
 

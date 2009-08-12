@@ -7,6 +7,7 @@ Version=2.1
 Type=HAsim
 Name=Hardware-Only HTG-v5-PCIe Environment
 Class=Asim::Model
+DefaultBenchmark=0
 
 [Model]
 DefaultAttributes=bluespec htg-v5-pcie
@@ -14,7 +15,7 @@ model=FPGA Environment
 
 [FPGA Environment/Requires]
 virtual_platform=Standard Virtual Platform
-fpga_components=Hardware FPGA Components
+fpga_components=Hardware FPGA Components for Virtex 5
 librl_bsv=RL Bluespec Library
 
 [Standard Virtual Platform]
@@ -31,26 +32,12 @@ File=modules/bluespec/common/fpgaenv/fpga-environment.awb
 Packagehint=platforms
 
 [Standard Virtual Devices]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/std-virtual-devices.awb
+File=config/pm/hasim/submodels/fpgaenv/std-virtual-devices.apm
 Packagehint=platforms
 
-[Hardware FPGA Components]
-File=modules/bluespec/common/fpgaenv/fpga-components/hardware-fpga-components.awb
-Packagehint=platforms
 
-[Standard Virtual Devices/Requires]
-front_panel=Physical HTG-v5-PCIe Front Panel
-streams=Simulation Streams
-scratchpad_memory=Local Memory Scratchpad Memory Device
-central_cache=NULL Central Cache
 
-[Physical HTG-v5-PCIe Front Panel]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/htg_v5_pcie/htg-v5-pcie-fp.awb
-Packagehint=platforms
 
-[Simulation Streams]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/streams/simulation-streams.awb
-Packagehint=platforms
 
 [Null RRR Module]
 File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/null/null-rrr.awb
@@ -110,13 +97,7 @@ Packagehint=platforms
 File=config/pm/hasim/submodels/fpgaenv/librl-bsv.apm
 Packagehint=platforms
 
-[Local Memory Scratchpad Memory Device]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/local/local-mem-scratch.awb
-Packagehint=platforms
 
-[NULL Central Cache]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/central-cache/null-central-cache.awb
-Packagehint=platforms
 
 [Common Physical Platform Utilities]
 File=modules/bluespec/common/fpgaenv/physical-platform/utils/utils.awb
@@ -124,4 +105,8 @@ Packagehint=platforms
 
 [Single-Ended Crystal Clocks Device]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/single-ended/single-ended-clocks-device.awb
+Packagehint=platforms
+
+[Hardware FPGA Components for Virtex 5]
+File=modules/bluespec/common/fpgaenv/fpga-components/hardware-fpga-components-virtex5.awb
 Packagehint=platforms

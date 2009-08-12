@@ -31,28 +31,16 @@ virtual_devices=Standard Virtual Devices
 low_level_platform_interface=Low Level Platform Interface Hybrid
 umf=Little-Endian 32-bit Unified Message Format
 
-[Hybrid Front Panel]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid/hybrid-fp.awb
-Packagehint=platforms
 
 [RRR Clients and Servers]
 File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic/basic-rrr.awb
 Packagehint=platforms
 
 [Standard Virtual Devices]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/std-virtual-devices.awb
+File=config/pm/hasim/submodels/fpgaenv/std-virtual-devices.apm
 Packagehint=platforms
 
-[Standard Virtual Devices/Requires]
-front_panel=Hybrid Front Panel
-streams=Hybrid Streams
-scratchpad_memory=Hybrid Scratchpad Memory Device
-central_cache=Local Memory Central Cache
-shared_memory=Null Shared Memory
 
-[Hybrid Streams]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/streams/hybrid-streams.awb
-Packagehint=platforms
 
 [Simulation Physical Channel]
 File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/sim/sim-physical-channel.awb
@@ -110,13 +98,7 @@ Packagehint=platforms
 File=config/pm/hasim/submodels/fpgaenv/librl-bsv.apm
 Packagehint=platforms
 
-[Hybrid Scratchpad Memory Device]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid/hybrid-mem-scratch.awb
-Packagehint=platforms
 
-[Local Memory Central Cache]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/central-cache/local-mem-central-cache.awb
-Packagehint=platforms
 
 [Simulation Clocks Device]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/simulation/sim-clocks-device.awb
@@ -135,6 +117,4 @@ LOCAL_MEM_ADDR_BITS=10
 File=modules/bluespec/common/fpgaenv/low-level-platform-interface/remote-memory/null/null-remote-memory.awb
 Packagehint=platforms
 
-[Null Shared Memory]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/shared-memory/null/null-shared-memory.awb
-Packagehint=platforms
+

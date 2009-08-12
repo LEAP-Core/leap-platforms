@@ -28,12 +28,12 @@ import Vector::*;
 `include "asim/provides/low_level_platform_interface.bsh"
 `include "asim/provides/local_mem.bsh"
 `include "asim/provides/physical_platform.bsh"
-`include "asim/provides/virtual_devices.bsh"
 `include "asim/provides/central_cache.bsh"
 `include "asim/provides/fpga_components.bsh"
 
-`include "asim/rrr/remote_client_stub_SCRATCHPAD_MEMORY.bsh"
-`include "asim/rrr/remote_server_stub_SCRATCHPAD_MEMORY.bsh"
+`include "asim/rrr/service_ids.bsh"
+`include "asim/rrr/client_stub_SCRATCHPAD_MEMORY.bsh"
+`include "asim/rrr/server_stub_SCRATCHPAD_MEMORY.bsh"
 `include "asim/dict/VDEV_CACHE.bsh"
 
 
@@ -61,7 +61,7 @@ typedef SCRATCHPAD_MEMORY_VIRTUAL_DEVICE#(SCRATCHPAD_MEM_ADDRESS, SCRATCHPAD_MEM
 // mkMemoryVirtualDevice --
 //     Build a device interface with the requested number of ports.
 //
-module [HASIM_MODULE] mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
+module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
                                              CENTRAL_CACHE_IFC centralCache)
     // interface:
     (SCRATCHPAD_MEMORY_VDEV)
@@ -70,7 +70,7 @@ module [HASIM_MODULE] mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
                            mkDebugFile("memory_scrathpad.out"):
                            mkDebugFileNull("memory_scrathpad.out");  
 
-    ClientStub_SCRATCHPAD_MEMORY scratchpad_rrr <- mkClientStub_SCRATCHPAD_MEMORY();
+    ClientStub_SCRATCHPAD_MEMORY scratchpad_rrr <- mkClientStub_SCRATCHPAD_MEMORY(llpi.rrrClient);
 
     //
     // Scratchpad's central cache port

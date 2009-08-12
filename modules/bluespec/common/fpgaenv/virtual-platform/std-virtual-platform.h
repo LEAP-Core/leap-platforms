@@ -27,13 +27,21 @@
 #ifndef __STD_VIRTUAL_PLATFORM_h__
 #define __STD_VIRTUAL_PLATFORM_h__
 
+#include <pthread.h>
+
+#include "asim/provides/low_level_platform_interface.h"
+#include "asim/provides/virtual_devices.h"
+
 typedef class VIRTUAL_PLATFORM_CLASS *VIRTUAL_PLATFORM;
 
 class VIRTUAL_PLATFORM_CLASS
 {
   public:
-    VIRTUAL_PLATFORM_CLASS() {};
-    ~VIRTUAL_PLATFORM_CLASS() {};
+    LLPI llpint;
+    VIRTUAL_DEVICES virtualDevices;
+    VIRTUAL_PLATFORM_CLASS();
+    ~VIRTUAL_PLATFORM_CLASS();
+    void Init();
 };
 
 #endif // __STD_VIRTUAL_PLATFORM_h__

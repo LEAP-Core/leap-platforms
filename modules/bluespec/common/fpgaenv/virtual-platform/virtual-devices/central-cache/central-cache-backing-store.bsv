@@ -36,7 +36,6 @@ import SpecialFIFOs::*;
 
 `include "asim/provides/librl_bsv_base.bsh"
 `include "asim/provides/librl_bsv_cache.bsh"
-`include "asim/provides/virtual_devices.bsh"
 
 
 interface CENTRAL_CACHE_BACKING_CONNECTION;

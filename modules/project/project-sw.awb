@@ -1,0 +1,26 @@
+#/********************************************************************
+#* Awb module specification
+#********************************************************************/
+
+%name Software-Only Project Foundation
+%desc Software-Only Project Foundation
+%attributes swonly
+
+%provides model
+
+%requires sw_application
+%requires command_switches
+
+%public  project-sw-main.h
+%private project-sw-main.cpp
+
+%library lib/libasim/libasim.a
+
+%makefile Makefile.top.template
+%scons %top   SCons.top.template
+%scons %sw    SCons.sw.template
+
+%param MAKE_ALL_TARGET      exe       "Target of 'make all'.  Most likely bit, exe or vexe."
+
+%param SMART_SYNTH_BOUNDARY 0        "use smart synthesis boundaries"
+%param SYNTH_BOUNDARY       mkModel  "name of synthesis boundary"

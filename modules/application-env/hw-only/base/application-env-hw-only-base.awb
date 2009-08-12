@@ -1,0 +1,10 @@
+%name Base Hardware Application Environment
+%desc Base Hardware Application Environment
+
+%attributes hwonly
+
+%provides hw_application_env
+
+%requires hw_application
+
+%public  application-env-hw-only-base.bsv

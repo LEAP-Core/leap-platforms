@@ -6,7 +6,7 @@
 
 service SCRATCHPAD_MEMORY
 {
-    server sw (cpp, method) <- hw (bsv, connection)
+    server sw (cpp, method) <- hw (bsv, method)
     {
         // Request regionWords scratchpad words for scratchpad region regionID.
         method InitRegion (in UINT32[32] regionID, in UINT32[32] regionEndIdx);

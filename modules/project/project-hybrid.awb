@@ -1,0 +1,34 @@
+#/********************************************************************
+#* Awb module specification
+#********************************************************************/
+
+%name HW/SW Hybrid Project Foundation
+%desc HW/SW Hybrid Project Foundation
+%attributes hybrid
+
+%provides model
+
+%requires application_env 
+%requires fpgaenv
+%requires command_switches
+
+%public  project-hybrid-main.bsv
+%public  project-hybrid-main.h
+%private project-hybrid-main.cpp
+%private hardware-done.h
+
+%library lib/libasim/libasim.a
+
+%makefile Makefile.top.template
+%scons %top   SCons.top.template
+%scons %hw    SCons.hw.template
+%scons %sw    SCons.sw.template
+%scons %iface SCons.iface.template
+
+%param MAKE_ALL_TARGET      exe       "Target of 'make all'.  Most likely bit, exe or vexe."
+
+%param SMART_SYNTH_BOUNDARY 0        "use smart synthesis boundaries"
+%param SYNTH_BOUNDARY       mkModel  "name of synthesis boundary"
+
+
+%param WAIT_FOR_HARDWARE    1         "1 = SW application waits for done signal from hardware."

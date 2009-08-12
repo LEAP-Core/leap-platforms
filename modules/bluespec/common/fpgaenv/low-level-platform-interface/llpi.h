@@ -41,6 +41,9 @@ class LLPI_CLASS: public PLATFORMS_MODULE_CLASS
     CHANNELIO_CLASS                  channelio;
     RRR_CLIENT_CLASS                 rrrClient;
     RRR_SERVER_MONITOR_CLASS         rrrServer;
+    
+    // Monitor thread ID for those who need it.
+    pthread_t monitorThreadID;
 
   public:
 
@@ -50,6 +53,10 @@ class LLPI_CLASS: public PLATFORMS_MODULE_CLASS
 
     // Main
     void Main();
+    
+    // Init - bring up the monitor thread
+    void Init();
+    
     
     // accessors
     PHYSICAL_DEVICES   GetPhysicalDevices() { return &physicalDevices; }

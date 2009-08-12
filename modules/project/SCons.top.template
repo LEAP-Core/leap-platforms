@@ -1,0 +1,644 @@
+# -*-Python-*-
+
+import os
+import re
+import sys
+import string
+
+SetOption('implicit_cache', 1)
+
+defs = {
+    'ALL_HW_DIRS'        : '@ALL_HW_DIRS@',
+    'APM_FILE'           : '@APM_FILE@',
+    'APM_NAME'           : '@APM_NAME@',
+    'BDPI_BAS'           : '@BDPI_BAS@',
+    'BDPI_CS'            : '@BDPI_CS@',
+    'BSC'                : '@BSC@',
+    'BSC_FLAGS'          : '@BSC_FLAGS@',
+    'BUILD_DIR'          : '@BUILD_DIR@',
+    'CONNECTION_SCRIPT'  : 'hasim-connect',
+    'COST_TABLE'         : '@COST_TABLE@',
+    'FPGA_PART'          : '@FPGA_PART@',
+    'GIVEN_BMMS'         : '@GIVEN_BMMS@', 
+    'GIVEN_ELFS'         : '@GIVEN_ELFS@',
+    'GIVEN_CS'           : '@GIVEN_CS@',
+    'GIVEN_VS'           : '@GIVEN_VS@',
+    'GIVEN_UCFS'         : '@GIVEN_UCFS@',
+    'GEN_BAS'            : '@GEN_BAS@',
+    'GEN_CXXS'           : 'schedule.cxx @GEN_CXXS@',
+    'GEN_HS'             : 'schedule.h @GEN_HS@',
+    'LDFLAGS'            : '-L /usr/lib64/curses -L /usr/lib/curses',
+    'M5_BUILD_DIR'       : '@M5_BUILD_DIR@',    # Defined if m5 simulator is present
+    'MAKE_ALL_TARGET'    : '@MAKE_ALL_TARGET@',
+    'MAP_OPTIONS'        : '@MAP_OPTIONS@',
+    'WORKSPACE_ROOT'     : '@MODEL_ROOT@',
+    'ROOT_DIR_MODEL'     : '@ROOT_DIR_MODEL@',
+    'ROOT_DIR_HW'        : '@ROOT_DIR_HW@',
+    'ROOT_DIR_HW_INC'    : '@ROOT_DIR_HW_INC@',
+    'ROOT_DIR_SW'        : '@ROOT_DIR_SW@',
+    'ROOT_DIR_SW_INC'    : '@ROOT_DIR_SW_INC@',
+    'SIMULATED_ISA'      : '@SIMULATED_ISA@',
+    'SW_INC_DIRS'        : '@SW_INC_DIRS@',
+    'SW_LIBS'            : '@SW_LIBS@',
+    'TMP_BSC_DIR'        : '@TMP_BSC_DIR@',
+    'TMP_XILINX_DIR'     : '@TMP_XILINX_DIR@',
+    'WORKSPACE_ROOT'     : '@WORKSPACE_ROOT@',
+    'XST_FILE'           : '@XST_FILE@',
+}
+
+# Propagate environment from external state
+env = Environment(ENV = os.environ, DEFS = defs)
+env['ENV']['SHELL'] = '/bin/sh'
+
+env['DEFS']['ROOT_DIR_HW_MODEL'] = env['DEFS']['ROOT_DIR_HW'] + '/' + \
+                                   env['DEFS']['ROOT_DIR_MODEL'];
+env['DEFS']['ROOT_DIR_SW_MODEL'] = env['DEFS']['ROOT_DIR_SW'] + '/' + \
+                                   env['DEFS']['ROOT_DIR_MODEL'];
+
+############################################################################
+############################################################################
+##
+## Build the interface files first
+##
+############################################################################
+############################################################################
+
+if os.path.isfile('iface/SConstruct'):
+    cmd = 'cd iface; scons'
+    if env.GetOption('clean'):
+        cmd += ' -c'
+    s = os.system(cmd)
+    if (s & 0xffff) != 0:
+        print 'Aborting due to iface submodel errors'
+        sys.exit(1)
+
+############################################################################
+############################################################################
+##
+## Utility functions used in this module and in submodules
+##
+############################################################################
+############################################################################
+
+utility_names = []
+
+##
+## clean_split --
+##     Split a string into a list using specified separator (default ':'),
+##     dropping empty entries.
+##
+utility_names.append('clean_split')
+def clean_split(list, sep=':'):
+    return [x for x in list.split(sep) if x != '' ]
+
+##
+## rebase_directory --
+##     Rebase directory (d) that is a reference relative to the root build
+##     directory, returning a result relative to cwd.  cwd must also be
+##     relative to the root build directory.
+##
+utility_names.append('rebase_directory')
+def rebase_directory(d, cwd):
+    d = clean_split(d, sep='/')
+    cwd = clean_split(cwd, sep='/')
+
+    for x in cwd:
+        if (len(d) == 0 or d[0] != x):
+            d.insert(0, '..')
+        else:
+            d.pop(0)
+
+    if (len(d) == 0): d = [ '.' ]
+    return '/'.join(d)
+
+##
+## transform_string_list --
+##     Interpret incoming string (str) as a list of substrings separated by (sep).
+##     Add (prefix) and (suffix) to each substring and return a modified string.
+##
+utility_names.append('transform_string_list')
+def transform_string_list(str, sep, prefix, suffix):
+    if (sep == None):
+        sep = ' '
+    t = [ prefix + a + suffix for a in clean_split(str, sep) ]
+    return string.join(t, sep)
+
+
+##
+## As of Bluespec 2008.11.C the -bdir target is put at the head of the search path
+## and the compiler complains about duplicate path entries.
+##
+## This code removes the local build target from the search path.
+##
+utility_names.append('bsc_bdir_prune')
+def bsc_bdir_prune(str, sep, match):
+    t = clean_split(str, sep)
+    if (env['DEFS']['BSC_VERSION'] >= 15480):
+        try:
+            while 1:
+                i = t.index(match)
+                del t[i]
+        except ValueError:
+            pass
+    return string.join(t, sep)
+    
+##
+## one_line_cmd --
+##     Issue a shell command and return the first line of output
+##
+def one_line_cmd(cmd):
+    p = os.popen(cmd)
+    r = p.read().rstrip()
+    p.close()
+    return r
+
+
+##
+## awb_resolver --
+##     Ask awb-resolver for some info.  Return the first line.
+##
+def awb_resolver(arg):
+    return one_line_cmd("awb-resolver " + arg)
+
+
+############################################################################
+############################################################################
+##
+## SCons configuration.
+##
+############################################################################
+############################################################################
+
+##
+## env.Clone() is new as of 0.97.  It used to be called Copy().
+##
+import SCons.Environment
+try:
+    SCons.Environment.Environment.Clone
+except AttributeError:
+    SCons.Environment.Environment.Clone = SCons.Environment.Environment.Copy
+
+
+############################################################################
+############################################################################
+##
+## Build rules
+##
+############################################################################
+############################################################################
+
+# Bluespec compains about signature mismatches if we use this to avoid
+# recompiling across synthesis boundaries.
+#TargetSignatures('content')
+
+APM_NAME = env['DEFS']['APM_NAME']
+BSC = env['DEFS']['BSC']
+BSC_FLAGS = env['DEFS']['BSC_FLAGS']
+LDFLAGS = env['DEFS']['LDFLAGS']
+TMP_BSC_DIR = env['DEFS']['TMP_BSC_DIR']
+WORKSPACE_ROOT = env['DEFS']['WORKSPACE_ROOT']
+
+##
+## DEBUG or OPT build?  User can override the workspace default rule by
+## specifying either OPT=1 or DEBUG=1 on the scons command line.
+##
+if (int(ARGUMENTS.get('OPT', 0))):
+    DEBUG = 0
+elif (int(ARGUMENTS.get('DEBUG', 0))):
+    DEBUG = 1
+else:
+    DEBUG = int(awb_resolver('-config=debug'))
+
+##
+## Enable tracing (software side debugging)?  Always enabled in debug mode.
+##
+TRACE = int(ARGUMENTS.get('TRACE', 0))
+if (DEBUG):
+    TRACE = 1
+
+##
+## Override Xilinx COST_TABLE with command line
+##
+env['DEFS']['COST_TABLE'] = ARGUMENTS.get('COST_TABLE', env['DEFS']['COST_TABLE'])
+
+##
+## Build events into model?
+##
+enable_events = int(ARGUMENTS.get('EVENTS', -1))
+if (enable_events == -1):
+    enable_events = int(awb_resolver('-config=events'))
+
+if (enable_events == 0):
+    bsc_events_flag = '-D HASIM_EVENTS_ENABLED=False'
+    cpp_events_flag = ''
+else:
+    bsc_events_flag = '-D HASIM_EVENTS_ENABLED=True'
+    cpp_events_flag = '-DHASIM_EVENTS_ENABLED'
+
+BSC_FLAGS += ' ' + bsc_events_flag
+env['DEFS']['BSC_FLAGS'] = BSC_FLAGS
+
+
+ROOT_WRAPPER_SYNTH_ID = 'mk_' + env['DEFS']['ROOT_DIR_MODEL'] + '_Wrapper'
+
+if env['DEFS']['GIVEN_CS'] != '':
+    SW_EXE_OR_TARGET = env['DEFS']['ROOT_DIR_SW'] + '/obj/' + APM_NAME + '_sw.exe'
+    SW_EXE = [SW_EXE_OR_TARGET]
+else:
+    SW_EXE_OR_TARGET = '$TARGET'
+    SW_EXE = []
+
+
+# What is the Bluespec compiler version?
+bsc_version = 0
+
+bsc_ostream = os.popen('bsc -verbose')
+ver_regexp = re.compile('^Bluespec Compiler, version.*\(build ([0-9]+),')
+for ln in bsc_ostream.readlines():
+    m = ver_regexp.match(ln)
+    if (m):
+        bsc_version = int(m.group(1))
+bsc_ostream.close()
+
+if bsc_version == 0:
+    print "Failed to get Bluespec compiler version"
+    sys.exit(1)
+
+env['DEFS']['BSC_VERSION'] = bsc_version
+
+
+############################################################################
+##
+## Rules for HW subdirectory.  These are shared by all targets.
+##
+############################################################################
+env['DEFS']['CWD_REL'] = env['DEFS']['ROOT_DIR_HW_MODEL']
+Export('env ' + " ".join(utility_names))
+wrapper_v = SConscript([env['DEFS']['ROOT_DIR_HW_MODEL'] + '/SConscript'])
+
+BuildDir(TMP_BSC_DIR, '.', duplicate=0)
+
+
+
+
+############################################################################
+##
+## Rules for building a Bluesim EXE.
+##
+############################################################################
+
+bsc_sim_command = BSC + ' ' + BSC_FLAGS + ' ' + LDFLAGS + ' -o $TARGET'
+
+if (env['DEFS']['BSC_VERSION'] >= 13013):
+    # 2008.01.A compiler allows us to pass C++ arguments.
+    if (DEBUG):
+        bsc_sim_command += ' -Xc++ -O0'
+    else:
+        bsc_sim_command += ' -Xc++ -O1'
+
+bsc_sim_command += \
+    ' -sim -e ' + ROOT_WRAPPER_SYNTH_ID + ' -simdir ' + \
+    TMP_BSC_DIR + ' ' + env['DEFS']['GEN_BAS'] + ' ' + env['DEFS']['BDPI_BAS'] + \
+    ' ' + env['DEFS']['BDPI_CS']
+
+sbin = env.Command(
+    TMP_BSC_DIR + '/' + APM_NAME + '_hw.exe',
+    wrapper_v + clean_split(env['DEFS']['GIVEN_VS'], sep = ' ') + clean_split(env['DEFS']['BDPI_CS'], sep=' '),
+    bsc_sim_command)
+
+if env.GetOption('clean'):
+    os.system('rm -rf .bsc')
+
+#
+# The final step must leave a few well known names:
+#   APM_NAME must be the software side, if there is one.  If there isn't, then
+#   it must be the Bluesim image.  The APM_NAME_hw.download file must NOT
+#   be present.  Lack of a .download script is a clue to the benchmark run
+#   scripts that Bluesim is being used.
+#
+exe = env.Command(
+    APM_NAME + '_hw.exe',
+    sbin + SW_EXE,
+    [ '@ln -fs $SOURCE $TARGET',
+      '@ln -fs ' + SW_EXE_OR_TARGET + ' ' + APM_NAME,
+      Delete(APM_NAME + '_hw.vexe'),
+      Delete(APM_NAME + '_hw.download') ])
+
+env.Alias('exe', exe)
+
+
+
+############################################################################
+##
+## Rules for building a Verilog simulation vexe
+##
+############################################################################
+
+vexe_gen_command = \
+    BSC + ' -vsim iverilog ' + BSC_FLAGS + ' -I ' + env['DEFS']['ROOT_DIR_HW'] + '/' + env['DEFS']['ROOT_DIR_MODEL'] + '/' + env['DEFS']['TMP_BSC_DIR'] + \
+    ' -o $TARGET -verilog -e ' + ROOT_WRAPPER_SYNTH_ID + \
+    ' $SOURCES ' + env['DEFS']['BDPI_BAS']
+
+vbin = env.Command(
+    TMP_BSC_DIR + '/' + APM_NAME + '_hw.vexe',
+    wrapper_v + clean_split(env['DEFS']['GIVEN_VS'], sep = ' ') + clean_split(env['DEFS']['BDPI_CS'], sep=' '),
+    [ vexe_gen_command,
+      Delete('directc.sft') ])
+
+
+vexe = env.Command(
+    APM_NAME + '_hw.vexe',
+    vbin + SW_EXE,
+    [ '@echo "#!/bin/sh" > $TARGET',
+      '@echo "./$SOURCE +bscvcd \$*" >> $TARGET',
+      '@chmod a+x $TARGET',
+      '@ln -fs ' + SW_EXE_OR_TARGET + ' ' + APM_NAME,
+      Delete(APM_NAME + '_hw.exe'),
+      Delete(APM_NAME + '_hw.download') ])
+
+env.Alias('vexe', vexe)
+
+
+
+############################################################################
+##
+## Rules for building a Xilinx bit image
+##
+############################################################################
+
+TMP_XILINX_DIR = env['DEFS']['TMP_XILINX_DIR']
+XILINX_APM_NAME = TMP_XILINX_DIR + '/' + APM_NAME
+XST_FILE = env['DEFS']['XST_FILE']
+
+FPGA_PART = env['DEFS']['FPGA_PART']
+
+xilinx_ngc = env.Command(
+    XILINX_APM_NAME + '.ngc',
+    wrapper_v + clean_split(env['DEFS']['GIVEN_VS'], sep = ' ') + ['config/' + APM_NAME + '.xst'],
+    [ Delete(XILINX_APM_NAME + '.srp'),
+      Delete(XILINX_APM_NAME + '_xst.xrpt'),
+      'xst -ifn config/' + APM_NAME + '.xst -ofn ' + XILINX_APM_NAME + '.srp' ])
+
+Clean(xilinx_ngc,  XILINX_APM_NAME + '.srp')
+
+
+# Concatenate UCF files
+xilinx_ucf = env.Command(
+    XILINX_APM_NAME + '.ucf',
+    clean_split(env['DEFS']['GIVEN_UCFS'], sep = ' '),
+    'cat $SOURCES > $TARGET')
+
+
+if(len(env['DEFS']['GIVEN_BMMS']) != 0):
+    bmm = ' -bm ' +  env['DEFS']['GIVEN_BMMS']
+else:
+    bmm = ''
+
+
+xilinx_ngd = env.Command(
+    XILINX_APM_NAME + '.ngd',
+    xilinx_ngc + xilinx_ucf,
+    [ Delete(XILINX_APM_NAME + '.bld'),
+      Delete(XILINX_APM_NAME + '_ngdbuild.xrpt'),
+      'ngdbuild -p ' + FPGA_PART + ' -sd ' + env['DEFS']['ROOT_DIR_HW_MODEL'] + ' -uc ' + XILINX_APM_NAME + '.ucf ' + bmm + ' $SOURCE $TARGET',
+      Move(TMP_XILINX_DIR + '/netlist.lst', 'netlist.lst') ])
+
+Depends(xilinx_ngd, env['DEFS']['GIVEN_BMMS']);
+
+Clean(xilinx_ngd, TMP_XILINX_DIR + '/netlist.lst')
+
+# Alias for everything up to map...
+env.Alias('xst', xilinx_ngd)
+
+#check for a cached post par ncd
+if(FindFile( APM_NAME + '_par.ncd', 
+             [env['DEFS']['WORKSPACE_ROOT'] + '/var/']) != None):
+    smartguide = ' -smartguide ' +  env['DEFS']['WORKSPACE_ROOT'] + '/var/' + APM_NAME + '_par.ncd' 
+else:
+    smartguide = ''
+
+# Map
+xilinx_map = env.Command(
+    [ XILINX_APM_NAME + '_map.ncd', XILINX_APM_NAME + '.pcf' ],
+    xilinx_ngd,
+    [ Delete(XILINX_APM_NAME + '_map.map'),
+      Delete(XILINX_APM_NAME + '_map.mrp'),
+      Delete(XILINX_APM_NAME + '_map.ncd'),
+      Delete(XILINX_APM_NAME + '_map.ngm'),
+      Delete(XILINX_APM_NAME + '_map.psr'),
+      'map -cm balanced -timing ' + smartguide + ' -t ' + env['DEFS']['COST_TABLE'] + ' ' +  env['DEFS']['MAP_OPTIONS'] + ' -logic_opt on -ol high -register_duplication -retiming on -pr b -c 100 -p ' + FPGA_PART + ' -o $TARGET $SOURCE ' + XILINX_APM_NAME + '.pcf' ])
+
+Clean(xilinx_map, TMP_XILINX_DIR + '/xilinx_device_details.xml')
+
+
+
+
+# Place and route
+xilinx_par = env.Command(
+    XILINX_APM_NAME + '_par.ncd',
+    xilinx_map,
+    [ Delete(XILINX_APM_NAME + '_par.pad'),
+      Delete(XILINX_APM_NAME + '_par.par'),
+      Delete(XILINX_APM_NAME + '_par.ptwx'),
+      Delete(XILINX_APM_NAME + '_par.unroutes'),
+      Delete(XILINX_APM_NAME + '_par.xpi'),
+      Delete(XILINX_APM_NAME + '_par_pad.csv'),
+      Delete(XILINX_APM_NAME + '_par_pad.txt'),
+      'par -w -ol high ' + smartguide + ' -t ' + env['DEFS']['COST_TABLE'] + ' ' + XILINX_APM_NAME + '_map.ncd $TARGET ' + XILINX_APM_NAME + '.pcf',
+      'cp $TARGET ' + env['DEFS']['WORKSPACE_ROOT'] + '/var/'])
+
+
+# Generate the FPGA timing report -- this report isn't built by default.  Use
+# the "timing" target to generate it
+xilinx_trce = env.Command(
+    XILINX_APM_NAME + '_par.twr',
+    [ xilinx_par, XILINX_APM_NAME + '.pcf' ],
+    'trce -e 100 $SOURCES -o $TARGET')
+
+if(len(env['DEFS']['GIVEN_ELFS']) != 0):
+    elf = ' -bd ' + env['DEFS']['GIVEN_ELFS']
+else:
+    elf = ''
+
+
+
+
+# Generate the FPGA image
+xilinx_bit = env.Command(
+    XILINX_APM_NAME + '_par.bit',
+    [ 'config/' + APM_NAME + '.ut', xilinx_par],
+    [ Delete('config/signature.sh'),
+      'bitgen ' + elf + ' -f $SOURCES $TARGET ' + XILINX_APM_NAME + '.pcf' ])
+
+Depends(xilinx_bit, env['DEFS']['GIVEN_ELFS']);
+
+# Generate the signature for the FPGA image
+signature = env.Command(
+    'config/signature.sh',
+    xilinx_bit,
+    [ '@echo \'#!/bin/sh\' > $TARGET',
+      '@echo signature=\\"' + APM_NAME + '-`md5sum $SOURCE | sed \'s/ .*//\'`\\" >> $TARGET' ])
+
+#
+# The final step must leave a few files in well-known locations since they are
+# used by the run scripts.  APM_NAME_hw.download is the script to download the
+# bit file to the FPGA.  APM_NAME is the software side, if there is one.
+#
+loader = env.Command(
+    APM_NAME + '_hw.download',
+    signature + SW_EXE + xilinx_trce,
+    [ '@ln -fs config/' + APM_NAME + '.download $TARGET',
+      '@ln -fs ' + SW_EXE_OR_TARGET + ' ' + APM_NAME,
+      Delete(APM_NAME + '_hw.exe'),
+      Delete(APM_NAME + '_hw.vexe'),
+      '@echo "++++++++++++ Post-Place & Route ++++++++"',
+      '@' + awb_resolver('tools/scripts/hasim-xilinx-summary') + ' ' +
+          XILINX_APM_NAME + '_map.map ' +
+          XILINX_APM_NAME + '_par.par ' +
+          APM_NAME + '_hw.errinfo' ])
+      
+env.Alias('bit', loader)
+
+
+##
+## Clean up a few extra files not described in the build rules
+##
+if env.GetOption('clean'):
+    os.system('cd ' + TMP_XILINX_DIR + '; rm -f ' + APM_NAME + '*')
+    os.system('rm -f APM_NAME')
+
+
+############################################################################
+##
+## Rules for building the software side.  Invoke scripts in subdirectories
+## to define the objects needing to be built.  The final link is defined
+## here.
+##
+############################################################################
+
+def host_defs():
+    hostos = one_line_cmd('uname -s')
+    hostmachine = one_line_cmd('uname -m')
+
+    if (hostos == 'FreeBSD'):
+        hflags = '-DHOST_FREEBSD'
+    else:
+        hflags = '-DHOST_LINUX'
+        if (hostmachine == 'ia64'):
+            hflags += ' -DHOST_LINUX_IA64'
+        else:
+            hflags += ' -DHOST_LINUX_X86'
+
+    return hflags
+
+
+if SW_EXE != []:
+    inc_paths = clean_split(env['DEFS']['SW_INC_DIRS'], sep = ' ')
+    libs = clean_split(env['DEFS']['SW_LIBS'], sep = ' ')
+    cc_flags = host_defs()
+    cc_flags += ' ' + cpp_events_flag
+    cc_flags += ' -DASIM_ENABLE_ASSERTIONS'
+    if (TRACE):
+        cc_flags += ' -DASIM_ENABLE_TRACE'
+    cc_flags += ' -DAPM_NAME=\\"' + APM_NAME + '\\"'
+
+    ##
+    ## These will be defined if the m5 simulator is part of the model
+    ##
+    M5_BUILD_DIR = env['DEFS']['M5_BUILD_DIR'] 
+    if (M5_BUILD_DIR != ''):
+        # m5 needs Python library
+        inc_paths += [ os.path.join(sys.exec_prefix, 'include', 'python' + sys.version[:3]) ]
+        python_zip = os.path.join(awb_resolver(M5_BUILD_DIR), 'm5py.zip')
+
+        cc_flags += ' -DTRACING_ON=1'
+        if (env['DEFS']['SIMULATED_ISA'] != ''):
+            cc_flags += ' -DTHE_ISA=' + env['DEFS']['SIMULATED_ISA'] + '_ISA'
+
+        if (DEBUG):
+            cc_flags += ' -DDEBUG'
+            # Swap the optimized m5 library for a debugging one
+            tmp_libs = []
+            for lib in libs:
+                if (os.path.basename(lib) == 'libm5_opt.a'):
+                    tmp_libs += [ os.path.join(os.path.dirname(lib), 'libm5_debug.a') ]
+                else:
+                    tmp_libs += [ lib ]
+            libs = tmp_libs
+
+    if (DEBUG):
+        copt_flags = '-ggdb3 '
+    else:
+        copt_flags = '-g -O2 '
+
+    # CPPPATH defines both gcc include path and dependence path for
+    # SCons.  The '#' forces paths to be relative to the root of the build.
+    sw_env = env.Clone(CCFLAGS = copt_flags + cc_flags,
+                       LINKFLAGS = copt_flags,
+                       CPPPATH = [ '#/' + env['DEFS']['ROOT_DIR_SW_INC'],
+                                   '#/' + env['DEFS']['ROOT_DIR_HW_MODEL'],
+                                   '#/iface/build/include',
+                                   '.' ] + inc_paths)
+
+    sw_env['DEFS']['CWD_REL'] = sw_env['DEFS']['ROOT_DIR_SW_MODEL']
+
+    Export('sw_env ' + " ".join(utility_names))
+    sw_build_dir = sw_env['DEFS']['ROOT_DIR_SW'] + '/obj'
+    sw_objects = SConscript([env['DEFS']['ROOT_DIR_SW_MODEL'] + '/SConscript'],
+                            build_dir = sw_build_dir,
+                            duplicate = 0)
+
+    sw_libpath = [ '.' ]
+    sw_link_libs = [ 'pthread' ]
+
+    sw_link_tgt = SW_EXE
+
+
+    ##
+    ## m5 needs libz, libmysqlclient and Python library
+    ##
+    if (M5_BUILD_DIR != ''):
+        sw_link_libs += [ 'z' ]
+
+        if (os.path.exists(os.path.join(sys.exec_prefix, 'lib' , 'libmysqlclient.a'))):
+            sw_link_libs += [ 'mysqlclient' ]
+        elif (os.path.exists(os.path.join(sys.exec_prefix, 'lib', 'mysql' , 'libmysqlclient.a'))):
+            sw_link_libs += [ 'mysqlclient' ]
+
+        # m5 needs python
+        sw_libpath += [ os.path.join(sys.exec_prefix, 'lib') ]
+        sw_link_libs += [ 'python' + sys.version[:3] ]
+
+        # m5 links a temporary file then adds Python code
+        sw_link_tgt = [ SW_EXE[0] + '.no_python' ]
+
+
+    ##
+    ## Put libs on the list of objects twice as a hack to work around the
+    ## inability to specify the order of %library declarations across separate
+    ## awb files.  Unix ld only searches libraries in command line order.
+    ##
+    sw_exe = sw_env.Program(sw_link_tgt, sw_objects + libs + libs, LIBPATH=sw_libpath, LIBS=sw_link_libs)
+
+    if (M5_BUILD_DIR != ''):
+        ##
+        ## Define a simple SCons builder to concatenate files.  Used to append the
+        ## Python zip archive to the executable.
+        ##
+        concat_builder = Builder(action = Action(['cat $SOURCES > $TARGET',
+                                                  'chmod +x $TARGET']))
+        sw_env.Append(BUILDERS = { 'Concat' : concat_builder })
+
+        # Append Python code to the binary
+        sw_exe = sw_env.Concat(SW_EXE, [ sw_exe, python_zip ])
+
+############################################################################
+############################################################################
+
+##
+## Set a default target
+##
+if (env['DEFS']['MAKE_ALL_TARGET'] != ''):
+    Default(env['DEFS']['MAKE_ALL_TARGET'])
+else:
+    Default(exe)

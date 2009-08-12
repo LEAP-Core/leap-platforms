@@ -7,6 +7,7 @@ Version=2.1
 Type=HAsim
 Name=Hardware-Only XUP Environment
 Class=Asim::Model
+DefaultBenchmark=0
 
 [Model]
 DefaultAttributes=bluespec xup
@@ -14,7 +15,7 @@ model=FPGA Environment
 
 [FPGA Environment/Requires]
 virtual_platform=Standard Virtual Platform
-fpga_components=Hardware FPGA Components
+fpga_components=Hardware FPGA Components for Virtex 2
 librl_bsv=RL Bluespec Library
 
 [Standard Virtual Platform]
@@ -31,22 +32,11 @@ File=modules/bluespec/common/fpgaenv/fpga-environment.awb
 Packagehint=platforms
 
 [Standard Virtual Devices]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/std-virtual-devices.awb
+File=config/pm/hasim/submodels/fpgaenv/std-virtual-devices.apm
 Packagehint=platforms
 
-[Hardware FPGA Components]
-File=modules/bluespec/common/fpgaenv/fpga-components/hardware-fpga-components.awb
-Packagehint=platforms
 
-[Standard Virtual Devices/Requires]
-front_panel=Physical XUP Front Panel
-streams=Simulation Streams
-scratchpad_memory=Local Memory Scratchpad Memory Device
-central_cache=NULL Central Cache
 
-[Physical XUP Front Panel]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/xup/xup-fp.awb
-Packagehint=platforms
 
 [Null Channel IO Module]
 File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/null/null-channelio.awb
@@ -83,9 +73,6 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/virtual-platform/umf/null/null-umf.awb
 Packagehint=platforms
 
-[Simulation Streams]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/streams/simulation-streams.awb
-Packagehint=platforms
 
 [Low Level Platform Interface Hardware-Only/Requires]
 physical_platform=XUP Physical Platform
@@ -110,13 +97,7 @@ Packagehint=platforms
 File=config/pm/hasim/submodels/fpgaenv/librl-bsv.apm
 Packagehint=platforms
 
-[Local Memory Scratchpad Memory Device]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/local/local-mem-scratch.awb
-Packagehint=platforms
 
-[NULL Central Cache]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/central-cache/null-central-cache.awb
-Packagehint=platforms
 
 [Common Physical Platform Utilities]
 File=modules/bluespec/common/fpgaenv/physical-platform/utils/utils.awb
@@ -124,4 +105,8 @@ Packagehint=platforms
 
 [Single-Ended Crystal Clocks Device]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/single-ended/single-ended-clocks-device.awb
+Packagehint=platforms
+
+[Hardware FPGA Components for Virtex 2]
+File=modules/bluespec/common/fpgaenv/fpga-components/hardware-fpga-components-virtex2.awb
 Packagehint=platforms

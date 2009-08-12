@@ -22,7 +22,6 @@
 #include <sys/mman.h>
 
 #include "asim/rrr/service_ids.h"
-#include "asim/provides/bluespec_system.h"
 #include "asim/provides/command_switches.h"
 #include "asim/ioformat.h"
 

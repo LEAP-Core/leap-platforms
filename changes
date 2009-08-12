@@ -6748,3 +6748,141 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/share
 - Fleshed out the Null shared memory to export the full standard interface
   (sans functionality). This was required because Platform Interface attempts
   to translate connection messages into method calls to the device.
+
+----------
+mpellaue    Date: Wed Aug 12 16:23:23 EDT 2009  CSN: CSN-platforms-251
+                  Wed Aug 12 20:23:23 UTC 2009
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-htg-hwonly.apm    Locally Modified          250 
+ fpgaenv-hybrid-xupv2-serial.apm Locally Modified          250 
+ hasim-fpgaenv-hybrid-sim.apm Locally Modified          250 
+ hasim-fpgaenv-htg-v5-pcie.apm Locally Modified          250 
+ hasim-fpgaenv-null.apm    Locally Modified          250 
+ std-virtual-devices.apm   Locally Added               0 
+ hasim-fpgaenv-xup.apm     Locally Modified          250 
+
+Directory modules/bluespec/common/fpgaenv/low-level-platform-interface
+ llpi.cpp                  Locally Modified          250 
+ llpi.h                    Locally Modified          250 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform
+ std-virtual-platform.cpp  Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ basic-rrr-client.cpp      Locally Modified          250 
+ basic-rrr-client.h        Locally Modified          250 
+ demarshaller.bsv          Locally Modified          250 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices
+ std-virtual-devices.cpp   Locally Added               0 
+ std-virtual-devices.h     Locally Added               0 
+ starter/                  Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/starter
+ starter-device.cpp        Locally Added               0 
+ starter-device.rrr        Locally Added               0 
+ starter-device.h          Locally Added               0 
+ starter-device.awb        Locally Added               0 
+ starter-device.bsv        Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices
+ std-virtual-device-interfaces.bsv Locally Modified          250 
+ std-virtual-devices.awb   Locally Modified          250 
+ std-virtual-devices.bsv   Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-mem-scratch.rrr    Locally Modified          250 
+ hybrid-mem-scratch.awb    Locally Modified          250 
+ hybrid-mem-scratch.bsv    Locally Modified          250 
+ hybrid-mem-scratch-interfaces.bsv Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/central-cache
+ central-cache-interfaces.bsv Locally Added               0 
+ local-mem-central-cache.awb Locally Modified          250 
+ local-mem-central-cache.bsv Locally Modified          250 
+ central-cache-backing-store.bsv Locally Modified          250 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/shared-memory/standard
+ standard-shared-memory.cpp Locally Modified          250 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform
+ std-virtual-platform.h    Locally Modified          250 
+ std-virtual-platform.awb  Locally Modified          250 
+ std-virtual-platform.bsv  Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled
+ htg-v5-pcie-enabled.ucf   Locally Modified          250 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr2-sdram
+ ddr2_sdram.ucf            Locally Modified          250 
+ ddr2-sdram-sync-tig.ucf   Locally Modified          250 
+
+Directory modules
+ project/                  Locally Added               0 
+
+Directory modules/project
+ SCons.dict.template       Locally Added               0 
+ SCons.sw.template         Locally Added               0 
+ project-hybrid-main.cpp   Locally Added               0 
+ Makefile.top.template     Locally Added               0 
+ project-hw.awb            Locally Added               0 
+ project-hw-main.bsv       Locally Added               0 
+ project-hybrid.awb        Locally Added               0 
+ project-hybrid-main.h     Locally Added               0 
+ project-sw-main.cpp       Locally Added               0 
+ project-hybrid-main.bsv   Locally Added               0 
+ SCons.top.template        Locally Added               0 
+ project-sw.awb            Locally Added               0 
+ project-sw-main.h         Locally Added               0 
+ SCons.iface.template      Locally Added               0 
+ hardware-done.h           Locally Added               0 
+ SCons.hw.template         Locally Added               0 
+
+Directory modules
+ application-env/          Locally Added               0 
+
+Directory modules/application-env
+ hybrid/                   Locally Added               0 
+
+Directory modules/application-env/hybrid
+ base/                     Locally Added               0 
+
+Directory modules/application-env/hybrid/base
+ application-env-hybrid-base.cpp Locally Added               0 
+ application-env-hybrid-base.h Locally Added               0 
+ application-env-hybrid-base.awb Locally Added               0 
+ application-env-hybrid-base.bsv Locally Added               0 
+
+Directory modules/application-env
+ hw-only/                  Locally Added               0 
+
+Directory modules/application-env/hw-only
+ base/                     Locally Added               0 
+
+Directory modules/application-env/hw-only/base
+ application-env-hw-only-base.awb Locally Added               0 
+ application-env-hw-only-base.bsv Locally Added               0 
+
+
+* Stage 1 of unraveling HAsim from general Hybrid applications using AWB.
+
+* The new "project" top-level module has been added, in HW, SW, and HW/SW flavors.
+
+* Projects which use Bluespec need an application environment. Right now that's
+  just Base. In Stage 2 we will add a Soft Connections environment.
+  
+* The virtual platform now instantiates the virtual devices directly.
+
+* Added a submodel for "standard virtual devices". This will help in Stage 2
+  when we add devices for Stats, Params, and Debug.
+
+
+* Added the new "Starter" device.
+
+* Disentangled Scratchpad and Central Cache from HAsim. This required changing
+  the demarshaller to have a new method that makes it more like a
+  soft-connection-wrapped RRR service.
+
+* UCF files updated to reflect the new instantiation hierarchy.

@@ -3,8 +3,12 @@
 
 %provides central_cache
 
+%public central-cache-interfaces.bsv
 %public local-mem-central-cache.bsv
 %public central-cache-backing-store.bsv
+
+%param --global CENTRAL_CACHE_LINE_ADDR_BITS     36 "Address size of entries in the central cache.  Must be at least as large as the largest client."
+%param --global CENTRAL_CACHE_REFINFO_BITS       64 "Reference metadata size.  Must be large enough for the largest client's metadata."
 
 %param CENTRAL_CACHE_LINE_RESP_CACHE_IDX_BITS  10  "Index bits for a BRAM-based cache of recently accessed lines"
 %param --global CENTRAL_CACHE_DEBUG_ENABLE  1  "Enables the central cache debug"

@@ -36,6 +36,9 @@ interface DEMARSHALLER#(parameter type in_T, parameter type out_T);
     // read the whole completed value and delete it
     method ActionValue#(out_T) readAndDelete();
 
+    // read the whole completed value
+    method out_T peek();
+
 endinterface
 
 // module
@@ -120,6 +123,28 @@ module mkDeMarshaller
         // switch to idle state
         state <= STATE_idle;
     
+        // return
+        return unpack(final_val);
+    
+    endmethod
+
+    // return the entire vector
+    method out_T peek() if (state == STATE_queueing &&
+                            chunksRemaining == 0);
+    
+        Bit#(out_SZ) final_val = 0;
+      
+        // this is where the good stuff happens
+        // fill in the result one bit at a time
+        for (Integer x = 0; x < valueof(out_SZ); x = x + 1)
+        begin
+        
+            Integer j = x / valueof(in_SZ);
+            Integer k = x % valueof(in_SZ);
+            final_val[x] = chunks[j][k];
+      
+        end
+        
         // return
         return unpack(final_val);
     

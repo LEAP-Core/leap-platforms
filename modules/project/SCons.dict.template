@@ -1,0 +1,29 @@
+# -*-Python-*-
+
+##
+## SCons script for building HAsim dictionaries
+##
+
+import os
+import re
+import string
+import sys
+
+# Propagate environment from external state
+env = Environment(ENV = os.environ)
+env['ENV']['SHELL'] = '/bin/sh'
+
+if env.GetOption('clean'):
+    os.system('rm -f *.bsh *.h')
+
+# Find the set of .dic files
+li = os.listdir('src')
+src = ['src/' + e for e in li if re.compile('\.dic$').search(e, 1)]
+
+if src == []:
+    # Nothing to do
+    sys.exit(0)
+
+dict = env.Command('dict_init.h', src, 'hasim-dict $SOURCES')
+
+Default(dict)

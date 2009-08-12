@@ -1,0 +1,11 @@
+
+%name Starter Virtual Device
+%desc Starter Virtual Device
+%provides starter_device
+
+%attributes hasim
+
+%sources -t BSV -v PUBLIC     starter-device.bsv
+%sources -t H   -v PUBLIC     starter-device.h
+%sources -t CPP -v PRIVATE    starter-device.cpp
+%sources -t RRR -v PUBLIC     starter-device.rrr
