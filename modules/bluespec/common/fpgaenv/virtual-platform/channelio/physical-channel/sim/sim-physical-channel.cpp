@@ -108,11 +108,6 @@ PHYSICAL_CHANNEL_CLASS::Write(
 
     // write header to pipe
     unixPipeDevice->Write(header, UMF_CHUNK_BYTES);
-    fprintf(stderr,"serial_write: ");
-    for(int i=0;i<UMF_CHUNK_BYTES;i++){
-      fprintf(stderr,"%02x", header);
-    }
-    fprintf(stderr, "\n");
 
     // write message data to pipe
     // NOTE: hardware demarshaller expects chunk pattern to start from most
