@@ -4,24 +4,24 @@ ADDRESS_MAP microblaze_0 MICROBLAZE 100
 	ADDRESS_SPACE lmb_bram_combined COMBINED [0x00000000:0x00003fff]
 		ADDRESS_RANGE RAMB16
 		BUS_BLOCK
-			m_pi_llpint_phys_plat_serial_device_primitiveSerialDevice/s/lmb_bram/lmb_bram/ramb16_s4_s4_0 [31:28] ;
-			m_pi_llpint_phys_plat_serial_device_primitiveSerialDevice/s/lmb_bram/lmb_bram/ramb16_s4_s4_1 [27:24] ;
-			m_pi_llpint_phys_plat_serial_device_primitiveSerialDevice/s/lmb_bram/lmb_bram/ramb16_s4_s4_2 [23:20] ;
-			m_pi_llpint_phys_plat_serial_device_primitiveSerialDevice/s/lmb_bram/lmb_bram/ramb16_s4_s4_3 [19:16] ;
-			m_pi_llpint_phys_plat_serial_device_primitiveSerialDevice/s/lmb_bram/lmb_bram/ramb16_s4_s4_4 [15:12] ;
-			m_pi_llpint_phys_plat_serial_device_primitiveSerialDevice/s/lmb_bram/lmb_bram/ramb16_s4_s4_5 [11:8] ;
-			m_pi_llpint_phys_plat_serial_device_primitiveSerialDevice/s/lmb_bram/lmb_bram/ramb16_s4_s4_6 [7:4] ;
-			m_pi_llpint_phys_plat_serial_device_primitiveSerialDevice/s/lmb_bram/lmb_bram/ramb16_s4_s4_7 [3:0] ;
+			m_vp_llpi_phys_plat_serial_device_primitiveSerialDevice/s/lmb_bram/lmb_bram/ramb16_s4_s4_0 [31:28] ;
+			m_vp_llpi_phys_plat_serial_device_primitiveSerialDevice/s/lmb_bram/lmb_bram/ramb16_s4_s4_1 [27:24] ;
+			m_vp_llpi_phys_plat_serial_device_primitiveSerialDevice/s/lmb_bram/lmb_bram/ramb16_s4_s4_2 [23:20] ;
+			m_vp_llpi_phys_plat_serial_device_primitiveSerialDevice/s/lmb_bram/lmb_bram/ramb16_s4_s4_3 [19:16] ;
+			m_vp_llpi_phys_plat_serial_device_primitiveSerialDevice/s/lmb_bram/lmb_bram/ramb16_s4_s4_4 [15:12] ;
+			m_vp_llpi_phys_plat_serial_device_primitiveSerialDevice/s/lmb_bram/lmb_bram/ramb16_s4_s4_5 [11:8] ;
+			m_vp_llpi_phys_plat_serial_device_primitiveSerialDevice/s/lmb_bram/lmb_bram/ramb16_s4_s4_6 [7:4] ;
+			m_vp_llpi_phys_plat_serial_device_primitiveSerialDevice/s/lmb_bram/lmb_bram/ramb16_s4_s4_7 [3:0] ;
 		END_BUS_BLOCK;
 		END_ADDRESS_RANGE;
 	END_ADDRESS_SPACE;
 	ADDRESS_SPACE xps_bram_if_cntlr_1_bram_combined COMBINED [0x83e18000:0x83e19fff]
 		ADDRESS_RANGE RAMB16
 		BUS_BLOCK
-			m_pi_llpint_phys_plat_serial_device_primitiveSerialDevice/s/xps_bram_if_cntlr_1_bram/xps_bram_if_cntlr_1_bram/ramb16_s9_s9_0 [31:24] ;
-			m_pi_llpint_phys_plat_serial_device_primitiveSerialDevice/s/xps_bram_if_cntlr_1_bram/xps_bram_if_cntlr_1_bram/ramb16_s9_s9_1 [23:16] ;
-			m_pi_llpint_phys_plat_serial_device_primitiveSerialDevice/s/xps_bram_if_cntlr_1_bram/xps_bram_if_cntlr_1_bram/ramb16_s9_s9_2 [15:8] ;
-			m_pi_llpint_phys_plat_serial_device_primitiveSerialDevice/s/xps_bram_if_cntlr_1_bram/xps_bram_if_cntlr_1_bram/ramb16_s9_s9_3 [7:0] ;
+			m_vp_llpi_phys_plat_serial_device_primitiveSerialDevice/s/xps_bram_if_cntlr_1_bram/xps_bram_if_cntlr_1_bram/ramb16_s9_s9_0 [31:24] ;
+			m_vp_llpi_phys_plat_serial_device_primitiveSerialDevice/s/xps_bram_if_cntlr_1_bram/xps_bram_if_cntlr_1_bram/ramb16_s9_s9_1 [23:16] ;
+			m_vp_llpi_phys_plat_serial_device_primitiveSerialDevice/s/xps_bram_if_cntlr_1_bram/xps_bram_if_cntlr_1_bram/ramb16_s9_s9_2 [15:8] ;
+			m_vp_llpi_phys_plat_serial_device_primitiveSerialDevice/s/xps_bram_if_cntlr_1_bram/xps_bram_if_cntlr_1_bram/ramb16_s9_s9_3 [7:0] ;
 		END_BUS_BLOCK;
 		END_ADDRESS_RANGE;
 	END_ADDRESS_SPACE;

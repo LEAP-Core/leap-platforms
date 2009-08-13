@@ -19,6 +19,8 @@
 #ifndef __PHYSICAL_CHANNEL__
 #define __PHYSICAL_CHANNEL__
 
+#include <stdio.h>
+
 #include "asim/provides/umf.h"
 #include "asim/provides/physical_platform.h"
 
@@ -34,6 +36,8 @@ class PHYSICAL_CHANNEL_CLASS: public PLATFORMS_MODULE_CLASS
   int serial_fd;
   // incomplete incoming read message
   UMF_MESSAGE incomingMessage;
+
+  FILE* errfd;
 
   void readPipe();
   void    serial_read(unsigned char *v, unsigned int numBytes);

@@ -55,50 +55,89 @@ PHYSICAL_CHANNEL_CLASS::PHYSICAL_CHANNEL_CLASS(
 
   // open serial device. As it's non-blocking we should hold until we
   // have a physical connection
+  errfd = fopen("./error_messages", "w");
 
-  serial_fd = open( "/dev/ttyS0", O_RDWR | O_NOCTTY | O_NDELAY); 
-    
-  if (serial_fd != 0){
-    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  serial_fd = open( "/dev/ttyS0", O_RDWR |  O_NOCTTY | O_NDELAY | O_EXCL); 
+  if (serial_fd == -1){
+    fprintf(errfd, "FAILED TO OPEN DEVICE\n");
+    int errnumber = errno;
+    char buf[100];
+    fprintf(errfd, "error is %s\n\n", strerror_r(errnumber, buf, 100));
+    exit(-1);
   }
-  struct termios attrib;
+    
+  fprintf(errfd, "OPENED DEVICE\n");
 
-  // get serial_fd attribute and set effective i/o speed
-  tcgetattr(serial_fd, &attrib);
-  
-  cfsetospeed(&attrib, B115200); //YYY ndave: this may be too fast. 
-  cfsetispeed(&attrib, B115200); 
+  struct termios newtio;      // structure to store the port settings in
+
+  newtio.c_cflag = B115200 | CS8 | CLOCAL | CREAD;
+  newtio.c_iflag = IGNPAR;
+  newtio.c_oflag = 0;
+  newtio.c_lflag = 0;
+  newtio.c_cc[VMIN]=1;
+  newtio.c_cc[VTIME]=0;
+  tcflush(serial_fd, TCIFLUSH);
+  tcsetattr(serial_fd,TCSANOW,&newtio);
 
   //Okay now. we're setup. We need to actually sync with the hardware
   
-  fprintf(stderr,"Synchronizing with the hardware\n");
+  fprintf(errfd,"Synchronizing with the hardware\n");
   int pos = 0; UMF_CHUNK v; int i =0 ;
   unsigned char* vptr = (unsigned char *) &v;
 
-  //scheme is pos 0 0xDEADBEEFF0 HW -> SW
+  //scheme is pos 0 0xDEADBEEF HW -> SW
   //          pos 1 0x0505CAFE SW -> HW
   //          pos 2 0x08675309 HW -> SW
+
   while(1){
+    fprintf(errfd," In Loop pos = %d\n", pos);
     if (pos == 0){
-      serial_read(vptr,4);
-      if(v == 0xDEADBEEF){pos = 1;} else {pos = 0;}// success
+      fprintf(errfd,"In pos 0 section\n");
+      if(serial_hasdata()){
+        fprintf(errfd,"about to serial_read\n");
+        serial_read(vptr,4);
+        fprintf(errfd,"read %x", v);
+        if(v == 0x44454144){pos = 1;} else {pos = 0;}// success
+      }
     } // end pos == 0
     else if(pos == 1){
-      v = 0x0505CAFE;
+      v = 0x042454546;
       serial_write(vptr, 4); // send data
-      serial_read(vptr, 4);  // read data
-      if(v == 0x08675309){ // handle result
-	break;
-      } else if (v == 0xDEADBEEF){
-	pos = 1;
-      } else {
-	fprintf(stderr,"NOT GOOD. Received unexpected signal from HW on serial channel");
-	pos = 0;
-      } // we failed. Retry
-    } // end pos == 1
+      pos = 2;
+    } else if (pos == 2){
+      if(serial_hasdata()){
+	serial_read(vptr, 4);  // read data
+        if(v == 0x043414645){ // handle result
+  	  break; //leave while loop
+        } else if (v == 0x44454144){
+	  pos = 2;
+        } else {
+	  fprintf(errfd,"NOT GOOD. Received unexpected signal from HW on serial channel %x", v);
+	  pos = 0;
+	} // we failed. Retry
+      } // end pos == 2
+    }
   } // end while
 
-  fprintf(stderr,"Synced");
+   fprintf(errfd,"Synced");
 
 }
 
@@ -176,7 +215,7 @@ PHYSICAL_CHANNEL_CLASS::Write(UMF_MESSAGE message){
 void
 PHYSICAL_CHANNEL_CLASS::readPipe(){
   // determine if we are starting a new message
-  fprintf(stderr, "entering readPipe\n");
+  fprintf(errfd, "entering readPipe\n");
   if (incomingMessage == NULL)    {
     // new message: read header
     unsigned char header[UMF_CHUNK_BYTES];
@@ -207,44 +246,47 @@ PHYSICAL_CHANNEL_CLASS::readPipe(){
     // append read bytes into message
     incomingMessage->AppendBytes(bytes_requested, buf);
   }
-  fprintf(stderr,"exiting readPipe\n");
+  fprintf(errfd,"exiting readPipe\n");
 }
 
 void PHYSICAL_CHANNEL_CLASS::serial_read(unsigned char *v, unsigned int numBytes){
   int bytes_read = 0; size_t rv =0; int i;
+  fprintf(errfd, "starting serial_read\n");
+  fflush(errfd);
   while(bytes_read < numBytes){
-    fprintf(stderr, "starting serial_read");
-    rv = read(serial_fd,(void *)(v[bytes_read]), numBytes - bytes_read);
-    fprintf(stderr, "read rv: %u", rv);
-
+    fprintf(errfd, "In Loop %d %d %d\n", numBytes, bytes_read, rv);
+    //    rv = read(serial_fd,(void *)(v[bytes_read]), numBytes - bytes_read);
+    rv = read(serial_fd,(void *)(v[bytes_read]), 1);
+    //fprintf(errfd, "read rv: %x\n", (unsigned int)rv);
     if (rv != -1){
       bytes_read += rv;
       for (i=0;i<100000;i++);
     }
     else {
-      fprintf(stderr, "NOO!!!! read has a problem");
+      //fprintf(errfd, "NOO!!!! read wasn't ready");
+      for (i=0;i<100000;i++);
     }
   }
-  fprintf(stderr,"serial_read: ");
+  fprintf(errfd,"serial_read: ");
     for(int i=0;i<numBytes;i++){
-      fprintf(stderr,"%02x", v[i]);
+      fprintf(errfd,"%02x", v[i]);
     }
-    fprintf(stderr, "\n");
-    fprintf(stderr, "exiting serial_read");
+    fprintf(errfd, "\n");
+    fprintf(errfd, "exiting serial_read");
 }
 
 void PHYSICAL_CHANNEL_CLASS::serial_write(unsigned char *v, unsigned int numBytes){
     // assume we can write data in one shot
-    fprintf(stderr,"serial_write: ");
+    fprintf(errfd,"serial_write: ");
     for(int i=0;i<numBytes;i++){
-      fprintf(stderr,"%2x", v[i]);
+      fprintf(errfd,"%2x", v[i]);
     }
-    fprintf(stderr, "\n");
+    fprintf(errfd, "\n");
 
     int bytes_written = write(serial_fd, (void *) v, numBytes);
     if (bytes_written < numBytes){
       //badness!
-      fprintf(stderr, "NOO!!!! we didn't fully write");
+      fprintf(errfd, "NOO!!!! we didn't fully write");
     }
 }
 
@@ -259,8 +301,10 @@ PHYSICAL_CHANNEL_CLASS::serial_hasdata()
     FD_ZERO(&readfds);
     FD_SET(serial_fd, &readfds);
 
+    fprintf(errfd, "entering serial_hasdata()\n");
+
     timeout.tv_sec  = 0;
-    timeout.tv_usec = 1;//SELECT_TIMEOUT
+    timeout.tv_usec = 1000;//SELECT_TIMEOUT
 
     data_available = select(serial_fd + 1, &readfds, NULL, NULL, &timeout);
 
@@ -287,9 +331,10 @@ PHYSICAL_CHANNEL_CLASS::serial_hasdata()
         }
 
         // yes, data is available
+        fprintf(errfd, "exit serial_hasdata() TRUE\n");
         return true;
     }
-
+    fprintf(errfd, "exit serial_hasdata() FALSE\n");
     // no fresh data
     return false;
 }

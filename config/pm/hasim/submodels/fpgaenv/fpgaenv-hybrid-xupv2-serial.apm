@@ -129,7 +129,6 @@ File=modules/bluespec/common/fpgaenv/low-level-platform-interface/remote-memory/
 Packagehint=platforms
 
 
-
 [Serial Physical Channel]
 File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/serial/serial-physical-channel.awb
 Packagehint=platforms

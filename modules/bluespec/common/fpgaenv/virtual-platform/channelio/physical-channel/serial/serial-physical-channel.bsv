@@ -40,28 +40,34 @@ module mkPhysicalChannel#(PHYSICAL_DRIVERS drivers)
 
 
   Reg#(Bool)    initialized <- mkReg(False);
-  Reg#(Bit#(12)) count      <- mkReg(0);
+  Reg#(Bit#(16)) count      <- mkReg(0);
   
-  //scheme is pos 0 0xF0 HW -> SW
-  //          pos 1 0xCA SW -> HW
-  //          pos 2 0x08 HW -> SW
+  //scheme is pos 0 "DEAD" HW -> SW
+  //          pos 1 "BEEF" SW -> HW
+  //          pos 2 "CAFE" HW -> SW
   
   rule sendPulse(!initialized);
     count <= count + 1;
     if (count == 0)
       begin
-	serialDriver.send(32'hDEADBEEF);
+	serialDriver.send(32'h44454144);
       end
   endrule
 
 
   rule getResp(!initialized);
     let x<- serialDriver.receive();
-    if (x == 32'h0505CAFE) // woo. A response Send a token and we're done 
+    if (x == 32'h42454546) // woo. A response Send a token and we're done 
       begin
-	serialDriver.send(32'h08675309);
+	serialDriver.send(32'h43414645);
 	initialized <= True;
-      end   
+      end
+     else
+       begin
+	 serialDriver.send(x);	 
+	 //serialDriver.send(32'h464F4F21);	 
+	 initialized <= True;
+       end   
   endrule  
  
   method ActionValue#(UMF_CHUNK) read() if (initialized);
