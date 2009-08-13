@@ -43,6 +43,7 @@ LLPI_CLASS::LLPI_CLASS() :
 
 LLPI_CLASS::~LLPI_CLASS()
 {
+    pthread_cancel(monitorThreadID);
 }
 
 void

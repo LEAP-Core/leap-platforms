@@ -6905,3 +6905,17 @@ I modified main.v in the Bluespec compiler directory, commenting out the
 parameters to "top()".  I had to change the copy in $BLUESPEC_LIB because,
 it appears, there is no way to specify a different main.v on the command line.
 This only affects iverilog simulation and not synthesized designs.
+
+----------
+mpellaue    Date: Thu Aug 13 09:43:32 EDT 2009  CSN: CSN-platforms-254
+                  Thu Aug 13 13:43:32 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/low-level-platform-interface
+ llpi.cpp                  Locally Modified          253 
+
+
+* Add a call to pthread_cancel in the LLPI destructor. This should alleviate the
+  race condition that was manifesting.
+  
+Michael
