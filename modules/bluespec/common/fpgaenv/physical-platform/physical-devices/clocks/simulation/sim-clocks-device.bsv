@@ -68,11 +68,11 @@ module mkClocksDevice
     (CLOCKS_DEVICE);
     
     //
-    // STAGE 1: create a simulated oscillator and a NULL reset
+    // STAGE 1: create a simulated oscillator and a reset
     //
     
-    Clock rawClock <- mkAbsoluteClock(0, 1);
-    Reset rawReset = noReset();
+    Clock rawClock <- mkAbsoluteClock(0, 10);
+    Reset rawReset <- mkInitialReset(10, clocked_by rawClock);
 
     //
     // STAGE 2: no DCM/PLL clock transformations for simulated clocks

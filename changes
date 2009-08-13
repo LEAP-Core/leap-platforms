@@ -6886,3 +6886,22 @@ Directory modules/application-env/hw-only/base
   soft-connection-wrapped RRR service.
 
 * UCF files updated to reflect the new instantiation hierarchy.
+
+----------
+mcadler     Date: Thu Aug 13 08:49:39 EDT 2009  CSN: CSN-platforms-253
+                  Thu Aug 13 12:49:39 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/simulation
+ sim-clocks-device.bsv     Locally Modified          252 
+
+Changes to make iverilog work again:
+  - Generate a reset at the beginning of the run.
+  - A period of 1 doesn't work for mkAbsoluteClock with the generated Verilog.
+
+NOTE: Our clock topology with clock/reset coming from the bottom of the design
+instead of the top does not work with the default version of $BLUESPEC_LIB/main.v.
+I modified main.v in the Bluespec compiler directory, commenting out the
+parameters to "top()".  I had to change the copy in $BLUESPEC_LIB because,
+it appears, there is no way to specify a different main.v on the command line.
+This only affects iverilog simulation and not synthesized designs.
