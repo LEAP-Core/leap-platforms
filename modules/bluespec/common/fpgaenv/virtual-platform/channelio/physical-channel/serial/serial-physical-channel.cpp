@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2008 Intel Corporation
+// Copyright XXX
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -24,6 +24,8 @@
 #include <sys/select.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/signal.h>
+#include <sys/ioctl.h>
 #include <signal.h>
 #include <string.h>
 #include <iostream>
@@ -35,6 +37,47 @@
 #include "asim/provides/umf.h"
 
 using namespace std;
+
+void m_set_hardware_flowcontrol(int fd, int on){
+   struct termios tty;
+   tcgetattr(fd, &tty);
+   if (on)
+     tty.c_cflag |= CRTSCTS;
+   else
+     tty.c_cflag &= ~CRTSCTS;
+   tcsetattr(fd, TCSANOW, &tty);
+}
+
+
+void m_setrts(int fd){
+#if defined(TIOCM_RTS) && defined(TIOCMODG)
+  {
+    int mcs=0;
+
+    ioctl(fd, TIOCMODG, &mcs);
+    mcs |= TIOCM_RTS;
+    ioctl(fd, TIOCMODS, &mcs);
+  }
+#endif
+#ifdef _COHERENT
+  ioctl(fd, TIOCSRTS, 0);
+#endif
+}
+
+
+void print_status(int fd, FILE *errfd) {
+	int status;
+	unsigned int arg;
+	status = ioctl(fd, TIOCMGET, &arg);
+	fprintf(errfd, "[STATUS]: ");
+	if(arg & TIOCM_RTS) fprintf(errfd, "RTS ");
+	if(arg & TIOCM_CTS) fprintf(errfd, "CTS ");
+	if(arg & TIOCM_DSR) fprintf(errfd, "DSR ");
+	if(arg & TIOCM_CAR) fprintf(errfd, "DCD ");
+	if(arg & TIOCM_DTR) fprintf(errfd, "DTR ");
+	if(arg & TIOCM_RNG) fprintf(errfd, "RI ");
+	fprintf(errfd, "\r\n");
+}
 
 // ==============================================
 //            WARNING WARNING WARNING
@@ -57,24 +100,6 @@ PHYSICAL_CHANNEL_CLASS::PHYSICAL_CHANNEL_CLASS(
   // have a physical connection
   errfd = fopen("./error_messages", "w");
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   serial_fd = open( "/dev/ttyS0", O_RDWR |  O_NOCTTY | O_NDELAY | O_EXCL); 
   if (serial_fd == -1){
     fprintf(errfd, "FAILED TO OPEN DEVICE\n");
@@ -88,6 +113,10 @@ PHYSICAL_CHANNEL_CLASS::PHYSICAL_CHANNEL_CLASS(
 
   struct termios newtio;      // structure to store the port settings in
 
+
+  print_status(serial_fd,errfd);
+
+
   newtio.c_cflag = B115200 | CS8 | CLOCAL | CREAD;
   newtio.c_iflag = IGNPAR;
   newtio.c_oflag = 0;
@@ -97,45 +126,82 @@ PHYSICAL_CHANNEL_CLASS::PHYSICAL_CHANNEL_CLASS(
   tcflush(serial_fd, TCIFLUSH);
   tcsetattr(serial_fd,TCSANOW,&newtio);
 
+  m_set_hardware_flowcontrol(serial_fd, 0); // set off
+  m_setrts(serial_fd);
+
+  print_status(serial_fd,errfd);
+
   //Okay now. we're setup. We need to actually sync with the hardware
   
   fprintf(errfd,"Synchronizing with the hardware\n");
-  int pos = 0; UMF_CHUNK v; int i =0 ;
+  int pos = 0; UMF_CHUNK v; 
+  volatile int i =0 ;
   unsigned char* vptr = (unsigned char *) &v;
 
   //scheme is pos 0 0xDEADBEEF HW -> SW
   //          pos 1 0x0505CAFE SW -> HW
   //          pos 2 0x08675309 HW -> SW
 
+  unsigned char codeword[16] = {'a','b','c','d','e','f','g','h',
+                       'A','B','C','D','E','F','G','H'};
+  int ptr  = 0;
+
+  unsigned char recvchar, sendchar;
+
   while(1){
-    fprintf(errfd," In Loop pos = %d\n", pos);
-    if (pos == 0){
-      fprintf(errfd,"In pos 0 section\n");
-      if(serial_hasdata()){
-        fprintf(errfd,"about to serial_read\n");
-        serial_read(vptr,4);
-        fprintf(errfd,"read %x", v);
-        if(v == 0x44454144){pos = 1;} else {pos = 0;}// success
-      }
-    } // end pos == 0
-    else if(pos == 1){
-      v = 0x042454546;
-      serial_write(vptr, 4); // send data
-      pos = 2;
-    } else if (pos == 2){
-      if(serial_hasdata()){
-	serial_read(vptr, 4);  // read data
-        if(v == 0x043414645){ // handle result
-  	  break; //leave while loop
-        } else if (v == 0x44454144){
-	  pos = 2;
-        } else {
-	  fprintf(errfd,"NOT GOOD. Received unexpected signal from HW on serial channel %x", v);
-	  pos = 0;
-	} // we failed. Retry
-      } // end pos == 2
+    fprintf(errfd,"Loop: %d, %c %c", ptr, sendchar, recvchar);
+    //recv byte
+    recvchar = codeword[ptr];
+    serial_read(&recvchar,1);
+    // if match move on
+    if (codeword[ptr] == recvchar){
+      ptr++;
+      sendchar = codeword[ptr];
+      serial_write(&sendchar,1);
+      ptr++;
     }
-  } // end while
+    else if ((ptr >=2) && (codeword[ptr-2] == recvchar)){
+	//noaction We got stale send
+    }
+    else{
+      ptr = 0;
+    }
+    if (ptr >= 15) break;
+  }
+
+
+
+
+
+//   while(1){
+//     fprintf(errfd," In Loop pos = %d\n", pos);
+//     if (pos == 0){
+//       fprintf(errfd,"In pos 0 section\n");
+//       if(serial_hasdata()){
+//         fprintf(errfd,"about to serial_read\n");
+//         serial_read(vptr,4);
+//         fprintf(errfd,"read %x", v);
+//         if(v == 0x44454144){pos = 1;} else {pos = 0;}// success
+//       }
+//     } // end pos == 0
+//     else if(pos == 1){
+//       v = 0x042454546;
+//       serial_write(vptr, 4); // send data
+//       pos = 2;
+//     } else if (pos == 2){
+//       if(serial_hasdata()){
+// 	serial_read(vptr, 4);  // read data
+//         if(v == 0x043414645){ // handle result
+//   	  break; //leave while loop
+//         } else if (v == 0x44454144){
+// 	  pos = 2;
+//         } else {
+// 	  fprintf(errfd,"NOT GOOD. Received unexpected signal from HW on serial channel %x", v);
+// 	  pos = 0;
+// 	} // we failed. Retry
+//       } // end pos == 2
+//     }
+//   } // end while
 
    fprintf(errfd,"Synced");
 

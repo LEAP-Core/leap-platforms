@@ -38,37 +38,38 @@ module mkPhysicalChannel#(PHYSICAL_DRIVERS drivers)
   // shortcut to drivers
   SERIAL_DRIVER serialDriver = drivers.serialDriver;
 
-
-  Reg#(Bool)    initialized <- mkReg(False);
-  Reg#(Bit#(16)) count      <- mkReg(0);
+  let initialized = True;
   
-  //scheme is pos 0 "DEAD" HW -> SW
-  //          pos 1 "BEEF" SW -> HW
-  //          pos 2 "CAFE" HW -> SW
+//   Reg#(Bool)    initialized <- mkReg(False);
+//   Reg#(Bit#(16)) count      <- mkReg(0);
   
-  rule sendPulse(!initialized);
-    count <= count + 1;
-    if (count == 0)
-      begin
-	serialDriver.send(32'h44454144);
-      end
-  endrule
+//   //scheme is pos 0 "DEAD" HW -> SW
+//   //          pos 1 "BEEF" SW -> HW
+//   //          pos 2 "CAFE" HW -> SW
+  
+//   rule sendPulse(!initialized);
+//     count <= count + 1;
+//     if (count == 0)
+//       begin
+// 	serialDriver.send(32'h44454144);
+//       end
+//   endrule
 
 
-  rule getResp(!initialized);
-    let x<- serialDriver.receive();
-    if (x == 32'h42454546) // woo. A response Send a token and we're done 
-      begin
-	serialDriver.send(32'h43414645);
-	initialized <= True;
-      end
-     else
-       begin
-	 serialDriver.send(x);	 
-	 //serialDriver.send(32'h464F4F21);	 
-	 initialized <= True;
-       end   
-  endrule  
+//   rule getResp(!initialized);
+//     let x<- serialDriver.receive();
+//     if (x == 32'h42454546) // woo. A response Send a token and we're done 
+//       begin
+// 	serialDriver.send(32'h43414645);
+// 	initialized <= True;
+//       end
+//      else
+//        begin
+// 	 serialDriver.send(x);	 
+// 	 //serialDriver.send(32'h464F4F21);	 
+// 	 //initialized <= True;
+//        end   
+//   endrule  
  
   method ActionValue#(UMF_CHUNK) read() if (initialized);
     let x <- serialDriver.receive();
