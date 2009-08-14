@@ -2,6 +2,7 @@ module serial( fpga_0_RS232_Uart_1_sin,
     fpga_0_RS232_Uart_1_sout,
     fpga_0_RS232_Uart_1_rtsN,
     fpga_0_RS232_Uart_1_ctsN,
+    fpga_0_RS232_Uart_1_dtrN,	       
     sys_clk_pin, 
     sys_rst_pin, 
     bramfeeder_0_RDY_ppcMessageOutput_get_pin, 
@@ -21,6 +22,7 @@ module serial( fpga_0_RS232_Uart_1_sin,
     input  fpga_0_RS232_Uart_1_sin;
     output fpga_0_RS232_Uart_1_sout;
     output  fpga_0_RS232_Uart_1_rtsN;
+    output  fpga_0_RS232_Uart_1_dtrN;
     input fpga_0_RS232_Uart_1_ctsN; 
     input  sys_clk_pin; 
     input  sys_rst_pin; 
@@ -48,6 +50,7 @@ module serial( fpga_0_RS232_Uart_1_sin,
     system s( .fpga_0_RS232_Uart_1_sin_pin(fpga_0_RS232_Uart_1_sin),
               .fpga_0_RS232_Uart_1_sout_pin(fpga_0_RS232_Uart_1_sout),
 	      .fpga_0_RS232_Uart_1_rtsN_pin(fpga_0_RS232_Uart_1_rtsN),
+    	      .RS232_Uart_1_dtrN_pin(fpga_0_RS232_Uart_1_dtrN),
               .fpga_0_RS232_Uart_1_ctsN_pin(fpga_0_RS232_Uart_1_ctsN),
               .sys_clk_pin(sys_clk_pin), 
               .sys_rst_pin(rst_p), 

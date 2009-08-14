@@ -24,7 +24,8 @@ module system
     bramfeeder_0_RDY_ppcMessageInput_put_pin,
     bramfeeder_0_EN_ppcMessageInput_put_pin,
     clock_generator_0_RSTOUT0_pin,
-    clock_generator_0_CLKOUT0_pin
+    clock_generator_0_CLKOUT0_pin,
+    RS232_Uart_1_dtrN_pin
   );
   input fpga_0_RS232_Uart_1_ctsN_pin;
   output fpga_0_RS232_Uart_1_rtsN_pin;
@@ -47,10 +48,12 @@ module system
   input bramfeeder_0_EN_ppcMessageInput_put_pin;
   output clock_generator_0_RSTOUT0_pin;
   output clock_generator_0_CLKOUT0_pin;
+  output RS232_Uart_1_dtrN_pin;
 
   // Internal signals
 
   wire Dcm_all_locked;
+  wire RS232_Uart_1_dtrN;
   wire bramfeeder_0_EN_ppcMessageInput_put;
   wire bramfeeder_0_EN_ppcMessageOutput_get;
   wire [0:31] bramfeeder_0_PORTA_BRAM_Addr;
@@ -219,6 +222,7 @@ module system
   assign bramfeeder_0_EN_ppcMessageInput_put = bramfeeder_0_EN_ppcMessageInput_put_pin;
   assign clock_generator_0_RSTOUT0_pin = sys_periph_reset[0];
   assign clock_generator_0_CLKOUT0_pin = sys_clk_s;
+  assign RS232_Uart_1_dtrN_pin = RS232_Uart_1_dtrN;
   assign net_gnd0 = 1'b0;
   assign fpga_0_net_gnd_pin = net_gnd0;
   assign fpga_0_net_gnd_1_pin = net_gnd0;
@@ -819,7 +823,7 @@ module system
       .dcdN ( net_gnd0 ),
       .ddis (  ),
       .dsrN ( net_gnd0 ),
-      .dtrN (  ),
+      .dtrN ( RS232_Uart_1_dtrN ),
       .out1N (  ),
       .out2N (  ),
       .rclk ( net_gnd0 ),
