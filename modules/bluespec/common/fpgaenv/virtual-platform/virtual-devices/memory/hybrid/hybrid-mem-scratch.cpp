@@ -82,13 +82,12 @@ SCRATCHPAD_MEMORY_SERVER_CLASS::~SCRATCHPAD_MEMORY_SERVER_CLASS()
     Cleanup();
 }
 
-// init
+
 void
-SCRATCHPAD_MEMORY_SERVER_CLASS::Init(
-    PLATFORMS_MODULE p)
+SCRATCHPAD_MEMORY_SERVER_CLASS::Init(PLATFORMS_MODULE p)
 {
-    // set parent pointer
-    parent = p;
+    // chain
+    PLATFORMS_MODULE_CLASS::Init(p);
 }
 
 // uninit: override

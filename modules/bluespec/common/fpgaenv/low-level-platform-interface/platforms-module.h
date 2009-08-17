@@ -26,6 +26,8 @@ class PLATFORMS_MODULE_CLASS
         void AddChild(PLATFORMS_MODULE);
 
         // common virtual methods
+        virtual void Init();
+        virtual void Init(PLATFORMS_MODULE parent);
         virtual void Uninit();
         virtual void CallbackExit(int);
 };

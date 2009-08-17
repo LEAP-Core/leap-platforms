@@ -1,5 +1,6 @@
 #include <cstdlib>
 #include <assert.h>
+#include <iostream>
 
 #include "platforms-module.h"
 
@@ -78,6 +79,41 @@ PLATFORMS_MODULE_CLASS::AddChild(
     // add to list of children
     child->next = children;
     children = child;
+}
+
+// init
+void
+PLATFORMS_MODULE_CLASS::Init()
+{
+    // walk through list of children and init them
+    PLATFORMS_MODULE child = children;
+    while (child != NULL)
+    {
+        child->Init();
+        child = child->next;
+    }
+}
+
+// init
+void
+PLATFORMS_MODULE_CLASS::Init(PLATFORMS_MODULE p)
+{
+    // walk through list of children and init them
+    PLATFORMS_MODULE child = children;
+    while (child != NULL)
+    {
+        child->Init();
+        child = child->next;
+    }
+
+    // set parent
+    parent = p;
+
+    // add self to parent's child list
+    if (parent != NULL)
+    {
+        parent->AddChild(this);
+    }
 }
 
 // uninit

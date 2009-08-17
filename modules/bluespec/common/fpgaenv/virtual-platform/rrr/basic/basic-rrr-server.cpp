@@ -96,7 +96,7 @@ RRR_SERVER_MONITOR_CLASS::RRR_SERVER_MONITOR_CLASS(
         PLATFORMS_MODULE_CLASS(p)
 {
     channelio = cio;
-    Init();
+    // Init();
 }
 
 // destructor
@@ -123,6 +123,8 @@ RRR_SERVER_MONITOR_CLASS::Init()
 
     // register with channelio for message delivery
     channelio->RegisterForDelivery(CHANNEL_ID, this);
+    
+    PLATFORMS_MODULE_CLASS::Init();
 }
 
 // uninit: override

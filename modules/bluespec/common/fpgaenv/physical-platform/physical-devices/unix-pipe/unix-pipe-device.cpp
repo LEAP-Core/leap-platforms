@@ -32,12 +32,14 @@
 #include <iostream>
 
 #include "platforms-module.h"
+#include "default-switches.h"
 
-#include "asim/provides/command_switches.h"
 #include "asim/provides/unix_pipe_device.h"
 
 
 using namespace std;
+
+extern GLOBAL_ARGS globalArgs;
 
 // ============================================
 //           UNIX Pipe Physical Device
@@ -46,7 +48,20 @@ using namespace std;
 // constructor: set up hardware partition
 UNIX_PIPE_DEVICE_CLASS::UNIX_PIPE_DEVICE_CLASS(
     PLATFORMS_MODULE p) :
+        bluesimSwitches(),
         PLATFORMS_MODULE_CLASS(p)
+{
+}
+
+// destructor
+UNIX_PIPE_DEVICE_CLASS::~UNIX_PIPE_DEVICE_CLASS()
+{
+    // cleanup
+    Cleanup();
+}
+
+void
+UNIX_PIPE_DEVICE_CLASS::Init()
 {
     childAlive = false;
 
@@ -124,7 +139,7 @@ UNIX_PIPE_DEVICE_CLASS::UNIX_PIPE_DEVICE_CLASS(
 
             // Make a copy of the argument vector so we can put the file name
             // as argv[0]
-            char **argv = new char *[globalArgs->BluesimArgc() + 3];
+            char **argv = new char *[bluesimSwitches.BluesimArgc() + 3];
 
             // Pointer to exe is argv[0]
             argv[0] = new char[hw_exe.length() + 1];
@@ -134,9 +149,9 @@ UNIX_PIPE_DEVICE_CLASS::UNIX_PIPE_DEVICE_CLASS(
             argv[1] = "-w";
 
             // Copy remaining argv pointers, including trailing NULL
-            for (int i = 1; i < globalArgs->BluesimArgc() + 1; i++)
+            for (int i = 0; i < bluesimSwitches.BluesimArgc() + 1; i++)
             {
-                argv[i + 1] = globalArgs->BluesimArgv()[i];
+                argv[i + 2] = bluesimSwitches.BluesimArgv()[i];
             }
 
             execvp(argv[0], argv);
@@ -188,14 +203,11 @@ UNIX_PIPE_DEVICE_CLASS::UNIX_PIPE_DEVICE_CLASS(
         exit(1);
     }
 
-    childAlive = true;
-}
+    // call default init so that we can continue
+    // chain if necessary
+    PLATFORMS_MODULE_CLASS::Init();
 
-// destructor
-UNIX_PIPE_DEVICE_CLASS::~UNIX_PIPE_DEVICE_CLASS()
-{
-    // cleanup
-    Cleanup();
+    childAlive = true;
 }
 
 // override default chain-uninit method because
@@ -308,3 +320,28 @@ UNIX_PIPE_DEVICE_CLASS::Write(
         CallbackExit(1);
     }
 }
+
+
+BLUESIM_SWITCH_CLASS::BLUESIM_SWITCH_CLASS() :
+    bluesimArgc(0),
+    bluesimArgv(new char *[1]),
+    COMMAND_SWITCH_LIST_CLASS("bluesim")
+{
+    bluesimArgv[0] = NULL;
+}
+
+void
+BLUESIM_SWITCH_CLASS::ProcessSwitchList(int switch_argc, char **switch_argv)
+{
+    bluesimArgc = switch_argc;
+    delete [] bluesimArgv;
+    bluesimArgv = switch_argv;
+}
+
+bool
+BLUESIM_SWITCH_CLASS::ShowSwitch(char *buff)
+{
+    strcpy(buff, "[--bluesim=\"<args>\"]    Arguments to Bluesim");
+    return true;
+}
+

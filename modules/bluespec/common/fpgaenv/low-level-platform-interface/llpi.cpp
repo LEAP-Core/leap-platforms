@@ -50,6 +50,8 @@ void
 LLPI_CLASS::Init()
 {
 
+    PLATFORMS_MODULE_CLASS::Init();
+    
     // spawn off Monitor/Service thread which calls LLPI's Main()
     if (pthread_create(&monitorThreadID,
                        NULL,

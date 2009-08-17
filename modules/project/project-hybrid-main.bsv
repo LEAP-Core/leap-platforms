@@ -8,9 +8,6 @@ import Clocks::*;
 `include "asim/provides/physical_platform.bsh"
 `include "asim/provides/clocks_device.bsh"
 
-// TODO: better story on command line args
-`include "asim/provides/command_switches.bsh"
-
 module mkModel
     //interface:
         (TOP_LEVEL_WIRES);

@@ -389,7 +389,7 @@ xilinx_ucf = env.Command(
     'cat $SOURCES > $TARGET')
 
 
-if(len(env['DEFS']['GIVEN_BMMS']) != 0):
+if len(env['DEFS']['GIVEN_BMMS']) != 0:
     bmm = ' -bm ' +  env['DEFS']['GIVEN_BMMS']
 else:
     bmm = ''
@@ -410,12 +410,25 @@ Clean(xilinx_ngd, TMP_XILINX_DIR + '/netlist.lst')
 # Alias for everything up to map...
 env.Alias('xst', xilinx_ngd)
 
-#check for a cached post par ncd
-if(FindFile( APM_NAME + '_par.ncd', 
-             [env['DEFS']['WORKSPACE_ROOT'] + '/var/']) != None):
-    smartguide = ' -smartguide ' +  env['DEFS']['WORKSPACE_ROOT'] + '/var/' + APM_NAME + '_par.ncd' 
+
+#
+# Use a cached post par ncd to guide map and par?  This is off by default since
+# the smart guide option can make place & route fail when it otherwise would have
+# worked.  It doesn't always improve run time, either.  To turn on smart guide
+# either define the environment variable USE_SMARTGUIDE or set
+# USE_SMARTGUIDE on the scons command line to a non-zero value.
+#
+smartguide_cache_dir = env['DEFS']['WORKSPACE_ROOT'] + '/var/xilinx_ncd'
+smartguide_cache_file = APM_NAME + '_par.ncd'
+if not os.path.isdir(smartguide_cache_dir):
+    os.mkdir(smartguide_cache_dir)
+
+if ((int(ARGUMENTS.get('USE_SMARTGUIDE', 0)) or env['ENV'].has_key('USE_SMARTGUIDE')) and
+    (FindFile(APM_NAME + '_par.ncd', [smartguide_cache_dir]) != None)):
+    smartguide = ' -smartguide ' +  smartguide_cache_dir + '/' + smartguide_cache_file
 else:
     smartguide = ''
+
 
 # Map
 xilinx_map = env.Command(
@@ -445,7 +458,7 @@ xilinx_par = env.Command(
       Delete(XILINX_APM_NAME + '_par_pad.csv'),
       Delete(XILINX_APM_NAME + '_par_pad.txt'),
       'par -w -ol high ' + smartguide + ' -t ' + env['DEFS']['COST_TABLE'] + ' ' + XILINX_APM_NAME + '_map.ncd $TARGET ' + XILINX_APM_NAME + '.pcf',
-      'cp $TARGET ' + env['DEFS']['WORKSPACE_ROOT'] + '/var/'])
+      Copy(smartguide_cache_dir + '/' + smartguide_cache_file, '$TARGET') ])
 
 
 # Generate the FPGA timing report -- this report isn't built by default.  Use
@@ -455,7 +468,7 @@ xilinx_trce = env.Command(
     [ xilinx_par, XILINX_APM_NAME + '.pcf' ],
     'trce -e 100 $SOURCES -o $TARGET')
 
-if(len(env['DEFS']['GIVEN_ELFS']) != 0):
+if len(env['DEFS']['GIVEN_ELFS']) != 0:
     elf = ' -bd ' + env['DEFS']['GIVEN_ELFS']
 else:
     elf = ''

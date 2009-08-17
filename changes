@@ -6919,3 +6919,44 @@ Directory modules/bluespec/common/fpgaenv/low-level-platform-interface
   race condition that was manifesting.
   
 Michael
+
+----------
+mpellaue    Date: Mon Aug 17 12:36:17 EDT 2009  CSN: CSN-platforms-258
+                  Mon Aug 17 16:36:17 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/low-level-platform-interface
+ platforms-module.h        Locally Modified          257 
+ llpi.cpp                  Locally Modified          257 
+ platforms-module.cpp      Locally Modified          257 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ basic-rrr-server.cpp      Locally Modified          257 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid
+ hybrid-fp.cpp             Locally Modified          257 
+ hybrid-fp-command-switches.cpp Locally Added               0 
+ hybrid-fp.h               Locally Modified          257 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-mem-scratch.cpp    Locally Modified          257 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/streams
+ hybrid-streams.cpp        Locally Modified          257 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe
+ unix-pipe-device.h        Locally Modified          257 
+ unix-pipe-device.cpp      Locally Modified          257 
+
+Directory modules/project
+ project-hybrid-main.cpp   Locally Modified          257 
+ project-hybrid-main.bsv   Locally Modified          257 
+ SCons.top.template        Locally Modified          257 
+
+
+* Command line parameter reorganization.
+
+* Update Scons.top.template to be in sync with hasim/model. We will be
+  maintaining 2 Scons scripts until stage 2 of the reorganization is compelete.
+
+Michael P.

@@ -12,10 +12,10 @@
 
 #include "asim/dict/init.h"
 
-#include "asim/provides/command_switches.h"
 #include "asim/provides/virtual_platform.h"
 #include "asim/provides/low_level_platform_interface.h"
 #include "asim/provides/application_env.h"
+#include "asim/provides/command_switches.h"
 #include "asim/provides/model.h"
 
 
@@ -27,9 +27,6 @@
 // Instantiate the virtual platform and application environment.
 // Run the user application through the application environment.
 
-// globally visible variables
-GLOBAL_ARGS globalArgs;
-
 // main
 int main(int argc, char *argv[])
 {
@@ -38,20 +35,24 @@ int main(int argc, char *argv[])
     setvbuf(stdout, NULL, _IOLBF, 0);
     setvbuf(stderr, NULL, _IOLBF, 0);
 
-    // parse args and place in global array
-    globalArgs = new GLOBAL_ARGS_CLASS(argc, argv); // TODO: need a better story here
-
     // Initialize pthread conditions so we know
     // when the HW & SW are done.
 
     VIRTUAL_PLATFORM vp         = new VIRTUAL_PLATFORM_CLASS();
     APPLICATION_ENV  appEnv     = new APPLICATION_ENV_CLASS(vp);
 
-    vp->Init(); // TODO: Does this want command line params?
+    // Set up default switches
+    globalArgs = new GLOBAL_ARGS_CLASS();
+    
+    // Process command line arguments
+    COMMAND_SWITCH_PROCESSOR switchProc = new COMMAND_SWITCH_PROCESSOR_CLASS();
+    switchProc->ProcessArgs(argc, argv);
 
+    // Init the virtual platform and the application environment.
+    vp->Init();
     appEnv->InitApp(argc, argv);
 
-    // transfer control to Application via Environment
+    // Transfer control to Application via Environment
     int ret_val = appEnv->RunApp(argc, argv);
 
     // Application's Main() exited => wait for hardware to be done.
@@ -70,7 +71,7 @@ int main(int argc, char *argv[])
     }
 
     // cout << "HW is done." << endl;
-    // cleanup and exit
+    // Cleanup and exit
     delete appEnv;
     delete vp;
 

@@ -2,6 +2,9 @@
 #define __HYBRID_FRONT_PANEL__
 
 #include "asim/provides/rrr.h"
+
+#include "command-switches.h"
+
 #include "asim/rrr/client_stub_FRONT_PANEL.h"
 
 #define SELECT_TIMEOUT      1000
@@ -9,14 +12,36 @@
 #define STDIN               0
 #define STDOUT              1
 
-typedef class FRONT_PANEL_SERVER_CLASS* FRONT_PANEL_SERVER;
+typedef class FRONT_PANEL_COMMAND_SWITCHES_CLASS* FRONT_PANEL_COMMAND_SWITCHES;
+class FRONT_PANEL_COMMAND_SWITCHES_CLASS : public COMMAND_SWITCH_OPTIONAL_STRING_CLASS
+{
+    private:
 
+        bool showFrontPanel;
+        bool showLEDsOnStdOut;
+    
+    public:
+        FRONT_PANEL_COMMAND_SWITCHES_CLASS();
+        ~FRONT_PANEL_COMMAND_SWITCHES_CLASS();
+        
+        void ProcessSwitchVoid();
+        void ProcessSwitchString(char *switch_arg);
+        virtual bool ShowSwitch(char *buff);
+
+        bool ShowFrontPanel()   { return showFrontPanel; }
+        bool ShowLEDsOnStdOut() { return showLEDsOnStdOut; }
+};
+
+typedef class FRONT_PANEL_SERVER_CLASS* FRONT_PANEL_SERVER;
 class FRONT_PANEL_SERVER_CLASS: public RRR_SERVER_CLASS,
                                 public PLATFORMS_MODULE_CLASS
 {
   private:
     // self-instantiation
     static FRONT_PANEL_SERVER_CLASS instance;
+    
+    // command-line switches
+    FRONT_PANEL_COMMAND_SWITCHES_CLASS fpSwitch;
     
     // stubs
     FRONT_PANEL_CLIENT_STUB clientStub;

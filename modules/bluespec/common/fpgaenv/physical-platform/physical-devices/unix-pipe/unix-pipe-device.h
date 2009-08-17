@@ -20,6 +20,7 @@
 #define __UNIX_PIPE__
 
 #include "platforms-module.h"
+#include "command-switches.h"
 #include "asim/provides/umf.h"
 
 #define STDIN             0
@@ -29,6 +30,22 @@
 #define BLOCK_SIZE        4
 #define SELECT_TIMEOUT    1000
 
+// Command-line switches for Bluesim.
+class BLUESIM_SWITCH_CLASS : public COMMAND_SWITCH_LIST_CLASS
+{
+    public:
+        BLUESIM_SWITCH_CLASS();
+        ~BLUESIM_SWITCH_CLASS() {}
+        int BluesimArgc() { return bluesimArgc; }
+        char** BluesimArgv() { return bluesimArgv; }
+        
+        void ProcessSwitchList(int argv, char** argc);
+        bool ShowSwitch(char* buff);
+    private:
+        int bluesimArgc;
+        char** bluesimArgv;
+};
+
 // ============================================
 //           UNIX Pipe Physical Device
 // ============================================
@@ -36,6 +53,9 @@ typedef class UNIX_PIPE_DEVICE_CLASS* UNIX_PIPE_DEVICE;
 class UNIX_PIPE_DEVICE_CLASS: public PLATFORMS_MODULE_CLASS
 {
   private:
+    // switches for bluesim
+    BLUESIM_SWITCH_CLASS bluesimSwitches;
+  
     // process/pipe state (physical channel)
     int  inpipe[2], outpipe[2];
     int  childpid;
@@ -50,6 +70,7 @@ class UNIX_PIPE_DEVICE_CLASS: public PLATFORMS_MODULE_CLASS
     UNIX_PIPE_DEVICE_CLASS(PLATFORMS_MODULE);
     ~UNIX_PIPE_DEVICE_CLASS();
 
+    void Init();
     void Cleanup();                    // cleanup
     void Uninit();                     // uninit
     bool Probe();                      // probe for data

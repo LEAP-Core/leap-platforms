@@ -50,6 +50,7 @@ STREAMS_SERVER_CLASS::Init(
         streamOutput[i] = stdout;
         callbackModule[i] = NULL;
     }
+    PLATFORMS_MODULE_CLASS::Init();
 }
 
 // uninit: we have to write this explicitly

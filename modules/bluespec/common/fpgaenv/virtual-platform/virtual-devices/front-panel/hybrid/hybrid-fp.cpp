@@ -9,7 +9,6 @@
 #include "asim/rrr/service_ids.h"
 #include "asim/provides/rrr.h"
 
-#include "asim/provides/command_switches.h"
 #include "asim/provides/front_panel.h"
 
 #define SERVICE_ID FRONT_PANEL_SERVICE_ID
@@ -18,7 +17,8 @@
 FRONT_PANEL_SERVER_CLASS FRONT_PANEL_SERVER_CLASS::instance;
 
 // constructor
-FRONT_PANEL_SERVER_CLASS::FRONT_PANEL_SERVER_CLASS()
+FRONT_PANEL_SERVER_CLASS::FRONT_PANEL_SERVER_CLASS() :
+    fpSwitch()
 {
     // instantiate stubs
     clientStub = new FRONT_PANEL_CLIENT_STUB_CLASS(this);
@@ -46,7 +46,7 @@ FRONT_PANEL_SERVER_CLASS::Init(
     outputDirty = false;
 
     // see if we should pop up the dialog box
-    if (globalArgs->ShowFrontPanel() == false)
+    if (fpSwitch.ShowFrontPanel() == false)
     {
         return;
     }
@@ -83,6 +83,9 @@ FRONT_PANEL_SERVER_CLASS::Init(
         // initial state
         childAlive = true;
     }
+
+    // chain
+    PLATFORMS_MODULE_CLASS::Init();
 }
 
 // uninit: override
@@ -130,9 +133,9 @@ void
 FRONT_PANEL_SERVER_CLASS::Poll()
 {
     // Is dialog disabled?
-    if (globalArgs->ShowFrontPanel() == false)
+    if (fpSwitch.ShowFrontPanel() == false)
     {
-        if (outputDirty && globalArgs->ShowLEDsOnStdOut())
+        if (outputDirty && fpSwitch.ShowLEDsOnStdOut())
         {
             syncOutputsConsole();
             outputDirty = false;
@@ -281,4 +284,56 @@ FRONT_PANEL_SERVER_CLASS::syncOutputs()
     // send translated data to dialog box
     nbytes = write(write_to_dialog, asciibuf, DIALOG_PACKET_SIZE * 8);
     assert(nbytes == DIALOG_PACKET_SIZE * 8);
+}
+
+FRONT_PANEL_COMMAND_SWITCHES_CLASS::FRONT_PANEL_COMMAND_SWITCHES_CLASS() :
+    showFrontPanel(false),
+    showLEDsOnStdOut(false),
+    COMMAND_SWITCH_OPTIONAL_STRING_CLASS("showfp")
+{
+}
+
+FRONT_PANEL_COMMAND_SWITCHES_CLASS::~FRONT_PANEL_COMMAND_SWITCHES_CLASS()
+{
+}
+
+void
+FRONT_PANEL_COMMAND_SWITCHES_CLASS::ProcessSwitchVoid()
+{
+    showFrontPanel = true;
+    showLEDsOnStdOut = false;
+}
+
+void
+FRONT_PANEL_COMMAND_SWITCHES_CLASS::ProcessSwitchString(char *switch_arg)
+{
+    if (strcmp(switch_arg, "gui") == 0)
+    {
+        showFrontPanel = true;
+        showLEDsOnStdOut = false;
+    }
+    else if (strcmp(switch_arg, "stdout") == 0)
+    {
+        showFrontPanel = false;
+        showLEDsOnStdOut = true;
+    }
+    else if (strncmp(switch_arg, "no", 2) == 0)
+    {
+        showFrontPanel = false;
+        showLEDsOnStdOut = false;
+    }
+    else
+    {
+        cerr << "Warning: Unknown argument to --showfp: " << switch_arg << endl;
+        cerr << "         Expected: [=gui|stdout|none]" << endl;
+        showFrontPanel = true;
+        showLEDsOnStdOut = false;
+    }
+}
+
+bool
+FRONT_PANEL_COMMAND_SWITCHES_CLASS::ShowSwitch(char *buff)
+{
+    strcpy(buff, "[--showfp[=gui|stdout|none]]");
+    return true;
 }
