@@ -20,9 +20,12 @@
 #define __PHYSICAL_CHANNEL__
 
 #include <stdio.h>
+#include "SerialStream.h"
 
 #include "asim/provides/umf.h"
 #include "asim/provides/physical_platform.h"
+
+
 
 // ============================================
 //               Physical Channel              
@@ -30,19 +33,20 @@
 
 class PHYSICAL_CHANNEL_CLASS: public PLATFORMS_MODULE_CLASS
 {
-  private:
 
-  // open file descriptor. 
+  private:
+ 
   int serial_fd;
+
+  LibSerial::SerialStream *serial_port;    
+
   // incomplete incoming read message
   UMF_MESSAGE incomingMessage;
 
   FILE* errfd;
 
-  void readPipe();
-  void    serial_read(unsigned char *v, unsigned int numBytes);
-  void   serial_write(unsigned char *v, unsigned int numBytes);
-  bool  serial_hasdata();
+  void   readPipe();
+  int    serial_hasdata();
 
   public:
 
