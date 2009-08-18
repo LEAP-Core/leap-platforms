@@ -60,7 +60,7 @@ void intializePort(LibSerial::SerialStream *serial_port, FILE *errfd) {
     //
     // Set the baud rate of the serial port.
     //
-    serial_port->SetBaudRate( LibSerial::SerialStreamBuf::BAUD_9600 ) ;
+    serial_port->SetBaudRate( LibSerial::SerialStreamBuf::BAUD_115200 ) ;
     if ( ! serial_port->good() ) 
     {
       fprintf(errfd,"Error: Could not open set baud rate.\n");

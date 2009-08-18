@@ -246,6 +246,10 @@ SerialStreamBuf::SetBaudRate(const BaudRateEnum baud_rate) {
     case BAUD_38400:
     case BAUD_57600:
     case BAUD_115200:
+    case BAUD_230400:
+ #ifdef __linux__       
+    case BAUD_460800:
+ #endif
         //
         // Get the current terminal settings. 
         //

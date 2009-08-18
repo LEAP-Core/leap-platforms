@@ -69,6 +69,15 @@ extern "C++" {
                 BAUD_38400 = B38400,      //!< 38400 baud.
                 BAUD_57600 = B57600,      //!< 57600 baud.
                 BAUD_115200 = B115200,    //!< 115200 baud.
+                BAUD_230400  = B230400,
+                //
+                // Bug#1318912
+                // B460800 is defined on Linux but not on Mac OS X. What about other
+                // operating systems ?
+                //
+                #ifdef __linux__       
+                   BAUD_460800  = B460800,
+                #endif
                 BAUD_INVALID              //!< Invalid baud rate.
             } ;
 
