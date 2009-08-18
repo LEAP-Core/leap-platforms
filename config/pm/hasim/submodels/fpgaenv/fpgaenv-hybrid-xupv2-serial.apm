@@ -36,11 +36,9 @@ Packagehint=platforms
 File=config/pm/hasim/submodels/fpgaenv/std-virtual-devices.apm
 Packagehint=platforms
 
-
 [RRR Clients and Servers]
 File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic/basic-rrr.awb
 Packagehint=platforms
-
 
 [Basic Virtual Channel Multiplexer]
 File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/basic/basic-channelio.awb
@@ -77,8 +75,6 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/physical-platform/debuggers/null/null-debugger.awb
 Packagehint=platforms
 
-
-
 [General LED Device]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/leds/general-led-device.awb
 Packagehint=platforms
@@ -110,7 +106,6 @@ Packagehint=platforms
 [Serial Physical Device (uBlaze-based)]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/serial/ublaze-serial/serial-device-ublaze.awb
 Packagehint=platforms
-
 
 [Single-Ended Crystal Clocks Device]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/single-ended/single-ended-clocks-device.awb

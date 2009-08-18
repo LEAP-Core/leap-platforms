@@ -5,6 +5,7 @@
 #include <sys/select.h>
 #include <sys/types.h>
 #include <signal.h>
+#include <string.h>
 
 #include "asim/rrr/service_ids.h"
 #include "asim/provides/rrr.h"

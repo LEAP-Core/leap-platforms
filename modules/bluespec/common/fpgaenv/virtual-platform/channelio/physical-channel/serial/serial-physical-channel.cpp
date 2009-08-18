@@ -60,7 +60,7 @@ void intializePort(LibSerial::SerialStream *serial_port, FILE *errfd) {
     //
     // Set the baud rate of the serial port.
     //
-    serial_port->SetBaudRate( LibSerial::SerialStreamBuf::BAUD_115200 ) ;
+    serial_port->SetBaudRate( LibSerial::SerialStreamBuf::BAUD_9600 ) ;
     if ( ! serial_port->good() ) 
     {
       fprintf(errfd,"Error: Could not open set baud rate.\n");
@@ -134,6 +134,10 @@ PHYSICAL_CHANNEL_CLASS::PHYSICAL_CHANNEL_CLASS(
 
   serial_port = new LibSerial::SerialStream();
 
+  msg_count_in = 0; 
+
+  msg_count_out = 0; 
+
   intializePort(serial_port, errfd);
 
   // Do some handshaking. We should probably bail out by re-running the fpga programming step. or something like
@@ -194,7 +198,7 @@ PHYSICAL_CHANNEL_CLASS::PHYSICAL_CHANNEL_CLASS(
 	// Do nothing 
     }
     //something unexpected 
-    //Write a junk character and try again
+    //Write a junk character to reset the ublaze and try again
     else { 
       sendchar = 'X';
       serial_port->write((const char *)&sendchar,1);
@@ -228,6 +232,7 @@ PHYSICAL_CHANNEL_CLASS::~PHYSICAL_CHANNEL_CLASS()
 UMF_MESSAGE
 PHYSICAL_CHANNEL_CLASS::Read(){
   // blocking loop
+  fprintf(errfd,"In read\n");    
   while (true){
     // check if message is ready
     if (incomingMessage && !incomingMessage->CanAppend()) {
@@ -248,6 +253,7 @@ PHYSICAL_CHANNEL_CLASS::Read(){
 UMF_MESSAGE
 PHYSICAL_CHANNEL_CLASS::TryRead(){   
  // We must check if there's new data. This will give us more and stop if we're full.
+
   if(serial_hasdata() > 0) {
     readPipe();
   }
@@ -269,7 +275,9 @@ PHYSICAL_CHANNEL_CLASS::Write(UMF_MESSAGE message){
   unsigned char header[UMF_CHUNK_BYTES];
   message->EncodeHeader(header);
 
-  // write header to pipe
+  msg_count_out++;
+  fprintf(errfd,"attempting to write msg %d of length %d: %x\n", msg_count_out,message->GetLength(),*header);    
+  //write header to pipe
   serial_port->write((const char *)header, UMF_CHUNK_BYTES);
 
   // write message data to pipe
@@ -279,12 +287,13 @@ PHYSICAL_CHANNEL_CLASS::Write(UMF_MESSAGE message){
   message->StartReverseExtract();
   while (message->CanReverseExtract()){
     UMF_CHUNK chunk = message->ReverseExtractChunk();
+    fprintf(errfd,"attempting to write %x\n",chunk);    
     serial_port->write((const char*)&chunk, sizeof(UMF_CHUNK));
   }
 
   // de-allocate message
   message->Delete();
-
+  fflush(errfd);
 }
 
 //=========================================================================================
@@ -293,10 +302,25 @@ void
 PHYSICAL_CHANNEL_CLASS::readPipe(){
   // determine if we are starting a new message
   fprintf(errfd, "entering readPipe\n");
+  fflush(errfd);
   if (incomingMessage == NULL)    {
     // new message: read header
     unsigned char header[UMF_CHUNK_BYTES];
-    serial_port->read((char*)header, UMF_CHUNK_BYTES);
+    // If we have no data to beginwith, bail.
+    if(serial_hasdata() == 0) { 
+      return;
+    }
+
+    msg_count_in++;
+    fprintf(errfd, "readPipe forming header: %d\n", msg_count_in);
+
+    for(int i = 0; i <  UMF_CHUNK_BYTES; i++) {
+      while(serial_hasdata() == 0) {} // Block :(
+      char temp;
+      serial_port->get(temp);
+      header[i] = temp;
+      fprintf(errfd, "readPipe header[%d]: %x\n",i,temp);
+    }
 
     // create a new message
     incomingMessage = UMF_MESSAGE_CLASS::New();
@@ -309,21 +333,30 @@ PHYSICAL_CHANNEL_CLASS::readPipe(){
   }
   else {
     // read in some more bytes for the current message
-    unsigned int BLOCK_SIZE = 4; //XXX check me
-    unsigned char buf[BLOCK_SIZE];
-    int bytes_requested = BLOCK_SIZE;
-    if (incomingMessage->BytesUnwritten() < BLOCK_SIZE){
-      bytes_requested = incomingMessage->BytesUnwritten();
+    // we will read exactly one chunk
+    unsigned char buf[UMF_CHUNK_BYTES]; 
+    int bytes_requested = UMF_CHUNK_BYTES;
+    for(int i = 0; i <  UMF_CHUNK_BYTES; i++) {
+      while(serial_hasdata() == 0) {} // Block :(
+      char temp;
+      serial_port->get(temp);
+      buf[i] = temp;
+
     }
 
-    if (serial_hasdata() > bytes_requested) {
-      serial_port->read((char*)buf, bytes_requested);
+    fprintf(errfd, "readPipe chunk: %x\n",*((int*)buf));
+    
+
+    // This is not correct, perhaps
+    if (incomingMessage->BytesUnwritten() < UMF_CHUNK_BYTES){
+      bytes_requested = incomingMessage->BytesUnwritten();
     }
 
     // append read bytes into message
     incomingMessage->AppendBytes(bytes_requested, buf);
   }
   fprintf(errfd,"exiting readPipe\n");
+  fflush(errfd);
 }
 
 int

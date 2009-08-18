@@ -37,6 +37,7 @@ class PHYSICAL_CHANNEL_CLASS: public PLATFORMS_MODULE_CLASS
   private:
  
   int serial_fd;
+  int msg_count_in, msg_count_out;
 
   LibSerial::SerialStream *serial_port;    
 

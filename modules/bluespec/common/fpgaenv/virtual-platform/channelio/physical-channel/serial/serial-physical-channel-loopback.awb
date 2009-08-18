@@ -7,6 +7,15 @@
 %sources -t BSV -v PUBLIC   serial-physical-channel-loopback.bsv
 %sources -t H   -v PUBLIC   serial-physical-channel.h
 %sources -t CPP -v PRIVATE  serial-physical-channel.cpp
+%sources -t CPP -v PRIVATE  PosixSignalDispatcher.cpp
+%sources -t H -v PUBLIC    PosixSignalDispatcher.h
+%sources -t H -v PUBLIC    PosixSignalHandler.h
+%sources -t CPP -v PRIVATE  SerialPort.cpp
+%sources -t H -v PUBLIC    SerialPort.h
+%sources -t CPP -v PRIVATE    SerialStreamBuf.cc
+%sources -t H -v PUBLIC   SerialStreamBuf.h
+%sources -t CPP -v PRIVATE    SerialStream.cc
+%sources -t H -v PUBLIC   SerialStream.h
 
 
 %param SIGNAL_RED           0   "Red Signal ID used for Bootstrapping"
