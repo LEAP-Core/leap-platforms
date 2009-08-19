@@ -6970,3 +6970,13 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci
  pci-express-c-import-mmap.cpp Locally Modified          261 
 
 Another #include needed very later versions of gcc.
+
+----------
+emer        Date: Wed Aug 19 19:33:08 EDT 2009  CSN: CSN-platforms-263
+                  Wed Aug 19 23:33:08 UTC 2009
+
+
+Directory modules/bluespec/librl/base
+ librl-bsv-base.awb        Locally Modified          262 
+
+Use %include -type=verilog instead of .prj file.

@@ -15,6 +15,6 @@
 %public memory-interface.bsv
 %public memory-pack.bsv
 
-%private bluespec-common.prj
+%include --type=verilog @BLUESPECDIR@/Verilog/
 
 %param DEBUG_LOG_DIR  "hasim_debug"   "Debug log directory"
