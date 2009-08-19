@@ -6960,3 +6960,13 @@ Directory modules/project
   maintaining 2 Scons scripts until stage 2 of the reorganization is compelete.
 
 Michael P.
+
+----------
+emer        Date: Wed Aug 19 15:12:34 EDT 2009  CSN: CSN-platforms-262
+                  Wed Aug 19 19:12:34 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express-new
+ pci-express-c-import-mmap.cpp Locally Modified          261 
+
+Another #include needed very later versions of gcc.
