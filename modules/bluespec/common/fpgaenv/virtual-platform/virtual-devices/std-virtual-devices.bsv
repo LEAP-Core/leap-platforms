@@ -5,20 +5,16 @@
 `include "asim/provides/scratchpad_memory.bsh"
 `include "asim/provides/shared_memory.bsh"
 `include "asim/provides/starter_device.bsh"
-`include "asim/provides/streams.bsh"
+`include "asim/provides/common_utility_devices.bsh"
 
 interface VIRTUAL_DEVICES;
 
-    interface FrontPanel frontPanel;
+    interface FRONT_PANEL frontPanel;
     interface CENTRAL_CACHE_VIRTUAL_DEVICE centralCache;
     interface SCRATCHPAD_MEMORY_VDEV scratchpadMemory;
     interface SHARED_MEMORY sharedMemory;
-    interface Streams streams;
     interface STARTER starter;
-    // TODO: add
-    // interface STATS stats;
-    // interface PARAMS params;
-    // interface DEBUG_SCAN debug;
+    interface COMMON_UTILITY_DEVICES commonUtilities;
 
 endinterface
 
@@ -32,13 +28,13 @@ module mkVirtualDevices#(LowLevelPlatformInterface llpint)
     let sp  <- mkMemoryVirtualDevice(llpint, cc);
     let sh  <- mkSharedMemory(llpint);
     let st  <- mkStarter(llpint);
-    let str <- mkStreams(llpint);
-    
+    let com <- mkCommonUtilityDevices(llpint);
+
     interface frontPanel = fp;
     interface centralCache = cc;
     interface scratchpadMemory = sp;
     interface sharedMemory = sh;
     interface starter = st;
-    interface streams = str;
+    interface commonUtilities = com;
 
 endmodule

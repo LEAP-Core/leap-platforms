@@ -1,0 +1,12 @@
+
+%name Debug Scan IO Service
+%desc Debuf Scan IO Service
+%provides debug_scan_io
+
+%attributes hasim
+
+%sources -t BSV -v PUBLIC  debug-scan-io.bsv
+%sources -t H   -v PUBLIC  debug-scan-io.h
+%sources -t CPP -v PRIVATE debug-scan-io.cpp
+%sources -t RRR -v PUBLIC  debug-scan-io.rrr
+%sources -t DICT -v PUBLIC debug-scan-io.dic

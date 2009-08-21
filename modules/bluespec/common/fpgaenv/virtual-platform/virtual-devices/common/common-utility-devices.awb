@@ -1,0 +1,10 @@
+
+%name Base Common Devices
+%desc A collection of useful utilities, mostly dealing with I/O
+%provides common_utility_devices
+
+%requires streams_io dynamic_parameters_io debug_scan_io assertions_io stats_io
+
+%sources -t BSV -v PUBLIC  common-utility-devices.bsv
+%sources -t H   -v PUBLIC  common-utility-devices.h
+%sources -t CPP -v PRIVATE common-utility-devices.cpp

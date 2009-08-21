@@ -1,0 +1,17 @@
+`ifndef __STREAMS_COMMON__
+`define __STREAMS_COMMON__
+
+`include "asim/dict/STREAMS.bsh"
+`include "asim/dict/STREAMID.bsh"
+
+typedef struct
+{
+    STREAMID_DICT_TYPE streamID;
+    STREAMS_DICT_TYPE stringID;
+    Bit#(32) payload0;
+    Bit#(32) payload1;
+}
+STREAMS_REQUEST
+    deriving (Bits, Eq);
+
+`endif

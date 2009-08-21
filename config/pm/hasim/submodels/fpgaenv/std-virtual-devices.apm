@@ -23,15 +23,11 @@ Packagehint=platforms
 
 [Standard Virtual Devices/Requires]
 front_panel=Hybrid Front Panel
-streams=Hybrid Streams
 scratchpad_memory=Hybrid Scratchpad Memory Device
 central_cache=Local Memory Central Cache
 shared_memory=Null Shared Memory
 starter_device=Starter Virtual Device
-
-[Hybrid Streams]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/streams/hybrid-streams.awb
-Packagehint=platforms
+common_utility_devices=Base Common Devices
 
 [Hybrid Scratchpad Memory Device]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid/hybrid-mem-scratch.awb
@@ -45,7 +41,39 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/starter/starter-device.awb
 Packagehint=platforms
 
-
 [Null Shared Memory]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/shared-memory/null/null-shared-memory.awb
+Packagehint=platforms
+
+
+
+[Hybrid Streams IO Service]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/streams-io/hybrid-streams.awb
+Packagehint=platforms
+
+[Dynamic Parameters IO Service]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/dynamic-parameters-io/dynamic-parameters-io.awb
+Packagehint=platforms
+
+[Debug Scan IO Service]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/debug-scan-io/debug-scan-io.awb
+Packagehint=platforms
+
+[Assertions IO Service]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/assertions-io/assertions-io.awb
+Packagehint=platforms
+
+[Stats IO Service]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/stats-io/stats-io.awb
+Packagehint=platforms
+
+[Base Common Devices/Requires]
+debug_scan_io=Debug Scan IO Service
+assertions_io=Assertions IO Service
+dynamic_parameters_io=Dynamic Parameters IO Service
+streams_io=Hybrid Streams IO Service
+stats_io=Stats IO Service
+
+[Base Common Devices]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/common-utility-devices.awb
 Packagehint=platforms

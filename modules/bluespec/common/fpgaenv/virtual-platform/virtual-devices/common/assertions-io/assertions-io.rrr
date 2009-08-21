@@ -1,0 +1,7 @@
+service ASSERTIONS_IO
+{
+    server sw (cpp, method) <- hw (bsv, method)
+    {
+        method Assert(in UINT32[32] assert_base, in UINT32[32] fpga_cc, in UINT32[32] assertions);
+    };
+};

@@ -1,0 +1,14 @@
+%name Soft Connections Hybrid Application Environment
+%desc Soft Connections Hybrid Application Environment
+
+%attributes hybrid
+
+%provides application_env
+
+%requires connected_application
+%requires platform_services
+%requires soft_connections_lib
+
+%public  application-env-hybrid-soft-conn.bsv
+%public  application-env-hybrid-soft-conn.h
+%private application-env-hybrid-soft-conn.cpp

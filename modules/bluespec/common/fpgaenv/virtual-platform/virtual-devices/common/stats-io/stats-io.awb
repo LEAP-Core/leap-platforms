@@ -1,0 +1,13 @@
+
+%name Stats IO Service
+%desc Stats IO Service
+%provides stats_io
+
+%public  stats-io.bsv
+%public  stats-io.h
+%private stats-io.cpp
+%private stats-io.rrr
+%private stats-io.dic
+
+%param --global HASIM_STATS_ENABLED True "Statically enable/disable Stats logging (True/False)."
+%param --global HASIM_STATS_SIZE 32 "Number of bits per Stat counter."

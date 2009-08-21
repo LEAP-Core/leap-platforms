@@ -1,0 +1,12 @@
+service DEBUG_SCAN_IO
+{
+    server hw (bsv, method) <- sw (cpp, method)
+    {
+        method Scan(in UINT8[8] dummy, out UINT8[8] ack);
+    };
+
+    server sw (cpp, method) <- hw (bsv, method)
+    {
+        method Send(in UINT32[32] debugScanID, in UINT8[8] value);
+    };
+};

@@ -31,11 +31,15 @@
 
 #include "asim/provides/low_level_platform_interface.h"
 #include "asim/provides/starter_device.h"
+#include "asim/provides/common_utility_devices.h"
 
 typedef class VIRTUAL_DEVICES_CLASS *VIRTUAL_DEVICES;
 
 class VIRTUAL_DEVICES_CLASS
 {
+  private:
+    COMMON_UTILITY_DEVICES commonUtilities;
+
   public:
     VIRTUAL_DEVICES_CLASS(LLPI llpint);
     ~VIRTUAL_DEVICES_CLASS();

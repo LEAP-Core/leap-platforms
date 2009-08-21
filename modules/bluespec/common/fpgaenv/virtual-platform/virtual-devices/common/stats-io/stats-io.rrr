@@ -1,0 +1,13 @@
+service STATS_IO
+{
+
+    server hw (bsv, method) <- sw (cpp, method)
+    {
+        method DumpStats(in UINT8[8] syn, out UINT8[8] ack);
+    };
+
+    server sw (cpp, method) <- hw (bsv, method)
+    {
+        method Send(in UINT32[32] statID, in UINT32[32] value);
+    };
+};

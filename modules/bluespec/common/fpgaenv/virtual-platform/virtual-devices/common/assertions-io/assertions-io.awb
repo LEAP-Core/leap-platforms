@@ -1,0 +1,12 @@
+
+%name Assertions IO Service
+%desc Assertions IO Service
+%provides assertions_io
+
+%public  assertions-io.bsv
+%public  assertions-io.h
+%private assertions-io.cpp
+%private assertions-io.rrr
+%private assertions-io.dic
+
+%param --global ASSERTIONS_PER_NODE 16 "Max number of assertions connected to an assertion node (ring stop)."

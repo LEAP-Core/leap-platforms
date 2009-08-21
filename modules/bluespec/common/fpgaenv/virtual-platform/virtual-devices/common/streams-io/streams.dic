@@ -1,0 +1,3 @@
+def STREAMS.NULL "null";
+
+def STREAMS.MESSAGE.EXIT   "Exit (%d)\n";

@@ -6980,3 +6980,118 @@ Directory modules/bluespec/librl/base
  librl-bsv-base.awb        Locally Modified          262 
 
 Use %include -type=verilog instead of .prj file.
+
+----------
+mpellaue    Date: Fri Aug 21 17:26:25 EDT 2009  CSN: CSN-platforms-264
+                  Fri Aug 21 21:26:25 UTC 2009
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-hybrid-exe.apm    Locally Added               0 
+ hasim-fpgaenv-hybrid-sim.apm Locally Modified          263 
+ std-virtual-devices.apm   Locally Modified          263 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices
+ std-virtual-devices.cpp   Locally Modified          263 
+ std-virtual-devices.h     Locally Modified          263 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid
+ hybrid-fp.bsv             Locally Modified          263 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices
+ std-virtual-devices.awb   Locally Modified          263 
+ std-virtual-devices.bsv   Locally Modified          263 
+ common/                   Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common
+ assertions-io/            Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/assertions-io
+ assertions-io.cpp         Locally Added               0 
+ assertions-io.rrr         Locally Added               0 
+ assertions-io.h           Locally Added               0 
+ assertions-io.awb         Locally Added               0 
+ assertions-io.bsv         Locally Added               0 
+ assertions-io.dic         Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common
+ common-utility-devices.h  Locally Added               0 
+ common-utility-devices.awb Locally Added               0 
+ common-utility-devices.bsv Locally Added               0 
+ stats-io/                 Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/stats-io
+ stats-io.dic              Locally Added               0 
+ stats-io.cpp              Locally Added               0 
+ stats-io.rrr              Locally Added               0 
+ stats-io.h                Locally Added               0 
+ stats-io.awb              Locally Added               0 
+ stats-io.bsv              Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common
+ streams-io/               Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/streams-io
+ streams-common.bsh        Locally Added               0 
+ hybrid-streams-services.rrr Locally Added               0 
+ hybrid-streams.h          Locally Added               0 
+ hybrid-streams.awb        Locally Added               0 
+ hybrid-streams.bsv        Locally Added               0 
+ streamid.dic              Locally Added               0 
+ streams.dic               Locally Added               0 
+ hybrid-streams.cpp        Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common
+ common-utility-null.h     Locally Added               0 
+ common-utility-null.awb   Locally Added               0 
+ dynamic-parameters-io/    Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/dynamic-parameters-io
+ dynamic-parameters-io.h   Locally Added               0 
+ dynamic-parameters-io.awb Locally Added               0 
+ dynamic-parameters-io.bsv Locally Added               0 
+ dynamic-parameters-io.dic Locally Added               0 
+ dynamic-parameters-io.cpp Locally Added               0 
+ dynamic-parameters-io.rrr Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common
+ common-utility-devices.cpp Locally Added               0 
+ common-utility-null.bsv   Locally Added               0 
+ debug-scan-io/            Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/debug-scan-io
+ debug-scan-io.rrr         Locally Added               0 
+ debug-scan-io.h           Locally Added               0 
+ debug-scan-io.awb         Locally Added               0 
+ debug-scan-io.bsv         Locally Added               0 
+ debug-scan-io.dic         Locally Added               0 
+ debug-scan-io.cpp         Locally Added               0 
+
+Directory modules/application-env/hybrid
+ soft-connections/         Locally Added               0 
+
+Directory modules/application-env/hybrid/soft-connections
+ application-env-hybrid-soft-conn.h Locally Added               0 
+ application-env-hybrid-soft-conn.awb Locally Added               0 
+ application-env-hybrid-soft-conn.bsv Locally Added               0 
+ default-sw/               Locally Added               0 
+
+Directory modules/application-env/hybrid/soft-connections/default-sw
+ connected-application-default-sw.h Locally Added               0 
+ connected-application-default-sw.awb Locally Added               0 
+ connected-application-default-sw.bsv Locally Added               0 
+
+Directory modules/application-env/hybrid/soft-connections
+ application-env-hybrid-soft-conn.cpp Locally Added               0 
+
+
+* Stage 2 of reorganization and generalization.
+
+* Added virtual devices for Stats, Params, Debug Scan, and Assertions under
+"Common Utility Devices"
+
+* Added a new application environment for Soft Connections.
+
+* Updated virtual device collection.
+
+Michael P.

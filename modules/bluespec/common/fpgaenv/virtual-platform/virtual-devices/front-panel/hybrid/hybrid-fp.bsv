@@ -27,6 +27,17 @@ typedef SizeOf#(FRONTP_SWITCHES) FRONTP_NUM_SWITCHES;
 typedef Bit#(5) FRONTP_BUTTONS;
 typedef SizeOf#(FRONTP_BUTTONS) FRONTP_NUM_BUTTONS;
 
+typedef struct
+{
+    Bit#(1) bUp;
+    Bit#(1) bDown;
+    Bit#(1) bLeft;
+    Bit#(1) bRight;
+    Bit#(1) bCenter;
+}
+FRONTP_BUTTON_INFO
+    deriving (Eq, Bits);
+
 typedef Bit#(32) FRONTP_INPUT_STATE;
 
 interface FrontPanel;
@@ -34,6 +45,8 @@ interface FrontPanel;
     method FRONTP_BUTTONS  readButtons();
     method Action          writeLEDs(FRONTP_LEDS state, FRONTP_LEDS mask);
 endinterface
+
+typedef FrontPanel FRONT_PANEL;
 
 module mkFrontPanel#(LowLevelPlatformInterface llpi) (FrontPanel);
 

@@ -1,0 +1,26 @@
+#/********************************************************************
+# *
+# * Awb module specification
+# *
+# *******************************************************************/
+
+#/*
+# %AWB_START
+#
+# %name Hybrid Streams IO Service
+# %desc Hybrid Streams IO Service
+# %provides streams_io
+#
+# %attributes hasim
+#
+# %sources -t BSH  -v PRIVATE streams-common.bsh
+# %sources -t BSV  -v PUBLIC  hybrid-streams.bsv
+# %sources -t H    -v PUBLIC  hybrid-streams.h
+# %sources -t CPP  -v PRIVATE hybrid-streams.cpp
+# %sources -t RRR  -v PUBLIC  hybrid-streams-services.rrr
+#
+# %sources -t DICT -v PUBLIC streamid.dic
+# %sources -t DICT -v PUBLIC streams.dic
+#
+# %AWB_END
+# */

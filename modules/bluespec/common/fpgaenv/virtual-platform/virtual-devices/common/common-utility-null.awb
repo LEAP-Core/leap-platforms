@@ -1,0 +1,8 @@
+
+%name Null Common Devices
+%desc Temporary device for backwards compatability
+%provides common_utility_devices
+%requires streams
+
+%sources -t BSV -v PUBLIC  common-utility-null.bsv
+%sources -t H   -v PUBLIC  common-utility-null.h

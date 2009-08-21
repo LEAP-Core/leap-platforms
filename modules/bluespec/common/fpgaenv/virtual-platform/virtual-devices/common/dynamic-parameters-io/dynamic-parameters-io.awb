@@ -1,0 +1,12 @@
+
+%name Dynamic Parameters IO Service
+%desc Dynamic Parameters IO Service
+%provides dynamic_parameters_io
+
+%attributes hasim
+
+%sources -t BSV -v PUBLIC  dynamic-parameters-io.bsv
+%sources -t H   -v PUBLIC  dynamic-parameters-io.h
+%sources -t CPP -v PRIVATE dynamic-parameters-io.cpp
+%sources -t RRR -v PUBLIC  dynamic-parameters-io.rrr
+%sources -t DICT -v PUBLIC dynamic-parameters-io.dic
