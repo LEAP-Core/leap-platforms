@@ -2,7 +2,7 @@
 [Global]
 SaveParameters=0
 Description=Hybrid HTG-v5-PCIe Environment
-File=hasim-fpgaenv-htg-v5-pcie
+File=fpgaenv-hybrid-htg-v5-pcie
 Version=2.1
 Type=HAsim
 Name=Hybrid HTG-v5-PCIe Environment
@@ -32,7 +32,7 @@ File=modules/bluespec/common/fpgaenv/fpga-environment.awb
 Packagehint=platforms
 
 [Standard Virtual Devices]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/std-virtual-devices.awb
+File=config/pm/hasim/submodels/fpgaenv/std-virtual-devices.apm
 Packagehint=platforms
 
 [HTG Virtex 5 PCIE Enabled]
@@ -127,44 +127,4 @@ Packagehint=platforms
 
 [PCI Express Physical Device (mmap-based)]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express-new/pci-express-device-mmap.awb
-Packagehint=platforms
-
-[Null Common Devices]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/common-utility-null.awb
-Packagehint=platforms
-
-[Local Memory Central Cache]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/central-cache/local-mem-central-cache.awb
-Packagehint=platforms
-
-
-[Null Common Devices/Requires]
-streams=Hybrid Streams
-
-[Starter Virtual Device]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/starter/starter-device.awb
-Packagehint=platforms
-
-[Hybrid Streams]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/streams/hybrid-streams.awb
-Packagehint=platforms
-
-[Null Shared Memory]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/shared-memory/null/null-shared-memory.awb
-Packagehint=platforms
-
-[Standard Virtual Devices/Requires]
-starter_device=Starter Virtual Device
-central_cache=Local Memory Central Cache
-scratchpad_memory=Hybrid Scratchpad Memory Device
-shared_memory=Null Shared Memory
-common_utility_devices=Null Common Devices
-front_panel=Hybrid Front Panel
-
-[Hybrid Front Panel]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid/hybrid-fp.awb
-Packagehint=platforms
-
-[Hybrid Scratchpad Memory Device]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid/hybrid-mem-scratch.awb
 Packagehint=platforms

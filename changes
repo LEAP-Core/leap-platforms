@@ -7095,3 +7095,18 @@ Directory modules/application-env/hybrid/soft-connections
 * Updated virtual device collection.
 
 Michael P.
+
+----------
+mpellaue    Date: Tue Aug 25 10:27:22 EDT 2009  CSN: CSN-platforms-265
+                  Tue Aug 25 14:27:22 UTC 2009
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ hasim-fpgaenv-htg-v5-pcie.apm Locally Modified          264 
+ fpgaenv-hybrid-htg-v5-pcie.apm Locally Added               0 
+
+
+* HTG environment made backwards compatable.
+* New forwards-compatable environment added.
+
+Michael P.
