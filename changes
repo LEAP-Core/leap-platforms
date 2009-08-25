@@ -7110,3 +7110,26 @@ Directory config/pm/hasim/submodels/fpgaenv
 * New forwards-compatable environment added.
 
 Michael P.
+
+----------
+emer        Date: Tue Aug 25 18:50:49 EDT 2009  CSN: CSN-platforms-266
+                  Tue Aug 25 22:50:49 UTC 2009
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-hybrid-exe.apm    Locally Modified          265 
+ hasim-fpgaenv-htg-v5-pcie.apm Locally Modified          265 
+
+Directory modules/project
+ project-hybrid.awb        Locally Modified          265 
+
+Directory modules/application-env/hybrid/base
+ application-env-hybrid-base.awb Locally Modified          265 
+
+Directory modules/application-env/hybrid/soft-connections
+ application-env-hybrid-soft-conn.awb Locally Modified          265 
+
+Directory modules/application-env/hybrid/soft-connections/default-sw
+ connected-application-default-sw.awb Locally Modified          265 
+
+Some attribute updates.

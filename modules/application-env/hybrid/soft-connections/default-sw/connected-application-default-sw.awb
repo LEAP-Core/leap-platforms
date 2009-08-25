@@ -1,7 +1,7 @@
 %name Default Software Connected Application
 %desc Default Software Connected Application
 
-%attributes hybrid
+%attributes slave connected hybrid
 
 %provides connected_application
 

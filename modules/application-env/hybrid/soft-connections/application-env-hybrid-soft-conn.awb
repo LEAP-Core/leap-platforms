@@ -1,7 +1,7 @@
 %name Soft Connections Hybrid Application Environment
 %desc Soft Connections Hybrid Application Environment
 
-%attributes hybrid
+%attributes connected hybrid
 
 %provides application_env
 

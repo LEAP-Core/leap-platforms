@@ -7,10 +7,11 @@ Version=2.1
 Type=HAsim
 Name=Hybrid HTG-v5-PCIe Environment
 Class=Asim::Model
-DefaultBenchmark=0
+DefaultBenchmark=
+DefaultRunOpts=
 
 [Model]
-DefaultAttributes=bluespec htg-v5-pcie
+DefaultAttributes=htg-v5-pcie htg
 model=FPGA Environment
 
 [FPGA Environment/Requires]

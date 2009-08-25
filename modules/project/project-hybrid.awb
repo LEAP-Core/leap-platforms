@@ -4,7 +4,7 @@
 
 %name HW/SW Hybrid Project Foundation
 %desc HW/SW Hybrid Project Foundation
-%attributes hybrid
+%attributes hybrid project
 
 %provides model
 

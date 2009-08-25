@@ -1,7 +1,7 @@
 %name Base Hybrid Application Environment
 %desc Base Hybrid Application Environment
 
-%attributes hybrid
+%attributes unconnected hybrid
 
 %provides application_env
 
