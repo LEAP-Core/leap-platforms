@@ -7269,3 +7269,16 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/commo
 * Clarify some type names as well.
 
 Michael P.
+
+----------
+pellauer    Date: Wed Aug 26 14:21:14 EDT 2009  CSN: CSN-platforms-268
+                  Wed Aug 26 18:21:14 UTC 2009
+
+
+Directory modules/project
+ project-hybrid.awb        Locally Modified          266 
+
+
+* Added new project_common requirement.
+
+Michael P.

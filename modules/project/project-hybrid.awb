@@ -10,7 +10,7 @@
 
 %requires application_env 
 %requires fpgaenv
-%requires command_switches
+%requires project_common
 
 %public  project-hybrid-main.bsv
 %public  project-hybrid-main.h
