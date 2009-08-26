@@ -7,7 +7,7 @@
 #include "asim/mesg.h"
 #include "asim/rrr/service_ids.h"
 #include "asim/provides/command_switches.h"
-#include "asim/provides/dynamic_parameters_io.h"
+#include "asim/provides/dynamic_parameters_device.h"
 
 #include "asim/dict/PARAMS.h"
 
@@ -56,27 +56,27 @@ NULL
 using namespace std;
 
 // constructor
-DYNAMIC_PARAMS_IO_CLASS::DYNAMIC_PARAMS_IO_CLASS() :
-    clientStub(new PARAMS_IO_CLIENT_STUB_CLASS(this))
+DYNAMIC_PARAMS_DEVICE_CLASS::DYNAMIC_PARAMS_DEVICE_CLASS() :
+    clientStub(new PARAMS_CLIENT_STUB_CLASS(this))
 {
 }
 
 // destructor
-DYNAMIC_PARAMS_IO_CLASS::~DYNAMIC_PARAMS_IO_CLASS()
+DYNAMIC_PARAMS_DEVICE_CLASS::~DYNAMIC_PARAMS_DEVICE_CLASS()
 {
     Cleanup();
 }
 
 // init
 void
-DYNAMIC_PARAMS_IO_CLASS::Init(PLATFORMS_MODULE p)
+DYNAMIC_PARAMS_DEVICE_CLASS::Init(PLATFORMS_MODULE p)
 {
     // chain
     PLATFORMS_MODULE_CLASS::Init(p);
 }
 
 void
-DYNAMIC_PARAMS_IO_CLASS::Uninit()
+DYNAMIC_PARAMS_DEVICE_CLASS::Uninit()
 {
     Cleanup();
 
@@ -86,14 +86,14 @@ DYNAMIC_PARAMS_IO_CLASS::Uninit()
 
 // cleanup
 void
-DYNAMIC_PARAMS_IO_CLASS::Cleanup()
+DYNAMIC_PARAMS_DEVICE_CLASS::Cleanup()
 {
     // delete stubs
     delete clientStub;
 }
 
 void 
-DYNAMIC_PARAMS_IO_CLASS::SendAllParams()
+DYNAMIC_PARAMS_DEVICE_CLASS::SendAllParams()
 {
     // Send all parameters to the hardware.
     UMF_MESSAGE msg;

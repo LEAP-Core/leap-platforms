@@ -22,7 +22,7 @@ import Vector::*;
 `include "asim/provides/low_level_platform_interface.bsh"
 `include "asim/provides/rrr.bsh"
 
-`include "asim/rrr/client_stub_ASSERTIONS_IO.bsh"
+`include "asim/rrr/client_stub_ASSERTIONS.bsh"
 `include "asim/rrr/service_ids.bsh"
 `include "asim/dict/ASSERTIONS.bsh"
 
@@ -61,7 +61,7 @@ endinstance
 // Vector of severity values for assertions baseID + index
 typedef Vector#(`ASSERTIONS_PER_NODE, ASSERTION_SEVERITY) ASSERTION_NODE_VECTOR;
 
-interface ASSERTIONS_IO;
+interface ASSERTIONS;
     method Action assertionNodeValues(ASSERTIONS_DICT_TYPE baseID, ASSERTION_NODE_VECTOR values);
 endinterface
 
@@ -69,14 +69,14 @@ endinterface
 
 // A module which serially passes Assertion failures back to the software.
 
-module mkAssertionsIO#(LowLevelPlatformInterface llpi)
+module mkAssertionsDevice#(LowLevelPlatformInterface llpi)
     // interface:
-        (ASSERTIONS_IO);
+        (ASSERTIONS);
 
     //***** State Elements *****
   
     // Communication to our RRR server
-    ClientStub_ASSERTIONS_IO clientStub <- mkClientStub_ASSERTIONS_IO(llpi.rrrClient);
+    ClientStub_ASSERTIONS clientStub <- mkClientStub_ASSERTIONS(llpi.rrrClient);
   
     Reg#(Bit#(32)) fpgaCC <- mkReg(0);
   

@@ -26,7 +26,7 @@
 #include <string.h>
 #include <iostream>
 
-#include "asim/provides/assertions_io.h"
+#include "asim/provides/assertions_device.h"
 #include "asim/rrr/service_ids.h"
 
 #include "asim/dict/ASSERTIONS.h"
@@ -43,26 +43,26 @@ enum ASSERTION_SEVERITY
 
 
 // ===== service instantiation =====
-ASSERTIONS_IO_SERVER_CLASS ASSERTIONS_IO_SERVER_CLASS::instance;
+ASSERTIONS_DEVICE_SERVER_CLASS ASSERTIONS_DEVICE_SERVER_CLASS::instance;
 
 // ===== methods =====
 
 // constructor
-ASSERTIONS_IO_SERVER_CLASS::ASSERTIONS_IO_SERVER_CLASS()
+ASSERTIONS_DEVICE_SERVER_CLASS::ASSERTIONS_DEVICE_SERVER_CLASS()
 {
     // instantiate stubs
-    serverStub = new ASSERTIONS_IO_SERVER_STUB_CLASS(this);
+    serverStub = new ASSERTIONS_SERVER_STUB_CLASS(this);
 }
 
 // destructor
-ASSERTIONS_IO_SERVER_CLASS::~ASSERTIONS_IO_SERVER_CLASS()
+ASSERTIONS_DEVICE_SERVER_CLASS::~ASSERTIONS_DEVICE_SERVER_CLASS()
 {
     Cleanup();
 }
 
 // init
 void
-ASSERTIONS_IO_SERVER_CLASS::Init(
+ASSERTIONS_DEVICE_SERVER_CLASS::Init(
     PLATFORMS_MODULE     p)
 {
     // set parent pointer
@@ -74,7 +74,7 @@ ASSERTIONS_IO_SERVER_CLASS::Init(
 
 // uninit: we have to write this explicitly
 void
-ASSERTIONS_IO_SERVER_CLASS::Uninit()
+ASSERTIONS_DEVICE_SERVER_CLASS::Uninit()
 {
     fclose(assertionsFile);
 
@@ -86,7 +86,7 @@ ASSERTIONS_IO_SERVER_CLASS::Uninit()
 
 // cleanup
 void
-ASSERTIONS_IO_SERVER_CLASS::Cleanup()
+ASSERTIONS_DEVICE_SERVER_CLASS::Cleanup()
 {
     // kill stubs
     delete serverStub;
@@ -98,7 +98,7 @@ ASSERTIONS_IO_SERVER_CLASS::Cleanup()
 
 // Assert
 void
-ASSERTIONS_IO_SERVER_CLASS::Assert(
+ASSERTIONS_DEVICE_SERVER_CLASS::Assert(
     UINT32 assert_base,
     UINT32 fpga_cc,
     UINT32 assertions)
@@ -143,7 +143,7 @@ ASSERTIONS_IO_SERVER_CLASS::Assert(
 
 // poll
 void
-ASSERTIONS_IO_SERVER_CLASS::Poll()
+ASSERTIONS_DEVICE_SERVER_CLASS::Poll()
 {
 }
 

@@ -1,17 +1,13 @@
-
 //
-// @file dynamic-parameters.h
-// @brief Pass dynamic parameters to the hardware side
+// @file common-utility-devices.h
+// @brief Instantiate useful utility devices.
 //
 // @author Michael Adler
 //
 
-#ifndef _IO_SERVICES_
-#define _IO_SERVICES_
-
 #include <stdio.h>
 
-#include "asim/provides/dynamic_parameters_io.h"
+#include "asim/provides/dynamic_parameters_device.h"
 
 typedef class COMMON_UTILITY_DEVICES_CLASS* COMMON_UTILITY_DEVICES;
 
@@ -21,7 +17,7 @@ class COMMON_UTILITY_DEVICES_CLASS
  
     // The parameter controller is a pure client
     // so we must instantiate it.
-    DYNAMIC_PARAMS_IO dynamicParamsIO;
+    DYNAMIC_PARAMS_DEVICE dynamicParamsDevice;
 
   public:
     COMMON_UTILITY_DEVICES_CLASS();
@@ -30,5 +26,3 @@ class COMMON_UTILITY_DEVICES_CLASS
     void Init();
 };
 
-
-#endif

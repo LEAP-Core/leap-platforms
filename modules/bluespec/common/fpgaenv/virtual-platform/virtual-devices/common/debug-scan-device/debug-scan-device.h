@@ -16,8 +16,8 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-#ifndef _DEBUG_SCAN_IO_
-#define _DEBUG_SCAN_IO_
+#ifndef _DEBUG_SCAN_DEVICE_
+#define _DEBUG_SCAN_DEVICE_
 
 #include <bitset>
 
@@ -25,7 +25,7 @@
 #include "asim/provides/rrr.h"
 
 #include "asim/dict/DEBUG_SCAN.h"
-#include "asim/rrr/client_stub_DEBUG_SCAN_IO.h"
+#include "asim/rrr/client_stub_DEBUG_SCAN.h"
 
 //
 // Manage debug scan chain coming from the hardware.
@@ -33,18 +33,19 @@
 
 #define DEBUG_SCAN_MAX_MSG_SIZE 1024
 
-typedef class DEBUG_SCAN_IO_SERVER_CLASS* DEBUG_SCAN_IO_SERVER;
+typedef class DEBUG_SCAN_DEVICE_SERVER_CLASS* DEBUG_SCAN_DEVICE_SERVER;
+typedef class DEBUG_SCAN_DEVICE_SERVER_CLASS* DEBUG_SCAN_SERVER;
 
-class DEBUG_SCAN_IO_SERVER_CLASS: public RRR_SERVER_CLASS,
+class DEBUG_SCAN_DEVICE_SERVER_CLASS: public RRR_SERVER_CLASS,
                                public PLATFORMS_MODULE_CLASS
 {
   private:
     // self-instantiation
-    static DEBUG_SCAN_IO_SERVER_CLASS instance;
+    static DEBUG_SCAN_DEVICE_SERVER_CLASS instance;
 
     // stubs
     RRR_SERVER_STUB serverStub;
-    DEBUG_SCAN_IO_CLIENT_STUB clientStub;
+    DEBUG_SCAN_CLIENT_STUB clientStub;
 
     // Internal display method
     void DisplayMsg();
@@ -54,11 +55,11 @@ class DEBUG_SCAN_IO_SERVER_CLASS: public RRR_SERVER_CLASS,
     UINT8 msgID;
 
   public:
-    DEBUG_SCAN_IO_SERVER_CLASS();
-    ~DEBUG_SCAN_IO_SERVER_CLASS();
+    DEBUG_SCAN_DEVICE_SERVER_CLASS();
+    ~DEBUG_SCAN_DEVICE_SERVER_CLASS();
 
     // static methods
-    static DEBUG_SCAN_IO_SERVER GetInstance() { return &instance; }
+    static DEBUG_SCAN_DEVICE_SERVER GetInstance() { return &instance; }
 
     // required RRR methods
     void Init(PLATFORMS_MODULE);
@@ -74,10 +75,10 @@ class DEBUG_SCAN_IO_SERVER_CLASS: public RRR_SERVER_CLASS,
 };
 
 // server stub
-#include "asim/rrr/server_stub_DEBUG_SCAN_IO.h"
+#include "asim/rrr/server_stub_DEBUG_SCAN.h"
 
 // all functionalities of the debug scan are completely implemented
-// by the DEBUG_SCAN_IO_SERVER class
-typedef DEBUG_SCAN_IO_SERVER_CLASS DEBUG_SCAN_IO_CLASS;
+// by the DEBUG_SCAN_DEVICE_SERVER class
+typedef DEBUG_SCAN_DEVICE_SERVER_CLASS DEBUG_SCAN_DEVICE_CLASS;
 
 #endif

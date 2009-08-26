@@ -1,4 +1,4 @@
-service PARAMS_IO
+service PARAMS
 {
     ##
     ## Send one dynamic parameter ID and value to the hardware.  An ACK

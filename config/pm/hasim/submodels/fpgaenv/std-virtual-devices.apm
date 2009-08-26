@@ -47,33 +47,36 @@ Packagehint=platforms
 
 
 
-[Hybrid Streams IO Service]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/streams-io/hybrid-streams.awb
-Packagehint=platforms
 
-[Dynamic Parameters IO Service]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/dynamic-parameters-io/dynamic-parameters-io.awb
-Packagehint=platforms
 
-[Debug Scan IO Service]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/debug-scan-io/debug-scan-io.awb
-Packagehint=platforms
-
-[Assertions IO Service]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/assertions-io/assertions-io.awb
-Packagehint=platforms
-
-[Stats IO Service]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/stats-io/stats-io.awb
-Packagehint=platforms
 
 [Base Common Devices/Requires]
-debug_scan_io=Debug Scan IO Service
-assertions_io=Assertions IO Service
-dynamic_parameters_io=Dynamic Parameters IO Service
-streams_io=Hybrid Streams IO Service
-stats_io=Stats IO Service
+stats_device=Stats Device
+dynamic_parameters_device=Dynamic Parameters Device
+streams_device=Hybrid Streams Device
+assertions_device=Assertions Device
+debug_scan_device=Debug Scan Device
 
 [Base Common Devices]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/common-utility-devices.awb
+Packagehint=platforms
+
+[Dynamic Parameters Device]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/dynamic-parameters-device/dynamic-parameters-device.awb
+Packagehint=platforms
+
+[Hybrid Streams Device]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/streams-device/hybrid-streams.awb
+Packagehint=platforms
+
+[Assertions Device]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/assertions-device/assertions-device.awb
+Packagehint=platforms
+
+[Stats Device]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/stats-device/stats-device.awb
+Packagehint=platforms
+
+[Debug Scan Device]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/debug-scan-device/debug-scan-device.awb
 Packagehint=platforms

@@ -13,20 +13,20 @@
 
 #include "platforms-module.h"
 #include "asim/provides/rrr.h"
-#include "asim/rrr/client_stub_PARAMS_IO.h"
+#include "asim/rrr/client_stub_PARAMS.h"
 
-typedef class DYNAMIC_PARAMS_IO_CLASS* DYNAMIC_PARAMS_IO;
+typedef class DYNAMIC_PARAMS_DEVICE_CLASS* DYNAMIC_PARAMS_DEVICE;
 
-class DYNAMIC_PARAMS_IO_CLASS: public PLATFORMS_MODULE_CLASS
+class DYNAMIC_PARAMS_DEVICE_CLASS: public PLATFORMS_MODULE_CLASS
 {
   private:
  
     // stub
-    PARAMS_IO_CLIENT_STUB clientStub;
+    PARAMS_CLIENT_STUB clientStub;
 
   public:
-    DYNAMIC_PARAMS_IO_CLASS();
-    ~DYNAMIC_PARAMS_IO_CLASS();
+    DYNAMIC_PARAMS_DEVICE_CLASS();
+    ~DYNAMIC_PARAMS_DEVICE_CLASS();
 
     // Send dynamic parameters to hardware
     void SendAllParams();

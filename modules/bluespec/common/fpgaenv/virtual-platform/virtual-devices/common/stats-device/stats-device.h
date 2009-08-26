@@ -16,37 +16,44 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-#ifndef _ASSERTIONS_IO_
-#define _ASSERTIONS_IO_
-
-#include <stdio.h>
+#include <bitset>
 
 #include "platforms-module.h"
 #include "asim/provides/rrr.h"
 
-// this module handles reporting assertion failures.
+#include "asim/dict/STATS.h"
 
-typedef class ASSERTIONS_IO_SERVER_CLASS* ASSERTIONS_IO_SERVER;
-class ASSERTIONS_IO_SERVER_CLASS: public RRR_SERVER_CLASS,
-                     public PLATFORMS_MODULE_CLASS
+// this module handles gathering statistics. 
+// Eventually this will interact with standard tools.
+
+typedef class STATS_DEVICE_SERVER_CLASS* STATS_DEVICE_SERVER;
+typedef class STATS_DEVICE_SERVER_CLASS* STATS_SERVER;
+
+class STATS_DEVICE_SERVER_CLASS: public RRR_SERVER_CLASS,
+                              public PLATFORMS_MODULE_CLASS
 {
   private:
     // self-instantiation
-    static ASSERTIONS_IO_SERVER_CLASS instance;
-    
+    static STATS_DEVICE_SERVER_CLASS instance;
+
     // stubs
     RRR_SERVER_STUB serverStub;
 
-    // File for output until we use DRAL.
-    FILE* assertionsFile;
+    // Running total of statistics per context as they are dumped incrementally.
+    UINT64 **statValues;
+
+    // Check that each stat appears at most once per context.
+    bitset<STATS_DICT_ENTRIES> *sawStat;
 
   public:
-    ASSERTIONS_IO_SERVER_CLASS();
-    ~ASSERTIONS_IO_SERVER_CLASS();
-    
+    STATS_DEVICE_SERVER_CLASS();
+    ~STATS_DEVICE_SERVER_CLASS();
+
+    void EmitFile();
+
     // static methods
-    static ASSERTIONS_IO_SERVER GetInstance() { return &instance; }
-    
+    static STATS_DEVICE_SERVER GetInstance() { return &instance; }
+
     // required RRR methods
     void Init(PLATFORMS_MODULE);
     void Uninit();
@@ -54,14 +61,15 @@ class ASSERTIONS_IO_SERVER_CLASS: public RRR_SERVER_CLASS,
     void Poll();
 
     // RRR service methods
-    void Assert(UINT32 assert_base, UINT32 fpga_cc, UINT32 assertions);
+    void  Send(UINT32 statID, UINT32 value);
+    UINT8 Done(UINT8 syn);
 };
 
 // server stub
-#include "asim/rrr/server_stub_ASSERTIONS_IO.h"
+#include "asim/rrr/server_stub_STATS.h"
 
-// all functionalities of the assertions io are completely implemented
-// by the ASSERTIONS_IO_SERVER class
-typedef ASSERTIONS_IO_SERVER_CLASS ASSERTIONS_IO_CLASS;
+// all functionalities of the stats controller are completely implemented
+// by the STATS_DEVICE_SERVER class
+typedef STATS_DEVICE_SERVER_CLASS STATS_DEVICE_CLASS;
 
-#endif
+void StatsEmitFile();

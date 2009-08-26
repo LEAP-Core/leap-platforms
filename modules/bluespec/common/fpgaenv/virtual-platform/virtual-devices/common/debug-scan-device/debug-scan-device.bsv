@@ -22,8 +22,8 @@ import FIFO::*;
 
 `include "asim/dict/DEBUG_SCAN.bsh"
 
-`include "asim/rrr/client_stub_DEBUG_SCAN_IO.bsh"
-`include "asim/rrr/server_stub_DEBUG_SCAN_IO.bsh"
+`include "asim/rrr/client_stub_DEBUG_SCAN.bsh"
+`include "asim/rrr/server_stub_DEBUG_SCAN.bsh"
 
 //
 // Debug scan is a set of nodes that scan out debug state to the host when
@@ -32,7 +32,7 @@ import FIFO::*;
 // Scanning begins when the dump command is received.  The device should be
 // signaled when the scan is complete via finishScan().
 //
-interface DEBUG_SCAN_IO;
+interface DEBUG_SCAN_DEVICE;
 
   method Bool   scanning();
   method Action finishScan();
@@ -58,15 +58,15 @@ DEBUG_SCAN_STATE
 //
 // Manage debug scan nodes.
 //
-module mkDebugScanIO#(LowLevelPlatformInterface llpi)
+module mkDebugScanDevice#(LowLevelPlatformInterface llpi)
     // interface:
-    (DEBUG_SCAN_IO);
+    (DEBUG_SCAN_DEVICE);
 
     // ****** State Elements ******
 
     // Communication to/from our SW via RRR
-    ClientStub_DEBUG_SCAN_IO clientStub <- mkClientStub_DEBUG_SCAN_IO(llpi.rrrClient);
-    ServerStub_DEBUG_SCAN_IO serverStub <- mkServerStub_DEBUG_SCAN_IO(llpi.rrrServer);
+    ClientStub_DEBUG_SCAN clientStub <- mkClientStub_DEBUG_SCAN(llpi.rrrClient);
+    ServerStub_DEBUG_SCAN serverStub <- mkServerStub_DEBUG_SCAN(llpi.rrrServer);
 
 
     // Our internal state

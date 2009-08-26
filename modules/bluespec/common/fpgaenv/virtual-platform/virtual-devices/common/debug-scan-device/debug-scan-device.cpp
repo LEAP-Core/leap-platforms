@@ -31,29 +31,29 @@
 #include "asim/rrr/service_ids.h"
 #include "asim/dict/DEBUG_SCAN.h"
 
-#include "debug-scan-io.h"
+#include "asim/provides/debug_scan_device.h"
 
 using namespace std;
 
 // ===== service instantiation =====
-DEBUG_SCAN_IO_SERVER_CLASS DEBUG_SCAN_IO_SERVER_CLASS::instance;
+DEBUG_SCAN_DEVICE_SERVER_CLASS DEBUG_SCAN_DEVICE_SERVER_CLASS::instance;
 
 // ===== methods =====
 
 // constructor
-DEBUG_SCAN_IO_SERVER_CLASS::DEBUG_SCAN_IO_SERVER_CLASS() :
+DEBUG_SCAN_DEVICE_SERVER_CLASS::DEBUG_SCAN_DEVICE_SERVER_CLASS() :
     msgIdx(0),
     msgID(DEBUG_SCAN_NULL),
     // instantiate stubs
-    clientStub(new DEBUG_SCAN_IO_CLIENT_STUB_CLASS(this)),
-    serverStub(new DEBUG_SCAN_IO_SERVER_STUB_CLASS(this))
+    clientStub(new DEBUG_SCAN_CLIENT_STUB_CLASS(this)),
+    serverStub(new DEBUG_SCAN_SERVER_STUB_CLASS(this))
 {
 }
 
 
 
 // destructor
-DEBUG_SCAN_IO_SERVER_CLASS::~DEBUG_SCAN_IO_SERVER_CLASS()
+DEBUG_SCAN_DEVICE_SERVER_CLASS::~DEBUG_SCAN_DEVICE_SERVER_CLASS()
 {
     Cleanup();
 }
@@ -61,7 +61,7 @@ DEBUG_SCAN_IO_SERVER_CLASS::~DEBUG_SCAN_IO_SERVER_CLASS()
 
 // init
 void
-DEBUG_SCAN_IO_SERVER_CLASS::Init(
+DEBUG_SCAN_DEVICE_SERVER_CLASS::Init(
     PLATFORMS_MODULE p)
 {
     // set parent pointer
@@ -71,7 +71,7 @@ DEBUG_SCAN_IO_SERVER_CLASS::Init(
 
 // uninit: we have to write this explicitly
 void
-DEBUG_SCAN_IO_SERVER_CLASS::Uninit()
+DEBUG_SCAN_DEVICE_SERVER_CLASS::Uninit()
 {
     Cleanup();
 
@@ -81,7 +81,7 @@ DEBUG_SCAN_IO_SERVER_CLASS::Uninit()
 
 // cleanup
 void
-DEBUG_SCAN_IO_SERVER_CLASS::Cleanup()
+DEBUG_SCAN_DEVICE_SERVER_CLASS::Cleanup()
 {
     // kill stubs
     delete serverStub;
@@ -97,7 +97,7 @@ DEBUG_SCAN_IO_SERVER_CLASS::Cleanup()
 //     Receive a debug scan packet.
 //
 void
-DEBUG_SCAN_IO_SERVER_CLASS::Send(
+DEBUG_SCAN_DEVICE_SERVER_CLASS::Send(
     UINT32 id,
     UINT8 value)
 {
@@ -126,7 +126,7 @@ DEBUG_SCAN_IO_SERVER_CLASS::Send(
 //     return control and proceed.
 //
 void
-DEBUG_SCAN_IO_SERVER_CLASS::Scan()
+DEBUG_SCAN_DEVICE_SERVER_CLASS::Scan()
 {
     UINT8 ack = clientStub->Scan(0);
 
@@ -143,7 +143,7 @@ DEBUG_SCAN_IO_SERVER_CLASS::Scan()
 
 // poll
 void
-DEBUG_SCAN_IO_SERVER_CLASS::Poll()
+DEBUG_SCAN_DEVICE_SERVER_CLASS::Poll()
 {
 }
 
@@ -153,7 +153,7 @@ DEBUG_SCAN_IO_SERVER_CLASS::Poll()
 //     Print a message for a given scan message.
 //
 void
-DEBUG_SCAN_IO_SERVER_CLASS::DisplayMsg()
+DEBUG_SCAN_DEVICE_SERVER_CLASS::DisplayMsg()
 {
     FILE *of = stdout;
 

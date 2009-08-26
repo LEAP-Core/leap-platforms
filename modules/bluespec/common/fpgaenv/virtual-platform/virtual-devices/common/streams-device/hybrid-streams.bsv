@@ -2,14 +2,14 @@
 `include "low_level_platform_interface.bsh"
 
 `include "asim/rrr/service_ids.bsh"
-`include "asim/rrr/client_stub_STREAMS_IO.bsh"
+`include "asim/rrr/client_stub_STREAMS.bsh"
 
 `include "streams-common.bsh"
 
 `define SERVICE_ID  `STREAMS_SERVICE_ID
 
 // Streams
-interface STREAMS_IO;
+interface STREAMS;
     method Action   makeRequest(STREAMID_DICT_TYPE streamID,
                                 STREAMS_DICT_TYPE  stringID,
                                 Bit#(32) payload0,
@@ -17,12 +17,12 @@ interface STREAMS_IO;
 endinterface
 
 // mkStreams
-module mkStreamsIO#(LowLevelPlatformInterface llpi)
+module mkStreamsDevice#(LowLevelPlatformInterface llpi)
     // interface
-                          (STREAMS_IO);
+                          (STREAMS);
     
     // stubs
-    ClientStub_STREAMS_IO clientStub <- mkClientStub_STREAMS_IO(llpi.rrrClient);
+    ClientStub_STREAMS clientStub <- mkClientStub_STREAMS(llpi.rrrClient);
     
     // ------------ methods ------------
 

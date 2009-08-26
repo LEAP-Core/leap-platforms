@@ -1,4 +1,4 @@
-service STREAMS_IO
+service STREAMS
 {
     server sw (cpp, method) <- hw (bsv, method)
     {

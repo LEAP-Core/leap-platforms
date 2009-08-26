@@ -3,7 +3,7 @@
 %desc A collection of useful utilities, mostly dealing with I/O
 %provides common_utility_devices
 
-%requires streams_io dynamic_parameters_io debug_scan_io assertions_io stats_io
+%requires streams_device dynamic_parameters_device debug_scan_device assertions_device stats_device
 
 %sources -t BSV -v PUBLIC  common-utility-devices.bsv
 %sources -t H   -v PUBLIC  common-utility-devices.h

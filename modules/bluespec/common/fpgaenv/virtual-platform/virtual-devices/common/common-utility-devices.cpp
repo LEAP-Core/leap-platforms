@@ -6,7 +6,7 @@ using namespace std;
 
 // constructor
 COMMON_UTILITY_DEVICES_CLASS::COMMON_UTILITY_DEVICES_CLASS() :
-    dynamicParamsIO(new DYNAMIC_PARAMS_IO_CLASS())
+    dynamicParamsDevice(new DYNAMIC_PARAMS_DEVICE_CLASS())
 {
 }
 
@@ -22,5 +22,5 @@ COMMON_UTILITY_DEVICES_CLASS::Init()
     // Tell the dynamic parameters IO service to send all
     // parameters to the hardware.
     
-    dynamicParamsIO->SendAllParams();
+    dynamicParamsDevice->SendAllParams();
 }

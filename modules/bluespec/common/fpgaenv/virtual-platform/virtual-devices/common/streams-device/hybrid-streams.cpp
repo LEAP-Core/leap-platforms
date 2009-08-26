@@ -8,44 +8,44 @@
 #include <string.h>
 #include <iostream>
 
-#include "asim/provides/streams_io.h"
+#include "asim/provides/streams_device.h"
 #include "asim/rrr/service_ids.h"
 
 #include "asim/dict/STREAMS.h"
 #include "asim/dict/STREAMID.h"
 
-#define SERVICE_ID       STREAMS_IO_SERVICE_ID
+#define SERVICE_ID       STREAMS_SERVICE_ID
 
 using namespace std;
 
 // ===== service instantiation =====
-STREAMS_IO_SERVER_CLASS STREAMS_IO_SERVER_CLASS::instance;
+STREAMS_DEVICE_SERVER_CLASS STREAMS_DEVICE_SERVER_CLASS::instance;
 
 // ===== methods =====
 
 // constructor
-STREAMS_IO_SERVER_CLASS::STREAMS_IO_SERVER_CLASS()
+STREAMS_DEVICE_SERVER_CLASS::STREAMS_DEVICE_SERVER_CLASS()
 {
     // instantiate stubs
-    serverStub = new STREAMS_IO_SERVER_STUB_CLASS(this);
+    serverStub = new STREAMS_SERVER_STUB_CLASS(this);
 }
 
 // destructor
-STREAMS_IO_SERVER_CLASS::~STREAMS_IO_SERVER_CLASS()
+STREAMS_DEVICE_SERVER_CLASS::~STREAMS_DEVICE_SERVER_CLASS()
 {
     Cleanup();
 }
 
 // init
 void
-STREAMS_IO_SERVER_CLASS::Init(
+STREAMS_DEVICE_SERVER_CLASS::Init(
     PLATFORMS_MODULE p)
 {
     // set parent pointer
     parent = p;
 
     // initialize maps
-    for (int i = 0; i < MAX_STREAMS_IO; i++)
+    for (int i = 0; i < MAX_STREAMS_DEVICE; i++)
     {
         streamOutput[i] = stdout;
         callbackModule[i] = NULL;
@@ -55,7 +55,7 @@ STREAMS_IO_SERVER_CLASS::Init(
 
 // uninit: we have to write this explicitly
 void
-STREAMS_IO_SERVER_CLASS::Uninit()
+STREAMS_DEVICE_SERVER_CLASS::Uninit()
 {
     Cleanup();
 
@@ -65,7 +65,7 @@ STREAMS_IO_SERVER_CLASS::Uninit()
 
 // cleanup
 void
-STREAMS_IO_SERVER_CLASS::Cleanup()
+STREAMS_DEVICE_SERVER_CLASS::Cleanup()
 {
     // destroy stubs
     delete serverStub;
@@ -73,7 +73,7 @@ STREAMS_IO_SERVER_CLASS::Cleanup()
 
 // RRR request method
 void
-STREAMS_IO_SERVER_CLASS::Print(
+STREAMS_DEVICE_SERVER_CLASS::Print(
     UINT32 streamID,
     UINT32 stringID,
     UINT32 payload0,
@@ -121,7 +121,7 @@ STREAMS_IO_SERVER_CLASS::Print(
     fflush(outstream);
 
     // call back module if required
-    STREAMS_IO_CALLBACK_MODULE module = callbackModule[streamID];
+    STREAMS_DEVICE_CALLBACK_MODULE module = callbackModule[streamID];
     if (module != NULL)
     {
         module->StreamsCallback(stringID, payload0, payload1);
@@ -136,18 +136,18 @@ STREAMS_IO_SERVER_CLASS::Print(
 
 // poll: FIXME FIXME FIXME we need this
 void
-STREAMS_IO_SERVER_CLASS::Poll()
+STREAMS_DEVICE_SERVER_CLASS::Poll()
 {
 }
 
 // map a stream to an output file
 void
-STREAMS_IO_SERVER_CLASS::MapStream(
+STREAMS_DEVICE_SERVER_CLASS::MapStream(
     int   streamID,
     FILE *out)
 {
     // sanity check
-    if (streamID >= MAX_STREAMS_IO)
+    if (streamID >= MAX_STREAMS_DEVICE)
     {
         cerr << "streams: invalid streamID: " << streamID << endl;
         CallbackExit(1);
@@ -159,16 +159,16 @@ STREAMS_IO_SERVER_CLASS::MapStream(
 
 // set link to module to be called back
 void
-STREAMS_IO_SERVER_CLASS::RegisterCallback(
+STREAMS_DEVICE_SERVER_CLASS::RegisterCallback(
     int streamID,
-    STREAMS_IO_CALLBACK_MODULE module)
+    STREAMS_DEVICE_CALLBACK_MODULE module)
 {
     callbackModule[streamID] = module;
 }
 
 // count number of payloads in a printf-style format string
 int
-STREAMS_IO_SERVER_CLASS::CountPayloads(
+STREAMS_DEVICE_SERVER_CLASS::CountPayloads(
     const char *str)
 {
     // simply count the number of %'s in the string. The only

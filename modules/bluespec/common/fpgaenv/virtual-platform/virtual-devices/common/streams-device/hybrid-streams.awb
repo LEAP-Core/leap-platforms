@@ -7,9 +7,9 @@
 #/*
 # %AWB_START
 #
-# %name Hybrid Streams IO Service
-# %desc Hybrid Streams IO Service
-# %provides streams_io
+# %name Hybrid Streams Device
+# %desc Prints Dictionary-defined messages when instructed by HW.
+# %provides streams_device
 #
 # %attributes hasim
 #

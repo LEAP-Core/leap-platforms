@@ -1,4 +1,4 @@
-service ASSERTIONS_IO
+service ASSERTIONS
 {
     server sw (cpp, method) <- hw (bsv, method)
     {

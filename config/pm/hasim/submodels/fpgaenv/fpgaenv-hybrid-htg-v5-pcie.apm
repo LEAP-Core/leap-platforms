@@ -1,11 +1,11 @@
 
 [Global]
 SaveParameters=0
-Description=Hybrid HTG-v5-PCIe Environment
+Description=Hybrid HTG-v5-PCIe FPGA Environment
 File=fpgaenv-hybrid-htg-v5-pcie
 Version=2.1
 Type=HAsim
-Name=Hybrid HTG-v5-PCIe Environment
+Name=Hybrid HTG-v5-PCIe FPGA Environment
 Class=Asim::Model
 DefaultBenchmark=0
 

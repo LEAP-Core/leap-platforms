@@ -19,21 +19,21 @@
 
 `include "asim/provides/low_level_platform_interface.bsh"
 
-`include "asim/provides/streams_io.bsh"
-`include "asim/provides/dynamic_parameters_io.bsh"
-`include "asim/provides/debug_scan_io.bsh"
-`include "asim/provides/assertions_io.bsh"
-`include "asim/provides/stats_io.bsh"
+`include "asim/provides/streams_device.bsh"
+`include "asim/provides/dynamic_parameters_device.bsh"
+`include "asim/provides/debug_scan_device.bsh"
+`include "asim/provides/assertions_device.bsh"
+`include "asim/provides/stats_device.bsh"
 
 // A set of useful IO services.
 
 interface COMMON_UTILITY_DEVICES;
 
-    interface STREAMS_IO streams;
-    interface DYNAMIC_PARAMETERS_IO dynamicParameters;
-    interface DEBUG_SCAN_IO debugScan;
-    interface ASSERTIONS_IO assertions;
-    interface STATS_IO stats;
+    interface STREAMS streams;
+    interface DYNAMIC_PARAMETERS dynamicParameters;
+    interface DEBUG_SCAN_DEVICE debugScan;
+    interface ASSERTIONS assertions;
+    interface STATS stats;
 
 endinterface
 
@@ -47,11 +47,11 @@ module mkCommonUtilityDevices#(LowLevelPlatformInterface llpi)
     // interface:
     (COMMON_UTILITY_DEVICES);
 
-    let str <- mkStreamsIO(llpi);
-    let dp  <- mkDynamicParametersIO(llpi);
-    let db  <- mkDebugScanIO(llpi);
-    let as  <- mkAssertionsIO(llpi);
-    let st  <- mkStatsIO(llpi);
+    let str <- mkStreamsDevice(llpi);
+    let dp  <- mkDynamicParametersDevice(llpi);
+    let db  <- mkDebugScanDevice(llpi);
+    let as  <- mkAssertionsDevice(llpi);
+    let st  <- mkStatsDevice(llpi);
 
     interface streams = str;
     interface dynamicParameters = dp;

@@ -31,26 +31,26 @@
 #include "asim/rrr/service_ids.h"
 #include "asim/provides/command_switches.h"
 
-#include "asim/provides/stats_io.h"
+#include "asim/provides/stats_device.h"
 
 using namespace std;
 
 
 // ===== service instantiation =====
-STATS_IO_SERVER_CLASS STATS_IO_SERVER_CLASS::instance;
+STATS_DEVICE_SERVER_CLASS STATS_DEVICE_SERVER_CLASS::instance;
 
 // ===== methods =====
 
 // constructor
-STATS_IO_SERVER_CLASS::STATS_IO_SERVER_CLASS()
+STATS_DEVICE_SERVER_CLASS::STATS_DEVICE_SERVER_CLASS()
 {
     // instantiate stubs
-    serverStub = new STATS_IO_SERVER_STUB_CLASS(this);
+    serverStub = new STATS_SERVER_STUB_CLASS(this);
 }
 
 
 // destructor
-STATS_IO_SERVER_CLASS::~STATS_IO_SERVER_CLASS()
+STATS_DEVICE_SERVER_CLASS::~STATS_DEVICE_SERVER_CLASS()
 {
     Cleanup();
 }
@@ -58,7 +58,7 @@ STATS_IO_SERVER_CLASS::~STATS_IO_SERVER_CLASS()
 
 // init
 void
-STATS_IO_SERVER_CLASS::Init(
+STATS_DEVICE_SERVER_CLASS::Init(
     PLATFORMS_MODULE     p)
 {
     // set parent pointer
@@ -77,7 +77,7 @@ STATS_IO_SERVER_CLASS::Init(
 
 // uninit: we have to write this explicitly
 void
-STATS_IO_SERVER_CLASS::Uninit()
+STATS_DEVICE_SERVER_CLASS::Uninit()
 {
     Cleanup();
 
@@ -87,7 +87,7 @@ STATS_IO_SERVER_CLASS::Uninit()
 
 // cleanup
 void
-STATS_IO_SERVER_CLASS::Cleanup()
+STATS_DEVICE_SERVER_CLASS::Cleanup()
 {
     // kill stubs
     delete serverStub;
@@ -112,7 +112,7 @@ STATS_IO_SERVER_CLASS::Cleanup()
 
 // Send
 void
-STATS_IO_SERVER_CLASS::Send(
+STATS_DEVICE_SERVER_CLASS::Send(
     UINT32 statID,
     UINT32 value)
 {
@@ -124,7 +124,7 @@ STATS_IO_SERVER_CLASS::Send(
     // Add new value to running total
     //
     
-    VERIFY(statID < STATS_DICT_ENTRIES, "stats-io:  Invalid stat id");
+    VERIFY(statID < STATS_DICT_ENTRIES, "stats device:  Invalid stat id");
     int currentContext = -1;
     for (int x = 0; x < globalArgs->NumContexts(); x++)
     {
@@ -136,7 +136,7 @@ STATS_IO_SERVER_CLASS::Send(
     if (currentContext != -1)
     {
 
-        WARN(! sawStat[currentContext].test(statID), "stats-io: stat " << STATS_DICT::Name(statID) << " appears more than once in Context " << currentContext);
+        WARN(! sawStat[currentContext].test(statID), "stats device: stat " << STATS_DICT::Name(statID) << " appears more than once in Context " << currentContext);
         sawStat[currentContext].set(statID);
 
         statValues[currentContext][statID] += value;
@@ -146,7 +146,7 @@ STATS_IO_SERVER_CLASS::Send(
 
 // Done
 UINT8
-STATS_IO_SERVER_CLASS::Done(
+STATS_DEVICE_SERVER_CLASS::Done(
     UINT8 syn)
 {
 
@@ -161,7 +161,7 @@ STATS_IO_SERVER_CLASS::Done(
 
 // poll
 void
-STATS_IO_SERVER_CLASS::Poll()
+STATS_DEVICE_SERVER_CLASS::Poll()
 {
 }
 
@@ -171,7 +171,7 @@ STATS_IO_SERVER_CLASS::Poll()
 //    Dump the in-memory statistics to a file.
 //
 void
-STATS_IO_SERVER_CLASS::EmitFile()
+STATS_DEVICE_SERVER_CLASS::EmitFile()
 {
     // Open the output file
     string statsFileName = string(globalArgs->Workload()) + ".stats";
@@ -206,5 +206,5 @@ STATS_IO_SERVER_CLASS::EmitFile()
 void
 StatsEmitFile()
 {
-    STATS_IO_SERVER_CLASS::GetInstance()->EmitFile();
+    STATS_DEVICE_SERVER_CLASS::GetInstance()->EmitFile();
 }

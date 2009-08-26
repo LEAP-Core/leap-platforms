@@ -21,21 +21,21 @@ import FIFO::*;
 `include "asim/provides/low_level_platform_interface.bsh"
 `include "asim/provides/rrr.bsh"
 
-`include "asim/rrr/client_stub_STATS_IO.bsh"
-`include "asim/rrr/server_stub_STATS_IO.bsh"
+`include "asim/rrr/client_stub_STATS.bsh"
+`include "asim/rrr/server_stub_STATS.bsh"
 `include "asim/dict/STATS.bsh"
 
-typedef Bit#(`HASIM_STATS_SIZE) STAT_VALUE;
+typedef Bit#(`STATS_SIZE) STAT_VALUE;
 
 
-// STATS_IO: Send a dictionary-defined stat value back to hardware.
+// STATS: Send a dictionary-defined stat value back to hardware.
 
-// STATS_IO
+// STATS
 
 // After Dump command is asserted dumping() becomes true. All stats should be
 // reported with reportStat() until finishDump() is called.
 
-interface STATS_IO;
+interface STATS;
 
   method Bool   dumping();
   method Action reportStat(STATS_DICT_TYPE stat, STAT_VALUE value);
@@ -44,19 +44,19 @@ interface STATS_IO;
 endinterface
 
 
-// mkStatsIO
+// mkStatsDevice
 
 // Wraps all communication to the software.
 
-module mkStatsIO#(LowLevelPlatformInterface llpi)
+module mkStatsDevice#(LowLevelPlatformInterface llpi)
     //interface:
-                (STATS_IO);
+                (STATS);
 
     // ****** State Elements ******
 
     // Communication to/from software
-    ClientStub_STATS_IO clientStub <- mkClientStub_STATS_IO(llpi.rrrClient);
-    ServerStub_STATS_IO serverStub <- mkServerStub_STATS_IO(llpi.rrrServer);
+    ClientStub_STATS clientStub <- mkClientStub_STATS(llpi.rrrClient);
+    ServerStub_STATS serverStub <- mkServerStub_STATS(llpi.rrrServer);
 
     // Track if we are dumping
     Reg#(Bool) dumpState  <- mkReg(False);

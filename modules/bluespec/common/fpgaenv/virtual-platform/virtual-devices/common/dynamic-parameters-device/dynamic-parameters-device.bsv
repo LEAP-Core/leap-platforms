@@ -19,7 +19,7 @@
 `include "asim/provides/low_level_platform_interface.bsh"
 `include "asim/provides/rrr.bsh"
 
-`include "asim/rrr/server_stub_PARAMS_IO.bsh"
+`include "asim/rrr/server_stub_PARAMS.bsh"
 
 `include "asim/dict/PARAMS.bsh"
 
@@ -34,7 +34,7 @@ typedef struct
                deriving (Eq, Bits);
 
 
-interface DYNAMIC_PARAMETERS_IO;
+interface DYNAMIC_PARAMETERS;
 
     // server methods
     method DYN_PARAM getParameter();
@@ -43,12 +43,12 @@ interface DYNAMIC_PARAMETERS_IO;
 endinterface
 
 // mkDynamicParameters
-module mkDynamicParametersIO#(LowLevelPlatformInterface llpi)
+module mkDynamicParametersDevice#(LowLevelPlatformInterface llpi)
     // interface:
-        (DYNAMIC_PARAMETERS_IO);
+        (DYNAMIC_PARAMETERS);
 
     // Communication to our RRR server
-    ServerStub_PARAMS_IO server_stub <- mkServerStub_PARAMS_IO(llpi.rrrServer);
+    ServerStub_PARAMS server_stub <- mkServerStub_PARAMS(llpi.rrrServer);
   
     method DYN_PARAM getParameter();
 

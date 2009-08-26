@@ -1,0 +1,12 @@
+
+%name Assertions Device
+%desc Report when a dictionary-defined important event occurs in HW.
+%provides assertions_device
+
+%public  assertions-device.bsv
+%public  assertions-device.h
+%private assertions-device.cpp
+%private assertions-device.rrr
+%private assertions-device.dic
+
+%param --global ASSERTIONS_PER_NODE 16 "Max number of assertions connected to an assertion node (ring stop)."

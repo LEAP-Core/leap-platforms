@@ -1,0 +1,12 @@
+
+%name Dynamic Parameters Device
+%desc Sends values set on the command line to HW.
+%provides dynamic_parameters_device
+
+%attributes hasim
+
+%sources -t BSV -v PUBLIC  dynamic-parameters-device.bsv
+%sources -t H   -v PUBLIC  dynamic-parameters-device.h
+%sources -t CPP -v PRIVATE dynamic-parameters-device.cpp
+%sources -t RRR -v PUBLIC  dynamic-parameters-device.rrr
+%sources -t DICT -v PUBLIC dynamic-parameters-device.dic

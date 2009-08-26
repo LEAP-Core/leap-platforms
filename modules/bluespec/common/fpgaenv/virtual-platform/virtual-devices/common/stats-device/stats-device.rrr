@@ -1,4 +1,4 @@
-service STATS_IO
+service STATS
 {
 
     server hw (bsv, method) <- sw (cpp, method)

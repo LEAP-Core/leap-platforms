@@ -1,4 +1,4 @@
-service DEBUG_SCAN_IO
+service DEBUG_SCAN
 {
     server hw (bsv, method) <- sw (cpp, method)
     {

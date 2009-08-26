@@ -7133,3 +7133,139 @@ Directory modules/application-env/hybrid/soft-connections/default-sw
  connected-application-default-sw.awb Locally Modified          265 
 
 Some attribute updates.
+
+----------
+pellauer    Date: Wed Aug 26 13:50:41 EDT 2009  CSN: CSN-platforms-267
+                  Wed Aug 26 17:50:41 UTC 2009
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-hybrid-htg-v5-pcie.apm Locally Modified          266 
+ std-virtual-devices.apm   Locally Modified          266 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common
+ common-utility-devices.awb Locally Modified          266 
+ dynamic-parameters-device/ Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/dynamic-parameters-device
+ dynamic-parameters-device.dic Locally Added               0 
+ dynamic-parameters-device.cpp Locally Added               0 
+ dynamic-parameters-device.rrr Locally Added               0 
+ dynamic-parameters-device.h Locally Added               0 
+ dynamic-parameters-device.awb Locally Added               0 
+ dynamic-parameters-device.bsv Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common
+ streams-io/               Locally Removed           266 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/streams-io
+ streams-common.bsh        Locally Removed           266 
+ hybrid-streams-services.rrr Locally Removed           266 
+ hybrid-streams.h          Locally Removed           266 
+ hybrid-streams.awb        Locally Removed           266 
+ hybrid-streams.bsv        Locally Removed           266 
+ streamid.dic              Locally Removed           266 
+ streams.dic               Locally Removed           266 
+ hybrid-streams.cpp        Locally Removed           266 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common
+ assertions-device/        Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/assertions-device
+ assertions-device.awb     Locally Added               0 
+ assertions-device.bsv     Locally Added               0 
+ assertions-device.dic     Locally Added               0 
+ assertions-device.cpp     Locally Added               0 
+ assertions-device.rrr     Locally Added               0 
+ assertions-device.h       Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common
+ common-utility-devices.cpp Locally Modified          266 
+ dynamic-parameters-io/    Locally Removed           266 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/dynamic-parameters-io
+ dynamic-parameters-io.h   Locally Removed           266 
+ dynamic-parameters-io.awb Locally Removed           266 
+ dynamic-parameters-io.bsv Locally Removed           266 
+ dynamic-parameters-io.dic Locally Removed           266 
+ dynamic-parameters-io.cpp Locally Removed           266 
+ dynamic-parameters-io.rrr Locally Removed           266 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common
+ stats-device/             Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/stats-device
+ stats-device.rrr          Locally Added               0 
+ stats-device.h            Locally Added               0 
+ stats-device.awb          Locally Added               0 
+ stats-device.bsv          Locally Added               0 
+ stats-device.dic          Locally Added               0 
+ stats-device.cpp          Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common
+ common-utility-devices.h  Locally Modified          266 
+ assertions-io/            Locally Removed           266 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/assertions-io
+ assertions-io.cpp         Locally Removed           266 
+ assertions-io.rrr         Locally Removed           266 
+ assertions-io.h           Locally Removed           266 
+ assertions-io.awb         Locally Removed           266 
+ assertions-io.bsv         Locally Removed           266 
+ assertions-io.dic         Locally Removed           266 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common
+ common-utility-devices.bsv Locally Modified          266 
+ stats-io/                 Locally Removed           266 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/stats-io
+ stats-io.dic              Locally Removed           266 
+ stats-io.cpp              Locally Removed           266 
+ stats-io.rrr              Locally Removed           266 
+ stats-io.h                Locally Removed           266 
+ stats-io.awb              Locally Removed           266 
+ stats-io.bsv              Locally Removed           266 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common
+ debug-scan-device/        Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/debug-scan-device
+ debug-scan-device.dic     Locally Added               0 
+ debug-scan-device.cpp     Locally Added               0 
+ debug-scan-device.rrr     Locally Added               0 
+ debug-scan-device.h       Locally Added               0 
+ debug-scan-device.awb     Locally Added               0 
+ debug-scan-device.bsv     Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common
+ streams-device/           Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/streams-device
+ streams-common.bsh        Locally Added               0 
+ hybrid-streams-services.rrr Locally Added               0 
+ hybrid-streams.h          Locally Added               0 
+ hybrid-streams.awb        Locally Added               0 
+ hybrid-streams.bsv        Locally Added               0 
+ streamid.dic              Locally Added               0 
+ streams.dic               Locally Added               0 
+ hybrid-streams.cpp        Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common
+ debug-scan-io/            Locally Removed           266 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/debug-scan-io
+ debug-scan-io.rrr         Locally Removed           266 
+ debug-scan-io.h           Locally Removed           266 
+ debug-scan-io.awb         Locally Removed           266 
+ debug-scan-io.bsv         Locally Removed           266 
+ debug-scan-io.dic         Locally Removed           266 
+ debug-scan-io.cpp         Locally Removed           266 
+
+
+* Clarify names of new virtual devices. "streams_device" instead of
+  "streams_io_service" and so on. The services are now exclusively in
+  platform_services.
+
+* Clarify some type names as well.
+
+Michael P.

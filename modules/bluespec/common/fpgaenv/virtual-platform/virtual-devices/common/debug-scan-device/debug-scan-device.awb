@@ -1,0 +1,12 @@
+
+%name Debug Scan Device
+%desc Scans dictionary-defined state values out from HW.
+%provides debug_scan_device
+
+%attributes hasim
+
+%sources -t BSV -v PUBLIC  debug-scan-device.bsv
+%sources -t H   -v PUBLIC  debug-scan-device.h
+%sources -t CPP -v PRIVATE debug-scan-device.cpp
+%sources -t RRR -v PUBLIC  debug-scan-device.rrr
+%sources -t DICT -v PUBLIC debug-scan-device.dic
