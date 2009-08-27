@@ -55,8 +55,7 @@ endinterface: CENTRAL_CACHE_BACKING
 //     Central cache using local memory.  One port is created for each
 //     client.
 //
-module mkCentralCache#(LowLevelPlatformInterface llpi,
-                       CENTRAL_CACHE_STATS stats)
+module mkCentralCache#(LowLevelPlatformInterface llpi)
     // interface:
     (CENTRAL_CACHE_IFC)
     provisos (Bits#(CENTRAL_CACHE_LINE_ADDR, t_CENTRAL_CACHE_LINE_ADDR_SZ),
@@ -131,12 +130,13 @@ module mkCentralCache#(LowLevelPlatformInterface llpi,
                  CENTRAL_CACHE_REF_INFO,
                  0) cache <- mkCacheSetAssoc(backingConnection.sourceData,
                                              cacheLocalData,
-                                             stats.cacheStats,
                                              debugLogInt);
 
     // Manage routing of flush/inval ACK back to requesting port
     FIFO#(CENTRAL_CACHE_PORT_NUM) flushAckRespQ <- mkFIFO();
 
+    PulseWire recentLineReadHitW  <- mkPulseWire();
+    PulseWire recentLineReadMissW <- mkPulseWire();
 
     // ====================================================================
     //
@@ -355,7 +355,7 @@ module mkCentralCache#(LowLevelPlatformInterface llpi,
             recent_line[req.wordIdx] matches tagged Valid .val)
         begin
             // Hit!  Skip the main cache and return the value.
-            stats.recentLineStats.readHit();
+            recentLineReadHitW.send();
 
             CENTRAL_CACHE_READ_RESP resp;
             resp.val = val;
@@ -374,7 +374,7 @@ module mkCentralCache#(LowLevelPlatformInterface llpi,
         else
         begin
             // Miss.  Ask the central cache.
-            stats.recentLineStats.readMiss();
+            recentLineReadMissW.send();
 
             cache.readReq(addr, req.wordIdx, req.refInfo);
             dbgCacheReadsInFlight.up();
@@ -517,6 +517,18 @@ module mkCentralCache#(LowLevelPlatformInterface llpi,
         enableLineCache <= enableRecentLineCache;
         initialized <= True;
     endmethod
+    
+    interface CENTRAL_CACHE_STATS stats;
+    
+        interface cacheStats = cache.stats;
+        interface CENTRAL_CACHE_RECENT_LINE_STATS recentLineStats;
+        
+            method Bool readHit() = recentLineReadHitW;
+            method Bool readMiss() = recentLineReadMissW;
+
+        endinterface
+    
+    endinterface
 endmodule
 
 

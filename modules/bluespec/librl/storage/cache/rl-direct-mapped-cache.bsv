@@ -123,6 +123,8 @@ interface RL_DM_CACHE#(type t_CACHE_ADDR,
     //
     method Action setCacheMode(RL_DM_CACHE_MODE mode);
 
+    interface RL_CACHE_STATS stats;
+
 endinterface: RL_DM_CACHE
 
 
@@ -251,7 +253,6 @@ RL_DM_CACHE_ENTRY#(type t_CACHE_WORD, type t_CACHE_TAG)
 module mkCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(t_CACHE_ADDR, t_CACHE_WORD, t_CACHE_REF_INFO) sourceData,
                             NumTypeParam#(n_ENTRIES) dummy,
                             Bool hashAddresses,
-                            RL_CACHE_STATS stats,
                             DEBUG_FILE debugLog)
     // interface:
     (RL_DM_CACHE#(t_CACHE_ADDR, t_CACHE_WORD, t_CACHE_REF_INFO))
@@ -295,7 +296,13 @@ module mkCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(t_CACHE_ADDR, t_CACHE_WORD,
     FIFO#(t_CACHE_REQ) invalQ <- mkFIFO();
 
     FIFO#(t_CACHE_LOAD_RESP) readRespQ <- mkBypassFIFO();
-
+    
+    // Wires for communicating stats
+    PulseWire readHitW         <- mkPulseWire();
+    PulseWire dirtyEntryFlushW <- mkPulseWire();
+    PulseWire readMissW        <- mkPulseWire();
+    PulseWire writeHitW        <- mkPulseWire();
+    PulseWire forceInvalLineW  <- mkPulseWire();
 
     //
     // Convert address to cache index and tag
@@ -369,7 +376,7 @@ module mkCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(t_CACHE_ADDR, t_CACHE_WORD,
             begin
                 // Hit!
                 debugLog.record($format("    lookupRead: HIT addr=0x%x, entry=0x%x, val=0x%x", r.addr, entryIdx, e.val));
-                stats.readHit();
+                readHitW.send();
 
                 t_CACHE_LOAD_RESP resp;
                 resp.val = e.val;
@@ -386,7 +393,7 @@ module mkCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(t_CACHE_ADDR, t_CACHE_WORD,
                 debugLog.record($format("    doWrite: FLUSH addr=0x%x, entry=0x%x, val=0x%x", old_addr, entryIdx, e.val));
 
                 sourceData.write(old_addr, e.val, r.refInfo);
-                stats.dirtyEntryFlush();
+                dirtyEntryFlushW.send();
             end
         end
 
@@ -406,7 +413,7 @@ module mkCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(t_CACHE_ADDR, t_CACHE_WORD,
 
         debugLog.record($format("    fillReq: addr=0x%x", r.addr));
 
-        stats.readMiss();
+        readMissW.send();
         sourceData.readReq(r.addr, r.refInfo);
     endrule
     
@@ -471,7 +478,7 @@ module mkCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(t_CACHE_ADDR, t_CACHE_WORD,
             debugLog.record($format("    doWrite: FLUSH addr=0x%x, entry=0x%x, val=0x%x", old_addr, entryIdx, e.val));
 
             sourceData.write(old_addr, e.val, r.refInfo);
-            stats.dirtyEntryFlush();
+            dirtyEntryFlushW.send();
         end
 
         // Now do the write.  The write may be skipped in NO ALLOC mode as long
@@ -481,7 +488,7 @@ module mkCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(t_CACHE_ADDR, t_CACHE_WORD,
         begin
             debugLog.record($format("    doWrite: WRITE addr=0x%x, entry=0x%x, val=0x%x", r.addr, entryIdx, w_data));
 
-            stats.writeHit();
+            writeHitW.send();
             cache.write(entryIdx, tagged Valid RL_DM_CACHE_ENTRY { dirty: (cacheMode == RL_DM_MODE_WRITE_BACK),
                                                                    tag: r_tag,
                                                                    val: w_data });
@@ -509,7 +516,7 @@ module mkCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(t_CACHE_ADDR, t_CACHE_WORD,
 
         if (cur_entry matches tagged Valid .e &&& (e.tag == r_tag))
         begin
-            stats.forceInvalLine();
+            forceInvalLineW.send();
 
             if (e.dirty)
             begin
@@ -638,6 +645,17 @@ module mkCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(t_CACHE_ADDR, t_CACHE_WORD,
     method Action setCacheMode(RL_DM_CACHE_MODE mode);
         cacheMode <= mode;
     endmethod
+
+    interface RL_CACHE_STATS stats;
+        method Bool readHit() = readHitW;
+        method Bool readMiss() = readMissW;
+        method Bool writeHit() = writeHitW;
+        method Bool writeMiss() = False;
+        method Bool invalEntry() = False;
+        method Bool dirtyEntryFlush() = dirtyEntryFlushW;
+        method Bool forceInvalLine() = forceInvalLineW;
+    endinterface
+
 endmodule
 
 
@@ -708,5 +726,15 @@ module mkNullCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(t_CACHE_ADDR, t_CACHE_W
     method Action setCacheMode(RL_DM_CACHE_MODE mode);
         noAction;
     endmethod
+
+    interface RL_CACHE_STATS stats;
+        method Bool readHit() = False;
+        method Bool readMiss() = False;
+        method Bool writeHit() = False;
+        method Bool writeMiss() = False;
+        method Bool invalEntry() = False;
+        method Bool dirtyEntryFlush() = False;
+        method Bool forceInvalLine() = False;
+    endinterface
 
 endmodule

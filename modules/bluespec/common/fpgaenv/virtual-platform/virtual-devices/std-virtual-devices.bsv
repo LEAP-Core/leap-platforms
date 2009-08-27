@@ -24,7 +24,7 @@ module mkVirtualDevices#(LowLevelPlatformInterface llpint)
 
     let fp  <- mkFrontPanel(llpint);
     // TODO: use the new Stats device for real stats
-    let cc  <- mkCentralCache(llpint, ?);
+    let cc  <- mkCentralCache(llpint);
     let sp  <- mkMemoryVirtualDevice(llpint, cc);
     let sh  <- mkSharedMemory(llpint);
     let st  <- mkStarter(llpint);

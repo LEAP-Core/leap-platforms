@@ -7282,3 +7282,25 @@ Directory modules/project
 * Added new project_common requirement.
 
 Michael P.
+
+----------
+mpellaue    Date: Thu Aug 27 17:13:48 EDT 2009  CSN: CSN-platforms-269
+                  Thu Aug 27 21:13:48 UTC 2009
+
+
+Directory modules/bluespec/librl/storage/cache
+ rl-direct-mapped-cache.bsv Locally Modified          268 
+ rl-set-assoc-cache.bsv    Locally Modified          268 
+ rl-cache.bsv              Locally Modified          268 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices
+ std-virtual-devices.bsv   Locally Modified          268 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/central-cache
+ central-cache-interfaces.bsv Locally Modified          268 
+ local-mem-central-cache.bsv Locally Modified          268 
+
+
+* Re-enable stats in the central cache device.
+
+Michael P.

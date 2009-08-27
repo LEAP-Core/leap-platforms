@@ -232,6 +232,9 @@ interface CENTRAL_CACHE_VIRTUAL_DEVICE;
     method CENTRAL_CACHE_DEBUG_SCAN debugScanState();
 
     method Action init(RL_SA_CACHE_MODE mode, Bool enableRecentLineCache);
+    
+    interface CENTRAL_CACHE_STATS stats;
+
 endinterface: CENTRAL_CACHE_VIRTUAL_DEVICE
 
 
@@ -239,8 +242,8 @@ endinterface: CENTRAL_CACHE_VIRTUAL_DEVICE
 // Central cache statistics interface
 //
 interface CENTRAL_CACHE_RECENT_LINE_STATS;
-    method Action readHit();
-    method Action readMiss();
+    method Bool readHit();
+    method Bool readMiss();
 endinterface: CENTRAL_CACHE_RECENT_LINE_STATS
 
 interface CENTRAL_CACHE_STATS;

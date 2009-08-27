@@ -170,6 +170,8 @@ interface RL_SA_CACHE#(type t_CACHE_ADDR,
     // Debug scan state.
     //
     method RL_SA_DEBUG_SCAN_DATA debugScanState();
+    
+    interface RL_CACHE_STATS stats;
 
 endinterface: RL_SA_CACHE
 
@@ -411,7 +413,6 @@ RL_SA_CACHE_REQ#(numeric type nWordsPerLine)
 
 module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_LINE, nWordsPerLine, t_CACHE_REF_INFO) sourceData,
                         RL_SA_CACHE_LOCAL_DATA#(t_CACHE_ADDR_SZ, t_CACHE_WORD, nWordsPerLine, nSets, nWays) localData,
-                        RL_CACHE_STATS stats,
                         DEBUG_FILE debugLog)
     // interface:
         (RL_SA_CACHE#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_WORD, nWordsPerLine, t_CACHE_REF_INFO, nTagExtraLowBits))
@@ -513,6 +514,14 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
     // Invalidate and flush requests are always returned in the order they
     // were requested.
     SCOREBOARD_FIFOF#(RL_SA_CACHE_MAX_INVAL, Bool) invalReqDoneQ <- mkScoreboardFIFOF();
+
+    PulseWire readMissW        <- mkPulseWire();
+    PulseWire writeMissW       <- mkPulseWire();
+    PulseWire readHitW         <- mkPulseWire();
+    PulseWire writeHitW        <- mkPulseWire();
+    PulseWire invalEntryW      <- mkPulseWire();
+    PulseWire forceInvalLineW  <- mkPulseWire();
+    PulseWire dirtyEntryFlushW <- mkPulseWire();
 
     // ***** Indexing functions *****
 
@@ -787,7 +796,7 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
             begin
                 // Invalidate line
                 meta_upd.ways[way] = tagged Invalid;
-                stats.forceInvalLine();
+                forceInvalLineW.send();
             end
 
             localData.metaData.write(set, meta_upd);
@@ -827,7 +836,7 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
                 tagged HCOP_FLUSH_DIRTY .needAck: needAck;
             endcase;
 
-        stats.dirtyEntryFlush();
+        dirtyEntryFlushW.send();
         debugLog.record($format("  Write back DIRTY: addr=0x%x, set=0x%x, mask=0x%x, data=0x%x", debugAddrFromTag(tag, set), set, word_valid_mask, flush_data));
 
         // Flush for invalidate request.  Use sync method to know the
@@ -902,7 +911,7 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
             if (way_meta.wordValid[rReq.wordIdx])
             begin
                 // Word hit!
-                stats.readHit();
+                readHitW.send();
                 localData.dataReadReq(1, set, way);
                 readHitQ.enq(tuple3(req_base_out, req, way_meta.wordValid));
 
@@ -963,7 +972,7 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
             let meta_upd = meta;
             meta_upd.lru <- cacheLRUUpdate(set, way, meta.lru);
 
-            stats.writeHit();
+            writeHitW.send();
 
             // Mark line dirty and word valid
             let new_word_valid = way_meta.wordValid;
@@ -1079,7 +1088,7 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
         // Miss.  Pick a victim.
         //
 
-        stats.readMiss();
+        readMissW.send();
 
         let addr = cacheAddr(tag, set);
         sourceData.readReq(addr, req_base.refInfo);
@@ -1102,7 +1111,7 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
         let tag = req_base_in.tag;
         let set = req_base_in.set;
 
-        stats.readMiss();
+        readMissW.send();
 
         //
         // Pick a fill victim:  either the first invalid or the LRU entry.
@@ -1134,7 +1143,7 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
         Bool flushed_dirty = False;
         if (meta.ways[fill_way] matches tagged Valid .m)
         begin
-            stats.invalEntry();
+            invalEntryW.send();
             if (m.dirty)
             begin
                 // Victim is dirty.  Flush data.
@@ -1170,7 +1179,7 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
         let tag = req_base_in.tag;
         let set = req_base_in.set;
 
-        stats.writeMiss();
+        writeMissW.send();
 
         //
         // Pick a fill victim:  either the first invalid or the LRU entry.
@@ -1209,7 +1218,7 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
         Bool flushed_dirty = False;
         if (meta.ways[fill_way] matches tagged Valid .m)
         begin
-            stats.invalEntry();
+            invalEntryW.send();
             if (m.dirty)
             begin
                 // Victim is dirty.  Flush data.
@@ -1244,7 +1253,7 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
         let set = req_base.set;
         let way = req_base.way;
 
-        stats.dirtyEntryFlush();
+        dirtyEntryFlushW.send();
         debugLog.record($format("  Write back DIRTY: addr=0x%x, set=0x%x, way=%0d, mask=0x%x, data=0x%x", debugAddrFromTag(flush_meta.tag, set), set, way, flush_meta.wordValid, flush_data));
 
         // Normal flush before a fill
@@ -1523,7 +1532,18 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
     //
     method RL_SA_DEBUG_SCAN_DATA debugScanState();
         return debugScanData;
-    endmethod    
+    endmethod
+
+    interface RL_CACHE_STATS stats;
+        method Bool readHit() = readHitW;
+        method Bool readMiss() = readMissW;
+        method Bool writeHit() = writeHitW;
+        method Bool writeMiss() = writeMissW;
+        method Bool invalEntry() = invalEntryW;
+        method Bool dirtyEntryFlush() = dirtyEntryFlushW;
+        method Bool forceInvalLine() = forceInvalLineW;
+    endinterface
+
 endmodule
 
 

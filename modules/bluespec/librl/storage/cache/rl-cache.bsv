@@ -17,49 +17,16 @@
 //
 
 //
-// Statistics object for caches so individual caches can log hit rates.
-// A null module providing this interface is defined below for cache clients
-// that don't need statistics.
+// Statistics wires for caches so individual caches can have their hit rates logged.
+// When a line becomes true the coresponding statistic should be incremented.
 //
 interface RL_CACHE_STATS;
-    method Action readHit();
-    method Action readMiss();
-    method Action writeHit();
-    method Action writeMiss();
-    method Action invalEntry();            // Invalidate due to capacity
-    method Action dirtyEntryFlush();
-    method Action forceInvalLine();        // Invalidate forced by external request
+    method Bool readHit();
+    method Bool readMiss();
+    method Bool writeHit();
+    method Bool writeMiss();
+    method Bool invalEntry();            // Invalidate due to capacity
+    method Bool dirtyEntryFlush();
+    method Bool forceInvalLine();        // Invalidate forced by external request
 endinterface: RL_CACHE_STATS
 
-
-
-//
-// mkNullRLCacheStats --
-//     Null version of RL_CACHE_STATS interface for clients not interested in
-//     statistics.
-//
-module mkNullRLCacheStats
-    // interface:
-    (RL_CACHE_STATS);
-    
-    method Action readHit();
-    endmethod
-
-    method Action readMiss();
-    endmethod
-
-    method Action writeHit();
-    endmethod
-
-    method Action writeMiss();
-    endmethod
-
-    method Action invalEntry();
-    endmethod
-
-    method Action dirtyEntryFlush();
-    endmethod
-
-    method Action forceInvalLine();
-    endmethod
-endmodule
