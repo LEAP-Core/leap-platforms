@@ -30,3 +30,7 @@ interface RL_CACHE_STATS;
     method Bool forceInvalLine();        // Invalidate forced by external request
 endinterface: RL_CACHE_STATS
 
+module mkNullRLCacheStats#(RL_CACHE_STATS stats) ();
+
+endmodule
+

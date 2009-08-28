@@ -7304,3 +7304,16 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/centr
 * Re-enable stats in the central cache device.
 
 Michael P.
+
+----------
+mpellaue    Date: Fri Aug 28 11:46:12 EDT 2009  CSN: CSN-platforms-270
+                  Fri Aug 28 15:46:12 UTC 2009
+
+
+Directory modules/bluespec/librl/storage/cache
+ rl-cache.bsv              Locally Modified          269 
+
+
+* Re-enable a default Null Stat Tracker to the library.
+
+Michael P.
