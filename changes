@@ -7317,3 +7317,25 @@ Directory modules/bluespec/librl/storage/cache
 * Re-enable a default Null Stat Tracker to the library.
 
 Michael P.
+
+----------
+mpellaue    Date: Mon Aug 31 18:51:33 EDT 2009  CSN: CSN-platforms-271
+                  Mon Aug 31 22:51:33 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/starter
+ starter-device.cpp        Locally Modified          270 
+ starter-device.h          Locally Modified          270 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/dynamic-parameters-device
+ dynamic-parameters-device.bsv Locally Modified          270 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/stats-device
+ stats-device.h            Locally Modified          270 
+ stats-device.cpp          Locally Modified          270 
+
+
+* For now the stats device and heartbeat are still intertwined.
+* Bugfix in dynamic parameters device.
+
+Michael P.

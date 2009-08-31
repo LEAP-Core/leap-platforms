@@ -21,6 +21,8 @@
 #include "platforms-module.h"
 #include "asim/provides/rrr.h"
 
+#include "asim/rrr/client_stub_STATS.h"
+
 #include "asim/dict/STATS.h"
 
 // this module handles gathering statistics. 
@@ -38,6 +40,7 @@ class STATS_DEVICE_SERVER_CLASS: public RRR_SERVER_CLASS,
 
     // stubs
     RRR_SERVER_STUB serverStub;
+    STATS_CLIENT_STUB clientStub;
 
     // Running total of statistics per context as they are dumped incrementally.
     UINT64 **statValues;
@@ -49,6 +52,7 @@ class STATS_DEVICE_SERVER_CLASS: public RRR_SERVER_CLASS,
     STATS_DEVICE_SERVER_CLASS();
     ~STATS_DEVICE_SERVER_CLASS();
 
+    void DumpStats();
     void EmitFile();
 
     // static methods

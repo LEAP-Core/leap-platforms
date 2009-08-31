@@ -32,6 +32,11 @@ class STARTER_DEVICE_SERVER_CLASS: public RRR_SERVER_CLASS,
     STARTER_DEVICE_CLIENT_STUB clientStub;
     RRR_SERVER_STUB     serverStub;
 
+    // Cycle when statistics were last scanned
+    UINT64 lastStatsScanCycle;
+    // Mask of bits to monitor for triggering statistics scan out from HW
+    UINT64 statsScanMask;
+
   public:
     STARTER_DEVICE_SERVER_CLASS();
     ~STARTER_DEVICE_SERVER_CLASS();

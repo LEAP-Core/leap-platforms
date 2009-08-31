@@ -63,6 +63,7 @@ module mkDynamicParametersDevice#(LowLevelPlatformInterface llpi)
     method Action nextParameter();
     
         let req <- server_stub.acceptRequest_sendParam();
+        server_stub.sendResponse_sendParam(0);
 
     endmethod
 

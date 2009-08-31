@@ -8,6 +8,9 @@
 #include "asim/rrr/service_ids.h"
 #include "asim/provides/starter_device.h"
 
+// Temporarily control the Stat Dumping.
+#include "asim/provides/stats_device.h"
+
 #include "asim/ioformat.h"
 
 using namespace std;
@@ -24,7 +27,8 @@ pthread_cond_t  hardwareFinishedSignal;
 STARTER_DEVICE_SERVER_CLASS STARTER_DEVICE_SERVER_CLASS::instance;
 
 // constructor
-STARTER_DEVICE_SERVER_CLASS::STARTER_DEVICE_SERVER_CLASS()
+STARTER_DEVICE_SERVER_CLASS::STARTER_DEVICE_SERVER_CLASS() :
+    lastStatsScanCycle(0)
 {
     // Initialize hardware status variables.
     pthread_mutex_init(&hardwareStatusLock, NULL);
@@ -86,6 +90,12 @@ void
 STARTER_DEVICE_SERVER_CLASS::End(
     UINT8 exit_code)
 {
+    // Temporarily disabled:
+    // cout << "        starting stats dump... ";
+    // STATS_DEVICE_SERVER_CLASS::GetInstance()->DumpStats();
+    // STATS_DEVICE_SERVER_CLASS::GetInstance()->EmitFile();
+    // cout << "done." << endl;
+
     // Set that the hardware is finished.
     // Signal any listening thread that might be listening.
 
@@ -115,6 +125,13 @@ STARTER_DEVICE_SERVER_CLASS::Heartbeat(
 {
     // TODO: add deadlock detection timeout.
     cout << "starter: hardware still alive: " << fpga_cycles << "." << endl;
+
+    if (((fpga_cycles ^ lastStatsScanCycle) & statsScanMask) != 0)
+    {
+        lastStatsScanCycle = fpga_cycles;
+        STATS_DEVICE_SERVER_CLASS::GetInstance()->DumpStats();
+    }
+    
 }
 
 

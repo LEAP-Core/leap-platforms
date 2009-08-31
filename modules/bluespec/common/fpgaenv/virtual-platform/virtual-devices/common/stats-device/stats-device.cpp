@@ -42,10 +42,11 @@ STATS_DEVICE_SERVER_CLASS STATS_DEVICE_SERVER_CLASS::instance;
 // ===== methods =====
 
 // constructor
-STATS_DEVICE_SERVER_CLASS::STATS_DEVICE_SERVER_CLASS()
-{
+STATS_DEVICE_SERVER_CLASS::STATS_DEVICE_SERVER_CLASS() :
     // instantiate stubs
-    serverStub = new STATS_SERVER_STUB_CLASS(this);
+    clientStub(new STATS_CLIENT_STUB_CLASS(this)),
+    serverStub(new STATS_SERVER_STUB_CLASS(this))
+{
 }
 
 
@@ -163,6 +164,13 @@ STATS_DEVICE_SERVER_CLASS::Done(
 void
 STATS_DEVICE_SERVER_CLASS::Poll()
 {
+}
+
+// DumpStats
+void
+STATS_DEVICE_SERVER_CLASS::DumpStats()
+{
+    UINT8 ack = clientStub->DumpStats(0);
 }
 
 
