@@ -44,6 +44,7 @@ STATS_DEVICE_SERVER_CLASS STATS_DEVICE_SERVER_CLASS::instance;
 // constructor
 STATS_DEVICE_SERVER_CLASS::STATS_DEVICE_SERVER_CLASS() :
     // instantiate stubs
+    statValues(NULL),
     clientStub(new STATS_CLIENT_STUB_CLASS(this)),
     serverStub(new STATS_SERVER_STUB_CLASS(this))
 {
@@ -96,7 +97,7 @@ STATS_DEVICE_SERVER_CLASS::Cleanup()
     // Free stats
     delete sawStat;
 
-    if (globalArgs != NULL)
+    if (statValues != NULL && globalArgs != NULL)
     {
         for (int x = 0; x < globalArgs->NumContexts(); x++)
         {
