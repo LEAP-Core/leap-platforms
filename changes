@@ -7353,3 +7353,23 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/commo
 
 Michael P.
 
+
+----------
+mcadler     Date: Tue Sep  1 20:27:13 EDT 2009  CSN: CSN-platforms-273
+                  Wed Sep  2 00:27:13 UTC 2009
+
+
+Directory modules/bluespec/librl/storage/cache
+ rl-set-assoc-cache.bsv    Locally Modified          272 
+
+Directory modules/bluespec/librl/base
+ hash-bits.bsv             Locally Modified          272 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-mem-scratch.bsv    Locally Modified          272 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/central-cache
+ local-mem-central-cache.awb Locally Modified          272 
+
+- Central cache now supports objects with 64 bit addresses.
+- Hashing function now supports inputs up to 128 bits wide.

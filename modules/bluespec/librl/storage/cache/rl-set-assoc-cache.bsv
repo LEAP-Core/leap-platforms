@@ -427,8 +427,9 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
               // Write word size must tile into cache line
               Bits#(Vector#(nWordsPerLine, t_CACHE_WORD), t_CACHE_LINE_SZ),
 
-              // Cache address size must be no larger than 64 bits
-              Add#(t_CACHE_ADDR_SZ, a__, 64),
+              // Cache address size must be no larger than 128 bits because
+              // of the hash function.
+              Add#(t_CACHE_ADDR_SZ, a__, 128),
 
               // Set index and tag.  Set index size + tag size == address size.
               Alias#(RL_SA_CACHE_SET_IDX#(nSets), t_CACHE_SET_IDX),

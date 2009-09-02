@@ -67,6 +67,10 @@ function Bit#(n) hashBits(Bit#(n) x);
         // unique outputs.
         if (n_bits > 32)
             h[31:0] = h[31:0] ^ reverseBits(h[63:32]);
+        if (n_bits > 64)
+            h[31:0] = h[31:0] ^ reverseBits(h[95:64]);
+        if (n_bits > 96)
+            h[31:0] = h[31:0] ^ reverseBits(h[127:96]);
 
         h[31:0] = hash32(h[31:0]);
     end
@@ -123,6 +127,10 @@ function Bit#(n) hashBits_inv(Bit#(n) x);
 
         if (n_bits > 32)
             h[31:0] = h[31:0] ^ reverseBits(h[63:32]);
+        if (n_bits > 64)
+            h[31:0] = h[31:0] ^ reverseBits(h[95:64]);
+        if (n_bits > 96)
+            h[31:0] = h[31:0] ^ reverseBits(h[127:96]);
     end
     else if (n_bits >= 24)
     begin

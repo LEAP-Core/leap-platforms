@@ -114,7 +114,14 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
         provisos(Log#(SCRATCHPAD_WORDS_PER_LINE, t_WORD_IDX_SZ),
                  Add#(t_WORD_IDX_SZ, t_LINE_ADDR_SZ, `SCRATCHPAD_MEMORY_ADDR_BITS));
         Bit#(t_WORD_IDX_SZ) w_zero = 0;
-        return zeroExtend({cAddr, w_zero});
+
+        // We don't know here whether the central cache line address size is
+        // larger or smaller than 64 bits.  The following sequence keeps
+        // Bluespec happy and should do the right thing.
+        Bit#(128) tmp = zeroExtend({cAddr, w_zero});
+        Bit#(64) host_addr = truncate(tmp);
+
+        return host_addr;
     endfunction
 
 
