@@ -25,6 +25,43 @@
 
 #include "asim/dict/STATS.h"
 
+// A class which represents a stat. Stats can actually be vectors.
+// We represent these vectors as linked lists since the HW may
+// not be using all of the vector for a particular run.
+// Each spot in the list is marked as unseen to begin with.
+
+typedef class STAT_VECTOR_CLASS* STAT_VECTOR;
+
+class STAT_VECTOR_CLASS
+{
+
+    private:
+        // Identifying information for error messages.
+        UINT32  myID;
+        UINT8   length;
+        // The actual value.
+        UINT64* curValues;
+        // Have we seen
+        bool*   sawPosition;
+        bool*   everSawPosition;
+
+    public:
+
+        STAT_VECTOR_CLASS(UINT32 id, UINT8 l);
+        ~STAT_VECTOR_CLASS();
+        
+        void AddStatValue(UINT32 val, UINT8 pos);
+        void DumpFinished();
+
+        UINT64* GetStatValues();
+
+        UINT64 GetStatValue(UINT8 pos);
+
+        UINT8   GetLength();
+        bool    EverSawPosition(UINT8 pos);
+
+};
+
 // this module handles gathering statistics. 
 // Eventually this will interact with standard tools.
 
@@ -42,16 +79,20 @@ class STATS_DEVICE_SERVER_CLASS: public RRR_SERVER_CLASS,
     RRR_SERVER_STUB serverStub;
     STATS_CLIENT_STUB clientStub;
 
-    // Running total of statistics per context as they are dumped incrementally.
-    UINT64 **statValues;
+    // Have we initialized the stats yet?
+    bool statsInited;
 
-    // Check that each stat appears at most once per context.
-    bitset<STATS_DICT_ENTRIES> *sawStat;
+    // Running total of statistic vectors as they are dumped incrementally.
+    STAT_VECTOR statValues[STATS_DICT_ENTRIES];
 
   public:
     STATS_DEVICE_SERVER_CLASS();
     ~STATS_DEVICE_SERVER_CLASS();
 
+    // Methods other people call to control stats.
+    void SetupStats();
+    void ToggleEnabled();
+    void ResetStatValues();
     void DumpStats();
     void EmitFile();
 
@@ -64,9 +105,10 @@ class STATS_DEVICE_SERVER_CLASS: public RRR_SERVER_CLASS,
     void Cleanup();
     void Poll();
 
-    // RRR service methods
-    void  Send(UINT32 statID, UINT32 value);
-    UINT8 Done(UINT8 syn);
+    // RRR server methods
+    void  ReportStat(UINT32 statID, UINT8 pos, UINT32 value);
+    void  StatOverflow(UINT32 statID, UINT8 pos);
+    void  SetVectorLength(UINT32 statID, UINT8 length);
 };
 
 // server stub

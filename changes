@@ -7386,3 +7386,34 @@ Directory config/pm/hasim/submodels/fpgaenv
 * Update serial device APM.
 
 Michael P.
+
+----------
+mpellaue    Date: Thu Sep  3 11:10:19 EDT 2009  CSN: CSN-platforms-275
+                  Thu Sep  3 15:10:19 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common
+ common-utility-devices.cpp Locally Modified          274 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/stats-device
+ stats-device.rrr          Locally Modified          274 
+ stats-device.h            Locally Modified          274 
+ stats-device.awb          Locally Modified          274 
+ stats-device.bsv          Locally Modified          274 
+ stats-device.cpp          Locally Modified          274 
+ stat-vector.cpp           Locally Added               0 
+
+
+* Stat vectors now work differently. The HW now reports just how long each stat
+vector is. Unused slots in the vector no longer show up in the stats output.
+
+* This means that stats are no longer hardwired to NUM_CONTEXTS.
+
+* Stat overflow is also treated differently. Instead of periodically scanning
+  the stats, the HW now just reports when an overflow of a single stat occurs.
+  This causes the SW to increment it by 32-bit UINT_MAX.
+
+* This should cut down on unnecessary RRR traffic, since only an actual overflow
+  will trigger this, rather than a potential time-based overflow.
+  
+Michael P.

@@ -5,6 +5,7 @@
 
 %public  stats-device.bsv
 %public  stats-device.h
+%private stat-vector.cpp
 %private stats-device.cpp
 %private stats-device.rrr
 %private stats-device.dic

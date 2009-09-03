@@ -26,6 +26,7 @@ import FIFO::*;
 `include "asim/dict/STATS.bsh"
 
 typedef Bit#(`STATS_SIZE) STAT_VALUE;
+typedef Bit#(8) STAT_VECTOR_INDEX;
 
 
 // STATS: Send a dictionary-defined stat value back to hardware.
@@ -37,9 +38,21 @@ typedef Bit#(`STATS_SIZE) STAT_VALUE;
 
 interface STATS;
 
-  method Bool   dumping();
-  method Action reportStat(STATS_DICT_TYPE stat, STAT_VALUE value);
-  method Action finishDump();
+    method Bool   gettingVectorLengths();
+    method Action setVectorLength(STATS_DICT_TYPE stat, STAT_VECTOR_INDEX len);
+    method Action finishVectorLengths();
+
+    method Bool   dumping();
+    method Action reportStat(STATS_DICT_TYPE stat, STAT_VECTOR_INDEX pos, STAT_VALUE value);
+    method Action finishDump();
+
+    method Bool   reseting();
+    method Action finishReseting();
+
+    method Bool   toggling();
+    method Action finishToggling();
+
+    method Action statOverflow(STATS_DICT_TYPE stat, STAT_VECTOR_INDEX pos);
 
 endinterface
 
@@ -47,6 +60,18 @@ endinterface
 // mkStatsDevice
 
 // Wraps all communication to the software.
+
+typedef enum
+{
+  SD_Idle,           // Not executing any commands
+  SD_GettingLengths, // Executing the GetVectorLengths command
+  SD_Dumping,        // Executing the Dump command
+  SD_Toggling,       // Executing the Toggle command
+  SD_Reseting        // Executing the Reset command
+}
+  STATS_DEVICE_STATE
+               deriving (Eq, Bits);
+
 
 module mkStatsDevice#(LowLevelPlatformInterface llpi)
     //interface:
@@ -58,34 +83,84 @@ module mkStatsDevice#(LowLevelPlatformInterface llpi)
     ClientStub_STATS clientStub <- mkClientStub_STATS(llpi.rrrClient);
     ServerStub_STATS serverStub <- mkServerStub_STATS(llpi.rrrServer);
 
-    // Track if we are dumping
-    Reg#(Bool) dumpState  <- mkReg(False);
+    // Track commands internally
+    Reg#(STATS_DEVICE_STATE) state <- mkReg(SD_Idle);
 
 
     // ****** Rules ******
 
-    rule beginDump (!dumpState);
+    rule beginVectorLengths (state == SD_Idle);
+    
+        let dummy <- serverStub.acceptRequest_GetVectorLengths();
+        state <= SD_GettingLengths;
+    
+    endrule
+
+    rule beginDump (state == SD_Idle);
     
         let dummy <- serverStub.acceptRequest_DumpStats();
-        dumpState <= True;
+        state <= SD_Dumping;
     
     endrule
     
-    method Bool dumping();
-        return dumpState;
+
+    method Bool gettingVectorLengths();
+        return state == SD_GettingLengths;
+    endmethod
+    
+
+    method Action setVectorLength(STATS_DICT_TYPE id, STAT_VECTOR_INDEX len);
+    
+        clientStub.makeRequest_SetVectorLength(zeroExtend(id), len);
+
+    endmethod
+    
+    
+    method Action finishVectorLengths();
+    
+        serverStub.sendResponse_GetVectorLengths(0);
+        state <= SD_Idle;
+    
     endmethod
 
-    method Action reportStat(STATS_DICT_TYPE id, STAT_VALUE value);
     
-        clientStub.makeRequest_Send(zeroExtend(id), value);
+    method Bool dumping();
+        return state == SD_Dumping;
+    endmethod
+
+    method Action reportStat(STATS_DICT_TYPE id, STAT_VECTOR_INDEX idx, STAT_VALUE value);
+    
+        clientStub.makeRequest_ReportStat(zeroExtend(id), idx, value);
 
     endmethod
     
     method Action finishDump();
     
         serverStub.sendResponse_DumpStats(0);
-        dumpState <= False;
+        state <= SD_Idle;
     
+    endmethod
+    
+    method Bool reseting();
+        return state == SD_Reseting;
+    endmethod
+
+    method Action finishReseting();
+        serverStub.sendResponse_Reset(0);
+        state <= SD_Idle;
+    endmethod
+
+    method Bool toggling();
+        return state == SD_Toggling;
+    endmethod
+
+    method Action finishToggling();
+        serverStub.sendResponse_Toggle(0);
+        state <= SD_Idle;
+    endmethod
+
+    method Action statOverflow(STATS_DICT_TYPE id, STAT_VECTOR_INDEX index);
+        clientStub.makeRequest_StatOverflow(zeroExtend(id), index);
     endmethod
 
 endmodule

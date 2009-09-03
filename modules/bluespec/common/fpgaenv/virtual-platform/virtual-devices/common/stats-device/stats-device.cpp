@@ -20,6 +20,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <limits.h>
 #include <sys/select.h>
 #include <sys/types.h>
 #include <signal.h>
@@ -43,11 +44,16 @@ STATS_DEVICE_SERVER_CLASS STATS_DEVICE_SERVER_CLASS::instance;
 
 // constructor
 STATS_DEVICE_SERVER_CLASS::STATS_DEVICE_SERVER_CLASS() :
+    statsInited(false),
     // instantiate stubs
-    statValues(NULL),
     clientStub(new STATS_CLIENT_STUB_CLASS(this)),
     serverStub(new STATS_SERVER_STUB_CLASS(this))
 {
+
+    for (int x = 0; x < STATS_DICT_ENTRIES; x++)
+    {
+        statValues[x] = NULL;
+    }
 }
 
 
@@ -65,17 +71,19 @@ STATS_DEVICE_SERVER_CLASS::Init(
 {
     // set parent pointer
     parent = p;
-    // Instantiate stats for each context.
-    statValues = new UINT64* [globalArgs->NumContexts()];
-    // statValues = (UINT64**) malloc(sizeof(UINT64*) * globalArgs->NumContexts());
-    sawStat = new bitset<STATS_DICT_ENTRIES>[globalArgs->NumContexts()];
-    for (int x = 0; x < globalArgs->NumContexts(); x++)
-    {
-        statValues[x] = new UINT64[STATS_DICT_ENTRIES];
-        bzero(statValues[x], STATS_DICT_ENTRIES * sizeof(UINT64));
-    }
 }
 
+
+
+// init
+void
+STATS_DEVICE_SERVER_CLASS::SetupStats()
+{
+    // This call will cause the hardware to invoke SetStatVectorLength
+    // for every stat. This will in turn instantiate the stats themselves.
+    int ack = clientStub->GetVectorLengths(0);
+    statsInited = true;
+}
 
 // uninit: we have to write this explicitly
 void
@@ -93,19 +101,18 @@ STATS_DEVICE_SERVER_CLASS::Cleanup()
 {
     // kill stubs
     delete serverStub;
-    
-    // Free stats
-    delete sawStat;
+    delete clientStub;
 
-    if (statValues != NULL && globalArgs != NULL)
+    if (statsInited)
     {
-        for (int x = 0; x < globalArgs->NumContexts(); x++)
+        for (int x = 0; x < STATS_DICT_ENTRIES; x++)
         {
-            delete statValues[x];
+            if (statValues[x] != NULL)
+            {
+                delete statValues[x];
+            }
         }
     }
-
-    delete [] statValues;
 }
 
 //
@@ -114,50 +121,41 @@ STATS_DEVICE_SERVER_CLASS::Cleanup()
 
 // Send
 void
-STATS_DEVICE_SERVER_CLASS::Send(
+STATS_DEVICE_SERVER_CLASS::ReportStat(
     UINT32 statID,
+    UINT8 pos,
     UINT32 value)
 {
-    // If the counter is greater than the number of active contexts, then the
-    // hardware is sending us the value of a stat from an inactive context.
-    // So we'll just drop it.
-
     //
     // Add new value to running total
     //
-    
-    VERIFY(statID < STATS_DICT_ENTRIES, "stats device:  Invalid stat id");
-    int currentContext = -1;
-    for (int x = 0; x < globalArgs->NumContexts(); x++)
-    {
-        if (!sawStat[x].test(statID) && currentContext == -1)
-        {
-            currentContext = x;
-        }
-    }
-    if (currentContext != -1)
-    {
-
-        WARN(! sawStat[currentContext].test(statID), "stats device: stat " << STATS_DICT::Name(statID) << " appears more than once in Context " << currentContext);
-        sawStat[currentContext].set(statID);
-
-        statValues[currentContext][statID] += value;
-    }
-    // Otherwise it's a stat from an inactive context, so drop it.
+    VERIFY(statValues[statID] != NULL, "stats device: got reported value for unknown stat ID: " << statID << ", Value: " << value);
+    statValues[statID]->AddStatValue(value, pos);
 }
 
+// StatOverflow
+void
+STATS_DEVICE_SERVER_CLASS::StatOverflow(
+    UINT32 statID,
+    UINT8 pos)
+{
+    //
+    // Add UINT32 MAX_INT to running total
+    //
+    
+    VERIFY(statValues[statID] != NULL, "stats device: got overflow for unknown stat ID: " << statID);
+    UINT32 mi = UINT_MAX;
+    statValues[statID]->AddStatValue(mi, pos);
+}
 // Done
-UINT8
-STATS_DEVICE_SERVER_CLASS::Done(
-    UINT8 syn)
+void
+STATS_DEVICE_SERVER_CLASS::SetVectorLength(
+    UINT32 statID,
+    UINT8 len)
 {
 
-    for (int x = 0; x < globalArgs->NumContexts(); x++)
-    {
-        sawStat[x].reset();
-    }
-    // send ack
-    return 0;
+    // Instantitate a new stat vector of the given length.
+    statValues[statID] = new STAT_VECTOR_CLASS(statID, len);
 }
 
 
@@ -172,6 +170,14 @@ void
 STATS_DEVICE_SERVER_CLASS::DumpStats()
 {
     UINT8 ack = clientStub->DumpStats(0);
+    
+    for (int x = 0; x < STATS_DICT_ENTRIES; x++)
+    {
+        if (statValues[x] != NULL)
+        {
+            statValues[x]->DumpFinished();
+        }
+    }
 }
 
 
@@ -198,12 +204,15 @@ STATS_DEVICE_SERVER_CLASS::EmitFile()
         const char *statName = STATS_DICT::Name(i);
         const char *statStr  = STATS_DICT::Str(i);
 
-        if ((i != STATS_NULL) && (statName != NULL))
+        if ((i != STATS_NULL) && (statName != NULL) && statValues[i] != NULL)
         {
             statsFile << "\"" << statStr << "\"," << statName;
-            for (int x = 0; x < globalArgs->NumContexts(); x++)
+            for (UINT8 x = 0; x < statValues[i]->GetLength(); x++)
             {
-                statsFile << "," << statValues[x][i];
+                if (statValues[i]->EverSawPosition(x))
+                {
+                    statsFile << "," << statValues[i]->GetStatValue(x);
+                }
             }
             statsFile << endl;
         }
