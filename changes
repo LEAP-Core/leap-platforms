@@ -7373,3 +7373,16 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/centr
 
 - Central cache now supports objects with 64 bit addresses.
 - Hashing function now supports inputs up to 128 bits wide.
+
+----------
+mpellaue    Date: Thu Sep  3 10:39:54 EDT 2009  CSN: CSN-platforms-274
+                  Thu Sep  3 14:39:54 UTC 2009
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-hybrid-xupv2-serial.apm Locally Modified          273 
+
+
+* Update serial device APM.
+
+Michael P.
