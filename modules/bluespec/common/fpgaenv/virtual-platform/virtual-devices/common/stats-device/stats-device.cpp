@@ -81,7 +81,7 @@ STATS_DEVICE_SERVER_CLASS::SetupStats()
 {
     // This call will cause the hardware to invoke SetStatVectorLength
     // for every stat. This will in turn instantiate the stats themselves.
-    int ack = clientStub->GetVectorLengths(0);
+    clientStub->GetVectorLengths(0);
     statsInited = true;
 }
 

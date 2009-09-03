@@ -7417,3 +7417,24 @@ vector is. Unused slots in the vector no longer show up in the stats output.
   will trigger this, rather than a potential time-based overflow.
   
 Michael P.
+
+----------
+mpellaue    Date: Thu Sep  3 17:34:24 EDT 2009  CSN: CSN-platforms-276
+                  Thu Sep  3 21:34:24 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/starter
+ starter-device.cpp        Locally Modified          275 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common
+ common-utility-devices.cpp Locally Modified          275 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/stats-device
+ stats-device.rrr          Locally Modified          275 
+ stats-device.bsv          Locally Modified          275 
+ stats-device.cpp          Locally Modified          275 
+
+
+* Fix another deadlock, this time in the stats device.
+
+Michael P.

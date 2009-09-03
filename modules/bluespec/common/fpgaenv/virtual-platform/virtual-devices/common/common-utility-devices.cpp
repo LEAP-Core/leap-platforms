@@ -24,8 +24,4 @@ COMMON_UTILITY_DEVICES_CLASS::Init()
     // parameters to the hardware.
     
     dynamicParamsDevice->SendAllParams();
-    
-    // Tell the stats device to setup itself. We wait until this
-    // point to do it to ensure that the RRR stack is up.
-    STATS_DEVICE_CLASS::GetInstance()->SetupStats();
 }

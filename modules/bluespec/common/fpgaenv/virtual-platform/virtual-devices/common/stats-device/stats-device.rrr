@@ -3,7 +3,7 @@ service STATS
 
     server hw (bsv, method) <- sw (cpp, method)
     {
-        method GetVectorLengths(in UINT8[8] syn, out UINT8[8] ack);
+        method GetVectorLengths(in UINT8[8] syn);
         method DumpStats(in UINT8[8] syn, out UINT8[8] ack);
         method Reset(in UINT8[8] syn, out UINT8[8] ack);
         method Toggle(in UINT8[8] syn, out UINT8[8] ack);

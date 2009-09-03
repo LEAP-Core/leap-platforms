@@ -61,16 +61,6 @@ endinterface
 
 // Wraps all communication to the software.
 
-typedef enum
-{
-  SD_Idle,           // Not executing any commands
-  SD_GettingLengths, // Executing the GetVectorLengths command
-  SD_Dumping,        // Executing the Dump command
-  SD_Toggling,       // Executing the Toggle command
-  SD_Reseting        // Executing the Reset command
-}
-  STATS_DEVICE_STATE
-               deriving (Eq, Bits);
 
 
 module mkStatsDevice#(LowLevelPlatformInterface llpi)
@@ -84,28 +74,44 @@ module mkStatsDevice#(LowLevelPlatformInterface llpi)
     ServerStub_STATS serverStub <- mkServerStub_STATS(llpi.rrrServer);
 
     // Track commands internally
-    Reg#(STATS_DEVICE_STATE) state <- mkReg(SD_Idle);
+    Reg#(Bool) dumpState <- mkReg(False);
+    Reg#(Bool) lengthState <- mkReg(False);
+    Reg#(Bool) toggleState <- mkReg(False);
+    Reg#(Bool) resetState <- mkReg(False);
 
 
     // ****** Rules ******
 
-    rule beginVectorLengths (state == SD_Idle);
+    rule beginVectorLengths (!lengthState);
     
         let dummy <- serverStub.acceptRequest_GetVectorLengths();
-        state <= SD_GettingLengths;
+        lengthState <= True;
     
     endrule
 
-    rule beginDump (state == SD_Idle);
+    rule beginDump (!dumpState);
     
         let dummy <- serverStub.acceptRequest_DumpStats();
-        state <= SD_Dumping;
+        dumpState <= True;
     
     endrule
     
+    rule beginReset (!resetState);
+    
+        let dummy <- serverStub.acceptRequest_Reset();
+        resetState <= True;
+    
+    endrule
+
+    rule beginToggle (!toggleState);
+    
+        let dummy <- serverStub.acceptRequest_Toggle();
+        toggleState <= True;
+    
+    endrule
 
     method Bool gettingVectorLengths();
-        return state == SD_GettingLengths;
+        return lengthState;
     endmethod
     
 
@@ -118,14 +124,13 @@ module mkStatsDevice#(LowLevelPlatformInterface llpi)
     
     method Action finishVectorLengths();
     
-        serverStub.sendResponse_GetVectorLengths(0);
-        state <= SD_Idle;
+        lengthState <= False;
     
     endmethod
 
     
     method Bool dumping();
-        return state == SD_Dumping;
+        return dumpState;
     endmethod
 
     method Action reportStat(STATS_DICT_TYPE id, STAT_VECTOR_INDEX idx, STAT_VALUE value);
@@ -137,26 +142,26 @@ module mkStatsDevice#(LowLevelPlatformInterface llpi)
     method Action finishDump();
     
         serverStub.sendResponse_DumpStats(0);
-        state <= SD_Idle;
+        dumpState <= False;
     
     endmethod
     
     method Bool reseting();
-        return state == SD_Reseting;
+        return resetState;
     endmethod
 
     method Action finishReseting();
         serverStub.sendResponse_Reset(0);
-        state <= SD_Idle;
+        resetState <= False;
     endmethod
 
     method Bool toggling();
-        return state == SD_Toggling;
+        return toggleState;
     endmethod
 
     method Action finishToggling();
         serverStub.sendResponse_Toggle(0);
-        state <= SD_Idle;
+        toggleState <= False;
     endmethod
 
     method Action statOverflow(STATS_DICT_TYPE id, STAT_VECTOR_INDEX index);

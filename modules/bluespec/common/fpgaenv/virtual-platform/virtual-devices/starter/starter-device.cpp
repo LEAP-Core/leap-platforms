@@ -125,13 +125,6 @@ STARTER_DEVICE_SERVER_CLASS::Heartbeat(
 {
     // TODO: add deadlock detection timeout.
     cout << "starter: hardware still alive: " << fpga_cycles << "." << endl;
-
-    if (((fpga_cycles ^ lastStatsScanCycle) & statsScanMask) != 0)
-    {
-        lastStatsScanCycle = fpga_cycles;
-        STATS_DEVICE_SERVER_CLASS::GetInstance()->DumpStats();
-    }
-    
 }
 
 
