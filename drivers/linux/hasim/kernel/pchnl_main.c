@@ -106,7 +106,7 @@ pchnl_init_module(void)
      }
      memset(gpchnl_drv, 0, sizeof(struct pchnl_driver));
 
-     ret = pci_module_init(&pchnl_driver);
+     ret = pci_register_driver(&pchnl_driver);
      if ( ret < 0){
           PCHNL_ERR("pchnl_init_module pci_module_init failed\n");
           goto err_module_init;
@@ -233,7 +233,7 @@ pchnl_probe(struct pci_dev *pdev,
      }
 
      if ((err = request_irq(gpchnl_dev->pdev->irq, &pchnl_intr,
-                            SA_SHIRQ | SA_SAMPLE_RANDOM,
+                            IRQF_SHARED |IRQF_SAMPLE_RANDOM,
                             NULL, gpchnl_dev))){
           PCHNL_ERR("pchnl_probe Unabe to allocate interrupt Error: %d\n", err);
           goto err_dev_init;

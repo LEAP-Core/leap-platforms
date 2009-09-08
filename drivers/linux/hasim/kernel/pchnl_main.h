@@ -31,6 +31,21 @@
 #include <linux/version.h>
 #include <asm/uaccess.h>
 
+// Fix compile for old kernels
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,18)
+#define IRQF_SHARED                    SA_SHIRQ
+#endif /* < 2.6.18 */
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,18)
+#define IRQF_SAMPLE_RANDOM             SA_SAMPLE_RANDOM
+#endif /* < 2.6.18 */
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,18)
+#define pci_register_driver            pci_init_module
+#endif /* < 2.6.18 */
+
+
 #ifdef DBG
 #define PCHNL_DBG(args...) printk(KERN_DEBUG "pchnl: " args)
 #else

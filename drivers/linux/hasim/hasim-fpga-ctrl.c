@@ -35,6 +35,8 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 
+//#define NO_PCIE
+
 typedef enum
 {
     STATE_FREE,
@@ -354,6 +356,10 @@ void set_pci_state(FPGA_STATE_T state)
 {
     char req;
     int f;
+
+    #ifdef NO_PCIE
+    return;
+    #endif
 
     switch (state)
     {
