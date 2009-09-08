@@ -18,6 +18,7 @@
 %scons %top   SCons.top.template
 %scons %hw    SCons.hw.template
 
+# TBD: This needs to be move somewhere appropriate for HW-only projects
 %param MAKE_ALL_TARGET      exe       "Target of 'make all'.  Most likely bit, exe or vexe."
 
 %param SMART_SYNTH_BOUNDARY 0        "use smart synthesis boundaries"

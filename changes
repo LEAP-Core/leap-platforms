@@ -7438,3 +7438,49 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/commo
 * Fix another deadlock, this time in the stats device.
 
 Michael P.
+
+----------
+emer        Date: Tue Sep  8 14:17:37 EDT 2009  CSN: CSN-platforms-278
+                  Tue Sep  8 18:17:37 UTC 2009
+
+
+Directory config/pm
+ platforms/                Locally Removed           277 
+
+Directory config/pm/platforms
+ README                    Locally Removed           277 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/simulation
+ sim-physical-platform.awb Locally Modified          277 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup/serial
+ xilinx-xup-serial.awb     Locally Modified          277 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup
+ xup-physical-platform.awb Locally Modified          277 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-disabled
+ htg-v5-pcie-disabled.awb  Locally Modified          277 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled
+ htg-v5-pcie-enabled.awb   Locally Modified          277 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/null
+ null-physical-platfrom.awb Locally Modified          277 
+
+Directory modules/project
+ project-hw.awb            Locally Modified          277 
+ project-hybrid.awb        Locally Modified          277 
+
+Directory modules
+ platforms/                Locally Removed           277 
+
+Directory modules/platforms
+ README                    Locally Removed           277 
+
+Moved MAKE_ALL_TARGET from the root modules (model/project) to the
+physical_platform module inside fpgaenv. In the various phyiscal
+platforms the default is set appropriately, e.g., exe for simulation,
+bit for real hardware. In the physical_platform module, MAKE_ALL_TARGET
+is declared as a 'global' parameter so it can be overridden in the
+model that requires an fpgaenv.

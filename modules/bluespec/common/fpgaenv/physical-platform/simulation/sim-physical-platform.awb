@@ -10,3 +10,5 @@
 %sources -t H   -v PUBLIC  sim-physical-platform.h
 %sources -t CPP -v PRIVATE sim-physical-platform.cpp
 
+%param --global MAKE_ALL_TARGET      exe       "Target of 'make all'.  Most likely bit, exe or vexe."
+
