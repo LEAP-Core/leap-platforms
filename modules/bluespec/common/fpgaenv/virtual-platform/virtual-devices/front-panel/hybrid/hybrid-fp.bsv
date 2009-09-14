@@ -1,3 +1,21 @@
+//
+// Copyright (C) 2009 Intel Corporation
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
+
 `include "low_level_platform_interface.bsh"
 `include "rrr.bsh"
 `include "physical_platform.bsh"
@@ -53,20 +71,13 @@ module mkFrontPanel#(LowLevelPlatformInterface llpi) (FrontPanel);
     // state
     Reg#(FRONTP_INPUT_STATE)    inputCache  <- mkReg(0);
     Reg#(FRONTP_LEDS)           ledState    <- mkReg(0);
-    Reg#(Bool)                  outputDirty <- mkReg(False);
 
     // stubs
     ServerStub_FRONT_PANEL server_stub <- mkServerStub_FRONT_PANEL(llpi.rrrServer);
     ClientStub_FRONT_PANEL client_stub <- mkClientStub_FRONT_PANEL(llpi.rrrClient);
 
-    // sync LED state
-    rule send_RRR_request (outputDirty == True);
-        client_stub.makeRequest_UpdateLEDs(zeroExtend(pack(ledState)));
-        outputDirty <= False;
-    endrule
-
     // read incoming updates for switch/button state
-    rule probe_updates (True);
+    rule probeUpdates (True);
         UINT32 data <- server_stub.acceptRequest_UpdateSwitchesButtons();
         inputCache <= unpack(data);
     endrule
@@ -87,7 +98,7 @@ module mkFrontPanel#(LowLevelPlatformInterface llpi) (FrontPanel);
         if (new_state != ledState)
         begin
             ledState <= new_state;
-            outputDirty <= True;
+            client_stub.makeRequest_UpdateLEDs(zeroExtend(pack(new_state)));
         end
     endmethod
 

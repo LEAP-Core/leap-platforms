@@ -101,7 +101,7 @@ DYNAMIC_PARAMS_DEVICE_CLASS::SendAllParams()
     UINT32 i = 0;
     while (paramValues[i])
     {
-        UINT8 ack = clientStub->sendParam(paramDictIDs[i], *paramValues[i]);
+        clientStub->sendParam(paramDictIDs[i], *paramValues[i]);
         i += 1;
     }
 }

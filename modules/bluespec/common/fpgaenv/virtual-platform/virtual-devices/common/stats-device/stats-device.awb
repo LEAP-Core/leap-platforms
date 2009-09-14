@@ -5,10 +5,9 @@
 
 %public  stats-device.bsv
 %public  stats-device.h
-%private stat-vector.cpp
 %private stats-device.cpp
 %private stats-device.rrr
 %private stats-device.dic
 
-%param --global STATS_ENABLED True "Enable Stat dumping?"
-%param --global STATS_SIZE 32 "Number of bits per Stat counter."
+%param --global STATS_ENABLED True  "Enable Stat dumping?"
+%param --global STATS_SIZE    28    "Number of bits per Stat counter."

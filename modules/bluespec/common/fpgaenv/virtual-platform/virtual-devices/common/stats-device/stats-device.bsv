@@ -18,6 +18,7 @@
 
 import FIFO::*;
 
+`include "asim/provides/librl_bsv_base.bsh"
 `include "asim/provides/low_level_platform_interface.bsh"
 `include "asim/provides/rrr.bsh"
 
@@ -26,46 +27,44 @@ import FIFO::*;
 `include "asim/dict/STATS.bsh"
 
 typedef Bit#(`STATS_SIZE) STAT_VALUE;
-typedef Bit#(8) STAT_VECTOR_INDEX;
+typedef 8 STAT_VECTOR_INDEX_SZ;
+typedef Bit#(STAT_VECTOR_INDEX_SZ) STAT_VECTOR_INDEX;
 
 
 // STATS: Send a dictionary-defined stat value back to hardware.
 
-// STATS
-
-// After Dump command is asserted dumping() becomes true. All stats should be
-// reported with reportStat() until finishDump() is called.
-
 interface STATS;
+    method ActionValue#(STATS_DEV_CMD) getCmd();
+    method STATS_DEV_CMD peekCmd();
+    method Action finishCmd(STATS_DEV_CMD cmd);
 
-    method Bool   gettingVectorLengths();
     method Action setVectorLength(STATS_DICT_TYPE stat, STAT_VECTOR_INDEX len);
-    method Action finishVectorLengths();
-
-    method Bool   dumping();
     method Action reportStat(STATS_DICT_TYPE stat, STAT_VECTOR_INDEX pos, STAT_VALUE value);
-    method Action finishDump();
-
-    method Bool   reseting();
-    method Action finishReseting();
-
-    method Bool   toggling();
-    method Action finishToggling();
-
-    method Action statOverflow(STATS_DICT_TYPE stat, STAT_VECTOR_INDEX pos);
-
 endinterface
 
 
-// mkStatsDevice
+//
+// Commands
+//
+typedef enum
+{
+    STATS_CMD_GETLENGTHS,
+    STATS_CMD_DUMP,
+    STATS_CMD_RESET,
+    STATS_CMD_TOGGLE
+}
+STATS_DEV_CMD
+    deriving (Eq, Bits);
 
-// Wraps all communication to the software.
 
-
-
+//
+// mkStatsDevice --
+//
+//     Wraps all communication to the software.
+//
 module mkStatsDevice#(LowLevelPlatformInterface llpi)
     //interface:
-                (STATS);
+    (STATS);
 
     // ****** State Elements ******
 
@@ -74,98 +73,83 @@ module mkStatsDevice#(LowLevelPlatformInterface llpi)
     ServerStub_STATS serverStub <- mkServerStub_STATS(llpi.rrrServer);
 
     // Track commands internally
-    Reg#(Bool) dumpState <- mkReg(False);
-    Reg#(Bool) lengthState <- mkReg(False);
-    Reg#(Bool) toggleState <- mkReg(False);
-    Reg#(Bool) resetState <- mkReg(False);
+    FIFO#(STATS_DEV_CMD) cmdQ <- mkFIFO();
 
 
-    // ****** Rules ******
-
-    rule beginVectorLengths (!lengthState);
-    
+    //
+    // Rules receiving incoming commands
+    //
+    rule beginVectorLengths (True);
         let dummy <- serverStub.acceptRequest_GetVectorLengths();
-        lengthState <= True;
-    
+        cmdQ.enq(STATS_CMD_GETLENGTHS);
     endrule
 
-    rule beginDump (!dumpState);
-    
+    rule beginDump (True);
         let dummy <- serverStub.acceptRequest_DumpStats();
-        dumpState <= True;
-    
+        cmdQ.enq(STATS_CMD_DUMP);
     endrule
-    
-    rule beginReset (!resetState);
-    
+
+    rule beginReset (True);
         let dummy <- serverStub.acceptRequest_Reset();
-        resetState <= True;
-    
+        cmdQ.enq(STATS_CMD_RESET);
     endrule
 
-    rule beginToggle (!toggleState);
-    
+    rule beginToggle (True);
         let dummy <- serverStub.acceptRequest_Toggle();
-        toggleState <= True;
-    
+        cmdQ.enq(STATS_CMD_TOGGLE);
     endrule
 
-    method Bool gettingVectorLengths();
-        return lengthState;
+
+    //
+    // Methods
+    //
+
+    //
+    // getCmd --
+    //     Retrieve the next command.
+    //
+    method ActionValue#(STATS_DEV_CMD) getCmd();
+        let c = cmdQ.first();
+        cmdQ.deq();
+    
+        return c;
     endmethod
     
+    method STATS_DEV_CMD peekCmd();
+        return cmdQ.first();
+    endmethod
+
+
+    //
+    // finishCmd --
+    //     Report that a command is complete.
+    //
+    method Action finishCmd(STATS_DEV_CMD cmd);
+        case (cmd)
+            STATS_CMD_GETLENGTHS:
+                noAction;
+
+            STATS_CMD_DUMP:
+                serverStub.sendResponse_DumpStats(0);
+
+            STATS_CMD_RESET:
+                serverStub.sendResponse_Reset(0);
+
+            STATS_CMD_TOGGLE:
+                serverStub.sendResponse_Toggle(0);
+        endcase
+    endmethod
+
+
+    //
+    // Module-specific actions
+    //
 
     method Action setVectorLength(STATS_DICT_TYPE id, STAT_VECTOR_INDEX len);
-    
         clientStub.makeRequest_SetVectorLength(zeroExtend(id), len);
-
-    endmethod
-    
-    
-    method Action finishVectorLengths();
-    
-        lengthState <= False;
-    
-    endmethod
-
-    
-    method Bool dumping();
-        return dumpState;
     endmethod
 
     method Action reportStat(STATS_DICT_TYPE id, STAT_VECTOR_INDEX idx, STAT_VALUE value);
-    
-        clientStub.makeRequest_ReportStat(zeroExtend(id), idx, value);
-
+        clientStub.makeRequest_ReportStat(zeroExtend(id), idx, zeroExtend(value));
     endmethod
-    
-    method Action finishDump();
-    
-        serverStub.sendResponse_DumpStats(0);
-        dumpState <= False;
-    
-    endmethod
-    
-    method Bool reseting();
-        return resetState;
-    endmethod
-
-    method Action finishReseting();
-        serverStub.sendResponse_Reset(0);
-        resetState <= False;
-    endmethod
-
-    method Bool toggling();
-        return toggleState;
-    endmethod
-
-    method Action finishToggling();
-        serverStub.sendResponse_Toggle(0);
-        toggleState <= False;
-    endmethod
-
-    method Action statOverflow(STATS_DICT_TYPE id, STAT_VECTOR_INDEX index);
-        clientStub.makeRequest_StatOverflow(zeroExtend(id), index);
-    endmethod
-
 endmodule

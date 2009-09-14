@@ -35,31 +35,25 @@ typedef class STAT_VECTOR_CLASS* STAT_VECTOR;
 class STAT_VECTOR_CLASS
 {
 
-    private:
-        // Identifying information for error messages.
-        UINT32  myID;
-        UINT8   length;
-        // The actual value.
-        UINT64* curValues;
-        // Have we seen
-        bool*   sawPosition;
-        bool*   everSawPosition;
+  private:
+    // Identifying information for error messages.
+    UINT32  myID;
+    UINT32  length;
+    // The actual value.
+    UINT64* curValues;
 
-    public:
+    // Have we seen ID?  Used to check for duplicates.
+    bool*   positionInitialized;
 
-        STAT_VECTOR_CLASS(UINT32 id, UINT8 l);
-        ~STAT_VECTOR_CLASS();
-        
-        void AddStatValue(UINT32 val, UINT8 pos);
-        void DumpFinished();
+  public:
+    STAT_VECTOR_CLASS(UINT32 id, UINT32 l);
+    ~STAT_VECTOR_CLASS();
 
-        UINT64* GetStatValues();
+    void InitPosition(UINT32 pos);
+    void AddStatValue(UINT32 val, UINT32 pos);
 
-        UINT64 GetStatValue(UINT8 pos);
-
-        UINT8   GetLength();
-        bool    EverSawPosition(UINT8 pos);
-
+    UINT64 GetStatValue(UINT32 pos);
+    UINT32 GetLength() const { return length; };
 };
 
 // this module handles gathering statistics. 
@@ -106,9 +100,8 @@ class STATS_DEVICE_SERVER_CLASS: public RRR_SERVER_CLASS,
     void Poll();
 
     // RRR server methods
-    void  ReportStat(UINT32 statID, UINT8 pos, UINT32 value);
-    void  StatOverflow(UINT32 statID, UINT8 pos);
-    void  SetVectorLength(UINT32 statID, UINT8 length);
+    void ReportStat(UINT32 statID, UINT32 pos, UINT32 value);
+    void SetVectorLength(UINT32 statID, UINT32 length);
 };
 
 // server stub

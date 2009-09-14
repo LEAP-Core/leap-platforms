@@ -1,11 +1,10 @@
 service PARAMS
 {
     ##
-    ## Send one dynamic parameter ID and value to the hardware.  An ACK
-    ## with no value is returned on each call.
+    ## Send one dynamic parameter ID and value to the hardware.
     ##
     server hw (bsv, method) <- sw (cpp, method)
     {
-        method sendParam(in UINT32[32] paramID, in UINT64[64] value, out UINT8[8] ack);
+        method sendParam(in UINT32[32] paramID, in UINT64[64] value);
     };
 };

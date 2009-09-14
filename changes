@@ -7484,3 +7484,38 @@ platforms the default is set appropriately, e.g., exe for simulation,
 bit for real hardware. In the physical_platform module, MAKE_ALL_TARGET
 is declared as a 'global' parameter so it can be overridden in the
 model that requires an fpgaenv.
+
+----------
+mcadler     Date: Mon Sep 14 09:21:36 EDT 2009  CSN: CSN-platforms-279
+                  Mon Sep 14 13:21:36 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid
+ hybrid-fp.bsv             Locally Modified          278 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/dynamic-parameters-device
+ dynamic-parameters-device.cpp Locally Modified          278 
+ dynamic-parameters-device.rrr Locally Modified          278 
+ dynamic-parameters-device.bsv Locally Modified          278 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/debug-scan-device
+ debug-scan-device.bsv     Locally Modified          278 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/stats-device
+ stats-device.rrr          Locally Modified          278 
+ stats-device.h            Locally Modified          278 
+ stats-device.awb          Locally Modified          278 
+ stats-device.bsv          Locally Modified          278 
+ stats-device.cpp          Locally Modified          278 
+ stat-vector.cpp           Locally Removed           278 
+
+- Refactor the driver interfaces so they all appear the same when possible.
+  Drivers now provide getCmd(), peekCmd() and finishCmd() methods.
+
+- Make statistics more robust:
+  - Verify that a dictionary entry is used at most once as a statistic.
+  - Simplify the protocol for determining the lengths of vector statistics.
+  - Make vector statistic output consistent by always emitting a value for
+    each vector element.
+
+- Eliminated many Bluespec scheduler warnings.

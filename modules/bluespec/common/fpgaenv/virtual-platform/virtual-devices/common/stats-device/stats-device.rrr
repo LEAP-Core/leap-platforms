@@ -13,6 +13,5 @@ service STATS
     {
         method SetVectorLength(in UINT32[32] statID, in UINT8[8] length);
         method ReportStat(in UINT32[32] statID, in UINT8[8] pos, in UINT32[32] value);
-        method StatOverflow(in UINT32[32] statID, in UINT8[8] pos);
     };
 };

@@ -82,6 +82,12 @@ STATS_DEVICE_SERVER_CLASS::SetupStats()
     // This call will cause the hardware to invoke SetStatVectorLength
     // for every stat. This will in turn instantiate the stats themselves.
     clientStub->GetVectorLengths(0);
+
+    // This initialization path will be used to allocate storage for non-vector
+    // statistics.  It will also be used to confirm that a statistics ID is
+    // used at most once.
+    clientStub->DumpStats(0);
+
     statsInited = true;
 }
 
@@ -123,38 +129,39 @@ STATS_DEVICE_SERVER_CLASS::Cleanup()
 void
 STATS_DEVICE_SERVER_CLASS::ReportStat(
     UINT32 statID,
-    UINT8 pos,
+    UINT32 pos,
     UINT32 value)
 {
-    //
-    // Add new value to running total
-    //
-    VERIFY(statValues[statID] != NULL, "stats device: got reported value for unknown stat ID: " << statID << ", Value: " << value);
+    // If no length set for statistic assume length 1.
+    if (statValues[statID] == NULL)
+    {
+        // Statistic must be non-vector or it would have been initialized by
+        // getVectorLengths.
+        VERIFY(pos == 0, "stats device: " << STATS_DICT::Name(statID) << " -- reference to uninitialized vector stat");
+        // Must be in initialization phase
+        VERIFY(! statsInited, "stats device: " << STATS_DICT::Name(statID) << " -- reference to uninitialized stat");
+
+        statValues[statID] = new STAT_VECTOR_CLASS(statID, 1);
+    }
+
+    if (! statsInited)
+    {
+        // Initialization pass.  Mark the bucket seen.
+        statValues[statID]->InitPosition(pos);
+    }
+
     statValues[statID]->AddStatValue(value, pos);
 }
 
-// StatOverflow
-void
-STATS_DEVICE_SERVER_CLASS::StatOverflow(
-    UINT32 statID,
-    UINT8 pos)
-{
-    //
-    // Add UINT32 MAX_INT to running total
-    //
-    
-    VERIFY(statValues[statID] != NULL, "stats device: got overflow for unknown stat ID: " << statID);
-    UINT32 mi = UINT_MAX;
-    statValues[statID]->AddStatValue(mi, pos);
-}
 // Done
 void
 STATS_DEVICE_SERVER_CLASS::SetVectorLength(
     UINT32 statID,
-    UINT8 len)
+    UINT32 len)
 {
 
     // Instantitate a new stat vector of the given length.
+    VERIFY(statValues[statID] == NULL, "stats device: vector length set twice for stat ID: " << statID);
     statValues[statID] = new STAT_VECTOR_CLASS(statID, len);
 }
 
@@ -169,15 +176,7 @@ STATS_DEVICE_SERVER_CLASS::Poll()
 void
 STATS_DEVICE_SERVER_CLASS::DumpStats()
 {
-    UINT8 ack = clientStub->DumpStats(0);
-    
-    for (int x = 0; x < STATS_DICT_ENTRIES; x++)
-    {
-        if (statValues[x] != NULL)
-        {
-            statValues[x]->DumpFinished();
-        }
-    }
+    clientStub->DumpStats(0);
 }
 
 
@@ -207,12 +206,9 @@ STATS_DEVICE_SERVER_CLASS::EmitFile()
         if ((i != STATS_NULL) && (statName != NULL) && statValues[i] != NULL)
         {
             statsFile << "\"" << statStr << "\"," << statName;
-            for (UINT8 x = 0; x < statValues[i]->GetLength(); x++)
+            for (UINT32 x = 0; x < statValues[i]->GetLength(); x++)
             {
-                if (statValues[i]->EverSawPosition(x))
-                {
-                    statsFile << "," << statValues[i]->GetStatValue(x);
-                }
+                statsFile << "," << statValues[i]->GetStatValue(x);
             }
             statsFile << endl;
         }
@@ -225,4 +221,58 @@ void
 StatsEmitFile()
 {
     STATS_DEVICE_SERVER_CLASS::GetInstance()->EmitFile();
+}
+
+
+
+// ========================================================================
+//
+// Storage for statistics vectors.
+//
+// ========================================================================
+
+STAT_VECTOR_CLASS::STAT_VECTOR_CLASS(UINT32 id, UINT32 l) : 
+    myID(id),
+    length(l),
+    curValues(new UINT64[l]),
+    positionInitialized(new bool[l])
+{
+    for (int x = 0; x < l; x++)
+    {
+        curValues[x] = 0;
+        positionInitialized[x] = false;
+    }
+}
+
+STAT_VECTOR_CLASS::~STAT_VECTOR_CLASS() 
+{ 
+    delete [] curValues; 
+    delete [] positionInitialized; 
+}
+
+void
+STAT_VECTOR_CLASS::AddStatValue(UINT32 val, UINT32 pos) 
+{ 
+    VERIFY(pos < length, "stats device: stat " << STATS_DICT::Name(myID) << " position out of bounds. Given: " << pos << " Max: " << length); 
+    VERIFY(positionInitialized[pos],  "stats device: stat " << STATS_DICT::Name(myID) << ", position " << pos << " -- reference to uninitialized entry");
+
+    curValues[pos] += val; 
+}
+
+UINT64
+STAT_VECTOR_CLASS::GetStatValue(UINT32 pos)  
+{ 
+    VERIFY(pos < length, "stats device: stat " << STATS_DICT::Name(myID) << " position out of bounds. Given: " << pos << " Max: " << length); 
+    VERIFY(positionInitialized[pos],  "stats device: stat " << STATS_DICT::Name(myID) << ", position " << pos << " -- reference to uninitialized entry");
+
+    return curValues[pos]; 
+}
+
+void
+STAT_VECTOR_CLASS::InitPosition(UINT32 pos)  
+{ 
+    VERIFY(pos < length, "stats device: stat " << STATS_DICT::Name(myID) << " position out of bounds. Given: " << pos << " Max: " << length); 
+    VERIFY(! positionInitialized[pos], "stats device: Duplicate entry " << STATS_DICT::Name(myID) << ", postion " << pos);
+
+    positionInitialized[pos] = true;
 }

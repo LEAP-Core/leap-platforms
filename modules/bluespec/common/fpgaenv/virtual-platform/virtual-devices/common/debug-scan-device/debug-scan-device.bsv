@@ -18,6 +18,7 @@
 
 import FIFO::*;
 
+`include "asim/provides/librl_bsv_base.bsh"
 `include "asim/provides/low_level_platform_interface.bsh"
 
 `include "asim/dict/DEBUG_SCAN.bsh"
@@ -32,25 +33,29 @@ import FIFO::*;
 // Scanning begins when the dump command is received.  The device should be
 // signaled when the scan is complete via finishScan().
 //
+
 interface DEBUG_SCAN_DEVICE;
+    method ActionValue#(DEBUG_SCAN_CMD) getCmd();
+    method DEBUG_SCAN_CMD peekCmd();
+    method Action finishCmd(DEBUG_SCAN_CMD cmd);
 
-  method Bool   scanning();
-  method Action finishScan();
-  method Action scanValue(DEBUG_SCAN_DICT_TYPE id, DEBUG_SCAN_VALUE value);
-
+    method Action scanValue(DEBUG_SCAN_DICT_TYPE id, DEBUG_SCAN_VALUE value);
 endinterface
+
+
+//
+// Commands
+//
+typedef enum
+{
+    DEBUG_SCAN_CMD_DOSCAN
+}
+DEBUG_SCAN_CMD
+    deriving (Eq, Bits);
 
 
 typedef 8 DEBUG_SCAN_VALUE_SZ;
 typedef Bit#(DEBUG_SCAN_VALUE_SZ) DEBUG_SCAN_VALUE;
-
-typedef enum
-{
-    DS_IDLE,
-    DS_DUMPING
-}
-DEBUG_SCAN_STATE
-    deriving (Eq, Bits);
 
 
 //
@@ -69,35 +74,40 @@ module mkDebugScanDevice#(LowLevelPlatformInterface llpi)
     ServerStub_DEBUG_SCAN serverStub <- mkServerStub_DEBUG_SCAN(llpi.rrrServer);
 
 
-    // Our internal state
-    Reg#(DEBUG_SCAN_STATE) state <- mkReg(DS_IDLE);
-    
+    //
+    // Methods
+    //
 
-    // ****** Rules ******
-  
-    rule beginDump (state == DS_IDLE);
-    
+    //
+    // getCmd --
+    //     Retrieve the next command.
+    //
+    method ActionValue#(DEBUG_SCAN_CMD) getCmd();
+        // There is only one command...
         let dummy <- serverStub.acceptRequest_Scan();
-        state <= DS_DUMPING;
-    
-    endrule
-    
-    method Bool scanning;
-        return state == DS_DUMPING;
+        return DEBUG_SCAN_CMD_DOSCAN;
     endmethod
 
+    method DEBUG_SCAN_CMD peekCmd();
+        let dummy = serverStub.peekRequest_Scan();
+        return DEBUG_SCAN_CMD_DOSCAN;
+    endmethod
+
+
+    //
+    // finishCmd --
+    //     Report that a command is complete.
+    //
+    method Action finishCmd(DEBUG_SCAN_CMD cmd);
+        serverStub.sendResponse_Scan(0);
+    endmethod
+
+
+    //
+    // Module-specific actions
+    //
 
     method Action scanValue(DEBUG_SCAN_DICT_TYPE id, DEBUG_SCAN_VALUE value);
-    
         clientStub.makeRequest_Send(zeroExtend(id), value);
-
     endmethod
-    
-    method Action finishScan();
-    
-        serverStub.sendResponse_Scan(0);
-        state <= DS_IDLE;
-    
-    endmethod
-    
 endmodule

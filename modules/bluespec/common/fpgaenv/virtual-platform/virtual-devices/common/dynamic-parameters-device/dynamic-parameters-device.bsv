@@ -30,41 +30,36 @@ typedef struct
     PARAMS_DICT_TYPE paramID;
     UINT64 value;
 }
-    DYN_PARAM
-               deriving (Eq, Bits);
+DYN_PARAM
+    deriving (Eq, Bits);
 
 
 interface DYNAMIC_PARAMETERS;
-
-    // server methods
-    method DYN_PARAM getParameter();
-    method Action nextParameter();
-
+    method ActionValue#(DYN_PARAM) getCmd();
+    method DYN_PARAM peekCmd();
+    method Action finishCmd();
 endinterface
 
-// mkDynamicParameters
+
+// mkDynamicParametersDevice
 module mkDynamicParametersDevice#(LowLevelPlatformInterface llpi)
     // interface:
-        (DYNAMIC_PARAMETERS);
+    (DYNAMIC_PARAMETERS);
 
     // Communication to our RRR server
     ServerStub_PARAMS server_stub <- mkServerStub_PARAMS(llpi.rrrServer);
   
-    method DYN_PARAM getParameter();
-
-        let req = server_stub.peekRequest_sendParam();
-        DYN_PARAM p;
-        p.paramID = truncate(pack(req.paramID));
-        p.value = req.value;
-        return p;
-    
-    endmethod
-    
-    method Action nextParameter();
-    
+    method ActionValue#(DYN_PARAM) getCmd();
         let req <- server_stub.acceptRequest_sendParam();
-        server_stub.sendResponse_sendParam(0);
-
+        return DYN_PARAM { paramID: truncate(pack(req.paramID)), value: req.value };
     endmethod
-
+    
+    method DYN_PARAM peekCmd();
+        let req = server_stub.peekRequest_sendParam();
+        return DYN_PARAM { paramID: truncate(pack(req.paramID)), value: req.value };
+    endmethod
+    
+    method Action finishCmd();
+        noAction;
+    endmethod
 endmodule
