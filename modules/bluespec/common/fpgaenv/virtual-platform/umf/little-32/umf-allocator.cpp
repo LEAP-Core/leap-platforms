@@ -43,6 +43,7 @@ UMF_ALLOCATOR_CLASS::UMF_ALLOCATOR_CLASS()
     freeList = pool;
     for (int i = 0; i < UMF_POOL_SIZE-1; i++)
     {
+        pool[i].Init(this);
         pool[i].SetNext(&pool[i+1]);
     }
     pool[UMF_POOL_SIZE-1].SetNext(NULL);
@@ -62,6 +63,14 @@ UMF_ALLOCATOR_CLASS::~UMF_ALLOCATOR_CLASS()
     }
     pool = NULL;
     freeList = NULL;
+}
+
+// init
+void
+UMF_ALLOCATOR_CLASS::Init(
+    PLATFORMS_MODULE p)
+{
+    parent = p;
 }
 
 // allocate a new message

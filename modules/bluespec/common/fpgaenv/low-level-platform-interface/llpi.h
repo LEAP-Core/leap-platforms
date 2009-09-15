@@ -57,7 +57,6 @@ class LLPI_CLASS: public PLATFORMS_MODULE_CLASS
     // Init - bring up the monitor thread
     void Init();
     
-    
     // accessors
     PHYSICAL_DEVICES   GetPhysicalDevices() { return &physicalDevices; }
     REMOTE_MEMORY      GetRemoteMemory()    { return &remoteMemory; }
@@ -65,8 +64,9 @@ class LLPI_CLASS: public PLATFORMS_MODULE_CLASS
     RRR_CLIENT         GetRRRClient()       { return &rrrClient; }
     RRR_SERVER_MONITOR GetRRRServer()       { return &rrrServer; }
 
-    // poll
+    // misc
     void Poll();
+    void KillMonitorThread();
 };
 
 #endif

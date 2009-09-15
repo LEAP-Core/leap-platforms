@@ -7519,3 +7519,32 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/commo
     each vector element.
 
 - Eliminated many Bluespec scheduler warnings.
+
+----------
+aparasha    Date: Tue Sep 15 17:49:10 EDT 2009  CSN: CSN-platforms-280
+                  Tue Sep 15 21:49:10 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ clock-buffers.v           Locally Added               0 
+ hardware-fpga-components-virtex5.awb Locally Modified          279 
+ clock-buffers.bsv         Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/low-level-platform-interface
+ llpi.cpp                  Locally Modified          279 
+ llpi.h                    Locally Modified          279 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/little-32
+ umf-little-32.cpp         Locally Modified          279 
+ umf-allocator.cpp         Locally Modified          279 
+ umf-little-32.h           Locally Modified          279 
+ umf-allocator.h           Locally Modified          279 
+
+- Added clock buffering modules to Virtex 5 FPGA components library.
+
+- Added explicit pthread cancelation point to Monitor thread after
+  each Poll. This may fix some exit-time segfaults.
+
+- Added the UMF Allocator and all UMF messages in the allocator's pool
+  to the Platforms module hierarchy so that UMF messages can use
+  CallbackExit() to exit cleanly if they see an error.

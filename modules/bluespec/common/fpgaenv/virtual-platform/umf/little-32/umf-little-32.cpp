@@ -54,6 +54,14 @@ UMF_MESSAGE_CLASS::~UMF_MESSAGE_CLASS()
     delete [] message;
 }
 
+// init
+void
+UMF_MESSAGE_CLASS::Init(
+    PLATFORMS_MODULE p)
+{
+    parent = p;
+}
+
 // clear all message data
 void
 UMF_MESSAGE_CLASS::Clear()
@@ -99,7 +107,7 @@ UMF_MESSAGE_CLASS::DecodeHeader(
     if (length > UMF_MAX_LENGTH)
     {
         cerr << "umf: message size too long: " << length << endl;
-        exit(1);
+        CallbackExit(1);
     }
 }
 
@@ -118,7 +126,7 @@ UMF_MESSAGE_CLASS::DecodeHeader(
     if (length > UMF_MAX_LENGTH)
     {
         cerr << "umf: message size too long: " << length << endl;
-        exit(1);
+        CallbackExit(1);
     }
 }
 
@@ -184,7 +192,7 @@ UMF_MESSAGE_CLASS::AppendBytes(
     if ((writeIndex + nbytes) > length)
     {
         cerr << "umf: message write overflow" << endl;
-        exit(1);
+        CallbackExit(1);
     }
 
     memcpy(&message[writeIndex], data, nbytes);
@@ -220,7 +228,7 @@ UMF_MESSAGE_CLASS::AppendUINT(
     if (nbytes > 8)
     {
         cerr << "umf: AppendUINT can take 8 bytes maximum" << endl;
-        exit(1);
+        CallbackExit(1);
     }
 
     AppendBytes(nbytes, (unsigned char*) &data);
@@ -231,6 +239,14 @@ UMF_MESSAGE_CLASS::AppendChunk(
     UMF_CHUNK chunk)
 {
     AppendBytes(sizeof(UMF_CHUNK), (unsigned char*) &chunk);
+}
+
+void
+UMF_MESSAGE_CLASS::AppendChunks(
+    int nchunks,
+    UMF_CHUNK chunks[])
+{
+    AppendBytes(nchunks * sizeof(UMF_CHUNK), (unsigned char*) chunks);
 }
 
 //
@@ -261,7 +277,7 @@ UMF_MESSAGE_CLASS::CheckExtractSanity(
              << readIndex << " writeIndex = " << writeIndex
              << " nbytes = " << nbytes << endl;
         Print(cerr);
-        exit(1);
+        CallbackExit(1);
     }
 
     if (writeIndex != length)
@@ -316,7 +332,7 @@ UMF_MESSAGE_CLASS::ExtractUINT(
     if (nbytes > sizeof(UINT64))
     {
         cerr << "umf: ExtractUINT can take 8 bytes maximum" << endl;
-        exit(1);
+        CallbackExit(1);
     }
 
     // it's too risky to do a direct typecast here

@@ -16,7 +16,27 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+#include <signal.h>
+
 #include "asim/provides/low_level_platform_interface.h"
+#include "asim/provides/umf.h"
+
+//
+// FIXME: Applications in which the client thread forces the monitor
+//        thread to exit at the end of execution (WAIT_FOR_HW == 0)
+//        segfault at the end, possibly because LLPI's submodules'
+//        destructors are called before LLPI's destructor (which
+//        cancels the Monitor thread). This means the Monitor thread
+//        is still alive for a short duration after the submodules
+//        cease to exist.
+//
+//        The problem has been patched locally in some implementations
+//        of lower-level modules, but we need a more general solution.
+//
+
+// UGLY: maintain a global pointer to LLPI's instance
+//       so that the signal handler can get access to it
+static LLPI llpi_instance = NULL;
 
 // *** trampolene function for LLPI's Main() ***
 void * LLPI_Main(void *argv)
@@ -24,6 +44,12 @@ void * LLPI_Main(void *argv)
     LLPI instance = LLPI(argv);
     instance->Main();
     return NULL;
+}
+
+// *** signal handler for Ctrl-C ***
+void LLPISignalHandler(int arg)
+{
+    llpi_instance->CallbackExit(0);
 }
 
 LLPI_CLASS::LLPI_CLASS() :
@@ -39,11 +65,13 @@ LLPI_CLASS::LLPI_CLASS() :
     // the service modules need this link since they
     // are statically instantiated
     RRRClient = &rrrClient;
+
+    llpi_instance = this;
 }
 
 LLPI_CLASS::~LLPI_CLASS()
 {
-    pthread_cancel(monitorThreadID);
+     KillMonitorThread();
 }
 
 void
@@ -51,7 +79,14 @@ LLPI_CLASS::Init()
 {
 
     PLATFORMS_MODULE_CLASS::Init();
-    
+
+    // setup signal handler to catch SIGINT
+    if (signal(SIGINT, LLPISignalHandler) == SIG_ERR)
+    {
+        perror("signal");
+        CallbackExit(1);
+    }
+
     // spawn off Monitor/Service thread which calls LLPI's Main()
     if (pthread_create(&monitorThreadID,
                        NULL,
@@ -64,18 +99,36 @@ LLPI_CLASS::Init()
     
     // RRR needs to know the monitor thread ID
     rrrClient.SetMonitorThreadID(monitorThreadID);
+
+    // initialize UMF_ALLOCATOR (FIXME: could do this cleaner)
+    UMF_ALLOCATOR_CLASS::GetInstance()->Init(this);
     
 }
+
+// cleanup
+void LLPI_CLASS::KillMonitorThread()
+{
+    if (pthread_self() == monitorThreadID)
+    {
+        ASIMERROR("llpi: Monitor thread trying to cancel itself!\n");
+    }
+    else
+    {
+        pthread_cancel(monitorThreadID);
+    }
+}
+
+// main
 void
 LLPI_CLASS::Main()
 {
     // infinite scheduler loop
     while (true)
     {
+        pthread_testcancel(); // set cancelation point
         Poll();
     }
 }
-
 
 void
 LLPI_CLASS::Poll()

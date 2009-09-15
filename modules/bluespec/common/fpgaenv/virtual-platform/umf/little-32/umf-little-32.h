@@ -34,6 +34,7 @@
 #include <iostream>
 
 #include "asim/syntax.h"
+#include "platforms-module.h"
 
 using namespace std;
 
@@ -48,7 +49,7 @@ typedef UINT32 UMF_CHUNK;
 // ================ UMF Message ================
 
 typedef class UMF_MESSAGE_CLASS* UMF_MESSAGE;
-class UMF_MESSAGE_CLASS
+class UMF_MESSAGE_CLASS: public PLATFORMS_MODULE_CLASS
 {
   private:   
     // header info
@@ -70,6 +71,8 @@ class UMF_MESSAGE_CLASS
     UMF_MESSAGE_CLASS();
     ~UMF_MESSAGE_CLASS();
     
+    void Init(PLATFORMS_MODULE p);
+
     // clear
     void Clear();
     
@@ -107,6 +110,7 @@ class UMF_MESSAGE_CLASS
     void               AppendUINT64(UINT64 data);
     void               AppendUINT(UINT64 data, int nbytes);
     void               AppendChunk(UMF_CHUNK chunk);
+    void               AppendChunks(int nchunks, UMF_CHUNK chunks[]);
     
     // demarshallers
     void               StartExtract();

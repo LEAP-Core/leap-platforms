@@ -35,6 +35,7 @@
 #include "asim/trace.h"
 
 #include "asim/provides/umf.h"
+#include "platforms-module.h"
 
 using namespace std;
 
@@ -43,7 +44,8 @@ using namespace std;
 // ================ UMF Allocator ================
 
 typedef class UMF_ALLOCATOR_CLASS* UMF_ALLOCATOR;
-class UMF_ALLOCATOR_CLASS: public TRACEABLE_CLASS
+class UMF_ALLOCATOR_CLASS: public PLATFORMS_MODULE_CLASS,
+                           public TRACEABLE_CLASS
 {
   private:
     // self-instantiation
@@ -63,6 +65,8 @@ class UMF_ALLOCATOR_CLASS: public TRACEABLE_CLASS
     // constructors and destructor
     UMF_ALLOCATOR_CLASS();
     ~UMF_ALLOCATOR_CLASS();
+
+    void Init(PLATFORMS_MODULE p);
 
     // allocation and de-allocation
     UMF_MESSAGE New();
