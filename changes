@@ -7548,3 +7548,44 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/little-32
 - Added the UMF Allocator and all UMF messages in the allocator's pool
   to the Platforms module hierarchy so that UMF messages can use
   CallbackExit() to exit cleanly if they see an error.
+
+----------
+kfleming    Date: Thu Sep 17 13:47:17 KST 2009  CSN: CSN-platforms-281
+                  Thu Sep 17 04:47:17 UTC 2009
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-hybrid-htg-v5-pcie.apm Locally Modified          280 
+
+Directory modules/bluespec/librl/storage/cache
+ rl-cache.bsv              Locally Modified          280 
+
+Directory modules/bluespec/common/fpgaenv/toplevel-wires/xilinx
+ xilinx.xst                Locally Modified          280 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup/serial
+ xilinx.sdc                Locally Added               0 
+ xilinx.sdf                Locally Added               0 
+ xilinx.xst                Locally Modified          280 
+ xilinx-xup-serial.awb     Locally Modified          280 
+ xilinx-xup-serial.ucf     Locally Modified          280 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup
+ xilinx.xst                Locally Modified          280 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-disabled
+ htg-v5-pcie-disabled.sdf  Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled
+ xilinx.sdf                Locally Added               0 
+ xilinx.xst                Locally Modified          280 
+ htg-v5-pcie-enabled.sdc   Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr2-sdram
+ ddr2_sdram.sdc            Locally Added               0 
+
+Directory modules/project
+ SCons.top.template        Locally Modified          280 
+
+
+Adding support for more general build process and building synplify

@@ -7,7 +7,8 @@ Version=2.1
 Type=HAsim
 Name=Hybrid HTG-v5-PCIe FPGA Environment
 Class=Asim::Model
-DefaultBenchmark=0
+DefaultBenchmark=
+DefaultRunOpts=
 
 [Model]
 DefaultAttributes=bluespec htg-v5-pcie
@@ -128,3 +129,4 @@ Packagehint=platforms
 [PCI Express Physical Device (mmap-based)]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express-new/pci-express-device-mmap.awb
 Packagehint=platforms
+

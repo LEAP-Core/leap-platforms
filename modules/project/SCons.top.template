@@ -18,7 +18,7 @@ defs = {
     'BUILD_DIR'          : '@BUILD_DIR@',
     'CONNECTION_SCRIPT'  : 'hasim-connect',
     'COST_TABLE'         : '@COST_TABLE@',
-    'FPGA_PART'          : '@FPGA_PART@',
+    'FPGA_PART_XILINX'   : '@FPGA_PART_XILINX@',
     'GIVEN_BMMS'         : '@GIVEN_BMMS@', 
     'GIVEN_ELFS'         : '@GIVEN_ELFS@',
     'GIVEN_CS'           : '@GIVEN_CS@',
@@ -277,8 +277,7 @@ Export('env ' + " ".join(utility_names))
 wrapper_v = SConscript([env['DEFS']['ROOT_DIR_HW_MODEL'] + '/SConscript'])
 
 BuildDir(TMP_BSC_DIR, '.', duplicate=0)
-
-
+env['ENV']['BUILD_DIR'] = env['DEFS']['BUILD_DIR']  # need to set the builddir for synplify
 
 
 ############################################################################
@@ -370,16 +369,25 @@ TMP_XILINX_DIR = env['DEFS']['TMP_XILINX_DIR']
 XILINX_APM_NAME = TMP_XILINX_DIR + '/' + APM_NAME
 XST_FILE = env['DEFS']['XST_FILE']
 
-FPGA_PART = env['DEFS']['FPGA_PART']
+FPGA_PART_XILINX = env['DEFS']['FPGA_PART_XILINX']
 
-xilinx_ngc = env.Command(
+
+if(env['ENV'].has_key('USE_SYNPLIFY')):
+    top_netlist = env.Command(
+    XILINX_APM_NAME + '.edf',
+    wrapper_v + clean_split(env['DEFS']['GIVEN_VS'], sep = ' ') + ['config/' + APM_NAME + '.synplify.prj'],
+    [ Delete(XILINX_APM_NAME + '.srp'),
+      Delete(XILINX_APM_NAME + '_xst.xrpt'),
+      'synplify_pro -batch config/' + APM_NAME + '.synplify.prj' ])
+else:
+    top_netlist = env.Command(
     XILINX_APM_NAME + '.ngc',
     wrapper_v + clean_split(env['DEFS']['GIVEN_VS'], sep = ' ') + ['config/' + APM_NAME + '.xst'],
     [ Delete(XILINX_APM_NAME + '.srp'),
       Delete(XILINX_APM_NAME + '_xst.xrpt'),
       'xst -ifn config/' + APM_NAME + '.xst -ofn ' + XILINX_APM_NAME + '.srp' ])
 
-Clean(xilinx_ngc,  XILINX_APM_NAME + '.srp')
+Clean(top_netlist,  XILINX_APM_NAME + '.srp')
 
 
 # Concatenate UCF files
@@ -394,14 +402,14 @@ if len(env['DEFS']['GIVEN_BMMS']) != 0:
 else:
     bmm = ''
 
-
 xilinx_ngd = env.Command(
     XILINX_APM_NAME + '.ngd',
-    xilinx_ngc + xilinx_ucf,
+    top_netlist + xilinx_ucf,
     [ Delete(XILINX_APM_NAME + '.bld'),
       Delete(XILINX_APM_NAME + '_ngdbuild.xrpt'),
-      'ngdbuild -p ' + FPGA_PART + ' -sd ' + env['DEFS']['ROOT_DIR_HW_MODEL'] + ' -uc ' + XILINX_APM_NAME + '.ucf ' + bmm + ' $SOURCE $TARGET',
+      'ngdbuild -p ' + FPGA_PART_XILINX + ' -sd ' + env['DEFS']['ROOT_DIR_HW_MODEL'] + ' -uc ' + XILINX_APM_NAME + '.ucf ' + bmm + ' $SOURCE $TARGET',
       Move(TMP_XILINX_DIR + '/netlist.lst', 'netlist.lst') ])
+
 
 Depends(xilinx_ngd, env['DEFS']['GIVEN_BMMS']);
 
@@ -439,7 +447,7 @@ xilinx_map = env.Command(
       Delete(XILINX_APM_NAME + '_map.ncd'),
       Delete(XILINX_APM_NAME + '_map.ngm'),
       Delete(XILINX_APM_NAME + '_map.psr'),
-      'map -cm balanced -timing ' + smartguide + ' -t ' + env['DEFS']['COST_TABLE'] + ' ' +  env['DEFS']['MAP_OPTIONS'] + ' -logic_opt on -ol high -register_duplication -retiming on -pr b -c 100 -p ' + FPGA_PART + ' -o $TARGET $SOURCE ' + XILINX_APM_NAME + '.pcf' ])
+      'map -cm balanced -timing ' + smartguide + ' -t ' + env['DEFS']['COST_TABLE'] + ' ' +  env['DEFS']['MAP_OPTIONS'] + ' -logic_opt on -ol high -register_duplication -retiming on -pr b -c 100 -p ' + FPGA_PART_XILINX + ' -o $TARGET $SOURCE ' + XILINX_APM_NAME + '.pcf' ])
 
 Clean(xilinx_map, TMP_XILINX_DIR + '/xilinx_device_details.xml')
 
