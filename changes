@@ -7589,3 +7589,16 @@ Directory modules/project
 
 
 Adding support for more general build process and building synplify
+
+----------
+aparasha    Date: Tue Sep 22 14:37:56 EDT 2009  CSN: CSN-platforms-282
+                  Tue Sep 22 18:37:56 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ user-clock-pll.bsv        Locally Added               0 
+ user-clock.bsv            Locally Modified          281 
+ user-clock-pll.v          Locally Added               0 
+ hardware-fpga-components-virtex5.awb Locally Modified          281 
+
+Added support for using PLLs as frequency synthesizers.

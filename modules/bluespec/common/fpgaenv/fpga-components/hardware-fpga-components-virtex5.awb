@@ -8,11 +8,12 @@
 %public bram.bsv bram-multi-read.bsv
 %public lutram.bsv
 %public alu-support.bsv
-%public user-clock.bsv
+%public user-clock.bsv user-clock-pll.bsv
 %public clock-buffers.bsv
 
 %private Bram.v
 %private user-clock-xilinx-virtex5.v
+%private user-clock-pll.v
 %private clock-buffers.v
 
 %param --global COST_TABLE 1 "Xilinx place and route cost table"

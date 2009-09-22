@@ -89,7 +89,6 @@ module mkUserClock_Ratio#(Integer inFreq,
 
 endmodule
 
-
 //
 // mkUserClock --
 //   Generate a user clock based on the incoming frequency that is multiplied
@@ -125,7 +124,6 @@ module mkUserClock#(Integer inFreq, Integer clockMultiplier, Integer clockDivide
     return clk;
 
 endmodule
-
 
 //
 // mkUserClockFromCrystal --
