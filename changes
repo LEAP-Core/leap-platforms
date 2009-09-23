@@ -7602,3 +7602,23 @@ Directory modules/bluespec/common/fpgaenv/fpga-components
  hardware-fpga-components-virtex5.awb Locally Modified          281 
 
 Added support for using PLLs as frequency synthesizers.
+
+----------
+mcadler     Date: Wed Sep 23 10:08:00 EDT 2009  CSN: CSN-platforms-283
+                  Wed Sep 23 14:08:00 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/toplevel-wires/xilinx
+ htg-v5-pcie-toplevel-wires.awb Locally Modified          282 
+ xup-toplevel-wires.awb    Locally Modified          282 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup
+ xup-physical-platform.awb Locally Modified          282 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled
+ htg-v5-pcie-enabled.awb   Locally Modified          282 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/null
+ null-physical-platfrom.awb Locally Modified          282 
+
+Use Elliott's new FPGA_PART_XILINX instead of FPGA_PART.

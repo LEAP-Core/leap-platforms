@@ -14,7 +14,7 @@
 %public htg-v5-pcie-TopLevelWires.bsv
 %private htg-v5-pcie.ucf xilinx.ut xilinx.xst xilinx.download
 
-%param FPGA_PART     "xc5vlx50t-ff1136" "FPGA Part ID"
-%param FPGA_POSITION 2                  "FPGA Position (in Xilinx iMPACT)"
+%param FPGA_PART_XILINX  "xc5vlx50t-ff1136" "FPGA Part ID"
+%param FPGA_POSITION     2                  "FPGA Position (in Xilinx iMPACT)"
 
 %AWB_END

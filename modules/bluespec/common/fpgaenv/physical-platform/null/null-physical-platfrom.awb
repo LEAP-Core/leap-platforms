@@ -9,6 +9,6 @@
 
 %param --global MAKE_ALL_TARGET      bit       "Target of 'make all'.  Most likely bit, exe or vexe."
 
-%param FPGA_PART     "NULL-SIMULATION-ONLY" "FPGA Part ID"
-%param FPGA_POSITION 3                  "FPGA Position (in Xilinx iMPACT)"
-%param MAP_OPTIONS   ""    "Extra Map Options"
+%param FPGA_PART_XILINX  "NULL-SIMULATION-ONLY" "FPGA Part ID"
+%param FPGA_POSITION     3                  "FPGA Position (in Xilinx iMPACT)"
+%param MAP_OPTIONS       ""    "Extra Map Options"
