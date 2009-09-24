@@ -25,8 +25,9 @@ import Clocks::*;
 // verilog only
 import "BVI"
 module mkUserClock_Ratio_PLL#(Integer inFreq,
+                              Integer clockInDivider,
                               Integer clockMultiplier,
-                              Integer clockDivider)
+                              Integer clockOutDivider)
     // Interface:
         (UserClock);
 
@@ -37,8 +38,9 @@ module mkUserClock_Ratio_PLL#(Integer inFreq,
 
     // Convert frequency (MHz) to period (ns)
     parameter CR_CLKIN_PERIOD = 1000 / inFreq;
-    parameter CR_CLKOUT_MULTIPLY = clockMultiplier;
-    parameter CR_CLKOUT_DIVIDE = clockDivider;
+    parameter CR_DIVCLK_DIVIDE = clockInDivider;
+    parameter CR_CLKFBOUT_MULT = clockMultiplier;
+    parameter CR_CLKOUT0_DIVIDE = clockOutDivider;
 
 endmodule
 
@@ -51,7 +53,11 @@ endmodule
 //
 //   Picks the best source given a few standard ratios.
 //
-module mkUserClock_PLL#(Integer inFreq, Integer clockMultiplier, Integer clockDivider)
+module mkUserClock_PLL#(Integer inFreq,
+                        Integer clockInDivider,
+                        Integer clockMultiplier,
+                        Integer clockOutDivider)
+    // Interface:
         (UserClock);
 
     UserClock clk = ?;
@@ -60,12 +66,12 @@ module mkUserClock_PLL#(Integer inFreq, Integer clockMultiplier, Integer clockDi
 
     // FPGA synthesis...
 
-    if (clockMultiplier ==  clockDivider)
+    if ((clockInDivider == 1) && (clockMultiplier ==  clockOutDivider))
         clk <- mkUserClock_Same;
-    else if (clockMultiplier == 1 && clockDivider == 2)
+    else if (clockInDivider == 1 && clockMultiplier == 1 && clockOutDivider == 2)
         clk <- mkUserClock_DivideByTwo;
     else
-        clk <- mkUserClock_Ratio_PLL(inFreq, clockMultiplier, clockDivider);
+        clk <- mkUserClock_Ratio_PLL(inFreq, clockInDivider, clockMultiplier, clockOutDivider);
 
   `else
 

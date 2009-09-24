@@ -18,8 +18,9 @@ module clk_pll(CLKIN1_IN,
               LOCKED_OUT);
 
    parameter PLL_CLKIN_PERIOD = 20;
-   parameter PLL_CLKOUT_MULTIPLY = 2;
-   parameter PLL_CLKOUT_DIVIDE = 1;
+   parameter PLL_DIVCLK_DIVIDE = 1;
+   parameter PLL_CLKFBOUT_MULT = 2;
+   parameter PLL_CLKOUT0_DIVIDE = 1;
 
     input CLKIN1_IN;
     input RST_IN;
@@ -76,12 +77,12 @@ module clk_pll(CLKIN1_IN,
    defparam PLL_ADV_INST.BANDWIDTH = "OPTIMIZED";
    defparam PLL_ADV_INST.CLKIN1_PERIOD = PLL_CLKIN_PERIOD;
    defparam PLL_ADV_INST.CLKIN2_PERIOD =  5.000;
-   defparam PLL_ADV_INST.CLKOUT0_DIVIDE = PLL_CLKOUT_DIVIDE;
+   defparam PLL_ADV_INST.CLKOUT0_DIVIDE = PLL_CLKOUT0_DIVIDE;
    defparam PLL_ADV_INST.CLKOUT0_PHASE = 0.000;
    defparam PLL_ADV_INST.CLKOUT0_DUTY_CYCLE = 0.500;
    defparam PLL_ADV_INST.COMPENSATION = "SYSTEM_SYNCHRONOUS";
-   defparam PLL_ADV_INST.DIVCLK_DIVIDE = 1;
-   defparam PLL_ADV_INST.CLKFBOUT_MULT = PLL_CLKOUT_MULTIPLY;
+   defparam PLL_ADV_INST.DIVCLK_DIVIDE = PLL_DIVCLK_DIVIDE;
+   defparam PLL_ADV_INST.CLKFBOUT_MULT = PLL_CLKFBOUT_MULT;
    defparam PLL_ADV_INST.CLKFBOUT_PHASE = 0.0;
    defparam PLL_ADV_INST.REF_JITTER = 0.005000;
 endmodule
@@ -92,8 +93,9 @@ endmodule
 module mkUserClock_Ratio_PLL(CLK, RST_N, CLK_OUT, RST_N_OUT);
 
    parameter CR_CLKIN_PERIOD = 20;
-   parameter CR_CLKOUT_MULTIPLY = 4;
-   parameter CR_CLKOUT_DIVIDE = 1;
+   parameter CR_DIVCLK_DIVIDE = 1;
+   parameter CR_CLKFBOUT_MULT = 2;
+   parameter CR_CLKOUT0_DIVIDE = 1;
 
    input CLK;
    input RST_N;
@@ -105,8 +107,9 @@ module mkUserClock_Ratio_PLL(CLK, RST_N, CLK_OUT, RST_N_OUT);
    assign RST = !RST_N;
 
    clk_pll#(CR_CLKIN_PERIOD,
-            CR_CLKOUT_MULTIPLY,
-            CR_CLKOUT_DIVIDE)
+            CR_DIVCLK_DIVIDE,
+            CR_CLKFBOUT_MULT,
+            CR_CLKOUT0_DIVIDE)
       x (.CLKIN1_IN(CLK),
          .RST_IN(RST),
          .CLKOUT0_OUT(CLK_OUT),

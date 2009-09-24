@@ -15,9 +15,10 @@
 //
 
 #define PREFIX "/usr/hasim/"
+#define FPGA_DEV   PREFIX "dev/fpga0"
 #define PCIE_POWER PREFIX "dev/pcie_fpga_power0"
 #define USB_PROG   PREFIX "dev/usb_programming_cable0"
-#define RES_FILE   PREFIX "reservations/pcie_fpga0"
+#define RES_FILE   PREFIX "reservations/fpga0"
 
 #define KERNEL_MOD      "pchnl"
 #define KERNEL_MOD_PATH PREFIX "kernel/" KERNEL_MOD ".ko"
@@ -34,8 +35,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
-
-//#define NO_PCIE
 
 typedef enum
 {
@@ -356,10 +355,14 @@ void set_pci_state(FPGA_STATE_T state)
 {
     char req;
     int f;
+    struct stat statb;
 
-    #ifdef NO_PCIE
-    return;
-    #endif
+    // Is this a PCIe system?
+    if (stat(PCIE_POWER, &statb) == -1)
+    {
+        // No PCIe power control.  Assume no PCIe.
+        return;
+    }
 
     switch (state)
     {
@@ -497,8 +500,8 @@ void set_prog_cable_access(int user_access, int quiet)
 
     if (stat(USB_PROG, &statb) == -1)
     {
-        fprintf(stderr, "hasim-fpga-ctrl: Can't stat %s\n", USB_PROG);
-        exit(1);
+        // Assume no programming cable to control
+        return;
     }
 
     if ((statb.st_mode & 00777) != prot)
@@ -511,6 +514,38 @@ void set_prog_cable_access(int user_access, int quiet)
         if (chmod(USB_PROG, prot) == -1)
         {
             fprintf(stderr, "hasim-fpga-ctrl: Failed to change protection of %s\n", USB_PROG);
+            exit(1);
+        }
+    }
+}
+
+
+//
+// set_fpga_device_access --
+//   Pass true to enable and false to disable user access to the fpga device.
+//
+void set_fpga_device_access(int user_access, int quiet)
+{
+    int prot = user_access ? 00666 : 00444;
+    char *msg = user_access ? "Enabling" : "Disabling";
+    struct stat statb;
+
+    if (stat(FPGA_DEV, &statb) == -1)
+    {
+        // Assume no FPGA device to control
+        return;
+    }
+
+    if ((statb.st_mode & 00777) != prot)
+    {
+        // Protection isn't what we want.  Change it.
+        if (! quiet)
+        {
+            printf("hasim-fpga-ctrl: %s FPGA device access...\n", msg);
+        }
+        if (chmod(FPGA_DEV, prot) == -1)
+        {
+            fprintf(stderr, "hasim-fpga-ctrl: Failed to change protection of %s\n", FPGA_DEV);
             exit(1);
         }
     }
@@ -532,6 +567,7 @@ void reserve()
 {
     change_current_reservation(STATE_RESERVED, NULL);
     set_prog_cable_access(0, 0);
+    set_fpga_device_access(0, 0);
 }
 
     
@@ -548,6 +584,7 @@ void program_pci()
     change_current_reservation(STATE_PROGRAM, NULL);
     set_pci_state(STATE_PROGRAM);
     set_prog_cable_access(1, 0);
+    set_fpga_device_access(0, 0);
 }
 
 
@@ -564,6 +601,7 @@ void activate_pci()
 {
     change_current_reservation(STATE_ACTIVE, NULL);
     set_prog_cable_access(0, 0);
+    set_fpga_device_access(1, 0);
     set_pci_state(STATE_ACTIVE);
 }
 
@@ -580,6 +618,7 @@ void drop_reservation()
 {
     change_current_reservation(STATE_FREE, NULL);
     set_prog_cable_access(0, 0);
+    set_fpga_device_access(0, 0);
 }
 
 
@@ -595,6 +634,7 @@ void reset()
 {
     change_current_reservation(STATE_RESET, NULL);
     set_prog_cable_access(0, 1);
+    set_fpga_device_access(0, 1);
 }
 
 

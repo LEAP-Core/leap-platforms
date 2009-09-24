@@ -311,9 +311,7 @@ if env.GetOption('clean'):
 #
 # The final step must leave a few well known names:
 #   APM_NAME must be the software side, if there is one.  If there isn't, then
-#   it must be the Bluesim image.  The APM_NAME_hw.download file must NOT
-#   be present.  Lack of a .download script is a clue to the benchmark run
-#   scripts that Bluesim is being used.
+#   it must be the Bluesim image.
 #
 exe = env.Command(
     APM_NAME + '_hw.exe',
@@ -321,7 +319,7 @@ exe = env.Command(
     [ '@ln -fs $SOURCE $TARGET',
       '@ln -fs ' + SW_EXE_OR_TARGET + ' ' + APM_NAME,
       Delete(APM_NAME + '_hw.vexe'),
-      Delete(APM_NAME + '_hw.download') ])
+      Delete(APM_NAME + '_hw.errinfo') ])
 
 env.Alias('exe', exe)
 
@@ -353,7 +351,7 @@ vexe = env.Command(
       '@chmod a+x $TARGET',
       '@ln -fs ' + SW_EXE_OR_TARGET + ' ' + APM_NAME,
       Delete(APM_NAME + '_hw.exe'),
-      Delete(APM_NAME + '_hw.download') ])
+      Delete(APM_NAME + '_hw.errinfo') ])
 
 env.Alias('vexe', vexe)
 
@@ -502,14 +500,12 @@ signature = env.Command(
 
 #
 # The final step must leave a few files in well-known locations since they are
-# used by the run scripts.  APM_NAME_hw.download is the script to download the
-# bit file to the FPGA.  APM_NAME is the software side, if there is one.
+# used by the run scripts.  APM_NAME is the software side, if there is one.
 #
 loader = env.Command(
-    APM_NAME + '_hw.download',
+    APM_NAME + '_hw.errinfo',
     signature + SW_EXE + xilinx_trce,
-    [ '@ln -fs config/' + APM_NAME + '.download $TARGET',
-      '@ln -fs ' + SW_EXE_OR_TARGET + ' ' + APM_NAME,
+    [ '@ln -fs ' + SW_EXE_OR_TARGET + ' ' + APM_NAME,
       Delete(APM_NAME + '_hw.exe'),
       Delete(APM_NAME + '_hw.vexe'),
       '@echo "++++++++++++ Post-Place & Route ++++++++"',

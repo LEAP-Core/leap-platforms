@@ -7622,3 +7622,26 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/null
  null-physical-platfrom.awb Locally Modified          282 
 
 Use Elliott's new FPGA_PART_XILINX instead of FPGA_PART.
+
+----------
+mcadler     Date: Thu Sep 24 17:18:03 EDT 2009  CSN: CSN-platforms-284
+                  Thu Sep 24 21:18:03 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ user-clock-pll.bsv        Locally Modified          283 
+ user-clock-pll.v          Locally Modified          283 
+
+Directory modules/project
+ SCons.top.template        Locally Modified          283 
+
+Directory drivers/linux/hasim
+ hasim-fpga-ctrl.c         Locally Modified          283 
+
+- Add input divider configuration option to PLL configuration.
+- SCons script no longer builds a download script since not all FPGAs are
+  programmed using Xilinx impact.
+- hasim-fpga-ctrl can now deal with ACP.  The code is getting a bit messy
+  since it has no idea whether the machine uses PCIe or not.  A configuration
+  file would be good.
+
