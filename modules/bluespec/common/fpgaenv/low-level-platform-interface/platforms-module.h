@@ -11,7 +11,8 @@ class PLATFORMS_MODULE_CLASS
 {
     protected:
         PLATFORMS_MODULE parent;   // parent module
-        PLATFORMS_MODULE next;     // sibling child module
+        PLATFORMS_MODULE next;     // next sibling child module
+        PLATFORMS_MODULE prev;     // prev sibling child module
         PLATFORMS_MODULE children; // list of children
         string       name;     // descriptive name
 

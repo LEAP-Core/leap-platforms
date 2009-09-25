@@ -11,6 +11,7 @@ PLATFORMS_MODULE_CLASS::PLATFORMS_MODULE_CLASS()
 {
     parent   = NULL;
     next     = NULL;
+    prev     = NULL;
     children = NULL;
 }
 
@@ -25,6 +26,7 @@ PLATFORMS_MODULE_CLASS::PLATFORMS_MODULE_CLASS(
 
     // initialize siblings and children to NULL
     next = NULL;
+    prev = NULL;
     children = NULL;
 
     // add self to parent's child list
@@ -46,6 +48,7 @@ PLATFORMS_MODULE_CLASS::PLATFORMS_MODULE_CLASS(
 
     // initialize siblings and children to NULL
     next = NULL;
+    prev = NULL;
     children = NULL;
 
     // add self to parent's child list
@@ -74,23 +77,51 @@ PLATFORMS_MODULE_CLASS::AddChild(
     PLATFORMS_MODULE child)
 {
     // sanity check
-    assert(child->next == NULL);
+    assert(child->next == NULL && child->prev == NULL);
 
+    //
     // add to list of children
-    child->next = children;
-    children = child;
+    //
+
+    // maintain doubly-linked circular list,
+    // because Init() needs to call them in the
+    // order they were constructed, while Uninit()
+    // needs to call them in the reverse order.
+
+    if (children != NULL)
+    {
+        PLATFORMS_MODULE first = children;
+        PLATFORMS_MODULE last  = children->prev;
+
+        last->next = child;
+        child->prev = last;
+
+        child->next = first;
+        first->prev = child;
+    }
+    else
+    {
+        child->next = child;
+        child->prev = child;
+
+        children = child;
+    }
 }
 
 // init
 void
 PLATFORMS_MODULE_CLASS::Init()
 {
-    // walk through list of children and init them
-    PLATFORMS_MODULE child = children;
-    while (child != NULL)
+    // walk through list of children in FIFO order and init them
+    if (children != NULL)
     {
-        child->Init();
-        child = child->next;
+        PLATFORMS_MODULE child = children;
+        do
+        {
+            child->Init();
+            child = child->next;
+        }
+        while (child != children);
     }
 }
 
@@ -98,12 +129,16 @@ PLATFORMS_MODULE_CLASS::Init()
 void
 PLATFORMS_MODULE_CLASS::Init(PLATFORMS_MODULE p)
 {
-    // walk through list of children and init them
-    PLATFORMS_MODULE child = children;
-    while (child != NULL)
+    // walk through list of children in FIFO order and init them
+    if (children != NULL)
     {
-        child->Init();
-        child = child->next;
+        PLATFORMS_MODULE child = children;
+        do
+        {
+            child->Init();
+            child = child->next;
+        }
+        while (child != children);
     }
 
     // set parent
@@ -120,12 +155,16 @@ PLATFORMS_MODULE_CLASS::Init(PLATFORMS_MODULE p)
 void
 PLATFORMS_MODULE_CLASS::Uninit()
 {
-    // walk through list of children and uninit them
-    PLATFORMS_MODULE child = children;
-    while (child != NULL)
+    // walk through list of children in LIFO order and uninit them
+    if (children != NULL)
     {
-        child->Uninit();
-        child = child->next;
+        PLATFORMS_MODULE child = children->prev;
+        do
+        {
+            child->Uninit();
+            child = child->prev;
+        }
+        while (child != children);
     }
 }
 

@@ -7645,3 +7645,15 @@ Directory drivers/linux/hasim
   since it has no idea whether the machine uses PCIe or not.  A configuration
   file would be good.
 
+
+----------
+aparasha    Date: Fri Sep 25 14:33:44 EDT 2009  CSN: CSN-platforms-285
+                  Fri Sep 25 18:33:44 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/low-level-platform-interface
+ platforms-module.h        Locally Modified          284 
+ platforms-module.cpp      Locally Modified          284 
+
+Updated init/uninit sequences to call Init() on children modules in the
+order they were constructed, and to call Uninit() in the reverse order.
