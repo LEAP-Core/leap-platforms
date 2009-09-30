@@ -7657,3 +7657,13 @@ Directory modules/bluespec/common/fpgaenv/low-level-platform-interface
 
 Updated init/uninit sequences to call Init() on children modules in the
 order they were constructed, and to call Uninit() in the reverse order.
+
+----------
+mcadler     Date: Wed Sep 30 13:04:56 EDT 2009  CSN: CSN-platforms-286
+                  Wed Sep 30 17:04:56 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ user-clock-pll.bsv        Locally Modified          285 
+
+Compute PLL parameters given input frequency and desired output frequency.
