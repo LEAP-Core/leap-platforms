@@ -74,6 +74,16 @@ module mkLocalMem#(PHYSICAL_DRIVERS drivers)
     //
     Vector#(LOCAL_MEM_WORDS_PER_LINE, BRAM#(LOCAL_MEM_LINE_ADDR, LOCAL_MEM_WORD)) mem <- replicateM(mkBRAM());
 
+    //
+    // FIFOs added between incoming requests and the BRAM because reqeusts
+    // from the central cache and this local memory wind up on the critical
+    // path if the BRAM is exposed in methods.
+    //
+    Vector#(LOCAL_MEM_WORDS_PER_LINE,
+            FIFO#(LOCAL_MEM_LINE_ADDR)) memReadReq <- replicateM(mkFIFO());
+    Vector#(LOCAL_MEM_WORDS_PER_LINE,
+            FIFO#(Tuple2#(LOCAL_MEM_LINE_ADDR, LOCAL_MEM_WORD))) memWriteReq <- replicateM(mkFIFO());
+
     // Record read requests (either full line or a word index).  If simulating
     // latency then only permit one operation at a time.
     FIFOF#(READ_REQ) readReqQ <- mkFIFOF();
@@ -98,6 +108,26 @@ module mkLocalMem#(PHYSICAL_DRIVERS drivers)
         writeBusyCnt <= writeBusyCnt - 1;
     endrule
 
+    //
+    // Forward incoming read and write requests to the BRAM.  This FIFO and
+    // extra stage break a critical path between the central cache and
+    // local memory.  The stage is added here to mirror stages already
+    // present (and required) in DRAM-based local memory.
+    //
+    for (Integer w = 0; w < valueOf(LOCAL_MEM_WORDS_PER_LINE); w = w + 1)
+    begin
+        rule forwardReadReq (True);
+            let addr = memReadReq[w].first();
+            memReadReq[w].deq();
+            mem[w].readReq(addr);
+        endrule
+
+        rule forwardWriteReq (True);
+            match {.addr, .data} = memWriteReq[w].first();
+            memWriteReq[w].deq();
+            mem[w].write(addr, data);
+        endrule
+    end
 
     //
     // checkLatency --
@@ -129,7 +159,7 @@ module mkLocalMem#(PHYSICAL_DRIVERS drivers)
 
     method Action readWordReq(LOCAL_MEM_ADDR addr) if (notBusy());
         match {.l_addr, .w_idx} = localMemBurstAddr(addr);
-        mem[w_idx].readReq(l_addr);
+        memReadReq[w_idx].enq(l_addr);
 
         // Note word read.
         readReqQ.enq(READ_REQ { fullLine: False, wordIdx: w_idx, reqCycle: cycle });
@@ -150,7 +180,7 @@ module mkLocalMem#(PHYSICAL_DRIVERS drivers)
 
         for (Integer w = 0; w < valueOf(LOCAL_MEM_WORDS_PER_LINE); w = w + 1)
         begin
-            mem[w].readReq(l_addr);
+            memReadReq[w].enq(l_addr);
         end
 
         // Note full line read.
@@ -178,7 +208,7 @@ module mkLocalMem#(PHYSICAL_DRIVERS drivers)
 
     method Action writeWord(LOCAL_MEM_ADDR addr, LOCAL_MEM_WORD data) if (notBusy());
         match {.l_addr, .w_idx} = localMemBurstAddr(addr);
-        mem[w_idx].write(l_addr, data);
+        memWriteReq[w_idx].enq(tuple2(l_addr, data));
 
         writeBusyCnt <= `LOCAL_MEM_WRITE_LATENCY;
     endmethod
@@ -189,7 +219,7 @@ module mkLocalMem#(PHYSICAL_DRIVERS drivers)
         Vector#(LOCAL_MEM_WORDS_PER_LINE, LOCAL_MEM_WORD) l_data = unpack(data);
         for (Integer w = 0; w < valueOf(LOCAL_MEM_WORDS_PER_LINE); w = w + 1)
         begin
-            mem[w].write(l_addr, l_data[w]);
+            memWriteReq[w].enq(tuple2(l_addr, l_data[w]));
         end
 
         writeBusyCnt <= `LOCAL_MEM_WRITE_LATENCY;
@@ -203,7 +233,7 @@ module mkLocalMem#(PHYSICAL_DRIVERS drivers)
         begin
             if (mask[w])
             begin
-                mem[w].write(l_addr, l_data[w]);
+                memWriteReq[w].enq(tuple2(l_addr, l_data[w]));
             end
         end
 
