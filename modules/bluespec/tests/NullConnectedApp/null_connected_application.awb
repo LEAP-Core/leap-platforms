@@ -1,0 +1,11 @@
+%name Null Connected Application
+%desc Null Connected Application
+
+%provides connected_application
+
+%attributes 6_375
+
+%sources -t H    -v PUBLIC  AudioProcessor.h
+%sources -t BSV  -v PUBLIC  AudioProcessor.bsv
+%sources -t CPP  -v PRIVATE AudioProcessor.cpp
+

@@ -1,0 +1,53 @@
+
+[Global]
+SaveParameters=0
+Description=Hello World Demo using hybrid streams for HTG v5 PCIe
+File=chanIO_loopback_xup2
+Version=2.1
+Name=Hello World for HTG v5 PCIe
+DefaultBenchmark=config/bm/bluespec/demos.cfx/benchmarks/null.cfg
+Type=HAsim
+Class=Asim::Model
+DefaultRunOpts=
+
+[Model]
+DefaultAttributes=hello unconnected hybrid project xup
+model=HW/SW Hybrid Project Foundation
+
+[FPGA Environment]
+File=config/pm/hasim/submodels/fpgaenv/fpgaenv-hybrid-xupv2-serial-chanIO-loopback.apm
+Packagehint=platforms
+
+[HW/SW Hybrid Project Foundation]
+File=modules/project/project-hybrid.awb
+Packagehint=platforms
+
+[HW/SW Hybrid Project Foundation/Requires]
+fpgaenv=FPGA Environment
+application_env=Soft Connections Hybrid Application Environment
+project_common=Hybrid Project Common Utilities
+
+[Hybrid Project Common Utilities]
+File=config/pm/hasim/submodels/common/project-common-default.apm
+Packagehint=hasim
+
+[Null Connected Application]
+File=modules/bluespec/tests/NullConnectedApp/null_connected_application.awb
+Packagehint=platforms
+
+[Soft Connections Hybrid Application Environment/Requires]
+platform_services=Platform Services
+soft_connections_lib=Soft Connections Library
+connected_application=Null Connected Application
+
+[Soft Connections Library]
+File=config/pm/hasim/submodels/common/soft-connections-lib.apm
+Packagehint=hasim
+
+[Platform Services]
+File=config/pm/hasim/submodels/platform-services/standard-platform-services.apm
+Packagehint=hasim
+
+[Soft Connections Hybrid Application Environment]
+File=modules/application-env/hybrid/soft-connections/application-env-hybrid-soft-conn.awb
+Packagehint=platforms

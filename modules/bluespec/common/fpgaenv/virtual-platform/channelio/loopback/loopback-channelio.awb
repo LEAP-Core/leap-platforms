@@ -1,0 +1,14 @@
+
+%name Loopback Channel IO Tester
+%desc Send Strings down to the Physical Channel and return them
+
+%provides channelio
+
+%requires physical_channel
+
+%sources -t BSV -v PUBLIC   loopback-channelio.bsv
+%sources -t H   -v PUBLIC   loopback-channelio.h
+%sources -t CPP -v PRIVATE  loopback-channelio.cpp
+
+%param CIO_NUM_CHANNELS     2   "Number of virtual duplex channels"
+
