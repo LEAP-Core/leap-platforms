@@ -15,7 +15,7 @@
 %public  project-hybrid-main.bsv
 %public  project-hybrid-main.h
 %private project-hybrid-main.cpp
-%private hardware-done.h
+%public  hardware-done.h
 
 %library lib/libasim/libasim.a
 

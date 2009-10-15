@@ -8,8 +8,9 @@
 #include "asim/provides/low_level_platform_interface.h"
 #include "asim/provides/rrr.h"
 #include "asim/provides/starter_device.h"
+#include "asim/provides/model.h"
 #include "asim/rrr/client_stub_STARTER_DEVICE.h"
-#include "hardware-done.h"
+
 
 // this module provides both client and server functionalities
 

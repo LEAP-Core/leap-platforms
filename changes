@@ -7679,3 +7679,24 @@ Directory modules/bluespec/common/fpgaenv/low-level-platform-interface/local-mem
 Put FIFOs between request methods and the BRAM to break a critical path
 in standard models that use local memory BRAM to hold the central cache's data.
 Without the FIFOs all models were limited to 75MHz.
+
+----------
+kfleming    Date: Thu Oct 15 16:26:33 KST 2009  CSN: CSN-platforms-290
+                  Thu Oct 15 07:26:33 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/serial
+ SerialStream.h            Locally Modified          289 
+ serial-physical-channel.awb Locally Modified          289 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/starter
+ starter-device.h          Locally Modified          289 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled
+ htg-v5-pcie-enabled.awb   Locally Modified          289 
+
+Directory modules/project
+ project-hybrid.awb        Locally Modified          289 
+
+
+Reworking file dependencies to have allow top level synthesis boundaries to actually build.
