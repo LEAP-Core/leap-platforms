@@ -9,7 +9,7 @@
 #include "asim/provides/starter_device.h"
 
 // Temporarily control the Stat Dumping.
-#include "asim/provides/stats_device.h"
+//#include "asim/provides/stats_device.h"
 
 #include "asim/ioformat.h"
 

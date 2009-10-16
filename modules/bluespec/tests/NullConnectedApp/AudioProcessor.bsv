@@ -23,7 +23,6 @@
 //AWB includes
 `include "asim/provides/low_level_platform_interface.bsh"
 `include "asim/provides/soft_connections.bsh"
-`include "asim/provides/common_services.bsh"
 
 
 module [CONNECTED_MODULE] mkConnectedApplication ();

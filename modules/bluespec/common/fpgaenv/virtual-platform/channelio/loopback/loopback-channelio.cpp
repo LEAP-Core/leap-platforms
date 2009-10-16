@@ -74,8 +74,8 @@ CHANNELIO_CLASS::RegisterForDelivery(
     int channel,
     CIO_DELIVERY_STATION module)
 {
-    stations[channel].type = CIO_STATION_TYPE_DELIVERY;
-    stations[channel].module = module;
+  stations[channel].type = CIO_STATION_TYPE_DELIVERY;
+  stations[channel].module = module;
 }
 
 // non-blocking read
@@ -83,18 +83,18 @@ UMF_MESSAGE
 CHANNELIO_CLASS::TryRead(
     int channel)
 {
-    UMF_MESSAGE msg = NULL;
-
-    // check if a message is already enqueued in read buffer
-    pthread_mutex_lock(&bufferLock);
-    if (stations[channel].readBuffer.empty() == false)
+  UMF_MESSAGE msg = NULL;
+  
+  // check if a message is already enqueued in read buffer
+  pthread_mutex_lock(&bufferLock);
+  if (stations[channel].readBuffer.empty() == false)
     {
-        msg = stations[channel].readBuffer.front();
-        stations[channel].readBuffer.pop();
+      msg = stations[channel].readBuffer.front();
+      stations[channel].readBuffer.pop();
     }
-    pthread_mutex_unlock(&bufferLock);
-    
-    return msg;
+  pthread_mutex_unlock(&bufferLock);
+  
+  return msg;
 }
 
 // blocking read
@@ -102,6 +102,7 @@ UMF_MESSAGE
 CHANNELIO_CLASS::Read(
     int channel)
 {
+
     //
     // We will use two locks to implement this functionality.
     // The first lock called channelLock simply guards access to
@@ -244,4 +245,35 @@ void
 CHANNELIO_CLASS::runTest()
 {
   printf("CHANNELIO_EXT_CLASS::runTest()\n");
+  for(int i = 0; i < 100; i++){
+    UMF_MESSAGE_CLASS message;
+    message.SetChannelID(0);
+    message.SetServiceID(0);
+    message.SetMethodID(0);
+    message.SetLength(sizeof(UINT32));
+    message.StartAppend();
+    message.AppendUINT32(0xabcdabcd);
+    printf("physicalChannel.Write(&message);\n");
+    physicalChannel.Write(&message);
+    UMF_MESSAGE rv = NULL;
+    printf("physicalChannel.Read();\n");
+    rv = physicalChannel.Read();
+    printf("%d\n",(rv->GetChannelID()));
+    printf("%d\n",(rv->GetServiceID()));
+    printf("%d\n",(rv->GetMethodID()));
+    printf("%d\n",(rv->GetLength()));
+    printf("%d\n",(rv->ExtractUINT32()));
+
+    bool valid =  ((rv->GetChannelID()==0)&&
+		   (rv->GetServiceID()==0)&&
+		   (rv->GetMethodID()==0)&&
+		   (rv->GetLength()==sizeof(UINT32))&&
+		   (rv->ExtractUINT32()==0xabcdabcd));
+
+    if(!valid){
+      printf("invalid message\ntest failed\n");
+      exit(0);
+    }
+      
+  }
 }

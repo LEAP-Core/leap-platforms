@@ -32,6 +32,7 @@ module mkChannelIO#(PHYSICAL_DRIVERS drivers) (CHANNEL_IO);
 
     rule loopback;
       let chunk <- physicalChannel.read();
+      $display("chunk %h", chunk);
       physicalChannel.write(chunk);
     endrule	 
 

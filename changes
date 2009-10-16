@@ -7700,3 +7700,48 @@ Directory modules/project
 
 
 Reworking file dependencies to have allow top level synthesis boundaries to actually build.
+
+----------
+mdk         Date: Fri Oct 16 13:43:08 KST 2009  CSN: CSN-platforms-291
+                  Fri Oct 16 04:43:08 UTC 2009
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-hybrid-exe-serial-ChanIO-loopback.apm Locally Added               0 
+ std-virtual-devices.apm   Locally Modified          290 
+
+Directory config/pm/platforms/tests
+ chanIO_loopback_sim.apm   Locally Added               0 
+ chanIO_loopback_xup2.apm  Locally Modified          290 
+
+Directory modules/bluespec/tests/NullConnectedApp
+ AudioProcessor.bsv        Locally Modified          290 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/loopback
+ loopback-channelio.bsv    Locally Modified          290 
+ loopback-channelio.cpp    Locally Modified          290 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/null
+ null-rrr-client.h         Locally Added               0 
+ null-rrr-server.cpp       Locally Added               0 
+ marshaller.bsv            Locally Added               0 
+ null-rrr.awb              Locally Modified          290 
+ null-rrr.bsv              Locally Modified          290 
+ null-rrr-server.h         Locally Added               0 
+ null-rrr.bsh              Locally Added               0 
+ null-rrr-client.cpp       Locally Added               0 
+ demarshaller.bsv          Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/starter
+ starter-device.cpp        Locally Modified          290 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices
+ null-virtual-devices.awb  Locally Added               0 
+ null-virtual-devices.cpp  Locally Added               0 
+ null-virtual-devices.h    Locally Added               0 
+ null-virtual-devices.bsv  Locally Added               0 
+
+
+
+getting null modules to work takes some real effort
+

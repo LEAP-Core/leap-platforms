@@ -1,0 +1,11 @@
+
+%name NULL Virtual Devices
+%desc NULL Virtual Devices
+
+%provides virtual_devices
+
+%requires starter_device 
+
+%public  null-virtual-devices.bsv
+%public  null-virtual-devices.h
+%private null-virtual-devices.cpp

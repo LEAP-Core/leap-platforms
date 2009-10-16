@@ -7,7 +7,8 @@ Version=2.1
 Type=HAsim
 Name=Standard Virtual Devices
 Class=Asim::Model
-DefaultBenchmark=0
+DefaultBenchmark=
+DefaultRunOpts=
 
 [Model]
 DefaultAttributes=platforms
@@ -44,11 +45,6 @@ Packagehint=platforms
 [Null Shared Memory]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/shared-memory/null/null-shared-memory.awb
 Packagehint=platforms
-
-
-
-
-
 
 [Base Common Devices/Requires]
 stats_device=Stats Device

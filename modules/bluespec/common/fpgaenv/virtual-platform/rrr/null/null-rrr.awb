@@ -4,3 +4,9 @@
 %provides rrr
 
 %sources -t BSV -v PUBLIC null-rrr.bsv
+%sources -t BSV -v PUBLIC marshaller.bsv
+%sources -t BSV -v PUBLIC demarshaller.bsv
+
+
+%sources -t H   -v PUBLIC  null-rrr-server.h null-rrr-client.h
+%sources -t CPP -v PUBLIC  null-rrr-server.cpp null-rrr-client.cpp

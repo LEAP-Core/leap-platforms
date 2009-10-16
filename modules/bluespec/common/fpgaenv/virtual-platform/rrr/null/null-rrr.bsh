@@ -1,0 +1,48 @@
+`ifndef _BASIC_RRR_
+`define _BASIC_RRR_
+
+`define RRR_CHUNK_SIZE      4
+`define LOG_RRR_CHUNK_SIZE  2
+
+typedef Bit#(4) CIO_ChannelID;
+typedef Bit#(8) RRR_ServiceID;
+typedef Bit#(4) RRR_MethodID;
+
+typedef Bit#(32) RRR_Param;
+typedef Bit#(32) RRR_Response;
+
+typedef Bit#(8)  UINT8;
+typedef Bit#(16) UINT16;
+typedef Bit#(32) UINT32;
+typedef Bit#(64) UINT64;
+
+//
+// A few hacks for defining simple types to pass multiple concatenated values
+// through RRR.  These will go away once we figure out how to represent types
+// and multiple arguments to RRR methods.
+//
+typedef Bit#(72)  UMF_UINT72;
+typedef Bit#(96)  UMF_UINT96;
+typedef Bit#(128) UMF_UINT128;
+
+typedef struct
+{
+    RRR_ServiceID   serviceID;
+    RRR_Param       param0;
+    RRR_Param       param1;
+    RRR_Param       param2;
+    RRR_Param       param3;
+    Bool            needResponse;
+} RRR_Request   deriving (Eq, Bits);
+
+typedef Bit#(32) RRR_Chunk;
+
+typedef struct
+{
+    Bit#(16)        length;
+    CIO_ChannelID   channelID;
+    RRR_ServiceID   serviceID;
+    RRR_MethodID    methodID;
+} RRR_HeaderChunk   deriving (Eq, Bits);
+
+`endif
