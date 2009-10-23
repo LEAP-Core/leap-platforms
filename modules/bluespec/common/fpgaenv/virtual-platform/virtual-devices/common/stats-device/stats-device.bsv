@@ -38,7 +38,7 @@ interface STATS;
     method STATS_DEV_CMD peekCmd();
     method Action finishCmd(STATS_DEV_CMD cmd);
 
-    method Action setVectorLength(STATS_DICT_TYPE stat, STAT_VECTOR_INDEX len);
+    method Action setVectorLength(STATS_DICT_TYPE stat, STAT_VECTOR_INDEX len, Bool buildVector);
     method Action reportStat(STATS_DICT_TYPE stat, STAT_VECTOR_INDEX pos, STAT_VALUE value);
 endinterface
 
@@ -127,7 +127,7 @@ module mkStatsDevice#(LowLevelPlatformInterface llpi)
     method Action finishCmd(STATS_DEV_CMD cmd);
         case (cmd)
             STATS_CMD_GETLENGTHS:
-                noAction;
+                serverStub.sendResponse_GetVectorLengths(0);
 
             STATS_CMD_DUMP:
                 serverStub.sendResponse_DumpStats(0);
@@ -145,8 +145,8 @@ module mkStatsDevice#(LowLevelPlatformInterface llpi)
     // Module-specific actions
     //
 
-    method Action setVectorLength(STATS_DICT_TYPE id, STAT_VECTOR_INDEX len);
-        clientStub.makeRequest_SetVectorLength(zeroExtend(id), len);
+    method Action setVectorLength(STATS_DICT_TYPE id, STAT_VECTOR_INDEX len, Bool buildArray);
+        clientStub.makeRequest_SetVectorLength(zeroExtend(id), len, zeroExtend(pack(buildArray)));
     endmethod
 
     method Action reportStat(STATS_DICT_TYPE id, STAT_VECTOR_INDEX idx, STAT_VALUE value);

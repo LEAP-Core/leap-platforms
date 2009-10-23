@@ -78,6 +78,7 @@ class STATS_DEVICE_SERVER_CLASS: public RRR_SERVER_CLASS,
 
     // Running total of statistic vectors as they are dumped incrementally.
     STAT_VECTOR statValues[STATS_DICT_ENTRIES];
+    UINT32 statArrayLength[STATS_DICT_ENTRIES];
 
   public:
     STATS_DEVICE_SERVER_CLASS();
@@ -101,7 +102,7 @@ class STATS_DEVICE_SERVER_CLASS: public RRR_SERVER_CLASS,
 
     // RRR server methods
     void ReportStat(UINT32 statID, UINT32 pos, UINT32 value);
-    void SetVectorLength(UINT32 statID, UINT32 length);
+    void SetVectorLength(UINT32 statID, UINT32 length, UINT8 buildArray);
 };
 
 // server stub

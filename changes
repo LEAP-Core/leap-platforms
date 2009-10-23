@@ -7763,3 +7763,17 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr
 
 
 Adding some new files for synplify
+
+----------
+mcadler     Date: Fri Oct 23 15:37:47 EDT 2009  CSN: CSN-platforms-293
+                  Fri Oct 23 19:37:47 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/stats-device
+ stats-device.rrr          Locally Modified          292 
+ stats-device.h            Locally Modified          292 
+ stats-device.bsv          Locally Modified          292 
+ stats-device.cpp          Locally Modified          292 
+
+More flexible array generation code.  Arrays can now be constructed from multiple
+hardware ring stops.

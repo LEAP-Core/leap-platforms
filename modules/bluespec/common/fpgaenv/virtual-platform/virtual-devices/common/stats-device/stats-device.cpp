@@ -53,6 +53,7 @@ STATS_DEVICE_SERVER_CLASS::STATS_DEVICE_SERVER_CLASS() :
     for (int x = 0; x < STATS_DICT_ENTRIES; x++)
     {
         statValues[x] = NULL;
+        statArrayLength[x] = 0;
     }
 }
 
@@ -80,10 +81,19 @@ void
 STATS_DEVICE_SERVER_CLASS::SetupStats()
 {
     // This call will cause the hardware to invoke SetStatVectorLength
-    // for every stat. This will in turn instantiate the stats themselves.
+    // for every array stat.
     clientStub->GetVectorLengths(0);
 
-    // This initialization path will be used to allocate storage for non-vector
+    // Allocate array stats
+    for (unsigned int x = 0; x < STATS_DICT_ENTRIES; x++)
+    {
+        if (statArrayLength[x] != 0)
+        {
+            statValues[x] = new STAT_VECTOR_CLASS(x, statArrayLength[x]);
+        }
+    }
+
+    // This initialization pass will be used to allocate storage for non-array
     // statistics.  It will also be used to confirm that a statistics ID is
     // used at most once.
     clientStub->DumpStats(0);
@@ -153,16 +163,30 @@ STATS_DEVICE_SERVER_CLASS::ReportStat(
     statValues[statID]->AddStatValue(value, pos);
 }
 
-// Done
+// Instantitate a new stat vector of the given length.
 void
 STATS_DEVICE_SERVER_CLASS::SetVectorLength(
     UINT32 statID,
-    UINT32 len)
+    UINT32 len,
+    UINT8 buildArray)
 {
+    //
+    // There are two possible ways to build an array.  One is a vector coming
+    // directly from the hardware (buildArray == false).  The other is a set
+    // of independent entries with unique IDs, coming from separate collectors
+    // in the hardware (buildArray == true).  For the latter we set the array
+    // size to the maximum length.  This avoids forcing the hardware nodes
+    // to communicate with each other to find the true size.
+    //
+    if (! buildArray)
+    {
+        VERIFY(statArrayLength[statID] == 0, "stats device: vector length set twice for stat: " << STATS_DICT::Name(statID));
+    }
 
-    // Instantitate a new stat vector of the given length.
-    VERIFY(statValues[statID] == NULL, "stats device: vector length set twice for stat ID: " << statID);
-    statValues[statID] = new STAT_VECTOR_CLASS(statID, len);
+    if (len > statArrayLength[statID])
+    {
+        statArrayLength[statID] = len;
+    }
 }
 
 
