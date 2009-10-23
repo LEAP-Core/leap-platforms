@@ -1,0 +1,36 @@
+%name DDR2 SDRAM Physical Device for Synplify
+%desc DDR2 SDRAM Physical Device for Synplify
+
+%provides ddr2_sdram_device
+
+%sources -t BSV -v PUBLIC ddr2-sdram-device.bsv
+%sources -t BSV -v PUBLIC ddr2-sdram-vhdl-import.bsv
+
+%sources -t VHD -v PRIVATE ddr2_chipscope.vhd
+%sources -t VHD -v PRIVATE ddr2_ctrl.vhd
+%sources -t VHD -v PRIVATE ddr2_idelay_ctrl.vhd
+%sources -t VHD -v PRIVATE ddr2_infrastructure.vhd
+%sources -t VHD -v PRIVATE ddr2_mem_if_top.vhd
+%sources -t VHD -v PRIVATE ddr2_phy_calib.vhd
+%sources -t VHD -v PRIVATE ddr2_phy_ctl_io.vhd
+%sources -t VHD -v PRIVATE ddr2_phy_dm_iob.vhd
+%sources -t VHD -v PRIVATE ddr2_phy_dq_iob.vhd
+%sources -t VHD -v PRIVATE ddr2_phy_dqs_iob.vhd
+%sources -t VHD -v PRIVATE ddr2_phy_init.vhd
+%sources -t VHD -v PRIVATE ddr2_phy_io.vhd
+%sources -t VHD -v PRIVATE ddr2_phy_top.vhd
+%sources -t VHD -v PRIVATE ddr2_phy_write.vhd
+%sources -t VHD -v PRIVATE ddr2_sdram.vhd
+%sources -t VHD -v PRIVATE ddr2_top.vhd
+%sources -t VHD -v PRIVATE ddr2_usr_addr_fifo.vhd
+%sources -t VHD -v PRIVATE ddr2_usr_rd.vhd
+%sources -t VHD -v PRIVATE ddr2_usr_top.vhd
+%sources -t VHD -v PRIVATE ddr2_usr_wr.vhd
+
+%sources -t VERILOG -v PRIVATE ddr2-pll.v
+%sources -t BSV     -v PUBLIC  ddr2-pll.bsv
+
+%sources -t UCF -v PRIVATE ddr2_sdram-synplify.ucf
+%sources -t UCF -v PRIVATE ddr2-sdram-sync-tig-synplify.ucf
+
+%param DRAM_MAX_OUTSTANDING_READS  8 "Maximum in-flight read requests"

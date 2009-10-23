@@ -7745,3 +7745,21 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices
 
 getting null modules to work takes some real effort
 
+
+----------
+kfleming    Date: Fri Oct 23 02:58:50 EDT 2009  CSN: CSN-platforms-292
+                  Fri Oct 23 06:58:50 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled
+ htg-v5-pcie-enabled-synplify.awb Locally Added               0 
+ htg-v5-pcie-enabled-synplify.ucf Locally Added               0 
+ htg-v5-pcie-enabled.sdc   Locally Modified          291 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr2-sdram
+ ddr2-sdram-device-synplify.awb Locally Added               0 
+ ddr2-sdram-sync-tig-synplify.ucf Locally Added               0 
+ ddr2_sdram-synplify.ucf   Locally Added               0 
+
+
+Adding some new files for synplify

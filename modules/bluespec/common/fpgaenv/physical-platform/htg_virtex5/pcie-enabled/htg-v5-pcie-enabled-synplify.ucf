@@ -1,0 +1,132 @@
+###############################################################################
+# Pinout and Related I/O Constraints
+###############################################################################
+
+#
+# SYS reset (input) signal.  The sys_reset_n signal should be
+# obtained from the PCI Express interface if possible.  For
+# slot based form factors, a system reset signal is usually
+# present on the connector.  For cable based form factors, a
+# system reset signal may not be available.  In this case, the
+# system reset signal must be generated locally by some form of
+# supervisory circuit.  You may change the IOSTANDARD and LOC
+# to suit your requirements and VCCO voltage banking rules.
+#
+
+NET "EN_pciExpressWires_sys_reset_n"      LOC = "H27"  | IOSTANDARD = LVCMOS25 | PULLUP | NODELAY ;
+
+#
+# SYS clock 100 MHz (input) signal. The sys_clk_p and sys_clk_n
+# signals are the PCI Express reference clock. Virtex-5 GTP
+# Transceiver architecture requires the use of a dedicated clock
+# resources (FPGA input pins) associated with each GTP Transceiver Tile.
+# To use these pins an IBUFDS primitive (refclk_ibuf) is
+# instantiated in user's design.
+# Please refer to the Virtex-5 GTP Transceiver User Guide
+# (UG196) for guidelines regarding clock resource selection.
+#
+
+NET  "EN_pciExpressWires_sys_clk_p"       LOC = "Y4"  ;
+NET  "EN_pciExpressWires_sys_clk_n"       LOC = "Y3"  ;
+
+#
+# Transceiver instance placement.  This constraint selects the
+# transceivers to be used, which also dictates the pinout for the
+# transmit and receive differential pairs.  Please refer to the
+# Virtex-5 GTP Transceiver User Guide (UG196) for more
+# information.
+#
+
+# PCIe Lanes 0, 1
+INST "*/ep/BU2/U0/pcie_ep0/pcie_blk/SIO/.pcie_gt_wrapper_i/GTD[0].GT_i" LOC = GTP_DUAL_X0Y4;
+
+# PCIe Lanes 2, 3
+INST "*/ep/BU2/U0/pcie_ep0/pcie_blk/SIO/.pcie_gt_wrapper_i/GTD[2].GT_i" LOC = GTP_DUAL_X0Y3;
+
+
+
+###############################################################################
+# Physical Constraints
+###############################################################################
+
+#
+# BlockRAM placement
+#
+
+INST "m_vp_llpi_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk/pcie_mim_wrapper_i/bram_retry/generate_sdp.ram_sdp_inst"      LOC = RAMB36_X3Y12 ;
+INST "m_vp_llpi_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk/pcie_mim_wrapper_i/bram_tl_tx/generate_tdp2[1].ram_tdp2_inst" LOC = RAMB36_X3Y11 ;
+INST "m_vp_llpi_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk/pcie_mim_wrapper_i/bram_tl_rx/generate_tdp2[1].ram_tdp2_inst" LOC = RAMB36_X3Y10 ;
+INST "m_vp_llpi_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk/pcie_mim_wrapper_i/bram_tl_tx/generate_tdp2[0].ram_tdp2_inst" LOC = RAMB36_X3Y9 ;
+INST "m_vp_llpi_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk/pcie_mim_wrapper_i/bram_tl_rx/generate_tdp2[0].ram_tdp2_inst" LOC = RAMB36_X3Y8 ;
+
+#
+# Timing critical placements
+#
+
+INST "m_vp_llpi_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk_if/ll_bridge/tx_bridge/tx_bridge/shift_pipe1" LOC = "SLICE_X107Y56" ;
+INST "m_vp_llpi_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk_if/ll_bridge/rx_bridge/arb_inst/completion_available" LOC = "SLICE_X106Y46" ;
+INST "m_vp_llpi_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk_if/cf_bridge/management_interface/mgmt_rdata_d1_3" LOC = "SLICE_X107Y45" ;
+###############################################################################
+# Timing Constraints
+###############################################################################
+
+#
+# Timing requirements and related constraints.
+#
+
+// CLOCKS
+
+NET "CLK" LOC = "J16" | IOSTANDARD = LVCMOS25;
+NET "CLK" TNM_NET = "CLK" ;
+TIMESPEC "TS_CLK"  = PERIOD "CLK" 50.00 MHz HIGH 50 % ;
+
+NET "m_vp_llpi_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk/SIO/.pcie_gt_wrapper_i/gt_refclk_out[0]" TNM_NET = "MGTCLK" ;
+TIMESPEC "TS_MGTCLK"  = PERIOD "MGTCLK" 100.00 MHz HIGH 50 % ;
+
+###############################################################################
+# End
+###############################################################################
+
+// RST_N
+
+NET "RST_N" LOC="G27";
+
+// LEDS
+
+NET "ledsWires_LED[0]" LOC="J27" | IOSTANDARD=LVCMOS25 | DRIVE=12 | SLEW=SLOW;
+NET "ledsWires_LED[1]" LOC="J26" | IOSTANDARD=LVCMOS25 | DRIVE=12 | SLEW=SLOW;
+NET "ledsWires_LED[2]" LOC="G25" | IOSTANDARD=LVCMOS25 | DRIVE=12 | SLEW=SLOW; 
+NET "ledsWires_LED[3]" LOC="G26" | IOSTANDARD=LVCMOS25 | DRIVE=12 | SLEW=SLOW;
+NET "ledsWires_LED[4]" LOC="H25" | IOSTANDARD=LVCMOS25 | DRIVE=12 | SLEW=SLOW;
+NET "ledsWires_LED[5]" LOC="H24" | IOSTANDARD=LVCMOS25 | DRIVE=12 | SLEW=SLOW;
+NET "ledsWires_LED[6]" LOC="F25" | IOSTANDARD=LVCMOS25 | DRIVE=12 | SLEW=SLOW; 
+NET "ledsWires_LED[7]" LOC="F26" | IOSTANDARD=LVCMOS25 | DRIVE=12 | SLEW=SLOW;
+
+// SWITCHES
+
+NET "switchesWires_SWITCH[0]" LOC="K24" | IOSTANDARD=LVCMOS25;
+NET "switchesWires_SWITCH[1]" LOC="L24" | IOSTANDARD=LVCMOS25;
+NET "switchesWires_SWITCH[2]" LOC="L25" | IOSTANDARD=LVCMOS25;
+NET "switchesWires_SWITCH[3]" LOC="L26" | IOSTANDARD=LVCMOS25;
+NET "switchesWires_SWITCH[4]" LOC="J24" | IOSTANDARD=LVCMOS25;
+NET "switchesWires_SWITCH[5]" LOC="J25" | IOSTANDARD=LVCMOS25;
+NET "switchesWires_SWITCH[6]" LOC="M25" | IOSTANDARD=LVCMOS25;
+NET "switchesWires_SWITCH[7]" LOC="M26" | IOSTANDARD=LVCMOS25;
+
+
+###############################################################################
+# Bugfixes
+###############################################################################
+
+## Sometimes map tries to pack these sync signals together into the same LUT,
+## and then complains that they should actually never be packed together.
+## An ugly way to get rid of these errors is to explicitly all of these to be
+## packed into different LUTs by using distinct strings names for the target
+## LUTs. This works as long as the names do not appear anywhere else. However,
+## if for some reason these signals get optimized away by XST, then these
+## constraints become invalid and ngdbuild will complain. Fortunately, this
+## hasn't occurred yet, possibly because these signals are tied or are very
+## close to physical pins.
+
+#INST "*/CAN_FIRE_RL_m_vp_llpi_cio_physicalChannel_recv_read_resp_0_0_a2_0" HLUTNM = "HLUTNM_pcie_random_name_00";
+#INST "m_vp_vdevs_fp_server_stub_dem_state_EN_i_lut6_1" LUTNM = "LUTNM_pcie_random_name_01";
