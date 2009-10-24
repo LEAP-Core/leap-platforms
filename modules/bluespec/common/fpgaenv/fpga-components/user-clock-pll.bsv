@@ -202,9 +202,9 @@ module mkUserClock_PLL#(Integer inFreq,
         if (d_in == 0)
         begin
             case (mul)
-                1: errorM("Input frequency is out of legal range");
-                2: errorM("Output frequency is out of legal range");
-                default: errorM("Something failed");
+                1: error("Input frequency is out of legal range");
+                2: error("Output frequency is out of legal range");
+                default: error("Something failed");
             endcase
         end
 

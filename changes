@@ -7777,3 +7777,22 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/commo
 
 More flexible array generation code.  Arrays can now be constructed from multiple
 hardware ring stops.
+
+----------
+kfleming    Date: Sat Oct 24 17:41:24 KST 2009  CSN: CSN-platforms-294
+                  Sat Oct 24 08:41:24 UTC 2009
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-hybrid-xupv2-serial.apm Locally Modified          293 
+ fpgaenv-hybrid-htg-v5-pcie-synplify.apm Locally Added               0 
+ xup-virtual-devices.apm   Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ user-clock-pll.bsv        Locally Modified          293 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/central-cache
+ null-central-cache.awb    Locally Modified          293 
+ null-central-cache.bsv    Locally Modified          293 
+
+New synplify fpgaenv and some minor bug fixes.

@@ -27,15 +27,17 @@ import FIFO::*;
 import FIFOF::*;
 import Vector::*;
 
+
 `include "asim/provides/librl_bsv_base.bsh"
+`include "asim/provides/fpga_components.bsh"
 `include "asim/provides/low_level_platform_interface.bsh"
 `include "asim/provides/physical_platform.bsh"
-`include "asim/provides/virtual_devices.bsh"
+
+
 
 typedef CENTRAL_CACHE_VIRTUAL_DEVICE CENTRAL_CACHE_IFC;
 
-module mkCentralCache#(LowLevelPlatformInterface llpi,
-                       CENTRAL_CACHE_STATS stats)
+module mkCentralCache#(LowLevelPlatformInterface llpi)
     // interface:
     (CENTRAL_CACHE_IFC);
     
