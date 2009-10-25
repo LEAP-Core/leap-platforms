@@ -14,7 +14,7 @@
 %sources -t UT  -v PRIVATE xilinx.ut
 %sources -t XST -v PRIVATE xilinx.xst
 %sources -t SDF -v PRIVATE xilinx.sdf
-%sources -t SDC -v PRIVATE xilinx.sdc
+%sources -t SDC -v PRIVATE htg-v5-pcie-enabled.sdc
 %sources -t DOWNLOAD -v PRIVATE xilinx.download
 
 

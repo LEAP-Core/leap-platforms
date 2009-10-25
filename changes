@@ -7796,3 +7796,14 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/centr
  null-central-cache.bsv    Locally Modified          293 
 
 New synplify fpgaenv and some minor bug fixes.
+
+----------
+kfleming    Date: Sun Oct 25 16:27:23 KST 2009  CSN: CSN-platforms-296
+                  Sun Oct 25 07:27:23 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled
+ htg-v5-pcie-enabled.awb   Locally Modified          295 
+
+
+Fixed typo in htg AWB...
