@@ -7807,3 +7807,36 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-ena
 
 
 Fixed typo in htg AWB...
+
+----------
+mdk         Date: Tue Oct 27 11:44:55 KST 2009  CSN: CSN-platforms-297
+                  Tue Oct 27 02:44:55 UTC 2009
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-hybrid-exe-serial-ChanIO-loopback.apm Locally Modified          296 
+
+Directory config/pm/platforms/tests
+ chanIO_loopback_sim.apm   Locally Modified          296 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/loopback
+ loopback-channelio.cpp    Locally Modified          296 
+ loopback-channelio.h      Locally Modified          296 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices
+ null-starter/             Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/null-starter
+ null-starter-device.awb   Locally Added               0 
+ starter-device.cpp        Locally Added               0 
+ starter-device.h          Locally Added               0 
+ starter-device.bsv        Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup/serial
+ xilinx.sdc                Locally Modified          296 
+ xilinx.sdf                Locally Modified          296 
+
+
+changing the sdc and sdf files to accomodate elliott's changes to the synthesis environment
+
+some other stuff to the loopback device which still doesn't work and is waiting on Angshu for his input

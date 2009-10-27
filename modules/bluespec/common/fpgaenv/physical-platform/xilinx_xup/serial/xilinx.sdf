@@ -15,7 +15,7 @@ set_option -use_fsm_explorer 1
 set_option -top_module "mk_model_Wrapper"
 
 #map options
-set_option -frequency 300.000
+set_option -frequency 50.000
 set_option -vendor_xcompatible_mode 0
 set_option -vendor_xcompatible_mode 0
 set_option -run_prop_extract 1

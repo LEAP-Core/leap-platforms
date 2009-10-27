@@ -58,3 +58,6 @@ starter_service=Starter Service
 [Starter Service]
 File=modules/hasim/util/platform-services/starter-service/starter-service.awb
 Packagehint=hasim
+
+[HW/SW Hybrid Project Foundation/Params]
+WAIT_FOR_HARDWARE=0

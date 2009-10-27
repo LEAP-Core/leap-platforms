@@ -246,26 +246,30 @@ CHANNELIO_CLASS::runTest()
 {
   printf("CHANNELIO_EXT_CLASS::runTest()\n");
   for(int i = 0; i < 100; i++){
-    UMF_MESSAGE_CLASS message;
-    message.SetChannelID(0);
-    message.SetServiceID(0);
-    message.SetMethodID(0);
-    message.SetLength(sizeof(UINT32));
-    message.StartAppend();
-    message.AppendUINT32(0xabcdabcd);
-    printf("physicalChannel.Write(&message);\n");
-    physicalChannel.Write(&message);
+    UMF_MESSAGE message = UMF_MESSAGE_CLASS::New();
+
+    message->SetChannelID(0);
+    message->SetServiceID(2);
+    message->SetMethodID(0);
+    message->SetLength(sizeof(UINT32));
+    message->StartAppend();
+    message->AppendUINT32(0xabcdabcd);
+
+    printf("physicalChannel.Write(message);\n");
+    physicalChannel.Write(message);
     UMF_MESSAGE rv = NULL;
     printf("physicalChannel.Read();\n");
+
     rv = physicalChannel.Read();
+    rv->StartExtract();
     printf("%d\n",(rv->GetChannelID()));
     printf("%d\n",(rv->GetServiceID()));
     printf("%d\n",(rv->GetMethodID()));
     printf("%d\n",(rv->GetLength()));
-    printf("%d\n",(rv->ExtractUINT32()));
+    printf("%x\n",(rv->ExtractUINT32()));
 
     bool valid =  ((rv->GetChannelID()==0)&&
-		   (rv->GetServiceID()==0)&&
+		   (rv->GetServiceID()==2)&&
 		   (rv->GetMethodID()==0)&&
 		   (rv->GetLength()==sizeof(UINT32))&&
 		   (rv->ExtractUINT32()==0xabcdabcd));

@@ -10,10 +10,6 @@
 
 using namespace std;
 
-// ============================================
-//       Base Class for Message Receivers
-// ============================================
-
 typedef class CIO_DELIVERY_STATION_CLASS* CIO_DELIVERY_STATION;
 class CIO_DELIVERY_STATION_CLASS
 {
@@ -45,18 +41,12 @@ struct CIO_STATION_INFO
 
 
 
-class CHANNELIO_EXT_CLASS
-{
- public:
-
-};
-
 // ============================================
 //                 Channel I/O                 
 // ============================================
 
 typedef class CHANNELIO_CLASS* CHANNELIO;
-class CHANNELIO_CLASS:  public PLATFORMS_MODULE_CLASS, public CHANNELIO_EXT_CLASS
+class CHANNELIO_CLASS:  public PLATFORMS_MODULE_CLASS
 {
 
   private:

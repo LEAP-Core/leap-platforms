@@ -114,8 +114,8 @@ File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/null-virtu
 Packagehint=platforms
 
 [NULL Virtual Devices/Requires]
-starter_device=Starter Virtual Device
+starter_device=Null Starter Virtual Device
 
-[Starter Virtual Device]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/starter/starter-device.awb
+[Null Starter Virtual Device]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/null-starter/null-starter-device.awb
 Packagehint=platforms
