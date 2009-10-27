@@ -158,7 +158,7 @@ PLATFORMS_MODULE_CLASS::Uninit()
     // walk through list of children in LIFO order and uninit them
     if (children != NULL)
     {
-        PLATFORMS_MODULE child = children->prev;
+        PLATFORMS_MODULE child = children;
         do
         {
             child->Uninit();

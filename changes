@@ -7840,3 +7840,13 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup/serial
 changing the sdc and sdf files to accomodate elliott's changes to the synthesis environment
 
 some other stuff to the loopback device which still doesn't work and is waiting on Angshu for his input
+
+----------
+mcadler     Date: Tue Oct 27 12:02:57 EDT 2009  CSN: CSN-platforms-298
+                  Tue Oct 27 16:02:57 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/low-level-platform-interface
+ platforms-module.cpp      Locally Modified          297 
+
+Uninit() was skipping the first child.
