@@ -7850,3 +7850,17 @@ Directory modules/bluespec/common/fpgaenv/low-level-platform-interface
  platforms-module.cpp      Locally Modified          297 
 
 Uninit() was skipping the first child.
+
+----------
+mdk         Date: Thu Oct 29 17:00:00 KST 2009  CSN: CSN-platforms-299
+                  Thu Oct 29 08:00:00 UTC 2009
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-hybrid-xupv2-serial.apm Locally Modified          298 
+
+Directory modules/bluespec/librl/storage
+ scoreboard-fifo.awb       Locally Removed           298 
+
+
+Removing a redundant module

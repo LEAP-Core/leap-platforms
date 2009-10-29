@@ -33,8 +33,8 @@ File=modules/bluespec/common/fpgaenv/fpga-environment.awb
 Packagehint=platforms
 
 [Standard Virtual Devices]
-File=config/pm/hasim/submodels/fpgaenv/std-virtual-devices.apm
-Packagehint=platforms
+File=config/pm/mit-6.375/virtex2-virtual-devices.apm
+Packagehint=mit-6.375
 
 [RRR Clients and Servers]
 File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic/basic-rrr.awb
