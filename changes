@@ -7913,3 +7913,21 @@ Directory modules/bluespec/librl/base
   like that any way and didn't depend on it to be commutative.
   
 Michael P.
+
+----------
+mcadler     Date: Tue Nov  3 11:05:29 EST 2009  CSN: CSN-platforms-303
+                  Tue Nov  3 16:05:29 UTC 2009
+
+
+Directory modules/bluespec/librl/base
+ fifo-functions.bsv        Locally Added               0 
+ librl-bsv-base.awb        Locally Modified          302 
+
+Add a functional, internally stateless, implementation of a FIFO.  Functions
+take the state of the FIFO as a parameter.  Those that update the FIFO return
+the new state.  The state is simply a struct that can be stored in any memory.
+
+Clearly the FIFO has different semantics than usual, since reading and writing
+from different rules in the same cycle is impossible.  The code simply manages
+a ring buffer.  The most likely use is in algorithms that need a large array
+of relatively small FIFOs.
