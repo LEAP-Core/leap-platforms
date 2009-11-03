@@ -7895,3 +7895,21 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ser
 
 
 Added TIG statements to ucf to allow upclocking the models.
+
+----------
+pellauer    Date: Tue Nov  3 10:57:42 EST 2009  CSN: CSN-platforms-302
+                  Tue Nov  3 15:57:42 UTC 2009
+
+
+Directory modules/bluespec/librl/base
+ bluespec-def.bsv          Locally Modified          301 
+
+
+* Updating the definition of Alias with a functional dependence A -> B. 
+* This allows the definition to work with the new bluespec compiler 
+  (also it's probably how it should have been written to start).
+* There's a small change in functionality, in that the order is now fixed to:
+  Alias#(t_EXISTING, t_NEW_ALIAS), however that's fine since we were using it
+  like that any way and didn't depend on it to be commutative.
+  
+Michael P.

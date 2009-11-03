@@ -20,7 +20,8 @@
 // Hacks for defining type aliases within a module to work around lack of
 // "typedef" inside module scope.
 //
-typeclass Alias#(type a, type b);
+typeclass Alias#(type a, type b)
+   dependencies (a determines b);
 endtypeclass
 
 instance Alias#(a,a);
