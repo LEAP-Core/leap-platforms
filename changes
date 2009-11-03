@@ -7864,3 +7864,14 @@ Directory modules/bluespec/librl/storage
 
 
 Removing a redundant module
+
+----------
+kfleming    Date: Mon Nov  2 19:51:18 EST 2009  CSN: CSN-platforms-300
+                  Tue Nov  3 00:51:18 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/serial/ublaze-serial
+ serial-device.bsv         Locally Modified          299 
+ firmware.elf              Locally Modified          299 
+
+Patch to fix early synchronization bug between phy and hardware.

@@ -135,6 +135,16 @@ module mkSerialDevice#(Clock rawClock, Reset rawReset) (SERIAL_DEVICE);
     SyncFIFOIfc#(SerialWord) sendfifo <- mkSyncFIFOFromCC(8,primitiveSerialDevice.serial_clk);
     SyncFIFOIfc#(SerialWord) receivefifo <- mkSyncFIFOToCC(8,primitiveSerialDevice.serial_clk,primitiveSerialDevice.serial_rst);
 
+    Reg#(Bool) synchronized <- mkReg(False);
+
+    rule sync(!synchronized);
+      receivefifo.deq;  
+      if(receivefifo.first == 32'hdeadbeef) 
+        begin
+          synchronized <= True;
+        end
+    endrule
+
     rule sendConnect;
         primitiveSerialDevice.send(sendfifo.first);
         sendfifo.deq;
@@ -147,11 +157,11 @@ module mkSerialDevice#(Clock rawClock, Reset rawReset) (SERIAL_DEVICE);
 
     interface SERIAL_DRIVER driver;
 
-        method Action send(SerialWord data);
+        method Action send(SerialWord data) if(synchronized);
             sendfifo.enq(data);
         endmethod
 
-        method ActionValue#(SerialWord) receive();
+        method ActionValue#(SerialWord) receive() if(synchronized);
             receivefifo.deq;
             return receivefifo.first;
         endmethod
