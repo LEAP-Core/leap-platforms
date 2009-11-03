@@ -1,6 +1,6 @@
 
-%name Serial Physical Device (uBlaze-based)
-%desc Serial Physical Device (uBlaze-based)
+%name Serial Physical Device (uBlaze-based) for Synplify
+%desc Serial Physical Device (uBlaze-based) for Synplify
 
 %provides serial_device
 
@@ -29,5 +29,5 @@
 
 %sources -t BMM -v PRIVATE system.bmm
 %sources -t ELF -v PRIVATE firmware.elf
-%sources -t UCF -v PUBLIC  serial-device-ublaze-tig.ucf
+%sources -t UCF -v PUBLIC  serial-device-ublaze-tig-synplify.ucf
  

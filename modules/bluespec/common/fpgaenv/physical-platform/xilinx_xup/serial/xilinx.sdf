@@ -56,4 +56,6 @@ set_option -enable64bit 1
 #par_1 attributes
 set_option -job par_1 -add par
 set_option -job par_1 -option run_backannotation 0
+project -run constraint_check 
+project -run synthesis
 impl -active "xup"

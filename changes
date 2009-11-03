@@ -7875,3 +7875,23 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ser
  firmware.elf              Locally Modified          299 
 
 Patch to fix early synchronization bug between phy and hardware.
+
+----------
+kfleming    Date: Tue Nov  3 17:40:00 KST 2009  CSN: CSN-platforms-301
+                  Tue Nov  3 08:40:00 UTC 2009
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-hybrid-xupv2-serial-synplify.apm Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup/serial
+ xilinx.sdf                Locally Modified          300 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/serial/ublaze-serial
+ serial-device-ublaze-synplify.awb Locally Added               0 
+ serial-device-ublaze-tig.ucf Locally Added               0 
+ serial-device-ublaze.awb  Locally Modified          300 
+ serial-device-ublaze-tig-synplify.ucf Locally Added               0 
+
+
+Added TIG statements to ucf to allow upclocking the models.
