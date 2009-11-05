@@ -152,7 +152,14 @@ for bsv in WRAPPER_BSVS.split():
                     '')
     env.Precious(w)
 
-    wrapper_builds += w
+    ##
+    ## Build the Xst black-box stub.
+    ##
+    bb = env.Command(TMP_BSC_DIR + '/mk_' + bsv.replace('.bsv', '_stub.v'),
+                     w,
+                     'hasim-gen-black-box < $SOURCE > $TARGET')
+
+    wrapper_builds += bb
 
 ##
 ## Build subdirectories

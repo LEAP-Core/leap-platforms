@@ -7931,3 +7931,32 @@ Clearly the FIFO has different semantics than usual, since reading and writing
 from different rules in the same cycle is impossible.  The code simply manages
 a ring buffer.  The most likely use is in algorithms that need a large array
 of relatively small FIFOs.
+
+----------
+mcadler     Date: Wed Nov  4 20:22:51 EST 2009  CSN: CSN-platforms-304
+                  Thu Nov  5 01:22:51 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/toplevel-wires/xilinx
+ xilinx.xst                Locally Modified          303 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup/serial
+ xilinx.xst                Locally Modified          303 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup
+ xilinx.xst                Locally Modified          303 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled
+ xilinx.xst                Locally Modified          303 
+
+Directory modules/project
+ SCons.top.template        Locally Modified          303 
+ SCons.hw.template         Locally Modified          303 
+
+Build each synthesis boundary as a separate invocation of Xilinx Xst, treating
+all other synthesis regions as black boxes.
+
+The SCons script waits for all Bluespec compilations to complete before
+beginning any Xst.  While this may not be completely necessary, the logic
+for building black boxes would have to be more complex.  All runs of Xst
+are independent, and SCons figures this out, so Xst building is parallel.

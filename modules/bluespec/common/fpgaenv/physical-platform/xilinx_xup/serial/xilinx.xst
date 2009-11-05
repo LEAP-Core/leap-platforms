@@ -1,3 +1,5 @@
+set -xsthdpdir @TMP_XILINX_DIR@/xst_hdp/@APM_NAME@
+
 run
 -ifmt mixed
 -register_balancing yes
@@ -6,4 +8,4 @@ run
 -ofn @TMP_XILINX_DIR@/@APM_NAME@
 -ofmt NGC
 -p @FPGA_PART_XILINX@
--top mk_model_Wrapper
+-top @APM_NAME@

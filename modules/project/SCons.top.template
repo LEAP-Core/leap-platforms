@@ -40,10 +40,11 @@ defs = {
     'SIMULATED_ISA'      : '@SIMULATED_ISA@',
     'SW_INC_DIRS'        : '@SW_INC_DIRS@',
     'SW_LIBS'            : '@SW_LIBS@',
+    'SYNTH_TOP'          : '@SYNTH_TOP@',
+    'SYNTH_WRAPPERS'     : '@SYNTH_WRAPPERS@',
     'TMP_BSC_DIR'        : '@TMP_BSC_DIR@',
     'TMP_XILINX_DIR'     : '@TMP_XILINX_DIR@',
     'WORKSPACE_ROOT'     : '@WORKSPACE_ROOT@',
-    'XST_FILE'           : '@XST_FILE@',
 }
 
 # Propagate environment from external state
@@ -365,27 +366,45 @@ env.Alias('vexe', vexe)
 
 TMP_XILINX_DIR = env['DEFS']['TMP_XILINX_DIR']
 XILINX_APM_NAME = TMP_XILINX_DIR + '/' + APM_NAME
-XST_FILE = env['DEFS']['XST_FILE']
+
+SYNTH_TOP = env['DEFS']['SYNTH_TOP']
+XILINX_SYNTH_TOP = TMP_XILINX_DIR + '/' + SYNTH_TOP
 
 FPGA_PART_XILINX = env['DEFS']['FPGA_PART_XILINX']
 
+wrapper_builds = []
 
 if(env['ENV'].has_key('USE_SYNPLIFY')):
     top_netlist = env.Command(
-    XILINX_APM_NAME + '.edf',
-    wrapper_v + clean_split(env['DEFS']['GIVEN_VS'], sep = ' ') + ['config/' + APM_NAME + '.synplify.prj'],
-    [ Delete(XILINX_APM_NAME + '.srp'),
-      Delete(XILINX_APM_NAME + '_xst.xrpt'),
-      'synplify_pro -batch config/' + APM_NAME + '.synplify.prj' ])
-else:
-    top_netlist = env.Command(
-    XILINX_APM_NAME + '.ngc',
-    wrapper_v + clean_split(env['DEFS']['GIVEN_VS'], sep = ' ') + ['config/' + APM_NAME + '.xst'],
-    [ Delete(XILINX_APM_NAME + '.srp'),
-      Delete(XILINX_APM_NAME + '_xst.xrpt'),
-      'xst -ifn config/' + APM_NAME + '.xst -ofn ' + XILINX_APM_NAME + '.srp' ])
+        XILINX_APM_NAME + '.edf',
+        wrapper_v + clean_split(env['DEFS']['GIVEN_VS'], sep = ' ') + ['config/' + APM_NAME + '.synplify.prj'],
+        [ Delete(XILINX_APM_NAME + '.srp'),
+          Delete(XILINX_APM_NAME + '_xst.xrpt'),
+          'synplify_pro -batch config/' + APM_NAME + '.synplify.prj' ])
 
-Clean(top_netlist,  XILINX_APM_NAME + '.srp')
+    Clean(top_netlist,  XILINX_APM_NAME + '.srp')
+else:
+    for wrapper in env['DEFS']['SYNTH_WRAPPERS'].split():
+        w = env.Command(
+            TMP_XILINX_DIR + '/' + wrapper + '.ngc',
+            wrapper_v + clean_split(env['DEFS']['GIVEN_VS'], sep = ' ') + ['config/' + wrapper + '.xst'],
+            [ Delete(TMP_XILINX_DIR + '/' + wrapper + '.srp'),
+              Delete(TMP_XILINX_DIR + '/' + wrapper + '_xst.xrpt'),
+              'xst -intstyle silent -ifn config/' + wrapper + '.xst -ofn ' + TMP_XILINX_DIR + '/' + wrapper + '.srp',
+              '@echo xst ' + wrapper + ' build complete.' ])
+
+        wrapper_builds += w
+        Clean(w,  TMP_XILINX_DIR + '/' + wrapper + '.srp')
+
+    top_netlist = env.Command(
+        XILINX_SYNTH_TOP + '.ngc',
+        wrapper_v + clean_split(env['DEFS']['GIVEN_VS'], sep = ' ') + ['config/' + SYNTH_TOP + '.xst'],
+        [ Delete(XILINX_SYNTH_TOP + '.srp'),
+          Delete(XILINX_SYNTH_TOP + '_xst.xrpt'),
+          'xst -intstyle silent -ifn config/' + SYNTH_TOP + '.xst -ofn ' + XILINX_SYNTH_TOP + '.srp',
+          '@echo xst ' + SYNTH_TOP + ' build complete.' ])
+
+    Clean(top_netlist,  XILINX_SYNTH_TOP + '.srp')
 
 
 # Concatenate UCF files
@@ -409,12 +428,13 @@ xilinx_ngd = env.Command(
       Move(TMP_XILINX_DIR + '/netlist.lst', 'netlist.lst') ])
 
 
-Depends(xilinx_ngd, env['DEFS']['GIVEN_BMMS']);
+Depends(xilinx_ngd, wrapper_builds)
+Depends(xilinx_ngd, env['DEFS']['GIVEN_BMMS'])
 
 Clean(xilinx_ngd, TMP_XILINX_DIR + '/netlist.lst')
 
 # Alias for everything up to map...
-env.Alias('xst', xilinx_ngd)
+env.Alias('xst', xilinx_ngd + SW_EXE)
 
 
 #
