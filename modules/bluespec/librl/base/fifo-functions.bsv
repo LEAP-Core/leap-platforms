@@ -38,14 +38,15 @@ import Vector::*;
 
 //
 // FUNC_FIFO --
-//     The base data type is a ring buffer.
+//     Base data type.  The oldest entry is always in slot 0 of the data
+//     vector.  Values are shifted as entries are dequeued.  Shifting
+//     is generally less expensive than the indexing that would be required
+//     of a ring buffer.
 //
 typedef struct
 {
     Vector#(n_ENTRIES, t_DATA) data;
-    Bit#(TLog#(n_ENTRIES)) oldest;
-    Bit#(TLog#(n_ENTRIES)) nextNew;
-    Bool notEmpty;
+    Bit#(TLog#(TAdd#(n_ENTRIES, 1))) activeEntries;
 }
 FUNC_FIFO#(type t_DATA, numeric type n_ENTRIES)
     deriving (Eq, Bits);
@@ -57,9 +58,7 @@ FUNC_FIFO#(type t_DATA, numeric type n_ENTRIES)
 //
 function FUNC_FIFO#(t_DATA, n_ENTRIES) funcFIFO_Init();
     return FUNC_FIFO { data: newVector(),
-                       oldest: 0,
-                       nextNew: 0,
-                       notEmpty: False };
+                       activeEntries: 0 };
 endfunction
 
 
@@ -73,7 +72,7 @@ endfunction
 // funcFIFO_notEmpty
 //
 function Bool funcFIFO_notEmpty(FUNC_FIFO#(t_DATA, n_ENTRIES) fifo);
-    return fifo.notEmpty;
+    return fifo.activeEntries != 0;
 endfunction
 
 
@@ -81,7 +80,7 @@ endfunction
 // funcFIFO_notFull
 //
 function Bool funcFIFO_notFull(FUNC_FIFO#(t_DATA, n_ENTRIES) fifo);
-    return (fifo.oldest != fifo.nextNew) || ! fifo.notEmpty;
+    return fifo.activeEntries < fromInteger(valueOf(n_ENTRIES));
 endfunction
 
 
@@ -95,7 +94,7 @@ endfunction
 // funcFIFO_UGfirst
 //
 function t_DATA funcFIFO_UGfirst(FUNC_FIFO#(t_DATA, n_ENTRIES) fifo);
-    return fifo.data[fifo.oldest];
+    return fifo.data[0];
 endfunction
 
 
@@ -103,15 +102,9 @@ endfunction
 // funcFIFO_UGdeq
 //
 function FUNC_FIFO#(t_DATA, n_ENTRIES) funcFIFO_UGdeq(FUNC_FIFO#(t_DATA, n_ENTRIES) fifo);
-    // Increment the pointer to the oldest object in the ring buffer
-    if (fifo.oldest == fromInteger(valueOf(TSub#(n_ENTRIES, 1))))
-        fifo.oldest = 0;
-    else
-        fifo.oldest = fifo.oldest + 1;
-    
-    // FIFO is empty if the oldest and nextNew pointers are the same
-    fifo.notEmpty = (fifo.oldest != fifo.nextNew);
-    
+    fifo.data = shiftInAtN(fifo.data, ?);
+    fifo.activeEntries = fifo.activeEntries - 1;
+
     return fifo;
 endfunction
 
@@ -121,14 +114,8 @@ endfunction
 //
 function FUNC_FIFO#(t_DATA, n_ENTRIES) funcFIFO_UGenq(FUNC_FIFO#(t_DATA, n_ENTRIES) fifo,
                                                       t_DATA val);
-    fifo.data[fifo.nextNew] = val;
-    fifo.notEmpty = True;
-
-    // Increment the pointer to the next new object in the ring buffer
-    if (fifo.nextNew == fromInteger(valueOf(TSub#(n_ENTRIES, 1))))
-        fifo.nextNew = 0;
-    else
-        fifo.nextNew = fifo.nextNew + 1;
+    fifo.data[fifo.activeEntries] = val;
+    fifo.activeEntries = fifo.activeEntries + 1;
     
     return fifo;
 endfunction
@@ -162,4 +149,33 @@ endfunction
 function FUNC_FIFO#(t_DATA, n_ENTRIES) funcFIFO_enq(FUNC_FIFO#(t_DATA, n_ENTRIES) fifo,
                                                     t_DATA val);
     return when (funcFIFO_notFull(fifo), funcFIFO_UGenq(fifo, val));
+endfunction
+
+
+// ========================================================================
+//
+//   Non-FIFO data access for callers that need to access an arbitrary
+//   object in the buffer.
+//
+// ========================================================================
+
+//
+// funcFIFO_peek --
+//     Read data in a specific slot.
+//
+function t_DATA funcFIFO_peek(FUNC_FIFO#(t_DATA, n_ENTRIES) fifo,
+                              Bit#(TLog#(n_ENTRIES)) idx);
+    return fifo.data[idx];
+endfunction
+
+
+//
+// funcFIFO_poke --
+//     Write data to a specific slot.
+//
+function FUNC_FIFO#(t_DATA, n_ENTRIES) funcFIFO_poke(FUNC_FIFO#(t_DATA, n_ENTRIES) fifo,
+                                                     Bit#(TLog#(n_ENTRIES)) idx,
+                                                     t_DATA value);
+    fifo.data[idx] = value;
+    return fifo;
 endfunction

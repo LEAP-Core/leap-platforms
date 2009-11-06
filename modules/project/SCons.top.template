@@ -384,6 +384,9 @@ if(env['ENV'].has_key('USE_SYNPLIFY')):
 
     Clean(top_netlist,  XILINX_APM_NAME + '.srp')
 else:
+    #
+    # Parallel Xst build.  Each synthesis boundary is independent.
+    #
     for wrapper in env['DEFS']['SYNTH_WRAPPERS'].split():
         w = env.Command(
             TMP_XILINX_DIR + '/' + wrapper + '.ngc',
@@ -424,6 +427,12 @@ xilinx_ngd = env.Command(
     top_netlist + xilinx_ucf,
     [ Delete(XILINX_APM_NAME + '.bld'),
       Delete(XILINX_APM_NAME + '_ngdbuild.xrpt'),
+      # Xilinx project files are created automatically by Xilinx tools, but not
+      # needed for command line tools.  The project files may be corrupt due
+      # to parallel invocation of xst.  Until we figure out how to move them
+      # or guarantee their safety, just delete them.
+      Delete('xlnx_auto_0.ise'),
+      Delete('xlnx_auto_0_xdb'),
       'ngdbuild -p ' + FPGA_PART_XILINX + ' -sd ' + env['DEFS']['ROOT_DIR_HW_MODEL'] + ' -uc ' + XILINX_APM_NAME + '.ucf ' + bmm + ' $SOURCE $TARGET',
       Move(TMP_XILINX_DIR + '/netlist.lst', 'netlist.lst') ])
 

@@ -7960,3 +7960,23 @@ The SCons script waits for all Bluespec compilations to complete before
 beginning any Xst.  While this may not be completely necessary, the logic
 for building black boxes would have to be more complex.  All runs of Xst
 are independent, and SCons figures this out, so Xst building is parallel.
+
+----------
+mcadler     Date: Fri Nov  6 07:37:21 EST 2009  CSN: CSN-platforms-305
+                  Fri Nov  6 12:37:21 UTC 2009
+
+
+Directory modules/bluespec/librl/base
+ fifo-functions.bsv        Locally Modified          303 
+
+Directory modules/project
+ SCons.top.template        Locally Modified          304 
+
+- Rewrite FIFO functions using a shift on deq instead of a ring buffer.
+
+- Delete Xilinx project database stub files at the start of map because they
+  can be corrupted by parallel xst builds.  The files aren't needed for
+  command line tools.  The problem of warnings and errors when xst starts
+  in parallel persist because I can't figure out how to keep xst from
+  trying to create a local database.  Unless xst actually aborts (very rare)
+  the messages appear to cause no harm.
