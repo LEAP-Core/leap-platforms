@@ -16,7 +16,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-#include <bitset>
+#include <list>
 
 #include "platforms-module.h"
 #include "asim/provides/rrr.h"
@@ -113,3 +113,25 @@ class STATS_DEVICE_SERVER_CLASS: public RRR_SERVER_CLASS,
 typedef STATS_DEVICE_SERVER_CLASS STATS_DEVICE_CLASS;
 
 void StatsEmitFile();
+
+
+// ========================================================================
+//
+//   HACK!  Clients may "register" as stats emitters by allocating an
+//   instance of the following class.  They may then write whatever
+//   they wish to the stats file.  Clearly this should be improved with
+//   some structure, perhaps by switching to statistics code from
+//   Asim.
+//
+// ========================================================================
+
+typedef class STATS_EMITTER_CLASS *STATS_EMITTER;
+
+class STATS_EMITTER_CLASS
+{
+  public:
+    STATS_EMITTER_CLASS();
+    ~STATS_EMITTER_CLASS();
+
+    virtual void EmitStats(ofstream &statsFile) = 0;
+};

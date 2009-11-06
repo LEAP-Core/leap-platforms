@@ -40,6 +40,9 @@ using namespace std;
 // ===== service instantiation =====
 STATS_DEVICE_SERVER_CLASS STATS_DEVICE_SERVER_CLASS::instance;
 
+// ===== registered stats emitters =====
+static list<STATS_EMITTER> statsEmitters;
+
 // ===== methods =====
 
 // constructor
@@ -221,6 +224,8 @@ STATS_DEVICE_SERVER_CLASS::EmitFile()
         ASIMERROR("Can't dump statistics");
     }
 
+    statsFile.precision(10);
+
     for (unsigned int i = 0; i < STATS_DICT_ENTRIES; i++)
     {
         // lookup event name from dictionary
@@ -237,6 +242,16 @@ STATS_DEVICE_SERVER_CLASS::EmitFile()
             statsFile << endl;
         }
     }
+
+    // Call other emitters.  Clearly this needs to be improved with some
+    // structured data.
+    for (list<STATS_EMITTER>::iterator i = statsEmitters.begin();
+         i != statsEmitters.end();
+         i++)
+    {
+        (*i)->EmitStats(statsFile);
+    }
+
     statsFile.close();
 }
 
@@ -299,4 +314,39 @@ STAT_VECTOR_CLASS::InitPosition(UINT32 pos)
     VERIFY(! positionInitialized[pos], "stats device: Duplicate entry " << STATS_DICT::Name(myID) << ", postion " << pos);
 
     positionInitialized[pos] = true;
+}
+
+
+
+
+// ========================================================================
+//
+//   HACK!  Clients may "register" as stats emitters by allocating an
+//   instance of the following class.  They may then write whatever
+//   they wish to the stats file.  Clearly this should be improved with
+//   some structure, perhaps by switching to statistics code from
+//   Asim.
+//
+// ========================================================================
+
+STATS_EMITTER_CLASS::STATS_EMITTER_CLASS()
+{
+    statsEmitters.push_front(this);
+}
+
+STATS_EMITTER_CLASS::~STATS_EMITTER_CLASS()
+{
+    //
+    // Drop me from the global list of emitters.
+    //
+    for (list<STATS_EMITTER>::iterator i = statsEmitters.begin();
+         i != statsEmitters.end();
+         i++)
+    {
+        if (*i == this)
+        {
+            statsEmitters.erase(i);
+            break;
+        }
+    }
 }
