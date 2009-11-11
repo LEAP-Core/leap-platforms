@@ -84,6 +84,14 @@ function Bool funcFIFO_notFull(FUNC_FIFO#(t_DATA, n_ENTRIES) fifo);
 endfunction
 
 
+//
+// funcFIFO_numBusySlots
+//
+function Bit#(TLog#(TAdd#(n_ENTRIES, 1))) funcFIFO_numBusySlots(FUNC_FIFO#(t_DATA, n_ENTRIES) fifo);
+    return fifo.activeEntries;
+endfunction
+
+
 // ========================================================================
 //
 //   Unguarded updates

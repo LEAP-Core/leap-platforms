@@ -7993,3 +7993,13 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/commo
 Add a hack for software clients that want to emit data to the statistics file.
 Right now the data is unstructured.  Eventually we should switch to a real
 package.
+
+----------
+mcadler     Date: Wed Nov 11 14:05:02 EST 2009  CSN: CSN-platforms-309
+                  Wed Nov 11 19:05:02 UTC 2009
+
+
+Directory modules/bluespec/librl/base
+ fifo-functions.bsv        Locally Modified          306 
+
+Add a function to ask how many slots are busy in a FIFO.
