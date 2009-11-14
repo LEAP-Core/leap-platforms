@@ -71,10 +71,6 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/physical-platform/utils/utils.awb
 Packagehint=platforms
 
-[Null Physical Platform Debugger]
-File=modules/bluespec/common/fpgaenv/physical-platform/debuggers/null/null-debugger.awb
-Packagehint=platforms
-
 [General LED Device]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/leds/general-led-device.awb
 Packagehint=platforms
@@ -89,6 +85,7 @@ serial_device=Serial Physical Device (uBlaze-based)
 physical_platform_utils=Common Physical Platform Utilities
 led_device=General LED Device
 switch_device=General Switch Device
+ddr_sdram_device=DDR SDRAM Physical Device
 
 [XUP Virtex 2 Serial]
 File=modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup/serial/xilinx-xup-serial.awb
@@ -125,4 +122,13 @@ Packagehint=platforms
 
 [Serial Physical Channel]
 File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/serial/serial-physical-channel.awb
+Packagehint=platforms
+
+[DDR SDRAM Physical Device]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr/ddr-sdram-device.awb
+Packagehint=platforms
+
+
+[Null Physical Platform Debugger]
+File=modules/bluespec/common/fpgaenv/physical-platform/debuggers/null/null-debugger.awb
 Packagehint=platforms

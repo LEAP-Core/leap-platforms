@@ -1,0 +1,18 @@
+%name DDR SDRAM Physical Device
+%desc DDR SDRAM Physical Device
+
+%provides ddr_sdram_device
+
+%sources -t BSV       -v PUBLIC ddr-sdram-device.bsv
+%sources -t BSV       -v PUBLIC ddr-sdram-verilog-import.bsv
+%sources -t BSV       -v PUBLIC NPICommon.bsv
+%sources -t BSV       -v PUBLIC NPIMaster.bsv
+%sources -t VERILOG   -v PRIVATE ddr_sdram.v
+%sources -t VERILOG   -v PRIVATE ddr_sdram_xilinx.v
+%sources -t NGC       -v PUBLIC clock_generator_0_wrapper.ngc 
+%sources -t NGC       -v PUBLIC ddr_sdram_wrapper.ngc
+
+
+
+%sources -t UCF -v PRIVATE ddr_sdram.ucf
+

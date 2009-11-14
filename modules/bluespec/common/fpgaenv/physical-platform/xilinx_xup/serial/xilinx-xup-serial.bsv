@@ -28,6 +28,7 @@ import Clocks::*;
 `include "clocks_device.bsh"
 `include "serial_device.bsh"
 `include "physical_platform_utils.bsh"
+`include "ddr_sdram_device.bsh"
 
 // 4 switches and leds, no buttons
 
@@ -47,6 +48,7 @@ interface PHYSICAL_DRIVERS;
     interface LEDS_DRIVER#(`NUMBER_LEDS)         ledsDriver;
     interface SWITCHES_DRIVER#(`NUMBER_SWITCHES) switchesDriver;
     interface SERIAL_DRIVER                      serialDriver;
+    interface DDR_SDRAM_DRIVER                   ddrDriver;
         
 endinterface
 
@@ -65,7 +67,8 @@ interface TOP_LEVEL_WIRES;
     interface LEDS_WIRES#(`NUMBER_LEDS)          ledsWires;
     interface SWITCHES_WIRES#(`NUMBER_SWITCHES)  switchesWires;
     interface SERIAL_WIRES                       serialWires;
-    
+    interface DDR_SDRAM_WIRES                    ddrWires; 
+
 endinterface
 
 // PHYSICAL_PLATFORM
@@ -108,6 +111,11 @@ module mkPhysicalPlatform
                                                   clocked_by clk, 
                                                   reset_by   rst);    
     
+    DDR_SDRAM_DEVICE ddr <- mkDDRSDRAMDevice(clocks_device.driver.rawClock, 
+                                             clocks_device.driver.rawReset, 
+                                             clocked_by clk, 
+                                             reset_by   rst);
+
     /*
     // Bugfix for Xilinx tools: if the LEDs and Switches are not used at all in the
     // design, map sometimes gets confused and crashes. Reading the switches and
@@ -132,7 +140,8 @@ module mkPhysicalPlatform
         interface ledsDriver       = leds_device.driver;
         interface switchesDriver   = switches_device.driver;
         interface serialDriver     = serial_device.driver;
-    
+        interface ddrDriver        = ddr.driver;   
+
     endinterface
     
     // Aggregate the wires
@@ -143,7 +152,8 @@ module mkPhysicalPlatform
         interface ledsWires        = leds_device.wires;
         interface switchesWires    = switches_device.wires;
         interface serialWires      = serial_device.wires;
- 
+        interface ddrWires         = ddr.wires;    
+
     endinterface
                
 endmodule

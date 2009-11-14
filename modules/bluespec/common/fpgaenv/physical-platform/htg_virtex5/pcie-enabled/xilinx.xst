@@ -11,3 +11,4 @@ run
 -ofmt NGC
 -p @FPGA_PART_XILINX@
 -top @APM_NAME@
+-sd {@HW_BUILD_DIR@}

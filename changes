@@ -8003,3 +8003,39 @@ Directory modules/bluespec/librl/base
  fifo-functions.bsv        Locally Modified          306 
 
 Add a function to ask how many slots are busy in a FIFO.
+
+----------
+kfleming    Date: Sat Nov 14 16:40:27 KST 2009  CSN: CSN-platforms-310
+                  Sat Nov 14 07:40:27 UTC 2009
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-hybrid-xupv2-serial.apm Locally Modified          309 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup/serial
+ xilinx.xst                Locally Modified          309 
+ xilinx-xup-serial.awb     Locally Modified          309 
+ xilinx-xup-serial.bsv     Locally Modified          309 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled
+ xilinx.xst                Locally Modified          309 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices
+ ddr/                      Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr
+ clock_generator_0_wrapper.vhd Locally Added               0 
+ ddr-sdram-device.awb      Locally Added               0 
+ ddr-sdram-verilog-import.bsv Locally Added               0 
+ ddr_sdram.v               Locally Added               0 
+ ddr_sdram_wrapper.v       Locally Added               0 
+ ddr-sdram-device.bsv      Locally Added               0 
+ ddr_sdram_wrapper.ngc     Locally Added               0 
+ clock_generator_0_wrapper.ngc Locally Added               0 
+ NPICommon.bsv             Locally Added               0 
+ NPIMaster.bsv             Locally Added               0 
+ ddr_sdram.ucf             Locally Added               0 
+ ddr_sdram_xilinx.v        Locally Added               0 
+
+
+Adding files for Xilinx MPMC DRAM support.  Doesn't work yet (at least not reliably), but the skeleton is essentially here.  The issue seems to be the the bsv and mpmc are not sharing the correct reset. 

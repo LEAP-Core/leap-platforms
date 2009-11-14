@@ -3,8 +3,7 @@
 %desc XUP Virtex 2 Serial
 
 %provides physical_platform	
-
-%requires clocks_device led_device switch_device serial_device physical_platform_utils
+%requires clocks_device led_device switch_device serial_device ddr_sdram_device physical_platform_utils
 
 %sources -t BSV -v PUBLIC  xilinx-xup-serial.bsv
 %sources -t H   -v PUBLIC  xilinx-xup-serial.h
