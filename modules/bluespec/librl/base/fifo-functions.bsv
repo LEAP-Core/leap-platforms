@@ -171,9 +171,12 @@ endfunction
 // funcFIFO_peek --
 //     Read data in a specific slot.
 //
-function t_DATA funcFIFO_peek(FUNC_FIFO#(t_DATA, n_ENTRIES) fifo,
-                              Bit#(TLog#(n_ENTRIES)) idx);
-    return fifo.data[idx];
+function Maybe#(t_DATA) funcFIFO_peek(FUNC_FIFO#(t_DATA, n_ENTRIES) fifo,
+                                      Bit#(TLog#(n_ENTRIES)) idx);
+    if (fifo.activeEntries > zeroExtendNP(idx))
+        return tagged Valid fifo.data[idx];
+    else
+        return tagged Invalid;
 endfunction
 
 
