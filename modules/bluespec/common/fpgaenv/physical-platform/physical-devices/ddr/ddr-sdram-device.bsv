@@ -87,46 +87,91 @@ endinterface
 
 // This device should be clocked at raw clock.  
 
-module mkDDRSDRAMDevice#(Clock topLevelClock, Reset topLevelReset) (DDR_SDRAM_DEVICE);
+module mkDDRSDRAMDevice#(Clock rawClock, Reset rawReset) (DDR_SDRAM_DEVICE);
 
-  Clock rawClock <- exposeCurrentClock;
-  Reset rawReset <- exposeCurrentReset;
+  Clock systemClock <- exposeCurrentClock;
+  Reset systemReset <- exposeCurrentReset;
 
-  XILINX_MPMC_DDR_DRAM_CONTROLLER controller <- mkXilinxMPMCDDRDRAMController(rawClock, rawReset);
+  XILINX_MPMC_DDR_DRAM_CONTROLLER controller <- mkXilinxMPMCDDRDRAMController(clocked_by rawClock, reset_by rawReset);
 
-  NPIMaster master <- mkNPIMaster(topLevelClock, topLevelReset);
+  NPIMaster master <- mkNPIMaster(systemClock, systemReset, clocked_by controller.controller_clk, reset_by controller.controller_rst);
 
-  // Connect master and controller raw wires
-  rule driveBE;
-    controller.wrFIFO_BE(master.npiMasterWires.wrFIFO_BE());
-  endrule
-
-  rule driveController;
-    // master -> controller
+  rule driveAddrReq;
     controller.addrReq(master.npiMasterWires.addrReq());
+  endrule
+
+  rule driveMasteraddrAck;
+    master.npiMasterWires.addrAck(controller.addrAck());
+  endrule
+
+  rule driveAddr;
     controller.addr(master.npiMasterWires.addr());
+  endrule
+
+  rule driveRNW;
     controller.rnw(master.npiMasterWires.rnw());
+  endrule
+
+  rule driveSize;
     controller.size(master.npiMasterWires.size());
+  endrule
+
+  rule driveRdModWr;
     controller.rdModWr(master.npiMasterWires.rdModWr());
+  endrule
+
+  rule driveMasterrdFIFO_Empty;
+    master.npiMasterWires.rdFIFO_Empty(controller.rdFIFO_Empty());
+  endrule
+
+  rule driverdFIFO_Pop;
     controller.rdFIFO_Pop(master.npiMasterWires.rdFIFO_Pop());
+  endrule
+
+  rule driverdFIFO_Flush;
+    controller.rdFIFO_Flush(master.npiMasterWires.rdFIFO_Flush());
+  endrule
+
+  rule driveMasterrdFIFO_Latency;
+    master.npiMasterWires.rdFIFO_Latency(controller.rdFIFO_Latency());
+  endrule
+
+  rule driveMasterrdFIFO_Data;
+    master.npiMasterWires.rdFIFO_Data(controller.rdFIFO_Data());
+  endrule
+
+  rule driveMasterrdFIFO_RdWdAddr;
+    master.npiMasterWires.rdFIFO_RdWdAddr(controller.rdFIFO_RdWdAddr());
+  endrule
+
+  rule driveMasterwrFIFO_Empty;
+    master.npiMasterWires.wrFIFO_Empty(controller.wrFIFO_Empty());
+  endrule
+
+  rule driveMasterwrFIFO_AlmostFull;
+    master.npiMasterWires.wrFIFO_AlmostFull(controller.wrFIFO_AlmostFull());
+  endrule
+
+  rule drivewrFIFO_Push;
     controller.wrFIFO_Push(master.npiMasterWires.wrFIFO_Push());
+  endrule
+
+  rule drivewrFIFO_Flush;
     controller.wrFIFO_Flush(master.npiMasterWires.wrFIFO_Flush());
+  endrule
+
+  rule drivewrFIFO_Data;
     controller.wrFIFO_Data(master.npiMasterWires.wrFIFO_Data());
+  endrule
+
+  rule drivewrFIFO_BE;
     controller.wrFIFO_BE(master.npiMasterWires.wrFIFO_BE());
   endrule
 
-  rule driveMaster;
-    // controller -> master
+  rule driveMasterinitDone;
     master.npiMasterWires.initDone(controller.initDone());
-    master.npiMasterWires.addrAck(controller.addrAck());
-    master.npiMasterWires.rdFIFO_Empty(controller.rdFIFO_Empty());
-    master.npiMasterWires.rdFIFO_Latency(controller.rdFIFO_Latency());
-    master.npiMasterWires.rdFIFO_Data(controller.rdFIFO_Data());
-    master.npiMasterWires.rdFIFO_RdWdAddr(controller.rdFIFO_RdWdAddr());
-    master.npiMasterWires.wrFIFO_Empty(controller.wrFIFO_Empty());
-    master.npiMasterWires.wrFIFO_AlmostFull(controller.wrFIFO_AlmostFull());
-
   endrule
+
 
   interface driver = master.npi_server; 
 

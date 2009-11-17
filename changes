@@ -8053,3 +8053,28 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
 
 - Wrap responses from funcFIFO_peek() in a Maybe#() to detect unoccupied slots.
 - Add a notEmpty() method to marshaller.
+
+----------
+kfleming    Date: Tue Nov 17 01:56:40 EST 2009  CSN: CSN-platforms-312
+                  Tue Nov 17 06:56:40 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr
+ ddr-sdram-device.awb      Locally Modified          311 
+ ddr-sdram-verilog-import.bsv Locally Modified          311 
+ clock_generator_0_wrapper.ngc Locally Removed           311 
+ NPICommon.bsv             Locally Modified          311 
+ NPIMaster.bsv             Locally Modified          311 
+ ddr_sdram_xilinx.v        Locally Modified          311 
+ clock_generator_ddr_wrapper.ngc Locally Added               0 
+ clock_generator_0_wrapper.vhd Locally Removed           311 
+ proc_sys_reset_ddr_wrapper.ngc Locally Added               0 
+ ddr_sdram.v               Locally Modified          311 
+ ddr-sdram-device.bsv      Locally Modified          311 
+ ddr_sdram_wrapper.ngc     Locally Modified          311 
+ ddr_sdram_tig.ucf         Locally Added               0 
+
+Directory modules/project
+ SCons.top.template        Locally Modified          311 
+
+Fixed bug in SCons where top level build was not being forced in single synthesis boundary designs.  Also, some updates to the ddr design.  Still not working, but several bugs have been fixed.

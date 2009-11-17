@@ -1,3 +1,7 @@
+//-----------------------------------------------------------------------------
+// system.v
+//-----------------------------------------------------------------------------
+
 module ddr_sdram_xilinx
   (
     fpga_0_DDR_SDRAM_DDR_Clk_pin,
@@ -20,26 +24,28 @@ module ddr_sdram_xilinx
     fpga_0_net_gnd_5_pin,
     fpga_0_net_gnd_6_pin,
     sys_clk_pin,
-    DDR_SDRAM_PIM0_Addr_pin,
-    DDR_SDRAM_PIM0_AddrReq_pin,
-    DDR_SDRAM_PIM0_AddrAck_pin,
-    DDR_SDRAM_PIM0_RNW_pin,
-    DDR_SDRAM_PIM0_Size_pin,
-    DDR_SDRAM_PIM0_RdModWr_pin,
-    DDR_SDRAM_PIM0_WrFIFO_Data_pin,
-    DDR_SDRAM_PIM0_WrFIFO_BE_pin,
-    DDR_SDRAM_PIM0_WrFIFO_Push_pin,
-    DDR_SDRAM_PIM0_RdFIFO_Data_pin,
-    DDR_SDRAM_PIM0_RdFIFO_Pop_pin,
-    DDR_SDRAM_PIM0_RdFIFO_RdWdAddr_pin,
-    DDR_SDRAM_PIM0_WrFIFO_Empty_pin,
-    DDR_SDRAM_PIM0_WrFIFO_AlmostFull_pin,
-    DDR_SDRAM_PIM0_WrFIFO_Flush_pin,
-    DDR_SDRAM_PIM0_RdFIFO_Empty_pin,
-    DDR_SDRAM_PIM0_RdFIFO_Flush_pin,
-    DDR_SDRAM_PIM0_RdFIFO_Latency_pin,
+    sys_rst_pin,
+    clock_generator_0_CLKOUT2_pin,
+    proc_sys_reset_0_Peripheral_Reset_pin,
     DDR_SDRAM_PIM0_InitDone_pin,
-    DDR_SDRAM_MPMC_Rst_pin
+    DDR_SDRAM_PIM0_RdFIFO_Latency_pin,
+    DDR_SDRAM_PIM0_RdFIFO_Flush_pin,
+    DDR_SDRAM_PIM0_RdFIFO_Empty_pin,
+    DDR_SDRAM_PIM0_WrFIFO_Flush_pin,
+    DDR_SDRAM_PIM0_WrFIFO_AlmostFull_pin,
+    DDR_SDRAM_PIM0_WrFIFO_Empty_pin,
+    DDR_SDRAM_PIM0_RdFIFO_RdWdAddr_pin,
+    DDR_SDRAM_PIM0_RdFIFO_Pop_pin,
+    DDR_SDRAM_PIM0_RdFIFO_Data_pin,
+    DDR_SDRAM_PIM0_WrFIFO_Push_pin,
+    DDR_SDRAM_PIM0_WrFIFO_BE_pin,
+    DDR_SDRAM_PIM0_WrFIFO_Data_pin,
+    DDR_SDRAM_PIM0_RdModWr_pin,
+    DDR_SDRAM_PIM0_Size_pin,
+    DDR_SDRAM_PIM0_RNW_pin,
+    DDR_SDRAM_PIM0_AddrAck_pin,
+    DDR_SDRAM_PIM0_AddrReq_pin,
+    DDR_SDRAM_PIM0_Addr_pin
   );
   output [2:0] fpga_0_DDR_SDRAM_DDR_Clk_pin;
   output [2:0] fpga_0_DDR_SDRAM_DDR_Clk_n_pin;
@@ -61,31 +67,32 @@ module ddr_sdram_xilinx
   output fpga_0_net_gnd_5_pin;
   output fpga_0_net_gnd_6_pin;
   input sys_clk_pin;
-  input [31:0] DDR_SDRAM_PIM0_Addr_pin;
-  input DDR_SDRAM_PIM0_AddrReq_pin;
-  output DDR_SDRAM_PIM0_AddrAck_pin;
-  input DDR_SDRAM_PIM0_RNW_pin;
-  input [3:0] DDR_SDRAM_PIM0_Size_pin;
-  input DDR_SDRAM_PIM0_RdModWr_pin;
-  input [63:0] DDR_SDRAM_PIM0_WrFIFO_Data_pin;
-  input [7:0] DDR_SDRAM_PIM0_WrFIFO_BE_pin;
-  input DDR_SDRAM_PIM0_WrFIFO_Push_pin;
-  output [63:0] DDR_SDRAM_PIM0_RdFIFO_Data_pin;
-  input DDR_SDRAM_PIM0_RdFIFO_Pop_pin;
-  output [3:0] DDR_SDRAM_PIM0_RdFIFO_RdWdAddr_pin;
-  output DDR_SDRAM_PIM0_WrFIFO_Empty_pin;
-  output DDR_SDRAM_PIM0_WrFIFO_AlmostFull_pin;
-  input DDR_SDRAM_PIM0_WrFIFO_Flush_pin;
-  output DDR_SDRAM_PIM0_RdFIFO_Empty_pin;
-  input DDR_SDRAM_PIM0_RdFIFO_Flush_pin;
-  output [1:0] DDR_SDRAM_PIM0_RdFIFO_Latency_pin;
+  input sys_rst_pin;
+  output clock_generator_0_CLKOUT2_pin;
+  output [0:0] proc_sys_reset_0_Peripheral_Reset_pin;
   output DDR_SDRAM_PIM0_InitDone_pin;
-  input DDR_SDRAM_MPMC_Rst_pin;
+  output [1:0] DDR_SDRAM_PIM0_RdFIFO_Latency_pin;
+  input DDR_SDRAM_PIM0_RdFIFO_Flush_pin;
+  output DDR_SDRAM_PIM0_RdFIFO_Empty_pin;
+  input DDR_SDRAM_PIM0_WrFIFO_Flush_pin;
+  output DDR_SDRAM_PIM0_WrFIFO_AlmostFull_pin;
+  output DDR_SDRAM_PIM0_WrFIFO_Empty_pin;
+  output [3:0] DDR_SDRAM_PIM0_RdFIFO_RdWdAddr_pin;
+  input DDR_SDRAM_PIM0_RdFIFO_Pop_pin;
+  output [63:0] DDR_SDRAM_PIM0_RdFIFO_Data_pin;
+  input DDR_SDRAM_PIM0_WrFIFO_Push_pin;
+  input [7:0] DDR_SDRAM_PIM0_WrFIFO_BE_pin;
+  input [63:0] DDR_SDRAM_PIM0_WrFIFO_Data_pin;
+  input DDR_SDRAM_PIM0_RdModWr_pin;
+  input [3:0] DDR_SDRAM_PIM0_Size_pin;
+  input DDR_SDRAM_PIM0_RNW_pin;
+  output DDR_SDRAM_PIM0_AddrAck_pin;
+  input DDR_SDRAM_PIM0_AddrReq_pin;
+  input [31:0] DDR_SDRAM_PIM0_Addr_pin;
 
   // Internal signals
 
   wire DDR_SDRAM_MPMC_Clk_Mem;
-  wire DDR_SDRAM_MPMC_Rst;
   wire [31:0] DDR_SDRAM_PIM0_Addr;
   wire DDR_SDRAM_PIM0_AddrAck;
   wire DDR_SDRAM_PIM0_AddrReq;
@@ -106,6 +113,7 @@ module ddr_sdram_xilinx
   wire DDR_SDRAM_PIM0_WrFIFO_Flush;
   wire DDR_SDRAM_PIM0_WrFIFO_Push;
   wire DDR_SDRAM_mpmc_clk_90_s;
+  wire Dcm_all_locked;
   wire dcm_clk_s;
   wire [12:0] fpga_0_DDR_SDRAM_DDR_Addr;
   wire [1:0] fpga_0_DDR_SDRAM_DDR_BankAddr;
@@ -131,6 +139,8 @@ module ddr_sdram_xilinx
   wire net_vcc0;
   wire [0:3] net_vcc4;
   wire sys_clk_s;
+  wire [0:0] sys_periph_reset;
+  wire sys_rst_s;
 
   // Internal assignments
 
@@ -145,26 +155,28 @@ module ddr_sdram_xilinx
   assign fpga_0_DDR_SDRAM_DDR_WE_n_pin = fpga_0_DDR_SDRAM_DDR_WE_n;
   assign fpga_0_DDR_SDRAM_DDR_DM_pin = fpga_0_DDR_SDRAM_DDR_DM;
   assign dcm_clk_s = sys_clk_pin;
-  assign DDR_SDRAM_PIM0_Addr = DDR_SDRAM_PIM0_Addr_pin;
-  assign DDR_SDRAM_PIM0_AddrReq = DDR_SDRAM_PIM0_AddrReq_pin;
-  assign DDR_SDRAM_PIM0_AddrAck_pin = DDR_SDRAM_PIM0_AddrAck;
-  assign DDR_SDRAM_PIM0_RNW = DDR_SDRAM_PIM0_RNW_pin;
-  assign DDR_SDRAM_PIM0_Size = DDR_SDRAM_PIM0_Size_pin;
-  assign DDR_SDRAM_PIM0_RdModWr = DDR_SDRAM_PIM0_RdModWr_pin;
-  assign DDR_SDRAM_PIM0_WrFIFO_Data = DDR_SDRAM_PIM0_WrFIFO_Data_pin;
-  assign DDR_SDRAM_PIM0_WrFIFO_BE = DDR_SDRAM_PIM0_WrFIFO_BE_pin;
-  assign DDR_SDRAM_PIM0_WrFIFO_Push = DDR_SDRAM_PIM0_WrFIFO_Push_pin;
-  assign DDR_SDRAM_PIM0_RdFIFO_Data_pin = DDR_SDRAM_PIM0_RdFIFO_Data;
-  assign DDR_SDRAM_PIM0_RdFIFO_Pop = DDR_SDRAM_PIM0_RdFIFO_Pop_pin;
-  assign DDR_SDRAM_PIM0_RdFIFO_RdWdAddr_pin = DDR_SDRAM_PIM0_RdFIFO_RdWdAddr;
-  assign DDR_SDRAM_PIM0_WrFIFO_Empty_pin = DDR_SDRAM_PIM0_WrFIFO_Empty;
-  assign DDR_SDRAM_PIM0_WrFIFO_AlmostFull_pin = DDR_SDRAM_PIM0_WrFIFO_AlmostFull;
-  assign DDR_SDRAM_PIM0_WrFIFO_Flush = DDR_SDRAM_PIM0_WrFIFO_Flush_pin;
-  assign DDR_SDRAM_PIM0_RdFIFO_Empty_pin = DDR_SDRAM_PIM0_RdFIFO_Empty;
-  assign DDR_SDRAM_PIM0_RdFIFO_Flush = DDR_SDRAM_PIM0_RdFIFO_Flush_pin;
-  assign DDR_SDRAM_PIM0_RdFIFO_Latency_pin = DDR_SDRAM_PIM0_RdFIFO_Latency;
+  assign sys_rst_s = sys_rst_pin;
+  assign clock_generator_0_CLKOUT2_pin = sys_clk_s;
+  assign proc_sys_reset_0_Peripheral_Reset_pin[0:0] = sys_periph_reset[0:0];
   assign DDR_SDRAM_PIM0_InitDone_pin = DDR_SDRAM_PIM0_InitDone;
-  assign DDR_SDRAM_MPMC_Rst = DDR_SDRAM_MPMC_Rst_pin;
+  assign DDR_SDRAM_PIM0_RdFIFO_Latency_pin = DDR_SDRAM_PIM0_RdFIFO_Latency;
+  assign DDR_SDRAM_PIM0_RdFIFO_Flush = DDR_SDRAM_PIM0_RdFIFO_Flush_pin;
+  assign DDR_SDRAM_PIM0_RdFIFO_Empty_pin = DDR_SDRAM_PIM0_RdFIFO_Empty;
+  assign DDR_SDRAM_PIM0_WrFIFO_Flush = DDR_SDRAM_PIM0_WrFIFO_Flush_pin;
+  assign DDR_SDRAM_PIM0_WrFIFO_AlmostFull_pin = DDR_SDRAM_PIM0_WrFIFO_AlmostFull;
+  assign DDR_SDRAM_PIM0_WrFIFO_Empty_pin = DDR_SDRAM_PIM0_WrFIFO_Empty;
+  assign DDR_SDRAM_PIM0_RdFIFO_RdWdAddr_pin = DDR_SDRAM_PIM0_RdFIFO_RdWdAddr;
+  assign DDR_SDRAM_PIM0_RdFIFO_Pop = DDR_SDRAM_PIM0_RdFIFO_Pop_pin;
+  assign DDR_SDRAM_PIM0_RdFIFO_Data_pin = DDR_SDRAM_PIM0_RdFIFO_Data;
+  assign DDR_SDRAM_PIM0_WrFIFO_Push = DDR_SDRAM_PIM0_WrFIFO_Push_pin;
+  assign DDR_SDRAM_PIM0_WrFIFO_BE = DDR_SDRAM_PIM0_WrFIFO_BE_pin;
+  assign DDR_SDRAM_PIM0_WrFIFO_Data = DDR_SDRAM_PIM0_WrFIFO_Data_pin;
+  assign DDR_SDRAM_PIM0_RdModWr = DDR_SDRAM_PIM0_RdModWr_pin;
+  assign DDR_SDRAM_PIM0_Size = DDR_SDRAM_PIM0_Size_pin;
+  assign DDR_SDRAM_PIM0_RNW = DDR_SDRAM_PIM0_RNW_pin;
+  assign DDR_SDRAM_PIM0_AddrAck_pin = DDR_SDRAM_PIM0_AddrAck;
+  assign DDR_SDRAM_PIM0_AddrReq = DDR_SDRAM_PIM0_AddrReq_pin;
+  assign DDR_SDRAM_PIM0_Addr = DDR_SDRAM_PIM0_Addr_pin;
   assign net_gnd0 = 1'b0;
   assign fpga_0_net_gnd_pin = net_gnd0;
   assign fpga_0_net_gnd_1_pin = net_gnd0;
@@ -186,8 +198,6 @@ module ddr_sdram_xilinx
   assign net_vcc0 = 1'b1;
   assign net_vcc4[0:3] = 4'b1111;
 
-  // Need this declaration?
-  (* read_cores = "yes" *)
   ddr_sdram_wrapper
     DDR_SDRAM (
       .FSL0_M_Clk ( net_vcc0 ),
@@ -1596,7 +1606,7 @@ module ddr_sdram_xilinx
       .MPMC_Clk0_DIV2 ( net_vcc0 ),
       .MPMC_Clk90 ( DDR_SDRAM_mpmc_clk_90_s ),
       .MPMC_Clk_200MHz ( net_vcc0 ),
-      .MPMC_Rst ( DDR_SDRAM_MPMC_Rst ),
+      .MPMC_Rst ( sys_periph_reset[0] ),
       .MPMC_Clk_Mem ( DDR_SDRAM_MPMC_Clk_Mem ),
       .MPMC_Idelayctrl_Rdy_I ( net_vcc0 ),
       .MPMC_Idelayctrl_Rdy_O (  ),
@@ -1647,8 +1657,8 @@ module ddr_sdram_xilinx
       .DDR2_DQS_Div_I ( net_gnd0 )
     );
 
-  clock_generator_0_wrapper
-    clock_generator_0 (
+  clock_generator_ddr_wrapper
+    clock_generator_ddr (
       .CLKIN ( dcm_clk_s ),
       .CLKFBIN ( net_gnd0 ),
       .CLKOUT0 ( sys_clk_s ),
@@ -1669,13 +1679,38 @@ module ddr_sdram_xilinx
       .CLKOUT15 (  ),
       .CLKFBOUT (  ),
       .RST ( net_gnd0 ),
-      .LOCKED (  )
+      .LOCKED ( Dcm_all_locked )
+    );
+
+  proc_sys_reset_ddr_wrapper
+    proc_sys_reset_ddr (
+      .Slowest_sync_clk ( sys_clk_s ),
+      .Ext_Reset_In ( sys_rst_s ),
+      .Aux_Reset_In ( net_gnd0 ),
+      .MB_Debug_Sys_Rst ( net_gnd0 ),
+      .Core_Reset_Req_0 ( net_gnd0 ),
+      .Chip_Reset_Req_0 ( net_gnd0 ),
+      .System_Reset_Req_0 ( net_gnd0 ),
+      .Core_Reset_Req_1 ( net_gnd0 ),
+      .Chip_Reset_Req_1 ( net_gnd0 ),
+      .System_Reset_Req_1 ( net_gnd0 ),
+      .Dcm_locked ( Dcm_all_locked ),
+      .RstcPPCresetcore_0 (  ),
+      .RstcPPCresetchip_0 (  ),
+      .RstcPPCresetsys_0 (  ),
+      .RstcPPCresetcore_1 (  ),
+      .RstcPPCresetchip_1 (  ),
+      .RstcPPCresetsys_1 (  ),
+      .MB_Reset (  ),
+      .Bus_Struct_Reset (  ),
+      .Peripheral_Reset ( sys_periph_reset[0:0] )
     );
 
 endmodule
 
 // synthesis attribute BOX_TYPE of ddr_sdram_wrapper is black_box;
-// synthesis attribute BOX_TYPE of clock_generator_0_wrapper is black_box;
+// synthesis attribute BOX_TYPE of clock_generator_ddr_wrapper is black_box;
+// synthesis attribute BOX_TYPE of proc_sys_reset_ddr_wrapper is black_box;
 
 module ddr_sdram_wrapper
   (
@@ -4592,7 +4627,7 @@ module ddr_sdram_wrapper
   input DDR2_DQS_Div_I;
 endmodule
 
-/*module clock_generator_0_wrapper
+module clock_generator_ddr_wrapper
   (
     CLKIN,
     CLKFBIN,
@@ -4638,4 +4673,49 @@ endmodule
   input RST;
   output LOCKED;
 endmodule
-*/
+
+module proc_sys_reset_ddr_wrapper
+  (
+    Slowest_sync_clk,
+    Ext_Reset_In,
+    Aux_Reset_In,
+    MB_Debug_Sys_Rst,
+    Core_Reset_Req_0,
+    Chip_Reset_Req_0,
+    System_Reset_Req_0,
+    Core_Reset_Req_1,
+    Chip_Reset_Req_1,
+    System_Reset_Req_1,
+    Dcm_locked,
+    RstcPPCresetcore_0,
+    RstcPPCresetchip_0,
+    RstcPPCresetsys_0,
+    RstcPPCresetcore_1,
+    RstcPPCresetchip_1,
+    RstcPPCresetsys_1,
+    MB_Reset,
+    Bus_Struct_Reset,
+    Peripheral_Reset
+  );
+  input Slowest_sync_clk;
+  input Ext_Reset_In;
+  input Aux_Reset_In;
+  input MB_Debug_Sys_Rst;
+  input Core_Reset_Req_0;
+  input Chip_Reset_Req_0;
+  input System_Reset_Req_0;
+  input Core_Reset_Req_1;
+  input Chip_Reset_Req_1;
+  input System_Reset_Req_1;
+  input Dcm_locked;
+  output RstcPPCresetcore_0;
+  output RstcPPCresetchip_0;
+  output RstcPPCresetsys_0;
+  output RstcPPCresetcore_1;
+  output RstcPPCresetchip_1;
+  output RstcPPCresetsys_1;
+  output MB_Reset;
+  output [0:0] Bus_Struct_Reset;
+  output [0:0] Peripheral_Reset;
+endmodule
+

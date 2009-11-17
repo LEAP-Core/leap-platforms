@@ -401,7 +401,7 @@ else:
 
     top_netlist = env.Command(
         XILINX_SYNTH_TOP + '.ngc',
-        wrapper_v + clean_split(env['DEFS']['GIVEN_VS'], sep = ' ') + ['config/' + SYNTH_TOP + '.xst'],
+        [env['DEFS']['ROOT_DIR_HW'] + '/' + env['DEFS']['ROOT_DIR_MODEL'] + '/' + env['DEFS']['TMP_BSC_DIR'] + '/' + env['DEFS']['SYNTH_TOP'] + '.v'] + wrapper_v + clean_split(env['DEFS']['GIVEN_VS'], sep = ' ') + ['config/' + SYNTH_TOP + '.xst'],
         [ Delete(XILINX_SYNTH_TOP + '.srp'),
           Delete(XILINX_SYNTH_TOP + '_xst.xrpt'),
           'xst -intstyle silent -ifn config/' + SYNTH_TOP + '.xst -ofn ' + XILINX_SYNTH_TOP + '.srp',

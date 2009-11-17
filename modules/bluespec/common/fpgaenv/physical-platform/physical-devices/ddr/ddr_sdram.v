@@ -12,6 +12,9 @@ module ddr_sdram(
     fpga_0_DDR_SDRAM_DDR_DQS,
     fpga_0_DDR_SDRAM_DDR_DQ,
     sys_clk_pin,
+    sys_rst_pin,
+    controller_clk_pin,
+    controller_rst_pin,	  
     DDR_SDRAM_PIM0_Addr_pin,
     DDR_SDRAM_PIM0_AddrReq_pin,
     DDR_SDRAM_PIM0_AddrAck_pin,
@@ -60,6 +63,9 @@ module ddr_sdram(
   inout [7:0] fpga_0_DDR_SDRAM_DDR_DQS;
   inout [63:0] fpga_0_DDR_SDRAM_DDR_DQ;
   input sys_clk_pin;
+  input sys_rst_pin;
+  output controller_clk_pin;
+  output controller_rst_pin;	  
   input [31:0] DDR_SDRAM_PIM0_Addr_pin;
   input DDR_SDRAM_PIM0_AddrReq_pin;
   output DDR_SDRAM_PIM0_AddrAck_pin;
@@ -93,6 +99,17 @@ module ddr_sdram(
   input wrFIFO_DataDummyEn;
   input wrFIFO_BEDummyEn;
 
+  // must invert the input reset?
+  wire rst_p;
+  assign rst_p = sys_rst_pin;
+   
+   
+   
+  // must invert controller reset
+  wire mpmc_rst_pin; 
+  assign controller_rst_pin = ~mpmc_rst_pin;
+   
+   
  ddr_sdram_xilinx dram
   (
     .fpga_0_DDR_SDRAM_DDR_Clk_pin(fpga_0_DDR_SDRAM_DDR_Clk_pin),
@@ -115,6 +132,9 @@ module ddr_sdram(
     .fpga_0_net_gnd_5_pin(),
     .fpga_0_net_gnd_6_pin(),
     .sys_clk_pin(sys_clk_pin),
+    .sys_rst_pin(rst_p),
+    .clock_generator_0_CLKOUT2_pin(controller_clk_pin),
+    .proc_sys_reset_0_Peripheral_Reset_pin(mpmc_rst_pin),
     .DDR_SDRAM_PIM0_Addr_pin(DDR_SDRAM_PIM0_Addr_pin),
     .DDR_SDRAM_PIM0_AddrReq_pin(DDR_SDRAM_PIM0_AddrReq_pin),
     .DDR_SDRAM_PIM0_AddrAck_pin(DDR_SDRAM_PIM0_AddrAck_pin),
@@ -133,8 +153,7 @@ module ddr_sdram(
     .DDR_SDRAM_PIM0_RdFIFO_Empty_pin(DDR_SDRAM_PIM0_RdFIFO_Empty_pin),
     .DDR_SDRAM_PIM0_RdFIFO_Flush_pin(DDR_SDRAM_PIM0_RdFIFO_Flush_pin),
     .DDR_SDRAM_PIM0_RdFIFO_Latency_pin(DDR_SDRAM_PIM0_RdFIFO_Latency_pin),
-    .DDR_SDRAM_PIM0_InitDone_pin(DDR_SDRAM_PIM0_InitDone_pin),
-    .DDR_SDRAM_MPMC_Rst_pin(DDR_SDRAM_MPMC_Rst_pin)
+    .DDR_SDRAM_PIM0_InitDone_pin(DDR_SDRAM_PIM0_InitDone_pin)
   );
 
 endmodule

@@ -50,7 +50,11 @@ interface NPIServer;
   interface Put#(NPIWriteWord) write;
   interface Get#(NPIReadWord) read;
   interface Put#(NPICommand) command;
+  method Bit#(32) addrAcksRead();
+  method Bit#(32) addrAcksWrite();
+  method Bit#(32) clockTicks();
 endinterface
+
 
 instance Connectable#(NPIClient,NPIServer);
   module mkConnection#(NPIClient client, NPIServer server) ();

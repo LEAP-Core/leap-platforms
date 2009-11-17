@@ -139,6 +139,15 @@ module mkNPIMaster#(Clock coreClock, Reset coreReset)(NPIMaster);
   SyncFIFOIfc#(Bit#(1)) readTokenQ <- mkSyncFIFO(32, npiClock, npiReset, coreClock);
   SyncFIFOIfc#(NPICommand) commandQ <- mkSyncFIFO(4, coreClock, coreReset, npiClock);
 
+
+  // Dual domain debug regs
+  Reg#(Bit#(32)) addrAcksReadSync <- mkSyncRegFromCC(0,coreClock);
+  Reg#(Bit#(32)) addrAcksReadLocal <- mkReg(0);
+  Reg#(Bit#(32)) addrAcksWriteSync <- mkSyncRegFromCC(0,coreClock);
+  Reg#(Bit#(32)) addrAcksWriteLocal <- mkReg(0);
+  Reg#(Bit#(32)) clockTicksSync <- mkSyncRegFromCC(0,coreClock);
+  Reg#(Bit#(32)) clockTicksLocal <- mkReg(0);
+
   //
   // Some assignments
   //
@@ -174,6 +183,12 @@ module mkNPIMaster#(Clock coreClock, Reset coreReset)(NPIMaster);
     end
   endrule
 
+
+  rule clockTicksCount;
+    clockTicksLocal <= clockTicksLocal + 1;
+    clockTicksSync <= clockTicksLocal + 1;
+  endrule
+
   // FSM for processing commands/injecting write data into MPMC
 
   rule process_command_fifo (state == ProcessCmd && init_done);
@@ -185,7 +200,12 @@ module mkNPIMaster#(Clock coreClock, Reset coreReset)(NPIMaster);
         size_val <= rc.size;
         rdModWr_val <= 1'b0;
 
-        if(addrAck_val == 1) commandQ.deq();
+        if(addrAck_val == 1) 
+          begin
+            commandQ.deq();
+            addrAcksReadLocal <= addrAcksReadLocal + 1;
+            addrAcksReadSync <= addrAcksReadLocal + 1;
+          end
       end
       tagged WriteCommand .wc: begin
         let burst_ready =
@@ -247,6 +267,8 @@ module mkNPIMaster#(Clock coreClock, Reset coreReset)(NPIMaster);
 
         if(addrAck_val == 1) begin
           commandQ.deq();
+          addrAcksWriteLocal <= addrAcksWriteLocal + 1;
+          addrAcksWriteSync <= addrAcksWriteLocal + 1;
           state <= ProcessCmd;
         end
       end
@@ -274,7 +296,13 @@ module mkNPIMaster#(Clock coreClock, Reset coreReset)(NPIMaster);
        commandQ.enq(in);
       endmethod
     endinterface
+
+    method addrAcksRead = addrAcksReadSync._read();
+    method addrAcksWrite = addrAcksWriteSync._read();
+    method clockTicks = clockTicksSync._read();
   endinterface
+
+
   interface NPIMasterWires npiMasterWires;
     // Init Done
     method Action initDone(Bit#(1) in);
