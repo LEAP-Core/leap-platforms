@@ -8091,3 +8091,13 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr
  NPIMaster.bsv             Locally Modified          312 
 
 Fixed ngc interface to DRAM.  It now works.  more testing will come soon.
+----------
+mcadler     Date: Wed Nov 18 11:45:24 EST 2009  CSN: CSN-platforms-314
+                  Wed Nov 18 16:45:24 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/low-level-platform-interface
+ llpi.cpp                  Locally Modified          313 
+ llpi.h                    Locally Modified          313 
+
+Wait for the monitor thread to die before continuing.

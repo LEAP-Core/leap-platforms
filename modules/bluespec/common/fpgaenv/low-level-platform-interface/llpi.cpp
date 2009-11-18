@@ -49,6 +49,7 @@ void * LLPI_Main(void *argv)
 // *** signal handler for Ctrl-C ***
 void LLPISignalHandler(int arg)
 {
+    llpi_instance->KillMonitorThread();
     llpi_instance->CallbackExit(0);
 }
 
@@ -59,7 +60,8 @@ LLPI_CLASS::LLPI_CLASS() :
         remoteMemory(this, &physicalDevices),
         channelio(this, &physicalDevices),
         rrrClient(this, &channelio),
-        rrrServer(this, &channelio)
+        rrrServer(this, &channelio),
+        monitorAlive(false)
 {
     // set global link to RRR client
     // the service modules need this link since they
@@ -71,7 +73,7 @@ LLPI_CLASS::LLPI_CLASS() :
 
 LLPI_CLASS::~LLPI_CLASS()
 {
-     KillMonitorThread();
+    KillMonitorThread();
 }
 
 void
@@ -98,6 +100,7 @@ LLPI_CLASS::Init()
     }
     
     // RRR needs to know the monitor thread ID
+    monitorAlive = true;
     rrrClient.SetMonitorThreadID(monitorThreadID);
 
     // initialize UMF_ALLOCATOR (FIXME: could do this cleaner)
@@ -112,9 +115,11 @@ void LLPI_CLASS::KillMonitorThread()
     {
         ASIMERROR("llpi: Monitor thread trying to cancel itself!\n");
     }
-    else
+    else if (monitorAlive)
     {
         pthread_cancel(monitorThreadID);
+        pthread_join(monitorThreadID, NULL);
+        monitorAlive = false;
     }
 }
 

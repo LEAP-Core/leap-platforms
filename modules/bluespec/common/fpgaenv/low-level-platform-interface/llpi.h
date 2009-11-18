@@ -44,6 +44,7 @@ class LLPI_CLASS: public PLATFORMS_MODULE_CLASS
     
     // Monitor thread ID for those who need it.
     pthread_t monitorThreadID;
+    bool monitorAlive;
 
   public:
 
