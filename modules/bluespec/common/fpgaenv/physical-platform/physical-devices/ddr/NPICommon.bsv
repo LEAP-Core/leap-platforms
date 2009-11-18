@@ -53,6 +53,7 @@ interface NPIServer;
   method Bit#(32) addrAcksRead();
   method Bit#(32) addrAcksWrite();
   method Bit#(32) clockTicks();
+  method Bit#(32) clockTicksCore();
 endinterface
 
 

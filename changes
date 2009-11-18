@@ -8078,3 +8078,16 @@ Directory modules/project
  SCons.top.template        Locally Modified          311 
 
 Fixed bug in SCons where top level build was not being forced in single synthesis boundary designs.  Also, some updates to the ddr design.  Still not working, but several bugs have been fixed.
+----------
+kfleming    Date: Tue Nov 17 21:05:06 EST 2009  CSN: CSN-platforms-313
+                  Wed Nov 18 02:05:06 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr
+ clock_generator_ddr_wrapper.ngc Locally Modified          312 
+ proc_sys_reset_ddr_wrapper.ngc Locally Modified          312 
+ ddr_sdram_wrapper.ngc     Locally Modified          312 
+ NPICommon.bsv             Locally Modified          312 
+ NPIMaster.bsv             Locally Modified          312 
+
+Fixed ngc interface to DRAM.  It now works.  more testing will come soon.

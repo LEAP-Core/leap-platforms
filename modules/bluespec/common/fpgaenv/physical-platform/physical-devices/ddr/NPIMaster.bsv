@@ -147,6 +147,7 @@ module mkNPIMaster#(Clock coreClock, Reset coreReset)(NPIMaster);
   Reg#(Bit#(32)) addrAcksWriteLocal <- mkReg(0);
   Reg#(Bit#(32)) clockTicksSync <- mkSyncRegFromCC(0,coreClock);
   Reg#(Bit#(32)) clockTicksLocal <- mkReg(0);
+  Reg#(Bit#(32)) clockTicksCore <- mkReg(0, clocked_by coreClock, reset_by coreReset);
 
   //
   // Some assignments
@@ -187,6 +188,10 @@ module mkNPIMaster#(Clock coreClock, Reset coreReset)(NPIMaster);
   rule clockTicksCount;
     clockTicksLocal <= clockTicksLocal + 1;
     clockTicksSync <= clockTicksLocal + 1;
+  endrule
+
+  rule clockTicksCoreCount;
+    clockTicksCore <= clockTicksCore + 1;
   endrule
 
   // FSM for processing commands/injecting write data into MPMC
@@ -300,6 +305,7 @@ module mkNPIMaster#(Clock coreClock, Reset coreReset)(NPIMaster);
     method addrAcksRead = addrAcksReadSync._read();
     method addrAcksWrite = addrAcksWriteSync._read();
     method clockTicks = clockTicksSync._read();
+    method clockTicksCore = clockTicksCore._read();
   endinterface
 
 
