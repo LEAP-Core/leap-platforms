@@ -26,7 +26,7 @@ Packagehint=platforms
 [Standard Virtual Platform/Requires]
 virtual_devices=Standard Virtual Devices
 low_level_platform_interface=Low Level Platform Interface Hybrid
-umf=Little-Endian 32-bit Unified Message Format
+umf=Little-Endian Unified Message Format
 
 [FPGA Environment]
 File=modules/bluespec/common/fpgaenv/fpga-environment.awb
@@ -59,8 +59,8 @@ physical_platform_debugger=Null Physical Platform Debugger
 local_mem=NULL Local Memory Interface
 remote_memory=Null Remote Memory
 
-[Little-Endian 32-bit Unified Message Format]
-File=modules/bluespec/common/fpgaenv/virtual-platform/umf/little-32/umf-little-32.awb
+[Little-Endian Unified Message Format]
+File=modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian/umf-little-endian.awb
 Packagehint=platforms
 
 [RL Bluespec Library]

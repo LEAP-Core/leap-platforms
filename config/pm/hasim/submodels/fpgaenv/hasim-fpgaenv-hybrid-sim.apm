@@ -7,7 +7,8 @@ Version=2.1
 Type=HAsim
 Name=Hybrid Simulation Environment
 Class=Asim::Model
-DefaultBenchmark=0
+DefaultBenchmark=
+DefaultRunOpts=
 
 [Model]
 DefaultAttributes=bluespec
@@ -29,7 +30,7 @@ Packagehint=platforms
 [Standard Virtual Platform/Requires]
 virtual_devices=Standard Virtual Devices
 low_level_platform_interface=Low Level Platform Interface Hybrid
-umf=Little-Endian 32-bit Unified Message Format
+umf=Little-Endian Unified Message Format
 
 [RRR Clients and Servers]
 File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic/basic-rrr.awb
@@ -75,9 +76,6 @@ physical_platform_utils=Common Physical Platform Utilities
 File=modules/bluespec/common/fpgaenv/physical-platform/simulation/sim-physical-platform.awb
 Packagehint=platforms
 
-[Little-Endian 32-bit Unified Message Format]
-File=modules/bluespec/common/fpgaenv/virtual-platform/umf/little-32/umf-little-32.awb
-Packagehint=platforms
 
 [Software FPGA Components]
 File=modules/bluespec/common/fpgaenv/fpga-components/software-fpga-components.awb
@@ -149,4 +147,8 @@ streams=Hybrid Streams
 
 [Hybrid Streams]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/streams/hybrid-streams.awb
+Packagehint=platforms
+
+[Little-Endian Unified Message Format]
+File=modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian/umf-little-endian.awb
 Packagehint=platforms

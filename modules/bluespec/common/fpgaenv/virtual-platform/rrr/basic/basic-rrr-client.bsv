@@ -173,8 +173,10 @@ module mkRRRClient#(CHANNEL_IO channel) (RRR_CLIENT);
             requestQueues[s].deq();
 
             // add my virtual channelID to header
-            UMF_PACKET newpacket = tagged UMF_PACKET_header
+            UMF_PACKET newpacket = tagged UMF_PACKET_header UMF_PACKET_HEADER
                                        {
+                                        filler: ?,
+                                        phyChannelPvt: ?,
                                         channelID: `CLIENT_CHANNEL_ID,
                                         serviceID: packet.UMF_PACKET_header.serviceID,
                                         methodID : packet.UMF_PACKET_header.methodID,

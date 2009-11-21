@@ -26,7 +26,7 @@ Packagehint=platforms
 [Standard Virtual Platform/Requires]
 virtual_devices=Standard Virtual Devices
 low_level_platform_interface=Low Level Platform Interface Hybrid
-umf=Little-Endian 32-bit Unified Message Format
+umf=Little-Endian Unified Message Format
 
 [FPGA Environment]
 File=modules/bluespec/common/fpgaenv/fpga-environment.awb
@@ -36,9 +36,6 @@ Packagehint=platforms
 File=config/pm/hasim/submodels/fpgaenv/std-virtual-devices.apm
 Packagehint=platforms
 
-[Little-Endian 32-bit Unified Message Format]
-File=modules/bluespec/common/fpgaenv/virtual-platform/umf/little-32/umf-little-32.awb
-Packagehint=platforms
 
 [RL Bluespec Library]
 File=config/pm/hasim/submodels/fpgaenv/librl-bsv.apm
@@ -62,6 +59,7 @@ serial_device=Serial Physical Device (uBlaze-based)
 physical_platform_utils=Common Physical Platform Utilities
 led_device=General LED Device
 switch_device=General Switch Device
+ddr_sdram_device=DDR SDRAM Physical Device
 
 [XUP Virtex 2 Serial]
 File=modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup/serial/xilinx-xup-serial.awb
@@ -125,4 +123,12 @@ CRYSTAL_CLOCK_FREQ=100
 
 [NULL Local Memory Interface]
 File=modules/bluespec/common/fpgaenv/low-level-platform-interface/local-mem/local-mem-null.awb
+Packagehint=platforms
+
+[DDR SDRAM Physical Device]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr/ddr-sdram-device.awb
+Packagehint=platforms
+
+[Little-Endian Unified Message Format]
+File=modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian/umf-little-endian.awb
 Packagehint=platforms

@@ -8101,3 +8101,67 @@ Directory modules/bluespec/common/fpgaenv/low-level-platform-interface
  llpi.h                    Locally Modified          313 
 
 Wait for the monitor thread to die before continuing.
+
+----------
+mcadler     Date: Fri Nov 20 19:35:19 EST 2009  CSN: CSN-platforms-315
+                  Sat Nov 21 00:35:19 UTC 2009
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-hybrid-xupv2-serial.apm Locally Modified          314 
+ fpgaenv-hybrid-htg-v5-pcie-synplify.apm Locally Modified          314 
+ hasim-fpgaenv-htg-v5-pcie.apm Locally Modified          314 
+ fpgaenv-hybrid-xupv2-serial-synplify.apm Locally Modified          314 
+ fpgaenv-hybrid-exe.apm    Locally Modified          314 
+ fpgaenv-hybrid-exe-serial-ChanIO-loopback.apm Locally Modified          314 
+ hasim-fpgaenv-hybrid-sim.apm Locally Modified          314 
+ fpgaenv-hybrid-htg-v5-pcie.apm Locally Modified          314 
+ fpgaenv-hybrid-xupv2-serial-chanIO-loopback.apm Locally Modified          314 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ basic-rrr-server.bsv      Locally Modified          314 
+ basic-rrr-client.bsv      Locally Modified          314 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/umf
+ little-32/                Locally Removed           314 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/little-32
+ umf-little-32.cpp         Locally Removed           314 
+ umf-allocator.cpp         Locally Removed           314 
+ umf-little-32.h           Locally Removed           314 
+ umf-allocator.h           Locally Removed           314 
+ umf-little-32.awb         Locally Removed           314 
+ umf-little-32.bsv         Locally Removed           314 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian
+ umf-little-endian.cpp     Locally Added               - 
+ umf-little-endian.h       Locally Added               - 
+ umf-little-endian.awb     Locally Added               - 
+ umf-little-endian.bsv     Locally Added               - 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe
+ unix-pipe-device.awb      Locally Modified          314 
+ unix-pipe-device.bsv      Locally Modified          314 
+ unix-pipe-device-bdpi.c   Locally Modified          314 
+ unix-pipe-device-bdpi.h   Locally Modified          314 
+
+- Fix a deadlock in unix pipe device when both the Bluespec side and the host
+  side are stuck in block writes to their ends of the pipes.  Fixed by adding
+  a pipe_can_write() BDPI method.  This is not the only source of deadlocks.
+  It is still possible to build a protocol that deadlocks due to an
+  algorithmic loop.  The host side still uses blocking writes.
+
+- Convert umf-little-32 to support either 32 or 64 bit chunks.
+- Simplify that AWB parameters controlling object sizes.  Anything that
+  can be computed from another parameter is now gone.
+- Make the Unix pipe device work wither with either 32 or 64 bit chunks.  The
+  size is derived automatically from the UMF size.
+- UMF header encode/decode field sizes now come from the AWB parameters.
+- Add a special 1-bit field to the UMF header for use in the physical
+  channel.  The ACP channel uses the field to differentiate between the
+  start of a new packet vs. unused parts of a buffer.
+
+- Tried to update all the platform configurations for the renamed
+  umf-little-endian.  In case I missed any, umf-little-endian is a drop-in
+  replacement for the old umf-little-32.  The default chunk size remains
+  32 bits.

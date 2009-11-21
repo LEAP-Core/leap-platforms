@@ -1,0 +1,19 @@
+%name Little-Endian Unified Message Format
+%desc Little-Endian Unified Message Format
+
+%provides umf
+
+%sources -t BSV -v PUBLIC   umf-little-endian.bsv
+%sources -t H   -v PUBLIC   umf-little-endian.h
+%sources -t CPP -v PRIVATE  umf-little-endian.cpp
+%sources -t H   -v PUBLIC   umf-allocator.h
+%sources -t CPP -v PRIVATE  umf-allocator.cpp
+
+%param UMF_CHUNK_BYTES      4       "Bytes in UMF Chunk"
+%param UMF_MAX_MSG_BYTES    1024    "Maximum message length"
+
+%param UMF_PHY_CHANNEL_RESERVED_BITS   1    "Bits reserved for use by the physical channel"
+%param UMF_CHANNEL_ID_BITS             4    "Bits in UMF ChannelID"
+%param UMF_SERVICE_ID_BITS             8    "Bits in UMF ServiceID"
+%param UMF_METHOD_ID_BITS              4    "Bits in UMF MethodID"
+%param UMF_MSG_LENGTH_BITS             15   "Bits in UMF MsgLength"

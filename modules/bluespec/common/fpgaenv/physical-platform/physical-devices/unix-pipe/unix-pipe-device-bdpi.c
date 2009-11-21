@@ -195,7 +195,7 @@ unsigned char pipe_open(unsigned char serviceID)
 }
 
 /* read one chunk of data */
-unsigned long long pipe_read(unsigned char handle)
+void pipe_read(unsigned int* resultptr, unsigned char handle)
 {
     struct timeval timeout;
     int done;
@@ -203,7 +203,8 @@ unsigned long long pipe_read(unsigned char handle)
 
     if (! initialized)
     {
-        return PIPE_NULL;
+        resultptr[2] = PIPE_NULL;
+        return;
     }
 
     /* lookup OCHT */
@@ -307,7 +308,6 @@ unsigned long long pipe_read(unsigned char handle)
 
         /* sanity checks */
         assert(channel->ibHead <= channel->ibTail);
-        assert(retval != PIPE_NULL);
 
         /* now that we have a full chunk, see if head and tail are
          * aligned, and if so, reset both pointers */
@@ -318,15 +318,65 @@ unsigned long long pipe_read(unsigned char handle)
         }
 
         /* chunk ready, return */
-        return retval;
+        resultptr[0] = (unsigned int)retval;
+        resultptr[1] = (unsigned int)(retval >> 32);
+        resultptr[2] = 0;
+        return;
     }
 
     /* if we're here, then there's no data on the incoming channel */
-    return PIPE_NULL;
+    resultptr[2] = PIPE_NULL;
+    return;
 }
 
+
+// Return 1 if can write, 0 if can not.
+unsigned char pipe_can_write(unsigned char handle)
+{
+    Channel *channel;
+
+    int    space_available;
+    fd_set writefds;
+    struct timeval timeout;
+
+    if (! initialized)
+    {
+        return 0;
+    }
+
+    assert(handle < MAX_OPEN_CHANNELS);
+    channel = &OCHT[handle];
+    if (! channel->open)
+    {
+        return 0;
+    }
+
+    FD_ZERO(&writefds);
+    FD_SET(DESC_FPGA_2_HOST, &writefds);
+
+    timeout.tv_sec  = 0;
+    timeout.tv_usec = 0;
+
+    space_available = select(DESC_FPGA_2_HOST + 1, NULL, &writefds, NULL, &timeout);
+    if (space_available == -1)
+    {
+        if (errno == EINTR)
+        {
+            space_available = 0;
+        }
+        else
+        {
+            perror("select");
+            exit(1);
+        }
+    }
+
+    return (space_available == 0 ? 0 : 1);
+}
+
+
 /* write one chunk of data */
-void pipe_write(unsigned char handle, unsigned int data)
+void pipe_write(unsigned char handle, unsigned long long data)
 {   
     int bytes_written;
     unsigned char databuf[BDPI_CHUNK_BYTES];

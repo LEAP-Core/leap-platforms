@@ -21,19 +21,26 @@
 
 #include <sys/select.h>
 
+// Hack to get UMF_CHUNK_BYTES.  Can't use normal search hierarchy since the
+// BDPI module is compiled by Bluespec.
+#define AWB_DEFS_ONLY
+#include "../../sw/include/asim/provides/umf.h"
+#undef AWB_DEFS_ONLY
+
 /* pipe I/O happens at the granularity of "chunks",
  * but to reduce overheads we physically do selects, reads
  * and writes at the granularity of "blocks" */
-#define BDPI_CHUNK_BYTES    4
+#define BDPI_CHUNK_BYTES    UMF_CHUNK_BYTES
 
-#define PIPE_NULL           0xFFFFFFFF00000000
+#define PIPE_NULL           1
+
 #define MAX_OPEN_CHANNELS   32
 
 #define STDIN             0
 #define STDOUT            1
 #define DESC_HOST_2_FPGA  100
 #define DESC_FPGA_2_HOST  101
-#define BLOCK_SIZE        4
+#define BLOCK_SIZE        UMF_CHUNK_BYTES
 #define SELECT_TIMEOUT    0
 
 typedef struct _Channel
@@ -54,7 +61,13 @@ typedef struct _Channel
 
 /* interface methods */
 unsigned char pipe_open(unsigned char programID);
-unsigned long long pipe_read(unsigned char handle);
-void pipe_write(unsigned char handle, unsigned int data);
+
+// Returns 65 useful bits.  The first unsigned long long is data.  The next
+// bit is set for PIPE_NULL (no new data).
+void pipe_read(unsigned int* resultptr, unsigned char handle);
+
+// Return 1 if can write, 0 if can not.
+unsigned char pipe_can_write(unsigned char handle);
+void pipe_write(unsigned char handle, unsigned long long data);
 
 #endif

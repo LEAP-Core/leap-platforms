@@ -26,7 +26,7 @@ Packagehint=platforms
 [Standard Virtual Platform/Requires]
 virtual_devices=Standard Virtual Devices
 low_level_platform_interface=Low Level Platform Interface Hybrid
-umf=Little-Endian 32-bit Unified Message Format
+umf=Little-Endian Unified Message Format
 
 [FPGA Environment]
 File=modules/bluespec/common/fpgaenv/fpga-environment.awb
@@ -71,9 +71,6 @@ remote_memory=Remote Memory using PCI Express DMA
 File=drivers/linux/hasim/kernel/pchnl_if.awb
 Packagehint=platforms
 
-[Little-Endian 32-bit Unified Message Format]
-File=modules/bluespec/common/fpgaenv/virtual-platform/umf/little-32/umf-little-32.awb
-Packagehint=platforms
 
 [RL Bluespec Library]
 File=config/pm/hasim/submodels/fpgaenv/librl-bsv.apm
@@ -128,4 +125,8 @@ switch_device=General Switch Device
 
 [HTG Virtex 5 PCIE Enabled Synplify]
 File=modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled/htg-v5-pcie-enabled-synplify.awb
+Packagehint=platforms
+
+[Little-Endian Unified Message Format]
+File=modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian/umf-little-endian.awb
 Packagehint=platforms

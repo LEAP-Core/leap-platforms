@@ -1,5 +1,5 @@
 /*****************************************************************************
- * umf-little-32.h
+ * umf-little-endian.h
  *
  * Copyright (C) 2008 Intel Corporation
  *
@@ -19,13 +19,13 @@
  */
 
 /**
- * @file umf-little-32.h
+ * @file umf-little-endian.h
  * @author Angshuman Parashar
  * @brief UMF interface
  */
 
 //
-// Little-endian UMF with 32-bit chunks
+// Little-endian UMF
 //
 
 #ifndef __UMF__
@@ -34,17 +34,28 @@
 #include <iostream>
 
 #include "asim/syntax.h"
+
+#include "asim/provides/umf.h"
 #include "platforms-module.h"
 
 using namespace std;
 
-#define UMF_MAX_LENGTH      1024
-#define UMF_CHUNK_BITS      32
-#define UMF_CHUNK_BYTES     4
-#define UMF_CHUNK_LOG_BYTES 2
-
 // specific types for this UMF implementation
+#if (UMF_CHUNK_BYTES == 4)
 typedef UINT32 UMF_CHUNK;
+#elif (UMF_CHUNK_BYTES == 8)
+typedef UINT64 UMF_CHUNK;
+#else
+#error Unsupported UMF_CHUNK_BYTES
+#endif
+
+// Bit masks from bit counts...
+#define UMF_BIT_MASK(x) ((1 << x) - 1)
+#define UMF_CHANNEL_ID_MASK    UMF_BIT_MASK(UMF_CHANNEL_ID_BITS)
+#define UMF_SERVICE_ID_MASK    UMF_BIT_MASK(UMF_SERVICE_ID_BITS)
+#define UMF_METHOD_ID_MASK     UMF_BIT_MASK(UMF_METHOD_ID_BITS)
+#define UMF_MSG_LENGTH_MASK    UMF_BIT_MASK(UMF_MSG_LENGTH_BITS)
+
 
 // ================ UMF Message ================
 
@@ -95,10 +106,10 @@ class UMF_MESSAGE_CLASS: public PLATFORMS_MODULE_CLASS
     void               SetLength(int len)      { length    = len; }
     
     // other header utilities
-    void               DecodeHeader(unsigned char header[]);
-    void               DecodeHeader(UMF_CHUNK chunk);
-    void               EncodeHeader(unsigned char buf[]);
-    UMF_CHUNK          EncodeHeader();
+    inline void        DecodeHeader(unsigned char header[]);
+    inline void        DecodeHeader(UMF_CHUNK chunk);
+    inline void        EncodeHeader(unsigned char buf[]) const;
+    inline UMF_CHUNK   EncodeHeader() const;
     
     // marshallers
     void               StartAppend();
@@ -138,5 +149,84 @@ class UMF_MESSAGE_CLASS: public PLATFORMS_MODULE_CLASS
     void               SetNext(UMF_MESSAGE m) { next = m; }
 
 };
+
+
+//
+// Inline, performance critical routines...
+//
+
+// decode header from chunk
+inline void
+UMF_MESSAGE_CLASS::DecodeHeader(
+    UMF_CHUNK chunk)
+{
+    // note: length in encoded header is in terms of number of chunks
+    length = UMF_CHUNK_BYTES * (chunk & UMF_MSG_LENGTH_MASK);
+    chunk >>= UMF_MSG_LENGTH_BITS;
+
+    methodID  = chunk & UMF_METHOD_ID_MASK;
+    chunk >>= UMF_METHOD_ID_BITS;
+
+    serviceID = chunk & UMF_SERVICE_ID_MASK;
+    chunk >>= UMF_SERVICE_ID_BITS;
+
+    channelID = chunk & UMF_CHANNEL_ID_MASK;
+
+    if (length > UMF_MAX_MSG_BYTES)
+    {
+        cerr << "umf: message size too long: " << length << endl;
+        CallbackExit(1);
+    }
+}
+
+
+// encode a header chunk from my internal info
+inline UMF_CHUNK
+UMF_MESSAGE_CLASS::EncodeHeader() const
+{
+    UMF_CHUNK chunk;
+
+    // convert length to number of chunks
+    unsigned int num_chunks = (length % UMF_CHUNK_BYTES) == 0 ?
+                              (length / UMF_CHUNK_BYTES)      :
+                              (length / UMF_CHUNK_BYTES) + 1;
+
+    chunk = channelID;
+
+    chunk <<= UMF_SERVICE_ID_BITS;
+    chunk |= serviceID;
+
+    chunk <<= UMF_METHOD_ID_BITS;
+    chunk |= methodID;
+
+    chunk <<= UMF_MSG_LENGTH_BITS;
+    chunk |= num_chunks;
+
+    return chunk;
+}
+
+
+//
+// Char array based header encode/decode.  Both routines depend on the machine
+// being little endian and headers being 32 bits.
+//
+inline void
+UMF_MESSAGE_CLASS::DecodeHeader(
+    unsigned char header[])
+{
+    UMF_CHUNK chunk = *(UINT32 *) header;
+    DecodeHeader(chunk);
+}
+
+
+inline void
+UMF_MESSAGE_CLASS::EncodeHeader(
+    unsigned char buf[]) const
+{
+    UMF_CHUNK chunk = EncodeHeader();
+
+    *(UINT32*) buf = chunk;
+}
+
 
 #endif
