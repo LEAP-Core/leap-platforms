@@ -8165,3 +8165,13 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/uni
   umf-little-endian.  In case I missed any, umf-little-endian is a drop-in
   replacement for the old umf-little-32.  The default chunk size remains
   32 bits.
+
+----------
+mcadler     Date: Mon Nov 23 15:08:59 EST 2009  CSN: CSN-platforms-316
+                  Mon Nov 23 20:08:59 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian
+ umf-little-endian.h       Locally Modified          315 
+
+Add a way to set the physical channel flag in a header.

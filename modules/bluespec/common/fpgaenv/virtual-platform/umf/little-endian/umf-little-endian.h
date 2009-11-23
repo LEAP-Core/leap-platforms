@@ -110,7 +110,8 @@ class UMF_MESSAGE_CLASS: public PLATFORMS_MODULE_CLASS
     inline void        DecodeHeader(UMF_CHUNK chunk);
     inline void        EncodeHeader(unsigned char buf[]) const;
     inline UMF_CHUNK   EncodeHeader() const;
-    
+    inline UMF_CHUNK   EncodeHeaderWithPhyChannelPvt(unsigned int pvt) const;
+
     // marshallers
     void               StartAppend();
     bool               CanAppend();
@@ -182,7 +183,7 @@ UMF_MESSAGE_CLASS::DecodeHeader(
 
 // encode a header chunk from my internal info
 inline UMF_CHUNK
-UMF_MESSAGE_CLASS::EncodeHeader() const
+UMF_MESSAGE_CLASS::EncodeHeaderWithPhyChannelPvt(unsigned int pvt) const
 {
     UMF_CHUNK chunk;
 
@@ -191,7 +192,10 @@ UMF_MESSAGE_CLASS::EncodeHeader() const
                               (length / UMF_CHUNK_BYTES)      :
                               (length / UMF_CHUNK_BYTES) + 1;
 
-    chunk = channelID;
+    chunk = pvt;
+
+    chunk <<= UMF_CHANNEL_ID_BITS;
+    chunk |= channelID;
 
     chunk <<= UMF_SERVICE_ID_BITS;
     chunk |= serviceID;
@@ -203,6 +207,13 @@ UMF_MESSAGE_CLASS::EncodeHeader() const
     chunk |= num_chunks;
 
     return chunk;
+}
+
+
+inline UMF_CHUNK
+UMF_MESSAGE_CLASS::EncodeHeader() const
+{
+    return EncodeHeaderWithPhyChannelPvt(0);
 }
 
 
