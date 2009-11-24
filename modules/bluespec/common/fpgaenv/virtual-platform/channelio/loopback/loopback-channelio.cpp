@@ -246,7 +246,7 @@ CHANNELIO_CLASS::runTest()
 {
   printf("CHANNELIO_EXT_CLASS::runTest()\n");
   for(int i = 0; i < 100; i++){
-    UMF_MESSAGE message = UMF_MESSAGE_CLASS::New();
+    UMF_MESSAGE message = new UMF_MESSAGE_CLASS;
 
     message->SetChannelID(0);
     message->SetServiceID(2);

@@ -33,13 +33,13 @@
 #include "asim/syntax.h"
 #include "asim/mesg.h"
 #include "asim/trace.h"
+#include "asim/freelist.h"
 
 #include "asim/provides/umf.h"
 #include "platforms-module.h"
 
 using namespace std;
 
-#define UMF_POOL_SIZE 32
 
 // ================ UMF Allocator ================
 
@@ -51,15 +51,8 @@ class UMF_ALLOCATOR_CLASS: public PLATFORMS_MODULE_CLASS,
     // self-instantiation
     static UMF_ALLOCATOR_CLASS instance;
 
-    // pool of UMF objects
-    UMF_MESSAGE pool;
-
-    // free list
-    UMF_MESSAGE freeList;
-    int         numFree;
-
-    // lock
-    pthread_mutex_t lock;
+    // Lock-free, thread safe, list of free UMF objects
+    ASIM_FREE_LIST_CLASS<UMF_MESSAGE_CLASS> freeList;
 
   public:
     // constructors and destructor
@@ -69,11 +62,34 @@ class UMF_ALLOCATOR_CLASS: public PLATFORMS_MODULE_CLASS,
     void Init(PLATFORMS_MODULE p);
 
     // allocation and de-allocation
-    UMF_MESSAGE New();
-    void        Delete(UMF_MESSAGE msg);
+    inline UMF_MESSAGE New();
+    inline void        Delete(UMF_MESSAGE msg);
 
     // access to static instance
     static UMF_ALLOCATOR GetInstance() { return &instance; }
 };
+
+
+// allocate a new message
+inline UMF_MESSAGE
+UMF_ALLOCATOR_CLASS::New()
+{
+    UMF_MESSAGE m = freeList.Pop();
+    if (m == NULL)
+    {
+        m = (UMF_MESSAGE) malloc(sizeof(UMF_MESSAGE_CLASS));
+        VERIFYX(m != NULL);
+    }
+
+    return m;
+}
+
+// de-allocate a message
+inline void
+UMF_ALLOCATOR_CLASS::Delete(
+    UMF_MESSAGE msg)
+{
+    freeList.Push(msg);
+}
 
 #endif

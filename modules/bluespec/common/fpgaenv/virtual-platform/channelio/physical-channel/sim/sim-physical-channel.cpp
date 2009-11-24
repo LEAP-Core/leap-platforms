@@ -121,7 +121,7 @@ PHYSICAL_CHANNEL_CLASS::Write(
     }
 
     // de-allocate message
-    message->Delete();
+    delete message;
 }
 
 // read un-processed data on the pipe
@@ -137,7 +137,7 @@ PHYSICAL_CHANNEL_CLASS::readPipe()
         unixPipeDevice->Read(header, UMF_CHUNK_BYTES);
 
         // create a new message
-        incomingMessage = UMF_MESSAGE_CLASS::New();
+        incomingMessage = new UMF_MESSAGE_CLASS;
         incomingMessage->DecodeHeader(header);
     }
     else if (!incomingMessage->CanAppend())

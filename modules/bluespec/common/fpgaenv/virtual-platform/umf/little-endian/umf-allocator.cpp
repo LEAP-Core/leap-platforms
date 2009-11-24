@@ -28,6 +28,8 @@
 
 using namespace std;
 
+#define UMF_POOL_SIZE 32
+
 // self-instantiate
 UMF_ALLOCATOR_CLASS UMF_ALLOCATOR_CLASS::instance;
 
@@ -36,33 +38,22 @@ UMF_ALLOCATOR_CLASS::UMF_ALLOCATOR_CLASS()
 {
     SetTraceableName("umf_allocator");
 
-    // allocate pool
-    pool = new UMF_MESSAGE_CLASS[UMF_POOL_SIZE];
-
-    // setup free list
-    freeList = pool;
-    for (int i = 0; i < UMF_POOL_SIZE-1; i++)
+    // Preallocate some entries for the pool, hoping they will be contiguous
+    for (int i = 0; i < UMF_POOL_SIZE; i++)
     {
-        pool[i].Init(this);
-        pool[i].SetNext(&pool[i+1]);
+        UMF_MESSAGE m = (UMF_MESSAGE) malloc(sizeof(UMF_MESSAGE_CLASS));
+        freeList.Push(m);
     }
-    pool[UMF_POOL_SIZE-1].SetNext(NULL);
-
-    numFree = UMF_POOL_SIZE;
-
-    // initialize lock
-    pthread_mutex_init(&lock, NULL);
 }
 
 // destructor
 UMF_ALLOCATOR_CLASS::~UMF_ALLOCATOR_CLASS()
 {
-    if (pool)
+    // Free what we can
+    while (UMF_MESSAGE msg = freeList.Pop())
     {
-        delete [] pool;
+        free((void*) msg);
     }
-    pool = NULL;
-    freeList = NULL;
 }
 
 // init
@@ -71,49 +62,4 @@ UMF_ALLOCATOR_CLASS::Init(
     PLATFORMS_MODULE p)
 {
     parent = p;
-}
-
-// allocate a new message
-UMF_MESSAGE
-UMF_ALLOCATOR_CLASS::New()
-{
-    pthread_mutex_lock(&lock);
-
-    // check if we have anything available
-    if (freeList == NULL)
-    {
-        cerr << "UMF Allocator: ran out of resources, please increase pool size\n";
-        exit(1);
-    }
-
-    // get one and update free list
-    UMF_MESSAGE retval = freeList;
-    freeList = freeList->GetNext();
-    retval->SetNext(NULL);
-
-    // track and log
-    numFree--;
-
-    pthread_mutex_unlock(&lock);
-
-    return retval;
-}
-
-// de-allocate a message
-void
-UMF_ALLOCATOR_CLASS::Delete(
-    UMF_MESSAGE msg)
-{
-    pthread_mutex_lock(&lock);
-
-    assert(msg);
-
-    // add to free list
-    msg->SetNext(freeList);
-    freeList = msg;
-
-    // track and log
-    numFree++;
-
-    pthread_mutex_unlock(&lock);
 }

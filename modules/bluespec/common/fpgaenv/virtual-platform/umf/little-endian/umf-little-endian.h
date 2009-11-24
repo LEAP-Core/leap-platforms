@@ -34,6 +34,7 @@
 #include <iostream>
 
 #include "asim/syntax.h"
+#include "asim/freelist.h"
 
 #include "asim/provides/umf.h"
 #include "platforms-module.h"
@@ -60,7 +61,8 @@ typedef UINT64 UMF_CHUNK;
 // ================ UMF Message ================
 
 typedef class UMF_MESSAGE_CLASS* UMF_MESSAGE;
-class UMF_MESSAGE_CLASS: public PLATFORMS_MODULE_CLASS
+class UMF_MESSAGE_CLASS: public PLATFORMS_MODULE_CLASS,
+                         public ASIM_FREE_LIST_ELEMENT_CLASS<UMF_MESSAGE_CLASS>
 {
   private:   
     // header info
@@ -69,8 +71,8 @@ class UMF_MESSAGE_CLASS: public PLATFORMS_MODULE_CLASS
     UINT32 methodID;
     UINT32 length;
     
-    // message
-    unsigned char* message;
+    // For now we use fixed sized message buffers to simplify allocation.
+    unsigned char message[UMF_MAX_MSG_BYTES];
     int readIndex;
     int writeIndex;
 
@@ -89,8 +91,8 @@ class UMF_MESSAGE_CLASS: public PLATFORMS_MODULE_CLASS
     
     // allocation and de-allocation: these methods pipe
     // through to the allocator
-    static UMF_MESSAGE New();
-    void               Delete();
+    static void* operator new(size_t size);
+    static void operator delete(void *obj);
 
     // accessors
     int                GetChannelID()  { return channelID; }
@@ -239,5 +241,236 @@ UMF_MESSAGE_CLASS::EncodeHeader(
     *(UINT32*) buf = chunk;
 }
 
+
+//
+// demarshallers
+//
+
+inline void
+UMF_MESSAGE_CLASS::StartExtract()
+{
+    readIndex = 0;
+}
+
+inline bool
+UMF_MESSAGE_CLASS::CanExtract()
+{
+    return(readIndex < writeIndex);
+}
+
+inline void
+UMF_MESSAGE_CLASS::CheckExtractSanity(
+    int nbytes)
+{
+    ASSERT((readIndex + nbytes) <= writeIndex,
+           "umf: message read underflow: readIndex = "
+           << readIndex << " writeIndex = " << writeIndex
+           << " nbytes = " << nbytes );
+
+    WARN(writeIndex == length,
+         "umf: [WARNING] attempt to read from incomplete message, are you sure you want to do this?");
+}
+
+inline void
+UMF_MESSAGE_CLASS::ExtractBytes(
+    int nbytes,
+    unsigned char data[])
+{
+    CheckExtractSanity(nbytes);
+    memcpy(data, &message[readIndex], nbytes);
+    readIndex += nbytes;
+}
+
+inline UINT8
+UMF_MESSAGE_CLASS::ExtractUINT8()
+{
+    CheckExtractSanity(sizeof(UINT8));
+    UINT8 retval = *(UINT8 *)(&message[readIndex]);
+    readIndex += sizeof(UINT8);
+    return retval;
+}
+
+inline UINT32
+UMF_MESSAGE_CLASS::ExtractUINT32()
+{
+    CheckExtractSanity(sizeof(UINT32));
+    UINT32 retval = *(UINT32 *)(&message[readIndex]);
+    readIndex += sizeof(UINT32);
+    return retval;
+}
+
+inline UINT64
+UMF_MESSAGE_CLASS::ExtractUINT64()
+{
+    CheckExtractSanity(sizeof(UINT64));
+    UINT64 retval = *(UINT64 *)(&message[readIndex]);
+    readIndex += sizeof(UINT64);
+    return retval;
+}
+
+inline UINT64
+UMF_MESSAGE_CLASS::ExtractUINT(
+    int nbytes)
+{
+    if (nbytes > sizeof(UINT64))
+    {
+        cerr << "umf: ExtractUINT can take 8 bytes maximum" << endl;
+        CallbackExit(1);
+    }
+
+    // it's too risky to do a direct typecast here
+    CheckExtractSanity(nbytes);
+    UINT64 retval = 0;
+    memcpy((unsigned char*)&retval, &message[readIndex], nbytes);
+    readIndex += nbytes;
+    return retval;
+}
+
+inline UMF_CHUNK
+UMF_MESSAGE_CLASS::ExtractChunk()
+{
+    CheckExtractSanity(sizeof(UMF_CHUNK));
+    UMF_CHUNK retval = *(UMF_CHUNK *)(&message[readIndex]);
+    readIndex += sizeof(UMF_CHUNK);
+    return retval;
+}
+
+
+//
+// marshallers: most of these are trivial for little-endian machines
+//
+
+inline void
+UMF_MESSAGE_CLASS::StartAppend()
+{
+    writeIndex = 0;
+}
+
+inline bool
+UMF_MESSAGE_CLASS::CanAppend()
+{
+    return(writeIndex < length);
+}
+
+inline void
+UMF_MESSAGE_CLASS::AppendBytes(
+    int nbytes,
+    unsigned char data[])
+{
+    ASSERT((writeIndex + nbytes) <= length, "umf: message write overflow");
+
+    memcpy(&message[writeIndex], data, nbytes);
+    writeIndex += nbytes;
+}
+
+inline void
+UMF_MESSAGE_CLASS::AppendUINT8(
+    UINT8 data)
+{
+    ASSERT((writeIndex + sizeof(data)) <= length, "umf: message write overflow");
+
+    *(UINT8*)&message[writeIndex] = data;
+    writeIndex += sizeof(data);
+}
+
+inline void
+UMF_MESSAGE_CLASS::AppendUINT32(
+    UINT32 data)
+{
+    ASSERT((writeIndex + sizeof(data)) <= length, "umf: message write overflow");
+
+    *(UINT32*)&message[writeIndex] = data;
+    writeIndex += sizeof(data);
+}
+
+inline void
+UMF_MESSAGE_CLASS::AppendUINT64(
+    UINT64 data)
+{
+    ASSERT((writeIndex + sizeof(data)) <= length, "umf: message write overflow");
+
+    *(UINT64*)&message[writeIndex] = data;
+    writeIndex += sizeof(data);
+}
+
+inline void
+UMF_MESSAGE_CLASS::AppendUINT(
+    UINT64 data,
+    int nbytes)
+{
+    if (nbytes > 8)
+    {
+        cerr << "umf: AppendUINT can take 8 bytes maximum" << endl;
+        CallbackExit(1);
+    }
+
+    AppendBytes(nbytes, (unsigned char*) &data);
+}
+
+inline void
+UMF_MESSAGE_CLASS::AppendChunk(
+    UMF_CHUNK chunk)
+{
+    ASSERT((writeIndex + sizeof(chunk)) <= length, "umf: message write overflow");
+
+    *(UMF_CHUNK*)&message[writeIndex] = chunk;
+    writeIndex += sizeof(chunk);
+}
+
+inline void
+UMF_MESSAGE_CLASS::AppendChunks(
+    int nchunks,
+    UMF_CHUNK chunks[])
+{
+    AppendBytes(nchunks * sizeof(UMF_CHUNK), (unsigned char*) chunks);
+}
+
+
+//
+// reverse (MSByte -> LSByte) read methods
+//
+
+inline void
+UMF_MESSAGE_CLASS::StartReverseExtract()
+{
+    readIndex = length;
+}
+
+inline bool
+UMF_MESSAGE_CLASS::CanReverseExtract()
+{
+    return(readIndex > 0);
+}
+
+inline UMF_CHUNK
+UMF_MESSAGE_CLASS::ReverseExtractChunk()
+{
+    // if readIndex = i, we want to read bytes (i - CHUNK_SIZE) .. (i - 1)
+
+    WARN(writeIndex == length,
+         "umf: [WARNING] attempt to reverse-read from incomplete message, are you sure you want to do this?");
+
+    // SPECIAL CASE: if this is the first reverse-read in a sequence, and
+    //               the message length is not a multiple of UMF_CHUNK size,
+    //               then pad this chunk
+    UINT32 residue = readIndex % sizeof(UMF_CHUNK);
+    if (residue != 0)
+    {
+        // sanity: this MUST be the first read
+        ASSERTX(readIndex == length);
+
+        // pad and read out the data
+        UMF_CHUNK retval = 0;
+        readIndex -= residue;
+        memcpy(&retval, &message[readIndex], residue);
+        return retval;
+    }
+    else
+    {
+        // copy the data behind the pointer and retard the pointer
+        readIndex -= sizeof(UMF_CHUNK);
+        return *(UMF_CHUNK *)(&message[readIndex]);
+    }
+}
 
 #endif

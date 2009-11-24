@@ -8175,3 +8175,47 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian
  umf-little-endian.h       Locally Modified          315 
 
 Add a way to set the physical channel flag in a header.
+
+----------
+mcadler     Date: Mon Nov 23 19:26:21 EST 2009  CSN: CSN-platforms-317
+                  Tue Nov 24 00:26:21 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/pcie-dma
+ dma-physical-channel.cpp  Locally Modified          316 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/serial
+ serial-physical-channel.cpp Locally Modified          316 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/pcie-csr
+ pcie-physical-channel.cpp Locally Modified          316 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/sim
+ sim-physical-channel.cpp  Locally Modified          316 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/loopback
+ loopback-channelio.cpp    Locally Modified          316 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian
+ umf-little-endian.cpp     Locally Modified          316 
+ umf-little-endian.h       Locally Modified          316 
+ umf-allocator.cpp         Locally Modified          316 
+ umf-allocator.h           Locally Modified          316 
+
+Directory modules/project
+ SCons.top.template        Locally Modified          316 
+
+UMF performance changes (about 20% boost on the tests I measured):
+
+- Allocator:
+  - Use a lock-free linked list (still supports multiple threads) instead of
+    pthreads mutex.
+  - Switch to C++ overloaded new/delete for the allocator instead of
+    non-standard methods.
+
+- UMF:
+  - Move performance-critical routines to the .h file and tag them inline.
+  - Allocate the message as part of the UMF_MESSAGE_CLASS instead of through
+    a pointer.  It was being allocated at a fixed size already.
+  - Switch from assert() to Asim's ASSERT and change the SCons script
+    so ASSERT is compiled only in debug mode.

@@ -284,7 +284,7 @@ PHYSICAL_CHANNEL_CLASS::Write(
     pciExpressDevice->WriteSystemCSR(GenIID() | (OP_UPDATE_H2FTAIL << 16) | (h2fTail));
 
     // de-allocate message
-    message->Delete();
+    delete message;
 }
 
 // read one chunk's worth of unread data from the F2H buffer
@@ -310,7 +310,7 @@ PHYSICAL_CHANNEL_CLASS::ReadF2HBuffer()
     if (incomingMessage == NULL)
     {
         // new message
-        incomingMessage = UMF_MESSAGE_CLASS::New();
+        incomingMessage = new UMF_MESSAGE_CLASS;
         incomingMessage->DecodeHeader(chunk);
     }
     else if (!incomingMessage->CanAppend())

@@ -195,7 +195,7 @@ PHYSICAL_CHANNEL_CLASS::Write(
     pciExpressDevice->WriteSystemCSR(genIID() | (OP_UPDATE_H2FTAIL << 16) | (h2fTail << 8));
 
     // de-allocate message
-    message->Delete();
+    delete message;
 }
 
 // read one CSR's worth of unread data
@@ -225,7 +225,7 @@ PHYSICAL_CHANNEL_CLASS::readCSR()
     if (incomingMessage == NULL)
     {
         // new message
-        incomingMessage = UMF_MESSAGE_CLASS::New();
+        incomingMessage = new UMF_MESSAGE_CLASS;
         incomingMessage->DecodeHeader(chunk);
     }
     else if (!incomingMessage->CanAppend())

@@ -583,7 +583,8 @@ if SW_EXE != []:
     libs = clean_split(env['DEFS']['SW_LIBS'], sep = ' ')
     cc_flags = host_defs()
     cc_flags += ' ' + cpp_events_flag
-    cc_flags += ' -DASIM_ENABLE_ASSERTIONS'
+    if (DEBUG):
+        cc_flags += ' -DASIM_ENABLE_ASSERTIONS'
     if (TRACE):
         cc_flags += ' -DASIM_ENABLE_TRACE'
     cc_flags += ' -DAPM_NAME=\\"' + APM_NAME + '\\"'

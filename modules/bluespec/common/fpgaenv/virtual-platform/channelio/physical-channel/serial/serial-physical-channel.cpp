@@ -292,7 +292,7 @@ PHYSICAL_CHANNEL_CLASS::Write(UMF_MESSAGE message){
   }
 
   // de-allocate message
-  message->Delete();
+  delete message;
   fflush(errfd);
 }
 
@@ -323,7 +323,7 @@ PHYSICAL_CHANNEL_CLASS::readPipe(){
     }
 
     // create a new message
-    incomingMessage = UMF_MESSAGE_CLASS::New();
+    incomingMessage = new UMF_MESSAGE_CLASS;
     incomingMessage->DecodeHeader(header);
   }
   else if (!incomingMessage->CanAppend()){
