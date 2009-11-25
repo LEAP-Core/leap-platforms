@@ -108,6 +108,21 @@ LLPI_CLASS::Init()
     
 }
 
+
+void
+LLPI_CLASS::Uninit()
+{
+    //
+    // This path is called only during an unexpected exit sequence, with
+    // the normal destructor not being called.  Make sure the physical
+    // channel is cleaned up properly.  Some hardware (e.g. ACP) needs
+    // to be power cycled if not closed cleanly.
+    //
+    channelio.~CHANNELIO_CLASS();
+    physicalDevices.~PHYSICAL_DEVICES_CLASS();
+}
+
+
 // cleanup
 void LLPI_CLASS::KillMonitorThread()
 {

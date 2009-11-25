@@ -8219,3 +8219,16 @@ UMF performance changes (about 20% boost on the tests I measured):
     a pointer.  It was being allocated at a fixed size already.
   - Switch from assert() to Asim's ASSERT and change the SCons script
     so ASSERT is compiled only in debug mode.
+
+----------
+mcadler     Date: Wed Nov 25 11:04:35 EST 2009  CSN: CSN-platforms-318
+                  Wed Nov 25 16:04:35 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/low-level-platform-interface
+ llpi.cpp                  Locally Modified          317 
+ llpi.h                    Locally Modified          317 
+
+Definie Uninit() that is invoked only on abnormal exit (e.g. due to a ^C).
+Uninit() calls the destructors for the channel and physical devices, which
+appears to make the ACP code close the device cleanly.

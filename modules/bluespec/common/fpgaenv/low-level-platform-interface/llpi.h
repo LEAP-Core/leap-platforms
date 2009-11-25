@@ -57,6 +57,7 @@ class LLPI_CLASS: public PLATFORMS_MODULE_CLASS
     
     // Init - bring up the monitor thread
     void Init();
+    void Uninit();
     
     // accessors
     PHYSICAL_DEVICES   GetPhysicalDevices() { return &physicalDevices; }
