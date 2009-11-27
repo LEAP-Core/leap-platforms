@@ -8232,3 +8232,14 @@ Directory modules/bluespec/common/fpgaenv/low-level-platform-interface
 Definie Uninit() that is invoked only on abnormal exit (e.g. due to a ^C).
 Uninit() calls the destructors for the channel and physical devices, which
 appears to make the ACP code close the device cleanly.
+
+----------
+kfleming    Date: Sat Nov 28 01:52:03 KST 2009  CSN: CSN-platforms-319
+                  Fri Nov 27 16:52:03 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr
+ NPIMaster.bsv             Locally Modified          318 
+
+
+Fixed NPI to support single word transfers, which required address latch before data transfer was attempted.  
