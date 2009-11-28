@@ -8243,3 +8243,38 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr
 
 
 Fixed NPI to support single word transfers, which required address latch before data transfer was attempted.  
+
+----------
+kfleming    Date: Sat Nov 28 14:42:02 KST 2009  CSN: CSN-platforms-320
+                  Sat Nov 28 05:42:02 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian
+ umf-little-endian.h       Locally Modified          319 
+
+Directory modules/project
+ SCons.top.template        Locally Modified          319 
+
+Fixed build bug in umf. Apparently memcpy is not automatically included in Karmic Koala, even though Jaunty Jackalope has no problems.  Also, fixed build problem wherein the top level exe was not rebuilt after changes in platforms.
+
+----------
+kfleming    Date: Sat Nov 28 14:48:42 KST 2009  CSN: CSN-platforms-320
+                  Sat Nov 28 05:48:42 UTC 2009
+
+
+Directory admin
+ mytags                    Locally Modified          319 
+
+Directory admin/packages
+ platforms                 Locally Modified          319 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian
+ umf-little-endian.h       Locally Modified          319 
+
+Directory modules/project
+ SCons.top.template        Locally Modified          319 
+
+Directory .
+ changes                   Locally Modified          319 
+
+Added include for memcpy in umf.  This seems to be necessary on some build platforms.  Also, fixed software side bug where changes in platform were not forcing a model rebuild.

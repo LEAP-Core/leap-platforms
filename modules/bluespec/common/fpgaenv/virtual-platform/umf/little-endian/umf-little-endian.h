@@ -1,7 +1,7 @@
 /*****************************************************************************
  * umf-little-endian.h
  *
- * Copyright (C) 2008 Intel Corporation
+ * Copyright (C) 2008 Intel Corporation 
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -32,6 +32,8 @@
 #define __UMF__
 
 #include <iostream>
+
+#include <string.h>
 
 #include "asim/syntax.h"
 #include "asim/freelist.h"

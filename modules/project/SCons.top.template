@@ -316,7 +316,7 @@ if env.GetOption('clean'):
 #
 exe = env.Command(
     APM_NAME + '_hw.exe',
-    sbin + SW_EXE,
+    sbin + SW_EXE + [env['DEFS']['ROOT_DIR_HW'] + '/' + env['DEFS']['ROOT_DIR_MODEL'] + '/' + env['DEFS']['TMP_BSC_DIR'] + '/' + env['DEFS']['SYNTH_TOP'] + '.ba'],
     [ '@ln -fs $SOURCE $TARGET',
       '@ln -fs ' + SW_EXE_OR_TARGET + ' ' + APM_NAME,
       Delete(APM_NAME + '_hw.vexe'),
