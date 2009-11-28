@@ -8278,3 +8278,13 @@ Directory .
  changes                   Locally Modified          319 
 
 Added include for memcpy in umf.  This seems to be necessary on some build platforms.  Also, fixed software side bug where changes in platform were not forcing a model rebuild.
+
+----------
+kfleming    Date: Sat Nov 28 15:39:21 KST 2009  CSN: CSN-platforms-321
+                  Sat Nov 28 06:39:21 UTC 2009
+
+
+Directory modules/bluespec/librl/base
+ memory-interface.bsv      Locally Modified          320 
+
+Added BURST_MEMORY_IFC and friends

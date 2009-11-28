@@ -17,6 +17,7 @@
 //
 
 import Vector::*;
+import Connectable::*;
 
 
 // ========================================================================
@@ -24,6 +25,102 @@ import Vector::*;
 // Memory interface definition
 //
 // ========================================================================
+
+
+typedef struct {
+  t_ADDR addr;
+  Bit#(TAdd#(1,TLog#(n_MAX_BURST))) size;
+} BURST_REQUEST#(type t_ADDR, numeric type n_MAX_BURST)
+  deriving(Bits,Eq);
+
+//
+// This is a general interface to a multi-cycle memory, which may also 
+// support burst requests. MEMORY_IFC can be expressed in terms of this 
+// interface.  That would be a good excercise for some lazy Friday.
+//
+
+interface BURST_MEMORY_IFC#(type t_ADDR, type t_DATA, numeric type n_MAX_BURST);
+    method Action readReq(BURST_REQUEST#(t_ADDR, n_MAX_BURST) burstReq); 
+
+    method ActionValue#(t_DATA) readRsp();
+
+    // Look at the read response value without popping it
+    method t_DATA peek();
+
+    // Read response ready
+    method Bool notEmpty();
+
+    // Read request possible?
+    method Bool notFull();
+
+    // We must split the write request and response...
+    method Action writeData(t_Data data); 
+
+    method Action writeReq(BURST_REQUEST#(t_ADDR, n_MAX_BURST) burstReq);
+    
+    // Write request possible?
+    method Bool writeNotFull();
+endinterface
+
+//
+// This is a complimentary interface to BURST_MEMORY_IFC and is intended to be connectable
+//
+
+interface BURST_MEMORY_CLIENT_IFC#(type t_ADDR, type t_DATA, numeric type n_MAX_BURST);
+    method ActionValue#(BURST_REQUEST#(t_ADDR, n_MAX_BURST)) readReq(); 
+
+    method Action readRsp(t_DATA data);
+
+    // Look at the read response value without popping it
+    method Action peek(t_DATA value);
+
+    // Read response ready
+    method Action notEmpty(Bool value);
+
+    // Read request possible?
+    method Action notFull(Bool value);
+
+    // We must split the write request and response...
+    method ActionValue#(t_DATA) writeData(); 
+
+    method ActionValue#(BURST_REQUEST#(t_ADDR, n_MAX_BURST)) writeReq();
+    
+    // Write request possible?
+    method Action writeNotFull(Bool value);
+endinterface
+
+
+//
+//  Connect a BURST_MEMORY_IFC to a BURST_MEMORY_CLIENT_IFC
+//
+
+instance Connectable#(BURST_MEMORY_IFC#(t_ADDR,t_DATA,n_MAX_BURST),
+                      BURST_MEMORY_CLIENT_IFC#(t_ADDR,t_DATA,n_MAX_BURST));
+  module mkConnection#(BURST_MEMORY_IFC#(t_ADDR,t_DATA,n_MAX_BURST) server,
+                       BURST_MEMORY_CLIENT_IFC#(t_ADDR,t_DATA,n_MAX_BURST) client) (Empty);
+    mkConnection(server.readReq, client.readReq);    
+    mkConnection(client.readRsp, server.readRsp);    
+    mkConnection(server.writeData, client.writeData);    
+    mkConnection(server.writeReq, client.writeReq);    
+ 
+    rule peekRule;
+      client.peek(server.peek);
+    endrule
+
+    rule notEmptyRule;
+      client.notEmpty(server.notEmpty);
+    endrule
+
+    rule notFullRule;
+      client.notFull(server.notFull);
+    endrule
+
+    rule writeNotFullRule;
+      client.writeNotFull(server.writeNotFull);
+    endrule
+
+  endmodule
+endinstance
 
 //
 // This is a general interface to a multi-cycle memory.  By making it common we
