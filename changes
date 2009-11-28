@@ -8288,3 +8288,13 @@ Directory modules/bluespec/librl/base
  memory-interface.bsv      Locally Modified          320 
 
 Added BURST_MEMORY_IFC and friends
+
+----------
+kfleming    Date: Sat Nov 28 16:55:53 KST 2009  CSN: CSN-platforms-322
+                  Sat Nov 28 07:55:53 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr
+ ddr_sdram_tig.ucf         Locally Modified          321 
+
+Removed vestigal debugging registers from ucf
