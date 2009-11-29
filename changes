@@ -8298,3 +8298,17 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr
  ddr_sdram_tig.ucf         Locally Modified          321 
 
 Removed vestigal debugging registers from ucf
+
+----------
+mcadler     Date: Sun Nov 29 13:46:39 EST 2009  CSN: CSN-platforms-323
+                  Sun Nov 29 18:46:39 UTC 2009
+
+
+Directory modules/project
+ SCons.hw.template         Locally Modified          322 
+
+Add build of .ba files to the set of objects built as a side effect of building
+the .bo files.  I suspect this should fix the problems Elliott was trying
+to fix up at the top level SCons script.  Elliott's most recent changes
+are unstable, with regressions in Hudson failing.  This change fixes that
+instability, since SCons now knows it built the .ba files.

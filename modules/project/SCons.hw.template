@@ -147,16 +147,24 @@ for bsv in WRAPPER_BSVS.split():
     ## to keep SCons from deleting the .v file.  I tried an Alias()
     ## first, but that didn't work.
     ##
-    w = env.Command(TMP_BSC_DIR + '/mk_' + bsv.replace('.bsv', '.v'),
-                    TMP_BSC_DIR + '/' + bsv.replace('.bsv', '.bo'),
-                    '')
-    env.Precious(w)
+    bld_v = env.Command(TMP_BSC_DIR + '/mk_' + bsv.replace('.bsv', '.v'),
+                        TMP_BSC_DIR + '/' + bsv.replace('.bsv', '.bo'),
+                        '')
+    env.Precious(bld_v)
+
+    ##
+    ## Do the same for .ba
+    ##
+    bld_ba = env.Command(TMP_BSC_DIR + '/mk_' + bsv.replace('.bsv', '.ba'),
+                         TMP_BSC_DIR + '/' + bsv.replace('.bsv', '.bo'),
+                         '')
+    env.Precious(bld_ba)
 
     ##
     ## Build the Xst black-box stub.
     ##
     bb = env.Command(TMP_BSC_DIR + '/mk_' + bsv.replace('.bsv', '_stub.v'),
-                     w,
+                     bld_v + bld_ba,
                      'hasim-gen-black-box < $SOURCE > $TARGET')
 
     wrapper_builds += bb
