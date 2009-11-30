@@ -8328,3 +8328,14 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr
  NPIMaster.bsv             Locally Modified          323 
 
 DDR now ascribes to BURST_MEMORY_IFC, using a wrapper to translate the NPI to BURST_MEMORY_IFC
+
+----------
+kfleming    Date: Tue Dec  1 00:04:49 KST 2009  CSN: CSN-platforms-325
+                  Mon Nov 30 15:04:49 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr
+ ddr-sdram-device.bsv      Locally Modified          324 
+ ddr_sdram_tig.ucf         Locally Modified          324 
+
+Fixed the conversion module to prevent more than one outstanding read at a time.  This was causing a number of bugs in the PHY, including overwhelming its limit of 4 outstanding transactions, and I think causing some issue in back to back addrAck's. This should be fixed at some point in an effort to mine out maximum parallelism.  

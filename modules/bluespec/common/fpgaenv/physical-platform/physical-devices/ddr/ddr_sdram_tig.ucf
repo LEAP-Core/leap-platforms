@@ -8,6 +8,7 @@
 # SyncFIFO: master command Q
 
 NET "m_vp_llpi_phys_plat_ddr_master_commandQ_dD_OUT[*]"     TIG;
+NET "m_vp_llpi_phys_plat_ddr_master_commandQ/*fifoMem*"     TIG;
 NET "m_vp_llpi_phys_plat_ddr_master_commandQ/dGDeqPtr[*]"   TIG;
 NET "m_vp_llpi_phys_plat_ddr_master_commandQ/dGDeqPtr1[*]"  TIG;
 NET "m_vp_llpi_phys_plat_ddr_master_commandQ/sGEnqPtr[*]"   TIG;

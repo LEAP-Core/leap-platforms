@@ -86,46 +86,53 @@ endinterface
 module  mkNPIWrapper#(NPIServer npiServer) (BURST_MEMORY_IFC#(Bit#(`DRAM_ADDRESS_SIZE), Bit#(`DRAM_WORD_SIZE), `DRAM_MAX_BURST_SIZE));
     Reg#(Bool) handlingRead <- mkReg(True);
     Reg#(Bit#(TAdd#(1,TLog#(`DRAM_MAX_BURST_SIZE)))) wordsRemaining <- mkReg(0);
+    Reg#(Bit#(TAdd#(1,TLog#(`DRAM_MAX_BURST_SIZE)))) outstandingReqs <- mkReg(0);
     Reg#(Bit#(`DRAM_ADDRESS_SIZE)) address <- mkReg(0);
      
     // We have to check for aligned accesses here...
 
-    rule handleRead(handlingRead && wordsRemaining > 0);
+    rule handleRead(handlingRead && wordsRemaining > 0 && outstandingReqs == 0);
       if(wordsRemaining >= 32 && address[4:0] == 0)
         begin
           npiServer.command.put(tagged ReadCommand{addr: zeroExtend({address,3'b000}), size: BURST_32});
           address <= address + 32;
           wordsRemaining <= wordsRemaining - 32;
+          outstandingReqs <= 32; 
         end
       else if(wordsRemaining >= 16 && address[3:0] == 0) 
         begin
           npiServer.command.put(tagged ReadCommand{addr: zeroExtend({address,3'b000}), size: BURST_16});
           address <= address + 16;
           wordsRemaining <= wordsRemaining - 16;
+          outstandingReqs <= 16; 
         end    
       else if(wordsRemaining >= 8 && address[2:0] == 0) 
         begin
           npiServer.command.put(tagged ReadCommand{addr: zeroExtend({address,3'b000}), size: BURST_8});
           address <= address + 8;
           wordsRemaining <= wordsRemaining - 8;
+          outstandingReqs <= 8; 
         end    
       else if(wordsRemaining >= 4 && address[1:0] == 0) 
         begin
           npiServer.command.put(tagged ReadCommand{addr: zeroExtend({address,3'b000}), size: BURST_4});
           address <= address + 4;
           wordsRemaining <= wordsRemaining - 4;
+          outstandingReqs <= 4; 
         end    
       else if(wordsRemaining >= 2 && address[0] == 0) 
         begin
           npiServer.command.put(tagged ReadCommand{addr: zeroExtend({address,3'b000}), size: BURST_2});
           address <= address + 2;
           wordsRemaining <= wordsRemaining - 2;
+          outstandingReqs <= 2; 
         end    
       else  
         begin
           npiServer.command.put(tagged ReadCommand{addr: zeroExtend({address,3'b000}), size: BURST_1});
           address <= address + 1;
           wordsRemaining <= wordsRemaining - 1;
+          outstandingReqs <= 1; 
         end    
     endrule
 
@@ -177,6 +184,7 @@ module  mkNPIWrapper#(NPIServer npiServer) (BURST_MEMORY_IFC#(Bit#(`DRAM_ADDRESS
 
     method ActionValue#(Bit#(`DRAM_WORD_SIZE)) readRsp();
       let npiResp <- npiServer.read.get;
+      outstandingReqs <= outstandingReqs - 1;
       return npiResp.data;
     endmethod
 
