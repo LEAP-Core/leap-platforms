@@ -24,6 +24,17 @@
 
 import Connectable::*;
 import GetPut::*;
+import FIFO::*;
+import Clocks::*;
+
+typedef enum {
+  BURST_1  = 0,
+  BURST_2  = 1,
+  BURST_4  = 2,
+  BURST_8  = 3,
+  BURST_16 = 4,
+  BURST_32 = 5
+} NPIBurst deriving(Bits,Eq);
 
 typedef struct {
   Bit#(64) data;
@@ -36,8 +47,8 @@ typedef struct {
 } NPIWriteWord deriving(Eq, Bits);
 
 typedef union tagged {
-  struct { Bit#(32) addr; Bit#(4) size; } ReadCommand;
-  struct { Bit#(32) addr; Bit#(4) size; Bool rmw; } WriteCommand;
+  struct { Bit#(32) addr; NPIBurst size; } ReadCommand;
+  struct { Bit#(32) addr; NPIBurst size; Bool rmw; } WriteCommand;
 } NPICommand deriving(Eq, Bits);
 
 interface NPIClient;

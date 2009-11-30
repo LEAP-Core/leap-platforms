@@ -221,7 +221,8 @@ module mkNPIMaster#(Clock coreClock, Reset coreReset)(NPIMaster);
         addrReq_val <= 1'b1;
         addr_val <= rc.addr;
         rnw_val <= 1'b1;
-        size_val <= rc.size;
+        size_val <= zeroExtend(pack(rc.size));
+
         rdModWr_val <= 1'b0;
 
         if(addrAck_val == 1) 
@@ -234,23 +235,23 @@ module mkNPIMaster#(Clock coreClock, Reset coreReset)(NPIMaster);
       tagged WriteCommand .wc: begin
         let burst_ready =
           case (wc.size)
-            0: return writeQ.dIsGreaterThan(0);
-            1: return writeQ.dIsGreaterThan(1);
-            2: return writeQ.dIsGreaterThan(3);
-            3: return writeQ.dIsGreaterThan(7);
-            4: return writeQ.dIsGreaterThan(15);
-            5: return writeQ.dIsGreaterThan(31);
+            BURST_1: return writeQ.dIsGreaterThan(0);
+            BURST_2: return writeQ.dIsGreaterThan(1);
+            BURST_4: return writeQ.dIsGreaterThan(3);
+            BURST_8: return writeQ.dIsGreaterThan(7);
+            BURST_16: return writeQ.dIsGreaterThan(15);
+            BURST_32: return writeQ.dIsGreaterThan(31);
             default: return writeQ.dIsGreaterThan(0);
           endcase;
 
         let burst_count_max =
           case (wc.size)
-            0: return 0;
-            1: return 1;
-            2: return 3;
-            3: return 7;
-            4: return 15;
-            5: return 31;
+            BURST_1: return 0;
+            BURST_2: return 1;
+            BURST_4: return 3;
+            BURST_8: return 7;
+            BURST_16: return 15;
+            BURST_32: return 31;
             default: 0;
           endcase;
 
@@ -258,7 +259,7 @@ module mkNPIMaster#(Clock coreClock, Reset coreReset)(NPIMaster);
         // Size 0 is a special case.  In this case, we need to push data 1 cycle _after_ the addr ack
         if(burst_ready) begin
           xfer_count <= burst_count_max;
-          state <= (wc.size == 0) ? ProcessWriteSpecial:ProcessWrite;
+          state <= (wc.size == BURST_1) ? ProcessWriteSpecial:ProcessWrite;
         end
       end
     endcase
@@ -288,8 +289,8 @@ module mkNPIMaster#(Clock coreClock, Reset coreReset)(NPIMaster);
         addrReq_val <= 1'b1;
         addr_val <= wc.addr;
         rnw_val <= 1'b0;
-        size_val <= wc.size;
-        rdModWr_val <= ((wc.rmw || wc.size == 0 || wc.size == 1) ? 1 : 0);
+        size_val <= zeroExtend(pack(wc.size));
+        rdModWr_val <= ((wc.rmw || wc.size == BURST_1 || wc.size == BURST_2) ? 1 : 0);
 
         if(addrAck_val == 1) begin
           commandQ.deq();
@@ -306,8 +307,8 @@ module mkNPIMaster#(Clock coreClock, Reset coreReset)(NPIMaster);
         addrReq_val <= 1'b1;
         addr_val <= wc.addr;
         rnw_val <= 1'b0;
-        size_val <= wc.size;
-        rdModWr_val <= ((wc.rmw || wc.size == 0 || wc.size == 1) ? 1 : 0);
+        size_val <= zeroExtend(pack(wc.size));
+        rdModWr_val <= ((wc.rmw || wc.size == BURST_1 || wc.size == BURST_2) ? 1 : 0);
 
         if(addrAck_val == 1) begin
           addrAcksWriteLocal <= addrAcksWriteLocal + 1;

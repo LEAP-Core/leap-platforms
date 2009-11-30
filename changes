@@ -8312,3 +8312,19 @@ the .bo files.  I suspect this should fix the problems Elliott was trying
 to fix up at the top level SCons script.  Elliott's most recent changes
 are unstable, with regressions in Hudson failing.  This change fixes that
 instability, since SCons now knows it built the .ba files.
+
+----------
+kfleming    Date: Mon Nov 30 19:05:46 KST 2009  CSN: CSN-platforms-324
+                  Mon Nov 30 10:05:46 UTC 2009
+
+
+Directory modules/bluespec/librl/base
+ memory-interface.bsv      Locally Modified          323 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr
+ ddr-sdram-device.awb      Locally Modified          323 
+ ddr-sdram-device.bsv      Locally Modified          323 
+ NPICommon.bsv             Locally Modified          323 
+ NPIMaster.bsv             Locally Modified          323 
+
+DDR now ascribes to BURST_MEMORY_IFC, using a wrapper to translate the NPI to BURST_MEMORY_IFC

@@ -17,3 +17,6 @@
 %sources -t UCF -v PRIVATE ddr_sdram.ucf
 %sources -t UCF -v PRIVATE ddr_sdram_tig.ucf
 
+%param DRAM_ADDRESS_SIZE  22  "DRAM address size (words)"
+%param DRAM_WORD_SIZE 64 "DRAM word size (bits)"
+%param DRAM_MAX_BURST_SIZE  32 "DRAM max burst size"

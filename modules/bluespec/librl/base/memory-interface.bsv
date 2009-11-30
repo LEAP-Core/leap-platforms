@@ -54,7 +54,7 @@ interface BURST_MEMORY_IFC#(type t_ADDR, type t_DATA, numeric type n_MAX_BURST);
     method Bool notFull();
 
     // We must split the write request and response...
-    method Action writeData(t_Data data); 
+    method Action writeData(t_DATA data); 
 
     method Action writeReq(BURST_REQUEST#(t_ADDR, n_MAX_BURST) burstReq);
     

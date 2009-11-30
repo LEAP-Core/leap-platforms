@@ -22,6 +22,10 @@
 
 // Author: Kermin Fleming kfleming@mit.edu
 
+`include "asim/provides/librl_bsv_base.bsh"
+`include "asim/provides/ddr_sdram_device.bsh"
+
+import NPICommon::*;
 
 interface DDR_SDRAM_WIRES;
     //
@@ -66,9 +70,145 @@ interface DDR_SDRAM_WIRES;
 
 endinterface
 
+//22 bits for now
+//interface NPIServer;
+//  interface Put#(NPIWriteWord) write;
+//  interface Get#(NPIReadWord) read;
+//  interface Put#(NPICommand) command;
+//  method Bit#(32) addrAcksRead();
+//  method Bit#(32) addrAcksWrite();
+//  method Bit#(32) clockTicks();
+//  method Bit#(32) clockTicksCore();
+//endinterface
+
+// At some point, we should add counters to track how much buffer capacity we have actually got
+
+module  mkNPIWrapper#(NPIServer npiServer) (BURST_MEMORY_IFC#(Bit#(`DRAM_ADDRESS_SIZE), Bit#(`DRAM_WORD_SIZE), `DRAM_MAX_BURST_SIZE));
+    Reg#(Bool) handlingRead <- mkReg(True);
+    Reg#(Bit#(TAdd#(1,TLog#(`DRAM_MAX_BURST_SIZE)))) wordsRemaining <- mkReg(0);
+    Reg#(Bit#(`DRAM_ADDRESS_SIZE)) address <- mkReg(0);
+     
+    // We have to check for aligned accesses here...
+
+    rule handleRead(handlingRead && wordsRemaining > 0);
+      if(wordsRemaining >= 32 && address[4:0] == 0)
+        begin
+          npiServer.command.put(tagged ReadCommand{addr: zeroExtend({address,3'b000}), size: BURST_32});
+          address <= address + 32;
+          wordsRemaining <= wordsRemaining - 32;
+        end
+      else if(wordsRemaining >= 16 && address[3:0] == 0) 
+        begin
+          npiServer.command.put(tagged ReadCommand{addr: zeroExtend({address,3'b000}), size: BURST_16});
+          address <= address + 16;
+          wordsRemaining <= wordsRemaining - 16;
+        end    
+      else if(wordsRemaining >= 8 && address[2:0] == 0) 
+        begin
+          npiServer.command.put(tagged ReadCommand{addr: zeroExtend({address,3'b000}), size: BURST_8});
+          address <= address + 8;
+          wordsRemaining <= wordsRemaining - 8;
+        end    
+      else if(wordsRemaining >= 4 && address[1:0] == 0) 
+        begin
+          npiServer.command.put(tagged ReadCommand{addr: zeroExtend({address,3'b000}), size: BURST_4});
+          address <= address + 4;
+          wordsRemaining <= wordsRemaining - 4;
+        end    
+      else if(wordsRemaining >= 2 && address[0] == 0) 
+        begin
+          npiServer.command.put(tagged ReadCommand{addr: zeroExtend({address,3'b000}), size: BURST_2});
+          address <= address + 2;
+          wordsRemaining <= wordsRemaining - 2;
+        end    
+      else  
+        begin
+          npiServer.command.put(tagged ReadCommand{addr: zeroExtend({address,3'b000}), size: BURST_1});
+          address <= address + 1;
+          wordsRemaining <= wordsRemaining - 1;
+        end    
+    endrule
+
+    rule handleWrite(!handlingRead && wordsRemaining > 0);
+      if(wordsRemaining >= 32 && address[4:0] == 0)
+        begin
+          npiServer.command.put(tagged WriteCommand{addr: zeroExtend({address,3'b000}), size: BURST_32, rmw: False});
+          address <= address + 32;
+          wordsRemaining <= wordsRemaining - 32;
+        end
+      else if(wordsRemaining >= 16 && address[3:0] == 0) 
+        begin
+          npiServer.command.put(tagged WriteCommand{addr: zeroExtend({address,3'b000}), size: BURST_16, rmw: False});
+          address <= address + 16;
+          wordsRemaining <= wordsRemaining - 16;
+        end    
+      else if(wordsRemaining >= 8 && address[2:0] == 0) 
+        begin
+          npiServer.command.put(tagged WriteCommand{addr: zeroExtend({address,3'b000}), size: BURST_8, rmw: False});
+          address <= address + 8;
+          wordsRemaining <= wordsRemaining - 8;
+        end    
+      else if(wordsRemaining >= 4 && address[1:0] == 0) 
+        begin
+          npiServer.command.put(tagged WriteCommand{addr: zeroExtend({address,3'b000}), size: BURST_4, rmw: False});
+          address <= address + 4;
+          wordsRemaining <= wordsRemaining - 4;
+        end    
+      else if(wordsRemaining >= 2 && address[0] == 0) 
+        begin
+          npiServer.command.put(tagged WriteCommand{addr: zeroExtend({address,3'b000}), size: BURST_2, rmw: False});
+          address <= address + 2;
+          wordsRemaining <= wordsRemaining - 2;
+        end    
+      else  
+        begin
+          npiServer.command.put(tagged WriteCommand{addr: zeroExtend({address,3'b000}), size: BURST_1, rmw: False});
+          address <= address + 1;
+          wordsRemaining <= wordsRemaining - 1;
+        end    
+    endrule
+
+
+    method Action readReq(BURST_REQUEST#(Bit#(`DRAM_ADDRESS_SIZE),`DRAM_MAX_BURST_SIZE) burstReq) if(wordsRemaining == 0); 
+      wordsRemaining <= burstReq.size;
+      address <= burstReq.addr;
+      handlingRead <= True;
+    endmethod
+
+    method ActionValue#(Bit#(`DRAM_WORD_SIZE)) readRsp();
+      let npiResp <- npiServer.read.get;
+      return npiResp.data;
+    endmethod
+
+    // Look at the read response value without popping it
+    method Bit#(`DRAM_WORD_SIZE) peek();
+      return peekGet(npiServer.read).data;  
+    endmethod
+
+    // Read response ready
+    method notEmpty = ?;
+
+    // Read request possible?
+    method notFull = ?;
+
+    // We must split the write request and response...
+    method Action writeData(Bit#(`DRAM_WORD_SIZE) data);
+      npiServer.write.put(NPIWriteWord{data: data, be: ~0}); 
+    endmethod
+
+    method Action writeReq(BURST_REQUEST#(Bit#(`DRAM_ADDRESS_SIZE),`DRAM_MAX_BURST_SIZE) burstReq) if(wordsRemaining == 0); 
+      wordsRemaining <= burstReq.size;
+      address <= burstReq.addr;
+      handlingRead <= False;
+    endmethod
+    
+    // Write request possible?
+    method writeNotFull = ?;
+
+endmodule
 
 // For now we use this typedef...
-typedef NPIServer DDR_SDRAM_DRIVER;
+typedef BURST_MEMORY_IFC#(Bit#(`DRAM_ADDRESS_SIZE), Bit#(`DRAM_WORD_SIZE), `DRAM_MAX_BURST_SIZE) DDR_SDRAM_DRIVER;
 
 
 //
@@ -95,6 +235,8 @@ module mkDDRSDRAMDevice#(Clock rawClock, Reset rawReset) (DDR_SDRAM_DEVICE);
   XILINX_MPMC_DDR_DRAM_CONTROLLER controller <- mkXilinxMPMCDDRDRAMController(clocked_by rawClock, reset_by rawReset);
 
   NPIMaster master <- mkNPIMaster(systemClock, systemReset, clocked_by controller.controller_clk, reset_by controller.controller_rst);
+
+  BURST_MEMORY_IFC#(Bit#(`DRAM_ADDRESS_SIZE), Bit#(`DRAM_WORD_SIZE), `DRAM_MAX_BURST_SIZE) burstIfc <- mkNPIWrapper(master.npi_server);
 
   rule driveAddrReq;
     controller.addrReq(master.npiMasterWires.addrReq());
@@ -173,7 +315,7 @@ module mkDDRSDRAMDevice#(Clock rawClock, Reset rawReset) (DDR_SDRAM_DEVICE);
   endrule
 
 
-  interface driver = master.npi_server; 
+  interface driver = burstIfc; 
 
   interface DDR_SDRAM_WIRES wires;
     
