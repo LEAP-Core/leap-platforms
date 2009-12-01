@@ -70,25 +70,29 @@ interface DDR_SDRAM_WIRES;
 
 endinterface
 
-//22 bits for now
-//interface NPIServer;
-//  interface Put#(NPIWriteWord) write;
-//  interface Get#(NPIReadWord) read;
-//  interface Put#(NPICommand) command;
-//  method Bit#(32) addrAcksRead();
-//  method Bit#(32) addrAcksWrite();
-//  method Bit#(32) clockTicks();
-//  method Bit#(32) clockTicksCore();
-//endinterface
+
+// For now we use this typedef...
+interface DDR_SDRAM_DRIVER;
+  interface BURST_MEMORY_IFC#(Bit#(`DRAM_ADDRESS_SIZE), Bit#(`DRAM_WORD_SIZE), `DRAM_MAX_BURST_SIZE) burstIfc;
+  method Bit#(32) readsReturned();
+  method Bit#(32) writesReceived();
+  method Bit#(32) writeCommandsReceived();
+  method Bit#(32) readCommandsReceived();
+endinterface
 
 // At some point, we should add counters to track how much buffer capacity we have actually got
 
-module  mkNPIWrapper#(NPIServer npiServer) (BURST_MEMORY_IFC#(Bit#(`DRAM_ADDRESS_SIZE), Bit#(`DRAM_WORD_SIZE), `DRAM_MAX_BURST_SIZE));
+module  mkNPIWrapper#(NPIServer npiServer) (DDR_SDRAM_DRIVER);
     Reg#(Bool) handlingRead <- mkReg(True);
     Reg#(Bit#(TAdd#(1,TLog#(`DRAM_MAX_BURST_SIZE)))) wordsRemaining <- mkReg(0);
     Reg#(Bit#(TAdd#(1,TLog#(`DRAM_MAX_BURST_SIZE)))) outstandingReqs <- mkReg(0);
     Reg#(Bit#(`DRAM_ADDRESS_SIZE)) address <- mkReg(0);
-     
+
+    Reg#(Bit#(32)) readsReturnedCount <- mkReg(0);
+    Reg#(Bit#(32)) writesReturnedCount <- mkReg(0);
+    Reg#(Bit#(32)) writeCommandsReceivedCount <- mkReg(0);
+    Reg#(Bit#(32)) readCommandsReceivedCount <- mkReg(0);
+
     // We have to check for aligned accesses here...
 
     rule handleRead(handlingRead && wordsRemaining > 0 && outstandingReqs == 0);
@@ -176,47 +180,57 @@ module  mkNPIWrapper#(NPIServer npiServer) (BURST_MEMORY_IFC#(Bit#(`DRAM_ADDRESS
     endrule
 
 
-    method Action readReq(BURST_REQUEST#(Bit#(`DRAM_ADDRESS_SIZE),`DRAM_MAX_BURST_SIZE) burstReq) if(wordsRemaining == 0); 
-      wordsRemaining <= burstReq.size;
-      address <= burstReq.addr;
-      handlingRead <= True;
-    endmethod
+    interface BURST_MEMORY_IFC burstIfc;
+      method Action readReq(BURST_REQUEST#(Bit#(`DRAM_ADDRESS_SIZE),`DRAM_MAX_BURST_SIZE) burstReq) if(wordsRemaining == 0); 
+        wordsRemaining <= burstReq.size;
+        address <= burstReq.addr;
+        handlingRead <= True;
+        readCommandsReceivedCount <= readCommandsReceivedCount + 1;
+      endmethod
 
-    method ActionValue#(Bit#(`DRAM_WORD_SIZE)) readRsp();
-      let npiResp <- npiServer.read.get;
-      outstandingReqs <= outstandingReqs - 1;
-      return npiResp.data;
-    endmethod
+      method ActionValue#(Bit#(`DRAM_WORD_SIZE)) readRsp();
+        let npiResp <- npiServer.read.get;
+        outstandingReqs <= outstandingReqs - 1;
+        readsReturnedCount <= readsReturnedCount + 1;
+        return npiResp.data;
+      endmethod
 
-    // Look at the read response value without popping it
-    method Bit#(`DRAM_WORD_SIZE) peek();
-      return peekGet(npiServer.read).data;  
-    endmethod
+      // Look at the read response value without popping it
+      method Bit#(`DRAM_WORD_SIZE) peek();
+        return peekGet(npiServer.read).data;  
+      endmethod
 
-    // Read response ready
-    method notEmpty = ?;
+      // Read response ready
+      method notEmpty = ?;
 
-    // Read request possible?
-    method notFull = ?;
+      // Read request possible?
+      method notFull = ?;
 
-    // We must split the write request and response...
-    method Action writeData(Bit#(`DRAM_WORD_SIZE) data);
-      npiServer.write.put(NPIWriteWord{data: data, be: ~0}); 
-    endmethod
+      // We must split the write request and response...
+      method Action writeData(Bit#(`DRAM_WORD_SIZE) data);
+        npiServer.write.put(NPIWriteWord{data: data, be: ~0}); 
+        writesReturnedCount <= writesReturnedCount + 1;
+      endmethod
 
-    method Action writeReq(BURST_REQUEST#(Bit#(`DRAM_ADDRESS_SIZE),`DRAM_MAX_BURST_SIZE) burstReq) if(wordsRemaining == 0); 
-      wordsRemaining <= burstReq.size;
-      address <= burstReq.addr;
-      handlingRead <= False;
-    endmethod
+      method Action writeReq(BURST_REQUEST#(Bit#(`DRAM_ADDRESS_SIZE),`DRAM_MAX_BURST_SIZE) burstReq) if(wordsRemaining == 0); 
+        wordsRemaining <= burstReq.size;
+        address <= burstReq.addr;
+        handlingRead <= False;
+        writeCommandsReceivedCount <= writeCommandsReceivedCount + 1;
+      endmethod
     
-    // Write request possible?
-    method writeNotFull = ?;
+      // Write request possible?
+      method writeNotFull = ?;
+    endinterface
+
+    method readsReturned = readsReturnedCount._read;
+    method writesReceived = writesReturnedCount._read;
+    method writeCommandsReceived = writeCommandsReceivedCount._read;
+    method readCommandsReceived = readCommandsReceivedCount._read;
 
 endmodule
 
-// For now we use this typedef...
-typedef BURST_MEMORY_IFC#(Bit#(`DRAM_ADDRESS_SIZE), Bit#(`DRAM_WORD_SIZE), `DRAM_MAX_BURST_SIZE) DDR_SDRAM_DRIVER;
+
 
 
 //
@@ -244,7 +258,7 @@ module mkDDRSDRAMDevice#(Clock rawClock, Reset rawReset) (DDR_SDRAM_DEVICE);
 
   NPIMaster master <- mkNPIMaster(systemClock, systemReset, clocked_by controller.controller_clk, reset_by controller.controller_rst);
 
-  BURST_MEMORY_IFC#(Bit#(`DRAM_ADDRESS_SIZE), Bit#(`DRAM_WORD_SIZE), `DRAM_MAX_BURST_SIZE) burstIfc <- mkNPIWrapper(master.npi_server);
+  DDR_SDRAM_DRIVER burstIfc <- mkNPIWrapper(master.npi_server);
 
   rule driveAddrReq;
     controller.addrReq(master.npiMasterWires.addrReq());

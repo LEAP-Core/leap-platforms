@@ -8339,3 +8339,13 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr
  ddr_sdram_tig.ucf         Locally Modified          324 
 
 Fixed the conversion module to prevent more than one outstanding read at a time.  This was causing a number of bugs in the PHY, including overwhelming its limit of 4 outstanding transactions, and I think causing some issue in back to back addrAck's. This should be fixed at some point in an effort to mine out maximum parallelism.  
+
+----------
+kfleming    Date: Tue Dec  1 19:32:41 KST 2009  CSN: CSN-platforms-326
+                  Tue Dec  1 10:32:41 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr
+ ddr-sdram-device.bsv      Locally Modified          325 
+
+Added debug registers to the DDR 
