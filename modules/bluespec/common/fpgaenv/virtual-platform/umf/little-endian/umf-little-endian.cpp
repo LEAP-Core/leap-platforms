@@ -69,7 +69,7 @@ UMF_MESSAGE_CLASS::Clear()
 }
 
 // allocate a new message: pipe through to the allocator
-static void *
+void *
 UMF_MESSAGE_CLASS::operator new(size_t size)
 {
     ASSERTX(size == sizeof(UMF_MESSAGE_CLASS));
@@ -84,7 +84,7 @@ UMF_MESSAGE_CLASS::operator new(size_t size)
 }
 
 // de-allocate this message: pipe through to the allocator
-static void
+void
 UMF_MESSAGE_CLASS::operator delete(void *obj)
 {
     // ask allocator to de-allocate me

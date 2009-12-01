@@ -107,14 +107,6 @@ SCRATCHPAD_MEMORY_SERVER_CLASS::Cleanup()
 {
 }
 
-// poll
-void
-SCRATCHPAD_MEMORY_SERVER_CLASS::Poll()
-{
-    // do nothing
-}
-
-
 
 //
 // RRR requests

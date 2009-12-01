@@ -134,12 +134,6 @@ STREAMS_DEVICE_SERVER_CLASS::Print(
     }
 }
 
-// poll: FIXME FIXME FIXME we need this
-void
-STREAMS_DEVICE_SERVER_CLASS::Poll()
-{
-}
-
 // map a stream to an output file
 void
 STREAMS_DEVICE_SERVER_CLASS::MapStream(

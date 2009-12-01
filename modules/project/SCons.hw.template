@@ -165,7 +165,7 @@ for bsv in WRAPPER_BSVS.split():
     ##
     bb = env.Command(TMP_BSC_DIR + '/mk_' + bsv.replace('.bsv', '_stub.v'),
                      bld_v + bld_ba,
-                     'hasim-gen-black-box < $SOURCE > $TARGET')
+                     'hasim-gen-black-box $SOURCE > $TARGET')
 
     wrapper_builds += bb
 

@@ -193,12 +193,6 @@ STATS_DEVICE_SERVER_CLASS::SetVectorLength(
 }
 
 
-// poll
-void
-STATS_DEVICE_SERVER_CLASS::Poll()
-{
-}
-
 // DumpStats
 void
 STATS_DEVICE_SERVER_CLASS::DumpStats()

@@ -49,7 +49,6 @@ class ASSERTIONS_DEVICE_SERVER_CLASS: public RRR_SERVER_CLASS,
     void Init(PLATFORMS_MODULE);
     void Uninit();
     void Cleanup();
-    void Poll();
 
     // RRR service methods
     void Assert(UINT32 assert_base, UINT32 fpga_cc, UINT32 assertions);

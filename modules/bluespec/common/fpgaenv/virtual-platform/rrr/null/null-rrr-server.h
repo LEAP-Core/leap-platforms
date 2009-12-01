@@ -15,7 +15,12 @@ class RRR_SERVER_CLASS
 {
   public:
     virtual void        Init(PLATFORMS_MODULE) = 0;
-    virtual void        Poll(void) {};    
+
+    // Polling is a performance bottleneck and most servers don't need to be
+    // polled.  Servers that don't need a Poll() can simply not implement
+    // the method.  Servers that need to be polled must return true from
+    // their Poll() method on every invocation.
+    virtual bool        Poll(void) { return false; };
 };
 
 // ============== RRR server stub base class =================
@@ -26,7 +31,7 @@ class RRR_SERVER_STUB_CLASS
   public:
     virtual UMF_MESSAGE Request(UMF_MESSAGE)   = 0;
     virtual void        Init(PLATFORMS_MODULE) = 0;
-    virtual void        Poll(void)             = 0;
+    virtual bool        Poll(void)             = 0;
 };
 
 // ================== Basic RRR Server Monitor ==================

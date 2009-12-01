@@ -85,6 +85,8 @@ PHYSICAL_CHANNEL_CLASS::PHYSICAL_CHANNEL_CLASS(
     // update pointers
     pciExpressDevice->WriteSystemCSR(genIID() | (OP_UPDATE_F2HHEAD << 16) | (f2hHead << 8));
     pciExpressDevice->WriteSystemCSR(genIID() | (OP_UPDATE_H2FTAIL << 16) | (h2fTail << 8));
+
+    pthread_mutex_init(&channelLock, NULL);
 }
 
 // destructor
@@ -97,6 +99,7 @@ UMF_MESSAGE
 PHYSICAL_CHANNEL_CLASS::Read()
 {
     // blocking loop
+    pthread_mutex_lock(&channelLock);
     while (true)
     {
         // check if message is ready
@@ -105,6 +108,7 @@ PHYSICAL_CHANNEL_CLASS::Read()
             // message is ready!
             UMF_MESSAGE msg = incomingMessage;
             incomingMessage = NULL;
+            pthread_mutex_unlock(&channelLock);
             return msg;
         }
 
@@ -126,6 +130,8 @@ PHYSICAL_CHANNEL_CLASS::Read()
 UMF_MESSAGE
 PHYSICAL_CHANNEL_CLASS::TryRead()
 {
+    pthread_mutex_lock(&channelLock);
+
     // if CSRs are empty, then poll pointers (OPTIONAL)
     if (f2hHead == f2hTailCache)
     {
@@ -140,10 +146,12 @@ PHYSICAL_CHANNEL_CLASS::TryRead()
     {
         UMF_MESSAGE msg = incomingMessage;
         incomingMessage = NULL;
+        pthread_mutex_unlock(&channelLock);
         return msg;
     }
 
     // message not yet ready
+    pthread_mutex_unlock(&channelLock);
     return NULL;
 }
 
@@ -152,6 +160,8 @@ void
 PHYSICAL_CHANNEL_CLASS::Write(
     UMF_MESSAGE message)
 {
+    pthread_mutex_lock(&channelLock);
+
     // block until buffer has sufficient space
     CSR_INDEX h2fTailPlusOne = (h2fTail == CSR_H2F_BUF_END) ? CSR_H2F_BUF_START : (h2fTail + 1);
     while (h2fTailPlusOne == h2fHeadCache)
@@ -193,6 +203,8 @@ PHYSICAL_CHANNEL_CLASS::Write(
     // sync h2fTail pointer. It is OPTIONAL to do this immediately, but we will do it
     // since this is probably the response to a request the hardware might be blocked on
     pciExpressDevice->WriteSystemCSR(genIID() | (OP_UPDATE_H2FTAIL << 16) | (h2fTail << 8));
+
+    pthread_mutex_unlock(&channelLock);
 
     // de-allocate message
     delete message;

@@ -44,7 +44,6 @@ CHANNELIO_CLASS::CHANNELIO_CLASS(
     PLATFORMS_MODULE p,
     PHYSICAL_DEVICES d) :
         readReq(false),
-        writeReq(false),
         PLATFORMS_MODULE_CLASS(p),
         physicalChannel(this, d)
 {
@@ -181,15 +180,19 @@ CHANNELIO_CLASS::Write(
     int channel,
     UMF_MESSAGE message)
 {
+    //
+    // We do NOT lock the channel here, under the assumption that parallel
+    // reads and writes are permitted in many channel implementations.
+    //
+    // Channels that do not support parallel reads and writes must provide
+    // their own locking.
+    //
+
     // attach channelID to message
     message->SetChannelID(channel);
 
     // send to physical channel
-    writeReq = true;
-    pthread_mutex_lock(&channelLock);
-    writeReq = false;
     physicalChannel.Write(message);
-    pthread_mutex_unlock(&channelLock);
 }
 
 // poll
@@ -199,7 +202,7 @@ CHANNELIO_CLASS::Poll()
     // Yield if a read or write request is trying to get the lock.  On multi-core
     // machines the pool loop can effectively hold the lock and never give it
     // up without this.
-    if (readReq || writeReq) return;
+    if (readReq) return;
 
     // check if physical channel has a new message
     pthread_mutex_lock(&channelLock);

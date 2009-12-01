@@ -65,7 +65,6 @@ class DEBUG_SCAN_DEVICE_SERVER_CLASS: public RRR_SERVER_CLASS,
     void Init(PLATFORMS_MODULE);
     void Uninit();
     void Cleanup();
-    void Poll();
 
     // Method to tell the hardware to dump state.
     void Scan();

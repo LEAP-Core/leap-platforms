@@ -8349,3 +8349,114 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr
  ddr-sdram-device.bsv      Locally Modified          325 
 
 Added debug registers to the DDR 
+
+----------
+mcadler     Date: Tue Dec  1 16:31:13 EST 2009  CSN: CSN-platforms-327
+                  Tue Dec  1 21:31:13 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/low-level-platform-interface
+ llpi.cpp                  Locally Modified          326 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/basic
+ basic-channelio.cpp       Locally Modified          326 
+ basic-channelio.h         Locally Modified          326 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/pcie-dma
+ dma-physical-channel.cpp  Locally Modified          326 
+ dma-physical-channel.h    Locally Modified          326 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/pcie-csr
+ pcie-physical-channel.cpp Locally Modified          326 
+ pcie-physical-channel.h   Locally Modified          326 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ basic-rrr-server.cpp      Locally Modified          326 
+ basic-rrr-server.h        Locally Modified          326 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/null
+ null-rrr-server.h         Locally Modified          326 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/starter
+ starter-device.cpp        Locally Modified          326 
+ starter-device.h          Locally Modified          326 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid
+ hybrid-fp.cpp             Locally Modified          326 
+ hybrid-fp.h               Locally Modified          326 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/dynamic-parameters-device
+ dynamic-parameters-device.h Locally Modified          326 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/debug-scan-device
+ debug-scan-device.cpp     Locally Modified          326 
+ debug-scan-device.h       Locally Modified          326 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/assertions-device
+ assertions-device.cpp     Locally Modified          326 
+ assertions-device.h       Locally Modified          326 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/stats-device
+ stats-device.h            Locally Modified          326 
+ stats-device.cpp          Locally Modified          326 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/streams-device
+ hybrid-streams.h          Locally Modified          326 
+ hybrid-streams.cpp        Locally Modified          326 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/null-starter
+ starter-device.cpp        Locally Modified          326 
+ starter-device.h          Locally Modified          326 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-mem-scratch.cpp    Locally Modified          326 
+ hybrid-mem-scratch.h      Locally Modified          326 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/shared-memory/standard
+ standard-shared-memory-server.cpp Locally Modified          326 
+ standard-shared-memory-server.h Locally Modified          326 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/streams
+ hybrid-streams.h          Locally Modified          326 
+ hybrid-streams.cpp        Locally Modified          326 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian
+ umf-little-endian.cpp     Locally Modified          326 
+ umf-little-endian.h       Locally Modified          326 
+
+Directory modules/project
+ SCons.top.template        Locally Modified          326 
+ SCons.hw.template         Locally Modified          326 
+
+- SCons build dependence:
+  - Some versions of SCons appear to look for changes only in immediate children
+    of a derived build.  When the children don't change the derived build is
+    not rebuilt.  This was a problem for our scheme since the parent of a synth
+    boundary is the Verilog wrapper, which changes only when the soft connections
+    change.  Fixed by adding an md5 signature of the Bluespec-generated Verilog
+    module to the Verilog wrapper module.
+  - Remove dependence on generated .ba files in SCons.top.template.  No longer
+    needed.
+
+- Performance changes:  Compared to PCIe, the ACP I/O stream is a fire hose.
+  Waste any time in key I/O code and we don't keep up with the bus.
+
+  - Change the polling loop in LLPI to favor channel I/O.  Only poll
+    the expensive and less likely RRR servers and clients every 16th iteration.
+
+  - Eliminate the channel lock preventing simultaneous reads and writes in
+    channel I/O.  Clients that require a lock (e.g. PCIe) must handle that
+    on their own.
+
+  - Reduce the cost of RRR server I/O:
+
+    - Don't iterate over unused server IDs
+
+    - Change the server Poll() method to return a bool allowing Poll() to
+      say it no longer needs to be called.
+
+    - Remove virtual Poll methods from RRR servers that don't need to be polled.
+      They will use the default implementation in the base class that simply
+      returns false, meaning "don't call me again."
+
+  - Optimize the UMF reverse extraction path.

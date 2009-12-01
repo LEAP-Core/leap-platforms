@@ -65,7 +65,6 @@ class CHANNELIO_CLASS:  public PLATFORMS_MODULE_CLASS
 
     // Read/write requests -- hints to Poll() to back off
     volatile bool       readReq;
-    volatile bool       writeReq;
 
   public:
 

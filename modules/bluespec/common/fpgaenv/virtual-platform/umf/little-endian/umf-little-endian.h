@@ -130,7 +130,7 @@ class UMF_MESSAGE_CLASS: public PLATFORMS_MODULE_CLASS,
     
     // demarshallers
     void               StartExtract();
-    bool               CanExtract();
+    bool               CanExtract(int nbytes = 1) const;
     void               CheckExtractSanity(int nbytes);
     
     void               ExtractBytes(int nbytes, unsigned char data[]);
@@ -140,14 +140,20 @@ class UMF_MESSAGE_CLASS: public PLATFORMS_MODULE_CLASS,
     UINT64             ExtractUINT(int nbytes);
     UMF_CHUNK          ExtractChunk();
     
+    // Reverse extraction
     void               StartReverseExtract();
-    bool               CanReverseExtract();
-
+    bool               CanReverseExtract() const;
     UMF_CHUNK          ReverseExtractChunk();
+    // Manage full extraction, calling routings above and returning the number
+    // of chunks extracted.
+    int                ReverseExtractAllChunks(UMF_CHUNK dst[]);
     
     // other
     void               Print(ostream &out);
-    int                BytesUnwritten() { return length - writeIndex; }
+    int                BytesUnwritten() const { return length - writeIndex; }
+    int                ExtractBytesLeft() const { return writeIndex - readIndex; }
+    int                GetReadIndex() const { return readIndex; };
+    int                GetWriteIndex() const { return writeIndex; };
 
     // links
     UMF_MESSAGE        GetNext()              { return next; }
@@ -255,16 +261,16 @@ UMF_MESSAGE_CLASS::StartExtract()
 }
 
 inline bool
-UMF_MESSAGE_CLASS::CanExtract()
+UMF_MESSAGE_CLASS::CanExtract(int nbytes) const
 {
-    return(readIndex < writeIndex);
+    return (ExtractBytesLeft() >= nbytes);
 }
 
 inline void
 UMF_MESSAGE_CLASS::CheckExtractSanity(
     int nbytes)
 {
-    ASSERT((readIndex + nbytes) <= writeIndex,
+    ASSERT(CanExtract(nbytes),
            "umf: message read underflow: readIndex = "
            << readIndex << " writeIndex = " << writeIndex
            << " nbytes = " << nbytes );
@@ -435,13 +441,29 @@ UMF_MESSAGE_CLASS::AppendChunks(
 inline void
 UMF_MESSAGE_CLASS::StartReverseExtract()
 {
+    WARN(writeIndex == length,
+         "umf: [WARNING] attempt to reverse-read from incomplete message, are you sure you want to do this?");
+
     readIndex = length;
+
+    // Make sure any residue left in the last chunk has 0s.
+    UINT32 residue = readIndex % sizeof(UMF_CHUNK);
+    if (residue != 0)
+    {
+        // Adjust read index so it is a multiple of the chunk size.  After
+        // calling this it is obligatory to call ReverseExtractChunk().
+        int extra_bytes = sizeof(UMF_CHUNK) - residue;
+        readIndex += extra_bytes;
+        ASSERTX(readIndex <= UMF_MAX_MSG_BYTES);
+
+        memset(&message[length + 1], 0, extra_bytes);
+    }
 }
 
 inline bool
-UMF_MESSAGE_CLASS::CanReverseExtract()
+UMF_MESSAGE_CLASS::CanReverseExtract() const
 {
-    return(readIndex > 0);
+    return (readIndex > 0);
 }
 
 inline UMF_CHUNK
@@ -449,30 +471,29 @@ UMF_MESSAGE_CLASS::ReverseExtractChunk()
 {
     // if readIndex = i, we want to read bytes (i - CHUNK_SIZE) .. (i - 1)
 
-    WARN(writeIndex == length,
-         "umf: [WARNING] attempt to reverse-read from incomplete message, are you sure you want to do this?");
+    // copy the data behind the pointer and rewind the pointer
+    readIndex -= sizeof(UMF_CHUNK);
+    return *(UMF_CHUNK *)(&message[readIndex]);
+}
 
-    // SPECIAL CASE: if this is the first reverse-read in a sequence, and
-    //               the message length is not a multiple of UMF_CHUNK size,
-    //               then pad this chunk
-    UINT32 residue = readIndex % sizeof(UMF_CHUNK);
-    if (residue != 0)
-    {
-        // sanity: this MUST be the first read
-        ASSERTX(readIndex == length);
+//
+// ReverseExtractAllChunks --
+//     Manage a full reverse extraction, returning the number of chunks
+//     extracted.
+//
+inline int
+UMF_MESSAGE_CLASS::ReverseExtractAllChunks(UMF_CHUNK dst[])
+{
+    StartReverseExtract();
 
-        // pad and read out the data
-        UMF_CHUNK retval = 0;
-        readIndex -= residue;
-        memcpy(&retval, &message[readIndex], residue);
-        return retval;
-    }
-    else
+    int n_chunks = 0;
+    while (CanReverseExtract())
     {
-        // copy the data behind the pointer and retard the pointer
-        readIndex -= sizeof(UMF_CHUNK);
-        return *(UMF_CHUNK *)(&message[readIndex]);
+        *dst++ = ReverseExtractChunk();
+        n_chunks += 1;
     }
+
+    return n_chunks;
 }
 
 #endif

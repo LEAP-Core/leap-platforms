@@ -98,7 +98,6 @@ class STATS_DEVICE_SERVER_CLASS: public RRR_SERVER_CLASS,
     void Init(PLATFORMS_MODULE);
     void Uninit();
     void Cleanup();
-    void Poll();
 
     // RRR server methods
     void ReportStat(UINT32 statID, UINT32 pos, UINT32 value);

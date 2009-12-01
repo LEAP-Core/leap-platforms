@@ -316,7 +316,7 @@ if env.GetOption('clean'):
 #
 exe = env.Command(
     APM_NAME + '_hw.exe',
-    sbin + SW_EXE + [env['DEFS']['ROOT_DIR_HW'] + '/' + env['DEFS']['ROOT_DIR_MODEL'] + '/' + env['DEFS']['TMP_BSC_DIR'] + '/' + env['DEFS']['SYNTH_TOP'] + '.ba'],
+    sbin + SW_EXE,
     [ '@ln -fs $SOURCE $TARGET',
       '@ln -fs ' + SW_EXE_OR_TARGET + ' ' + APM_NAME,
       Delete(APM_NAME + '_hw.vexe'),
@@ -401,7 +401,7 @@ else:
 
     top_netlist = env.Command(
         XILINX_SYNTH_TOP + '.ngc',
-        [env['DEFS']['ROOT_DIR_HW'] + '/' + env['DEFS']['ROOT_DIR_MODEL'] + '/' + env['DEFS']['TMP_BSC_DIR'] + '/' + env['DEFS']['SYNTH_TOP'] + '.v'] + wrapper_v + clean_split(env['DEFS']['GIVEN_VS'], sep = ' ') + ['config/' + SYNTH_TOP + '.xst'],
+        wrapper_v + clean_split(env['DEFS']['GIVEN_VS'], sep = ' ') + ['config/' + SYNTH_TOP + '.xst'],
         [ Delete(XILINX_SYNTH_TOP + '.srp'),
           Delete(XILINX_SYNTH_TOP + '_xst.xrpt'),
           'xst -intstyle silent -ifn config/' + SYNTH_TOP + '.xst -ofn ' + XILINX_SYNTH_TOP + '.srp',

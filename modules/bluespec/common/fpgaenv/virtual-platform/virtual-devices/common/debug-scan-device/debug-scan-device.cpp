@@ -141,13 +141,6 @@ DEBUG_SCAN_DEVICE_SERVER_CLASS::Scan()
 }
 
 
-// poll
-void
-DEBUG_SCAN_DEVICE_SERVER_CLASS::Poll()
-{
-}
-
-
 //
 // DisplayMsg --
 //     Print a message for a given scan message.

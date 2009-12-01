@@ -130,7 +130,7 @@ FRONT_PANEL_SERVER_CLASS::UpdateLEDs(
 }
 
 // poll
-void
+bool
 FRONT_PANEL_SERVER_CLASS::Poll()
 {
     // Is dialog disabled?
@@ -141,7 +141,7 @@ FRONT_PANEL_SERVER_CLASS::Poll()
             syncOutputsConsole();
             outputDirty = false;
         }
-        return;
+        return true;
     }
 
     // if output cache is dirty relative to dialog, update dialog
@@ -160,6 +160,9 @@ FRONT_PANEL_SERVER_CLASS::Poll()
         clientStub->UpdateSwitchesButtons(inputCache);
         inputDirty = false;
     }
+
+    // True means call this method again.  False indicates no polling needed.
+    return true;
 }
 
 // internal helper method: sync input cache state for console

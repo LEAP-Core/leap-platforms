@@ -55,12 +55,6 @@ SHARED_MEMORY_SERVER_CLASS::Cleanup()
     delete serverStub;
 }
 
-// poll
-void
-SHARED_MEMORY_SERVER_CLASS::Poll()
-{
-}
-
 // update a translation in the page table (called by SW client)
 void
 SHARED_MEMORY_SERVER_CLASS::UpdateTranslation(

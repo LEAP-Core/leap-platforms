@@ -15,7 +15,12 @@ class RRR_SERVER_CLASS
 {
   public:
     virtual void        Init(PLATFORMS_MODULE) = 0;
-    virtual void        Poll(void) {};    
+
+    // Polling is a performance bottleneck and most servers don't need to be
+    // polled.  Servers that don't need a Poll() can simply not implement
+    // the method.  Servers that need to be polled must return true from
+    // their Poll() method on every invocation.
+    virtual bool        Poll(void) { return false; };
 };
 
 // ============== RRR server stub base class =================
@@ -26,7 +31,7 @@ class RRR_SERVER_STUB_CLASS
   public:
     virtual UMF_MESSAGE Request(UMF_MESSAGE)   = 0;
     virtual void        Init(PLATFORMS_MODULE) = 0;
-    virtual void        Poll(void)             = 0;
+    virtual bool        Poll(void)             = 0;
 };
 
 // ================== Basic RRR Server Monitor ==================
@@ -44,15 +49,17 @@ class RRR_SERVER_MONITOR_CLASS: public PLATFORMS_MODULE_CLASS,
     // registered themselves. We do this because it is possible
     // to explicitly intialize a simple integer static variable
     // to 0, but not an entire array.
-    static UINT64 RegistrationMask;
+    static UINT64 registrationMask;
+    static int maxRegisteredService;
     
     // link to lower layer in protocol stack
     CHANNELIO channelio;
     
     // internal methods
-    static inline bool isServerRegistered(int serviceid);
-    static inline void setServerRegistered(int serviceid);
-    static inline void unsetServerRegistered(int serviceid);
+    static inline bool IsServerRegistered(int serviceid);
+    static inline void SetServerRegistered(int serviceid);
+    static inline void UnsetServerRegistered(int serviceid);
+    inline int MaxServiceId() const { return maxRegisteredService; };
     
   public:
 

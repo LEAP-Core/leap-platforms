@@ -56,12 +56,6 @@ STARTER_DEVICE_SERVER_CLASS::Cleanup()
 {
 }
 
-// poll
-void
-STARTER_DEVICE_SERVER_CLASS::Poll()
-{
-}
-
 // End
 void
 STARTER_DEVICE_SERVER_CLASS::End(

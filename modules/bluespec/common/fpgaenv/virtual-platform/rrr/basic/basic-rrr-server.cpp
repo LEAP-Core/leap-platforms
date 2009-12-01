@@ -37,7 +37,8 @@ using namespace std;
 // populated by the individual services (also statically
 // instantiated) before main().
 RRR_SERVER_STUB RRR_SERVER_MONITOR_CLASS::ServerMap[MAX_SERVICES];
-UINT64          RRR_SERVER_MONITOR_CLASS::RegistrationMask = 0;
+UINT64          RRR_SERVER_MONITOR_CLASS::registrationMask = 0;
+int             RRR_SERVER_MONITOR_CLASS::maxRegisteredService = 0;
 
 // =============================
 // Server Monitor static methods    
@@ -49,7 +50,7 @@ RRR_SERVER_MONITOR_CLASS::RegisterServer(
     int             serviceid,
     RRR_SERVER_STUB server)
 {
-    if (isServerRegistered(serviceid))
+    if (IsServerRegistered(serviceid))
     {
         fprintf(stderr,
             "software server: duplicate serviceID registration: %d\n");
@@ -58,31 +59,33 @@ RRR_SERVER_MONITOR_CLASS::RegisterServer(
 
     // set link in map table
     ServerMap[serviceid] = server;
-    setServerRegistered(serviceid);
+    SetServerRegistered(serviceid);
 }
 
 bool
-RRR_SERVER_MONITOR_CLASS::isServerRegistered(
+RRR_SERVER_MONITOR_CLASS::IsServerRegistered(
     int serviceid)
 {
     UINT64 mask = UINT64(0x01) << serviceid;
-    return ((RegistrationMask & mask) > 0 ? true : false);
+    return (registrationMask & mask) > 0;
 }
 
 void
-RRR_SERVER_MONITOR_CLASS::setServerRegistered(
+RRR_SERVER_MONITOR_CLASS::SetServerRegistered(
     int serviceid)
 {
+    maxRegisteredService = max(maxRegisteredService, serviceid);
+
     UINT64 mask = UINT64(0x01) << serviceid;
-    RegistrationMask |= mask;
+    registrationMask |= mask;
 }
 
 void
-RRR_SERVER_MONITOR_CLASS::unsetServerRegistered(
+RRR_SERVER_MONITOR_CLASS::UnsetServerRegistered(
     int serviceid)
 {
     UINT64 mask = UINT64(0x01) << serviceid;
-    RegistrationMask &= (~mask);
+    registrationMask &= (~mask);
 }
 
 // ===========================
@@ -110,9 +113,9 @@ void
 RRR_SERVER_MONITOR_CLASS::Init()
 {
     // initialize services
-    for (int i = 0; i < MAX_SERVICES; i++)
+    for (int i = 0; i <= MaxServiceId(); i++)
     {
-        if (isServerRegistered(i))
+        if (IsServerRegistered(i))
         {
             // set myself as the PLATFORMS_MODULE parent
             // for all services so that I can chain
@@ -132,9 +135,9 @@ void
 RRR_SERVER_MONITOR_CLASS::Uninit()
 {
     // reset service map
-    for (int i = 0; i < MAX_SERVICES; i++)
+    for (int i = 0; i <= MaxServiceId(); i++)
     {
-        if (isServerRegistered(i))
+        if (IsServerRegistered(i))
         {
             // no need to explicitly call Uninit() on
             // services, this will happen automatically
@@ -142,7 +145,7 @@ RRR_SERVER_MONITOR_CLASS::Uninit()
             ServerMap[i] = NULL;
         }
     }
-    RegistrationMask = 0;
+    registrationMask = 0;
 
     // chain
     PLATFORMS_MODULE_CLASS::Uninit();
@@ -158,7 +161,7 @@ RRR_SERVER_MONITOR_CLASS::DeliverMessage(
     int serviceID = message->GetServiceID();
 
     // validate serviceID
-    if (isServerRegistered(serviceID) == false)
+    if (IsServerRegistered(serviceID) == false)
     {
         fprintf(stderr, "software server: invalid serviceID: %u\n", serviceID);
         parent->CallbackExit(1);
@@ -182,12 +185,24 @@ RRR_SERVER_MONITOR_CLASS::DeliverMessage(
 void
 RRR_SERVER_MONITOR_CLASS::Poll()
 {
+    static UINT64 serverIsPolled = ~0;
+
     // poll each service module
-    for (int i = 0; i < MAX_SERVICES; i++)
+    UINT64 serviceIdMask = 1;
+
+    for (int i = 0; i <= MaxServiceId(); i++)
     {
-        if (isServerRegistered(i))
+        if (IsServerRegistered(i) && ((serverIsPolled & serviceIdMask) != 0))
         {
-            ServerMap[i]->Poll();
+            if (! ServerMap[i]->Poll())
+            {
+                // Server responded "false," indicating that polling is not
+                // required.  Calling the virtual Poll() method is on a
+                // critical I/O path, so skip the call when not needed.
+                serverIsPolled ^= serviceIdMask;
+            }
         }
+
+        serviceIdMask <<= 1;
     }
 }

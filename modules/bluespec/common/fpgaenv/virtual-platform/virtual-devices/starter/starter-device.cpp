@@ -79,12 +79,6 @@ STARTER_DEVICE_SERVER_CLASS::Cleanup()
     delete serverStub;
 }
 
-// poll
-void
-STARTER_DEVICE_SERVER_CLASS::Poll()
-{
-}
-
 // End
 void
 STARTER_DEVICE_SERVER_CLASS::End(

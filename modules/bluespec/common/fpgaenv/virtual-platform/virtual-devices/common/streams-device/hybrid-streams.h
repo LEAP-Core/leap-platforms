@@ -45,7 +45,6 @@ class STREAMS_DEVICE_SERVER_CLASS: public RRR_SERVER_CLASS,
     void Init(PLATFORMS_MODULE);
     void Uninit();
     void Cleanup();
-    void Poll();
     
     // RRR request methods
     void Print(UINT32 streamID, UINT32 stringID, UINT32 payload0, UINT32 payload1);

@@ -153,6 +153,8 @@ PHYSICAL_CHANNEL_CLASS::PHYSICAL_CHANNEL_CLASS(
     // set leaky bucket parameters
     pciExpressDevice->WriteSystemCSR(GenIID() | (OP_SET_MAX_BUCKET   << 16) | 5);
     pciExpressDevice->WriteSystemCSR(GenIID() | (OP_SET_MAX_THROTTLE << 16) | 32);
+
+    pthread_mutex_init(&channelLock, NULL);
 }
 
 // destructor
@@ -189,6 +191,7 @@ UMF_MESSAGE
 PHYSICAL_CHANNEL_CLASS::Read()
 {
     // blocking loop
+    pthread_mutex_lock(&channelLock);
     while (true)
     {
         // check if message is ready
@@ -197,6 +200,7 @@ PHYSICAL_CHANNEL_CLASS::Read()
             // message is ready!
             UMF_MESSAGE msg = incomingMessage;
             incomingMessage = NULL;
+            pthread_mutex_unlock(&channelLock);
             return msg;
         }
 
@@ -218,6 +222,8 @@ PHYSICAL_CHANNEL_CLASS::Read()
 UMF_MESSAGE
 PHYSICAL_CHANNEL_CLASS::TryRead()
 {
+    pthread_mutex_lock(&channelLock);
+
     // if CSRs are empty, then poll pointers (OPTIONAL)
     if (f2hHead == f2hTailCache)
     {
@@ -233,10 +239,12 @@ PHYSICAL_CHANNEL_CLASS::TryRead()
     {
         UMF_MESSAGE msg = incomingMessage;
         incomingMessage = NULL;
+        pthread_mutex_unlock(&channelLock);
         return msg;
     }
 
     // message not yet ready
+    pthread_mutex_unlock(&channelLock);
     return NULL;
 }
 
@@ -245,6 +253,8 @@ void
 PHYSICAL_CHANNEL_CLASS::Write(
     UMF_MESSAGE message)
 {
+    pthread_mutex_lock(&channelLock);
+
     // block until buffer has sufficient space
     while (h2fHeadCache == ((h2fTail + 1) % bufferSize))
     {
@@ -282,6 +292,8 @@ PHYSICAL_CHANNEL_CLASS::Write(
     // sync h2fTail pointer. It is OPTIONAL to do this immediately, but we will do it
     // since this is probably the response to a request the hardware might be blocked on
     pciExpressDevice->WriteSystemCSR(GenIID() | (OP_UPDATE_H2FTAIL << 16) | (h2fTail));
+
+    pthread_mutex_unlock(&channelLock);
 
     // de-allocate message
     delete message;

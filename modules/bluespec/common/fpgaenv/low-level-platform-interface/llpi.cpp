@@ -150,11 +150,18 @@ LLPI_CLASS::Main()
     }
 }
 
-void
+inline void
 LLPI_CLASS::Poll()
 {
-    // poll channelio and RRR server
+    // Poll channelio and RRR server.  Favor channelio over other polling loops,
+    // since it tends to have much more activity.
+    static int m = 0;
+
     channelio.Poll();
-    rrrServer.Poll();
-    rrrClient.Poll();
+
+    if ((++m & 15) == 0)
+    {
+        rrrServer.Poll();
+        rrrClient.Poll();
+    }
 }

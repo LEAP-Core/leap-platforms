@@ -35,7 +35,6 @@ class DYNAMIC_PARAMS_DEVICE_CLASS: public PLATFORMS_MODULE_CLASS
     void Init(PLATFORMS_MODULE);
     void Uninit();
     void Cleanup();
-    void Poll()     {}
 };
 
 

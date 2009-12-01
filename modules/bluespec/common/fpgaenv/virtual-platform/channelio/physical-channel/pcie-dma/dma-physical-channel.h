@@ -19,6 +19,8 @@
 #ifndef __PHYSICAL_CHANNEL__
 #define __PHYSICAL_CHANNEL__
 
+#include <pthread.h>
+
 #include "asim/provides/umf.h"
 #include "asim/provides/pci_express_device.h"
 #include "asim/provides/physical_platform.h"
@@ -55,6 +57,8 @@ class PHYSICAL_CHANNEL_CLASS: public PLATFORMS_MODULE_CLASS
     // instruction ID
     CSR_DATA iid;
     
+    pthread_mutex_t channelLock;
+
     // internal methods
     void     ReadF2HBuffer();
     CSR_DATA GenIID();
