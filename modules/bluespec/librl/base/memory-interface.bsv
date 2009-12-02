@@ -30,8 +30,16 @@ import Connectable::*;
 typedef struct {
   t_ADDR addr;
   Bit#(TAdd#(1,TLog#(n_MAX_BURST))) size;
+} BURST_COMMAND#(type t_ADDR, numeric type n_MAX_BURST)
+  deriving(Bits,Eq);
+
+typedef union tagged {
+  BURST_COMMAND#(t_ADDR,n_MAX_BURST) ReadReq;
+  BURST_COMMAND#(t_ADDR,n_MAX_BURST) WriteReq;
 } BURST_REQUEST#(type t_ADDR, numeric type n_MAX_BURST)
   deriving(Bits,Eq);
+
+
 
 //
 // This is a general interface to a multi-cycle memory, which may also 
@@ -40,8 +48,6 @@ typedef struct {
 //
 
 interface BURST_MEMORY_IFC#(type t_ADDR, type t_DATA, numeric type n_MAX_BURST);
-    method Action readReq(BURST_REQUEST#(t_ADDR, n_MAX_BURST) burstReq); 
-
     method ActionValue#(t_DATA) readRsp();
 
     // Look at the read response value without popping it
@@ -56,7 +62,7 @@ interface BURST_MEMORY_IFC#(type t_ADDR, type t_DATA, numeric type n_MAX_BURST);
     // We must split the write request and response...
     method Action writeData(t_DATA data); 
 
-    method Action writeReq(BURST_REQUEST#(t_ADDR, n_MAX_BURST) burstReq);
+    method Action burstReq(BURST_REQUEST#(t_ADDR, n_MAX_BURST) burstReq);
     
     // Write request possible?
     method Bool writeNotFull();
@@ -67,8 +73,6 @@ endinterface
 //
 
 interface BURST_MEMORY_CLIENT_IFC#(type t_ADDR, type t_DATA, numeric type n_MAX_BURST);
-    method ActionValue#(BURST_REQUEST#(t_ADDR, n_MAX_BURST)) readReq(); 
-
     method Action readRsp(t_DATA data);
 
     // Look at the read response value without popping it
@@ -83,7 +87,7 @@ interface BURST_MEMORY_CLIENT_IFC#(type t_ADDR, type t_DATA, numeric type n_MAX_
     // We must split the write request and response...
     method ActionValue#(t_DATA) writeData(); 
 
-    method ActionValue#(BURST_REQUEST#(t_ADDR, n_MAX_BURST)) writeReq();
+    method ActionValue#(BURST_REQUEST#(t_ADDR, n_MAX_BURST)) burstReq();
     
     // Write request possible?
     method Action writeNotFull(Bool value);
@@ -98,10 +102,9 @@ instance Connectable#(BURST_MEMORY_IFC#(t_ADDR,t_DATA,n_MAX_BURST),
                       BURST_MEMORY_CLIENT_IFC#(t_ADDR,t_DATA,n_MAX_BURST));
   module mkConnection#(BURST_MEMORY_IFC#(t_ADDR,t_DATA,n_MAX_BURST) server,
                        BURST_MEMORY_CLIENT_IFC#(t_ADDR,t_DATA,n_MAX_BURST) client) (Empty);
-    mkConnection(server.readReq, client.readReq);    
+    mkConnection(server.burstReq, client.burstReq);    
     mkConnection(client.readRsp, server.readRsp);    
     mkConnection(server.writeData, client.writeData);    
-    mkConnection(server.writeReq, client.writeReq);    
  
     rule peekRule;
       client.peek(server.peek);

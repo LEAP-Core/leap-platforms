@@ -8460,3 +8460,18 @@ Directory modules/project
       returns false, meaning "don't call me again."
 
   - Optimize the UMF reverse extraction path.
+
+----------
+kfleming    Date: Thu Dec  3 00:53:38 KST 2009  CSN: CSN-platforms-328
+                  Wed Dec  2 15:53:38 UTC 2009
+
+
+Directory modules/bluespec/librl/base
+ memory-interface.bsv      Locally Modified          327 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr
+ ddr-sdram-device.bsv      Locally Modified          327 
+ NPIMaster.bsv             Locally Modified          327 
+ ddr_sdram_xilinx.v        Locally Modified          327 
+
+Changed BURST_MEM_IFC to have single command interface.  This gives a clearer, more supportable semantics to the end user.

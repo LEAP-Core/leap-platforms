@@ -181,11 +181,21 @@ module  mkNPIWrapper#(NPIServer npiServer) (DDR_SDRAM_DRIVER);
 
 
     interface BURST_MEMORY_IFC burstIfc;
-      method Action readReq(BURST_REQUEST#(Bit#(`DRAM_ADDRESS_SIZE),`DRAM_MAX_BURST_SIZE) burstReq) if(wordsRemaining == 0); 
-        wordsRemaining <= burstReq.size;
-        address <= burstReq.addr;
-        handlingRead <= True;
-        readCommandsReceivedCount <= readCommandsReceivedCount + 1;
+      method Action burstReq(BURST_REQUEST#(Bit#(`DRAM_ADDRESS_SIZE),`DRAM_MAX_BURST_SIZE) req) if(wordsRemaining == 0); 
+        case (req) matches 
+          tagged ReadReq .command: begin       
+            wordsRemaining <= command.size;
+            address <= command.addr;
+            handlingRead <= True;
+            readCommandsReceivedCount <= readCommandsReceivedCount + 1;
+          end
+          tagged WriteReq .command: begin       
+            wordsRemaining <= command.size;
+            address <= command.addr;
+            handlingRead <= False;
+            writeCommandsReceivedCount <= writeCommandsReceivedCount + 1;
+          end
+        endcase
       endmethod
 
       method ActionValue#(Bit#(`DRAM_WORD_SIZE)) readRsp();
@@ -212,13 +222,6 @@ module  mkNPIWrapper#(NPIServer npiServer) (DDR_SDRAM_DRIVER);
         writesReturnedCount <= writesReturnedCount + 1;
       endmethod
 
-      method Action writeReq(BURST_REQUEST#(Bit#(`DRAM_ADDRESS_SIZE),`DRAM_MAX_BURST_SIZE) burstReq) if(wordsRemaining == 0); 
-        wordsRemaining <= burstReq.size;
-        address <= burstReq.addr;
-        handlingRead <= False;
-        writeCommandsReceivedCount <= writeCommandsReceivedCount + 1;
-      endmethod
-    
       // Write request possible?
       method writeNotFull = ?;
     endinterface

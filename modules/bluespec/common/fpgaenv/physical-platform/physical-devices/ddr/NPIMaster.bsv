@@ -405,7 +405,7 @@ module mkNPIMaster#(Clock coreClock, Reset coreReset)(NPIMaster);
       return assertPop ? 1 : 0;
     endmethod
     method Bit#(1) rdFIFO_Flush();
-      return rdFIFO_Flush_val;
+      return 0;
     endmethod
     // Write FIFO Interface
     method Action wrFIFO_Empty(Bit#(1) in);
@@ -418,7 +418,7 @@ module mkNPIMaster#(Clock coreClock, Reset coreReset)(NPIMaster);
       return wrFIFO_Push_val;
     endmethod
     method Bit#(1) wrFIFO_Flush();
-      return rdFIFO_Flush_val;
+      return 0;
     endmethod
     method Bit#(64) wrFIFO_Data();
       return wrFIFO_Data_val;
