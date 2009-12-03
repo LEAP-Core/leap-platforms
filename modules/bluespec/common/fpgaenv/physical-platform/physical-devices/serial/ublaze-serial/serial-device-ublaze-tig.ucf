@@ -7,7 +7,7 @@
 
 # SyncFIFO: receivefifo
 
-#NET "m_vp_llpi_phys_plat_serial_device_receivefifo$dD_OUT[*]"     TIG;
+#NET "m_vp_llpi_phys_plat_serial_device_receivefifo_dD_OUT[*]"     TIG;
 NET "m_vp_llpi_phys_plat_serial_device_receivefifo/dGDeqPtr[*]"   TIG;
 NET "m_vp_llpi_phys_plat_serial_device_receivefifo/dGDeqPtr1[*]"  TIG;
 NET "m_vp_llpi_phys_plat_serial_device_receivefifo/sGEnqPtr[*]"   TIG;
@@ -16,7 +16,7 @@ NET "m_vp_llpi_phys_plat_serial_device_receivefifo/sGEnqPtr1[*]"  TIG;
 
 # SyncFIFO: sendfifo
 
-#NET "m_vp_llpi_phys_plat_serial_device_sendfifo$dD_OUT[*]"      TIG;
+NET "m_vp_llpi_phys_plat_serial_device_sendfifo_dD_OUT[*]"      TIG;
 NET "m_vp_llpi_phys_plat_serial_device_sendfifo/dGDeqPtr[*]"    TIG;
 NET "m_vp_llpi_phys_plat_serial_device_sendfifo/dGDeqPtr1[*]"   TIG;
 NET "m_vp_llpi_phys_plat_serial_device_sendfifo/sGEnqPtr[*]"    TIG;

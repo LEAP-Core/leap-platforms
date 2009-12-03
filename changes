@@ -8475,3 +8475,20 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr
  ddr_sdram_xilinx.v        Locally Modified          327 
 
 Changed BURST_MEM_IFC to have single command interface.  This gives a clearer, more supportable semantics to the end user.
+
+----------
+kfleming    Date: Thu Dec  3 22:34:48 KST 2009  CSN: CSN-platforms-329
+                  Thu Dec  3 13:34:48 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/serial/ublaze-serial
+ serial-device-ublaze-tig.ucf Locally Modified          328 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr
+ ddr-sdram-device-synplify.awb Locally Added               0 
+ ddr_sdram_xilinx.v        Locally Modified          328 
+ ddr_sdram_synplify.ucf    Locally Added               0 
+ ddr_sdram_tig_synplify.ucf Locally Added               0 
+ ddr_sdram_tig.ucf         Locally Modified          328 
+
+Fixed Synplify build.  Still doesn't do recursion however.  

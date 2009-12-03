@@ -3170,20 +3170,8 @@ module ddr_sdram_wrapper
     DDR2_DQS_Div_O,
     DDR2_DQS_Div_I
   )
-/* synthesis syn_black_box black_box_pad_pin="  
-    DDR_Clk[2:0],
-    DDR_Clk_n[2:0],
-    DDR_CE,
-    DDR_CS_n,
-    DDR_RAS_n,
-    DDR_CAS_n,
-    DDR_WE_n,
-    DDR_BankAddr[1:0],
-    DDR_Addr[12:0],
-    DDR_DM[7:0]" 
-  synthesis syn_black_box black_box_tri_pins="
-    DDR_DQS[7:0],
-    DDR_DQ[63:0]" */
+  /* synthesis syn_black_box */
+/* synthesis syn_black_box black_box_pad_pin="DDR_Clk[2:0], DDR_Clk_n[2:0], DDR_CE, DDR_CS_n, DDR_DM[7:0], DDR_DQS[7:0], DDR_DQ[63:0]" */
 ;
   input FSL0_M_Clk;
   input FSL0_M_Write;

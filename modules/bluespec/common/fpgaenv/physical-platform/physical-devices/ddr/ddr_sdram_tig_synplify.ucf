@@ -7,21 +7,22 @@
 
 # SyncFIFO: master command Q
 
-NET "m_vp_llpi_phys_plat_ddr_master_commandQ_dD_OUT[*]"     TIG;
-NET "m_vp_llpi_phys_plat_ddr_master_commandQ/dGDeqPtr[*]"   TIG; 
+NET "m_vp_llpi_phys_plat_ddr_master_commandQ$dD_OUT[*]"     TIG;
+NET "m_vp_llpi_phys_plat_ddr_master_commandQ/*fifoMem*"     TIG;
+NET "m_vp_llpi_phys_plat_ddr_master_commandQ/dGDeqPtr[*]"   TIG;
 NET "m_vp_llpi_phys_plat_ddr_master_commandQ/dGDeqPtr1[*]"  TIG;
 NET "m_vp_llpi_phys_plat_ddr_master_commandQ/sGEnqPtr[*]"   TIG;
 NET "m_vp_llpi_phys_plat_ddr_master_commandQ/sGEnqPtr1[*]"  TIG;
 
 
 # SyncFIFO: writeQ
-NET "m_vp_llpi_phys_plat_ddr_master_writeQ_dD_OUT[*]"     TIG;
+NET "m_vp_llpi_phys_plat_ddr_master_writeQ$dD_OUT[*]"     TIG;
 NET "m_vp_llpi_phys_plat_ddr_master_writeQ/dGDeqPtr[*]"   TIG;
 NET "m_vp_llpi_phys_plat_ddr_master_writeQ/sGEnqPtr[*]"   TIG;
 
 # SyncFIFO: readQ
 
-NET "m_vp_llpi_phys_plat_ddr_master_readQ_dD_OUT[*]"     TIG;
+NET "m_vp_llpi_phys_plat_ddr_master_readQ$dD_OUT[*]"     TIG;
 NET "m_vp_llpi_phys_plat_ddr_master_readQ/dGDeqPtr[*]"   TIG;
 NET "m_vp_llpi_phys_plat_ddr_master_readQ/dGDeqPtr1[*]"  TIG;
 NET "m_vp_llpi_phys_plat_ddr_master_readQ/sGEnqPtr[*]"   TIG;
