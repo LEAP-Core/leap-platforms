@@ -8492,3 +8492,16 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr
  ddr_sdram_tig.ucf         Locally Modified          328 
 
 Fixed Synplify build.  Still doesn't do recursion however.  
+
+----------
+kfleming    Date: Thu Dec  3 23:44:56 KST 2009  CSN: CSN-platforms-330
+                  Thu Dec  3 14:44:56 UTC 2009
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-hybrid-xupv2-serial-synplify.apm Locally Modified          329 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr
+ ddr-sdram-device-synplify.awb Locally Modified          329 
+
+Fixed pointer to synplify ucf file

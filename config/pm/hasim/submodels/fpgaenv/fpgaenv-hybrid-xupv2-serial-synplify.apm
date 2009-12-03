@@ -89,6 +89,7 @@ serial_device=Serial Physical Device (uBlaze-based) for Synplify
 physical_platform_utils=Common Physical Platform Utilities
 led_device=General LED Device
 switch_device=General Switch Device
+ddr_sdram_device=DDR SDRAM Physical Device for Synplify
 
 [XUP Virtex 2 Serial]
 File=modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup/serial/xilinx-xup-serial.awb
@@ -125,4 +126,8 @@ Packagehint=platforms
 
 [Serial Physical Device (uBlaze-based) for Synplify]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/serial/ublaze-serial/serial-device-ublaze-synplify.awb
+Packagehint=platforms
+
+[DDR SDRAM Physical Device for Synplify]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr/ddr-sdram-device-synplify.awb
 Packagehint=platforms
