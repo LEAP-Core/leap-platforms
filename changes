@@ -8523,3 +8523,13 @@ Directory modules/project
  SCons.top.template        Locally Modified          330 
 
 Added timing files for DDR, changed build of SDCs to make recompilation faster and simpler
+
+----------
+kfleming    Date: Fri Dec  4 14:14:26 KST 2009  CSN: CSN-platforms-332
+                  Fri Dec  4 05:14:26 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr
+ ddr_sdram.sdc             Locally Added               0 
+
+Forgot to add ddr timing file

@@ -1,0 +1,1 @@
+ define_clock   {m_vp_llpi_phys_plat_ddr_controller.dram.m_vp_llpi_phys_plat_ddr_controller\$controller_clk_pin} -name {DDR_CLK}  -freq 100 -clockgroup default_clock_group_ddr
