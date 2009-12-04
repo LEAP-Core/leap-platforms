@@ -24,6 +24,7 @@ defs = {
     'GIVEN_CS'           : '@GIVEN_CS@',
     'GIVEN_VS'           : '@GIVEN_VS@',
     'GIVEN_UCFS'         : '@GIVEN_UCFS@',
+    'GIVEN_SDCS'         : '@GIVEN_SDCS@',
     'GEN_BAS'            : '@GEN_BAS@',
     'GEN_CXXS'           : 'schedule.cxx @GEN_CXXS@',
     'GEN_HS'             : 'schedule.h @GEN_HS@',
@@ -374,11 +375,23 @@ FPGA_PART_XILINX = env['DEFS']['FPGA_PART_XILINX']
 
 wrapper_builds = []
 
+# Concatenate SDC files
+if len(env['DEFS']['GIVEN_SDCS']) != 0:
+    synplify_sdc = env.Command(
+    XILINX_APM_NAME + '.sdc',
+    clean_split(env['DEFS']['GIVEN_SDCS'], sep = ' '),
+    'cat $SOURCES > $TARGET')
+else:
+    synplify_sdc = env.Command(
+    XILINX_APM_NAME + '.sdc',
+    clean_split(env['DEFS']['GIVEN_SDCS'], sep = ' '),
+    'touch $TARGET') 
+
 if(env['ENV'].has_key('USE_SYNPLIFY')):
     top_netlist = env.Command(
         XILINX_APM_NAME + '.edf',
-        wrapper_v + clean_split(env['DEFS']['GIVEN_VS'], sep = ' ') + ['config/' + APM_NAME + '.synplify.prj'],
-        [ Delete(XILINX_APM_NAME + '.srp'),
+        wrapper_v + clean_split(env['DEFS']['GIVEN_VS'], sep = ' ') + ['config/' + APM_NAME + '.synplify.prj'] + synplify_sdc,
+        [ Delete(XILINX_APM_NAME + '.srr'),
           Delete(XILINX_APM_NAME + '_xst.xrpt'),
           'synplify_pro -batch config/' + APM_NAME + '.synplify.prj' ])
 
@@ -415,6 +428,8 @@ xilinx_ucf = env.Command(
     XILINX_APM_NAME + '.ucf',
     clean_split(env['DEFS']['GIVEN_UCFS'], sep = ' '),
     'cat $SOURCES > $TARGET')
+
+
 
 
 if len(env['DEFS']['GIVEN_BMMS']) != 0:

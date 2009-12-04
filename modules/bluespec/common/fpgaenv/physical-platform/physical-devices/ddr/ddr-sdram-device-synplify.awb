@@ -16,6 +16,8 @@
 
 %sources -t UCF -v PRIVATE ddr_sdram_synplify.ucf
 %sources -t UCF -v PRIVATE ddr_sdram_tig_synplify.ucf
+%sources -t SDC -v PRIVATE ddr_sdram.sdc
+
 
 %param DRAM_ADDRESS_SIZE  22  "DRAM address size (words)"
 %param DRAM_WORD_SIZE 64 "DRAM word size (bits)"
