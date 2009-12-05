@@ -8533,3 +8533,21 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr
  ddr_sdram.sdc             Locally Added               0 
 
 Forgot to add ddr timing file
+
+----------
+kfleming    Date: Sat Dec  5 12:59:27 KST 2009  CSN: CSN-platforms-333
+                  Sat Dec  5 03:59:27 UTC 2009
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-hybrid-xupv2-serial-synplify.apm Locally Modified          332 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr
+ NPIMaster.bsv             Locally Modified          332 
+ ddr-sdram-device-synplify.awb Locally Modified          332 
+ ddr-sdram-device.bsv      Locally Modified          332 
+ ddr_sdram.sdc             Locally Modified          332 
+ ddr_sdram_synplify.ucf    Locally Modified          332 
+ ddr_sdram_tig_synplify.ucf Locally Modified          332 
+
+Synplify now sees the dram ngc.  This leads to better synthesis results.  

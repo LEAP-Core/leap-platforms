@@ -131,3 +131,6 @@ Packagehint=platforms
 [DDR SDRAM Physical Device for Synplify]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr/ddr-sdram-device-synplify.awb
 Packagehint=platforms
+
+[DDR SDRAM Physical Device for Synplify/Params]
+DRAM_ADDRESS_SIZE=26

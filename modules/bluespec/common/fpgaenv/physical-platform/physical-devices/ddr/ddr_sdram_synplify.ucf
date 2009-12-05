@@ -54,8 +54,8 @@ Net ddrWires_dm[1] LOC=V29;
 Net ddrWires_dm[1] IOSTANDARD = SSTL2_II;
 Net ddrWires_dm[0] LOC=U26;
 Net ddrWires_dm[0] IOSTANDARD = SSTL2_II;
-Net "ddrWires_dqs[7]" LOC=AH26;
-Net "ddrWires_dqs[7]" IOSTANDARD = SSTL2_II;
+Net ddrWires_dqs[7] LOC=AH26;
+Net ddrWires_dqs[7] IOSTANDARD = SSTL2_II;
 Net ddrWires_dqs[6] LOC=AC25;
 Net ddrWires_dqs[6] IOSTANDARD = SSTL2_II;
 Net ddrWires_dqs[5] LOC=AA25;
@@ -213,7 +213,7 @@ Net ddrWires_ck_n[2] IOSTANDARD = SSTL2_II;
 
 # DRAM specific constraints
 
-Net */DDR_SDRAM/*rd_data_rise_in* MAXDELAY = 1000 ps;
-Net */DDR_SDRAM/*rd_data_fall_in* MAXDELAY = 1000 ps;
+#Net */DDR_SDRAM/*rd_data_rise_in* MAXDELAY = 1000 ps;
+#Net */DDR_SDRAM/*rd_data_fall_in* MAXDELAY = 1000 ps;
 
 

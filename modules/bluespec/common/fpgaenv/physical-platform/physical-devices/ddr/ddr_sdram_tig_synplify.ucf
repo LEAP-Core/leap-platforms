@@ -16,7 +16,7 @@ NET "m_vp_llpi_phys_plat_ddr_master_commandQ/sGEnqPtr1[*]"  TIG;
 
 
 # SyncFIFO: writeQ
-NET "m_vp_llpi_phys_plat_ddr_master_writeQ$dD_OUT[*]"     TIG;
+#NET "m_vp_llpi_phys_plat_ddr_master_writeQ$dD_OUT[*]"     TIG;
 NET "m_vp_llpi_phys_plat_ddr_master_writeQ/dGDeqPtr[*]"   TIG;
 NET "m_vp_llpi_phys_plat_ddr_master_writeQ/sGEnqPtr[*]"   TIG;
 

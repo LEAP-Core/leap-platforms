@@ -9,9 +9,9 @@
 %sources -t BSV       -v PUBLIC NPIMaster.bsv
 %sources -t VERILOG   -v PRIVATE ddr_sdram.v
 %sources -t VERILOG   -v PRIVATE ddr_sdram_xilinx.v
-%sources -t NGC       -v PUBLIC clock_generator_ddr_wrapper.ngc 
-%sources -t NGC       -v PUBLIC ddr_sdram_wrapper.ngc
-%sources -t NGC       -v PUBLIC proc_sys_reset_ddr_wrapper.ngc
+%sources -t NGC       -v PRIVATE clock_generator_ddr_wrapper.ngc 
+%sources -t NGC       -v PRIVATE ddr_sdram_wrapper.ngc
+%sources -t NGC       -v PRIVATE proc_sys_reset_ddr_wrapper.ngc
 
 
 %sources -t UCF -v PRIVATE ddr_sdram_synplify.ucf

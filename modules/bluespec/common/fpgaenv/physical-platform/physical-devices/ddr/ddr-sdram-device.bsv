@@ -93,6 +93,7 @@ module  mkNPIWrapper#(NPIServer npiServer) (DDR_SDRAM_DRIVER);
     Reg#(Bit#(32)) writeCommandsReceivedCount <- mkReg(0);
     Reg#(Bit#(32)) readCommandsReceivedCount <- mkReg(0);
 
+
     // We have to check for aligned accesses here...
 
     rule handleRead(handlingRead && wordsRemaining > 0 && outstandingReqs == 0);
