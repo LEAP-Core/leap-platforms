@@ -8551,3 +8551,13 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr
  ddr_sdram_tig_synplify.ucf Locally Modified          332 
 
 Synplify now sees the dram ngc.  This leads to better synthesis results.  
+
+----------
+kfleming    Date: Sat Dec  5 16:02:47 KST 2009  CSN: CSN-platforms-334
+                  Sat Dec  5 07:02:47 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr
+ NPIMaster.bsv             Locally Modified          333 
+
+Added floating check for init done.  This seems to fix the size one issue.

@@ -161,22 +161,22 @@ module mkNPIMaster#(Clock coreClock, Reset coreReset)(NPIMaster);
   //
 
   let init_done = (initDone_val == 0) ? False : True;
-
+  
   //
   // Rules
   //
 
   //Sometimes the xilinx ip has leftover data in it from previous runs clear it out.
   rule initializePHY(init_done && !initialized);
-    initialized <= True;
+    //initialized <= True;
     // send a flush if necessary
     //if(rdFIFO_Empty_val == 0)
     //  begin
-    rdFIFO_Flush_val <= 1;
+    //rdFIFO_Flush_val <= 1;
     //  end
   endrule
 
-  rule assert_pop (initialized && (rdFIFO_Empty_val == 0));
+  rule assert_pop (init_done && (rdFIFO_Empty_val == 0));
     readTokenQ.enq(?);
     assertPop.send;
   endrule
@@ -188,7 +188,7 @@ module mkNPIMaster#(Clock coreClock, Reset coreReset)(NPIMaster);
 
   // dequeue read data whenever its ready
   // but only if init is done
-  rule process_read_fifo(initialized);
+  rule process_read_fifo(init_done);
     // MPMC specifies the latency between pop assert and data valid
     // by way of a "latency" signal - can be 0, 1, or 2 cycles
     let delay = rdFIFO_Latency_val;
@@ -215,7 +215,7 @@ module mkNPIMaster#(Clock coreClock, Reset coreReset)(NPIMaster);
 
   // FSM for processing commands/injecting write data into MPMC
 
-  rule process_command_fifo (state == ProcessCmd && initialized);
+  rule process_command_fifo (state == ProcessCmd && init_done);
     case (commandQ.first()) matches
       tagged ReadCommand .rc: begin
         addrReq_val <= 1'b1;
@@ -265,7 +265,7 @@ module mkNPIMaster#(Clock coreClock, Reset coreReset)(NPIMaster);
     endcase
   endrule
 
-  rule process_write_fifo (state == ProcessWrite && initialized);
+  rule process_write_fifo (state == ProcessWrite && init_done);
     if(wrFIFO_AlmostFull_val == 0) begin
       if(xfer_count == 0) state <= SendWrite;
       else xfer_count <= xfer_count - 1;
@@ -282,7 +282,7 @@ module mkNPIMaster#(Clock coreClock, Reset coreReset)(NPIMaster);
   endrule
 
 
-  rule send_write_cmd (state == SendWrite && initialized);
+  rule send_write_cmd (state == SendWrite && init_done);
     case (commandQ.first()) matches
       tagged ReadCommand .rc: state <= ProcessCmd;
       tagged WriteCommand .wc: begin
@@ -300,13 +300,13 @@ module mkNPIMaster#(Clock coreClock, Reset coreReset)(NPIMaster);
     endcase
   endrule
 
-  rule send_write_cmd_special (state == ProcessWriteSpecial && initialized);
+  rule send_write_cmd_special (state == ProcessWriteSpecial && init_done);
     case (commandQ.first()) matches
       tagged ReadCommand .rc: state <= ProcessCmd; // Not really possible...
       tagged WriteCommand .wc: begin
         addrReq_val <= 1'b1;
         addr_val <= wc.addr;
-        rnw_val <= 1'b0;
+        rnw_val <= 1'b0; 
         size_val <= zeroExtend(pack(wc.size));
         rdModWr_val <= ((wc.rmw || wc.size == BURST_1 || wc.size == BURST_2) ? 1 : 0);
 
@@ -319,7 +319,7 @@ module mkNPIMaster#(Clock coreClock, Reset coreReset)(NPIMaster);
     endcase
   endrule
 
-  rule process_write_fifo_special (state == ProcessWriteSpecialData && initialized);
+  rule process_write_fifo_special (state == ProcessWriteSpecialData && init_done);
     if(wrFIFO_AlmostFull_val == 0) begin
       state <= ProcessCmd;
       
