@@ -48,9 +48,9 @@ Packagehint=platforms
 pci_express_device=PCI Express Physical Device (mmap-based)
 led_device=General LED Device
 switch_device=General Switch Device
-ddr2_sdram_device=DDR2 SDRAM Physical Device
 clocks_device=Single-Ended Crystal Clocks Device
 physical_platform_utils=Common Physical Platform Utilities
+ddr2_device=DDR2 SDRAM Physical Device
 
 [General Switch Device]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/switches/general-switch-device.awb
@@ -82,7 +82,6 @@ remote_memory=Remote Memory using PCI Express DMA
 [Driver Header for PCIe Kernel Module]
 File=drivers/linux/hasim/kernel/pchnl_if.awb
 Packagehint=platforms
-
 
 [DDR2 SDRAM Physical Device]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr2-sdram/ddr2-sdram-device.awb

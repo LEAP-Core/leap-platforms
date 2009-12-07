@@ -174,4 +174,6 @@ module mkCentralCache#(LowLevelPlatformInterface llpi)
     method Action init(RL_SA_CACHE_MODE mode, Bool enableRecentLineCache);
         noAction;
     endmethod
+
+    interface CENTRAL_CACHE_STATS stats = ?;
 endmodule

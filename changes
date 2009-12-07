@@ -8575,3 +8575,45 @@ as any other bit-packable type.  The original value is truncated or zero
 extended as needed.
 
 I have no idea why we didn't add this earlier.
+
+----------
+mcadler     Date: Mon Dec  7 18:36:42 EST 2009  CSN: CSN-platforms-337
+                  Mon Dec  7 23:36:42 UTC 2009
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-hybrid-htg-v5-pcie-synplify.apm Locally Modified          336 
+ hasim-fpgaenv-htg-v5-pcie.apm Locally Modified          336 
+ fpgaenv-htg-hwonly.apm    Locally Modified          336 
+ fpgaenv-hybrid-htg-v5-pcie.apm Locally Modified          336 
+
+Directory modules/bluespec/common/fpgaenv/low-level-platform-interface/local-mem
+ local-mem-ddr2.bsv        Locally Modified          336 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/central-cache
+ null-central-cache.bsv    Locally Modified          336 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/local
+ scratch-interfaces.bsv    Locally Added               0 
+ local-mem-scratch.awb     Locally Modified          336 
+ local-mem-scratch.bsv     Locally Modified          336 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-disabled
+ htg-v5-pcie-disabled.awb  Locally Modified          336 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled
+ htg-v5-pcie-enabled-synplify.awb Locally Modified          336 
+ htg-v5-pcie-enabled.awb   Locally Modified          336 
+ htg-v5-pcie-enabled.bsv   Locally Modified          336 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr2-sdram
+ ddr2-sdram-device.bsv     Locally Modified          336 
+ ddr2-sdram-device-synplify.awb Locally Modified          336 
+ ddr2_sdram.ucf            Locally Modified          336 
+ ddr2-sdram-device.awb     Locally Modified          336 
+ ddr2_sdram-synplify.ucf   Locally Modified          336 
+
+- Fix the scratchpad code that uses local memory with no central cache.
+
+- Rename DDR2 memory interfaces to remove the type of memory (SDRAM, SRAM, etc.)
+  since that is of no consequence at higher levels.

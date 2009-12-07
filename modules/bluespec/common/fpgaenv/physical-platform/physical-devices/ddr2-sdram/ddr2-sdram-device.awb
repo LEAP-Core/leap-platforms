@@ -1,7 +1,7 @@
 %name DDR2 SDRAM Physical Device
 %desc DDR2 SDRAM Physical Device
 
-%provides ddr2_sdram_device
+%provides ddr2_device
 
 %sources -t BSV -v PUBLIC ddr2-sdram-device.bsv
 %sources -t BSV -v PUBLIC ddr2-sdram-vhdl-import.bsv

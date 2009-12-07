@@ -26,22 +26,22 @@ import SpecialFIFOs::*;
 import Vector::*;
 
 `include "asim/provides/physical_platform.bsh"
-`include "asim/provides/ddr2_sdram_device.bsh"
+`include "asim/provides/ddr2_device.bsh"
 
 
 //
 // The DRAM driver breaks reads and writes into multi-cycle bursts.
-// DRAM_FULL_LINE is the full data packet and should correspond exactly
+// DDR_FULL_LINE is the full data packet and should correspond exactly
 // to a LOCAL_MEM_LINE.
 //
-typedef Vector#(FPGA_DRAM_BURST_LENGTH, FPGA_DRAM_DUALEDGE_DATA) DRAM_FULL_LINE;
-typedef Vector#(FPGA_DRAM_BURST_LENGTH, FPGA_DRAM_DUALEDGE_DATA_MASK) DRAM_FULL_LINE_MASK;
+typedef Vector#(FPGA_DDR_BURST_LENGTH, FPGA_DDR_DUALEDGE_DATA) DDR_FULL_LINE;
+typedef Vector#(FPGA_DDR_BURST_LENGTH, FPGA_DDR_DUALEDGE_DATA_MASK) DDR_FULL_LINE_MASK;
 
 
 typedef struct
 {
-    DRAM_FULL_LINE data;
-    DRAM_FULL_LINE_MASK mask;
+    DDR_FULL_LINE data;
+    DDR_FULL_LINE_MASK mask;
 }
 LOCAL_MEM_WRITE_REQ
     deriving (Bits, Eq);
@@ -52,7 +52,7 @@ module mkLocalMem#(PHYSICAL_DRIVERS drivers)
     (LOCAL_MEM);
 
     // Get a handle to the DDR2 DRAM Controller
-    DDR2_SDRAM_DRIVER dramDriver = drivers.ddr2SDRAMDriver;
+    DDR2_DRIVER dramDriver = drivers.ddr2Driver;
 
     // Record read requests (either full line or a word index)
     FIFOF#(Maybe#(LOCAL_MEM_WORD_IDX)) readReqQ <- mkSizedFIFOF(16);
@@ -62,8 +62,8 @@ module mkLocalMem#(PHYSICAL_DRIVERS drivers)
     //
 
     FIFO#(LOCAL_MEM_LINE) readQ <- mkFIFO();
-    Reg#(DRAM_FULL_LINE) nextReadLine <- mkRegU();
-    Reg#(Bit#(TLog#(TAdd#(FPGA_DRAM_BURST_LENGTH, 1)))) readStage <- mkReg(0);
+    Reg#(DDR_FULL_LINE) nextReadLine <- mkRegU();
+    Reg#(Bit#(TLog#(TAdd#(FPGA_DDR_BURST_LENGTH, 1)))) readStage <- mkReg(0);
 
     //
     // doReads --
@@ -73,7 +73,7 @@ module mkLocalMem#(PHYSICAL_DRIVERS drivers)
     rule doReads (True);
         let d <- dramDriver.readRsp();
        
-        if (readStage != fromInteger(valueOf(TSub#(FPGA_DRAM_BURST_LENGTH, 1))))
+        if (readStage != fromInteger(valueOf(TSub#(FPGA_DDR_BURST_LENGTH, 1))))
         begin
             // Not the last stage.  Accumulate data.
             nextReadLine[readStage] <= d;
@@ -82,7 +82,7 @@ module mkLocalMem#(PHYSICAL_DRIVERS drivers)
         else
         begin
             // Last stage in the burst.  Collect and forward the line's data.
-            DRAM_FULL_LINE line = nextReadLine;
+            DDR_FULL_LINE line = nextReadLine;
             line[readStage] = d;
             
             readQ.enq(pack(line));
@@ -96,7 +96,7 @@ module mkLocalMem#(PHYSICAL_DRIVERS drivers)
     //
 
     FIFOF#(LOCAL_MEM_WRITE_REQ) writeDataQ <- mkBypassFIFOF();
-    Reg#(Bit#(TLog#(TAdd#(FPGA_DRAM_BURST_LENGTH, 1)))) writeStage <- mkReg(0);
+    Reg#(Bit#(TLog#(TAdd#(FPGA_DDR_BURST_LENGTH, 1)))) writeStage <- mkReg(0);
 
     //
     // forwardWriteData --
@@ -110,7 +110,7 @@ module mkLocalMem#(PHYSICAL_DRIVERS drivers)
         dramDriver.writeData(req.data[writeStage], req.mask[writeStage]);
 
         // Last stage in the burst?
-        if (writeStage == fromInteger(valueOf(TSub#(FPGA_DRAM_BURST_LENGTH, 1))))
+        if (writeStage == fromInteger(valueOf(TSub#(FPGA_DDR_BURST_LENGTH, 1))))
         begin
             writeDataQ.deq();
             writeStage <= 0;
@@ -173,7 +173,7 @@ module mkLocalMem#(PHYSICAL_DRIVERS drivers)
     
         // Build a mask to enable writing just the requested word.
         // There may be more than one mask bit per word, hence this vector:
-        Vector#(LOCAL_MEM_WORDS_PER_LINE, Bit#(TDiv#(SizeOf#(DRAM_FULL_LINE_MASK), LOCAL_MEM_WORDS_PER_LINE))) mask = newVector();
+        Vector#(LOCAL_MEM_WORDS_PER_LINE, Bit#(TDiv#(SizeOf#(DDR_FULL_LINE_MASK), LOCAL_MEM_WORDS_PER_LINE))) mask = newVector();
         Vector#(LOCAL_MEM_WORDS_PER_LINE, LOCAL_MEM_WORD) line_data = newVector();
         for (Integer w = 0; w < valueOf(LOCAL_MEM_WORDS_PER_LINE); w = w + 1)
         begin
@@ -199,7 +199,7 @@ module mkLocalMem#(PHYSICAL_DRIVERS drivers)
 
         // Convert incoming mask with 1 bit per word to DRAM mask.  Incoming
         // mask indicates write with 1.  Outgoing mask indicates write with 0.
-        Vector#(LOCAL_MEM_WORDS_PER_LINE, Bit#(TDiv#(SizeOf#(DRAM_FULL_LINE_MASK), LOCAL_MEM_WORDS_PER_LINE))) ddr_mask = newVector();
+        Vector#(LOCAL_MEM_WORDS_PER_LINE, Bit#(TDiv#(SizeOf#(DDR_FULL_LINE_MASK), LOCAL_MEM_WORDS_PER_LINE))) ddr_mask = newVector();
         for (Integer w = 0; w < valueOf(LOCAL_MEM_WORDS_PER_LINE); w = w + 1)
         begin
             // 0 means write the data!

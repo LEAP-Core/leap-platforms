@@ -71,7 +71,6 @@ remote_memory=Remote Memory using PCI Express DMA
 File=drivers/linux/hasim/kernel/pchnl_if.awb
 Packagehint=platforms
 
-
 [RL Bluespec Library]
 File=config/pm/hasim/submodels/fpgaenv/librl-bsv.apm
 Packagehint=platforms
@@ -116,12 +115,12 @@ File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr2-sdr
 Packagehint=platforms
 
 [HTG Virtex 5 PCIE Enabled Synplify/Requires]
-ddr2_sdram_device=DDR2 SDRAM Physical Device for Synplify
 pci_express_device=PCI Express Physical Device (mmap-based)
 clocks_device=Single-Ended Crystal Clocks Device
 physical_platform_utils=Common Physical Platform Utilities
 led_device=General LED Device
 switch_device=General Switch Device
+ddr2_device=DDR2 SDRAM Physical Device for Synplify
 
 [HTG Virtex 5 PCIE Enabled Synplify]
 File=modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled/htg-v5-pcie-enabled-synplify.awb

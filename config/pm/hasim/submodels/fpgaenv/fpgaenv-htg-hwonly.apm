@@ -7,7 +7,8 @@ Version=2.1
 Type=HAsim
 Name=Hardware-Only HTG-v5-PCIe Environment
 Class=Asim::Model
-DefaultBenchmark=0
+DefaultBenchmark=
+DefaultRunOpts=
 
 [Model]
 DefaultAttributes=bluespec htg-v5-pcie
@@ -34,10 +35,6 @@ Packagehint=platforms
 [Standard Virtual Devices]
 File=config/pm/hasim/submodels/fpgaenv/std-virtual-devices.apm
 Packagehint=platforms
-
-
-
-
 
 [Null RRR Module]
 File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/null/null-rrr.awb
@@ -69,9 +66,9 @@ Packagehint=platforms
 [HTG Virtex 5 PCIE Disabled/Requires]
 led_device=General LED Device
 switch_device=General Switch Device
-ddr2_sdram_device=DDR2 SDRAM Physical Device
 clocks_device=Single-Ended Crystal Clocks Device
 physical_platform_utils=Common Physical Platform Utilities
+ddr2_device=DDR2 SDRAM Physical Device
 
 [General Switch Device]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/switches/general-switch-device.awb
@@ -96,8 +93,6 @@ Packagehint=platforms
 [RL Bluespec Library]
 File=config/pm/hasim/submodels/fpgaenv/librl-bsv.apm
 Packagehint=platforms
-
-
 
 [Common Physical Platform Utilities]
 File=modules/bluespec/common/fpgaenv/physical-platform/utils/utils.awb

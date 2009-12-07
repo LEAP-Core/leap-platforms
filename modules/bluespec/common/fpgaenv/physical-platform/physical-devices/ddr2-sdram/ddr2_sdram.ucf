@@ -40,23 +40,23 @@ TIMESPEC "TS_SYS_clk0" = PERIOD "SYS_clk0" 6.67 ns HIGH 50 %;
 
 NET  "m_vp_llpi_phys_plat_ddr2_sdram_device_dramController_ddr2_dq[*]"                               IOSTANDARD = SSTL18_II_DCI;
 
-NET  "ddr2SDRAMWires_a[*]"                                IOSTANDARD = SSTL18_II;
-NET  "ddr2SDRAMWires_ba[*]"                               IOSTANDARD = SSTL18_II;
-NET  "ddr2SDRAMWires_ras_n"                               IOSTANDARD = SSTL18_II;
-NET  "ddr2SDRAMWires_dm[*]"                               IOSTANDARD = SSTL18_II;
+NET  "ddr2Wires_a[*]"                                IOSTANDARD = SSTL18_II;
+NET  "ddr2Wires_ba[*]"                               IOSTANDARD = SSTL18_II;
+NET  "ddr2Wires_ras_n"                               IOSTANDARD = SSTL18_II;
+NET  "ddr2Wires_dm[*]"                               IOSTANDARD = SSTL18_II;
 
-NET  "ddr2SDRAMWires_cas_n"                               IOSTANDARD = SSTL18_II;
-NET  "ddr2SDRAMWires_we_n"                                IOSTANDARD = SSTL18_II;
-NET  "ddr2SDRAMWires_cs_n[*]"                             IOSTANDARD = SSTL18_II;
-NET  "ddr2SDRAMWires_odt[*]"                              IOSTANDARD = SSTL18_II;
-NET  "ddr2SDRAMWires_cke[*]"                              IOSTANDARD = SSTL18_II;
+NET  "ddr2Wires_cas_n"                               IOSTANDARD = SSTL18_II;
+NET  "ddr2Wires_we_n"                                IOSTANDARD = SSTL18_II;
+NET  "ddr2Wires_cs_n[*]"                             IOSTANDARD = SSTL18_II;
+NET  "ddr2Wires_odt[*]"                              IOSTANDARD = SSTL18_II;
+NET  "ddr2Wires_cke[*]"                              IOSTANDARD = SSTL18_II;
 
 
 NET  "m_vp_llpi_phys_plat_ddr2_sdram_device_dramController_ddr2_dqs[*]"                              IOSTANDARD = DIFF_SSTL18_II_DCI;
 NET  "m_vp_llpi_phys_plat_ddr2_sdram_device_dramController_ddr2_dqs_n[*]"                            IOSTANDARD = DIFF_SSTL18_II_DCI;
 
-NET  "ddr2SDRAMWires_ck_p[*]"                             IOSTANDARD = DIFF_SSTL18_II;
-NET  "ddr2SDRAMWires_ck_n[*]"                             IOSTANDARD = DIFF_SSTL18_II;
+NET  "ddr2Wires_ck_p[*]"                             IOSTANDARD = DIFF_SSTL18_II;
+NET  "ddr2Wires_ck_n[*]"                             IOSTANDARD = DIFF_SSTL18_II;
 
 ################################################################################
 # Location Constraints
@@ -127,40 +127,40 @@ NET  "m_vp_llpi_phys_plat_ddr2_sdram_device_dramController_ddr2_dq[61]"         
 NET  "m_vp_llpi_phys_plat_ddr2_sdram_device_dramController_ddr2_dq[62]"                               LOC = "AA24" ;	      #Bank 21
 NET  "m_vp_llpi_phys_plat_ddr2_sdram_device_dramController_ddr2_dq[63]"                               LOC = "Y24" ;	      #Bank 21
 
-NET  "ddr2SDRAMWires_a[12]"                                LOC = "AF19" ;	      #Bank 4
-NET  "ddr2SDRAMWires_a[11]"                                LOC = "AG18" ;	      #Bank 4
-NET  "ddr2SDRAMWires_a[10]"                                LOC = "AG15" ;	      #Bank 4
-NET  "ddr2SDRAMWires_a[9]"                                 LOC = "AH15" ;	      #Bank 4
-NET  "ddr2SDRAMWires_a[8]"                                 LOC = "AG21" ;	      #Bank 4
-NET  "ddr2SDRAMWires_a[7]"                                 LOC = "AH13" ;	      #Bank 4
-NET  "ddr2SDRAMWires_a[6]"                                 LOC = "AH14" ;	      #Bank 4
-NET  "ddr2SDRAMWires_a[5]"                                 LOC = "AH19" ;	      #Bank 4
-NET  "ddr2SDRAMWires_a[4]"                                 LOC = "AH20" ;	      #Bank 4
-NET  "ddr2SDRAMWires_a[3]"                                 LOC = "AG13" ;	      #Bank 4
-NET  "ddr2SDRAMWires_a[2]"                                 LOC = "AH12" ;	      #Bank 4
-NET  "ddr2SDRAMWires_a[1]"                                 LOC = "AH22" ;	      #Bank 4
-NET  "ddr2SDRAMWires_a[0]"                                 LOC = "AG22" ;	      #Bank 4
-NET  "ddr2SDRAMWires_ba[1]"                                LOC = "AH18" ;	      #Bank 4
-NET  "ddr2SDRAMWires_ba[0]"                                LOC = "AE18" ;	      #Bank 4
+NET  "ddr2Wires_a[12]"                                LOC = "AF19" ;	      #Bank 4
+NET  "ddr2Wires_a[11]"                                LOC = "AG18" ;	      #Bank 4
+NET  "ddr2Wires_a[10]"                                LOC = "AG15" ;	      #Bank 4
+NET  "ddr2Wires_a[9]"                                 LOC = "AH15" ;	      #Bank 4
+NET  "ddr2Wires_a[8]"                                 LOC = "AG21" ;	      #Bank 4
+NET  "ddr2Wires_a[7]"                                 LOC = "AH13" ;	      #Bank 4
+NET  "ddr2Wires_a[6]"                                 LOC = "AH14" ;	      #Bank 4
+NET  "ddr2Wires_a[5]"                                 LOC = "AH19" ;	      #Bank 4
+NET  "ddr2Wires_a[4]"                                 LOC = "AH20" ;	      #Bank 4
+NET  "ddr2Wires_a[3]"                                 LOC = "AG13" ;	      #Bank 4
+NET  "ddr2Wires_a[2]"                                 LOC = "AH12" ;	      #Bank 4
+NET  "ddr2Wires_a[1]"                                 LOC = "AH22" ;	      #Bank 4
+NET  "ddr2Wires_a[0]"                                 LOC = "AG22" ;	      #Bank 4
+NET  "ddr2Wires_ba[1]"                                LOC = "AH18" ;	      #Bank 4
+NET  "ddr2Wires_ba[0]"                                LOC = "AE18" ;	      #Bank 4
 
-NET  "ddr2SDRAMWires_ras_n"                                LOC = "AN13" ;	      #Bank 22
-NET  "ddr2SDRAMWires_cas_n"                                LOC = "AA10" ;	      #Bank 22
-NET  "ddr2SDRAMWires_we_n"                                 LOC = "AB10" ;	      #Bank 22
-NET  "ddr2SDRAMWires_cs_n[0]"                              LOC = "AM12" ;	      #Bank 22
-NET  "ddr2SDRAMWires_cs_n[1]"                              LOC = "AC9" ;	      #Bank 22
-NET  "ddr2SDRAMWires_odt[0]"                               LOC = "AN14" ;	      #Bank 22
-#NET  "ddr2SDRAMWires_odt[1]"                               LOC = "AN12" ;	      #Bank 22
-NET  "ddr2SDRAMWires_cke[0]"                               LOC = "AP14" ;	      #Bank 22
-#NET  "ddr2SDRAMWires_cke[1]"                               LOC = "AP12" ;	      #Bank 22
+NET  "ddr2Wires_ras_n"                                LOC = "AN13" ;	      #Bank 22
+NET  "ddr2Wires_cas_n"                                LOC = "AA10" ;	      #Bank 22
+NET  "ddr2Wires_we_n"                                 LOC = "AB10" ;	      #Bank 22
+NET  "ddr2Wires_cs_n[0]"                              LOC = "AM12" ;	      #Bank 22
+NET  "ddr2Wires_cs_n[1]"                              LOC = "AC9" ;	      #Bank 22
+NET  "ddr2Wires_odt[0]"                               LOC = "AN14" ;	      #Bank 22
+#NET  "ddr2Wires_odt[1]"                               LOC = "AN12" ;	      #Bank 22
+NET  "ddr2Wires_cke[0]"                               LOC = "AP14" ;	      #Bank 22
+#NET  "ddr2Wires_cke[1]"                               LOC = "AP12" ;	      #Bank 22
 
-NET  "ddr2SDRAMWires_dm[0]"                                LOC = "W10" ;	      #Bank 18
-NET  "ddr2SDRAMWires_dm[1]"                                LOC = "AB6" ;	      #Bank 18
-NET  "ddr2SDRAMWires_dm[2]"                                LOC = "AD6" ;	      #Bank 18
-NET  "ddr2SDRAMWires_dm[3]"                                LOC = "AL10" ;	      #Bank 22
-NET  "ddr2SDRAMWires_dm[4]"                                LOC = "AG11" ;	      #Bank 22
-NET  "ddr2SDRAMWires_dm[5]"                                LOC = "AD24" ;	      #Bank 21
-NET  "ddr2SDRAMWires_dm[6]"                                LOC = "AG27" ;	      #Bank 21
-NET  "ddr2SDRAMWires_dm[7]"                                LOC = "AA28" ;	      #Bank 21
+NET  "ddr2Wires_dm[0]"                                LOC = "W10" ;	      #Bank 18
+NET  "ddr2Wires_dm[1]"                                LOC = "AB6" ;	      #Bank 18
+NET  "ddr2Wires_dm[2]"                                LOC = "AD6" ;	      #Bank 18
+NET  "ddr2Wires_dm[3]"                                LOC = "AL10" ;	      #Bank 22
+NET  "ddr2Wires_dm[4]"                                LOC = "AG11" ;	      #Bank 22
+NET  "ddr2Wires_dm[5]"                                LOC = "AD24" ;	      #Bank 21
+NET  "ddr2Wires_dm[6]"                                LOC = "AG27" ;	      #Bank 21
+NET  "ddr2Wires_dm[7]"                                LOC = "AA28" ;	      #Bank 21
 
 NET  "m_vp_llpi_phys_plat_ddr2_sdram_device_dramController_ddr2_dqs[0]"                               LOC = "W7" ;	      #Bank 18
 NET  "m_vp_llpi_phys_plat_ddr2_sdram_device_dramController_ddr2_dqs_n[0]"                             LOC = "V7" ;	      #Bank 18
@@ -179,10 +179,10 @@ NET  "m_vp_llpi_phys_plat_ddr2_sdram_device_dramController_ddr2_dqs_n[6]"       
 NET  "m_vp_llpi_phys_plat_ddr2_sdram_device_dramController_ddr2_dqs[7]"                               LOC = "AH27" ;	      #Bank 21
 NET  "m_vp_llpi_phys_plat_ddr2_sdram_device_dramController_ddr2_dqs_n[7]"                             LOC = "AJ26" ;	      #Bank 21
 
-NET  "ddr2SDRAMWires_ck_p[0]"                                LOC = "AG5" ;	      #Bank 18
-NET  "ddr2SDRAMWires_ck_n[0]"                              LOC = "AF5" ;	      #Bank 18
-NET  "ddr2SDRAMWires_ck_p[1]"                                LOC = "AK26" ;	      #Bank 21
-NET  "ddr2SDRAMWires_ck_n[1]"                              LOC = "AJ27" ;	      #Bank 21
+NET  "ddr2Wires_ck_p[0]"                                LOC = "AG5" ;	      #Bank 18
+NET  "ddr2Wires_ck_n[0]"                              LOC = "AF5" ;	      #Bank 18
+NET  "ddr2Wires_ck_p[1]"                                LOC = "AK26" ;	      #Bank 21
+NET  "ddr2Wires_ck_n[1]"                              LOC = "AJ27" ;	      #Bank 21
 
 ################################################################################
 #IDELAYCTRL Location Constraints

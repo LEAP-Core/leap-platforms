@@ -26,7 +26,7 @@ import Clocks::*;
 `include "led_device.bsh"
 `include "switch_device.bsh"
 `include "pci_express_device.bsh"
-`include "ddr2_sdram_device.bsh"
+`include "ddr2_device.bsh"
 `include "clocks_device.bsh"
 `include "physical_platform_utils.bsh"
 
@@ -47,7 +47,7 @@ interface PHYSICAL_DRIVERS;
     interface LEDS_DRIVER#(`NUMBER_LEDS)         ledsDriver;
     interface SWITCHES_DRIVER#(`NUMBER_SWITCHES) switchesDriver;
     interface PCI_EXPRESS_DRIVER                 pciExpressDriver;
-    interface DDR2_SDRAM_DRIVER                  ddr2SDRAMDriver;
+    interface DDR2_DRIVER                        ddr2Driver;
         
 endinterface
 
@@ -66,7 +66,7 @@ interface TOP_LEVEL_WIRES;
     interface LEDS_WIRES#(`NUMBER_LEDS)          ledsWires;
     interface SWITCHES_WIRES#(`NUMBER_SWITCHES)  switchesWires;
     interface PCI_EXPRESS_WIRES                  pciExpressWires;
-    interface DDR2_SDRAM_WIRES                   ddr2SDRAMWires;
+    interface DDR2_WIRES                         ddr2Wires;
     
 endinterface
 
@@ -110,10 +110,10 @@ module mkPhysicalPlatform
     
     LEDS_DEVICE#(`NUMBER_LEDS)         leds_device       <- mkLEDsDevice(clocked_by clk, reset_by rst);
     SWITCHES_DEVICE#(`NUMBER_SWITCHES) switches_device   <- mkSwitchesDevice(clocked_by clk, reset_by rst);
-    DDR2_SDRAM_DEVICE                  ddr2_sdram_device <- mkDDR2SDRAMDevice(clocks_device.driver.rawClock,
-                                                                              clocks_device.driver.rawReset,
-                                                                              clocked_by clk,
-                                                                              reset_by   rst);
+    DDR2_DEVICE                        ddr2_sdram_device <- mkDDR2Device(clocks_device.driver.rawClock,
+                                                                         clocks_device.driver.rawReset,
+                                                                         clocked_by clk,
+                                                                         reset_by rst);
     
     /*
     // Bugfix for Xilinx tools: if the LEDs and Switches are not used at all in the
@@ -139,7 +139,7 @@ module mkPhysicalPlatform
         interface ledsDriver       = leds_device.driver;
         interface switchesDriver   = switches_device.driver;
         interface pciExpressDriver = pci_express_device.driver;
-        interface ddr2SDRAMDriver  = ddr2_sdram_device.driver;
+        interface ddr2Driver       = ddr2_sdram_device.driver;
     
     endinterface
     
@@ -151,7 +151,7 @@ module mkPhysicalPlatform
         interface ledsWires        = leds_device.wires;
         interface switchesWires    = switches_device.wires;
         interface pciExpressWires  = pci_express_device.wires;
-        interface ddr2SDRAMWires   = ddr2_sdram_device.wires;
+        interface ddr2Wires        = ddr2_sdram_device.wires;
 
     endinterface
                
