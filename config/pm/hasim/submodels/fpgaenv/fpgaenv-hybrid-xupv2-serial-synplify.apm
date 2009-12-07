@@ -24,17 +24,13 @@ File=modules/bluespec/common/fpgaenv/virtual-platform/std-virtual-platform.awb
 Packagehint=platforms
 
 [Standard Virtual Platform/Requires]
-virtual_devices=Standard Virtual Devices
-low_level_platform_interface=Low Level Platform Interface Hybrid
+virtual_devices=6375 Virtual Devices
+low_level_platform_interface=6375 Low Level Platform Interface Hybrid
 umf=Little-Endian Unified Message Format
 
 [FPGA Environment]
 File=modules/bluespec/common/fpgaenv/fpga-environment.awb
 Packagehint=platforms
-
-[Standard Virtual Devices]
-File=config/pm/mit-6.375/virtex2-virtual-devices.apm
-Packagehint=mit-6.375
 
 [RRR Clients and Servers]
 File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic/basic-rrr.awb
@@ -46,18 +42,6 @@ Packagehint=platforms
 
 [Basic Virtual Channel Multiplexer/Requires]
 physical_channel=Serial Physical Channel
-
-[Low Level Platform Interface Hybrid]
-File=modules/bluespec/common/fpgaenv/low-level-platform-interface/hybrid-llpi.awb
-Packagehint=platforms
-
-[Low Level Platform Interface Hybrid/Requires]
-physical_platform=XUP Virtex 2 Serial
-channelio=Basic Virtual Channel Multiplexer
-rrr=RRR Clients and Servers
-physical_platform_debugger=Null Physical Platform Debugger
-local_mem=NULL Local Memory Interface
-remote_memory=Null Remote Memory
 
 [Little-Endian Unified Message Format]
 File=modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian/umf-little-endian.awb
@@ -95,11 +79,6 @@ ddr_sdram_device=DDR SDRAM Physical Device for Synplify
 File=modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup/serial/xilinx-xup-serial.awb
 Packagehint=platforms
 
-[NULL Local Memory Interface/Params]
-LOCAL_MEM_WORDS_PER_LINE=4
-LOCAL_MEM_WORD_BITS=64
-LOCAL_MEM_ADDR_BITS=26
-
 [NULL Local Memory Interface]
 File=modules/bluespec/common/fpgaenv/low-level-platform-interface/local-mem/local-mem-null.awb
 Packagehint=platforms
@@ -107,10 +86,6 @@ Packagehint=platforms
 [Single-Ended Crystal Clocks Device]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/single-ended/single-ended-clocks-device.awb
 Packagehint=platforms
-
-[Single-Ended Crystal Clocks Device/Params]
-MODEL_CLOCK_MULTIPLIER=2
-CRYSTAL_CLOCK_FREQ=100
 
 [Hardware FPGA Components for Virtex 2]
 File=modules/bluespec/common/fpgaenv/fpga-components/hardware-fpga-components-virtex2.awb
@@ -132,5 +107,23 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr/ddr-sdram-device-synplify.awb
 Packagehint=platforms
 
-[DDR SDRAM Physical Device for Synplify/Params]
-DRAM_ADDRESS_SIZE=26
+[6375 Virtual Devices]
+File=config/pm/mit-6.375/6375-virtual-devices.apm
+Packagehint=mit-6.375
+
+[Burst Memory Interface using DDR Memory]
+File=modules/bluespec/mit-6.375/lab6/burst-mem-ddr/burst-mem-ddr.awb
+Packagehint=mit-6.375
+
+[6375 Low Level Platform Interface Hybrid]
+File=modules/bluespec/mit-6.375/lab6/xupv2-low-level-platform-interface/hybrid-llpi.awb
+Packagehint=mit-6.375
+
+[6375 Low Level Platform Interface Hybrid/Requires]
+physical_platform=XUP Virtex 2 Serial
+remote_memory=Null Remote Memory
+channelio=Basic Virtual Channel Multiplexer
+rrr=RRR Clients and Servers
+burst_mem=Burst Memory Interface using DDR Memory
+physical_platform_debugger=Null Physical Platform Debugger
+local_mem=NULL Local Memory Interface
