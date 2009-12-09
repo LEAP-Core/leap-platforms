@@ -8617,3 +8617,18 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr
 
 - Rename DDR2 memory interfaces to remove the type of memory (SDRAM, SRAM, etc.)
   since that is of no consequence at higher levels.
+
+----------
+kfleming    Date: Wed Dec  9 12:40:33 KST 2009  CSN: CSN-platforms-338
+                  Wed Dec  9 03:40:33 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/single-ended
+ single-ended-clocks-device-simulation.awb Locally Added               0 
+ single-ended-clocks-device-simulation.bsv Locally Added               0 
+ single-ended-clocks-device-simulation.v Locally Added               0 
+
+Directory modules/project
+ SCons.top.template        Locally Modified          337 
+
+Patched the verilog simulator builds.  Work is not complete, but the current scons will build a functional, vpi-based simulator.  Currently, benchmarks scripts must link to the *.vpi files in the hw directory.  I will try to fix this next.

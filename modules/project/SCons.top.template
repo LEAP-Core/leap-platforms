@@ -26,6 +26,7 @@ defs = {
     'GIVEN_UCFS'         : '@GIVEN_UCFS@',
     'GIVEN_SDCS'         : '@GIVEN_SDCS@',
     'GEN_BAS'            : '@GEN_BAS@',
+    'GEN_VS'             : '@GEN_VS@',
     'GEN_CXXS'           : 'schedule.cxx @GEN_CXXS@',
     'GEN_HS'             : 'schedule.h @GEN_HS@',
     'LDFLAGS'            : '-L /usr/lib64/curses -L /usr/lib/curses',
@@ -334,13 +335,13 @@ env.Alias('exe', exe)
 ############################################################################
 
 vexe_gen_command = \
-    BSC + ' -vsim iverilog ' + BSC_FLAGS + ' -I ' + env['DEFS']['ROOT_DIR_HW'] + '/' + env['DEFS']['ROOT_DIR_MODEL'] + '/' + env['DEFS']['TMP_BSC_DIR'] + \
+    BSC + ' ' + BSC_FLAGS + ' -vdir ' + env['DEFS']['ROOT_DIR_HW'] + '/' + env['DEFS']['ROOT_DIR_MODEL'] + '/' + env['DEFS']['TMP_BSC_DIR'] + \
     ' -o $TARGET -verilog -e ' + ROOT_WRAPPER_SYNTH_ID + \
     ' $SOURCES ' + env['DEFS']['BDPI_BAS']
 
 vbin = env.Command(
     TMP_BSC_DIR + '/' + APM_NAME + '_hw.vexe',
-    wrapper_v + clean_split(env['DEFS']['GIVEN_VS'], sep = ' ') + clean_split(env['DEFS']['BDPI_CS'], sep=' '),
+    clean_split(env['DEFS']['GEN_VS'], sep = ' ') + clean_split(env['DEFS']['GIVEN_VS'], sep = ' ') + clean_split(env['DEFS']['BDPI_CS'], sep=' '),
     [ vexe_gen_command,
       Delete('directc.sft') ])
 
