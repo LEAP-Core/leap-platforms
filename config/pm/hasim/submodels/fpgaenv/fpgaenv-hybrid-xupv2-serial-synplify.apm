@@ -25,7 +25,7 @@ Packagehint=platforms
 
 [Standard Virtual Platform/Requires]
 virtual_devices=6375 Virtual Devices
-low_level_platform_interface=6375 Low Level Platform Interface Hybrid
+low_level_platform_interface=6375 Low Level Platform Interface
 umf=Little-Endian Unified Message Format
 
 [FPGA Environment]
@@ -115,11 +115,13 @@ Packagehint=mit-6.375
 File=modules/bluespec/mit-6.375/lab6/burst-mem-ddr/burst-mem-ddr.awb
 Packagehint=mit-6.375
 
-[6375 Low Level Platform Interface Hybrid]
+
+
+[6375 Low Level Platform Interface]
 File=modules/bluespec/mit-6.375/lab6/xupv2-low-level-platform-interface/hybrid-llpi.awb
 Packagehint=mit-6.375
 
-[6375 Low Level Platform Interface Hybrid/Requires]
+[6375 Low Level Platform Interface/Requires]
 physical_platform=XUP Virtex 2 Serial
 remote_memory=Null Remote Memory
 channelio=Basic Virtual Channel Multiplexer
@@ -127,3 +129,6 @@ rrr=RRR Clients and Servers
 burst_mem=Burst Memory Interface using DDR Memory
 physical_platform_debugger=Null Physical Platform Debugger
 local_mem=NULL Local Memory Interface
+
+[XUP Virtex 2 Serial/Params]
+SYNTHESIS_TOOL="synplify_pro"

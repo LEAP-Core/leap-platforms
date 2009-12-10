@@ -33,6 +33,7 @@ defs = {
     'M5_BUILD_DIR'       : '@M5_BUILD_DIR@',    # Defined if m5 simulator is present
     'MAKE_ALL_TARGET'    : '@MAKE_ALL_TARGET@',
     'MAP_OPTIONS'        : '@MAP_OPTIONS@',
+    'SYNTHESIS_TOOL'     : '@SYNTHESIS_TOOL@',
     'WORKSPACE_ROOT'     : '@MODEL_ROOT@',
     'ROOT_DIR_MODEL'     : '@ROOT_DIR_MODEL@',
     'ROOT_DIR_HW'        : '@ROOT_DIR_HW@',
@@ -388,7 +389,7 @@ else:
     clean_split(env['DEFS']['GIVEN_SDCS'], sep = ' '),
     'touch $TARGET') 
 
-if(env['ENV'].has_key('USE_SYNPLIFY')):
+if(env['DEFS']['SYNTHESIS_TOOL'] == "synplify_pro"):
     top_netlist = env.Command(
         XILINX_APM_NAME + '.edf',
         wrapper_v + clean_split(env['DEFS']['GIVEN_VS'], sep = ' ') + ['config/' + APM_NAME + '.synplify.prj'] + synplify_sdc,

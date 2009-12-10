@@ -8632,3 +8632,24 @@ Directory modules/project
  SCons.top.template        Locally Modified          337 
 
 Patched the verilog simulator builds.  Work is not complete, but the current scons will build a functional, vpi-based simulator.  Currently, benchmarks scripts must link to the *.vpi files in the hw directory.  I will try to fix this next.
+
+----------
+kfleming    Date: Thu Dec 10 20:36:02 KST 2009  CSN: CSN-platforms-339
+                  Thu Dec 10 11:36:02 UTC 2009
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-hybrid-xupv2-serial.apm Locally Modified          338 
+ fpgaenv-hybrid-xupv2-serial-synplify.apm Locally Modified          338 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup/serial
+ xilinx-xup-serial.awb     Locally Modified          338 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled
+ htg-v5-pcie-enabled-synplify.awb Locally Modified          338 
+ htg-v5-pcie-enabled.awb   Locally Modified          338 
+
+Directory modules/project
+ SCons.top.template        Locally Modified          338 
+
+Made a "synthesis tool" build option, which triggers the xst or synplify build paths.  This is needed to run fpga based regressions for 6.375.  

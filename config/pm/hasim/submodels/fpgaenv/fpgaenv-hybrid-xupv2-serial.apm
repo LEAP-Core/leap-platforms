@@ -124,11 +124,11 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/serial/serial-physical-channel.awb
 Packagehint=platforms
 
-[DDR SDRAM Physical Device]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr/ddr-sdram-device.awb
+[Null Physical Platform Debugger]
+File=modules/bluespec/common/fpgaenv/physical-platform/debuggers/null/null-debugger.awb
 Packagehint=platforms
 
 
-[Null Physical Platform Debugger]
-File=modules/bluespec/common/fpgaenv/physical-platform/debuggers/null/null-debugger.awb
+[DDR SDRAM Physical Device]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr/ddr-sdram-device.awb
 Packagehint=platforms

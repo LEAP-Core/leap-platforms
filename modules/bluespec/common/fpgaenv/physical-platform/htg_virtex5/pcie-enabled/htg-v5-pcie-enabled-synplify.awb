@@ -29,3 +29,4 @@
 %param FPGA_PART_SYNPLIFY "XC5VLX110T"         "FPGA Part (Synplify)"
 %param FPGA_SPEED         "-1"              "FPGA Speed Grade (Synplify)"
 %param FPGA_PACKAGE       "FF1136"           "FPGA Package (Synplify)"
+%param SYNTHESIS_TOOL     "synplify_pro"                "Synthesis tool, xst or synplify_pro supported"
