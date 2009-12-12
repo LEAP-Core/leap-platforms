@@ -8653,3 +8653,23 @@ Directory modules/project
  SCons.top.template        Locally Modified          338 
 
 Made a "synthesis tool" build option, which triggers the xst or synplify build paths.  This is needed to run fpga based regressions for 6.375.  
+
+----------
+kfleming    Date: Sat Dec 12 22:43:37 KST 2009  CSN: CSN-platforms-340
+                  Sat Dec 12 13:43:37 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr
+ ddr_sdram.ucf             Locally Modified          339 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express-new
+ pci-express-c-import-mmap.cpp Locally Modified          339 
+
+Directory modules/project
+ synplify.sdc              Locally Added               0 
+ project-hybrid.awb        Locally Modified          339 
+ SCons.top.template        Locally Modified          339 
+ SCons.iface.template      Locally Modified          339 
+ SCons.hw.template         Locally Modified          339 
+
+Adding support for unified synplify and xst build

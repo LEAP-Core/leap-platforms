@@ -11,7 +11,8 @@ import sys
 
 defs = {
     'BSC'                : '@BSC@',
-    'BSC_FLAGS'          : '@BSC_FLAGS@',
+    'BSC_FLAGS_VERILOG'  : '@BSC_FLAGS_VERILOG@',
+    'BSC_FLAGS_SIM'      : '@BSC_FLAGS_SIM@',
     'DICT_SRCS'          : '@DICT_SRCS@',
     'ROOT_DIR_SW_INC'    : '@ROOT_DIR_SW_INC@',
     'RRR_SRCS'           : '@RRR_SRCS@',
@@ -23,7 +24,8 @@ env = Environment(ENV = os.environ, DEFS = defs)
 env['ENV']['SHELL'] = '/bin/sh'
 
 BSC = env['DEFS']['BSC']
-BSC_FLAGS = env['DEFS']['BSC_FLAGS']
+BSC_FLAGS_SIM = env['DEFS']['BSC_FLAGS_SIM']
+BSC_FLAGS_VERILOG = env['DEFS']['BSC_FLAGS_VERILOG']
 TMP_BSC_DIR = env['DEFS']['TMP_BSC_DIR']
 
 inc_tgt = 'build/include'
@@ -143,7 +145,7 @@ def compile_bo(source, target, env, for_signature):
     if (bsc_version < 15480):
         maybe_bdir_tgt = ':' + bdir
 
-    cmd = BSC + ' ' + BSC_FLAGS + \
+    cmd = BSC + ' ' + BSC_FLAGS_VERILOG + \
           ' -p +:' + inc_tgt + ':' + hw_tgt + maybe_bdir_tgt + \
           ' -bdir ' + bdir + ' -vdir ' + bdir + ' -simdir ' + bdir + ' ' + \
           str(source[0])

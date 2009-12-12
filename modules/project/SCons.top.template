@@ -14,7 +14,8 @@ defs = {
     'BDPI_BAS'           : '@BDPI_BAS@',
     'BDPI_CS'            : '@BDPI_CS@',
     'BSC'                : '@BSC@',
-    'BSC_FLAGS'          : '@BSC_FLAGS@',
+    'BSC_FLAGS_VERILOG'  : '@BSC_FLAGS_VERILOG@',
+    'BSC_FLAGS_SIM'      : '@BSC_FLAGS_SIM@',
     'BUILD_DIR'          : '@BUILD_DIR@',
     'CONNECTION_SCRIPT'  : 'hasim-connect',
     'COST_TABLE'         : '@COST_TABLE@',
@@ -197,7 +198,8 @@ except AttributeError:
 
 APM_NAME = env['DEFS']['APM_NAME']
 BSC = env['DEFS']['BSC']
-BSC_FLAGS = env['DEFS']['BSC_FLAGS']
+BSC_FLAGS_SIM = env['DEFS']['BSC_FLAGS_SIM']
+BSC_FLAGS_VERILOG = env['DEFS']['BSC_FLAGS_VERILOG']
 LDFLAGS = env['DEFS']['LDFLAGS']
 TMP_BSC_DIR = env['DEFS']['TMP_BSC_DIR']
 WORKSPACE_ROOT = env['DEFS']['WORKSPACE_ROOT']
@@ -239,8 +241,11 @@ else:
     bsc_events_flag = '-D HASIM_EVENTS_ENABLED=True'
     cpp_events_flag = '-DHASIM_EVENTS_ENABLED'
 
-BSC_FLAGS += ' ' + bsc_events_flag
-env['DEFS']['BSC_FLAGS'] = BSC_FLAGS
+BSC_FLAGS_VERILOG += ' ' + bsc_events_flag
+env['DEFS']['BSC_FLAGS_VERILOG'] = BSC_FLAGS_VERILOG
+
+BSC_FLAGS_SIM += ' ' + bsc_events_flag
+env['DEFS']['BSC_FLAGS_SIM'] = BSC_FLAGS_SIM
 
 
 ROOT_WRAPPER_SYNTH_ID = 'mk_' + env['DEFS']['ROOT_DIR_MODEL'] + '_Wrapper'
@@ -290,7 +295,7 @@ env['ENV']['BUILD_DIR'] = env['DEFS']['BUILD_DIR']  # need to set the builddir f
 ##
 ############################################################################
 
-bsc_sim_command = BSC + ' ' + BSC_FLAGS + ' ' + LDFLAGS + ' -o $TARGET'
+bsc_sim_command = BSC + ' ' + BSC_FLAGS_SIM + ' ' + LDFLAGS + ' -o $TARGET'
 
 if (env['DEFS']['BSC_VERSION'] >= 13013):
     # 2008.01.A compiler allows us to pass C++ arguments.
@@ -336,7 +341,7 @@ env.Alias('exe', exe)
 ############################################################################
 
 vexe_gen_command = \
-    BSC + ' ' + BSC_FLAGS + ' -vdir ' + env['DEFS']['ROOT_DIR_HW'] + '/' + env['DEFS']['ROOT_DIR_MODEL'] + '/' + env['DEFS']['TMP_BSC_DIR'] + \
+    BSC + ' ' + BSC_FLAGS_VERILOG + ' -vdir ' + env['DEFS']['ROOT_DIR_HW'] + '/' + env['DEFS']['ROOT_DIR_MODEL'] + '/' + env['DEFS']['TMP_BSC_DIR'] + \
     ' -o $TARGET -verilog -e ' + ROOT_WRAPPER_SYNTH_ID + \
     ' $SOURCES ' + env['DEFS']['BDPI_BAS']
 
