@@ -15,7 +15,7 @@ BSVS = '@BSVS@'
 GEN_BSVS = '@GEN_BSVS@'
 
 BSC = env['DEFS']['BSC']
-BSC_FLAGS_VERILOG = env['DEFS']['BSC_FLAGS_VERILOG']
+BSC_FLAGS = env['DEFS']['BSC_FLAGS']
 TMP_BSC_DIR = env['DEFS']['TMP_BSC_DIR']
 
 ##
@@ -81,7 +81,7 @@ def emitter_bo(target, source, env):
 def compile_bo_bsc_base(target):
     bdir = os.path.dirname(str(target[0]))
     lib_dirs = bsc_bdir_prune(ALL_LIB_DIRS_FROM_ROOT, ':', bdir)
-    return BSC + ' ' + BSC_FLAGS_VERILOG + ' -p +:' + \
+    return BSC + ' ' + BSC_FLAGS + ' -p +:' + \
            ROOT_DIR_HW_INC + ':' + ROOT_DIR_HW_INC + '/asim/provides:' + \
            lib_dirs + ':' + TMP_BSC_DIR + ' -bdir ' + bdir + \
            ' -vdir ' + bdir + ' -simdir ' + bdir + ' -info-dir ' + bdir

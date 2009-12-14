@@ -8673,3 +8673,16 @@ Directory modules/project
  SCons.hw.template         Locally Modified          339 
 
 Adding support for unified synplify and xst build
+
+----------
+kfleming    Date: Mon Dec 14 18:42:43 KST 2009  CSN: CSN-platforms-341
+                  Mon Dec 14 09:42:43 UTC 2009
+
+
+Directory modules/project
+ project-hybrid.awb        Locally Modified          340 
+ SCons.top.template        Locally Modified          340 
+ SCons.iface.template      Locally Modified          340 
+ SCons.hw.template         Locally Modified          340 
+
+Reverting BSC_FLAGS_SIM and VERILOG in Scons child modules per adler.  Change in iface is not complete because I haven't figured out it's invocation yet.

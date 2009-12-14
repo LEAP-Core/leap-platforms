@@ -282,6 +282,7 @@ env['DEFS']['BSC_VERSION'] = bsc_version
 ##
 ############################################################################
 env['DEFS']['CWD_REL'] = env['DEFS']['ROOT_DIR_HW_MODEL']
+env['DEFS']['BSC_FLAGS'] = env['DEFS']['BSC_FLAGS_VERILOG']
 Export('env ' + " ".join(utility_names))
 wrapper_v = SConscript([env['DEFS']['ROOT_DIR_HW_MODEL'] + '/SConscript'])
 

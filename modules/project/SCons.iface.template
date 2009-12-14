@@ -12,7 +12,6 @@ import sys
 defs = {
     'BSC'                : '@BSC@',
     'BSC_FLAGS_VERILOG'  : '@BSC_FLAGS_VERILOG@',
-    'BSC_FLAGS_SIM'      : '@BSC_FLAGS_SIM@',
     'DICT_SRCS'          : '@DICT_SRCS@',
     'ROOT_DIR_SW_INC'    : '@ROOT_DIR_SW_INC@',
     'RRR_SRCS'           : '@RRR_SRCS@',
@@ -24,7 +23,6 @@ env = Environment(ENV = os.environ, DEFS = defs)
 env['ENV']['SHELL'] = '/bin/sh'
 
 BSC = env['DEFS']['BSC']
-BSC_FLAGS_SIM = env['DEFS']['BSC_FLAGS_SIM']
 BSC_FLAGS_VERILOG = env['DEFS']['BSC_FLAGS_VERILOG']
 TMP_BSC_DIR = env['DEFS']['TMP_BSC_DIR']
 
