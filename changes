@@ -8686,3 +8686,14 @@ Directory modules/project
  SCons.hw.template         Locally Modified          340 
 
 Reverting BSC_FLAGS_SIM and VERILOG in Scons child modules per adler.  Change in iface is not complete because I haven't figured out it's invocation yet.
+
+----------
+kfleming    Date: Tue Dec 15 15:46:54 KST 2009  CSN: CSN-platforms-342
+                  Tue Dec 15 06:46:54 UTC 2009
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/single-ended
+ single-ended-clocks-device-verilog-simulation.bsv Locally Added               0 
+ single-ended-clocks-device.v Locally Added               0 
+
+Added a couple of files for simulating single ended clocks.  This change was necessary to make Bluespec's verilog build script happy, but I forgot to add these files
