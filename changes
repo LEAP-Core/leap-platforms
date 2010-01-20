@@ -8697,3 +8697,13 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clo
  single-ended-clocks-device.v Locally Added               0 
 
 Added a couple of files for simulating single ended clocks.  This change was necessary to make Bluespec's verilog build script happy, but I forgot to add these files
+
+----------
+mcadler     Date: Wed Jan 20 10:26:17 EST 2010  CSN: CSN-platforms-343
+                  Wed Jan 20 15:26:17 UTC 2010
+
+
+Directory modules/project
+ SCons.iface.template      Locally Modified          342 
+
+Pass C include path to hasim-dict, since it now runs cpp in input files.

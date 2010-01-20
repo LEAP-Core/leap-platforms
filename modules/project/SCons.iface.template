@@ -61,6 +61,8 @@ if bsc_version == 0:
     sys.exit(1)
 
 
+inc_dirs = env['DEFS']['ROOT_DIR_SW_INC']
+
 # Compile dictionary
 #  NOTE: this must run even if there are no dictionary files.  It always
 #  builds an init.h, even if it is empty.  That way any model can safely
@@ -76,7 +78,7 @@ def dict_emitter(target, source, env):
     for s in source:
         src_names += ' ' + str(s)
     # Ask hasim-dict for the output names based on the input files
-    for d in os.popen('hasim-dict --querymodules' + src_names).readlines():
+    for d in os.popen('hasim-dict --querymodules --src-inc ' + inc_dirs + ' ' + src_names).readlines():
         #
         # Querymodules describes both targets and dependence info.  Targets
         # are the first element of each line followed by a colon and a
@@ -106,15 +108,18 @@ def dict_emitter(target, source, env):
     return target, source
 
 # Define the dictionary builder
-d_bld = Builder(action = 'hasim-dict --tgt-inc ' + dict_inc_tgt + ' --tgt-hw ' + hw_tgt + ' $SOURCES',
+d_bld = Builder(action = 'hasim-dict --src-inc ' + inc_dirs + ' --tgt-inc ' + dict_inc_tgt + ' --tgt-hw ' + hw_tgt + ' $SOURCES',
                 emitter = dict_emitter)
 env.Append(BUILDERS = {'DIC' : d_bld})
+
+# Add dependence info computed by previous dictionary builds (it uses cpp).
+for dic in env['DEFS']['DICT_SRCS'].split():
+    d = '.depends-dic-' + os.path.basename(dic)
+    env.ParseDepends(d, must_exist = False)
 
 # Finally, request dictionary build
 d_tgt = env.DIC(dict_inc_tgt + '/init.h', env['DEFS']['DICT_SRCS'].split())
 tgt += d_tgt
-
-inc_dirs = env['DEFS']['ROOT_DIR_SW_INC']
 
 # Add dependence info computed by previous RRR builds (it uses cpp).
 for rrr in env['DEFS']['RRR_SRCS'].split():
