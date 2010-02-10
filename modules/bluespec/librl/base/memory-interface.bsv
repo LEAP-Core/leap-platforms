@@ -561,3 +561,41 @@ module mkMemInitialized#(MEMORY_IFC#(t_ADDR, t_DATA) mem,
 
     return m;
 endmodule
+
+
+//
+// mkSafeMemoryReader --
+//     A wrapper for memory reader that guarantees output buffer space
+//     before issuing a request to memory.  This helps in deadlock avoidance,
+//     by guaranteeing that memory responses are drained, in the case that a 
+//     memory is shared by several readers.
+//
+module mkSafeMemoryReader#(MEMORY_READER_IFC#(t_ADDR, t_DATA) unsafeReader) (MEMORY_READER_IFC#(t_ADDR, t_DATA))
+    provisos(Bits#(t_DATA, t_DATA_SZ));
+  
+    // State elements.  Notice that bypass/loopy fifo usage preserves performance
+    FIFOF#(Bit#(0)) tokenFIFO <- mkLFIFOF();
+    FIFOF#(t_DATA) outputFIFO <- mkBypassFIFOF();
+    
+    rule response;
+        t_DATA data <- unsafeReader.readRsp;
+        outputFIFO.enq(data);
+    endrule
+
+    method Action readReq(t_ADDR addr);
+        tokenFIFO.enq(0);
+        unsafeReader.readReq(addr);
+    endmethod
+
+    method ActionValue#(t_DATA) readRsp();
+        tokenFIFO.deq;
+        outputFIFO.deq;
+        return outputFIFO.first;
+    endmethod
+
+    method peek = outputFIFO.first;
+    method notEmpty = outputFIFO.notEmpty;
+    method notFull = tokenFIFO.notFull;
+
+endmodule
+
