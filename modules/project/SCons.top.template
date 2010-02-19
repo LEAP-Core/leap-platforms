@@ -11,7 +11,6 @@ defs = {
     'ALL_HW_DIRS'        : '@ALL_HW_DIRS@',
     'APM_FILE'           : '@APM_FILE@',
     'APM_NAME'           : '@APM_NAME@',
-    'BDPI_BAS'           : '@BDPI_BAS@',
     'BDPI_CS'            : '@BDPI_CS@',
     'BSC'                : '@BSC@',
     'BSC_FLAGS_VERILOG'  : '@BSC_FLAGS_VERILOG@',
@@ -20,6 +19,7 @@ defs = {
     'CONNECTION_SCRIPT'  : 'hasim-connect',
     'COST_TABLE'         : '@COST_TABLE@',
     'FPGA_PART_XILINX'   : '@FPGA_PART_XILINX@',
+    'GIVEN_BAS'          : '@GIVEN_BAS@',
     'GIVEN_BMMS'         : '@GIVEN_BMMS@', 
     'GIVEN_ELFS'         : '@GIVEN_ELFS@',
     'GIVEN_CS'           : '@GIVEN_CS@',
@@ -307,7 +307,7 @@ if (env['DEFS']['BSC_VERSION'] >= 13013):
 
 bsc_sim_command += \
     ' -sim -e ' + ROOT_WRAPPER_SYNTH_ID + ' -simdir ' + \
-    TMP_BSC_DIR + ' ' + env['DEFS']['GEN_BAS'] + ' ' + env['DEFS']['BDPI_BAS'] + \
+    TMP_BSC_DIR + ' ' + env['DEFS']['GEN_BAS'] + ' ' + env['DEFS']['GIVEN_BAS'] + \
     ' ' + env['DEFS']['BDPI_CS']
 
 sbin = env.Command(
@@ -344,7 +344,7 @@ env.Alias('exe', exe)
 vexe_gen_command = \
     BSC + ' ' + BSC_FLAGS_VERILOG + ' -vdir ' + env['DEFS']['ROOT_DIR_HW'] + '/' + env['DEFS']['ROOT_DIR_MODEL'] + '/' + env['DEFS']['TMP_BSC_DIR'] + \
     ' -o $TARGET -verilog -e ' + ROOT_WRAPPER_SYNTH_ID + \
-    ' $SOURCES ' + env['DEFS']['BDPI_BAS']
+    ' $SOURCES ' + env['DEFS']['GIVEN_BAS']
 
 vbin = env.Command(
     TMP_BSC_DIR + '/' + APM_NAME + '_hw.vexe',

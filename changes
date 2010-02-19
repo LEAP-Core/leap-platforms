@@ -8717,3 +8717,17 @@ Directory modules/bluespec/librl/base
  memory-interface.bsv      Locally Modified          343 
 
 Added an interface to make multiple reader memories safe.
+
+----------
+kfleming    Date: Fri Feb 19 18:18:21 EST 2010  CSN: CSN-platforms-345
+                  Fri Feb 19 23:18:21 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe
+ unix-pipe-device.awb      Locally Modified          344 
+
+Directory modules/project
+ SCons.top.template        Locally Modified          344 
+
+
+Arbitrary synthesis boundaries/BPDI now supported

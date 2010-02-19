@@ -7,7 +7,14 @@
 %sources -t BSV    -v PUBLIC  unix-pipe-device.bsv
 %sources -t BDPI_H -v PUBLIC  unix-pipe-device-bdpi.h
 %sources -t BDPI_C -v PRIVATE unix-pipe-device-bdpi.c
+
 %sources -t H      -v PUBLIC  unix-pipe-device.h
 %sources -t CPP    -v PRIVATE unix-pipe-device.cpp
 
-%param BDPI_NAMES   "pipe_init pipe_open pipe_read pipe_can_write pipe_write pipe_receive_reset pipe_clear_reset"  "list of BDPI-exported names"
+%generated -t BA pipe_init.ba
+%generated -t BA pipe_open.ba
+%generated -t BA pipe_read.ba
+%generated -t BA pipe_can_write.ba
+%generated -t BA pipe_write.ba
+%generated -t BA pipe_receive_reset.ba
+%generated -t BA pipe_clear_reset.ba
