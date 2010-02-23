@@ -8731,3 +8731,17 @@ Directory modules/project
 
 
 Arbitrary synthesis boundaries/BPDI now supported
+
+----------
+kfleming    Date: Mon Feb 22 22:06:35 EST 2010  CSN: CSN-platforms-346
+                  Tue Feb 23 03:06:35 UTC 2010
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-hybrid-xupv2-serial.apm Locally Modified          345 
+
+Directory modules/project
+ SCons.top.template        Locally Modified          345 
+
+
+Added support for multiple processors with multiple bmms and elfs.

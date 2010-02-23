@@ -85,7 +85,7 @@ serial_device=Serial Physical Device (uBlaze-based)
 physical_platform_utils=Common Physical Platform Utilities
 led_device=General LED Device
 switch_device=General Switch Device
-ddr_sdram_device=DDR SDRAM Physical Device
+ddr_sdram_device=NULL DDR SDRAM Physical Device
 
 [XUP Virtex 2 Serial]
 File=modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup/serial/xilinx-xup-serial.awb
@@ -128,7 +128,6 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/physical-platform/debuggers/null/null-debugger.awb
 Packagehint=platforms
 
-
-[DDR SDRAM Physical Device]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr/ddr-sdram-device.awb
-Packagehint=platforms
+[NULL DDR SDRAM Physical Device]
+File=modules/bluespec/mit-6.375/lab6/ddr-sdram-null/ddr-sdram-device.awb
+Packagehint=mit-6.375

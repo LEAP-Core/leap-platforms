@@ -438,16 +438,20 @@ xilinx_ucf = env.Command(
     'cat $SOURCES > $TARGET')
 
 
-
-
 if len(env['DEFS']['GIVEN_BMMS']) != 0:
-    bmm = ' -bm ' +  env['DEFS']['GIVEN_BMMS']
+    xilinx_bmm = env.Command(
+    XILINX_APM_NAME + '.bmm',
+    clean_split(env['DEFS']['GIVEN_BMMS'], sep = ' '),
+    'cat $SOURCES > $TARGET')
+    #./ works around crappy xilinx parser
+    bmm = ' -bm ./' + XILINX_APM_NAME + '.bmm' 
 else:
+    xilinx_bmm = ''
     bmm = ''
 
 xilinx_ngd = env.Command(
     XILINX_APM_NAME + '.ngd',
-    top_netlist + xilinx_ucf,
+    top_netlist + xilinx_ucf + xilinx_bmm,
     [ Delete(XILINX_APM_NAME + '.bld'),
       Delete(XILINX_APM_NAME + '_ngdbuild.xrpt'),
       # Xilinx project files are created automatically by Xilinx tools, but not
@@ -461,7 +465,6 @@ xilinx_ngd = env.Command(
 
 
 Depends(xilinx_ngd, wrapper_builds)
-Depends(xilinx_ngd, env['DEFS']['GIVEN_BMMS'])
 
 Clean(xilinx_ngd, TMP_XILINX_DIR + '/netlist.lst')
 
@@ -526,8 +529,10 @@ xilinx_trce = env.Command(
     [ xilinx_par, XILINX_APM_NAME + '.pcf' ],
     'trce -e 100 $SOURCES -o $TARGET')
 
+
+
 if len(env['DEFS']['GIVEN_ELFS']) != 0:
-    elf = ' -bd ' + env['DEFS']['GIVEN_ELFS']
+    elf = ' -bd ' + str.join(' -bd ',clean_split(env['DEFS']['GIVEN_ELFS'], sep = ' '))
 else:
     elf = ''
 
@@ -541,7 +546,7 @@ xilinx_bit = env.Command(
     [ Delete('config/signature.sh'),
       'bitgen ' + elf + ' -f $SOURCES $TARGET ' + XILINX_APM_NAME + '.pcf' ])
 
-Depends(xilinx_bit, env['DEFS']['GIVEN_ELFS']);
+Depends(xilinx_bit, clean_split(env['DEFS']['GIVEN_ELFS'], sep = ' '));
 
 # Generate the signature for the FPGA image
 signature = env.Command(
