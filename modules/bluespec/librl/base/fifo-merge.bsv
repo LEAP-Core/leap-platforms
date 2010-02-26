@@ -116,7 +116,7 @@ module mkMergeFIFOFImpl#(FIFOF#(Vector#(n_INPUTS, Maybe#(t_DATA))) dataQ)
     Vector#(n_INPUTS, RWire#(t_DATA)) incomingData <- replicateM(mkRWire());
 
     // Mask of dataQ.first that has already been dequeued.
-    Reg#(Vector#(n_INPUTS, Bool)) alreadyDeq <- mkReg(replicate(False));
+    Reg#(Vector#(n_INPUTS, Bool)) notDeqPort <- mkReg(replicate(True));
 
     // Incoming port interfaces
     Vector#(n_INPUTS, MERGE_FIFOF_IN_PORT#(n_INPUTS, t_DATA)) portsLocal = newVector();
@@ -151,20 +151,15 @@ module mkMergeFIFOFImpl#(FIFOF#(Vector#(n_INPUTS, Maybe#(t_DATA))) dataQ)
     //     Find the first port in the head of dataQ that is valid and
     //     has not been dequeued, according to the didDeq bit mask parameter.
     //
-    function Maybe#(Bit#(TLog#(n_INPUTS))) findValidPort(Vector#(n_INPUTS, Bool) didDeq);
-        let d = dataQ.first();
+    function Maybe#(UInt#(TLog#(n_INPUTS))) findValidPort(Vector#(n_INPUTS, Bool) notDeq);
+        // Vector indicating valid incoming ports
+        Vector#(n_INPUTS, Bool) valid_ports = map(isValid, dataQ.first());
 
-        // Find the lowest number input port with data that hasn't been dequeued.
-        Maybe#(Bit#(TLog#(n_INPUTS))) idx = tagged Invalid;
-        for (Integer p = 0; p < valueOf(n_INPUTS); p = p + 1)
-        begin
-            if (isValid(d[p]) && ! didDeq[p] && ! isValid(idx))
-            begin
-                idx = tagged Valid fromInteger(p);
-            end
-        end
-    
-        return idx;
+        // Vector indicating valid incoming ports not yet seen
+        Vector#(n_INPUTS, Bool) new_valid_ports = unpack(pack(valid_ports) &
+                                                         pack(notDeq));
+
+        return findElem(True, new_valid_ports);
     endfunction
 
 
@@ -174,11 +169,11 @@ module mkMergeFIFOFImpl#(FIFOF#(Vector#(n_INPUTS, Maybe#(t_DATA))) dataQ)
     // the complex computation and vector reads out of the scheduling
     // predictes for the first() and deq() methods.
     //
-    Wire#(Maybe#(Bit#(TLog#(n_INPUTS)))) firstIndex <- mkDWire(tagged Invalid);
+    Wire#(Maybe#(UInt#(TLog#(n_INPUTS)))) firstIndex <- mkDWire(tagged Invalid);
     (* fire_when_enabled *)
     rule findFirstValidPort (True);
         // Compute the index of the next output value
-        firstIndex <= findValidPort(alreadyDeq);
+        firstIndex <= findValidPort(notDeqPort);
     endrule
 
     // If output is available write the value to a wire for consumption by first().
@@ -192,11 +187,11 @@ module mkMergeFIFOFImpl#(FIFOF#(Vector#(n_INPUTS, Maybe#(t_DATA))) dataQ)
     Wire#(Bool) firstIsLastInDataQ <- mkDWire(False);
     (* fire_when_enabled *)
     rule readyForDataDeq (firstIndex matches tagged Valid .idx);
-        let did_deq = alreadyDeq;
-        did_deq[idx] = True;
+        let not_deq = notDeqPort;
+        not_deq[idx] = False;
 
         // Any more valid entries from this set of data?
-        if (findValidPort(did_deq) matches tagged Invalid)
+        if (findValidPort(not_deq) matches tagged Invalid)
             firstIsLastInDataQ <= True;
     endrule
 
@@ -221,7 +216,7 @@ module mkMergeFIFOFImpl#(FIFOF#(Vector#(n_INPUTS, Maybe#(t_DATA))) dataQ)
 
 
     method Bit#(TLog#(n_INPUTS)) firstPortID() if (firstIndex matches tagged Valid .idx);
-        return idx;
+        return pack(idx);
     endmethod
 
     method t_DATA first() if (firstValue matches tagged Valid .v);
@@ -235,12 +230,12 @@ module mkMergeFIFOFImpl#(FIFOF#(Vector#(n_INPUTS, Maybe#(t_DATA))) dataQ)
         begin
             // No more
             dataQ.deq();
-            alreadyDeq <= replicate(False);
+            notDeqPort <= replicate(True);
         end
         else
         begin
             // There are still more
-            alreadyDeq[idx] <= True;
+            notDeqPort[idx] <= False;
         end
     endmethod
 

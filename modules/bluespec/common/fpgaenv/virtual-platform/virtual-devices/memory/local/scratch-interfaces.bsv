@@ -25,10 +25,10 @@
 typedef `VDEV_SCRATCH__NENTRIES SCRATCHPAD_N_CLIENTS;
 
 //
-// Scratchpad port number.  Add 1 to the number of clients in case there is
-// only one client.  Bit#(0) is not a valid array index.
+// Scratchpad port number.  Add 2 to the number of clients in case there are
+// zero or one clients.  Bit#(0) is not a valid array index.
 //
-typedef Bit#(TLog#(TAdd#(1, SCRATCHPAD_N_CLIENTS))) SCRATCHPAD_PORT_NUM;
+typedef Bit#(TLog#(TAdd#(2, SCRATCHPAD_N_CLIENTS))) SCRATCHPAD_PORT_NUM;
 
 //
 // Scratpads are not required to return read results in order.  Clients

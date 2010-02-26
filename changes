@@ -8755,3 +8755,18 @@ Directory modules/bluespec/librl/base
  fifo-merge.bsv            Locally Modified          346 
 
 Add LFIFOF flavor (mkMergeLFIFOF).
+
+----------
+mcadler     Date: Fri Feb 26 12:39:55 EST 2010  CSN: CSN-platforms-348
+                  Fri Feb 26 17:39:55 UTC 2010
+
+
+Directory modules/bluespec/librl/base
+ fifo-merge.bsv            Locally Modified          347 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/local
+ scratch-interfaces.bsv    Locally Modified          347 
+
+- Use standard vector search functions in merge FIFO instead of hand-rolled code.
+- Tweak the hack in the scratchpad index typedef to guarantee the index size is
+  non-zero.
