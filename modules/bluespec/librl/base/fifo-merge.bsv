@@ -65,7 +65,24 @@ module mkMergeFIFOF
     (MERGE_FIFOF#(n_INPUTS, t_DATA))
     provisos(Bits#(t_DATA, t_DATA_SZ));
 
-    let m <- mkMergeFIFOFImpl(False);
+    FIFOF#(Vector#(n_INPUTS, Maybe#(t_DATA))) dataQ <- mkFIFOF();
+
+    let m <- mkMergeFIFOFImpl(dataQ);
+    return m;
+endmodule
+
+
+//
+// Merge FIFO with LFIFO as the internal FIFO.
+//
+module mkMergeLFIFOF
+    // interface:
+    (MERGE_FIFOF#(n_INPUTS, t_DATA))
+    provisos(Bits#(t_DATA, t_DATA_SZ));
+
+    FIFOF#(Vector#(n_INPUTS, Maybe#(t_DATA))) dataQ <- mkLFIFOF();
+
+    let m <- mkMergeFIFOFImpl(dataQ);
     return m;
 endmodule
 
@@ -79,7 +96,9 @@ module mkMergeBypassFIFOF
     (MERGE_FIFOF#(n_INPUTS, t_DATA))
     provisos(Bits#(t_DATA, t_DATA_SZ));
 
-    let m <- mkMergeFIFOFImpl(True);
+    FIFOF#(Vector#(n_INPUTS, Maybe#(t_DATA))) dataQ <- mkBypassFIFOF();
+
+    let m <- mkMergeFIFOFImpl(dataQ);
     return m;
 endmodule
 
@@ -88,13 +107,10 @@ endmodule
 // Internal implementation of the merge FIFO, invoked by the exposed modules
 // above.
 //
-module mkMergeFIFOFImpl#(Bool useBypassFIFO)
+module mkMergeFIFOFImpl#(FIFOF#(Vector#(n_INPUTS, Maybe#(t_DATA))) dataQ)
     // interface:
     (MERGE_FIFOF#(n_INPUTS, t_DATA))
     provisos(Bits#(t_DATA, t_DATA_SZ));
-
-    // Queue that merges all input ports that arrive together into a single entry
-    FIFOF#(Vector#(n_INPUTS, Maybe#(t_DATA))) dataQ <- (useBypassFIFO ? mkBypassFIFOF() : mkFIFOF());
 
     // Wire with data coming in this cycle
     Vector#(n_INPUTS, RWire#(t_DATA)) incomingData <- replicateM(mkRWire());
