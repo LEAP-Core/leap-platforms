@@ -420,10 +420,6 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
               Bits#(t_CACHE_REF_INFO, t_CACHE_REF_INFO_SZ),
               Bits#(t_CACHE_WORD, t_CACHE_WORD_SZ),
 
-              // The interface allows for a number of sets that isn't a
-              // power of 2, but the implementation currently does not.
-              Add#(nSets, 0, TExp#(TLog#(nSets))),
-
               // Write word size must tile into cache line
               Bits#(Vector#(nWordsPerLine, t_CACHE_WORD), t_CACHE_LINE_SZ),
 
@@ -461,6 +457,16 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
               Log#(nWays, TLog#(nWays)),
               Add#(TLog#(TExp#(TLog#(nSets))), 0, TLog#(nSets)),
               Add#(TLog#(TDiv#(TExp#(TLog#(nSets)), 2)), x__, TLog#(nSets)));
+
+    // ***** Elaboration time checks of types"
+    // The interface allows for a number of sets that isn't a
+    // power of 2, but the implementation currently does not.
+   
+    if(valueof(nSets) != valueof(TExp#(TLog#(nSets))))
+    begin
+        error("nSets must be a power of 2");
+    end
+ 
 
 
     // ***** Internal state *****
