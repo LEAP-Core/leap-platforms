@@ -6,6 +6,7 @@
 %sources -t BSV -v PUBLIC   umf-little-endian.bsv
 %sources -t H   -v PUBLIC   umf-little-endian.h
 %sources -t CPP -v PRIVATE  umf-little-endian.cpp
+%sources -t H   -v PUBLIC   umf-awb-size-hacks.h
 %sources -t H   -v PUBLIC   umf-allocator.h
 %sources -t CPP -v PRIVATE  umf-allocator.cpp
 

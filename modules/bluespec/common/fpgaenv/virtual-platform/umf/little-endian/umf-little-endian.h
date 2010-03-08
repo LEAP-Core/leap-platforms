@@ -59,7 +59,6 @@ typedef UINT64 UMF_CHUNK;
 #define UMF_METHOD_ID_MASK     UMF_BIT_MASK(UMF_METHOD_ID_BITS)
 #define UMF_MSG_LENGTH_MASK    UMF_BIT_MASK(UMF_MSG_LENGTH_BITS)
 
-
 // ================ UMF Message ================
 
 typedef class UMF_MESSAGE_CLASS* UMF_MESSAGE;
@@ -122,6 +121,7 @@ class UMF_MESSAGE_CLASS: public PLATFORMS_MODULE_CLASS,
     
     void               AppendBytes(int nbytes, unsigned char data[]);
     void               AppendUINT8(UINT8 data);
+    void               AppendUINT16(UINT16 data);
     void               AppendUINT32(UINT32 data);
     void               AppendUINT64(UINT64 data);
     void               AppendUINT(UINT64 data, int nbytes);
@@ -135,6 +135,7 @@ class UMF_MESSAGE_CLASS: public PLATFORMS_MODULE_CLASS,
     
     void               ExtractBytes(int nbytes, unsigned char data[]);
     UINT8              ExtractUINT8();
+    UINT16             ExtractUINT16();
     UINT32             ExtractUINT32();
     UINT64             ExtractUINT64();
     UINT64             ExtractUINT(int nbytes);
@@ -298,6 +299,15 @@ UMF_MESSAGE_CLASS::ExtractUINT8()
     return retval;
 }
 
+inline UINT16
+UMF_MESSAGE_CLASS::ExtractUINT16()
+{
+    CheckExtractSanity(sizeof(UINT16));
+    UINT16 retval = *(UINT16 *)(&message[readIndex]);
+    readIndex += sizeof(UINT16);
+    return retval;
+}
+
 inline UINT32
 UMF_MESSAGE_CLASS::ExtractUINT32()
 {
@@ -378,6 +388,16 @@ UMF_MESSAGE_CLASS::AppendUINT8(
     ASSERT((writeIndex + sizeof(data)) <= length, "umf: message write overflow");
 
     *(UINT8*)&message[writeIndex] = data;
+    writeIndex += sizeof(data);
+}
+
+inline void
+UMF_MESSAGE_CLASS::AppendUINT16(
+    UINT16 data)
+{
+    ASSERT((writeIndex + sizeof(data)) <= length, "umf: message write overflow");
+
+    *(UINT16*)&message[writeIndex] = data;
     writeIndex += sizeof(data);
 }
 

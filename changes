@@ -8780,3 +8780,50 @@ Directory modules/bluespec/librl/storage/cache
  rl-set-assoc-cache.bsv    Locally Modified          348 
 
 Changed proviso to an elaboration time check.  
+
+----------
+mcadler     Date: Mon Mar  8 16:56:59 EST 2010  CSN: CSN-platforms-350
+                  Mon Mar  8 21:56:59 UTC 2010
+
+
+Directory modules/bluespec/librl/base
+ fifo-functions.bsv        Locally Modified          349 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian
+ umf-awb-size-hacks.h      Locally Added               0 
+ umf-little-endian.h       Locally Modified          349 
+ umf-little-endian.awb     Locally Modified          349 
+
+- Add 16 bit integers to UMF base types.
+
+- Add C preprocessor macros for converting an integer macro value to an
+  integer type.  This is useful for specifying an AWB macro that is a type's
+  size in bits and having C++ magically build, e.g., a UINT64 when the
+  value is 64.  It can then be used in RRR definitions:
+
+    #include "asim/restricted/umf-awb-size-hacks.h"
+    #include "asim/provides/hasim_exascale_port.h"
+
+    #define CF_TILE    BITS_TO_UINT(CHANNEL_FIFOS_TILE_BITS)
+
+    service CHANNEL_FIFOS
+    {
+        server sw (cpp, method) <- hw (bsv, connection)
+        {
+            method NextCycle(in CF_TILE[CHANNEL_FIFOS_TILE_BITS] tile);
+        }
+    }
+
+  or in C++ headers:
+
+    typedef BITS_TO_UINT(CHANNEL_FIFOS_TILE_BITS) CF_TILE;
+
+  Don't expect much if the size isn't 8, 16, 32 or 64.
+
+- Add a new class of Bluespec functions to manage a FIFO.  The old class
+  managed a struct representing the entire fifo (both data and metadata).
+  The new class manages just the metadata and returns the index of the
+  data that should be read or written, depending on the function.  This
+  lets a caller store metadata and data in separate structures and allows
+  the data to be indexed by FIFO slot instead of being loaded and stored
+  as a huge chunk.

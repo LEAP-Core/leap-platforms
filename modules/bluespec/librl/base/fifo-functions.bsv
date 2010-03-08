@@ -36,6 +36,14 @@
 import Vector::*;
 
 
+// ========================================================================
+// ========================================================================
+//
+//   First implementation:  full FIFO in a struct.
+//
+// ========================================================================
+// ========================================================================
+
 //
 // FUNC_FIFO --
 //     Base data type.  The oldest entry is always in slot 0 of the data
@@ -189,4 +197,195 @@ function FUNC_FIFO#(t_DATA, n_ENTRIES) funcFIFO_poke(FUNC_FIFO#(t_DATA, n_ENTRIE
                                                      t_DATA value);
     fifo.data[idx] = value;
     return fifo;
+endfunction
+
+
+
+
+
+// ========================================================================
+// ========================================================================
+//
+//   Second implementation:  struct holds only the metadata for a FIFO.
+//       The full data must be managed outside the functions.  Functions
+//       return the index that must be read/written to complete the
+//       operation.
+//
+// ========================================================================
+// ========================================================================
+
+//
+// FUNC_FIFO_IDX --
+//     Base data type for the FIFO index manages the oldest and newest
+//     pointers.
+//
+typedef struct
+{
+    Bit#(TLog#(n_ENTRIES)) idxOldest;
+    Bit#(TLog#(n_ENTRIES)) idxNextNew;
+    Bool notEmpty;
+}
+FUNC_FIFO_IDX#(numeric type n_ENTRIES)
+    deriving (Eq, Bits);
+
+
+//
+// funcFIFO_IDX_Init --
+//     Initialize a FIFO.
+//
+function FUNC_FIFO_IDX#(n_ENTRIES) funcFIFO_IDX_Init();
+    return FUNC_FIFO_IDX { idxOldest: 0,
+                           idxNextNew: 0,
+                           notEmpty: False };
+endfunction
+
+
+// ========================================================================
+//
+//   Queries
+//
+// ========================================================================
+
+//
+// funcFIFO_IDX_notEmpty
+//
+function Bool funcFIFO_IDX_notEmpty(FUNC_FIFO_IDX#(n_ENTRIES) fifo);
+    return fifo.notEmpty;
+endfunction
+
+
+//
+// funcFIFO_IDX_notFull
+//
+function Bool funcFIFO_IDX_notFull(FUNC_FIFO_IDX#(n_ENTRIES) fifo);
+    return (fifo.idxOldest != fifo.idxNextNew) || ! fifo.notEmpty;
+endfunction
+
+
+//
+// funcFIFO_IDX_numBusySlots
+//
+function Bit#(TLog#(TAdd#(n_ENTRIES, 1))) funcFIFO_IDX_numBusySlots(FUNC_FIFO_IDX#(n_ENTRIES) fifo);
+    Bit#(TLog#(TAdd#(n_ENTRIES, 1))) n_busy;
+
+    if (fifo.idxOldest == fifo.idxNextNew)
+    begin
+        n_busy = funcFIFO_IDX_notEmpty(fifo) ? fromInteger(valueOf(n_ENTRIES)) : 0;
+    end
+    else if (fifo.idxOldest < fifo.idxNextNew)
+    begin
+        n_busy = zeroExtendNP(fifo.idxNextNew - fifo.idxOldest);
+    end
+    else
+    begin
+        n_busy = fromInteger(valueOf(n_ENTRIES)) - zeroExtendNP(fifo.idxOldest - fifo.idxNextNew);
+    end
+
+    return n_busy;
+endfunction
+
+
+// ========================================================================
+//
+//   Unguarded updates
+//
+// ========================================================================
+
+//
+// funcFIFO_IDX_UGfirst
+//
+function Bit#(TLog#(n_ENTRIES)) funcFIFO_IDX_UGfirst(FUNC_FIFO_IDX#(n_ENTRIES) fifo);
+    return fifo.idxOldest;
+endfunction
+
+
+//
+// funcFIFO_IDX_UGdeq
+//
+function FUNC_FIFO_IDX#(n_ENTRIES) funcFIFO_IDX_UGdeq(FUNC_FIFO_IDX#(n_ENTRIES) fifo);
+    if (fifo.idxOldest == fromInteger(valueOf(TSub#(n_ENTRIES, 1))))
+        fifo.idxOldest = 0;
+    else
+        fifo.idxOldest = fifo.idxOldest + 1;
+
+    fifo.notEmpty = (fifo.idxOldest != fifo.idxNextNew);
+
+    return fifo;
+endfunction
+
+
+//
+// funcFIFO_IDX_UGenq
+//
+function Tuple2#(FUNC_FIFO_IDX#(n_ENTRIES),
+                 Bit#(TLog#(n_ENTRIES))) funcFIFO_IDX_UGenq(FUNC_FIFO_IDX#(n_ENTRIES) fifo);
+
+    let enq_idx = fifo.idxNextNew;
+    fifo.notEmpty = True;
+    
+    if (fifo.idxNextNew == fromInteger(valueOf(TSub#(n_ENTRIES, 1))))
+        fifo.idxNextNew = 0;
+    else
+        fifo.idxNextNew = fifo.idxNextNew + 1;
+
+    return tuple2(fifo, enq_idx);
+endfunction
+
+
+// ========================================================================
+//
+//   Guarded updates
+//
+// ========================================================================
+
+//
+// funcFIFO_IDX_first
+//
+function Bit#(TLog#(n_ENTRIES)) funcFIFO_IDX_first(FUNC_FIFO_IDX#(n_ENTRIES) fifo);
+    return when (funcFIFO_IDX_notEmpty(fifo), funcFIFO_IDX_UGfirst(fifo));
+endfunction
+
+
+//
+// funcFIFO_IDX_deq
+//
+function FUNC_FIFO_IDX#(n_ENTRIES) funcFIFO_IDX_deq(FUNC_FIFO_IDX#(n_ENTRIES) fifo);
+    return when (funcFIFO_IDX_notEmpty(fifo), funcFIFO_IDX_UGdeq(fifo));
+endfunction
+
+
+//
+// funcFIFO_IDX_enq
+//
+function Tuple2#(FUNC_FIFO_IDX#(n_ENTRIES),
+                 Bit#(TLog#(n_ENTRIES))) funcFIFO_IDX_enq(FUNC_FIFO_IDX#(n_ENTRIES) fifo);
+    return when (funcFIFO_IDX_notFull(fifo), funcFIFO_IDX_UGenq(fifo));
+endfunction
+
+
+// ========================================================================
+//
+//   Non-FIFO data access for callers that need to access an arbitrary
+//   object in the buffer.
+//
+// ========================================================================
+
+//
+// funcFIFO_IDX_index --
+//     Compute the index of a particular position in the FIFO.
+//
+function Maybe#(Bit#(TLog#(n_ENTRIES))) funcFIFO_IDX_index(FUNC_FIFO_IDX#(n_ENTRIES) fifo,
+                                                           Bit#(TLog#(n_ENTRIES)) idx);
+    let active_slots = funcFIFO_IDX_numBusySlots(fifo);
+    if (zeroExtendNP(idx) >= active_slots)
+    begin
+        return tagged Invalid;
+    end
+    else
+    begin
+        Bit#(TLog#(TAdd#(n_ENTRIES, 1))) s = zeroExtendNP(idx);
+        s = s + zeroExtendNP(fifo.idxOldest);
+        s = s % fromInteger(valueOf(n_ENTRIES));
+        return tagged Valid truncateNP(s);
+    end
 endfunction
