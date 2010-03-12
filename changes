@@ -8874,3 +8874,16 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memor
 StoreLine() now uses MMX/SSE instructions only when they are available.
 The alternate version isn't terrible now that I figured out how to generate
 byte masks.
+
+----------
+pellauer    Date: Fri Mar 12 11:49:13 EST 2010  CSN: CSN-platforms-353
+                  Fri Mar 12 16:49:13 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled
+ xilinx.xst                Locally Modified          352 
+
+
+* Add -iobuf no to HTG .xst script to un-break synthesis boundaries.
+
+Michael P.
