@@ -8861,3 +8861,16 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memor
 
 - Expose the byte-masked write interface in local memory.  That is the native
   hardware support.  The old code exposed only word masks.
+
+----------
+mcadler     Date: Fri Mar 12 09:05:36 EST 2010  CSN: CSN-platforms-352
+                  Fri Mar 12 14:05:36 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-mem-scratch.cpp    Locally Modified          351 
+ hybrid-mem-scratch.h      Locally Modified          351 
+
+StoreLine() now uses MMX/SSE instructions only when they are available.
+The alternate version isn't terrible now that I figured out how to generate
+byte masks.

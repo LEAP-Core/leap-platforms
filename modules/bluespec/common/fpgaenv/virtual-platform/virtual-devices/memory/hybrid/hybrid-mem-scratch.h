@@ -79,6 +79,8 @@ class SCRATCHPAD_MEMORY_SERVER_CLASS: public RRR_SERVER_CLASS,
         return addr & ((SCRATCHPAD_MEMORY_ADDR(1) << SCRATCHPAD_MEMORY_ADDR_BITS) - 1);
     };
 
+    UINT64 FullByteMask(UINT64 mask);
+
   public:
 
     SCRATCHPAD_MEMORY_SERVER_CLASS();

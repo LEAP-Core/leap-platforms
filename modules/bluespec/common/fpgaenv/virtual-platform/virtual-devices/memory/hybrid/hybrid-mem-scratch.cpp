@@ -169,6 +169,7 @@ SCRATCHPAD_MEMORY_SERVER_CLASS::LoadLine(
     return v;
 }
 
+
 //
 // Store --
 //
@@ -181,9 +182,6 @@ SCRATCHPAD_MEMORY_SERVER_CLASS::StoreLine(
     SCRATCHPAD_MEMORY_WORD data2,
     SCRATCHPAD_MEMORY_WORD data3)
 {
-    typedef signed char V8QI __attribute__ ((vector_size (8)));
-    typedef int V2SI __attribute__ ((vector_size (8)));
-
     // Burst the incoming address into a region ID and a pointer to the line.
     UINT32 region = regionID(addr);
     SCRATCHPAD_MEMORY_WORD *store_line = regionBase[region] + regionOffset(addr);
@@ -201,6 +199,11 @@ SCRATCHPAD_MEMORY_SERVER_CLASS::StoreLine(
     // are 1 bit lower, so the mask is shifted left 1 bit for each word using
     // pslld.
     //
+
+#if defined(__MMX__) && defined(__SSE__)
+
+    typedef signed char V8QI __attribute__ ((vector_size (8)));
+    typedef int V2SI __attribute__ ((vector_size (8)));
 
     V8QI mask = V8QI(byteMask);
     __builtin_ia32_maskmovq(V8QI(data0), mask, (char *)(store_line + 0));
@@ -229,4 +232,52 @@ SCRATCHPAD_MEMORY_SERVER_CLASS::StoreLine(
     {
         T1("\t\tS 3:\t" << fmt_data(*(store_line + 3)));
     }
+
+#else
+
+    UINT64 mask = FullByteMask(byteMask);
+    *(store_line + 0) = (data0 & mask) | (*(store_line + 0) & ~mask);
+    if (mask)
+    {
+        T1("\t\tS 0:\t" << fmt_data(*(store_line + 0)));
+    }
+
+    mask = FullByteMask(byteMask << 1);
+    *(store_line + 1) = (data1 & mask) | (*(store_line + 1) & ~mask);
+    if (mask)
+    {
+        T1("\t\tS 0:\t" << fmt_data(*(store_line + 1)));
+    }
+
+    mask = FullByteMask(byteMask << 2);
+    *(store_line + 2) = (data2 & mask) | (*(store_line + 2) & ~mask);
+    if (mask)
+    {
+        T1("\t\tS 0:\t" << fmt_data(*(store_line + 2)));
+    }
+
+    mask = FullByteMask(byteMask << 3);
+    *(store_line + 3) = (data3 & mask) | (*(store_line + 3) & ~mask);
+    if (mask)
+    {
+        T1("\t\tS 0:\t" << fmt_data(*(store_line + 3)));
+    }
+
+#endif
+}
+
+
+//
+// Convert a bit mask appropriate for maskmovq (high bit of each byte)
+// to a full mask for each byte.
+//
+inline UINT64
+SCRATCHPAD_MEMORY_SERVER_CLASS::FullByteMask(
+    UINT64 in_mask)
+{
+    UINT64 pos_mask = in_mask & 0x8080808080808080;
+    UINT64 mask = pos_mask | (pos_mask >> 7) ^ 0x0101010101010101;
+    mask -= 0x0101010101010101;
+    mask |= pos_mask;
+    return mask;
 }
