@@ -25,13 +25,14 @@ service SCRATCHPAD_MEMORY
         // Store Line --
         //     Line sized store.
         //
-        //     wordMask indicates which data elements are valid and should be
-        //     written.  Bit 0 of wordMask corresponds to data0.
+        //     byteMask indicates which data elements are valid and should be
+        //     written.  The mask is designed for use by the SSE maskmovq
+        //     instruction.
         //
         //     Address requirements are the same as load.
         //
-        method StoreLine (in UINT64[64] addr,
-                          in UINT8[8] wordMask,
+        method StoreLine (in UINT64[64] byteMask,
+                          in UINT64[64] addr,
                           in UINT64[64] data0,
                           in UINT64[64] data1,
                           in UINT64[64] data2,

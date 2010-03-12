@@ -53,4 +53,12 @@ module mkLocalMem#(PHYSICAL_DRIVERS drivers)
     method Action writeLine(LOCAL_MEM_ADDR addr, LOCAL_MEM_LINE data);
         noAction;
     endmethod
+
+    method Action writeWordMasked(LOCAL_MEM_ADDR addr, LOCAL_MEM_WORD data, LOCAL_MEM_WORD_MASK mask);
+        noAction;
+    endmethod
+
+    method Action writeLineMasked(LOCAL_MEM_ADDR addr, LOCAL_MEM_LINE data, LOCAL_MEM_LINE_MASK mask);
+        noAction;
+    endmethod
 endmodule

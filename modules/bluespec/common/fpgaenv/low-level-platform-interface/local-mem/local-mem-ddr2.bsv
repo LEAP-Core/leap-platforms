@@ -194,17 +194,31 @@ module mkLocalMem#(PHYSICAL_DRIVERS drivers)
         writeDataQ.enq(LOCAL_MEM_WRITE_REQ { data: unpack(data), mask: unpack(0) });
     endmethod
 
+    method Action writeWordMasked(LOCAL_MEM_ADDR addr, LOCAL_MEM_WORD data, LOCAL_MEM_WORD_MASK mask) if (readReqQ.notFull());
+        match {.l_addr, .w_idx} = localMemBurstAddr(addr);
+    
+        // Build a mask to enable writing just the requested word in a full line.
+        LOCAL_MEM_LINE_MASK l_mask = replicate(replicate(False));
+        l_mask[w_idx] = mask;
+
+        // DRAM mask writes on 0, ignores on 1!  This code depends on the DDR
+        // mask being 1 bit per byte.
+        DDR_FULL_LINE_MASK ddr_mask = unpack(~pack(l_mask));
+
+        // Replicate the data to every word
+        Vector#(LOCAL_MEM_WORDS_PER_LINE, LOCAL_MEM_WORD) line_data;
+        line_data = replicate(data);
+
+        dramDriver.writeReq(localMemLineAddrToAddr(l_addr));
+        writeDataQ.enq(LOCAL_MEM_WRITE_REQ { data: unpack(pack(line_data)), mask: unpack(pack(ddr_mask)) });
+    endmethod
+
     method Action writeLineMasked(LOCAL_MEM_ADDR addr, LOCAL_MEM_LINE data, LOCAL_MEM_LINE_MASK mask) if (readReqQ.notFull());
         dramDriver.writeReq(addr);
 
-        // Convert incoming mask with 1 bit per word to DRAM mask.  Incoming
-        // mask indicates write with 1.  Outgoing mask indicates write with 0.
-        Vector#(LOCAL_MEM_WORDS_PER_LINE, Bit#(TDiv#(SizeOf#(DDR_FULL_LINE_MASK), LOCAL_MEM_WORDS_PER_LINE))) ddr_mask = newVector();
-        for (Integer w = 0; w < valueOf(LOCAL_MEM_WORDS_PER_LINE); w = w + 1)
-        begin
-            // 0 means write the data!
-            ddr_mask[w] = mask[w] ? 0 : -1;
-        end
+        // DRAM mask writes on 0, ignores on 1!  This code depends on the DDR
+        // mask being 1 bit per byte.
+        DDR_FULL_LINE_MASK ddr_mask = unpack(~pack(mask));
 
         writeDataQ.enq(LOCAL_MEM_WRITE_REQ { data: unpack(data), mask: unpack(pack(ddr_mask)) });
     endmethod

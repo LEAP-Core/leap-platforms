@@ -63,6 +63,7 @@ class SCRATCHPAD_MEMORY_SERVER_CLASS: public RRR_SERVER_CLASS,
     size_t regionSize[VDEV_SCRATCH__NENTRIES + 1];
 
     Format fmt_addr;
+    Format fmt_mask;
     Format fmt_data;
 
     // internal methods
@@ -94,8 +95,8 @@ class SCRATCHPAD_MEMORY_SERVER_CLASS: public RRR_SERVER_CLASS,
 
     OUT_TYPE_LoadLine LoadLine(SCRATCHPAD_MEMORY_ADDR addr);
 
-    void StoreLine(SCRATCHPAD_MEMORY_ADDR addr,
-                   UINT8 wordMask,
+    void StoreLine(UINT64 byteMask,
+                   SCRATCHPAD_MEMORY_ADDR addr,
                    SCRATCHPAD_MEMORY_WORD data0,
                    SCRATCHPAD_MEMORY_WORD data1,
                    SCRATCHPAD_MEMORY_WORD data2,

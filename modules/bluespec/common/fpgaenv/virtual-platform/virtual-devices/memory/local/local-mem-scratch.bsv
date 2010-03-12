@@ -43,12 +43,19 @@ import Vector::*;
 `ifdef SCRATCHPAD_MEMORY_USE_LINES_Z
 typedef LOCAL_MEM_ADDR SCRATCHPAD_MEM_ADDRESS;
 typedef LOCAL_MEM_WORD SCRATCHPAD_MEM_VALUE;
+typedef LOCAL_MEM_WORD_SZ SCRATCHPAD_MEM_VALUE_SZ;
+typedef LOCAL_MEM_WORD_MASK SCRATCHPAD_MEM_MASK;
 `else
 typedef LOCAL_MEM_LINE_ADDR SCRATCHPAD_MEM_ADDRESS;
 typedef LOCAL_MEM_LINE SCRATCHPAD_MEM_VALUE;
+typedef LOCAL_MEM_LINE_SZ SCRATCHPAD_MEM_VALUE_SZ;
+typedef LOCAL_MEM_LINE_MASK SCRATCHPAD_MEM_MASK;
 `endif
 
-typedef SCRATCHPAD_MEMORY_VIRTUAL_DEVICE#(SCRATCHPAD_MEM_ADDRESS, SCRATCHPAD_MEM_VALUE) SCRATCHPAD_MEMORY_VDEV;
+
+typedef SCRATCHPAD_MEMORY_VIRTUAL_DEVICE#(SCRATCHPAD_MEM_ADDRESS,
+                                          SCRATCHPAD_MEM_VALUE,
+                                          SCRATCHPAD_MEM_MASK) SCRATCHPAD_MEMORY_VDEV;
 
 
 //
@@ -62,8 +69,8 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
     provisos (Bits#(SCRATCHPAD_MEM_ADDRESS, t_SCRATCHPAD_MEM_ADDRESS_SZ));
 
     DEBUG_FILE debugLog <- (`SCRATCHPAD_MEMORY_DEBUG_ENABLE == 1)?
-                           mkDebugFile("memory_scrathpad.out"):
-                           mkDebugFileNull("memory_scrathpad.out");
+                           mkDebugFile("memory_scratchpad.out"):
+                           mkDebugFileNull("memory_scratchpad.out");
 
     // Total memory allocated
     Reg#(SCRATCHPAD_MEM_ADDRESS) totalAlloc <- mkReg(0);
@@ -178,7 +185,9 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
     //     write method is predicated by readQ.notFull() to ensure
     //     synchronization of read and write requests.
     //
-    method Action write(SCRATCHPAD_MEM_ADDRESS addr, SCRATCHPAD_MEM_VALUE val, SCRATCHPAD_PORT_NUM portNum) if (! initBusy &&& readQ.notFull());
+    method Action write(SCRATCHPAD_MEM_ADDRESS addr,
+                        SCRATCHPAD_MEM_VALUE val,
+                        SCRATCHPAD_PORT_NUM portNum) if (! initBusy &&& readQ.notFull());
         if (portSegmentBase.sub(portNum) matches tagged Valid .segment_base)
         begin
             let p_addr = addr + segment_base;
@@ -194,9 +203,33 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
 
 
     //
+    // writeMasked --
+    //     Same as write() but only write the bytes flagged in byteWriteMask.
+    //
+    method Action writeMasked(SCRATCHPAD_MEM_ADDRESS addr,
+                              SCRATCHPAD_MEM_VALUE val,
+                              SCRATCHPAD_MEM_MASK byteWriteMask,
+                              SCRATCHPAD_PORT_NUM portNum) if (! initBusy &&& readQ.notFull());
+        if (portSegmentBase.sub(portNum) matches tagged Valid .segment_base)
+        begin
+            let p_addr = addr + segment_base;
+            debugLog.record($format("write masked port %0d: addr 0x%x, p_addr 0x%x, val 0x%x, mask %b", portNum, addr, p_addr, val, pack(byteWriteMask)));
+
+`ifdef SCRATCHPAD_MEMORY_USE_LINES_Z
+            llpi.localMem.writeWordMasked(p_addr, val, byteWriteMask);
+`else
+            llpi.localMem.writeLineMasked(localMemLineAddrToAddr(p_addr), val, byteWriteMask);
+`endif
+        end
+    endmethod
+
+
+    //
     // Initialization
     //
-    method ActionValue#(Bool) init(SCRATCHPAD_MEM_ADDRESS allocLastWordIdx, SCRATCHPAD_PORT_NUM portNum);
+    method ActionValue#(Bool) init(SCRATCHPAD_MEM_ADDRESS allocLastWordIdx,
+                                   SCRATCHPAD_PORT_NUM portNum,
+                                   Bool useCentralCache);
         SCRATCHPAD_MEM_ADDRESS last_word = totalAlloc + allocLastWordIdx;
 
         // Arithmetic for debug (includes overflow bit)

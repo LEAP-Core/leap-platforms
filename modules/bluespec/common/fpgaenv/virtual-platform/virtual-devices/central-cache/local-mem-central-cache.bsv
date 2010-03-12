@@ -919,7 +919,16 @@ module mkLocalMemCacheData#(LowLevelPlatformInterface llpi, DEBUG_FILE debugLog)
                             Vector#(LOCAL_MEM_WORDS_PER_LINE, Bool) wordMask,
                             Vector#(LOCAL_MEM_WORDS_PER_LINE, t_CACHE_WORD) val) if (initialized);
 
-        memory.writeLineMasked(getDataIdx(set, way), pack(val), wordMask);
+        // The memory interface uses byte write masks.  Convert the word mask
+        // to bytes.
+        Vector#(LOCAL_MEM_WORDS_PER_LINE,
+                Vector#(LOCAL_MEM_BYTES_PER_WORD, Bool)) byte_mask = newVector();
+        for (Integer w = 0; w < valueOf(LOCAL_MEM_WORDS_PER_LINE); w = w + 1)
+        begin
+            byte_mask[w] = replicate(wordMask[w]);
+        end
+
+        memory.writeLineMasked(getDataIdx(set, way), pack(val), byte_mask);
     endmethod
 
     method Action dataWriteWord(RL_SA_CACHE_SET_IDX#(nSets) set,

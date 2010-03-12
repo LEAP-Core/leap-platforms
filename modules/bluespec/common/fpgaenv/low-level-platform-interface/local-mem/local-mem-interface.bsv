@@ -41,6 +41,8 @@ typedef TMul#(LOCAL_MEM_WORD_SZ, LOCAL_MEM_WORDS_PER_LINE) LOCAL_MEM_LINE_SZ;
 typedef Bit#(LOCAL_MEM_WORD_SZ) LOCAL_MEM_WORD;
 typedef Bit#(LOCAL_MEM_LINE_SZ) LOCAL_MEM_LINE;
 
+typedef TDiv#(LOCAL_MEM_WORD_SZ, 8) LOCAL_MEM_BYTES_PER_WORD;
+
 // Index of a word within a line.  ASSUMES A POWER OF 2 WORDS PER LINE!
 typedef TLog#(LOCAL_MEM_WORDS_PER_LINE) LOCAL_MEM_WORD_IDX_SZ;
 typedef Bit#(LOCAL_MEM_WORD_IDX_SZ) LOCAL_MEM_WORD_IDX;
@@ -55,8 +57,9 @@ typedef TSub#(LOCAL_MEM_ADDR_SZ, LOCAL_MEM_WORD_IDX_SZ) LOCAL_MEM_LINE_ADDR_SZ;
 typedef Bit#(LOCAL_MEM_LINE_ADDR_SZ) LOCAL_MEM_LINE_ADDR;
 
 
-// Mask words within a line
-typedef Vector#(LOCAL_MEM_WORDS_PER_LINE, Bool) LOCAL_MEM_LINE_MASK;
+// Mask bytes within words and lines
+typedef Vector#(LOCAL_MEM_BYTES_PER_WORD, Bool) LOCAL_MEM_WORD_MASK;
+typedef Vector#(LOCAL_MEM_WORDS_PER_LINE, LOCAL_MEM_WORD_MASK) LOCAL_MEM_LINE_MASK;
 
 
 interface LOCAL_MEM;
@@ -77,7 +80,8 @@ interface LOCAL_MEM;
     method Action writeWord(LOCAL_MEM_ADDR addr, LOCAL_MEM_WORD data);
     method Action writeLine(LOCAL_MEM_ADDR addr, LOCAL_MEM_LINE data);
 
-    // Only write words in a line with corresponding True in mask
+    // Only write bytes in a line with corresponding True in mask
+    method Action writeWordMasked(LOCAL_MEM_ADDR addr, LOCAL_MEM_WORD data, LOCAL_MEM_WORD_MASK mask);
     method Action writeLineMasked(LOCAL_MEM_ADDR addr, LOCAL_MEM_LINE data, LOCAL_MEM_LINE_MASK mask);
 endinterface: LOCAL_MEM
 

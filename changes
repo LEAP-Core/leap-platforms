@@ -8827,3 +8827,37 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian
   lets a caller store metadata and data in separate structures and allows
   the data to be indexed by FIFO slot instead of being loaded and stored
   as a huge chunk.
+
+----------
+mcadler     Date: Thu Mar 11 20:12:40 EST 2010  CSN: CSN-platforms-351
+                  Fri Mar 12 01:12:40 UTC 2010
+
+
+Directory modules/bluespec/librl/base
+ bluespec-def.bsv          Locally Modified          350 
+
+Directory modules/bluespec/common/fpgaenv/low-level-platform-interface/local-mem
+ local-mem-null.bsv        Locally Modified          350 
+ local-mem-ddr2.bsv        Locally Modified          350 
+ local-mem-interface.bsv   Locally Modified          350 
+ local-mem-bram.bsv        Locally Modified          350 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/central-cache
+ local-mem-central-cache.bsv Locally Modified          350 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-mem-scratch.cpp    Locally Modified          350 
+ hybrid-mem-scratch.rrr    Locally Modified          350 
+ hybrid-mem-scratch.h      Locally Modified          350 
+ hybrid-mem-scratch.bsv    Locally Modified          350 
+ hybrid-mem-scratch-interfaces.bsv Locally Modified          350 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/local
+ scratch-interfaces.bsv    Locally Modified          350 
+ local-mem-scratch.bsv     Locally Modified          350 
+
+- Add a new category of scratchpad called "uncached".  See the corresponding
+  checkin in hasim for a description.
+
+- Expose the byte-masked write interface in local memory.  That is the native
+  hardware support.  The old code exposed only word masks.

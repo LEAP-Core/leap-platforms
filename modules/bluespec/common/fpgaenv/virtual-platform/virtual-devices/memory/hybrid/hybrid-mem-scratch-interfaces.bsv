@@ -25,10 +25,10 @@
 typedef `VDEV_SCRATCH__NENTRIES SCRATCHPAD_N_CLIENTS;
 
 //
-// Scratchpad port number.  Add 1 to the number of clients in case there is
-// only one client.  Bit#(0) is not a valid array index.
+// Scratchpad port number.  Add 2 to the number of clients in case there are
+// zero or one clients.  Bit#(0) is not a valid array index.
 //
-typedef Bit#(TLog#(TAdd#(1, SCRATCHPAD_N_CLIENTS))) SCRATCHPAD_PORT_NUM;
+typedef Bit#(TLog#(TAdd#(2, SCRATCHPAD_N_CLIENTS))) SCRATCHPAD_PORT_NUM;
 
 //
 // Scratpads are not required to return read results in order.  Clients
@@ -79,14 +79,22 @@ SCRATCHPAD_READ_RESP#(type t_ADDR, type t_DATA)
 // The REF_INFO is used to determine address spaces and route reponses back
 // to the corresponding requester.
 //
-interface SCRATCHPAD_MEMORY_VIRTUAL_DEVICE#(type t_ADDR, type t_DATA);
+interface SCRATCHPAD_MEMORY_VIRTUAL_DEVICE#(type t_ADDR, type t_DATA, type t_MASK);
     method Action readReq(t_ADDR addr, SCRATCHPAD_REF_INFO refInfo);
     method ActionValue#(SCRATCHPAD_READ_RESP#(t_ADDR, t_DATA)) readRsp();
  
-    method Action write(t_ADDR addr, t_DATA val, SCRATCHPAD_PORT_NUM portNum);
+    method Action write(t_ADDR addr,
+                        t_DATA val,
+                        SCRATCHPAD_PORT_NUM portNum);
+    method Action writeMasked(t_ADDR addr,
+                              t_DATA val,
+                              t_MASK byteMask,
+                              SCRATCHPAD_PORT_NUM portNum);
 
     // Initialize a port, requesting an allocation of allocLastWordIdx + 1
     // SCRATCHPAD_MEM_VALUE sized words.
-    method ActionValue#(Bool) init(t_ADDR allocLastWordIdx, SCRATCHPAD_PORT_NUM portNum);
+    method ActionValue#(Bool) init(t_ADDR allocLastWordIdx,
+                                   SCRATCHPAD_PORT_NUM portNum,
+                                   Bool useCentralCache);
 endinterface: SCRATCHPAD_MEMORY_VIRTUAL_DEVICE
 

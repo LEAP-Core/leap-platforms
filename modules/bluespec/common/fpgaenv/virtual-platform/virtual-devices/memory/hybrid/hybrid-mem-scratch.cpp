@@ -61,6 +61,9 @@ SCRATCHPAD_MEMORY_SERVER_CLASS::SCRATCHPAD_MEMORY_SERVER_CLASS()
     sprintf(fmt, "0%dx", sizeof(SCRATCHPAD_MEMORY_ADDR) * 2);
     fmt_addr = Format("0x", fmt);
 
+    sprintf(fmt, "0%dx", sizeof(UINT32) * 2);
+    fmt_mask = Format("0x", fmt);
+
     sprintf(fmt, "0%dx", sizeof(SCRATCHPAD_MEMORY_WORD) * 2);
     fmt_data = Format("0x", fmt);
 }
@@ -166,48 +169,64 @@ SCRATCHPAD_MEMORY_SERVER_CLASS::LoadLine(
     return v;
 }
 
-
 //
 // Store --
 //
 void
 SCRATCHPAD_MEMORY_SERVER_CLASS::StoreLine(
+    UINT64 byteMask,
     SCRATCHPAD_MEMORY_ADDR addr,
-    UINT8 wordMask,
     SCRATCHPAD_MEMORY_WORD data0,
     SCRATCHPAD_MEMORY_WORD data1,
     SCRATCHPAD_MEMORY_WORD data2,
     SCRATCHPAD_MEMORY_WORD data3)
 {
+    typedef signed char V8QI __attribute__ ((vector_size (8)));
+    typedef int V2SI __attribute__ ((vector_size (8)));
+
     // Burst the incoming address into a region ID and a pointer to the line.
     UINT32 region = regionID(addr);
     SCRATCHPAD_MEMORY_WORD *store_line = regionBase[region] + regionOffset(addr);
     
     T1("\tSCRATCHPAD store region " << region
                                     << ": r_addr " << fmt_addr(regionOffset(addr))
-                                    << ", mask " << UINT32(wordMask));
+                                    << ", mask " << fmt_mask(byteMask));
 
     ASSERTX(regionBase[region] != NULL);
     ASSERTX(regionOffset(addr) < regionWords[region]);
 
-    if (wordMask & 1)
+    //
+    // The mask has been arranged so it works well with the maskmovq instruction.
+    // Masks for data0 are in the high bits of each byte.  Masks for data1
+    // are 1 bit lower, so the mask is shifted left 1 bit for each word using
+    // pslld.
+    //
+
+    V8QI mask = V8QI(byteMask);
+    __builtin_ia32_maskmovq(V8QI(data0), mask, (char *)(store_line + 0));
+    if (UINT64(mask) & 0x8080808080808080)
     {
-        *(store_line + 0) = data0;
-        T1("\t\tS 0:\t" << fmt_data(data0));
+        T1("\t\tS 0:\t" << fmt_data(*(store_line + 0)));
     }
-    if (wordMask & 2)
+
+    mask = V8QI(__builtin_ia32_pslld(V2SI(mask), 1));
+    __builtin_ia32_maskmovq(V8QI(data1), mask, (char *)(store_line + 1));
+    if (UINT64(mask) & 0x8080808080808080)
     {
-        *(store_line + 1) = data1;
-        T1("\t\tS 1:\t" << fmt_data(data1));
+        T1("\t\tS 1:\t" << fmt_data(*(store_line + 1)));
     }
-    if (wordMask & 4)
+
+    mask = V8QI(__builtin_ia32_pslld(V2SI(mask), 1));
+    __builtin_ia32_maskmovq(V8QI(data2), mask, (char *)(store_line + 2));
+    if (UINT64(mask) & 0x8080808080808080)
     {
-        *(store_line + 2) = data2;
-        T1("\t\tS 2:\t" << fmt_data(data2));
+        T1("\t\tS 2:\t" << fmt_data(*(store_line + 2)));
     }
-    if (wordMask & 8)
+
+    mask = V8QI(__builtin_ia32_pslld(V2SI(mask), 1));
+    __builtin_ia32_maskmovq(V8QI(data3), mask, (char *)(store_line + 3));
+    if (UINT64(mask) & 0x8080808080808080)
     {
-        *(store_line + 3) = data3;
-        T1("\t\tS 3:\t" << fmt_data(data3));
+        T1("\t\tS 3:\t" << fmt_data(*(store_line + 3)));
     }
 }
