@@ -202,7 +202,14 @@ SCRATCHPAD_MEMORY_SERVER_CLASS::StoreLine(
 
 #if defined(__MMX__) && defined(__SSE__)
 
-    typedef signed char V8QI __attribute__ ((vector_size (8)));
+    // Older versions of the compiler appear to want 
+    // this typedef to be a signed char
+    #if (__GNUC__ >= 4) && (__GNUC_MINOR__ >= 3)
+        typedef char V8QI __attribute__ ((vector_size (8)));
+    #else
+        typedef signed char V8QI __attribute__ ((vector_size (8)));
+    #endif
+
     typedef int V2SI __attribute__ ((vector_size (8)));
 
     V8QI mask = V8QI(byteMask);
@@ -212,21 +219,33 @@ SCRATCHPAD_MEMORY_SERVER_CLASS::StoreLine(
         T1("\t\tS 0:\t" << fmt_data(*(store_line + 0)));
     }
 
-    mask = V8QI(__builtin_ia32_pslld(V2SI(mask), 1));
+    #if (__GNUC__ >= 4) && (__GNUC_MINOR__ >= 4)
+        mask = V8QI(__builtin_ia32_pslld(V2SI(mask), V2SI(1LLU)));
+    #else
+        mask = V8QI(__builtin_ia32_pslld(V2SI(mask), 1));
+    #endif
     __builtin_ia32_maskmovq(V8QI(data1), mask, (char *)(store_line + 1));
     if (UINT64(mask) & 0x8080808080808080)
     {
         T1("\t\tS 1:\t" << fmt_data(*(store_line + 1)));
     }
 
-    mask = V8QI(__builtin_ia32_pslld(V2SI(mask), 1));
+    #if (__GNUC__ >= 4) && (__GNUC_MINOR__ >= 4)
+        mask = V8QI(__builtin_ia32_pslld(V2SI(mask), V2SI(1LLU)));
+    #else
+        mask = V8QI(__builtin_ia32_pslld(V2SI(mask), 1));
+    #endif    
     __builtin_ia32_maskmovq(V8QI(data2), mask, (char *)(store_line + 2));
     if (UINT64(mask) & 0x8080808080808080)
     {
         T1("\t\tS 2:\t" << fmt_data(*(store_line + 2)));
     }
 
-    mask = V8QI(__builtin_ia32_pslld(V2SI(mask), 1));
+    #if (__GNUC__ >= 4) && (__GNUC_MINOR__ >= 4)
+        mask = V8QI(__builtin_ia32_pslld(V2SI(mask), V2SI(1LLU)));
+    #else
+        mask = V8QI(__builtin_ia32_pslld(V2SI(mask), 1));
+    #endif
     __builtin_ia32_maskmovq(V8QI(data3), mask, (char *)(store_line + 3));
     if (UINT64(mask) & 0x8080808080808080)
     {

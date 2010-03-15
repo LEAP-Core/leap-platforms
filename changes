@@ -8887,3 +8887,14 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-ena
 * Add -iobuf no to HTG .xst script to un-break synthesis boundaries.
 
 Michael P.
+
+----------
+kfleming    Date: Sun Mar 14 23:23:56 EDT 2010  CSN: CSN-platforms-354
+                  Mon Mar 15 03:23:56 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-mem-scratch.cpp    Locally Modified          353 
+
+Added support for later model gccs in the scratchpad code.  Some thinking should be done about whether this is the right way to construct the code, but I am checking it in anyway because all my nightlies are shot. 
+
