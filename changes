@@ -8952,3 +8952,16 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memor
 - Add word-sized RRR store method and use it when only one word in a line has
   changes.
 - Clean up GCC version code for inline SSE instructions.
+
+----------
+mcadler     Date: Fri Mar 19 15:25:38 EDT 2010  CSN: CSN-platforms-357
+                  Fri Mar 19 19:25:38 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-mem-scratch.cpp    Locally Modified          356 
+
+Commented out the SSE path of masked writes for two reasons:
+  1.  Our version of GCC corrupted FP state.
+  2.  The SSE version is slower than my non-SSE masking that implements the
+      same function.  Doh!

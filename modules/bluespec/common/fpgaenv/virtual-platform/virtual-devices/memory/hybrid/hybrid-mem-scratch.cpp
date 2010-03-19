@@ -213,7 +213,14 @@ SCRATCHPAD_MEMORY_SERVER_CLASS::StoreLine(
     // pslld.
     //
 
-#if defined(__MMX__) && defined(__SSE__)
+#if defined(__MMX__) && defined(__SSE__) && defined(ENABLE_SSE_FOR_SCRATCHPAD)
+
+    //
+    // Using SSE instructions seemed like a good idea, but they appear to be
+    // slower than the non-SSE version below!  For now we keep the code
+    // here but predicate it with ENABLE_SSE_FOR_SCRATCHPAD, which is not
+    // defined.
+    //
 
     #if (__GNUC__ >= 4) && (__GNUC_MINOR__ >= 4)
         #define SHIFT_BY_1 V2SI(1LLU)
@@ -300,7 +307,7 @@ SCRATCHPAD_MEMORY_SERVER_CLASS::StoreWord(
     ASSERTX(regionBase[region] != NULL);
     ASSERTX(regionOffset(addr) < regionWords[region]);
 
-#if defined(__MMX__) && defined(__SSE__)
+#if defined(__MMX__) && defined(__SSE__) && defined(ENABLE_SSE_FOR_SCRATCHPAD)
 
     V8QI mask = V8QI(byteMask);
     __builtin_ia32_maskmovq(V8QI(data), mask, (char *)(store_word));
