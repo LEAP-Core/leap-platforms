@@ -72,6 +72,19 @@ SCRATCHPAD_READ_RESP#(type t_ADDR, type t_DATA)
 
 
 //
+// Debug scan state
+//
+typedef struct
+{
+    Bool uncachedReqWritePending;
+    Bool uncachedReqReadPending;
+    Bool initQnotEmpty;
+}
+SCRATCHPAD_MEMORY_DEBUG_SCAN
+    deriving (Eq, Bits);
+
+
+//
 // All scratchpad requests flow through a single request/response interface.
 // The platform interface module may fan out connections to clients of the
 // scratchpad using, for example, multiple soft connections.
@@ -96,5 +109,7 @@ interface SCRATCHPAD_MEMORY_VIRTUAL_DEVICE#(type t_ADDR, type t_DATA, type t_MAS
     method ActionValue#(Bool) init(t_ADDR allocLastWordIdx,
                                    SCRATCHPAD_PORT_NUM portNum,
                                    Bool useCentralCache);
+
+    method SCRATCHPAD_MEMORY_DEBUG_SCAN debugScanState();
 endinterface: SCRATCHPAD_MEMORY_VIRTUAL_DEVICE
 

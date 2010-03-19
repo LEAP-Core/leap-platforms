@@ -8898,3 +8898,36 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memor
 
 Added support for later model gccs in the scratchpad code.  Some thinking should be done about whether this is the right way to construct the code, but I am checking it in anyway because all my nightlies are shot. 
 
+
+----------
+mcadler     Date: Fri Mar 19 07:22:04 EDT 2010  CSN: CSN-platforms-355
+                  Fri Mar 19 11:22:04 UTC 2010
+
+
+Directory modules/bluespec/librl/storage
+ fifos.bsv                 Locally Removed           354 
+ librl-bsv-storage.awb     Locally Modified          354 
+ fifo-mem.bsv              Locally Added               0 
+ fifo-scoreboard.bsv       Locally Added               - 
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ Bram.v                    Locally Modified          354 
+ bram.bsv                  Locally Modified          354 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-mem-scratch.awb    Locally Modified          354 
+ hybrid-mem-scratch.bsv    Locally Modified          354 
+ hybrid-mem-scratch-interfaces.bsv Locally Modified          354 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/local
+ scratch-interfaces.bsv    Locally Modified          354 
+ local-mem-scratch.bsv     Locally Modified          354 
+
+- Add a BRAM FIFO that uses the FIFO functions in fifo-functions.bsv
+- Remove all predicates from the unguarded BRAM so that it actually is unguarded.
+- Guarantee that INIT messages go out before all other scratchpad messages.
+- Increase scratchpad hybrid read request metadata buffer size using a BRAM
+  FIFO.  The buffer size limits the number of outstanding host read requests.
+  The limit used to be 16 and is now 1024.  Tuning is not yet done and will
+  depend on the latency of hybrid read requests.
+- Rename fifos.bsv to fifo-scoreboard.bsv

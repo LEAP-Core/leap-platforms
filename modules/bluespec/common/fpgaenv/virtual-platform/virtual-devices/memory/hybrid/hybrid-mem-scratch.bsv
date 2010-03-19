@@ -31,6 +31,7 @@ import Vector::*;
 `include "asim/provides/physical_platform.bsh"
 `include "asim/provides/central_cache.bsh"
 `include "asim/provides/fpga_components.bsh"
+`include "asim/provides/librl_bsv_storage.bsh"
 
 `include "asim/rrr/service_ids.bsh"
 `include "asim/rrr/client_stub_SCRATCHPAD_MEMORY.bsh"
@@ -128,7 +129,7 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
     //
 
     // Scratchpads may delcare that they don't use the central cache
-    LUTRAM#(SCRATCHPAD_PORT_NUM, Bool) portUsesCentralCache <- mkLUTRAMU();
+    Reg#(Vector#(SCRATCHPAD_N_CLIENTS, Bool)) portUsesCentralCache <- mkRegU();
 
     //
     // Scratchpad's central cache port
@@ -136,7 +137,8 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
     let centralCachePort = centralCache.clientPorts[`VDEV_CACHE_SCRATCH - `VDEV_CACHE__BASE];
 
     // Meta-data for outstanding reads from the host
-    FIFO#(SCRATCHPAD_HYBRID_READ_INFO) readReqInfoQ <- mkSizedFIFO(16);
+    NumTypeParam#(1024) reqInfoEntries = ?;
+    FIFO#(SCRATCHPAD_HYBRID_READ_INFO) readReqInfoQ <- mkSizedBRAMFIFO(reqInfoEntries);
 
     FIFOF#(Tuple3#(SCRATCHPAD_MEM_ADDRESS,
                    SCRATCHPAD_MEM_VALUE,
@@ -256,13 +258,13 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
     // ====================================================================
     
     // FIFO1 because it isn't worth the space to pipeline initialization.
-    FIFO#(Tuple3#(SCRATCHPAD_PORT_NUM, SCRATCHPAD_MEM_ADDRESS, Bool)) initQ <- mkFIFO1();
+    FIFOF#(Tuple3#(SCRATCHPAD_PORT_NUM, SCRATCHPAD_MEM_ADDRESS, Bool)) initQ <- mkFIFOF1();
 
     rule initRegion (True);
         match {.port, .alloc_last_word_idx, .use_central_cache} = initQ.first();
         initQ.deq();
 
-        portUsesCentralCache.upd(port, use_central_cache);
+        portUsesCentralCache[port] <= use_central_cache;
         scratchpad_rrr.makeRequest_InitRegion(zeroExtend(port), alloc_last_word_idx);
     endrule
 
@@ -277,7 +279,7 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
     let centralCacheBackingPort = centralCache.backingPorts[`VDEV_CACHE_SCRATCH - `VDEV_CACHE__BASE];
 
 
-    rule backingReadReq (True);
+    rule backingReadReq (! initQ.notEmpty());
         let r <- centralCacheBackingPort.getReadReq();
         let h_addr = hostAddrFromCacheAddr(r.addr);
         debugLog.record($format("backingReadReq: addr=0x%x", h_addr));
@@ -334,7 +336,7 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
         writeCtrlQ.enq(r);
     endrule
 
-    rule backingWriteDataReq (True);
+    rule backingWriteDataReq (! initQ.notEmpty());
         let v <- centralCacheBackingPort.getWriteData();
         debugLog.record($format("backingWriteData: val=0x%x", v));
 
@@ -405,7 +407,8 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
     //     Write a portion of a word to the system.
     //
     (* conservative_implicit_conditions *)
-    rule uncachedWriteReq (uncachedReqQ.first() matches tagged SCRATCHPAD_HYBRID_WRITE .w_req);
+    rule uncachedWriteReq (! initQ.notEmpty() &&&
+                           uncachedReqQ.first() matches tagged SCRATCHPAD_HYBRID_WRITE .w_req);
         let port = w_req.port;
         let l_addr = scratchpadLineAddr(w_req.addr);
         let word_idx = scratchpadWordIdx(w_req.addr);
@@ -496,9 +499,9 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
     //      Request from scratchpad client for data not stored in the central
     //      cache.
     //
-    (* descending_urgency = "initRegion, backingWriteDataReq, backingReadReq, uncachedReadReq, uncachedWriteReq" *)
     (* conservative_implicit_conditions *)
-    rule uncachedReadReq (uncachedReqQ.first() matches tagged SCRATCHPAD_HYBRID_READ .r_req);
+    rule uncachedReadReq (! initQ.notEmpty() &&&
+                          uncachedReqQ.first() matches tagged SCRATCHPAD_HYBRID_READ .r_req);
         let port = r_req.refInfo.portNum;
         let l_addr = scratchpadLineAddr(r_req.addr);
         let w_idx = scratchpadWordIdx(r_req.addr);
@@ -549,27 +552,13 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
             end
         end
         else if (uncachedLastReadAddr.sub(port) matches tagged Valid .lr_addr &&&
-                 lr_addr == l_addr)
+                 lr_addr == l_addr &&&
+                 uncachedLastReadBuf.sub(port) matches tagged Valid .lr_val)
         begin
-            //
-            // The last read buffer was for the same address.
-            //
-            // If the last read buffer is not valid that means there is an
-            // outstanding read request for this line being serviced by the
-            // host.  We have two options:  wait for it to return and block
-            // the uncachedReqQ pipeline or let the pipeline continue by sending
-            // a duplicate request to the host.  On the assumption that
-            // reducing I/O pressure is good, we do nothing, let the current
-            // rule fire again, and wait for the response.
-            //
-
-            if (uncachedLastReadBuf.sub(port) matches tagged Valid .lr_val)
-            begin
-                // The word is valid.  Return it.
-                uncachedReqQ.deq();
-                uncachedReadRspQ.enq(tuple3(r_req.addr, lr_val[w_idx], r_req.refInfo));
-                debugLog.record($format("uncachedReadReq: last read hit, addr=0x%x, idx=%0d, val=0x%x", l_addr, w_idx, lr_val[w_idx]));
-            end
+            // Requested line is already in the last read buffer.
+            uncachedReqQ.deq();
+            uncachedReadRspQ.enq(tuple3(r_req.addr, lr_val[w_idx], r_req.refInfo));
+            debugLog.record($format("uncachedReadReq: last read hit, addr=0x%x, idx=%0d, val=0x%x", l_addr, w_idx, lr_val[w_idx]));
         end
         else
         begin
@@ -620,7 +609,7 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
     // uncachedReadResp --
     //     Forward response from host directly to the scratchpad client.
     //
-    (* descending_urgency = "uncachedReadResp, uncachedReadReq, uncachedWriteReq" *)
+    (* descending_urgency = "uncachedReadResp, uncachedReadReq, uncachedWriteReq, backingWriteDataReq, backingReadReq" *)
     rule uncachedReadResp (! readReqInfoQ.first().fromCentralCache);
         let info = readReqInfoQ.first();
         readReqInfoQ.deq();
@@ -653,6 +642,26 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
     endrule
 
 
+    //
+    // Compute debug scan state.
+    //
+    PulseWire uncachedReqWritePending <- mkPulseWire();    
+    PulseWire uncachedReqReadPending <- mkPulseWire();    
+
+    (* fire_when_enabled *)
+    rule uncachedDebugState (True);
+        if (uncachedReqQ.first() matches tagged SCRATCHPAD_HYBRID_WRITE .w_req)
+        begin
+            uncachedReqWritePending.send();
+        end
+
+        if (uncachedReqQ.first() matches tagged SCRATCHPAD_HYBRID_READ .r_req)
+        begin
+            uncachedReqReadPending.send();
+        end
+    endrule
+
+
     // ====================================================================
     //
     // Scratchpad port methods.
@@ -668,7 +677,7 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
         // Take different paths depending on whether the scratchpad is permitted
         // to store data in the central cache.
         //
-        if (! portUsesCentralCache.sub(refInfo.portNum))
+        if (! portUsesCentralCache[refInfo.portNum])
         begin
             // No caching.  Direct to host.
             SCRATCHPAD_HYBRID_READ_REQ r_req;
@@ -796,5 +805,18 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
 
         initQ.enq(tuple3(portNum, allocLastWordIdx, useCentralCache));
         return True;
+    endmethod
+
+
+    //
+    // Debug (deadlock) scan chain
+    //
+    method SCRATCHPAD_MEMORY_DEBUG_SCAN debugScanState();
+        SCRATCHPAD_MEMORY_DEBUG_SCAN state;
+        state.uncachedReqWritePending = uncachedReqWritePending;
+        state.uncachedReqReadPending = uncachedReqReadPending;
+        state.initQnotEmpty = initQ.notEmpty();
+
+        return state;
     endmethod
 endmodule

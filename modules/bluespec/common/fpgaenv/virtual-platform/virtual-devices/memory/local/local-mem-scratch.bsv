@@ -251,4 +251,8 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
         totalAlloc <= last_word + 1;
         return ok;
     endmethod
+
+    method SCRATCHPAD_MEMORY_DEBUG_SCAN debugScanState();
+        return ?;
+    endmethod
 endmodule

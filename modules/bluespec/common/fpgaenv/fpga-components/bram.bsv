@@ -64,9 +64,9 @@ import "BVI" Bram = module mkBRAMUnguardedNonZero
     parameter dataSize = valueOf(data_SZ);
     parameter numRows = valueOf(TExp#(addr_SZ));
 
-    method readReq(readAddr) enable(readEnable) ready(readReady);
-    method readData readRsp() enable(readDataEnable) ready(readDataReady);
-    method write(writeAddr, writeData) enable(writeEnable) ready(writeReady);
+    method readReq(readAddr) enable(readEnable);
+    method readData readRsp() enable(readDataEnable);
+    method write(writeAddr, writeData) enable(writeEnable);
 
     schedule readReq C readReq;
     schedule readRsp C readRsp;
@@ -134,7 +134,10 @@ endmodule
 //
 module mkBRAMUnguarded
     // interface:
-    (BRAM#(Bit#(addr_SZ), Bit#(data_SZ)));
+        (BRAM#(t_ADDR, t_DATA))
+    provisos
+        (Bits#(t_ADDR, addr_SZ),
+         Bits#(t_DATA, data_SZ));
 
     `ifdef SYNTH
     let mem <- (valueOf(addr_SZ) == 0 || valueOf(data_SZ) == 0)? mkBRAMUnguardedZero(): mkBRAMUnguardedNonZero();
@@ -142,13 +145,18 @@ module mkBRAMUnguarded
     let mem <- mkBRAMUnguardedSim();
     `endif
 
-    method Action readReq(Bit#(addr_SZ) addr) = mem.readReq(addr);
-    method ActionValue#(Bit#(data_SZ)) readRsp() = mem.readRsp();
+    method Action readReq(t_ADDR addr) = mem.readReq(pack(addr));
+
+    method ActionValue#(t_DATA) readRsp();
+        let m <- mem.readRsp();
+        return unpack(m);
+    endmethod
+
     method t_DATA peek() = ?;     // Don't use this method
     method Bool notEmpty() = ?;   // Don't use this method
     method Bool notFull() = True;
 
-    method Action write(Bit#(addr_SZ) addr, Bit#(data_SZ) val) = mem.write(addr, val);
+    method Action write(t_ADDR addr, t_DATA val) = mem.write(pack(addr), pack(val));
     method Bool writeNotFull() = True;
 endmodule
 
