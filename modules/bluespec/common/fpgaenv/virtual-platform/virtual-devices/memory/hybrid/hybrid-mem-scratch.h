@@ -103,6 +103,10 @@ class SCRATCHPAD_MEMORY_SERVER_CLASS: public RRR_SERVER_CLASS,
                    SCRATCHPAD_MEMORY_WORD data1,
                    SCRATCHPAD_MEMORY_WORD data2,
                    SCRATCHPAD_MEMORY_WORD data3);
+
+    void StoreWord(UINT64 byteMask,
+                   SCRATCHPAD_MEMORY_ADDR addr,
+                   SCRATCHPAD_MEMORY_WORD data);
 };
 
 // Now that the server class is defined the RRR wrapper can be loaded.

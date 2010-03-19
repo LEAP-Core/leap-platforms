@@ -61,8 +61,7 @@ SCRATCHPAD_MEMORY_SERVER_CLASS::SCRATCHPAD_MEMORY_SERVER_CLASS()
     sprintf(fmt, "0%dx", sizeof(SCRATCHPAD_MEMORY_ADDR) * 2);
     fmt_addr = Format("0x", fmt);
 
-    sprintf(fmt, "0%dx", sizeof(UINT32) * 2);
-    fmt_mask = Format("0x", fmt);
+    fmt_mask = fmt_addr;
 
     sprintf(fmt, "0%dx", sizeof(SCRATCHPAD_MEMORY_WORD) * 2);
     fmt_data = Format("0x", fmt);
@@ -173,6 +172,20 @@ SCRATCHPAD_MEMORY_SERVER_CLASS::LoadLine(
 //
 // Store --
 //
+
+// Vector type definitions...
+//
+// Older versions of the compiler appear to want 
+// this typedef to be a signed char
+#if (__GNUC__ >= 4) && (__GNUC_MINOR__ >= 3)
+    typedef char V8QI __attribute__ ((vector_size (8)));
+#else
+    typedef signed char V8QI __attribute__ ((vector_size (8)));
+#endif
+
+typedef int V2SI __attribute__ ((vector_size (8)));
+
+
 void
 SCRATCHPAD_MEMORY_SERVER_CLASS::StoreLine(
     UINT64 byteMask,
@@ -186,9 +199,9 @@ SCRATCHPAD_MEMORY_SERVER_CLASS::StoreLine(
     UINT32 region = regionID(addr);
     SCRATCHPAD_MEMORY_WORD *store_line = regionBase[region] + regionOffset(addr);
     
-    T1("\tSCRATCHPAD store region " << region
-                                    << ": r_addr " << fmt_addr(regionOffset(addr))
-                                    << ", mask " << fmt_mask(byteMask));
+    T1("\tSCRATCHPAD store line, region " << region
+                                          << ": r_addr " << fmt_addr(regionOffset(addr))
+                                          << ", mask " << fmt_mask(byteMask));
 
     ASSERTX(regionBase[region] != NULL);
     ASSERTX(regionOffset(addr) < regionWords[region]);
@@ -202,15 +215,11 @@ SCRATCHPAD_MEMORY_SERVER_CLASS::StoreLine(
 
 #if defined(__MMX__) && defined(__SSE__)
 
-    // Older versions of the compiler appear to want 
-    // this typedef to be a signed char
-    #if (__GNUC__ >= 4) && (__GNUC_MINOR__ >= 3)
-        typedef char V8QI __attribute__ ((vector_size (8)));
+    #if (__GNUC__ >= 4) && (__GNUC_MINOR__ >= 4)
+        #define SHIFT_BY_1 V2SI(1LLU)
     #else
-        typedef signed char V8QI __attribute__ ((vector_size (8)));
+        #define SHIFT_BY_1 1
     #endif
-
-    typedef int V2SI __attribute__ ((vector_size (8)));
 
     V8QI mask = V8QI(byteMask);
     __builtin_ia32_maskmovq(V8QI(data0), mask, (char *)(store_line + 0));
@@ -219,33 +228,21 @@ SCRATCHPAD_MEMORY_SERVER_CLASS::StoreLine(
         T1("\t\tS 0:\t" << fmt_data(*(store_line + 0)));
     }
 
-    #if (__GNUC__ >= 4) && (__GNUC_MINOR__ >= 4)
-        mask = V8QI(__builtin_ia32_pslld(V2SI(mask), V2SI(1LLU)));
-    #else
-        mask = V8QI(__builtin_ia32_pslld(V2SI(mask), 1));
-    #endif
+    mask = V8QI(__builtin_ia32_pslld(V2SI(mask), SHIFT_BY_1));
     __builtin_ia32_maskmovq(V8QI(data1), mask, (char *)(store_line + 1));
     if (UINT64(mask) & 0x8080808080808080)
     {
         T1("\t\tS 1:\t" << fmt_data(*(store_line + 1)));
     }
 
-    #if (__GNUC__ >= 4) && (__GNUC_MINOR__ >= 4)
-        mask = V8QI(__builtin_ia32_pslld(V2SI(mask), V2SI(1LLU)));
-    #else
-        mask = V8QI(__builtin_ia32_pslld(V2SI(mask), 1));
-    #endif    
+    mask = V8QI(__builtin_ia32_pslld(V2SI(mask), SHIFT_BY_1));
     __builtin_ia32_maskmovq(V8QI(data2), mask, (char *)(store_line + 2));
     if (UINT64(mask) & 0x8080808080808080)
     {
         T1("\t\tS 2:\t" << fmt_data(*(store_line + 2)));
     }
 
-    #if (__GNUC__ >= 4) && (__GNUC_MINOR__ >= 4)
-        mask = V8QI(__builtin_ia32_pslld(V2SI(mask), V2SI(1LLU)));
-    #else
-        mask = V8QI(__builtin_ia32_pslld(V2SI(mask), 1));
-    #endif
+    mask = V8QI(__builtin_ia32_pslld(V2SI(mask), SHIFT_BY_1));
     __builtin_ia32_maskmovq(V8QI(data3), mask, (char *)(store_line + 3));
     if (UINT64(mask) & 0x8080808080808080)
     {
@@ -280,6 +277,45 @@ SCRATCHPAD_MEMORY_SERVER_CLASS::StoreLine(
     if (mask)
     {
         T1("\t\tS 0:\t" << fmt_data(*(store_line + 3)));
+    }
+
+#endif
+}
+
+
+void
+SCRATCHPAD_MEMORY_SERVER_CLASS::StoreWord(
+    UINT64 byteMask,
+    SCRATCHPAD_MEMORY_ADDR addr,
+    SCRATCHPAD_MEMORY_WORD data)
+{
+    // Burst the incoming address into a region ID and a pointer to the line.
+    UINT32 region = regionID(addr);
+    SCRATCHPAD_MEMORY_WORD *store_word = regionBase[region] + regionOffset(addr);
+    
+    T1("\tSCRATCHPAD store word, region " << region
+                                          << ": r_addr " << fmt_addr(regionOffset(addr))
+                                          << ", mask " << fmt_mask(byteMask));
+
+    ASSERTX(regionBase[region] != NULL);
+    ASSERTX(regionOffset(addr) < regionWords[region]);
+
+#if defined(__MMX__) && defined(__SSE__)
+
+    V8QI mask = V8QI(byteMask);
+    __builtin_ia32_maskmovq(V8QI(data), mask, (char *)(store_word));
+    if (UINT64(mask) & 0x8080808080808080)
+    {
+        T1("\t\tS 0:\t" << fmt_data(*store_word));
+    }
+
+#else
+
+    UINT64 mask = FullByteMask(byteMask);
+    *store_word = (data & mask) | (*store_word & ~mask);
+    if (mask)
+    {
+        T1("\t\tS 0:\t" << fmt_data(*store_word));
     }
 
 #endif

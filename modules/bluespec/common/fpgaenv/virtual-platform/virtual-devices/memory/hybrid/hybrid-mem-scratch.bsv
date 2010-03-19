@@ -70,6 +70,7 @@ typedef SCRATCHPAD_MEMORY_VIRTUAL_DEVICE#(SCRATCHPAD_MEM_ADDRESS,
 typedef struct
 {
     SCRATCHPAD_MEM_ADDRESS addr;
+    SCRATCHPAD_MEM_MASK byteMask;
     SCRATCHPAD_REF_INFO refInfo;
 }
 SCRATCHPAD_HYBRID_READ_REQ
@@ -115,8 +116,12 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
               Bits#(SCRATCHPAD_MEM_MASK, t_SCRATCHPAD_MEM_MASK_SZ),
               Log#(SCRATCHPAD_WORDS_PER_LINE, t_WORD_IDX_SZ),
               Add#(t_WORD_IDX_SZ, t_LINE_ADDR_SZ, `SCRATCHPAD_MEMORY_ADDR_BITS),
+
               Alias#(Bit#(t_LINE_ADDR_SZ), t_LINE_ADDR),
-              Alias#(Bit#(t_WORD_IDX_SZ), t_WORD_IDX));
+              Alias#(Bit#(t_WORD_IDX_SZ), t_WORD_IDX),
+
+              Alias#(Vector#(SCRATCHPAD_WORDS_PER_LINE, SCRATCHPAD_MEM_VALUE), t_SCRATCHPAD_LINE),
+              Alias#(Vector#(SCRATCHPAD_WORDS_PER_LINE, SCRATCHPAD_MEM_MASK), t_SCRATCHPAD_LINE_MASK));
 
     DEBUG_FILE debugLog <- (`SRATCHPAD_MEMORY_DEBUG_ENABLE == 1)?
                            mkDebugFile("memory_scratchpad.out"):
@@ -236,8 +241,7 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
     //     shift the mask left 1, use the shifted mask for the second
     //     word, etc.
     //
-    function Bit#(64) maskmovqMask(Vector#(SCRATCHPAD_WORDS_PER_LINE,
-                                           SCRATCHPAD_MEM_MASK) mask);
+    function Bit#(64) maskmovqMask(t_SCRATCHPAD_LINE_MASK mask);
         Bit#(64) out_mask = 0;
         for (Integer w = 0; w < valueOf(SCRATCHPAD_WORDS_PER_LINE); w = w + 1)
         begin
@@ -248,6 +252,46 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
         end
 
         return out_mask;
+    endfunction
+
+
+    function Bool maskIsSet(SCRATCHPAD_MEM_MASK m) = (pack(m) != 0);
+
+    //
+    // storeLine --
+    //     Emit a line to the host, sending as little data as possible.
+    //
+    function Action storeLine(t_SCRATCHPAD_LINE_MASK mask,
+                              Bit#(64) hostAddr,
+                              t_SCRATCHPAD_LINE val);
+    action
+        if (countIf(maskIsSet, mask) != 1)
+        begin
+            //
+            // More than one word is changed.  Write the whole line.
+            //
+            scratchpad_rrr.makeRequest_StoreLine(maskmovqMask(mask),
+                                                 hostAddr,
+                                                 val[0],
+                                                 val[1],
+                                                 val[2],
+                                                 val[3]);
+        end
+        else
+        begin
+            //
+            // Only one word is changed.  Just write the word.
+            //
+            let idx = validValue(findIndex(maskIsSet, mask));
+
+            t_SCRATCHPAD_LINE_MASK w_mask = replicate(replicate(False));
+            w_mask[0] = mask[idx];
+
+            scratchpad_rrr.makeRequest_StoreWord(maskmovqMask(w_mask),
+                                                 hostAddr | zeroExtend(pack(idx)),
+                                                 val[idx]);
+        end
+    endaction
     endfunction
 
 
@@ -307,7 +351,7 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
             r = scratchpad_rrr.peekResponse_LoadLine();
         end
 
-        Vector#(SCRATCHPAD_WORDS_PER_LINE, SCRATCHPAD_MEM_VALUE) line;
+        t_SCRATCHPAD_LINE line;
         line[0] = r.data0;
         line[1] = r.data1;
         line[2] = r.data2;
@@ -325,7 +369,7 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
     // The cache guarantees they messages come in the right order.
     //
     FIFO#(CENTRAL_CACHE_BACKING_WRITE_REQ) writeCtrlQ <- mkFIFO();
-    Reg#(Vector#(SCRATCHPAD_WORDS_PER_LINE, SCRATCHPAD_MEM_VALUE)) writeData <- mkRegU();
+    Reg#(t_SCRATCHPAD_LINE) writeData <- mkRegU();
     Reg#(Bit#(TLog#(SCRATCHPAD_WORDS_PER_LINE))) writeWordIdx <- mkReg(0);
 
     rule backingWriteCtrlReq (True);
@@ -352,18 +396,15 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
             let h_addr = hostAddrFromCacheAddr(ctrl.addr);
 
             // Convert word-based valid mask to byte-based
-            Vector#(SCRATCHPAD_WORDS_PER_LINE, SCRATCHPAD_MEM_MASK) mask = newVector();
+            t_SCRATCHPAD_LINE_MASK mask = newVector();
             for (Integer w = 0; w < valueOf(SCRATCHPAD_WORDS_PER_LINE); w = w + 1)
             begin
                 mask[w] = ctrl.wordValidMask[w] ? replicate(True) : replicate(False);
             end
 
-            scratchpad_rrr.makeRequest_StoreLine(maskmovqMask(mask),
-                                                 h_addr,
-                                                 writeData[0],
-                                                 writeData[1],
-                                                 writeData[2],
-                                                 v);
+            let w_data = writeData;
+            w_data[3] = v;
+            storeLine(mask, h_addr, w_data);
         end
 
         writeWordIdx <= writeWordIdx + 1;
@@ -399,8 +440,7 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
     LUTRAM#(SCRATCHPAD_PORT_NUM, Maybe#(t_LINE_ADDR)) uncachedLastReadAddr <- mkLUTRAM(tagged Invalid);
     // Data
     LUTRAM#(SCRATCHPAD_PORT_NUM,
-            Maybe#(Vector#(SCRATCHPAD_WORDS_PER_LINE,
-                           SCRATCHPAD_MEM_VALUE))) uncachedLastReadBuf <- mkLUTRAMU();
+            Maybe#(t_SCRATCHPAD_LINE)) uncachedLastReadBuf <- mkLUTRAMU();
 
     //
     // uncachedWriteReq --
@@ -417,8 +457,8 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
         begin
             // Get the store buffer data and mask.  It will either be flushed
             // to the host or merged with the new data.
-            Vector#(SCRATCHPAD_WORDS_PER_LINE, SCRATCHPAD_MEM_VALUE) sb_val = newVector();
-            Vector#(SCRATCHPAD_WORDS_PER_LINE, SCRATCHPAD_MEM_MASK) sb_mask = newVector();
+            t_SCRATCHPAD_LINE sb_val = newVector();
+            t_SCRATCHPAD_LINE_MASK sb_mask = newVector();
             for (Integer w = 0; w < valueOf(SCRATCHPAD_WORDS_PER_LINE); w = w + 1)
             begin
                 match {.val, .bmask} = uncachedStoreBuf[w].sub(port);
@@ -435,12 +475,7 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
                 // request will be processed again now that the store buffer
                 // is empty.
                 let h_addr = hostAddrFromLineAddr(port, sb_addr);
-                scratchpad_rrr.makeRequest_StoreLine(maskmovqMask(sb_mask),
-                                                     h_addr,
-                                                     sb_val[0],
-                                                     sb_val[1],
-                                                     sb_val[2],
-                                                     sb_val[3]);
+                storeLine(sb_mask, h_addr, sb_val);
 
                 uncachedStoreBufAddr.upd(port, tagged Invalid);
                 debugLog.record($format("uncachedWriteReq: Flush SB entry, addr=0x%x, mask=%b", l_addr, pack(sb_mask)));
@@ -512,8 +547,8 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
             // Address being read is in the store buffer!
 
             // Get the store buffer data and mask.
-            Vector#(SCRATCHPAD_WORDS_PER_LINE, SCRATCHPAD_MEM_VALUE) sb_val = newVector();
-            Vector#(SCRATCHPAD_WORDS_PER_LINE, SCRATCHPAD_MEM_MASK) sb_mask = newVector();
+            t_SCRATCHPAD_LINE sb_val = newVector();
+            t_SCRATCHPAD_LINE_MASK sb_mask = newVector();
             for (Integer w = 0; w < valueOf(SCRATCHPAD_WORDS_PER_LINE); w = w + 1)
             begin
                 match {.val, .bmask} = uncachedStoreBuf[w].sub(port);
@@ -529,23 +564,20 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
             // request remains unhandled.  It will be rerun on the next FPGA
             // cycle in this rule.
             //
-            if (pack(sb_mask[w_idx]) == -1)
+            // The client specified which bytes must be valid.
+            //
+            if ((pack(sb_mask[w_idx]) & pack(r_req.byteMask)) == pack(r_req.byteMask))
             begin
-                // Full hit.  Return the store buffer.
+                // Hit.  Return the store buffer.
                 uncachedReqQ.deq();
                 uncachedReadRspQ.enq(tuple3(r_req.addr, sb_val[w_idx], r_req.refInfo));
-                debugLog.record($format("uncachedReadReq: SB hit, addr=0x%x, idx=%0d, val=0x%x", l_addr, w_idx, sb_val[w_idx]));
+                debugLog.record($format("uncachedReadReq: SB hit, addr=0x%x, idx=%0d, val=0x%x, mask=%b", l_addr, w_idx, sb_val[w_idx], pack(r_req.byteMask)));
             end
             else
             begin
                 // Flush the store buffer to the host
                 let h_addr = hostAddrFromLineAddr(port, sb_addr);
-                scratchpad_rrr.makeRequest_StoreLine(maskmovqMask(sb_mask),
-                                                     h_addr,
-                                                     sb_val[0],
-                                                     sb_val[1],
-                                                     sb_val[2],
-                                                     sb_val[3]);
+                storeLine(sb_mask, h_addr, sb_val);
 
                 uncachedStoreBufAddr.upd(port, tagged Invalid);
                 debugLog.record($format("uncachedReadReq: Flush SB entry, addr=0x%x, mask=%b", l_addr, pack(sb_mask)));
@@ -620,7 +652,7 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
         let r <- scratchpad_rrr.getResponse_LoadLine();
 
         // Only one word from the line is expected.  Pick the right one.
-        Vector#(SCRATCHPAD_WORDS_PER_LINE, SCRATCHPAD_MEM_VALUE) line;
+        t_SCRATCHPAD_LINE line;
         line[0] = r.data0;
         line[1] = r.data1;
         line[2] = r.data2;
@@ -672,7 +704,9 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
     // readReq --
     //     Incoming read requests.
     //
-    method Action readReq(SCRATCHPAD_MEM_ADDRESS addr, SCRATCHPAD_REF_INFO refInfo);
+    method Action readReq(SCRATCHPAD_MEM_ADDRESS addr,
+                          SCRATCHPAD_MEM_MASK byteMask,
+                          SCRATCHPAD_REF_INFO refInfo);
         //
         // Take different paths depending on whether the scratchpad is permitted
         // to store data in the central cache.
@@ -682,6 +716,7 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
             // No caching.  Direct to host.
             SCRATCHPAD_HYBRID_READ_REQ r_req;
             r_req.addr = addr;
+            r_req.byteMask = byteMask;
             r_req.refInfo = refInfo;
 
             uncachedReqQ.enq(tagged SCRATCHPAD_HYBRID_READ r_req);

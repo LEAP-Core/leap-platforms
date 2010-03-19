@@ -144,7 +144,9 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
     //
     // ====================================================================
 
-    method Action readReq(SCRATCHPAD_MEM_ADDRESS addr, SCRATCHPAD_REF_INFO refInfo) if (! initBusy);
+    method Action readReq(SCRATCHPAD_MEM_ADDRESS addr,
+                          SCRATCHPAD_MEM_MASK byteMask,
+                          SCRATCHPAD_REF_INFO refInfo);
         if (portSegmentBase.sub(refInfo.portNum) matches tagged Valid .segment_base)
         begin
             let p_addr = addr + segment_base;

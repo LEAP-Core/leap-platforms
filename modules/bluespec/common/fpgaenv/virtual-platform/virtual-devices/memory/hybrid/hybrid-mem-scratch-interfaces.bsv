@@ -93,7 +93,9 @@ SCRATCHPAD_MEMORY_DEBUG_SCAN
 // to the corresponding requester.
 //
 interface SCRATCHPAD_MEMORY_VIRTUAL_DEVICE#(type t_ADDR, type t_DATA, type t_MASK);
-    method Action readReq(t_ADDR addr, SCRATCHPAD_REF_INFO refInfo);
+    method Action readReq(t_ADDR addr,
+                          t_MASK byteMask,
+                          SCRATCHPAD_REF_INFO refInfo);
     method ActionValue#(SCRATCHPAD_READ_RESP#(t_ADDR, t_DATA)) readRsp();
  
     method Action write(t_ADDR addr,

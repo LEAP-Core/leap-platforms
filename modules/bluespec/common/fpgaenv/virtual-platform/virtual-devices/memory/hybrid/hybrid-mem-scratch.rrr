@@ -12,16 +12,6 @@ service SCRATCHPAD_MEMORY
         method InitRegion (in UINT32[32] regionID, in UINT32[32] regionEndIdx);
 
         //
-        // Load Line --
-        //     Assume 4 words per line until RRR types are more general.
-        //
-        method LoadLine (in UINT64[64] addr,
-                         out UINT64[64] data0,
-                         out UINT64[64] data1,
-                         out UINT64[64] data2,
-                         out UINT64[64] data3);
-
-        //
         // Store Line --
         //     Line sized store.
         //
@@ -37,5 +27,23 @@ service SCRATCHPAD_MEMORY
                           in UINT64[64] data1,
                           in UINT64[64] data2,
                           in UINT64[64] data3);
+
+        //
+        // Store Word --
+        //     Word sized store.
+        //
+        method StoreWord (in UINT64[64] byteMask,
+                          in UINT64[64] addr,
+                          in UINT64[64] data);
+
+        //
+        // Load Line --
+        //     Assume 4 words per line until RRR types are more general.
+        //
+        method LoadLine (in UINT64[64] addr,
+                         out UINT64[64] data0,
+                         out UINT64[64] data1,
+                         out UINT64[64] data2,
+                         out UINT64[64] data3);
     };
 };

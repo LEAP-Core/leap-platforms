@@ -8931,3 +8931,24 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memor
   The limit used to be 16 and is now 1024.  Tuning is not yet done and will
   depend on the latency of hybrid read requests.
 - Rename fifos.bsv to fifo-scoreboard.bsv
+
+----------
+mcadler     Date: Fri Mar 19 13:42:15 EDT 2010  CSN: CSN-platforms-356
+                  Fri Mar 19 17:42:15 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-mem-scratch.cpp    Locally Modified          355 
+ hybrid-mem-scratch.rrr    Locally Modified          355 
+ hybrid-mem-scratch.h      Locally Modified          355 
+ hybrid-mem-scratch.bsv    Locally Modified          355 
+ hybrid-mem-scratch-interfaces.bsv Locally Modified          355 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/local
+ scratch-interfaces.bsv    Locally Modified          355 
+ local-mem-scratch.bsv     Locally Modified          355 
+
+- Store buffer can now hit at the byte level instead of requiring a full word.
+- Add word-sized RRR store method and use it when only one word in a line has
+  changes.
+- Clean up GCC version code for inline SSE instructions.
