@@ -228,7 +228,7 @@ STATS_DEVICE_SERVER_CLASS::EmitFile()
 
         if ((i != STATS_NULL) && (statName != NULL) && statValues[i] != NULL)
         {
-            statsFile << "\"" << statStr << "\"," << statName;
+            statsFile << statName << ",\"" << statStr << "\"";
             for (UINT32 x = 0; x < statValues[i]->GetLength(); x++)
             {
                 statsFile << "," << statValues[i]->GetStatValue(x);

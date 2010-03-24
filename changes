@@ -8965,3 +8965,19 @@ Commented out the SSE path of masked writes for two reasons:
   1.  Our version of GCC corrupted FP state.
   2.  The SSE version is slower than my non-SSE masking that implements the
       same function.  Doh!
+
+----------
+mcadler     Date: Wed Mar 24 17:43:11 EDT 2010  CSN: CSN-platforms-358
+                  Wed Mar 24 21:43:11 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/stats-device
+ stats-device.cpp          Locally Modified          357 
+
+Directory modules/project
+ project-hybrid-main.cpp   Locally Modified          357 
+
+- Instantiate an ASIM_CONFIG_CLASS in main.  The config class is a member of
+  STATS_EMITTER_CLASS, which will cause the parameter values to be written
+  to the stats file.
+- Reverse name and description in the stats file for better sorting.
