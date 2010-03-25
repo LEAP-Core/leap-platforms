@@ -9,7 +9,6 @@
 #include <string.h>
 
 #include "asim/syntax.h"
-#include "asim/config.h"
 
 #include "asim/dict/init.h"
 
@@ -41,10 +40,6 @@ int main(int argc, char *argv[])
 
     VIRTUAL_PLATFORM vp         = new VIRTUAL_PLATFORM_CLASS();
     APPLICATION_ENV  appEnv     = new APPLICATION_ENV_CLASS(vp);
-
-    // Simulator configuration
-    ASIM_CONFIG sim_config = new ASIM_CONFIG_CLASS();
-    sim_config->RegisterSimulatorConfiguration();
 
     // Set up default switches
     globalArgs = new GLOBAL_ARGS_CLASS();

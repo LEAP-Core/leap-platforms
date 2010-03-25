@@ -29,6 +29,9 @@
 #include <iostream>
 #include <cmath>
 
+#include "asim/syntax.h"
+#include "asim/config.h"
+
 #include "asim/rrr/service_ids.h"
 #include "asim/provides/command_switches.h"
 
@@ -236,6 +239,12 @@ STATS_DEVICE_SERVER_CLASS::EmitFile()
             statsFile << endl;
         }
     }
+
+    // Hack: instantiate the simulator configuration here to be able to emit
+    // all the model parameters.
+    ASIM_CONFIG sim_config = new ASIM_CONFIG_CLASS();
+    sim_config->RegisterSimulatorConfiguration();
+    sim_config->EmitStats(statsFile);
 
     // Call other emitters.  Clearly this needs to be improved with some
     // structured data.

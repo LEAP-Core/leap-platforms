@@ -8981,3 +8981,17 @@ Directory modules/project
   STATS_EMITTER_CLASS, which will cause the parameter values to be written
   to the stats file.
 - Reverse name and description in the stats file for better sorting.
+
+----------
+mcadler     Date: Thu Mar 25 14:38:14 EDT 2010  CSN: CSN-platforms-359
+                  Thu Mar 25 18:38:14 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/stats-device
+ stats-device.cpp          Locally Modified          358 
+
+Directory modules/project
+ project-hybrid-main.cpp   Locally Modified          358 
+
+Previous change broke models that have no support for statistics.  Move the
+instantiation of an ASIM_CONFIG_CLASS down to the stats-device for now.
