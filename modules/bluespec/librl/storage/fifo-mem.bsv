@@ -51,7 +51,7 @@ module mkSizedBRAMFIFOF#(NumTypeParam#(n_ENTRIES) p)
     provisos (Bits#(t_DATA, t_DATA_SZ));
      
     MEMORY_IFC#(Bit#(TLog#(n_ENTRIES)), t_DATA) mem <- mkBRAMUnguarded();
-    FIFOF#(t_DATA) fifo <- mkMemoryFIFOF(mem);
+    FIFOF#(t_DATA) fifo <- mkMemoryFIFOF(p,mem);
     return fifo;
 endmodule
 
@@ -65,7 +65,7 @@ endmodule
 //         2.  Read data is available one cycle following a read request.
 //
 //
-module mkMemoryFIFOF#(MEMORY_IFC#(Bit#(TLog#(n_ENTRIES)), t_DATA) mem)
+module mkMemoryFIFOF#(NumTypeParam#(n_ENTRIES) p, MEMORY_IFC#(Bit#(TLog#(n_ENTRIES)), t_DATA) mem)
     // Interface:
     (FIFOF#(t_DATA))
     provisos (Bits#(t_DATA, t_DATA_SZ));

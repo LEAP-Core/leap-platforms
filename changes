@@ -8995,3 +8995,13 @@ Directory modules/project
 
 Previous change broke models that have no support for statistics.  Move the
 instantiation of an ASIM_CONFIG_CLASS down to the stats-device for now.
+
+----------
+kfleming    Date: Fri Mar 26 13:43:19 EDT 2010  CSN: CSN-platforms-360
+                  Fri Mar 26 17:43:19 UTC 2010
+
+
+Directory modules/bluespec/librl/storage
+ fifo-mem.bsv              Locally Modified          359 
+
+added type parameter to fix breakage in newer bluespec compiler versions. 
