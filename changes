@@ -9005,3 +9005,18 @@ Directory modules/bluespec/librl/storage
  fifo-mem.bsv              Locally Modified          359 
 
 added type parameter to fix breakage in newer bluespec compiler versions. 
+
+----------
+kfleming    Date: Sat Mar 27 21:30:51 EDT 2010  CSN: CSN-platforms-361
+                  Sun Mar 28 01:30:51 UTC 2010
+
+
+Directory modules/project
+ project-pipeline.awb      Locally Added               0 
+ ProjectDependency.py      Locally Added               0 
+ SCons.top.pipeline.template Locally Added               0 
+ XST.py                    Locally Added               0 
+ ModuleList.py             Locally Added               0 
+ Module.py                 Locally Added               0 
+
+Added support for python libraries in SCons.  %scons %library will create a symlink in the new site_scons directory.  This enables, among other things, a relatively easy way to break down the monolithic makefile.  It also sets the stage for Altera support.  The edit is a little rough, and I would like to investigate using a more SConsy object-oriented approach with the Builder and Node classes. 
