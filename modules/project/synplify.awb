@@ -1,0 +1,12 @@
+#/********************************************************************
+#* Python libraries for Synplify synthesis tool
+#********************************************************************/
+
+%name Synplify Synthesis Tool
+%desc Synplify Synthesis Tool
+%attributes tool
+
+%provides synthesis_tool
+
+%scons %library Synplify.py
+

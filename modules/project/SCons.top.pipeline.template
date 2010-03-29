@@ -6,9 +6,7 @@ import sys
 import string
 from model import  *
 from synthesis_tool import  *
-#from synthesis_tool.XST import *
 
-print dir()
 
 SetOption('implicit_cache', 1)
 
@@ -388,24 +386,14 @@ FPGA_PART_XILINX = env['DEFS']['FPGA_PART_XILINX']
 
 wrapper_builds = []
 
-# Concatenate SDC files
-if len(env['DEFS']['GIVEN_SDCS']) != 0:
-    synplify_sdc = env.Command(
-    XILINX_APM_NAME + '.sdc',
-    clean_split(env['DEFS']['GIVEN_SDCS'], sep = ' '),
-    'cat $SOURCES > $TARGET')
-else:
-    synplify_sdc = env.Command(
-    XILINX_APM_NAME + '.sdc',
-    clean_split(env['DEFS']['GIVEN_SDCS'], sep = ' '),
-    'touch $TARGET') 
-
 moduleList = ModuleList(env['DEFS']['SYNTH_WRAPPERS'].split(), 
                         TMP_XILINX_DIR, 
                         clean_split(env['DEFS']['GIVEN_VS'], sep = ' '), 
+                        clean_split(env['DEFS']['GIVEN_SDCS'], sep = ' '), 
                         SYNTH_TOP, 
                         wrapper_v,
-                        env)
+                        env,
+                        APM_NAME)
 
 moduleList.dump()                      
 

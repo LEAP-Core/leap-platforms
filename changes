@@ -9037,3 +9037,17 @@ Added support for awb-style swapable python build modules.  Syntax is
 from module_name import *.  This allows multiple tools
 (XST/Synplify/Quartus/DC) to share similar build pipelines it also
 helps in sharing build code among several projects.  
+
+----------
+kfleming    Date: Mon Mar 29 14:26:01 EDT 2010  CSN: CSN-platforms-363
+                  Mon Mar 29 18:26:01 UTC 2010
+
+
+Directory modules/project
+ synplify.awb              Locally Added               0 
+ SCons.top.pipeline.template Locally Modified          362 
+ Synplify.py               Locally Added               0 
+ XST.py                    Locally Modified          362 
+ ModuleList.py             Locally Modified          362 
+
+Added support for synplify in the new style.  With the <> wire naming change introduced a lilittle while ago, it appears that some designs can now build without a seperate synplify specific udf files. If any problems exist, they are likely due to bi-directional busses, which xilinx seems to handle poorly.
