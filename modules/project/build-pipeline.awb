@@ -1,0 +1,11 @@
+#/********************************************************************
+#* Generic FPGA build pipeline
+#********************************************************************/
+
+%name FPGA Build Pipeline
+%desc FPGA Build Pipeline
+%attributes tool
+
+%provides fpga_build_pipeline
+
+%requires synthesis_tool

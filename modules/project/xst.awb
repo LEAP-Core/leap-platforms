@@ -1,0 +1,12 @@
+#/********************************************************************
+#* Python libraries for XST synthesis tool
+#********************************************************************/
+
+%name XST Synthesis Tool
+%desc XST Synthesis Tool
+%attributes tool
+
+%provides synthesis_tool
+
+%scons %library XST.py
+

@@ -4,9 +4,11 @@ import os
 import re
 import sys
 import string
-import ModuleList
-import Module
-import XST
+from model import  *
+from synthesis_tool import  *
+#from synthesis_tool.XST import *
+
+print dir()
 
 SetOption('implicit_cache', 1)
 
@@ -398,7 +400,7 @@ else:
     clean_split(env['DEFS']['GIVEN_SDCS'], sep = ' '),
     'touch $TARGET') 
 
-moduleList = ModuleList.ModuleList(env['DEFS']['SYNTH_WRAPPERS'].split(), 
+moduleList = ModuleList(env['DEFS']['SYNTH_WRAPPERS'].split(), 
                         TMP_XILINX_DIR, 
                         clean_split(env['DEFS']['GIVEN_VS'], sep = ' '), 
                         SYNTH_TOP, 
@@ -407,41 +409,7 @@ moduleList = ModuleList.ModuleList(env['DEFS']['SYNTH_WRAPPERS'].split(),
 
 moduleList.dump()                      
 
-#if(env['DEFS']['SYNTHESIS_TOOL'] == "synplify_pro"):
-#    top_netlist = env.Command(
-#        XILINX_APM_NAME + '.edf',
-#        wrapper_v + clean_split(env['DEFS']['GIVEN_VS'], sep = ' ') + ['config/' + APM_NAME + '.synplify.prj'] + synplify_sdc,
-#        [ Delete(XILINX_APM_NAME + '.srr'),
-#          Delete(XILINX_APM_NAME + '_xst.xrpt'),
-#          'synplify_pro -batch config/' + APM_NAME + '.synplify.prj' ])
-
-#    Clean(top_netlist,  XILINX_APM_NAME + '.srp')
-#else:
-    #
-    # Parallel Xst build.  Each synthesis boundary is independent.
-    #
-#    for wrapper in env['DEFS']['SYNTH_WRAPPERS'].split():
-#        w = env.Command(
-#            TMP_XILINX_DIR + '/' + wrapper + '.ngc',
-#            wrapper_v + clean_split(env['DEFS']['GIVEN_VS'], sep = ' ') + ['config/' + wrapper + '.xst'],
-#            [ Delete(TMP_XILINX_DIR + '/' + wrapper + '.srp'),
-#              Delete(TMP_XILINX_DIR + '/' + wrapper + '_xst.xrpt'),
-#              'xst -intstyle silent -ifn config/' + wrapper + '.xst -ofn ' + TMP_XILINX_DIR + '/' + wrapper + '.srp',
-#              '@echo xst ' + wrapper + ' build complete.' ])
-
-#        wrapper_builds += w
-#        Clean(w,  TMP_XILINX_DIR + '/' + wrapper + '.srp')
-
-#    top_netlist = env.Command(
-#        XILINX_SYNTH_TOP + '.ngc',
-#        wrapper_v + clean_split(env['DEFS']['GIVEN_VS'], sep = ' ') + ['config/' + SYNTH_TOP + '.xst'],
-#        [ Delete(XILINX_SYNTH_TOP + '.srp'),
-#          Delete(XILINX_SYNTH_TOP + '_xst.xrpt'),
-#          'xst -intstyle silent -ifn config/' + SYNTH_TOP + '.xst -ofn ' + XILINX_SYNTH_TOP + '.srp',
-#          '@echo xst ' + SYNTH_TOP + ' build complete.' ])
-
-#    Clean(top_netlist,  XILINX_SYNTH_TOP + '.srp')
-synthesisDependency = XST.Synthesis(moduleList);
+synthesisDependency = Synthesize(moduleList);
 
 
 # Concatenate UCF files

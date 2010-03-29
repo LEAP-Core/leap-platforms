@@ -11,6 +11,7 @@
 %requires application_env 
 %requires fpgaenv
 %requires project_common
+%requires fpga_build_pipeline
 
 %public  project-hybrid-main.bsv
 %public  project-hybrid-main.h
@@ -24,7 +25,6 @@
 %scons %top     SCons.top.pipeline.template
 %scons %library ModuleList.py
 %scons %library Module.py
-%scons %library XST.py
 %scons %library ProjectDependency.py
 %scons %hw      SCons.hw.template
 %scons %sw      SCons.sw.template

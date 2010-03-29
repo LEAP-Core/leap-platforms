@@ -9020,3 +9020,20 @@ Directory modules/project
  Module.py                 Locally Added               0 
 
 Added support for python libraries in SCons.  %scons %library will create a symlink in the new site_scons directory.  This enables, among other things, a relatively easy way to break down the monolithic makefile.  It also sets the stage for Altera support.  The edit is a little rough, and I would like to investigate using a more SConsy object-oriented approach with the Builder and Node classes. 
+
+----------
+kfleming    Date: Sun Mar 28 21:19:21 EDT 2010  CSN: CSN-platforms-362
+                  Mon Mar 29 01:19:21 UTC 2010
+
+
+Directory modules/project
+ project-pipeline.awb      Locally Modified          361 
+ xst.awb                   Locally Added               0 
+ SCons.top.pipeline.template Locally Modified          361 
+ XST.py                    Locally Modified          361 
+ build-pipeline.awb        Locally Added               0 
+
+Added support for awb-style swapable python build modules.  Syntax is
+from module_name import *.  This allows multiple tools
+(XST/Synplify/Quartus/DC) to share similar build pipelines it also
+helps in sharing build code among several projects.  

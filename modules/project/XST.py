@@ -1,15 +1,13 @@
 import os
 
 from SCons.Script import *
+from model import  *
 
-import ModuleList
-import Module
-import ProjectDependency
 
 #this might be better implemented as a 'Node' in scons, but 
 #I want to get something working before exploring that path
 
-class Synthesis(ProjectDependency.ProjectDependency):
+class Synthesize(ProjectDependency):
   def __init__(self, moduleList):
     for module in moduleList.moduleList:    
         w = moduleList.env.Command(
