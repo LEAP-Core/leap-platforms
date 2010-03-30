@@ -32,6 +32,7 @@ import Vector::*;
 `include "asim/provides/central_cache.bsh"
 `include "asim/provides/fpga_components.bsh"
 `include "asim/provides/librl_bsv_storage.bsh"
+`include "asim/provides/scratchpad_memory_common.bsh"
 
 `include "asim/rrr/service_ids.bsh"
 `include "asim/rrr/client_stub_SCRATCHPAD_MEMORY.bsh"
@@ -123,7 +124,7 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
               Alias#(Vector#(SCRATCHPAD_WORDS_PER_LINE, SCRATCHPAD_MEM_VALUE), t_SCRATCHPAD_LINE),
               Alias#(Vector#(SCRATCHPAD_WORDS_PER_LINE, SCRATCHPAD_MEM_MASK), t_SCRATCHPAD_LINE_MASK));
 
-    DEBUG_FILE debugLog <- (`SRATCHPAD_MEMORY_DEBUG_ENABLE == 1)?
+    DEBUG_FILE debugLog <- (`SCRATCHPAD_MEMORY_DEBUG_ENABLE == 1)?
                            mkDebugFile("memory_scratchpad.out"):
                            mkDebugFileNull("memory_scratchpad.out");  
 

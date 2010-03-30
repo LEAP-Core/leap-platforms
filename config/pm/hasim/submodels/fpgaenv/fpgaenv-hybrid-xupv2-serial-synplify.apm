@@ -73,7 +73,7 @@ serial_device=Serial Physical Device (uBlaze-based) for Synplify
 physical_platform_utils=Common Physical Platform Utilities
 led_device=General LED Device
 switch_device=General Switch Device
-ddr_sdram_device=DDR SDRAM Physical Device for Synplify
+ddr_sdram_device=DDR SDRAM Physical Device
 
 [XUP Virtex 2 Serial]
 File=modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup/serial/xilinx-xup-serial.awb
@@ -103,10 +103,6 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/serial/ublaze-serial/serial-device-ublaze-synplify.awb
 Packagehint=platforms
 
-[DDR SDRAM Physical Device for Synplify]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr/ddr-sdram-device-synplify.awb
-Packagehint=platforms
-
 [6375 Virtual Devices]
 File=config/pm/mit-6.375/6375-virtual-devices.apm
 Packagehint=mit-6.375
@@ -114,8 +110,6 @@ Packagehint=mit-6.375
 [Burst Memory Interface using DDR Memory]
 File=modules/bluespec/mit-6.375/lab6/burst-mem-ddr/burst-mem-ddr.awb
 Packagehint=mit-6.375
-
-
 
 [6375 Low Level Platform Interface]
 File=modules/bluespec/mit-6.375/lab6/xupv2-low-level-platform-interface/hybrid-llpi.awb
@@ -132,3 +126,7 @@ local_mem=NULL Local Memory Interface
 
 [XUP Virtex 2 Serial/Params]
 SYNTHESIS_TOOL="synplify_pro"
+
+[DDR SDRAM Physical Device]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr/ddr-sdram-device.awb
+Packagehint=platforms

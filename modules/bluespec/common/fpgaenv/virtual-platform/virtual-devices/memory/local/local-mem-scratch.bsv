@@ -35,6 +35,7 @@ import Vector::*;
 `include "asim/provides/physical_platform.bsh"
 `include "asim/provides/central_cache.bsh"
 `include "asim/provides/fpga_components.bsh"
+`include "asim/provides/scratchpad_memory_common.bsh"
 
 //
 // Scratchpad memory address and value.  awb parameter controls whether accesses

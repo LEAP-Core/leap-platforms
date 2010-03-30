@@ -9051,3 +9051,31 @@ Directory modules/project
  ModuleList.py             Locally Modified          362 
 
 Added support for synplify in the new style.  With the <> wire naming change introduced a lilittle while ago, it appears that some designs can now build without a seperate synplify specific udf files. If any problems exist, they are likely due to bi-directional busses, which xilinx seems to handle poorly.
+
+----------
+kfleming    Date: Tue Mar 30 15:08:36 EDT 2010  CSN: CSN-platforms-364
+                  Tue Mar 30 19:08:36 UTC 2010
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-hybrid-xupv2-serial-synplify.apm Locally Modified          363 
+ std-virtual-devices.apm   Locally Modified          363 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-mem-scratch.awb    Locally Modified          363 
+ hybrid-mem-scratch.bsv    Locally Modified          363 
+ hybrid-mem-scratch-interfaces.bsv Locally Removed           363 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory
+ common/                   Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/common
+ mem-scratch-common.awb    Locally Added               0 
+ mem-scratch-common-interfaces.bsv Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/local
+ scratch-interfaces.bsv    Locally Removed           363 
+ local-mem-scratch.awb     Locally Modified          363 
+ local-mem-scratch.bsv     Locally Modified          363 
+
+Refactored scratchpad to eliminate shared file

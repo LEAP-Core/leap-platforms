@@ -1,0 +1,10 @@
+%name Scratchpad Memory Common Definitions
+%desc Scratchpad Memory Common Definitions
+
+%provides scratchpad_memory_common
+
+%public   mem-scratch-common-interfaces.bsv
+
+%param --global SCRATCHPAD_MEMORY_DEBUG_ENABLE 1 "Enables the scratchpad memory debug"
+
+%param --global SCRATCHPAD_CLIENT_REF_INFO_BITS  11 "Bits available to clients to tag a reference."

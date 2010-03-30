@@ -76,3 +76,10 @@ Packagehint=platforms
 [Debug Scan Device]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/debug-scan-device/debug-scan-device.awb
 Packagehint=platforms
+
+[Hybrid Scratchpad Memory Device/Requires]
+scratchpad_memory_common=Scratchpad Memory Common Definitions
+
+[Scratchpad Memory Common Definitions]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/common/mem-scratch-common.awb
+Packagehint=platforms

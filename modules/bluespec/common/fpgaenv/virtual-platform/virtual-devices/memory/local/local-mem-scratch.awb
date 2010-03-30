@@ -3,10 +3,9 @@
 
 %provides scratchpad_memory
 
-%public scratch-interfaces.bsv
+%requires scratchpad_memory_common
+
 %public local-mem-scratch.bsv
 
 %param SCRATCHPAD_MEMORY_USE_LINES  0  "0 or 1: use word (0) or line (1) accesses to local memory."
 
-%param --global SCRATCHPAD_MEMORY_DEBUG_ENABLE 1 "Enables the scratchpad memory debug"
-%param --global SCRATCHPAD_CLIENT_REF_INFO_BITS   7 "Bits available to clients to tag a reference."
