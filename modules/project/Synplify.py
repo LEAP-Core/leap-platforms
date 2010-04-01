@@ -15,8 +15,8 @@ class Synthesize(ProjectDependency):
 
     #first dump the wrapper files to the new prj 
     for module in moduleList.moduleList:    
-      print "writing wrappers:" . module.synthTop
-      newPrjFile.write('add_file -verilog "$env(BUILD_DIR)/'+module.synthTop+'\n');      
+      print 'writing wrappers:' + module.synthTop +'\n'
+      newPrjFile.write('add_file -verilog \"$env(BUILD_DIR)/'+module.synthTop+'\"\n');      
 
     #and dump the old file contents
     print "Dumping old prj file\n"

@@ -9079,3 +9079,28 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memor
  local-mem-scratch.bsv     Locally Modified          363 
 
 Refactored scratchpad to eliminate shared file
+
+----------
+kfleming    Date: Thu Apr  1 18:14:08 EDT 2010  CSN: CSN-platforms-365
+                  Thu Apr  1 22:14:08 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup/serial
+ xilinx.sdf                Locally Modified          364 
+
+Directory modules/project
+ SCons.hw.pipeline.template Locally Added               0 
+ project-pipeline.awb      Locally Modified          364 
+ Utils.py                  Locally Added               0 
+ SCons.sw.pipeline.template Locally Added               0 
+ ProjectDependency.py      Locally Modified          364 
+ SCons.top.pipeline.template Locally Modified          364 
+ Synplify.py               Locally Modified          364 
+ XST.py                    Locally Modified          364 
+ ModuleList.py             Locally Modified          364 
+ Module.py                 Locally Modified          364 
+
+
+Refactored new build pipeline codes.  Now hasim configure generates a
+module tree data structure for the python code.  Started pulling
+library code out of top template.  Resurrected Synplify code.

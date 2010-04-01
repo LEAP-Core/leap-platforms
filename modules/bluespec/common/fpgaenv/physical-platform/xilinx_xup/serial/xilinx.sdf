@@ -43,7 +43,7 @@ set_option -write_apr_constraint 1
 #set result format/file last
 #This depends on the build dir existing in the environment, which is a little
 #ugly
-project -result_file "$env(BUILD_DIR)/@TMP_XILINX_DIR@/@APM_NAME@.edf"
+project -result_file "$env(BUILD_DIR)/@TMP_XILINX_DIR@/@TOP_MODULE@.edf"
 
 #
 #implementation attributes

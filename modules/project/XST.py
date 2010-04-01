@@ -6,33 +6,30 @@ from model import  *
 #this might be better implemented as a 'Node' in scons, but 
 #I want to get something working before exploring that path
 
-class Synthesize(ProjectDependency):
+class Synthesize():
   def __init__(self, moduleList):
     for module in moduleList.moduleList:    
+        print 'XXX' + moduleList.compileDirectory + '/' + module.wrapperName() + '.ngc' + '\n'
         w = moduleList.env.Command(
-            moduleList.compileDirectory + '/' + module.synthTop + '.ngc',
-            moduleList.givenVs + ['config/' + module.synthTop + '.xst'],
-            [ SCons.Script.Delete(moduleList.compileDirectory + '/' + module.synthTop + '.srp'),
-              SCons.Script.Delete(moduleList.compileDirectory + '/' + module.synthTop + '_xst.xrpt'),
-              'xst -intstyle silent -ifn config/' + module.synthTop + '.xst -ofn ' + moduleList.compileDirectory + '/' + module.synthTop + '.srp',
+            moduleList.compileDirectory + '/' + module.wrapperName() + '.ngc',
+            module.moduleDependency['VERILOG'] + module.moduleDependency['XST'] ,
+            [ SCons.Script.Delete(moduleList.compileDirectory + '/' + module.wrapperName() + '.srp'),
+              SCons.Script.Delete(moduleList.compileDirectory + '/' + module.wrapperName() + '_xst.xrpt'),
+              'xst -intstyle silent -ifn config/' + module.wrapperName() + '.xst -ofn ' + moduleList.compileDirectory + '/' + module.wrapperName() + '.srp',
               '@echo xst ' + moduleList.compileDirectory + ' build complete.' ])
 
-        module.ngc = [moduleList.compileDirectory + '/' + module.synthTop  + '.ngc']
-        module.synthDependency = w 
-
-        self.moduleDependency += w
-        SCons.Script.Clean(w,  moduleList.compileDirectory + '/' + module.synthTop + '.srp')
+        module.moduleDependency['SYNTHESIS'] = [w]
+        SCons.Script.Clean(w,  moduleList.compileDirectory + '/' + module.wrapperName() + '.srp')
     
-    topSRP = moduleList.compileDirectory + '/' + moduleList.synthTop + '.srp'
+    topSRP = moduleList.compileDirectory + '/' + moduleList.topModule.wrapperName() + '.srp'
 
     top_netlist = moduleList.env.Command(
-        moduleList.compileDirectory + '/' + moduleList.synthTop + '.ngc',
-        moduleList.topVerilog + moduleList.givenVs + ['config/' + moduleList.apmName + '.xst'],
+        moduleList.compileDirectory + '/' + moduleList.topModule.wrapperName() + '.ngc',
+        moduleList.topModule.moduleDependency['VERILOG'] + moduleList.topModule.moduleDependency['XST'],
         [ SCons.Script.Delete(topSRP),
-          SCons.Script.Delete(moduleList.compileDirectory + '/' + moduleList.apnName + '_xst.xrpt'),
-          'xst -intstyle silent -ifn config/' + moduleList.apmName + '.xst -ofn ' + topSRP,
+          SCons.Script.Delete(moduleList.compileDirectory + '/' + moduleList.apmName + '_xst.xrpt'),
+          'xst -intstyle silent -ifn config/' + moduleList.topModule.wrapperName() + '.xst -ofn ' + topSRP,
           '@echo xst ' + moduleList.apmName + ' build complete.' ])    
 
-    self.topDependency = top_netlist
-
+    moduleList.topModule.moduleDependency['SYNTHESIS'] = [top_netlist]
     SCons.Script.Clean(top_netlist, topSRP)

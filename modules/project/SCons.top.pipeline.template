@@ -49,6 +49,7 @@ defs = {
     'SW_LIBS'            : '@SW_LIBS@',
     'SYNTH_TOP'          : '@SYNTH_TOP@',
     'SYNTH_WRAPPERS'     : '@SYNTH_WRAPPERS@',
+    'SYNTH_BOUNDARIES'   : [@SYNTH_BOUNDARIES@],
     'TMP_BSC_DIR'        : '@TMP_BSC_DIR@',
     'TMP_XILINX_DIR'     : '@TMP_XILINX_DIR@',
     'WORKSPACE_ROOT'     : '@WORKSPACE_ROOT@',
@@ -62,6 +63,8 @@ env['DEFS']['ROOT_DIR_HW_MODEL'] = env['DEFS']['ROOT_DIR_HW'] + '/' + \
                                    env['DEFS']['ROOT_DIR_MODEL'];
 env['DEFS']['ROOT_DIR_SW_MODEL'] = env['DEFS']['ROOT_DIR_SW'] + '/' + \
                                    env['DEFS']['ROOT_DIR_MODEL'];
+
+utility_names = []
 
 ############################################################################
 ############################################################################
@@ -79,94 +82,6 @@ if os.path.isfile('iface/SConstruct'):
     if (s & 0xffff) != 0:
         print 'Aborting due to iface submodel errors'
         sys.exit(1)
-
-############################################################################
-############################################################################
-##
-## Utility functions used in this module and in submodules
-##
-############################################################################
-############################################################################
-
-utility_names = []
-
-##
-## clean_split --
-##     Split a string into a list using specified separator (default ':'),
-##     dropping empty entries.
-##
-utility_names.append('clean_split')
-def clean_split(list, sep=':'):
-    return [x for x in list.split(sep) if x != '' ]
-
-##
-## rebase_directory --
-##     Rebase directory (d) that is a reference relative to the root build
-##     directory, returning a result relative to cwd.  cwd must also be
-##     relative to the root build directory.
-##
-utility_names.append('rebase_directory')
-def rebase_directory(d, cwd):
-    d = clean_split(d, sep='/')
-    cwd = clean_split(cwd, sep='/')
-
-    for x in cwd:
-        if (len(d) == 0 or d[0] != x):
-            d.insert(0, '..')
-        else:
-            d.pop(0)
-
-    if (len(d) == 0): d = [ '.' ]
-    return '/'.join(d)
-
-##
-## transform_string_list --
-##     Interpret incoming string (str) as a list of substrings separated by (sep).
-##     Add (prefix) and (suffix) to each substring and return a modified string.
-##
-utility_names.append('transform_string_list')
-def transform_string_list(str, sep, prefix, suffix):
-    if (sep == None):
-        sep = ' '
-    t = [ prefix + a + suffix for a in clean_split(str, sep) ]
-    return string.join(t, sep)
-
-
-##
-## As of Bluespec 2008.11.C the -bdir target is put at the head of the search path
-## and the compiler complains about duplicate path entries.
-##
-## This code removes the local build target from the search path.
-##
-utility_names.append('bsc_bdir_prune')
-def bsc_bdir_prune(str, sep, match):
-    t = clean_split(str, sep)
-    if (env['DEFS']['BSC_VERSION'] >= 15480):
-        try:
-            while 1:
-                i = t.index(match)
-                del t[i]
-        except ValueError:
-            pass
-    return string.join(t, sep)
-    
-##
-## one_line_cmd --
-##     Issue a shell command and return the first line of output
-##
-def one_line_cmd(cmd):
-    p = os.popen(cmd)
-    r = p.read().rstrip()
-    p.close()
-    return r
-
-
-##
-## awb_resolver --
-##     Ask awb-resolver for some info.  Return the first line.
-##
-def awb_resolver(arg):
-    return one_line_cmd("awb-resolver " + arg)
 
 
 ############################################################################
@@ -286,7 +201,7 @@ env['DEFS']['BSC_VERSION'] = bsc_version
 ############################################################################
 env['DEFS']['CWD_REL'] = env['DEFS']['ROOT_DIR_HW_MODEL']
 env['DEFS']['BSC_FLAGS'] = env['DEFS']['BSC_FLAGS_VERILOG']
-Export('env ' + " ".join(utility_names))
+Export('env '+ " ".join(utility_names))
 wrapper_v = SConscript([env['DEFS']['ROOT_DIR_HW_MODEL'] + '/SConscript'])
 
 BuildDir(TMP_BSC_DIR, '.', duplicate=0)
@@ -386,19 +301,19 @@ FPGA_PART_XILINX = env['DEFS']['FPGA_PART_XILINX']
 
 wrapper_builds = []
 
-moduleList = ModuleList(env['DEFS']['SYNTH_WRAPPERS'].split(), 
+moduleList = ModuleList(env['DEFS']['SYNTH_BOUNDARIES'], 
                         TMP_XILINX_DIR, 
                         clean_split(env['DEFS']['GIVEN_VS'], sep = ' '), 
                         clean_split(env['DEFS']['GIVEN_SDCS'], sep = ' '), 
-                        SYNTH_TOP, 
-                        wrapper_v,
                         env,
                         APM_NAME)
-
+print "wrapper_v: " + wrapper_v + "\n"
+moduleList.defaultVerilog(wrapper_v)
 moduleList.dump()                      
 
-synthesisDependency = Synthesize(moduleList);
+Synthesize(moduleList)
 
+moduleList.dump()                      
 
 # Concatenate UCF files
 xilinx_ucf = env.Command(
@@ -420,7 +335,7 @@ else:
 
 xilinx_ngd = env.Command(
     XILINX_APM_NAME + '.ngd',
-    synthesisDependency.topDependency + xilinx_ucf + xilinx_bmm,
+    moduleList.getAllDependencies('SYNTHESIS') + xilinx_ucf + xilinx_bmm,
     [ Delete(XILINX_APM_NAME + '.bld'),
       Delete(XILINX_APM_NAME + '_ngdbuild.xrpt'),
       # Xilinx project files are created automatically by Xilinx tools, but not
@@ -626,7 +541,7 @@ if SW_EXE != []:
 
     sw_env['DEFS']['CWD_REL'] = sw_env['DEFS']['ROOT_DIR_SW_MODEL']
 
-    Export('sw_env ' + " ".join(utility_names))
+    Export('sw_env '+ " ".join(utility_names))
     sw_build_dir = sw_env['DEFS']['ROOT_DIR_SW'] + '/obj'
     sw_objects = SConscript([env['DEFS']['ROOT_DIR_SW_MODEL'] + '/SConscript'],
                             build_dir = sw_build_dir,
