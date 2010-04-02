@@ -2,15 +2,11 @@
 #* Python libraries for XST synthesis tool
 #********************************************************************/
 
-%name Xilinx Post-synthesis Toolchain
-%desc Xilinx Post-synthesis Toolchain
+%name Xilinx BMM
+%desc Xilinx BMM
 %attributes tool
 
-%provides post_synthesis_tool
+%provides xilinx_bmm
 
-%requires xilinx_ucf
-%requires xilinx_bmm
-%requires xilinx_ngd
-
-%scons %library XILINX_POST_SYNTH.py
+%scons %library XILINX_BMM.py
 
