@@ -1,0 +1,12 @@
+#/********************************************************************
+#* Python libraries for XST synthesis tool
+#********************************************************************/
+
+%name Xilinx Post-synthesis Toolchain
+%desc Xilinx Post-synthesis Toolchain
+%attributes tool
+
+%provides post_synthesis_tool
+
+%scons %library XILINX_POST_SYNTH.py
+

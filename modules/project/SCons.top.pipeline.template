@@ -6,6 +6,7 @@ import sys
 import string
 from model import  *
 from synthesis_tool import  *
+from post_synthesis_tool import *
 
 
 SetOption('implicit_cache', 1)
@@ -301,59 +302,65 @@ FPGA_PART_XILINX = env['DEFS']['FPGA_PART_XILINX']
 
 wrapper_builds = []
 
-moduleList = ModuleList(env['DEFS']['SYNTH_BOUNDARIES'], 
-                        TMP_XILINX_DIR, 
-                        clean_split(env['DEFS']['GIVEN_VS'], sep = ' '), 
-                        clean_split(env['DEFS']['GIVEN_SDCS'], sep = ' '), 
-                        env,
-                        APM_NAME)
-print "wrapper_v: " + wrapper_v + "\n"
-moduleList.defaultVerilog(wrapper_v)
+moduleList = ModuleList(env)
+
+# moduleList = ModuleList(env['DEFS']['SYNTH_BOUNDARIES'], 
+#                         TMP_XILINX_DIR, 
+#                         clean_split(env['DEFS']['GIVEN_VS'], sep = ' '), 
+#                         clean_split(env['DEFS']['GIVEN_SDCS'], sep = ' '), 
+#                         env,
+#                         APM_NAME)
+# print "wrapper_v: " + wrapper_v + "\n"
+# moduleList.defaultVerilog(wrapper_v)
 moduleList.dump()                      
 
 Synthesize(moduleList)
 
 moduleList.dump()                      
 
+PostSynthesize(moduleList)
+
+moduleList.dump()
+
 # Concatenate UCF files
-xilinx_ucf = env.Command(
-    XILINX_APM_NAME + '.ucf',
-    clean_split(env['DEFS']['GIVEN_UCFS'], sep = ' '),
-    'cat $SOURCES > $TARGET')
+# xilinx_ucf = env.Command(
+#     XILINX_APM_NAME + '.ucf',
+#     clean_split(env['DEFS']['GIVEN_UCFS'], sep = ' '),
+#     'cat $SOURCES > $TARGET')
 
 
-if len(env['DEFS']['GIVEN_BMMS']) != 0:
-    xilinx_bmm = env.Command(
-    XILINX_APM_NAME + '.bmm',
-    clean_split(env['DEFS']['GIVEN_BMMS'], sep = ' '),
-    'cat $SOURCES > $TARGET')
-    #./ works around crappy xilinx parser
-    bmm = ' -bm ./' + XILINX_APM_NAME + '.bmm' 
-else:
-    xilinx_bmm = ''
-    bmm = ''
+# if len(env['DEFS']['GIVEN_BMMS']) != 0:
+#     xilinx_bmm = env.Command(
+#     XILINX_APM_NAME + '.bmm',
+#     clean_split(env['DEFS']['GIVEN_BMMS'], sep = ' '),
+#     'cat $SOURCES > $TARGET')
+#     #./ works around crappy xilinx parser
+#     bmm = ' -bm ./' + XILINX_APM_NAME + '.bmm' 
+# else:
+#     xilinx_bmm = ''
+#     bmm = ''
 
-xilinx_ngd = env.Command(
-    XILINX_APM_NAME + '.ngd',
-    moduleList.getAllDependencies('SYNTHESIS') + xilinx_ucf + xilinx_bmm,
-    [ Delete(XILINX_APM_NAME + '.bld'),
-      Delete(XILINX_APM_NAME + '_ngdbuild.xrpt'),
-      # Xilinx project files are created automatically by Xilinx tools, but not
-      # needed for command line tools.  The project files may be corrupt due
-      # to parallel invocation of xst.  Until we figure out how to move them
-      # or guarantee their safety, just delete them.
-      Delete('xlnx_auto_0.ise'),
-      Delete('xlnx_auto_0_xdb'),
-      'ngdbuild -p ' + FPGA_PART_XILINX + ' -sd ' + env['DEFS']['ROOT_DIR_HW_MODEL'] + ' -uc ' + XILINX_APM_NAME + '.ucf ' + bmm + ' $SOURCE $TARGET',
-      Move(TMP_XILINX_DIR + '/netlist.lst', 'netlist.lst') ])
+# xilinx_ngd = env.Command(
+#     XILINX_APM_NAME + '.ngd',
+#     moduleList.getAllDependencies('SYNTHESIS') + xilinx_ucf + xilinx_bmm,
+#     [ Delete(XILINX_APM_NAME + '.bld'),
+#       Delete(XILINX_APM_NAME + '_ngdbuild.xrpt'),
+#       # Xilinx project files are created automatically by Xilinx tools, but not
+#       # needed for command line tools.  The project files may be corrupt due
+#       # to parallel invocation of xst.  Until we figure out how to move them
+#       # or guarantee their safety, just delete them.
+#       Delete('xlnx_auto_0.ise'),
+#       Delete('xlnx_auto_0_xdb'),
+#       'ngdbuild -p ' + FPGA_PART_XILINX + ' -sd ' + env['DEFS']['ROOT_DIR_HW_MODEL'] + ' -uc ' + XILINX_APM_NAME + '.ucf ' + bmm + ' $SOURCE $TARGET',
+#       Move(TMP_XILINX_DIR + '/netlist.lst', 'netlist.lst') ])
 
 
-Depends(xilinx_ngd, wrapper_builds)
+# Depends(xilinx_ngd, wrapper_builds)
 
-Clean(xilinx_ngd, TMP_XILINX_DIR + '/netlist.lst')
+# Clean(xilinx_ngd, TMP_XILINX_DIR + '/netlist.lst')
 
 # Alias for everything up to map...
-env.Alias('xst', xilinx_ngd + SW_EXE)
+#env.Alias('xst', xilinx_ngd + SW_EXE)
 
 
 #
@@ -378,7 +385,7 @@ else:
 # Map
 xilinx_map = env.Command(
     [ XILINX_APM_NAME + '_map.ncd', XILINX_APM_NAME + '.pcf' ],
-    xilinx_ngd,
+    moduleList.getAllDependencies('NGD'),
     [ Delete(XILINX_APM_NAME + '_map.map'),
       Delete(XILINX_APM_NAME + '_map.mrp'),
       Delete(XILINX_APM_NAME + '_map.ncd'),

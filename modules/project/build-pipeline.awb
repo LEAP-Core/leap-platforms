@@ -9,3 +9,4 @@
 %provides fpga_build_pipeline
 
 %requires synthesis_tool
+%requires post_synthesis_tool
