@@ -21,7 +21,7 @@ class ModuleList:
     self.topModule.dump()  
     for module in self.moduleList:
       module.dump()
-    print "\n "
+    print "\n"
     print "apmName: " + self.apmName + "\n"
 
 
@@ -45,13 +45,16 @@ class ModuleList:
       else:
         print "adding " + module.name + " to module list" 
         self.moduleList.append(module)
+
     self.topModule.moduleDependency['XST'] = ['config/' + self.topModule.wrapperName() + '.xst']
-    self.topModule.moduleDependency['VERILOG'] = ['hw/' + self.topModule.buildPath + '/.bsc/mk_' + self.topModule.name + '_Wrapper.v'] + self.wrapper_v + self.givenVs
+    #Notice that we call get_bluespec_verilog here this will eventually called by the BLUESPEC build rule 
+    self.topModule.moduleDependency['VERILOG'] = ['hw/' + self.topModule.buildPath + '/.bsc/mk_' + self.topModule.name + '_Wrapper.v'] + self.wrapper_v + self.givenVs + Utils.get_bluespec_verilog(env)
+
     self.topModule.moduleDependency['VERILOG_STUB'] = ['hw/' + self.topModule.buildPath + '/.bsc/mk_' + self.topModule.name + '_Wrapper_stub.v'] 
     # deal with other modules
     for module in self.moduleList:
       module.moduleDependency['XST'] = ['config/' + module.wrapperName() + '.xst']
-      module.moduleDependency['VERILOG'] = ['hw/' + module.buildPath + '/.bsc/mk_' + module.name + '_Wrapper.v'] + self.wrapper_v + self.givenVs
+      module.moduleDependency['VERILOG'] = ['hw/' + module.buildPath + '/.bsc/mk_' + module.name + '_Wrapper.v'] + self.wrapper_v + self.givenVs + Utils.get_bluespec_verilog(env)
       module.moduleDependency['VERILOG_STUB'] = ['hw/' + module.buildPath + '/.bsc/mk_' + module.name + '_Wrapper_stub.v']     
     
     

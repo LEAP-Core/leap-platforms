@@ -10,6 +10,7 @@ import os
 import re
 import sys
 import string
+import subprocess
 
 ##
 ## clean_split --
@@ -50,7 +51,6 @@ def transform_string_list(str, sep, prefix, suffix):
     return string.join(t, sep)
 
 
-##
 ## As of Bluespec 2008.11.C the -bdir target is put at the head of the search path
 ## and the compiler complains about duplicate path entries.
 ##
@@ -85,3 +85,20 @@ def one_line_cmd(cmd):
 def awb_resolver(arg):
     return one_line_cmd("awb-resolver " + arg)
 
+##
+## one_line_cmd --
+##     Issue a shell command and return the first line of output
+##
+def get_bluespec_verilog(env):
+    resultArray = []
+    bluespecdir = env['ENV']['BLUESPECDIR']
+    print 'bluespecdir: ' + bluespecdir
+    
+    fileProc = subprocess.Popen(["ls", "-1", bluespecdir + '/Verilog/'], stdout = subprocess.PIPE)
+    fileList = fileProc.stdout.read()
+    print fileList
+    fileArray = clean_split(fileList, sep = '\n')
+    for file in fileArray:
+        if((file != 'main.v') and (file != 'ConstrainedRandom.v')):
+            resultArray.append(bluespecdir + '/Verilog/' + file)
+    return resultArray

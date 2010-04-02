@@ -3,11 +3,6 @@ import ProjectDependency
 
 class Module(ProjectDependency.ProjectDependency):
 
-  #name = ""
-  #buildPath = ""
-  #parent = ""
-  #childArray = []  
-
   def dump(self):
     print "Module: " + self.name + "\n"
     print "\tBuildPath: " + self.buildPath + "\n"

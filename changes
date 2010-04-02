@@ -9154,3 +9154,23 @@ Directory modules/project
   For HTG it must NOT be specified at top level.
 
 - Drop a bypass FIFO from the central cache scratchpad interface for timing.
+
+----------
+kfleming    Date: Fri Apr  2 18:38:23 EDT 2010  CSN: CSN-platforms-371
+                  Fri Apr  2 22:38:23 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup/serial
+ xilinx.sdf                Locally Modified          370 
+
+Directory modules/project
+ Utils.py                  Locally Modified          370 
+ ProjectDependency.py      Locally Modified          370 
+ Synplify.py               Locally Modified          370 
+ ModuleList.py             Locally Modified          370 
+ Module.py                 Locally Modified          370 
+
+
+Synplify finally supports synthesis boundaries. Next up is fixing build dependency issues in XST and parallelizing Synplify.
+
+
