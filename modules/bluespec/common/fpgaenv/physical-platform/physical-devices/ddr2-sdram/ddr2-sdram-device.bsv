@@ -31,6 +31,9 @@ import RWire::*;
 // not flexible.
 //
 
+typedef 1 FPGA_DDR_BANKS;
+typedef `DRAM_MAX_OUTSTANDING_READS FPGA_DDR_MAX_OUTSTANDING_READS;
+
 // The smallest addressable word:
 typedef 64 FPGA_DDR_WORD_SZ;
 typedef Bit#(FPGA_DDR_WORD_SZ) FPGA_DDR_WORD;
@@ -80,6 +83,16 @@ interface DDR2_DRIVER;
     // FPGA_DDR_BURST_LENGTH times for every write request.  The order of
     // writeReq() and writeData() calls are not important.
     method Action writeData(FPGA_DDR_DUALEDGE_DATA data, FPGA_DDR_DUALEDGE_DATA_MASK mask);
+
+`ifndef DRAM_DEBUG_Z
+    // Methods enabled only for debugging the controller:
+
+    // Get status.  Should never block.
+    method Bit#(64) statusCheck();
+    // Set the maximum number of outstanding reads permitted.  Useful for
+    // calibrating sync buffer sizes.
+    method Action setMaxReads(Bit#(TLog#(TAdd#(`DRAM_MAX_OUTSTANDING_READS, 1))) maxReads);
+`endif
 endinterface
 
 
@@ -462,6 +475,13 @@ module mkDDR2Device#(Clock topLevelClock, Reset topLevelReset)
     endrule
 
 
+`ifndef DRAM_DEBUG_Z
+    // Useful for calibrating the optimal size of DRAM_MAX_OUTSTANDING_READS
+    Reg#(Bit#(TLog#(TAdd#(`DRAM_MAX_OUTSTANDING_READS, 1)))) calibrateMaxReads <-
+        mkReg(`DRAM_MAX_OUTSTANDING_READS);
+`endif
+
+
     // ====================================================================
     //
     // Methods
@@ -491,7 +511,26 @@ module mkDDR2Device#(Clock topLevelClock, Reset topLevelReset)
     // Drivers visible to upper layers
     interface DDR2_DRIVER driver;
     
+`ifndef DRAM_DEBUG_Z
+        method Bit#(64) statusCheck();
+            return 0;
+        endmethod
+
+        //
+        // setMaxReads --
+        //     Set a maximum number of outstanding reads that may be lower than
+        //     the available buffer size.  Useful for building one time and
+        //     finding the optimal buffer size.
+        //
+        method Action setMaxReads(Bit#(TLog#(TAdd#(`DRAM_MAX_OUTSTANDING_READS, 1))) maxReads);
+            calibrateMaxReads <= maxReads;
+        endmethod
+`endif
+
         method Action readReq(FPGA_DDR_ADDRESS addr) if ((state == STATE_ready) &&
+`ifndef DRAM_DEBUG_Z
+                                                         (nInflightReads.value() < calibrateMaxReads) &&
+`endif
                                                          (nInflightReads.value() < `DRAM_MAX_OUTSTANDING_READS));
             mergeReqQ.ports[0].enq(tagged DRAM_READ addr);
             nInflightReads.up();

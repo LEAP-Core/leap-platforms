@@ -41,25 +41,24 @@ typedef TMul#(LOCAL_MEM_WORD_SZ, LOCAL_MEM_WORDS_PER_LINE) LOCAL_MEM_LINE_SZ;
 typedef Bit#(LOCAL_MEM_WORD_SZ) LOCAL_MEM_WORD;
 typedef Bit#(LOCAL_MEM_LINE_SZ) LOCAL_MEM_LINE;
 
-typedef TDiv#(LOCAL_MEM_WORD_SZ, 8) LOCAL_MEM_BYTES_PER_WORD;
-
 // Index of a word within a line.  ASSUMES A POWER OF 2 WORDS PER LINE!
 typedef TLog#(LOCAL_MEM_WORDS_PER_LINE) LOCAL_MEM_WORD_IDX_SZ;
 typedef Bit#(LOCAL_MEM_WORD_IDX_SZ) LOCAL_MEM_WORD_IDX;
 
 
-// Address index words in local memory.
-typedef `LOCAL_MEM_ADDR_BITS LOCAL_MEM_ADDR_SZ;
+// Mask bytes within words and lines
+typedef TDiv#(LOCAL_MEM_WORD_SZ, 8) LOCAL_MEM_BYTES_PER_WORD;
+typedef Vector#(LOCAL_MEM_BYTES_PER_WORD, Bool) LOCAL_MEM_WORD_MASK;
+typedef Vector#(LOCAL_MEM_WORDS_PER_LINE, LOCAL_MEM_WORD_MASK) LOCAL_MEM_LINE_MASK;
+
+
+// Address size comes from the underlying memory.  For real memory (e.g.
+// DDR) it is a function of the hardware.  The address is for words.
 typedef Bit#(LOCAL_MEM_ADDR_SZ) LOCAL_MEM_ADDR;
 
 // Address of a line (drops the word index)
 typedef TSub#(LOCAL_MEM_ADDR_SZ, LOCAL_MEM_WORD_IDX_SZ) LOCAL_MEM_LINE_ADDR_SZ;
 typedef Bit#(LOCAL_MEM_LINE_ADDR_SZ) LOCAL_MEM_LINE_ADDR;
-
-
-// Mask bytes within words and lines
-typedef Vector#(LOCAL_MEM_BYTES_PER_WORD, Bool) LOCAL_MEM_WORD_MASK;
-typedef Vector#(LOCAL_MEM_WORDS_PER_LINE, LOCAL_MEM_WORD_MASK) LOCAL_MEM_LINE_MASK;
 
 
 interface LOCAL_MEM;
@@ -87,10 +86,11 @@ endinterface: LOCAL_MEM
 
 
 //
-// localMemBurstAddr --
+// localMemSeparateAddr --
 //     Separate an address into a line-aligned address and a word offset.
 //
-function Tuple2#(LOCAL_MEM_LINE_ADDR, LOCAL_MEM_WORD_IDX) localMemBurstAddr(LOCAL_MEM_ADDR addr);
+function Tuple2#(LOCAL_MEM_LINE_ADDR,
+                 LOCAL_MEM_WORD_IDX) localMemSeparateAddr(LOCAL_MEM_ADDR addr);
     return unpack(addr);
 endfunction
 

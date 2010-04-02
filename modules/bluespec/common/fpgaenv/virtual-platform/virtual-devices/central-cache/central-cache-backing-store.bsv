@@ -60,7 +60,7 @@ module mkCentralCacheBackingConnection#(Integer port, DEBUG_FILE debugLog)
     (CENTRAL_CACHE_BACKING_CONNECTION);
     
     // Internal communication
-    FIFO#(CENTRAL_CACHE_BACKING_READ_REQ) readReqQ <- mkBypassFIFO();
+    FIFO#(CENTRAL_CACHE_BACKING_READ_REQ) readReqQ <- mkFIFO();
     FIFOF#(Bool) writeAckQ <- mkBypassFIFOF();
 
     // FIFO1 to save space.  Throughput isn't terribly important here

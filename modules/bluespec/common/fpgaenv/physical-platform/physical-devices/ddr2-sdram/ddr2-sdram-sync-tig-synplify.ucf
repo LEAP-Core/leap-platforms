@@ -7,33 +7,33 @@
 
 # SyncFIFO: syncReadDataQ
 
-#NET "m_vp_llpi_phys_plat_ddr2_sdram_device_syncReadDataQ_dD_OUT[*]"     TIG;
-NET "m_vp_llpi_phys_plat_ddr2_sdram_device_syncReadDataQ/dGDeqPtr[*]"   TIG;
-NET "m_vp_llpi_phys_plat_ddr2_sdram_device_syncReadDataQ/dGDeqPtr1[*]"  TIG;
-NET "m_vp_llpi_phys_plat_ddr2_sdram_device_syncReadDataQ/sGEnqPtr[*]"   TIG;
-NET "m_vp_llpi_phys_plat_ddr2_sdram_device_syncReadDataQ/sGEnqPtr1[*]"  TIG;
+#NET "*_ddr2_sdram_device_*_syncReadDataQ_dD_OUT[*]"     TIG;
+NET "*_ddr2_sdram_device_*_syncReadDataQ/dGDeqPtr[*]"   TIG;
+NET "*_ddr2_sdram_device_*_syncReadDataQ/dGDeqPtr1[*]"  TIG;
+NET "*_ddr2_sdram_device_*_syncReadDataQ/sGEnqPtr[*]"   TIG;
+NET "*_ddr2_sdram_device_*_syncReadDataQ/sGEnqPtr1[*]"  TIG;
 
 
 # SyncFIFO: syncRequestQ
 
-#NET "m_vp_llpi_phys_plat_ddr2_sdram_device_syncRequestQ_dD_OUT[*]"      TIG;
-NET "m_vp_llpi_phys_plat_ddr2_sdram_device_syncRequestQ/dGDeqPtr[*]"    TIG;
-NET "m_vp_llpi_phys_plat_ddr2_sdram_device_syncRequestQ/dGDeqPtr1[*]"   TIG;
-NET "m_vp_llpi_phys_plat_ddr2_sdram_device_syncRequestQ/sGEnqPtr[*]"    TIG;
-NET "m_vp_llpi_phys_plat_ddr2_sdram_device_syncRequestQ/sGEnqPtr1[*]"   TIG;
+#NET "*_ddr2_sdram_device_*_syncRequestQ_dD_OUT[*]"      TIG;
+NET "*_ddr2_sdram_device_*_syncRequestQ/dGDeqPtr[*]"    TIG;
+NET "*_ddr2_sdram_device_*_syncRequestQ/dGDeqPtr1[*]"   TIG;
+NET "*_ddr2_sdram_device_*_syncRequestQ/sGEnqPtr[*]"    TIG;
+NET "*_ddr2_sdram_device_*_syncRequestQ/sGEnqPtr1[*]"   TIG;
 
 # SyncFIFOLevel: syncWriteDataQ
 
-#NET "m_vp_llpi_phys_plat_ddr2_sdram_device_syncWriteDataQ_dD_OUT[*]"    TIG;
-NET "m_vp_llpi_phys_plat_ddr2_sdram_device_syncWriteDataQ/dGDeqPtr[*]"  TIG;
-NET "m_vp_llpi_phys_plat_ddr2_sdram_device_syncWriteDataQ/dGDeqPtr1[*]" TIG;
-NET "m_vp_llpi_phys_plat_ddr2_sdram_device_syncWriteDataQ/sGEnqPtr[*]"  TIG;
-NET "m_vp_llpi_phys_plat_ddr2_sdram_device_syncWriteDataQ/sGEnqPtr1[*]" TIG;
+#NET "*_ddr2_sdram_device_*_syncWriteDataQ_dD_OUT[*]"    TIG;
+NET "*_ddr2_sdram_device_*_syncWriteDataQ/dGDeqPtr[*]"  TIG;
+NET "*_ddr2_sdram_device_*_syncWriteDataQ/dGDeqPtr1[*]" TIG;
+NET "*_ddr2_sdram_device_*_syncWriteDataQ/sGEnqPtr[*]"  TIG;
+NET "*_ddr2_sdram_device_*_syncWriteDataQ/sGEnqPtr1[*]" TIG;
 
 # SyncFIFOLevel: syncResetQ
 
-NET "m_vp_llpi_phys_plat_ddr2_sdram_device_syncResetQ/dGDeqPtr[*]"  TIG;
-NET "m_vp_llpi_phys_plat_ddr2_sdram_device_syncResetQ/dGDeqPtr1[*]" TIG;
-NET "m_vp_llpi_phys_plat_ddr2_sdram_device_syncResetQ/sGEnqPtr[*]"  TIG;
+NET "*_ddr2_sdram_device_*_syncResetQ/dGDeqPtr[*]"  TIG;
+NET "*_ddr2_sdram_device_*_syncResetQ/dGDeqPtr1[*]" TIG;
+NET "*_ddr2_sdram_device_*_syncResetQ/sGEnqPtr[*]"  TIG;
 
-NET "m_vp_llpi_phys_plat_ddr2_sdram_device_syncResetQ/sGEnqPtr1[*]" TIG;
+NET "*_ddr2_sdram_device_*_syncResetQ/sGEnqPtr1[*]" TIG;

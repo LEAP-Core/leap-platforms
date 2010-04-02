@@ -409,12 +409,21 @@ else:
     # Parallel Xst build.  Each synthesis boundary is independent.
     #
     for wrapper in env['DEFS']['SYNTH_WRAPPERS'].split():
+        # we must tweak the xst files of the internal module list
+        # to prevent the insertion of iobuffers
+        newXSTFile = open('config/' + wrapper + '.modified.xst','w')
+        oldXSTFile = open('config/' + wrapper + '.xst','r')
+        newXSTFile.write(oldXSTFile.read());
+        newXSTFile.write('-iobuf no\n');
+        newXSTFile.close();
+        oldXSTFile.close();
+
         w = env.Command(
             TMP_XILINX_DIR + '/' + wrapper + '.ngc',
             wrapper_v + clean_split(env['DEFS']['GIVEN_VS'], sep = ' ') + ['config/' + wrapper + '.xst'],
             [ Delete(TMP_XILINX_DIR + '/' + wrapper + '.srp'),
               Delete(TMP_XILINX_DIR + '/' + wrapper + '_xst.xrpt'),
-              'xst -intstyle silent -ifn config/' + wrapper + '.xst -ofn ' + TMP_XILINX_DIR + '/' + wrapper + '.srp',
+              'xst -intstyle silent -ifn config/' + wrapper + '.modified.xst -ofn ' + TMP_XILINX_DIR + '/' + wrapper + '.srp',
               '@echo xst ' + wrapper + ' build complete.' ])
 
         wrapper_builds += w

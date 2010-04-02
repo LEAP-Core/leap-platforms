@@ -43,6 +43,8 @@ import Vector::*;
 `include "asim/provides/physical_platform.bsh"
 `include "asim/provides/fpga_components.bsh"
 
+typedef `LOCAL_MEM_ADDR_BITS LOCAL_MEM_ADDR_SZ;
+
 // Cycle counter for calculating delays
 typedef UInt#(16) REQ_CYCLE;
 
@@ -174,7 +176,7 @@ module mkLocalMem#(PHYSICAL_DRIVERS drivers)
 
 
     method Action readWordReq(LOCAL_MEM_ADDR addr) if (notBusy());
-        match {.l_addr, .w_idx} = localMemBurstAddr(addr);
+        match {.l_addr, .w_idx} = localMemSeparateAddr(addr);
         memReadReq[w_idx].enq(l_addr);
 
         // Note word read.
@@ -197,7 +199,7 @@ module mkLocalMem#(PHYSICAL_DRIVERS drivers)
 
 
     method Action readLineReq(LOCAL_MEM_ADDR addr) if (notBusy());
-        match {.l_addr, .w_idx} = localMemBurstAddr(addr);
+        match {.l_addr, .w_idx} = localMemSeparateAddr(addr);
 
         for (Integer w = 0; w < valueOf(LOCAL_MEM_WORDS_PER_LINE); w = w + 1)
         begin
@@ -232,14 +234,14 @@ module mkLocalMem#(PHYSICAL_DRIVERS drivers)
     //
 
     method Action writeWord(LOCAL_MEM_ADDR addr, LOCAL_MEM_WORD data) if (notBusy());
-        match {.l_addr, .w_idx} = localMemBurstAddr(addr);
+        match {.l_addr, .w_idx} = localMemSeparateAddr(addr);
         memWriteReq[w_idx].enq(tuple3(l_addr, data, replicate(True)));
 
         writeBusyCnt <= `LOCAL_MEM_WRITE_LATENCY;
     endmethod
 
     method Action writeLine(LOCAL_MEM_ADDR addr, LOCAL_MEM_LINE data) if (notBusy());
-        match {.l_addr, .w_idx} = localMemBurstAddr(addr);
+        match {.l_addr, .w_idx} = localMemSeparateAddr(addr);
 
         Vector#(LOCAL_MEM_WORDS_PER_LINE, LOCAL_MEM_WORD) l_data = unpack(data);
         for (Integer w = 0; w < valueOf(LOCAL_MEM_WORDS_PER_LINE); w = w + 1)
@@ -251,7 +253,7 @@ module mkLocalMem#(PHYSICAL_DRIVERS drivers)
     endmethod
 
     method Action writeWordMasked(LOCAL_MEM_ADDR addr, LOCAL_MEM_WORD data, LOCAL_MEM_WORD_MASK mask) if (notBusy());
-        match {.l_addr, .w_idx} = localMemBurstAddr(addr);
+        match {.l_addr, .w_idx} = localMemSeparateAddr(addr);
         if (pack(mask) != 0)
         begin
             memWriteReq[w_idx].enq(tuple3(l_addr, data, mask));
@@ -261,7 +263,7 @@ module mkLocalMem#(PHYSICAL_DRIVERS drivers)
     endmethod
 
     method Action writeLineMasked(LOCAL_MEM_ADDR addr, LOCAL_MEM_LINE data, LOCAL_MEM_LINE_MASK mask) if (notBusy());
-        match {.l_addr, .w_idx} = localMemBurstAddr(addr);
+        match {.l_addr, .w_idx} = localMemSeparateAddr(addr);
 
         Vector#(LOCAL_MEM_WORDS_PER_LINE, LOCAL_MEM_WORD) l_data = unpack(data);
         for (Integer w = 0; w < valueOf(LOCAL_MEM_WORDS_PER_LINE); w = w + 1)

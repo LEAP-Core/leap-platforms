@@ -9104,3 +9104,53 @@ Directory modules/project
 Refactored new build pipeline codes.  Now hasim configure generates a
 module tree data structure for the python code.  Started pulling
 library code out of top template.  Resurrected Synplify code.
+
+----------
+mcadler     Date: Fri Apr  2 16:33:51 EDT 2010  CSN: CSN-platforms-370
+                  Fri Apr  2 20:33:51 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/low-level-platform-interface/local-mem
+ local-mem-ddr2.awb        Locally Modified          369 
+ local-mem-null.bsv        Locally Modified          369 
+ local-mem-ddr2.bsv        Locally Modified          369 
+ local-mem-interface.bsv   Locally Modified          369 
+ local-mem-bram.bsv        Locally Modified          369 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/central-cache
+ central-cache-backing-store.bsv Locally Modified          369 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled
+ xilinx.xst                Locally Modified          369 
+ htg-v5-pcie-enabled.bsv   Locally Modified          369 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr2-sdram
+ ddr2-sdram-device.bsv     Locally Modified          369 
+ ddr2-sdram-sync-tig-synplify.ucf Locally Modified          369 
+ ddr2_sdram.ucf            Locally Modified          369 
+ ddr2-sdram-device.awb     Locally Modified          369 
+ ddr2-sdram-sync-tig.ucf   Locally Modified          369 
+ ddr2_sdram-synplify.ucf   Locally Modified          369 
+
+Directory modules/project
+ XST.py                    Locally Modified          369 
+ SCons.top.template        Locally Modified          369 
+
+- Generalize local memory using DDR to support both the HTG and ACP controllers:
+  - Local memory configuration now virtualizes word and line sizes for the
+    rest of the model.  It will marshall low-level DDR physical characteristics
+    to the requested sizes.
+  - The current implementation assumes that a line is composed of at least one
+    access to all memory banks.
+  - Local memory using DDR no longer takes an address size.  The virtualized
+    address space is recomputed to fill the underlying memory using the
+    requested word size.
+
+- Update the DDR2 SDRAM controller to conform to the new interface expected
+  by local memory.  (The largest change was making the controllers a vector
+  over the number of banks.)
+
+- "-iobuf no" must be specified at all synthesis levels below top level.
+  For HTG it must NOT be specified at top level.
+
+- Drop a bypass FIFO from the central cache scratchpad interface for timing.

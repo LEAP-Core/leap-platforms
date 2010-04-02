@@ -14,7 +14,7 @@ class Synthesize():
         newXSTFile = open('config/' + module.wrapperName() + '.modified.xst','w')
         oldXSTFile = open('config/' + module.wrapperName() + '.xst','r')
         newXSTFile.write(oldXSTFile.read());
-        newXSTFile.write('\n-iobuf no\n');
+        newXSTFile.write('-iobuf no\n');
         newXSTFile.close();
         oldXSTFile.close();
         w = moduleList.env.Command(

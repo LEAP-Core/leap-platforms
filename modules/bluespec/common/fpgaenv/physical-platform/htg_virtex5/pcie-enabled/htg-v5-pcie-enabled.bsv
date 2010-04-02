@@ -17,6 +17,7 @@
 //
 
 import FIFO::*;
+import Vector::*;
 import Clocks::*;
 
 // htg-v5-pcie-enabled
@@ -47,7 +48,7 @@ interface PHYSICAL_DRIVERS;
     interface LEDS_DRIVER#(`NUMBER_LEDS)         ledsDriver;
     interface SWITCHES_DRIVER#(`NUMBER_SWITCHES) switchesDriver;
     interface PCI_EXPRESS_DRIVER                 pciExpressDriver;
-    interface DDR2_DRIVER                        ddr2Driver;
+    interface Vector#(FPGA_DDR_BANKS, DDR2_DRIVER) ddr2Driver;
         
 endinterface
 
@@ -66,7 +67,7 @@ interface TOP_LEVEL_WIRES;
     interface LEDS_WIRES#(`NUMBER_LEDS)          ledsWires;
     interface SWITCHES_WIRES#(`NUMBER_SWITCHES)  switchesWires;
     interface PCI_EXPRESS_WIRES                  pciExpressWires;
-    interface DDR2_WIRES                         ddr2Wires;
+    interface Vector#(FPGA_DDR_BANKS, DDR2_WIRES) ddr2Wires;
     
 endinterface
 
@@ -110,11 +111,21 @@ module mkPhysicalPlatform
     
     LEDS_DEVICE#(`NUMBER_LEDS)         leds_device       <- mkLEDsDevice(clocked_by clk, reset_by rst);
     SWITCHES_DEVICE#(`NUMBER_SWITCHES) switches_device   <- mkSwitchesDevice(clocked_by clk, reset_by rst);
-    DDR2_DEVICE                        ddr2_sdram_device <- mkDDR2Device(clocks_device.driver.rawClock,
-                                                                         clocks_device.driver.rawReset,
-                                                                         clocked_by clk,
-                                                                         reset_by rst);
+
+    Vector#(FPGA_DDR_BANKS, DDR2_DEVICE) ddr2_sdram_device = newVector();
+    Vector#(FPGA_DDR_BANKS, DDR2_DRIVER) ddr2_driver = newVector();
+    Vector#(FPGA_DDR_BANKS, DDR2_WIRES) ddr2_wires = newVector();
+    for (Integer b = 0; b < valueOf(FPGA_DDR_BANKS); b = b + 1)
+    begin
+        ddr2_sdram_device[b] <- mkDDR2Device(clocks_device.driver.rawClock,
+                                             clocks_device.driver.rawReset,
+                                             clocked_by clk,
+                                             reset_by rst);
+        ddr2_driver[b] = ddr2_sdram_device[b].driver;
+        ddr2_wires[b] = ddr2_sdram_device[b].wires;
+    end
     
+
     /*
     // Bugfix for Xilinx tools: if the LEDs and Switches are not used at all in the
     // design, map sometimes gets confused and crashes. Reading the switches and
@@ -131,6 +142,7 @@ module mkPhysicalPlatform
     endrule
     */
 
+
     // Aggregate the drivers
     
     interface PHYSICAL_DRIVERS physicalDrivers;
@@ -139,7 +151,7 @@ module mkPhysicalPlatform
         interface ledsDriver       = leds_device.driver;
         interface switchesDriver   = switches_device.driver;
         interface pciExpressDriver = pci_express_device.driver;
-        interface ddr2Driver       = ddr2_sdram_device.driver;
+        interface ddr2Driver       = ddr2_driver;
     
     endinterface
     
@@ -151,7 +163,7 @@ module mkPhysicalPlatform
         interface ledsWires        = leds_device.wires;
         interface switchesWires    = switches_device.wires;
         interface pciExpressWires  = pci_express_device.wires;
-        interface ddr2Wires        = ddr2_sdram_device.wires;
+        interface ddr2Wires        = ddr2_wires;
 
     endinterface
                

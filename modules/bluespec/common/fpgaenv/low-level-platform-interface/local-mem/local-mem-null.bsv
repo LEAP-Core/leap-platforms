@@ -24,6 +24,8 @@
 `include "asim/provides/fpga_components.bsh"
 
 
+typedef `LOCAL_MEM_ADDR_BITS LOCAL_MEM_ADDR_SZ;
+
 module mkLocalMem#(PHYSICAL_DRIVERS drivers)
     // interface:
     (LOCAL_MEM);

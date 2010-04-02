@@ -34,3 +34,4 @@
 %sources -t UCF -v PRIVATE ddr2-sdram-sync-tig.ucf
 
 %param DRAM_MAX_OUTSTANDING_READS  8 "Maximum in-flight read requests"
+%param DRAM_DEBUG                  0 "Non-zero enables debugging methods"
