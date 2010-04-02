@@ -1,7 +1,7 @@
 import os
 import SCons.Script
 from model import  *
-
+from xilinx_ucf import *
 
 #this might be better implemented as a 'Node' in scons, but 
 #I want to get something working before exploring that path
@@ -12,12 +12,9 @@ class PostSynthesize():
     self.fpga_part_xilinx = moduleList.env['DEFS']['FPGA_PART_XILINX']
     self.xilinx_apm_name = moduleList.compileDirectory + '/' + moduleList.apmName
     # Concatenate UCF files
-    xilinx_ucf = moduleList.env.Command(
-      self.xilinx_apm_name + '.ucf',
-      Utils.clean_split(moduleList.env['DEFS']['GIVEN_UCFS'], sep = ' '),
-      'cat $SOURCES > $TARGET')
+    UCF(moduleList)
 
-    moduleList.topModule.moduleDependency['UCFS'] = [xilinx_ucf]
+    moduleList.dump()
 
     if len(moduleList.env['DEFS']['GIVEN_BMMS']) != 0:
       xilinx_bmm = moduleList.env.Command(

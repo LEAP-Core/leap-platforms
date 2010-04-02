@@ -2,13 +2,11 @@
 #* Python libraries for XST synthesis tool
 #********************************************************************/
 
-%name Xilinx Post-synthesis Toolchain
-%desc Xilinx Post-synthesis Toolchain
+%name Xilinx UCF
+%desc Xilinx UCF
 %attributes tool
 
-%provides post_synthesis_tool
+%provides xilinx_ucf
 
-%requires xilinx_ucf
-
-%scons %library XILINX_POST_SYNTH.py
+%scons %library XILINX_UCF.py
 

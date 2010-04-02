@@ -9,6 +9,8 @@
 %provides post_synthesis_tool
 
 %requires xilinx_ucf
+%requires xilinx_bmm
+%requires xilinx_ngd
 
 %scons %library XILINX_POST_SYNTH.py
 
