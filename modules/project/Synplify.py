@@ -15,8 +15,8 @@ class Synthesize(ProjectDependency):
 
     #first dump the wrapper files to the new prj 
     for module in moduleList.moduleList:    
-      print 'writing wrappers:' + module.synthTop +'\n'
-      newPrjFile.write('add_file -verilog \"$env(BUILD_DIR)/'+module.synthTop+'\"\n');      
+      print 'writing wrappers:' + module.wrapperName() +'\n'
+      newPrjFile.write('add_file -verilog \"$env(BUILD_DIR)/hw/'+module.buildPath + '/.bsc/' + module.wrapperName()+'.v\"\n');      
 
     #and dump the old file contents
     print "Dumping old prj file\n"
@@ -35,13 +35,13 @@ class Synthesize(ProjectDependency):
     # Now that we've set up the world let's compile
 
     top_netlist = moduleList.env.Command(
-        moduleList.compileDirectory + '/' +  moduleList.apmName + '.edf',
-        moduleList.topVerilog + moduleList.givenVs + ['config/' + moduleList.apmName + '.modified.synplify.prj'] ,
+        moduleList.compileDirectory + '/' +  moduleList.topModule.wrapperName() + '.edf',
+        moduleList.topModule.moduleDependency['VERILOG'] + ['config/' + moduleList.apmName + '.modified.synplify.prj'] ,
         [ SCons.Script.Delete(moduleList.compileDirectory + '/' + moduleList.apmName  + '.srr'),
           SCons.Script.Delete(moduleList.compileDirectory + '/' + moduleList.apmName  + '_xst.xrpt'),
           'synplify_pro -batch config/' + moduleList.apmName + '.modified.synplify.prj' ])
     SCons.Script.Clean(top_netlist,moduleList.compileDirectory + '/' + moduleList.apmName + '.srp')
     SCons.Script.Clean(top_netlist,'config/' + moduleList.apmName + '.modified.synplify.prj')
 
-    self.topDependency = top_netlist
+    moduleList.topModule.moduleDependency['SYNTHESIS'] = top_netlist
 

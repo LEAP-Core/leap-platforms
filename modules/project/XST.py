@@ -9,13 +9,20 @@ from model import  *
 class Synthesize():
   def __init__(self, moduleList):
     for module in moduleList.moduleList:    
-        print 'XXX' + moduleList.compileDirectory + '/' + module.wrapperName() + '.ngc' + '\n'
+        # we must tweak the xst files of the internal module list
+        # to prevent the insertion of iobuffers
+        newXSTFile = open('config/' + module.wrapperName() + '.modified.xst','w')
+        oldXSTFile = open('config/' + module.wrapperName() + '.xst','r')
+        newXSTFile.write(oldXSTFile.read());
+        newXSTFile.write('\n-iobuf no\n');
+        newXSTFile.close();
+        oldXSTFile.close();
         w = moduleList.env.Command(
             moduleList.compileDirectory + '/' + module.wrapperName() + '.ngc',
             module.moduleDependency['VERILOG'] + module.moduleDependency['XST'] ,
             [ SCons.Script.Delete(moduleList.compileDirectory + '/' + module.wrapperName() + '.srp'),
               SCons.Script.Delete(moduleList.compileDirectory + '/' + module.wrapperName() + '_xst.xrpt'),
-              'xst -intstyle silent -ifn config/' + module.wrapperName() + '.xst -ofn ' + moduleList.compileDirectory + '/' + module.wrapperName() + '.srp',
+              'xst -intstyle silent -ifn config/' + module.wrapperName() + '.modified.xst -ofn ' + moduleList.compileDirectory + '/' + module.wrapperName() + '.srp',
               '@echo xst ' + moduleList.compileDirectory + ' build complete.' ])
 
         module.moduleDependency['SYNTHESIS'] = [w]

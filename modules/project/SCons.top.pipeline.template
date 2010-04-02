@@ -322,47 +322,6 @@ PostSynthesize(moduleList)
 
 moduleList.dump()
 
-# Concatenate UCF files
-# xilinx_ucf = env.Command(
-#     XILINX_APM_NAME + '.ucf',
-#     clean_split(env['DEFS']['GIVEN_UCFS'], sep = ' '),
-#     'cat $SOURCES > $TARGET')
-
-
-# if len(env['DEFS']['GIVEN_BMMS']) != 0:
-#     xilinx_bmm = env.Command(
-#     XILINX_APM_NAME + '.bmm',
-#     clean_split(env['DEFS']['GIVEN_BMMS'], sep = ' '),
-#     'cat $SOURCES > $TARGET')
-#     #./ works around crappy xilinx parser
-#     bmm = ' -bm ./' + XILINX_APM_NAME + '.bmm' 
-# else:
-#     xilinx_bmm = ''
-#     bmm = ''
-
-# xilinx_ngd = env.Command(
-#     XILINX_APM_NAME + '.ngd',
-#     moduleList.getAllDependencies('SYNTHESIS') + xilinx_ucf + xilinx_bmm,
-#     [ Delete(XILINX_APM_NAME + '.bld'),
-#       Delete(XILINX_APM_NAME + '_ngdbuild.xrpt'),
-#       # Xilinx project files are created automatically by Xilinx tools, but not
-#       # needed for command line tools.  The project files may be corrupt due
-#       # to parallel invocation of xst.  Until we figure out how to move them
-#       # or guarantee their safety, just delete them.
-#       Delete('xlnx_auto_0.ise'),
-#       Delete('xlnx_auto_0_xdb'),
-#       'ngdbuild -p ' + FPGA_PART_XILINX + ' -sd ' + env['DEFS']['ROOT_DIR_HW_MODEL'] + ' -uc ' + XILINX_APM_NAME + '.ucf ' + bmm + ' $SOURCE $TARGET',
-#       Move(TMP_XILINX_DIR + '/netlist.lst', 'netlist.lst') ])
-
-
-# Depends(xilinx_ngd, wrapper_builds)
-
-# Clean(xilinx_ngd, TMP_XILINX_DIR + '/netlist.lst')
-
-# Alias for everything up to map...
-#env.Alias('xst', xilinx_ngd + SW_EXE)
-
-
 #
 # Use a cached post par ncd to guide map and par?  This is off by default since
 # the smart guide option can make place & route fail when it otherwise would have

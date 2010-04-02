@@ -51,25 +51,20 @@ class ModuleList:
     # deal with other modules
     for module in self.moduleList:
       module.moduleDependency['XST'] = ['config/' + module.wrapperName() + '.xst']
-      module.moduleDependency['VERILOG'] = ['hw/' + module.buildPath + '/.bsc/mk_' + module.name + '_Wrapper.v'] + wrapper_v + self.givenVs
+      module.moduleDependency['VERILOG'] = ['hw/' + module.buildPath + '/.bsc/mk_' + module.name + '_Wrapper.v'] + self.wrapper_v + self.givenVs
       module.moduleDependency['VERILOG_STUB'] = ['hw/' + module.buildPath + '/.bsc/mk_' + module.name + '_Wrapper_stub.v']     
     
     
-  #for now, this will fill in the default   
-#   def defaultVerilog(self, wrapper_v):
-#     self.topModule.moduleDependency['XST'] = ['config/' + self.topModule.wrapperName() + '.xst']
-#     self.topModule.moduleDependency['VERILOG'] = ['hw/' + self.topModule.buildPath + '/.bsc/mk_' + self.topModule.name + '_Wrapper.v'] + wrapper_v + Utils.clean_split(self.env['DEFS']['GIVEN_VS'], sep = ' ')
-#     self.topModule.moduleDependency['VERILOG_STUB'] = ['hw/' + self.topModule.buildPath + '/.bsc/mk_' + self.topModule.name + '_Wrapper_stub.v'] 
-#     # deal with other modules
-#     for module in self.moduleList:
-#       module.moduleDependency['XST'] = ['config/' + module.wrapperName() + '.xst']
-#       module.moduleDependency['VERILOG'] = ['hw/' + module.buildPath + '/.bsc/mk_' + module.name + '_Wrapper.v'] + wrapper_v + Utils.clean_split(self.env['DEFS']['GIVEN_VS'], sep = ' ')
-#       module.moduleDependency['VERILOG_STUB'] = ['hw/' + module.buildPath + '/.bsc/mk_' + module.name + '_Wrapper_stub.v']     
-
- 
   def getAllDependencies(self, key):
-    allDeps = self.topModule.moduleDependency[key]
+    # we must check to see if the dependencies actually exist.
+    allDeps = []
+    if(self.topModule.moduleDependency.has_key(key)):
+      allDeps = self.topModule.moduleDependency[key]
     for module in self.moduleList:
-      allDeps += module.moduleDependency[key]
+      if(module.moduleDependency.has_key(key)):
+        allDeps += module.moduleDependency[key]
+
+    if(len(allDeps) == 0):
+      sys.stderr.write("Warning, no dependencies were found")
 
     return allDeps
