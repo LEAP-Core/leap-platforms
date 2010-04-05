@@ -20,7 +20,8 @@
 
 import Clocks::*;
 
-`include "physical_platform_utils.bsh"
+`include "asim/provides/physical_platform_utils.bsh"
+`include "asim/provides/fpga_components.bsh"
 
 //
 // CLOCKS_DRIVER: clocks exported to the model
@@ -71,15 +72,17 @@ module mkClocksDevice
     // STAGE 1: create a simulated oscillator and a reset
     //
     
-    Clock rawClock <- mkAbsoluteClock(0, 10);
+    Clock rawClock <- mkAbsoluteClock(0, `MAGIC_SIMULATION_CLOCK_FACTOR/`CRYSTAL_CLOCK_FREQ);
     Reset rawReset <- mkInitialReset(10, clocked_by rawClock);
 
     //
     // STAGE 2: no DCM/PLL clock transformations for simulated clocks
     //
     
-    Clock userClock = rawClock;
-    Reset userReset = rawReset;
+    let pllClock <-  mkUserClock_PLL(`CRYSTAL_CLOCK_FREQ,`CRYSTAL_CLOCK_FREQ*`MODEL_CLOCK_MULTIPLIER/`MODEL_CLOCK_DIVIDER);
+
+    Clock userClock = pllClock.clk;
+    Reset userReset = pllClock.rst;
     
     //
     // STAGE 3: soft reset

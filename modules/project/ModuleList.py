@@ -32,7 +32,7 @@ class ModuleList:
     self.env = env
     self.arguments = arguments
     self.compileDirectory = env['DEFS']['TMP_XILINX_DIR']
-    self.givenVs = Utils.clean_split(env['DEFS']['GIVEN_VS'], sep = ' ')
+    self.givenVs = Utils.clean_split(env['DEFS']['GIVEN_VS'], sep = ' ') +  Utils.clean_split(env['DEFS']['GEN_VS'], sep = ' ') 
     self.givenSDCs = Utils.clean_split(env['DEFS']['GIVEN_SDCS'], sep = ' ')
     self.apmName = env['DEFS']['APM_NAME']
     self.moduleList = []
@@ -83,13 +83,13 @@ class ModuleList:
 
     self.topModule.moduleDependency['XST'] = ['config/' + self.topModule.wrapperName() + '.xst']
     #Notice that we call get_bluespec_verilog here this will eventually called by the BLUESPEC build rule 
-    self.topModule.moduleDependency['VERILOG'] = ['hw/' + self.topModule.buildPath + '/.bsc/mk_' + self.topModule.name + '_Wrapper.v'] + self.wrapper_v + self.givenVs + Utils.get_bluespec_verilog(env)
+    self.topModule.moduleDependency['VERILOG'] = ['hw/' + self.topModule.buildPath + '/.bsc/mk_' + self.topModule.name + '_Wrapper.v'] + self.givenVs + Utils.get_bluespec_verilog(env)
 
     self.topModule.moduleDependency['VERILOG_STUB'] = ['hw/' + self.topModule.buildPath + '/.bsc/mk_' + self.topModule.name + '_Wrapper_stub.v'] 
     # deal with other modules
     for module in self.moduleList:
       module.moduleDependency['XST'] = ['config/' + module.wrapperName() + '.xst']
-      module.moduleDependency['VERILOG'] = ['hw/' + module.buildPath + '/.bsc/mk_' + module.name + '_Wrapper.v'] + self.wrapper_v + self.givenVs + Utils.get_bluespec_verilog(env)
+      module.moduleDependency['VERILOG'] = ['hw/' + module.buildPath + '/.bsc/mk_' + module.name + '_Wrapper.v'] + self.givenVs + Utils.get_bluespec_verilog(env)
       module.moduleDependency['VERILOG_STUB'] = ['hw/' + module.buildPath + '/.bsc/mk_' + module.name + '_Wrapper_stub.v']     
     
     

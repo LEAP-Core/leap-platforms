@@ -1,5 +1,3 @@
-#implementation: "xup"
-impl -add xup -type fpga
 
 #device options
 set_option -technology @FPGA_TECHNOLOGY@
@@ -12,14 +10,12 @@ set_option -part_companion ""
 set_option -default_enum_encoding default
 set_option -resource_sharing 1
 set_option -use_fsm_explorer 1
-set_option -top_module "mk_model_Wrapper"
 
 #map options
 set_option -vendor_xcompatible_mode 0
 set_option -vendor_xcompatible_mode 0
 set_option -run_prop_extract 1
 set_option -fanout_limit 10000
-set_option -disable_io_insertion 0
 set_option -pipe 1
 set_option -update_models_cp 0
 set_option -verification_mode 0
@@ -39,11 +35,6 @@ set_option -write_vhdl 0
 #automatic place and route (vendor) options
 set_option -write_apr_constraint 1
 
-#set result format/file last
-#This depends on the build dir existing in the environment, which is a little
-#ugly
-project -result_file "$env(BUILD_DIR)/@TMP_XILINX_DIR@/@APM_NAME@.edf"
-
 #
 #implementation attributes
 
@@ -52,7 +43,4 @@ set_option -dup 0
 set_option -project_relative_includes 1
 set_option -enable64bit 1
 
-#par_1 attributes
-set_option -job par_1 -add par
-set_option -job par_1 -option run_backannotation 0
-impl -active "xup"
+

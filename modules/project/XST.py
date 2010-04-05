@@ -19,7 +19,7 @@ class Synthesize():
         oldXSTFile.close();
         w = moduleList.env.Command(
             moduleList.compileDirectory + '/' + module.wrapperName() + '.ngc',
-            module.moduleDependency['VERILOG'] + module.moduleDependency['XST'] ,
+            module.moduleDependency['VERILOG'] + moduleList.getAllDependencies('VERILOG_STUB')  + module.moduleDependency['XST'] ,
             [ SCons.Script.Delete(moduleList.compileDirectory + '/' + module.wrapperName() + '.srp'),
               SCons.Script.Delete(moduleList.compileDirectory + '/' + module.wrapperName() + '_xst.xrpt'),
               'xst -intstyle silent -ifn config/' + module.wrapperName() + '.modified.xst -ofn ' + moduleList.compileDirectory + '/' + module.wrapperName() + '.srp',
@@ -32,7 +32,7 @@ class Synthesize():
 
     top_netlist = moduleList.env.Command(
         moduleList.compileDirectory + '/' + moduleList.topModule.wrapperName() + '.ngc',
-        moduleList.topModule.moduleDependency['VERILOG'] + moduleList.topModule.moduleDependency['XST'],
+        moduleList.topModule.moduleDependency['VERILOG'] +  moduleList.getAllDependencies('VERILOG_STUB') + moduleList.topModule.moduleDependency['XST'],
         [ SCons.Script.Delete(topSRP),
           SCons.Script.Delete(moduleList.compileDirectory + '/' + moduleList.apmName + '_xst.xrpt'),
           'xst -intstyle silent -ifn config/' + moduleList.topModule.wrapperName() + '.xst -ofn ' + topSRP,

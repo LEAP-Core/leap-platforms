@@ -6,3 +6,8 @@
 
 %sources -t BSV -v PUBLIC  sim-clocks-device.bsv
 
+%param CRYSTAL_CLOCK_FREQ 50 "Input (Crystal) Clock Frequency"
+
+%param --global MODEL_CLOCK_MULTIPLIER 3   "Clock multiplier (integer).  Model clock freq = crystal freq * (multiplier / divider)."
+%param --global MODEL_CLOCK_DIVIDER    2   "Clock divider (integer).  Model clock freq = crystal freq * (multiplier / divider)."
+

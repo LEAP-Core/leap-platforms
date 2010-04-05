@@ -117,7 +117,8 @@ module mkUserClock#(Integer inFreq, Integer clockMultiplier, Integer clockDivide
   `else
 
     // Clock ratios make no sense in Bluesim
-    clk <- mkUserClock_Same;
+
+    Clock rawClock <- mkAbsoluteClock(0, `MAGIC_SIMULATION_CLOCK_FACTOR/inFreq*clockDivider/clockMultiplier);
 
   `endif
 

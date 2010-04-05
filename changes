@@ -9174,3 +9174,33 @@ Directory modules/project
 Synplify finally supports synthesis boundaries. Next up is fixing build dependency issues in XST and parallelizing Synplify.
 
 
+
+----------
+kfleming    Date: Mon Apr  5 13:24:03 EDT 2010  CSN: CSN-platforms-373
+                  Mon Apr  5 17:24:03 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ user-clock-pll.bsv        Locally Modified          372 
+ user-clock.bsv            Locally Modified          372 
+ software-fpga-components.awb Locally Modified          372 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup/serial
+ xilinx.sdf                Locally Modified          372 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-disabled
+ htg-v5-pcie-disabled.sdf  Locally Modified          372 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled
+ xilinx.sdf                Locally Modified          372 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/simulation
+ sim-clocks-device.awb     Locally Modified          372 
+ sim-clocks-device.bsv     Locally Modified          372 
+
+Directory modules/project
+ Synplify.py               Locally Modified          372 
+ XST.py                    Locally Modified          372 
+ ModuleList.py             Locally Modified          372 
+
+Added support for ratioed clocks in simulation.  Now the clocks library can create precisely ratioed clocks, rather than just passing back an unmodified clock.  Due to some estimation, small errors in ratio calculation may be present.

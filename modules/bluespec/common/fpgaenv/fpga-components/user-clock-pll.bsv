@@ -217,9 +217,14 @@ module mkUserClock_PLL#(Integer inFreq,
     end
 
   `else
+       // Out frequency is an _absolute_ measure
+       Clock pllClock <- mkAbsoluteClock(0, `MAGIC_SIMULATION_CLOCK_FACTOR/outFreq);
+       Reset pllReset <- mkInitialReset(10, clocked_by pllClock);
 
-    // Clock ratios make no sense in Bluesim
-    clk <- mkUserClock_Same;
+       clk = interface UserClock
+                 interface clk = pllClock;
+                 interface rst = pllReset;
+             endinterface;
 
   `endif
 

@@ -11,7 +11,8 @@ set_option -part_companion ""
 #compilation/mapping options
 set_option -default_enum_encoding default
 set_option -resource_sharing 1
-set_option -use_fsm_explorer 1
+#This takes a huge amount of time
+#set_option -use_fsm_explorer 1
 set_option -top_module "mk_model_Wrapper"
 
 #map options
@@ -20,7 +21,6 @@ set_option -vendor_xcompatible_mode 0
 set_option -vendor_xcompatible_mode 0
 set_option -run_prop_extract 1
 set_option -fanout_limit 10000
-set_option -disable_io_insertion 0
 set_option -pipe 1
 set_option -update_models_cp 0
 set_option -verification_mode 0
