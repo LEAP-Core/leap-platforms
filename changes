@@ -9204,3 +9204,24 @@ Directory modules/project
  ModuleList.py             Locally Modified          372 
 
 Added support for ratioed clocks in simulation.  Now the clocks library can create precisely ratioed clocks, rather than just passing back an unmodified clock.  Due to some estimation, small errors in ratio calculation may be present.
+
+----------
+kfleming    Date: Mon Apr  5 18:25:30 EDT 2010  CSN: CSN-platforms-374
+                  Mon Apr  5 22:25:30 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform
+ development_board_arriaII_gx/ Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/development_board_arriaII_gx
+ jtag/                     Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/development_board_arriaII_gx/jtag
+ altera-arriaIIgx_dev-jtag.bsv Locally Added               0 
+ jtag.sdf                  Locally Added               0 
+ altera-arriaIIgx_dev-jtag.ucf Locally Added               0 
+ altera-arriaIIgx_dev-jtag.cpp Locally Added               0 
+ altera-arriaIIgx_dev-jtag.h Locally Added               0 
+ altera-arriaIIgx_dev-jtag.awb Locally Added               0 
+
+Added skeleton for arriaII GX physical platform

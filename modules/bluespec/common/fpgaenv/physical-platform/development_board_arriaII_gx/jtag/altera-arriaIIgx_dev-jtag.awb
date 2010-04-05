@@ -1,0 +1,27 @@
+
+%name ArriaII GX JTAG
+%desc ArriaII GX JTAG
+
+%provides physical_platform	
+%requires clocks_device led_device jtag_device physical_platform_utils
+
+%sources -t BSV -v PUBLIC  altera-arriaIIgx_dev-jtag.bsv
+%sources -t H   -v PUBLIC  altera-arriaIIgx_dev-jtag.h
+%sources -t CPP -v PRIVATE altera-arriaIIgx_dev-jtag.cpp
+%sources -t UCF -v PRIVATE altera-arriaIIgx_dev-jtag.ucf
+
+%sources -t SDF -v PUBLIC jtag.sdf
+%sources -t SDC -v PUBLIC jtag.sdc
+
+
+%param --global MAKE_ALL_TARGET      bit       "Target of 'make all'.  Most likely bit, exe or vexe."
+
+%param FPGA_PART_ALTERA   "xc2vp30-7-ff896" "FPGA Part ID (XST)"
+%param FPGA_TECHNOLOGY    "VIRTEX2P"        "FPGA Technology (Synplify)"
+%param FPGA_PART_SYNPLIFY "XC2VP30"         "FPGA Part (Synplify)"
+%param FPGA_SPEED         "-7"              "FPGA Speed Grade (Synplify)"
+%param FPGA_PACKAGE       "FF896"           "FPGA Package (Synplify)"
+%param FPGA_POSITION      3                 "FPGA Position (in Xilinx iMPACT)"
+%param MAP_OPTIONS        ""                "Extra Map Options"
+
+
