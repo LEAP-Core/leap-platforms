@@ -1,0 +1,12 @@
+#/********************************************************************
+#* Python libraries for XST synthesis tool
+#********************************************************************/
+
+%name Xilinx BITGEN
+%desc Xilinx BITGEN
+%attributes tool
+
+%provides xilinx_bitgen
+
+%scons %library XILINX_BITGEN.py
+

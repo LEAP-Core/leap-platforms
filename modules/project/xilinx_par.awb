@@ -1,0 +1,12 @@
+#/********************************************************************
+#* Python libraries for XST synthesis tool
+#********************************************************************/
+
+%name Xilinx PAR
+%desc Xilinx PAR
+%attributes tool
+
+%provides xilinx_par
+
+%scons %library XILINX_PAR.py
+

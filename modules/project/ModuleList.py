@@ -25,18 +25,53 @@ class ModuleList:
     print "apmName: " + self.apmName + "\n"
 
 
-  def __init__(self, env):
+  def __init__(self, env, arguments):
       # do a pattern match on the synth boundary paths, which we need to build
       # the module structures
     print "constructing moduleList\n"
+    self.env = env
+    self.arguments = arguments
     self.compileDirectory = env['DEFS']['TMP_XILINX_DIR']
     self.givenVs = Utils.clean_split(env['DEFS']['GIVEN_VS'], sep = ' ')
     self.givenSDCs = Utils.clean_split(env['DEFS']['GIVEN_SDCS'], sep = ' ')
     self.apmName = env['DEFS']['APM_NAME']
-    self.env = env
     self.moduleList = []
     self.synthBoundaries = env['DEFS']['SYNTH_BOUNDARIES']
     self.wrapper_v = env.SConscript([env['DEFS']['ROOT_DIR_HW_MODEL'] + '/SConscript'])
+
+    if env['DEFS']['GIVEN_CS'] != '':
+      SW_EXE_OR_TARGET = env['DEFS']['ROOT_DIR_SW'] + '/obj/' + self.apmName + '_sw.exe'
+      SW_EXE = [SW_EXE_OR_TARGET]
+    else:
+      SW_EXE_OR_TARGET = '$TARGET'
+      SW_EXE = []
+    self.swExeOrTarget = SW_EXE_OR_TARGET
+    self.swExe = SW_EXE
+
+    if len(env['DEFS']['GIVEN_ELFS']) != 0:
+      elf = ' -bd ' + str.join(' -bd ',Utils.clean_split(env['DEFS']['GIVEN_ELFS'], sep = ' '))
+    else:
+      elf = ''
+    self.elf = elf
+
+    #
+    # Use a cached post par ncd to guide map and par?  This is off by default since
+    # the smart guide option can make place & route fail when it otherwise would have
+    # worked.  It doesn't always improve run time, either.  To turn on smart guide
+    # either define the environment variable USE_SMARTGUIDE or set
+    # USE_SMARTGUIDE on the scons command line to a non-zero value.
+    #
+    self.smartguide_cache_dir = env['DEFS']['WORKSPACE_ROOT'] + '/var/xilinx_ncd'
+    self.smartguide_cache_file = self.apmName + '_par.ncd'
+    if not os.path.isdir(self.smartguide_cache_dir):
+      os.mkdir(self.smartguide_cache_dir)
+        
+    if ((int(self.arguments.get('USE_SMARTGUIDE', 0)) or self.env['ENV'].has_key('USE_SMARTGUIDE')) and
+        (FindFile(self.apmName + '_par.ncd', [self.smartguide_cache_dir]) != None)):
+      self.smartguide = ' -smartguide ' +  self.smartguide_cache_dir + '/' + self.smartguide_cache_file
+    else:
+      self.smartguide = ''
+
     for module in self.synthBoundaries:
       # check to see if this is the top module (has no parent)
       module.dump()

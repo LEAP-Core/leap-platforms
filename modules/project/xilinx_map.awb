@@ -1,0 +1,12 @@
+#/********************************************************************
+#* Python libraries for XST synthesis tool
+#********************************************************************/
+
+%name Xilinx MAP
+%desc Xilinx MAP
+%attributes tool
+
+%provides xilinx_map
+
+%scons %library XILINX_MAP.py
+

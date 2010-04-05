@@ -8,10 +8,10 @@ from model import  *
 class UCF():
   def __init__(self, moduleList):
 
-    self.xilinx_apm_name = moduleList.compileDirectory + '/' + moduleList.apmName
+    xilinx_apm_name = moduleList.compileDirectory + '/' + moduleList.apmName
     # Concatenate UCF files
     xilinx_ucf = moduleList.env.Command(
-      self.xilinx_apm_name + '.ucf',
+      xilinx_apm_name + '.ucf',
       Utils.clean_split(moduleList.env['DEFS']['GIVEN_UCFS'], sep = ' '),
       'cat $SOURCES > $TARGET')
 

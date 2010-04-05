@@ -1,0 +1,12 @@
+#/********************************************************************
+#* Python libraries for XST synthesis tool
+#********************************************************************/
+
+%name Xilinx LOADER
+%desc Xilinx LOADER
+%attributes tool
+
+%provides xilinx_loader
+
+%scons %library XILINX_LOADER.py
+
