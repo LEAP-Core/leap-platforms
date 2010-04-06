@@ -9265,3 +9265,19 @@ Directory modules/bluespec/common/fpgaenv/fpga-components
 
 
 Replaced accidentally deleted file
+
+----------
+kfleming    Date: Tue Apr  6 17:16:37 EDT 2010  CSN: CSN-platforms-377
+                  Tue Apr  6 21:16:37 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices
+ jtag/                     Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/jtag
+ altera/                   Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/jtag/altera
+ jtag-device.bsv           Locally Added               0 
+
+Added skeleton code for altera jtag device
