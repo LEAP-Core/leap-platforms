@@ -9,6 +9,7 @@
 %public lutram.bsv
 %public alu-support.bsv
 %public user-clock.bsv
+%public user-clock-xilinx.bsv
 
 %private Bram.v
 %private user-clock-xilinx-virtex2.v

@@ -1,5 +1,5 @@
-%name Hardware FPGA Components for Virtex 5
-%desc Hardware FPGA Components for Virtex 5
+%name Hardware FPGA Components for ArriaII
+%desc Hardware FPGA Components for ArriaII
 
 %provides fpga_components
 
@@ -8,14 +8,11 @@
 %public bram.bsv bram-multi-read.bsv
 %public lutram.bsv
 %public alu-support.bsv
-%public user-clock.bsv user-clock-pll-virtex5.bsv
-%public user-clock-xilinx.bsv
-%public clock-buffers.bsv
+%public user-clock.bsv
+%public user-clock-altera.bsv
 
 %private Bram.v
-%private user-clock-xilinx-virtex5.v
-%private user-clock-pll-virtex5.v
-%private clock-buffers.v
+%private user-clock-altera-arriaII.v
 
 %param --global COST_TABLE 1 "Xilinx place and route cost table"
 

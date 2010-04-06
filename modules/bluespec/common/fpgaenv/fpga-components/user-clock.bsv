@@ -53,42 +53,6 @@ module mkUserClock_DivideByTwo
 
 endmodule
 
-// verilog only
-import "BVI"
-module mkUserClock_MultiplyByTwo#(Integer inFreq)
-    // Interface:
-        (UserClock);
-
-    default_clock (CLK);
-    default_reset (RST_N);
-    output_clock clk (CLK_OUT);
-    output_reset rst (RST_N_OUT) clocked_by (clk);
-
-    // Convert frequency (MHz) to period (ns)
-    parameter C2_CLKIN_PERIOD = 1000 / inFreq;
-
-endmodule
-
-// verilog only
-import "BVI"
-module mkUserClock_Ratio#(Integer inFreq,
-                          Integer clockMultiplier,
-                          Integer clockDivider)
-    // Interface:
-        (UserClock);
-
-    default_clock (CLK);
-    default_reset (RST_N);
-    output_clock clk (CLK_OUT);
-    output_reset rst (RST_N_OUT) clocked_by (clk);
-
-    // Convert frequency (MHz) to period (ns)
-    parameter CR_CLKIN_PERIOD = 1000 / inFreq;
-    parameter CR_CLKFX_MULTIPLY = clockMultiplier;
-    parameter CR_CLKFX_DIVIDE = clockDivider;
-
-endmodule
-
 //
 // mkUserClock --
 //   Generate a user clock based on the incoming frequency that is multiplied
@@ -108,7 +72,7 @@ module mkUserClock#(Integer inFreq, Integer clockMultiplier, Integer clockDivide
     if (clockMultiplier ==  clockDivider)
         clk <- mkUserClock_Same;
     else if (clockMultiplier == 2 && clockDivider == 1)
-        clk <- mkUserClock_MultiplyByTwo(inFreq);
+        clk <- mkUserClock_Ratio(inFreq, clockMultiplier*2, clockDivider*2);
     else if (clockMultiplier == 1 && clockDivider == 2)
         clk <- mkUserClock_DivideByTwo;
     else

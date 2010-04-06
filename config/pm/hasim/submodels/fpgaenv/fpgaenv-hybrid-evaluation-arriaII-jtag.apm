@@ -1,0 +1,102 @@
+
+[Global]
+SaveParameters=0
+Description=Hybrid evaluation-arriaII-JTAG FPGA Environment
+File=fpgaenv-hybrid--evaluation-arriaII-jtag
+Version=2.1
+Type=HAsim
+Name=Hybrid evaluation-arriaII-JTAG FPGA Environment
+Class=Asim::Model
+DefaultBenchmark=
+DefaultRunOpts=
+
+[Model]
+DefaultAttributes=bluespec altera
+model=FPGA Environment
+
+[FPGA Environment/Requires]
+virtual_platform=Standard Virtual Platform
+fpga_components=Hardware FPGA Components for ArriaII
+librl_bsv=RL Bluespec Library
+
+[Standard Virtual Platform]
+File=modules/bluespec/common/fpgaenv/virtual-platform/std-virtual-platform.awb
+Packagehint=platforms
+
+[Standard Virtual Platform/Requires]
+virtual_devices=Standard Virtual Devices
+low_level_platform_interface=Low Level Platform Interface Hybrid
+umf=Little-Endian Unified Message Format
+
+[FPGA Environment]
+File=modules/bluespec/common/fpgaenv/fpga-environment.awb
+Packagehint=platforms
+
+[Standard Virtual Devices]
+File=config/pm/hasim/submodels/fpgaenv/std-virtual-devices.apm
+Packagehint=platforms
+
+[General LED Device]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/leds/general-led-device.awb
+Packagehint=platforms
+
+[RRR Clients and Servers]
+File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic/basic-rrr.awb
+Packagehint=platforms
+
+[Basic Virtual Channel Multiplexer]
+File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/basic/basic-channelio.awb
+Packagehint=platforms
+
+[Low Level Platform Interface Hybrid]
+File=modules/bluespec/common/fpgaenv/low-level-platform-interface/hybrid-llpi.awb
+Packagehint=platforms
+
+[Low Level Platform Interface Hybrid/Requires]
+physical_platform=ArriaII GX JTAG
+channelio=Basic Virtual Channel Multiplexer
+rrr=RRR Clients and Servers
+physical_platform_debugger=Null Physical Platform Debugger
+local_mem=Local Memory Interface using DDR2 Memory
+remote_memory=Remote Memory using PCI Express DMA
+
+[RL Bluespec Library]
+File=config/pm/hasim/submodels/fpgaenv/librl-bsv.apm
+Packagehint=platforms
+
+[Single-Ended Crystal Clocks Device]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/single-ended/single-ended-clocks-device.awb
+Packagehint=platforms
+
+[Common Physical Platform Utilities]
+File=modules/bluespec/common/fpgaenv/physical-platform/utils/utils.awb
+Packagehint=platforms
+
+[Local Memory Interface using DDR2 Memory]
+File=modules/bluespec/common/fpgaenv/low-level-platform-interface/local-mem/local-mem-ddr2.awb
+Packagehint=platforms
+
+[Null Physical Platform Debugger]
+File=modules/bluespec/common/fpgaenv/physical-platform/debuggers/null/null-debugger.awb
+Packagehint=platforms
+
+[Remote Memory using PCI Express DMA]
+File=modules/bluespec/common/fpgaenv/low-level-platform-interface/remote-memory/pci-express-dma/remote-memory-pcie-dma.awb
+Packagehint=platforms
+
+[Little-Endian Unified Message Format]
+File=modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian/umf-little-endian.awb
+Packagehint=platforms
+
+[ArriaII GX JTAG/Requires]
+clocks_device=Single-Ended Crystal Clocks Device
+physical_platform_utils=Common Physical Platform Utilities
+led_device=General LED Device
+
+[ArriaII GX JTAG]
+File=modules/bluespec/common/fpgaenv/physical-platform/development_board_arriaII_gx/jtag/altera-arriaIIgx_dev-jtag.awb
+Packagehint=platforms
+
+[Hardware FPGA Components for ArriaII]
+File=modules/bluespec/common/fpgaenv/fpga-components/hardware-fpga-components-arriaII.awb
+Packagehint=platforms

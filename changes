@@ -9225,3 +9225,32 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/development_board_ar
  altera-arriaIIgx_dev-jtag.awb Locally Added               0 
 
 Added skeleton for arriaII GX physical platform
+
+----------
+kfleming    Date: Tue Apr  6 15:05:11 EDT 2010  CSN: CSN-platforms-375
+                  Tue Apr  6 19:05:11 UTC 2010
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-hybrid-evaluation-arriaII-jtag.apm Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ hardware-fpga-components-arriaII.awb Locally Added               0 
+ user-clock-pll.bsv        Locally Removed           374 
+ user-clock-pll-virtex5.bsv Locally Added               - 
+ user-clock-altera-arriaII.v Locally Added               0 
+ user-clock-pll.v          Locally Removed           374 
+ user-clock.bsv            Locally Modified          374 
+ hardware-fpga-components-virtex2.awb Locally Modified          374 
+ user-clock-pll-virtex5.v  Locally Added               - 
+ user-clock-altera.bsv     Locally Added               0 
+ hardware-fpga-components-virtex5.awb Locally Modified          374 
+ user-clock-xilinx.bsv     Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/development_board_arriaII_gx/jtag
+ altera-arriaIIgx_dev-jtag.awb Locally Modified          374 
+
+
+Reworked the fpga components to support Altera targets.  This
+consisted of introducing manufacturer specific clock imports. Also
+added new Arria II physical platform based on a JTAG phy channel.

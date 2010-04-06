@@ -184,8 +184,6 @@ module mkUserClock_PLL#(Integer inFreq,
 
     UserClock clk = ?;
 
-  `ifdef SYNTH
-
     // FPGA synthesis...
 
     if (inFreq == outFreq)
@@ -216,17 +214,6 @@ module mkUserClock_PLL#(Integer inFreq,
         clk <- mkUserClock_Ratio_PLL(inFreq, d_in, mul, d_out);
     end
 
-  `else
-       // Out frequency is an _absolute_ measure
-       Clock pllClock <- mkAbsoluteClock(0, `MAGIC_SIMULATION_CLOCK_FACTOR/outFreq);
-       Reset pllReset <- mkInitialReset(10, clocked_by pllClock);
-
-       clk = interface UserClock
-                 interface clk = pllClock;
-                 interface rst = pllReset;
-             endinterface;
-
-  `endif
 
     return clk;
 
