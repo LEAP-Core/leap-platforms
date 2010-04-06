@@ -9254,3 +9254,14 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/development_board_ar
 Reworked the fpga components to support Altera targets.  This
 consisted of introducing manufacturer specific clock imports. Also
 added new Arria II physical platform based on a JTAG phy channel.
+
+----------
+kfleming    Date: Tue Apr  6 16:38:13 EDT 2010  CSN: CSN-platforms-376
+                  Tue Apr  6 20:38:13 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ user-clock-pll.bsv        Locally Added               0 
+
+
+Replaced accidentally deleted file
