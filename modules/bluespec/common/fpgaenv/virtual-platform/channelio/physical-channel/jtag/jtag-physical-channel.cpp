@@ -26,6 +26,7 @@
 #include <sys/wait.h>
 #include <sys/signal.h>
 #include <sys/ioctl.h>
+#include <sys/time.h>
 #include <signal.h>
 #include <string.h>
 #include <iostream>
@@ -33,83 +34,11 @@
 #include <errno.h>
 #include <fcntl.h>
 
-#include "SerialStream.h"
-#include "SerialStreamBuf.h"
-#include "SerialPort.h"
-
 #include "asim/provides/physical_channel.h"
 #include "asim/provides/umf.h"
 
 using namespace std;
 
-
-
-
-
-
-void intializePort(LibSerial::SerialStream *serial_port, FILE *errfd) {
- // Configure the serial port
-  serial_port->Open( "/dev/ttyS0" ) ;
-   
-  if ( ! serial_port->good() ) 
-  {
-     fprintf(errfd,"Error: Could not open serial port.\n");
-     exit(1) ;
-  }
-
-    //
-    // Set the baud rate of the serial port.
-    //
-    serial_port->SetBaudRate( LibSerial::SerialStreamBuf::BAUD_115200 ) ;
-    if ( ! serial_port->good() ) 
-    {
-      fprintf(errfd,"Error: Could not open set baud rate.\n");
-        exit(1) ;
-    }
-    //
-    // Set the number of data bits.
-    //
-    serial_port->SetCharSize(  LibSerial::SerialStreamBuf::CHAR_SIZE_8 ) ;
-    if ( ! serial_port->good() ) 
-    {
-      fprintf(errfd,"Error: Could not open set char size.\n");
-      exit(1) ;
-    }
-    //
-    // Disable parity.
-    //
-    serial_port->SetParity(  LibSerial::SerialStreamBuf::PARITY_NONE ) ;
-    if ( ! serial_port->good() ) 
-    {
-      fprintf(errfd,"Error: Could not open set parity.\n");
-        exit(1) ;
-    }
-    //
-    // Set the number of stop bits.
-    //
-    serial_port->SetNumOfStopBits( 1 ) ;
-    if ( ! serial_port->good() ) 
-    {
-      fprintf(errfd,"Error: Could not open set stop bite.\n");
-      exit(1) ;
-    }
-    //
-    // Turn on hardware flow control.
-    //
-    serial_port->SetFlowControl(  LibSerial::SerialStreamBuf::FLOW_CONTROL_HARD ) ;
-    if ( ! serial_port->good() ) 
-    {
-        fprintf(errfd,"Error: Could not open set HW Flow Control.\n");
-        exit(1) ;
-    }
-    //
-    // Do not skip whitespace characters while reading from the
-    // serial port.
-    //
-
-    serial_port->unsetf( std::ios_base::skipws ) ;
-
-}
 
 // ==============================================
 //            WARNING WARNING WARNING
@@ -126,106 +55,52 @@ PHYSICAL_CHANNEL_CLASS::PHYSICAL_CHANNEL_CLASS(
     PHYSICAL_DEVICES d) :
     PLATFORMS_MODULE_CLASS(p)
 {
+  int     child_to_parent[2];
+  int     parent_to_child[2];
+  int     pid;
+
   incomingMessage = NULL;
 
   // open serial device. As it's non-blocking we should hold until we
   // have a physical connection
   errfd = fopen("./error_messages", "w");
 
-  serial_port = new LibSerial::SerialStream();
 
-  msg_count_in = 0; 
-
-  msg_count_out = 0; 
-
-  intializePort(serial_port, errfd);
-
-  // Do some handshaking. We should probably bail out by re-running the fpga programming step. or something like
-  // that
-
-  int pos = 0; UMF_CHUNK v; 
-  volatile int i =0 ;
-  unsigned char* vptr = (unsigned char *) &v;
-
-  //scheme is pos 0 0xDEADBEEF HW -> SW
-  //          pos 1 0x0505CAFE SW -> HW
-  //          pos 2 0x08675309 HW -> SW
-
-  char password[4] = {'a','b','c','d'};
-  char counterword[4] = {'A','B','C','D'};
-  int ptr  = 0;
-  int failures = 0;
-  int retry  = 0;
-
-
-
-  while(1){
-    char recvchar=0, sendchar=0;     
-  
-    if(failures > 3000) {
-      fprintf(errfd,"Failed too many times, try a reset\r\n");
-      if(retry > 100) {
-        fprintf(errfd,"Retried too many times, bailing\r\n"); 
-        fflush(errfd);
-        exit(1);
-      }
-      retry++;
-      failures = 0;
-      serial_port->Close();
-      intializePort(serial_port, errfd);
-    }
-
-    if(serial_hasdata() > 0) {
-      fprintf(errfd,"Has Data: %d\r\n",serial_hasdata());
-      //serial_port->read((char *)&recvchar,1);
-      serial_port->get(recvchar);
-    } else {
-      usleep(100); // sleep for a bit
-      failures++;
-      continue;
-    }
-
-
-    // if match move on
-    if (password[ptr] == recvchar){
-      sendchar = counterword[ptr];
-      serial_port->write((const char *) &sendchar,1);
-      ptr++;
-      fprintf(errfd,"Loop: %d, send:%x recv:%x\r\n", failures, sendchar, recvchar);
-    }
-    // drain left overs 
-    else if(password[0] == recvchar) {
-	// Do nothing 
-    }
-    //something unexpected 
-    //Write a junk character to reset the ublaze and try again
-    else { 
-      sendchar = 'X';
-      serial_port->write((const char *)&sendchar,1);
-      failures ++;
-      ptr = 0; 
-      fprintf(errfd,"Loop: %d, send:%x recv:%x\r\n", failures, (unsigned int)sendchar, (unsigned int)recvchar);
-      // flush buffer
-      while(serial_hasdata() > 0) {
-        serial_port->get(recvchar);
-      }
-    }
-    
-    if(ptr == 4) {
-      break;
-    }
-
-    
+  //spawn a process
+  if (pipe(child_to_parent) < 0 || pipe(parent_to_child) < 0)
+  {
+      parent->CallbackExit(1);
   }
 
-   fprintf(errfd,"Sunk\r\n");
+  pid = fork();
+  if (pid == 0)
+  {
+        // child
+        close(child_to_parent[0]);
+        close(parent_to_child[1]);
 
+        dup2(parent_to_child[0], STDIN);
+        dup2(child_to_parent[1], STDOUT);
+
+        execlp("nios2-terminal", "nios2-terminal", NULL);
+    }
+    else
+    {
+        // parent
+        close(child_to_parent[1]);
+        close(parent_to_child[0]);
+        input = child_to_parent[0];
+        output = parent_to_child[1];
+
+    }
 }
 
 // destructor
 PHYSICAL_CHANNEL_CLASS::~PHYSICAL_CHANNEL_CLASS()
 {
-  serial_port->Close();
+  // we should probably trap the signal as well to gracefully kill our child
+  close(input);
+  close(output);
 }
 
 // blocking read
@@ -252,11 +127,21 @@ PHYSICAL_CHANNEL_CLASS::Read(){
 // non-blocking read
 UMF_MESSAGE
 PHYSICAL_CHANNEL_CLASS::TryRead(){   
- // We must check if there's new data. This will give us more and stop if we're full.
+  // We must check if there's new data. This will give us more and stop if we're full.
+  fd_set readFile;
+  struct timeval time = {0,0};  
 
-  if(serial_hasdata() > 0) {
+  FD_ZERO(&readFile);
+  FD_SET(input, &readFile); 
+  
+  select(1,&readFile,NULL,NULL, &time);
+
+  //select says we're okay
+  if(FD_ISSET(input,&readFile)) {
     readPipe();
   }
+
+
   // now see if we have a complete message
   if (incomingMessage && !incomingMessage->CanAppend()){
     UMF_MESSAGE msg = incomingMessage;
@@ -288,7 +173,7 @@ PHYSICAL_CHANNEL_CLASS::Write(UMF_MESSAGE message){
   while (message->CanReverseExtract()){
     UMF_CHUNK chunk = message->ReverseExtractChunk();
     fprintf(errfd,"attempting to write %x\n",chunk);    
-    serial_port->write((const char*)&chunk, sizeof(UMF_CHUNK));
+    write(output,(const char*)&chunk, sizeof(UMF_CHUNK));
   }
 
   // de-allocate message
@@ -307,17 +192,14 @@ PHYSICAL_CHANNEL_CLASS::readPipe(){
     // new message: read header
     unsigned char header[UMF_CHUNK_BYTES];
     // If we have no data to beginwith, bail.
-    if(serial_hasdata() == 0) { 
-      return;
-    }
 
     msg_count_in++;
     fprintf(errfd, "readPipe forming header: %d\n", msg_count_in);
 
     for(int i = 0; i <  UMF_CHUNK_BYTES; i++) {
-      while(serial_hasdata() == 0) {} // Block :(
       char temp;
-      serial_port->get(temp);
+      int returnVal;
+      while((returnVal = read(input,&temp,sizeof(char))) < 1) {} // Block :(
       header[i] = temp;
       fprintf(errfd, "readPipe header[%d]: %x\n",i,temp);
     }
@@ -337,11 +219,11 @@ PHYSICAL_CHANNEL_CLASS::readPipe(){
     unsigned char buf[UMF_CHUNK_BYTES]; 
     int bytes_requested = UMF_CHUNK_BYTES;
     for(int i = 0; i <  UMF_CHUNK_BYTES; i++) {
-      while(serial_hasdata() == 0) {} // Block :(
       char temp;
-      serial_port->get(temp);
-      buf[i] = temp;
-
+      int returnVal;
+      while((returnVal = read(input,&temp,sizeof(char))) < 1) {} // Block :(
+      header[i] = temp;
+      fprintf(errfd, "readPipe header[%d]: %x\n",i,temp);
     }
 
     fprintf(errfd, "readPipe chunk: %x\n",*((int*)buf));
@@ -359,8 +241,4 @@ PHYSICAL_CHANNEL_CLASS::readPipe(){
   fflush(errfd);
 }
 
-int
-PHYSICAL_CHANNEL_CLASS::serial_hasdata()
-{
-  return serial_port->rdbuf()->in_avail();
-}
+

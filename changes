@@ -9311,3 +9311,16 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-ch
 
 
 Added jtag phy channel code skeleton.  Impl not complete.
+
+----------
+kfleming    Date: Wed Apr  7 18:37:56 EDT 2010  CSN: CSN-platforms-381
+                  Wed Apr  7 22:37:56 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/jtag
+ jtag-physical-channel.cpp Locally Modified          380 
+ jtag-physical-channel.h   Locally Modified          380 
+
+
+
+Add Altera JTAG C code.  This code probably needs a robust way of shooting down NIOS 2 Terminal.
