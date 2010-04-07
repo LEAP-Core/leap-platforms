@@ -44,6 +44,8 @@ class PHYSICAL_CHANNEL_CLASS: public PLATFORMS_MODULE_CLASS
   int input;
   int output;
 
+  void   readPipe();
+
   public:
 
     PHYSICAL_CHANNEL_CLASS(PLATFORMS_MODULE, PHYSICAL_DEVICES);
