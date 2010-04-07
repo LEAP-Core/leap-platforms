@@ -9281,3 +9281,16 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/jta
  jtag-device.bsv           Locally Added               0 
 
 Added skeleton code for altera jtag device
+
+----------
+kfleming    Date: Wed Apr  7 14:18:03 EDT 2010  CSN: CSN-platforms-379
+                  Wed Apr  7 18:18:03 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled
+ xilinx.sdf                Locally Modified          378 
+
+Directory modules/project
+ Synplify.py               Locally Modified          378 
+
+Fixed bug in synplify build.

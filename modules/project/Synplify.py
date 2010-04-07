@@ -61,7 +61,7 @@ class Synthesize(ProjectDependency):
     #once we get synth boundaries up, this will be needed only for top level
     newPrjFile.write('set_option -disable_io_insertion 0\n');
 
-    newPrjFile.write('impl -add ' + moduleList.topModule.wrapperName()  + '-type fpga\n')
+    newPrjFile.write('impl -add ' + moduleList.topModule.wrapperName()  + ' -type fpga\n')
 
     #dump synplify options file
     print 'Dumping old prj file\n'
