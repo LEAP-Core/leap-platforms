@@ -3,8 +3,6 @@ import re
 import sys
 import SCons.Script
 from model import  *
-from xilinx_ucf import *
-from xilinx_bmm import *
 from xilinx_ngd import *
 from xilinx_map import *
 from xilinx_par import *
@@ -19,14 +17,6 @@ class PostSynthesize():
 
     fpga_part_xilinx = moduleList.env['DEFS']['FPGA_PART_XILINX']
     xilinx_apm_name = moduleList.compileDirectory + '/' + moduleList.apmName
-    # Concatenate UCF files
-    UCF(moduleList)
-
-    moduleList.dump()
-
-    BMM(moduleList)
-
-    moduleList.dump()
       
     NGD(moduleList)
 

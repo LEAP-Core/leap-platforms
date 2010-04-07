@@ -10,12 +10,27 @@ class NGD():
 
     fpga_part_xilinx = moduleList.env['DEFS']['FPGA_PART_XILINX']
     xilinx_apm_name = moduleList.compileDirectory + '/' + moduleList.apmName
-    bmm = ''
-    for i in range(len(moduleList.getAllDependencies('BMM'))):
-        bmm += moduleList.getAllDependencies('BMM')[i]
+
+    # Concatenate UCF files
+    xilinx_ucf = moduleList.env.Command(
+      xilinx_apm_name + '.ucf',
+      Utils.clean_split(moduleList.env['DEFS']['GIVEN_UCFS'], sep = ' '),
+      'cat $SOURCES > $TARGET')
+
+    if len(moduleList.env['DEFS']['GIVEN_BMMS']) != 0:
+      xilinx_bmm = moduleList.env.Command(
+        xilinx_apm_name + '.bmm',
+        Utils.clean_split(moduleList.env['DEFS']['GIVEN_BMMS'], sep = ' '),
+        'cat $SOURCES > $TARGET')
+    #./ works around crappy xilinx parser
+      bmm = ' -bm ./' + xilinx_apm_name + '.bmm' 
+    else:
+      xilinx_bmm = ''
+      bmm = ''
+
     xilinx_ngd = moduleList.env.Command(
       xilinx_apm_name + '.ngd',
-      moduleList.getAllDependencies('SYNTHESIS') + moduleList.getAllDependencies('UCFS') + moduleList.getAllDependencies('XILINX_BMM'),
+      moduleList.getAllDependencies('SYNTHESIS') + xilinx_ucf + xilinx_bmm,
       [ SCons.Script.Delete(xilinx_apm_name + '.bld'),
         SCons.Script.Delete(xilinx_apm_name + '_ngdbuild.xrpt'),
         # Xilinx project files are created automatically by Xilinx tools, but not

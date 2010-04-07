@@ -8,8 +8,6 @@
 
 %provides post_synthesis_tool
 
-%requires xilinx_ucf
-%requires xilinx_bmm
 %requires xilinx_ngd
 %requires xilinx_map
 %requires xilinx_par
