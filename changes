@@ -9294,3 +9294,20 @@ Directory modules/project
  Synplify.py               Locally Modified          378 
 
 Fixed bug in synplify build.
+
+----------
+kfleming    Date: Wed Apr  7 14:22:39 EDT 2010  CSN: CSN-platforms-380
+                  Wed Apr  7 18:22:39 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel
+ jtag/                     Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/jtag
+ jtag-physical-channel.cpp Locally Added               0 
+ jtag-physical-channel.h   Locally Added               0 
+ jtag-physical-channel.awb Locally Added               0 
+ jtag-physical-channel.bsv Locally Added               0 
+
+
+Added jtag phy channel code skeleton.  Impl not complete.

@@ -1,0 +1,10 @@
+
+%name JTAG Physical Channel
+%desc JTAG Physical Channel
+
+%provides physical_channel
+
+%sources -t BSV -v PUBLIC   jtag-physical-channel.bsv
+%sources -t H   -v PUBLIC   jtag-physical-channel.h
+%sources -t CPP -v PUBLIC   jtag-physical-channel.cpp
+
