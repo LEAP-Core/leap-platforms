@@ -17,8 +17,9 @@
 //
 
 `include "physical_platform.bsh"
-`include "serial_device.bsh"
+`include "jtag_device.bsh"
 `include "umf.bsh"
+`include "rrr.bsh"
 
 // ============== Physical Channel ===============
 
@@ -35,49 +36,34 @@ module mkPhysicalChannel#(PHYSICAL_DRIVERS drivers)
     // interface
         (PHYSICAL_CHANNEL);
   
-  // shortcut to drivers
-  SERIAL_DRIVER serialDriver = drivers.serialDriver;
-
-  let initialized = True;
+   // shortcut to drivers
+   JTAG_DRIVER jtagDriver = drivers.jtagDriver;
   
-//   Reg#(Bool)    initialized <- mkReg(False);
-//   Reg#(Bit#(16)) count      <- mkReg(0);
-  
-//   //scheme is pos 0 "DEAD" HW -> SW
-//   //          pos 1 "BEEF" SW -> HW
-//   //          pos 2 "CAFE" HW -> SW
-  
-//   rule sendPulse(!initialized);
-//     count <= count + 1;
-//     if (count == 0)
-//       begin
-// 	serialDriver.send(32'h44454144);
-//       end
-//   endrule
+   DEMARSHALLER#(JTAGWord,ChannelIOWord) jtagIncoming  <- mkDeMarshaller;
+   MARSHALLER#(ChannelIOWord, JTAGWord)  jtagOutgoing  <- mkMarshaller;
 
+   rule startNewDemarshalling;
+      demarshaller.start(valueof(SizeOf#(UMF_CHUNK)/SizeOf#(JTAGWord))); // only work if UMF_CHUNK are multiple of JTAGWord
+   endrule
+   
+   rule sendToJtag;
+      let x = jtagOutgoing.first();
+      jtagDriver.send(x);
+      jtagOutgoing.deq();
+   endrule
+   
+   rule recvFromJtag;
+      let x <- jtagDriver.receive();
+      jtagIncoming.insert(x);
+   endrule
 
-//   rule getResp(!initialized);
-//     let x<- serialDriver.receive();
-//     if (x == 32'h42454546) // woo. A response Send a token and we're done 
-//       begin
-// 	serialDriver.send(32'h43414645);
-// 	initialized <= True;
-//       end
-//      else
-//        begin
-// 	 serialDriver.send(x);	 
-// 	 //serialDriver.send(32'h464F4F21);	 
-// 	 //initialized <= True;
-//        end   
-//   endrule  
- 
-  method ActionValue#(UMF_CHUNK) read() if (initialized);
-    let x <- serialDriver.receive();
-    return x;
-  endmethod
-
-  method Action write(UMF_CHUNK x) if (initialized);
-    serialDriver.send(x);
-  endmethod
-  
+   method Action write(UMF_CHUNK data) (initialized);
+      jtagOutgoing.enq(data);
+   endmethod
+   
+   method ActionValue#(UMF_CHUNK) read() (initialized);
+      let x <- jtagIncoming.readAndDelete();
+      return x;
+   endmethod
+   
 endmodule
