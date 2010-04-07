@@ -15,7 +15,7 @@ module mkUserClock_Ratio#(Integer inFreq,
     default_clock (inclk0);
     default_reset (areset_n);
     output_clock clk (c0);
-    output_reset rst (locked) clocked_by (c0);
+    output_reset rst (locked) clocked_by (clk);
 
     // Convert frequency (MHz) to period (ns)
     parameter CR_CLKIN_PERIOD = 1000000 / inFreq;
