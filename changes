@@ -9334,3 +9334,14 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-ch
  jtag-physical-channel.h   Locally Modified          381 
 
 Fixed compilation error
+
+----------
+kfleming    Date: Wed Apr  7 21:44:35 EDT 2010  CSN: CSN-platforms-388
+                  Thu Apr  8 01:44:35 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/jtag
+ jtag-physical-channel.cpp Locally Modified          387 
+
+
+Fixed some code typos.  This file compiles now.

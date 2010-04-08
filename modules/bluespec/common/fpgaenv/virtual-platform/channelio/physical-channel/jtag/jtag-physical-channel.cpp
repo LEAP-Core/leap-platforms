@@ -79,8 +79,8 @@ PHYSICAL_CHANNEL_CLASS::PHYSICAL_CHANNEL_CLASS(
         close(child_to_parent[0]);
         close(parent_to_child[1]);
 
-        dup2(parent_to_child[0], STDIN);
-        dup2(child_to_parent[1], STDOUT);
+        dup2(parent_to_child[0], fileno(stdin));
+        dup2(child_to_parent[1], fileno(stdout));
 
         execlp("nios2-terminal", "nios2-terminal", NULL);
     }
@@ -163,7 +163,7 @@ PHYSICAL_CHANNEL_CLASS::Write(UMF_MESSAGE message){
   msg_count_out++;
   fprintf(errfd,"attempting to write msg %d of length %d: %x\n", msg_count_out,message->GetLength(),*header);    
   //write header to pipe
-  serial_port->write((const char *)header, UMF_CHUNK_BYTES);
+  write(output,(const char *)header, UMF_CHUNK_BYTES);
 
   // write message data to pipe
   // NOTE: hardware demarshaller expects chunk pattern to start from most
@@ -222,7 +222,7 @@ PHYSICAL_CHANNEL_CLASS::readPipe(){
       char temp;
       int returnVal;
       while((returnVal = read(input,&temp,sizeof(char))) < 1) {} // Block :(
-      header[i] = temp;
+      buf[i] = temp;
       fprintf(errfd, "readPipe header[%d]: %x\n",i,temp);
     }
 
