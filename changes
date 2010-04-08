@@ -9371,3 +9371,17 @@ with name 'Standard Virtual Devices' used in std-virtual-device.apm.
 Only difference in this submodel from 'Standard Virtual Devices' seems
 to be use of a NULL central cache instead of a local memory central
 cache. There also seemed to be no usage of this submodel.
+
+----------
+mcadler     Date: Thu Apr  8 17:48:14 EDT 2010  CSN: CSN-platforms-391
+                  Thu Apr  8 21:48:14 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-mem-scratch.bsv    Locally Modified          390 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/simulation
+ sim-clocks-device.awb     Locally Modified          390 
+
+- Make the default simulation clock ration 1:1
+- Tweak debugging message in scratchpad.

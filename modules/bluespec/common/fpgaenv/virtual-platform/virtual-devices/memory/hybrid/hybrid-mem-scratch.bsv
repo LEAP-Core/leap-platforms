@@ -721,6 +721,7 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
             r_req.refInfo = refInfo;
 
             uncachedReqQ.enq(tagged SCRATCHPAD_HYBRID_READ r_req);
+            debugLog.record($format("port %0d: readReq uncached addr=0x%x", refInfo.portNum, addr));
         end
         else
         begin
