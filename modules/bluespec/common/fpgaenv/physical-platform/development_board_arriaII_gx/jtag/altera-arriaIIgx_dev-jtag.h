@@ -19,7 +19,8 @@
 #ifndef __PHYSICAL_PLATFORM__
 #define __PHYSICAL_PLATFORM__
 
-#include "asim/provides/jtag_device.h"
+#include "platforms-module.h"
+
 
 typedef class PHYSICAL_DEVICES_CLASS* PHYSICAL_DEVICES;
 class PHYSICAL_DEVICES_CLASS: public PLATFORMS_MODULE_CLASS
