@@ -1,11 +1,11 @@
 
 [Global]
 SaveParameters=0
-Description=Standard Virtual Devices
+Description=Standard Virtual Devices for XUP
 File=xup-virtual-devices
 Version=2.1
 Type=HAsim
-Name=Standard Virtual Devices
+Name=XUP Virtual Devices
 Class=Asim::Model
 DefaultBenchmark=
 DefaultRunOpts=
@@ -75,4 +75,11 @@ Packagehint=platforms
 
 [NULL Central Cache]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/central-cache/null-central-cache.awb
+Packagehint=platforms
+
+[Hybrid Scratchpad Memory Device/Requires]
+scratchpad_memory_common=Scratchpad Memory Common Definitions
+
+[Scratchpad Memory Common Definitions]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/common/mem-scratch-common.awb
 Packagehint=platforms

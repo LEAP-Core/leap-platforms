@@ -9356,3 +9356,18 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/development_board_ar
  altera-arriaIIgx_dev-jtag.h Locally Modified          388 
 
 Added platforms module include to jtag phy platform C++ stub.
+
+----------
+jsemer      Date: Thu Apr  8 09:29:48 EDT 2010  CSN: CSN-platforms-390
+                  Thu Apr  8 13:29:48 UTC 2010
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ xup-virtual-devices.apm   Locally Modified          389 
+
+Changed name of model to 'XUP Virtual Devices' to eliminate duplication 
+with name 'Standard Virtual Devices' used in std-virtual-device.apm.
+
+Only difference in this submodel from 'Standard Virtual Devices' seems
+to be use of a NULL central cache instead of a local memory central
+cache. There also seemed to be no usage of this submodel.
