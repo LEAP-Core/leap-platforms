@@ -1,6 +1,7 @@
 import Vector::*;
 import FIFO::*;
 
+`include "asim/provides/umf.bsh"
 
 // DeMarshaller
 

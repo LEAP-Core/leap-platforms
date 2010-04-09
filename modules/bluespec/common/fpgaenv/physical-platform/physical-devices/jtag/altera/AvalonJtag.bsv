@@ -62,7 +62,7 @@ module mkAvalonJtagDriver#(Clock rawClock, Reset rawReset) (JTAG_DRIVER);
    Clock sysClock <- exposeCurrentClock();
    Reset sysReset <- exposeCurrentReset();
    
-   AvalonMasterInverseWires#(32,32)  driver    <- mkAvalonMasterDriver();
+   AvalonMasterInverseWires#(32,32)  driver    <- mkAvalonMasterDriver(clocked_by rawClock, reset_by rawReset);
    AvalonMaster#(32, 32)             master    <- mkAvalonMasterDualDomain(sysClock, sysReset, clocked_by rawClock, reset_by rawReset);
    FIFOF#(JTAGWord)                  inQ       <- mkFIFOF();
    FIFOF#(JTAGWord)                  outQ      <- mkFIFOF();

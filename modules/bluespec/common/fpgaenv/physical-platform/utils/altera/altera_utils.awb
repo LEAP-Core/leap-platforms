@@ -1,0 +1,8 @@
+
+%name Common Altera Platform Utilities
+%desc Common Utilities shared by Altera Platforms
+
+%provides altera_utils
+
+%requires avalon fifo_utils c_bus_utils debug_utils register_mapper vector_utils
+

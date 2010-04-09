@@ -19,7 +19,7 @@
 `include "physical_platform.bsh"
 `include "jtag_device.bsh"
 `include "umf.bsh"
-`include "rrr.bsh"
+`include "rrr_common.bsh"
 
 // ============== Physical Channel ===============
 
@@ -39,11 +39,14 @@ module mkPhysicalChannel#(PHYSICAL_DRIVERS drivers)
    // shortcut to drivers
    JTAG_DRIVER jtagDriver = drivers.jtagDriver;
   
-   DEMARSHALLER#(JTAGWord,ChannelIOWord) jtagIncoming  <- mkDeMarshaller;
-   MARSHALLER#(ChannelIOWord, JTAGWord)  jtagOutgoing  <- mkMarshaller;
+   DEMARSHALLER#(JTAGWord,UMF_CHUNK) jtagIncoming  <- mkDeMarshaller;
+   MARSHALLER#(UMF_CHUNK, JTAGWord)  jtagOutgoing  <- mkMarshaller;
+   
+   // no. jtag words to assemble a umf chunk
+   UMF_MSG_LENGTH no_jtag_words = fromInteger(valueof(SizeOf#(UMF_CHUNK))/valueOf(SizeOf#(JTAGWord)));
 
    rule startNewDemarshalling;
-      demarshaller.start(valueof(SizeOf#(UMF_CHUNK)/SizeOf#(JTAGWord))); // only work if UMF_CHUNK are multiple of JTAGWord
+      jtagIncoming.start(no_jtag_words); // only work if UMF_CHUNK are multiple of JTAGWord
    endrule
    
    rule sendToJtag;
@@ -57,11 +60,11 @@ module mkPhysicalChannel#(PHYSICAL_DRIVERS drivers)
       jtagIncoming.insert(x);
    endrule
 
-   method Action write(UMF_CHUNK data) (initialized);
-      jtagOutgoing.enq(data);
+   method Action write(UMF_CHUNK data);
+      jtagOutgoing.enq(data,no_jtag_words);
    endmethod
    
-   method ActionValue#(UMF_CHUNK) read() (initialized);
+   method ActionValue#(UMF_CHUNK) read();
       let x <- jtagIncoming.readAndDelete();
       return x;
    endmethod

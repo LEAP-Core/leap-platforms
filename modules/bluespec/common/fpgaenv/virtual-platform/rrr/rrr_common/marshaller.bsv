@@ -1,7 +1,7 @@
 import Vector::*;
 import FIFO::*;
 
-// this is a copy
+`include "asim/provides/umf.bsh"
 
 // MARSHALLER
 
@@ -19,6 +19,7 @@ interface MARSHALLER#(parameter type in_T, parameter type out_T);
     // Deq the the chunk.
     method Action deq();
 
+    method Bool notEmpty();
 endinterface
 
 module mkMarshaller
@@ -123,4 +124,9 @@ module mkMarshaller
     
     endmethod
 
+    // notEmpty
+
+    method Bool notEmpty();
+        return ! done;    
+    endmethod
 endmodule

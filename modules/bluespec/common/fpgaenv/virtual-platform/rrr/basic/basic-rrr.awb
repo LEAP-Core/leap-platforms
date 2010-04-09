@@ -3,11 +3,11 @@
 
 %provides rrr
 
+%requires rrr_common
+
 %sources -t BSV -v PUBLIC  basic-rrr-client.bsv
 %sources -t BSV -v PUBLIC  basic-rrr-server.bsv
 %sources -t BSH -v PUBLIC  basic-rrr-common.bsh
-%sources -t BSV -v PUBLIC  demarshaller.bsv
-%sources -t BSV -v PUBLIC  marshaller.bsv
 %sources -t BSV -v PUBLIC  arbiters.bsv
 
 %sources -t H   -v PUBLIC  basic-rrr-server.h basic-rrr-client.h
