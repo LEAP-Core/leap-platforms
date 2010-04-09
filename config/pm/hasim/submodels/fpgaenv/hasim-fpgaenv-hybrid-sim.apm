@@ -76,7 +76,6 @@ physical_platform_utils=Common Physical Platform Utilities
 File=modules/bluespec/common/fpgaenv/physical-platform/simulation/sim-physical-platform.awb
 Packagehint=platforms
 
-
 [Software FPGA Components]
 File=modules/bluespec/common/fpgaenv/fpga-components/software-fpga-components.awb
 Packagehint=platforms
@@ -151,4 +150,18 @@ Packagehint=platforms
 
 [Little-Endian Unified Message Format]
 File=modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian/umf-little-endian.awb
+Packagehint=platforms
+
+[RRR Common Module]
+File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/rrr_common/rrr_common.awb
+Packagehint=platforms
+
+[RRR Clients and Servers/Requires]
+rrr_common=RRR Common Module
+
+[Hybrid Scratchpad Memory Device/Requires]
+scratchpad_memory_common=Scratchpad Memory Common Definitions
+
+[Scratchpad Memory Common Definitions]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/common/mem-scratch-common.awb
 Packagehint=platforms

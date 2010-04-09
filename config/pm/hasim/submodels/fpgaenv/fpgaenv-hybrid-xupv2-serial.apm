@@ -131,3 +131,10 @@ Packagehint=platforms
 [NULL DDR SDRAM Physical Device]
 File=modules/bluespec/mit-6.375/lab6/ddr-sdram-null/ddr-sdram-device.awb
 Packagehint=mit-6.375
+
+[RRR Common Module]
+File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/rrr_common/rrr_common.awb
+Packagehint=platforms
+
+[RRR Clients and Servers/Requires]
+rrr_common=RRR Common Module

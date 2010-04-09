@@ -7,7 +7,8 @@ Version=2.1
 Type=HAsim
 Name=Hardware-Only XUP Environment
 Class=Asim::Model
-DefaultBenchmark=0
+DefaultBenchmark=
+DefaultRunOpts=
 
 [Model]
 DefaultAttributes=bluespec xup
@@ -34,9 +35,6 @@ Packagehint=platforms
 [Standard Virtual Devices]
 File=config/pm/hasim/submodels/fpgaenv/std-virtual-devices.apm
 Packagehint=platforms
-
-
-
 
 [Null Channel IO Module]
 File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/null/null-channelio.awb
@@ -73,7 +71,6 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/virtual-platform/umf/null/null-umf.awb
 Packagehint=platforms
 
-
 [Low Level Platform Interface Hardware-Only/Requires]
 physical_platform=XUP Physical Platform
 channelio=Null Channel IO Module
@@ -97,8 +94,6 @@ Packagehint=platforms
 File=config/pm/hasim/submodels/fpgaenv/librl-bsv.apm
 Packagehint=platforms
 
-
-
 [Common Physical Platform Utilities]
 File=modules/bluespec/common/fpgaenv/physical-platform/utils/utils.awb
 Packagehint=platforms
@@ -110,3 +105,10 @@ Packagehint=platforms
 [Hardware FPGA Components for Virtex 2]
 File=modules/bluespec/common/fpgaenv/fpga-components/hardware-fpga-components-virtex2.awb
 Packagehint=platforms
+
+[RRR Common Module]
+File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/rrr_common/rrr_common.awb
+Packagehint=platforms
+
+[Null RRR Module/Requires]
+rrr_common=RRR Common Module

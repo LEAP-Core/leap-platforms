@@ -7,12 +7,12 @@ Version=2.1
 Name=Hardware-Only Simulation Environment
 Type=HAsim
 Class=Asim::Model
-DefaultBenchmark=0
+DefaultBenchmark=
+DefaultRunOpts=
 
 [Model]
 DefaultAttributes=bluespec
 model=FPGA Environment
-
 
 [Standard Virtual Platform/Requires]
 virtual_devices=Standard Virtual Devices
@@ -44,7 +44,6 @@ Packagehint=platforms
 File=config/pm/hasim/submodels/fpgaenv/std-virtual-devices.apm
 Packagehint=platforms
 
-
 [Null Physical Platform]
 File=modules/bluespec/common/fpgaenv/physical-platform/null/null-physical-platfrom.awb
 Packagehint=platforms
@@ -52,7 +51,6 @@ Packagehint=platforms
 [Null Unified Message Format]
 File=modules/bluespec/common/fpgaenv/virtual-platform/umf/null/null-umf.awb
 Packagehint=platforms
-
 
 [Low Level Platform Interface Hardware-Only/Requires]
 physical_platform=Null Physical Platform
@@ -77,9 +75,13 @@ Packagehint=platforms
 File=config/pm/hasim/submodels/fpgaenv/librl-bsv.apm
 Packagehint=platforms
 
-
-
-
 [Software FPGA Components]
 File=modules/bluespec/common/fpgaenv/fpga-components/software-fpga-components.awb
 Packagehint=platforms
+
+[RRR Common Module]
+File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/rrr_common/rrr_common.awb
+Packagehint=platforms
+
+[Null RRR Module/Requires]
+rrr_common=RRR Common Module

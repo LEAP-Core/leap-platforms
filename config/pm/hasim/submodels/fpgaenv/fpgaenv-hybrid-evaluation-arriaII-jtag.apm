@@ -56,11 +56,9 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/physical-platform/utils/utils.awb
 Packagehint=platforms
 
-
 [Null Physical Platform Debugger]
 File=modules/bluespec/common/fpgaenv/physical-platform/debuggers/null/null-debugger.awb
 Packagehint=platforms
-
 
 [Little-Endian Unified Message Format]
 File=modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian/umf-little-endian.awb
@@ -71,6 +69,7 @@ clocks_device=Single-Ended Crystal Clocks Device
 physical_platform_utils=Common Physical Platform Utilities
 led_device=General LED Device
 jtag_device=Altera JTAG
+altera_utils=Common Altera Platform Utilities
 
 [ArriaII GX JTAG]
 File=modules/bluespec/common/fpgaenv/physical-platform/development_board_arriaII_gx/jtag/altera-arriaIIgx_dev-jtag.awb
@@ -91,13 +90,9 @@ Packagehint=platforms
 [Basic Virtual Channel Multiplexer/Requires]
 physical_channel=JTAG Physical Channel
 
-
-
-
-
 [Standard Virtual Devices]
-File=config/pm/mit-6.375/virtex2-virtual-devices.apm
-Packagehint=mit-6.375
+File=config/pm/hasim/submodels/fpgaenv/std-virtual-devices.apm
+Packagehint=platforms
 
 [Low Level Platform Interface Hybrid]
 File=modules/bluespec/common/fpgaenv/low-level-platform-interface/hybrid-llpi.awb
@@ -109,12 +104,62 @@ remote_memory=Null Remote Memory
 channelio=Basic Virtual Channel Multiplexer
 rrr=RRR Clients and Servers
 physical_platform_debugger=Null Physical Platform Debugger
-local_mem=NULL Local Memory Interface
+local_mem=Local Memory Interface using BRAM
 
 [Null Remote Memory]
 File=modules/bluespec/common/fpgaenv/low-level-platform-interface/remote-memory/null/null-remote-memory.awb
 Packagehint=platforms
 
-[NULL Local Memory Interface]
-File=modules/bluespec/common/fpgaenv/low-level-platform-interface/local-mem/local-mem-null.awb
+[Local Memory Interface using BRAM]
+File=modules/bluespec/common/fpgaenv/low-level-platform-interface/local-mem/local-mem-bram.awb
+Packagehint=platforms
+
+[RRR Common Module]
+File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/rrr_common/rrr_common.awb
+Packagehint=platforms
+
+[RRR Clients and Servers/Requires]
+rrr_common=RRR Common Module
+
+[Avalon Bus Intefaces]
+File=modules/bsv-libraries/bluespec/Avalon/src/avalon.awb
+Packagehint=bsv-libraries
+
+[Register Mapping Utilities]
+File=modules/bsv-libraries/bluespec/RegisterMapper/src/register_mapper.awb
+Packagehint=bsv-libraries
+
+[FIFO Utility]
+File=modules/bsv-libraries/bluespec/FIFOUtility/fifo_utility.awb
+Packagehint=bsv-libraries
+
+[Vector Utilities]
+File=modules/bsv-libraries/bluespec/VectorUtils/vector_utils.awb
+Packagehint=bsv-libraries
+
+[Debug Utilities]
+File=modules/bsv-libraries/bluespec/Debug/debug_utils.awb
+Packagehint=bsv-libraries
+
+[RegisterLibrary]
+File=modules/bsv-libraries/bluespec/Register/src/register_library.awb
+Packagehint=bsv-libraries
+
+[CBus Utilities]
+File=modules/bsv-libraries/bluespec/CBusUtils/c_bus_utils.awb
+Packagehint=bsv-libraries
+
+[Register Mapping Utilities/Requires]
+register_library=RegisterLibrary
+
+[Common Altera Platform Utilities/Requires]
+c_bus_utils=CBus Utilities
+fifo_utils=FIFO Utility
+vector_utils=Vector Utilities
+avalon=Avalon Bus Intefaces
+debug_utils=Debug Utilities
+register_mapper=Register Mapping Utilities
+
+[Common Altera Platform Utilities]
+File=modules/bluespec/common/fpgaenv/physical-platform/utils/altera/altera_utils.awb
 Packagehint=platforms

@@ -76,7 +76,6 @@ physical_platform_utils=Common Physical Platform Utilities
 File=modules/bluespec/common/fpgaenv/physical-platform/simulation/sim-physical-platform.awb
 Packagehint=platforms
 
-
 [Software FPGA Components]
 File=modules/bluespec/common/fpgaenv/fpga-components/software-fpga-components.awb
 Packagehint=platforms
@@ -110,7 +109,13 @@ LOCAL_MEM_ADDR_BITS=10
 File=modules/bluespec/common/fpgaenv/low-level-platform-interface/remote-memory/null/null-remote-memory.awb
 Packagehint=platforms
 
-
 [Little-Endian Unified Message Format]
 File=modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian/umf-little-endian.awb
 Packagehint=platforms
+
+[RRR Common Module]
+File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/rrr_common/rrr_common.awb
+Packagehint=platforms
+
+[RRR Clients and Servers/Requires]
+rrr_common=RRR Common Module
