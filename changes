@@ -9385,3 +9385,18 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clo
 
 - Make the default simulation clock ration 1:1
 - Tweak debugging message in scratchpad.
+
+----------
+kfleming    Date: Fri Apr  9 19:18:55 EDT 2010  CSN: CSN-platforms-394
+                  Fri Apr  9 23:18:55 UTC 2010
+
+
+Directory modules/project
+ SCons.top.pipeline.template Locally Modified          393 
+ Synplify.py               Locally Modified          393 
+ ModuleList.py             Locally Modified          393 
+ SCons.top.template        Locally Modified          393 
+
+Changes to support the moving names of the new types command.  
+
+I have tested this pretty heavily, but there could still be bugs.  

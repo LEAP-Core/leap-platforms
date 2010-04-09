@@ -24,10 +24,12 @@ defs = {
     'COST_TABLE'         : '@COST_TABLE@',
     'FPGA_PART_XILINX'   : '@FPGA_PART_XILINX@',
     'GIVEN_BAS'          : '@GIVEN_BAS@',
+    'GIVEN_VHDS'         : '@GIVEN_VHDS@',
+    'GIVEN_NGCS'         : '@GIVEN_NGCS@',
     'GIVEN_BMMS'         : '@GIVEN_BMMS@', 
     'GIVEN_ELFS'         : '@GIVEN_ELFS@',
     'GIVEN_CS'           : '@GIVEN_CS@',
-    'GIVEN_VS'           : '@GIVEN_VS@',
+    'GIVEN_VERILOGS'           : '@GIVEN_VERILOGS@',
     'GIVEN_UCFS'         : '@GIVEN_UCFS@',
     'GIVEN_SDCS'         : '@GIVEN_SDCS@',
     'GEN_BAS'            : '@GEN_BAS@',
@@ -231,7 +233,7 @@ bsc_sim_command += \
 
 sbin = env.Command(
     TMP_BSC_DIR + '/' + APM_NAME + '_hw.exe',
-    wrapper_v + clean_split(env['DEFS']['GIVEN_VS'], sep = ' ') + clean_split(env['DEFS']['BDPI_CS'], sep=' '),
+    wrapper_v + clean_split(env['DEFS']['GIVEN_VERILOGS'], sep = ' ') + clean_split(env['DEFS']['BDPI_CS'], sep=' '),
     bsc_sim_command)
 
 if env.GetOption('clean'):
@@ -267,7 +269,7 @@ vexe_gen_command = \
 
 vbin = env.Command(
     TMP_BSC_DIR + '/' + APM_NAME + '_hw.vexe',
-    clean_split(env['DEFS']['GEN_VS'], sep = ' ') + clean_split(env['DEFS']['GIVEN_VS'], sep = ' ') + clean_split(env['DEFS']['BDPI_CS'], sep=' '),
+    clean_split(env['DEFS']['GEN_VS'], sep = ' ') + clean_split(env['DEFS']['GIVEN_VERILOGS'], sep = ' ') + clean_split(env['DEFS']['GIVEN_VHDS'], sep = ' ')  + clean_split(env['DEFS']['BDPI_CS'], sep=' '),
     [ vexe_gen_command,
       Delete('directc.sft') ])
 
@@ -304,14 +306,6 @@ wrapper_builds = []
 
 moduleList = ModuleList(env, ARGUMENTS)
 
-# moduleList = ModuleList(env['DEFS']['SYNTH_BOUNDARIES'], 
-#                         TMP_XILINX_DIR, 
-#                         clean_split(env['DEFS']['GIVEN_VS'], sep = ' '), 
-#                         clean_split(env['DEFS']['GIVEN_SDCS'], sep = ' '), 
-#                         env,
-#                         APM_NAME)
-# print "wrapper_v: " + wrapper_v + "\n"
-# moduleList.defaultVerilog(wrapper_v)
 moduleList.dump()                      
 
 Synthesize(moduleList)

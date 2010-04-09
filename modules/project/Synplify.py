@@ -40,6 +40,14 @@ class Synthesize(ProjectDependency):
     prjFile = open('config/' + moduleList.apmName + '.synplify.prj','r');  
     newPrjFile = open('config/' + moduleList.apmName + '.modified.synplify.prj','w');  
 
+    #build unified sdc 
+    combinedSDC = open(moduleList.compileDirectory + '/' + moduleList.apmName + '.sdc','w')
+    for sdc in moduleList.getAllDependencies('SDC'):
+      sdcIn = open(sdc,'r')
+      print 'reading SDC' + sdc + '\n' 
+      combinedSDC.write(sdcIn.read()+'\n')
+    combinedSDC.close();
+
     #first dump the wrapper files to the new prj 
 
     for module in moduleList.moduleList:    
@@ -47,7 +55,7 @@ class Synthesize(ProjectDependency):
       newPrjFile.write('add_file -verilog \"$env(BUILD_DIR)/hw/'+module.buildPath + '/.bsc/' + module.wrapperName()+'.v\"\n');      
 
     # now dump all the 'VERILOG' 
-    fileArray = moduleList.topModule.moduleDependency['VERILOG']
+    fileArray = moduleList.topModule.moduleDependency['VERILOG'] + moduleList.topModule.moduleDependency['NGC'] + moduleList.topModule.moduleDependency['VHD']
     for file in fileArray:
       if(type(file) is str):
         newPrjFile.write(_generate_synplify_include(file))
@@ -65,7 +73,14 @@ class Synthesize(ProjectDependency):
 
     #dump synplify options file
     print 'Dumping old prj file\n'
-    newPrjFile.write(prjFile.read());
+    newPrjFile.write(prjFile.read())
+
+
+    # add in global constraints files 
+    newPrjFile.write('add_file -constraint  \"$env(BUILD_DIR)/' + moduleList.compileDirectory + '/' + moduleList.apmName + '.sdc\"\n')
+    newPrjFile.write('set_option -constraint -enable  \"$env(BUILD_DIR)/' + moduleList.compileDirectory + '/' + moduleList.apmName + '.sdc\"\n')
+
+
 
 
     #write the tail end of the options file to actually do the synthesis
@@ -82,12 +97,6 @@ class Synthesize(ProjectDependency):
     prjFile.close();
 
 
-    # second step build a unified SDC
-    combinedSDC = open(moduleList.compileDirectory + '/' + moduleList.apmName + '.sdc','w')
-    for sdc in moduleList.givenSDCs:
-      sdcIn = open(sdc,'r')
-      combinedSDC.write(sdcIn.read()+'\n')
-         
     # Now that we've set up the world let's compile
 
     top_netlist = moduleList.env.Command(
