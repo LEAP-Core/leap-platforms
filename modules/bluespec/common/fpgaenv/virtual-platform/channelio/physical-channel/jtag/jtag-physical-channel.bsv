@@ -19,7 +19,6 @@
 `include "physical_platform.bsh"
 `include "jtag_device.bsh"
 `include "umf.bsh"
-`include "rrr_common.bsh"
 
 // ============== Physical Channel ===============
 
@@ -31,42 +30,41 @@ interface PHYSICAL_CHANNEL;
         
 endinterface
 
+typedef Bit#(TLog#(TAdd#(TDiv#(SizeOf#(UMF_CHUNK),SizeOf#(JTAGWord)),1))) UMF_COUNTER;
+
 // module
 module mkPhysicalChannel#(PHYSICAL_DRIVERS drivers)
     // interface
         (PHYSICAL_CHANNEL);
-  
-   // shortcut to drivers
-   JTAG_DRIVER jtagDriver = drivers.jtagDriver;
-  
-   DEMARSHALLER#(JTAGWord,UMF_CHUNK) jtagIncoming  <- mkDeMarshaller;
-   MARSHALLER#(UMF_CHUNK, JTAGWord)  jtagOutgoing  <- mkMarshaller;
    
    // no. jtag words to assemble a umf chunk
-   UMF_MSG_LENGTH no_jtag_words = fromInteger(valueof(SizeOf#(UMF_CHUNK))/valueOf(SizeOf#(JTAGWord)));
+   UMF_COUNTER no_jtag_words = fromInteger(valueof(SizeOf#(UMF_CHUNK))/valueOf(SizeOf#(JTAGWord)));
 
-   rule startNewDemarshalling;
-      jtagIncoming.start(no_jtag_words); // only work if UMF_CHUNK are multiple of JTAGWord
+   Reg#(UMF_CHUNK)      jtagIncoming      <- mkReg(0);
+   Reg#(UMF_COUNTER)    jtagIncomingCount <- mkReg(0); 
+   Reg#(UMF_CHUNK)      jtagOutgoing      <- mkReg(0);
+   Reg#(UMF_COUNTER)    jtagOutgoingCount <- mkReg(no_jtag_words);       
+   
+   rule sendToJtag (jtagOutgoingCount != no_jtag_words);
+      JTAGWord x = truncate(jtagOutgoing);
+      jtagOutgoing <= jtagOutgoing >> valueOf(SizeOf#(JTAGWord));
+      jtagOutgoingCount <= jtagOutgoingCount + 1;
    endrule
    
-   rule sendToJtag;
-      let x = jtagOutgoing.first();
-      jtagDriver.send(x);
-      jtagOutgoing.deq();
-   endrule
-   
-   rule recvFromJtag;
-      let x <- jtagDriver.receive();
-      jtagIncoming.insert(x);
+   rule recvFromJtag (jtagIncomingCount != no_jtag_words);
+      JTAGWord x <- drivers.jtagDriver.receive();
+      jtagIncoming <= (jtagIncoming << valueOf(SizeOf#(JTAGWord))) + zeroExtend(x);
+      jtagIncomingCount <= jtagIncomingCount + 1;
    endrule
 
-   method Action write(UMF_CHUNK data);
-      jtagOutgoing.enq(data,no_jtag_words);
+   method Action write(UMF_CHUNK data) if (jtagOutgoingCount == no_jtag_words);
+      jtagOutgoing <= data;
+      jtagOutgoingCount <= 0;
    endmethod
    
-   method ActionValue#(UMF_CHUNK) read();
-      let x <- jtagIncoming.readAndDelete();
-      return x;
+   method ActionValue#(UMF_CHUNK) read() if (jtagIncomingCount == no_jtag_words);
+      jtagIncomingCount <= 0;
+      return jtagIncoming;
    endmethod
    
 endmodule

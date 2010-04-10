@@ -12,10 +12,11 @@
 
 %sources -t BSV -v PUBLIC AvalonJtag.bsv
 %sources -t BSV -v PUBLIC AvalonMasterDriver.bsv
-%sources -t VERILOG -v PRIVATE avalon_jtag.v
-%sources -t VERILOG -v PRIVATE jtag_uart_0.v
-%sources -t VERILOG -v PRIVATE mkAvalonWrapperInstance_0.v
-%sources -t VERILOG -v PRIVATE mkAvalonWrapperInstance.v
+%sources -t VERILOG -v PRIVATE avalon_jtag_black_box.v
+%sources -t ALTERA_VERILOG -v PRIVATE avalon_jtag.v
+%sources -t ALTERA_VERILOG -v PRIVATE jtag_uart_0.v
+%sources -t ALTERA_VERILOG -v PRIVATE mkAvalonWrapperInstance_0.v
+%sources -t ALTERA_VERILOG -v PRIVATE mkAvalonWrapperInstance.v
 
 %param JTAG_BASE_ADDR 0 "Base address of the memory mapped jtag"
 

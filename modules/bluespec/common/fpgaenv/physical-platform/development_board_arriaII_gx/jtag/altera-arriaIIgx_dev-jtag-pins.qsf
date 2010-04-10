@@ -1,0 +1,3 @@
+set_location_assignment PIN_F18 -to CLK
+set_instance_assignment -name IO_STANDARD LVDS -to CLK
+set_location_assignment PIN_N10 -to RST_N
