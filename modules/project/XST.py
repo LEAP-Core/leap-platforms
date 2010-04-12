@@ -1,4 +1,5 @@
 import os
+import sys
 import SCons.Script
 from model import  *
 
@@ -28,6 +29,10 @@ class Synthesize():
         module.moduleDependency['SYNTHESIS'] = [w]
         SCons.Script.Clean(w,  moduleList.compileDirectory + '/' + module.wrapperName() + '.srp')
     
+
+    #patch top verilog
+    os.system('$BLUESPECDIR/lib/bin/basicinout ' + moduleList.topModule.buildPath + '/' + moduleList.topModule.wrapperName() + '.v');     
+
     topSRP = moduleList.compileDirectory + '/' + moduleList.topModule.wrapperName() + '.srp'
 
     top_netlist = moduleList.env.Command(

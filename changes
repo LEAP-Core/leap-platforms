@@ -9400,3 +9400,16 @@ Directory modules/project
 Changes to support the moving names of the new types command.  
 
 I have tested this pretty heavily, but there could still be bugs.  
+
+----------
+kfleming    Date: Mon Apr 12 17:04:33 EDT 2010  CSN: CSN-platforms-397
+                  Mon Apr 12 21:04:33 UTC 2010
+
+
+Directory modules/project
+ Synplify.py               Locally Modified          396 
+ XST.py                    Locally Modified          396 
+
+
+Added support for patching XST mishandling of Bluespec's inout naming
+syntax. This enables us to unify ucf syntax across tools.

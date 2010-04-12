@@ -55,7 +55,7 @@ class Synthesize(ProjectDependency):
       newPrjFile.write('add_file -verilog \"$env(BUILD_DIR)/hw/'+module.buildPath + '/.bsc/' + module.wrapperName()+'.v\"\n');      
 
     # now dump all the 'VERILOG' 
-    fileArray = moduleList.topModule.moduleDependency['VERILOG'] + moduleList.topModule.moduleDependency['NGC'] + moduleList.topModule.moduleDependency['VHD']
+    fileArray = moduleList.getAllDependencies('VERILOG') + moduleList.getAllDependencies('VHD') + moduleList.getAllDependencies('NGC')  
     for file in fileArray:
       if(type(file) is str):
         newPrjFile.write(_generate_synplify_include(file))
@@ -97,6 +97,9 @@ class Synthesize(ProjectDependency):
     prjFile.close();
 
 
+    # invoke perl script on top level verilog to patch xilinx sythesis issue.
+    os.system('$BLUESPECDIR/lib/bin/basicinout ' + moduleList.topModule.buildPath + '/' + moduleList.topModule.wrapperName() + '.v'); 
+         
     # Now that we've set up the world let's compile
 
     top_netlist = moduleList.env.Command(
