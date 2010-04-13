@@ -163,3 +163,8 @@ register_mapper=Register Mapping Utilities
 [Common Altera Platform Utilities]
 File=modules/bluespec/common/fpgaenv/physical-platform/utils/altera/altera_utils.awb
 Packagehint=platforms
+
+[Single-Ended Crystal Clocks Device/Params]
+MODEL_CLOCK_DIVIDER=1
+MODEL_CLOCK_MULTIPLIER=1
+CRYSTAL_CLOCK_FREQ=125
