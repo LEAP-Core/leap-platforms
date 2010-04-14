@@ -1,0 +1,14 @@
+
+%name Single-Ended Crystal Clocks Device (ALTERA)
+%desc Single-Ended Crystal Clocks Device (ALTERA)
+
+%provides clocks_device
+
+%sources -t BSV -v PUBLIC  single-ended-clocks-vhdl-import.bsv
+%sources -t BSV -v PUBLIC  single-ended-clocks-device.bsv
+%sources -t VERILOG -v PRIVATE single-ended-clocks-device.v
+
+%param CRYSTAL_CLOCK_FREQ 50 "Input (Crystal) Clock Frequency"
+
+%param --global MODEL_CLOCK_MULTIPLIER 3   "Clock multiplier (integer).  Model clock freq = crystal freq * (multiplier / divider)."
+%param --global MODEL_CLOCK_DIVIDER    2   "Clock divider (integer).  Model clock freq = crystal freq * (multiplier / divider)."

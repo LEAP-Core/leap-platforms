@@ -54,10 +54,11 @@ endinterface
 
 interface TOP_LEVEL_WIRES;
 
-    // wires from devices
-    (* prefix = "" *)
-    interface CLOCKS_WIRES                       clocksWires;
-    interface LEDS_WIRES#(`NUMBER_LEDS)          ledsWires;
+   // wires from devices
+   (* prefix = "" *)
+   interface CLOCKS_WIRES                       clocksWires;
+   interface LEDS_WIRES#(`NUMBER_LEDS)          ledsWires;
+   interface JTAG_WIRES                         jtagWires;   
 
 endinterface
 
@@ -76,7 +77,6 @@ endinterface
 
 // This is a convenient way for the outside world to instantiate all the devices
 // and an aggregation of all the wires.
-
 module mkPhysicalPlatform
        //interface: 
                     (PHYSICAL_PLATFORM);
@@ -117,8 +117,9 @@ module mkPhysicalPlatform
     
     interface TOP_LEVEL_WIRES topLevelWires;
 
-        interface clocksWires      = clocks_device.wires;
-        interface ledsWires        = leds_device.wires;
+       interface clocksWires      = clocks_device.wires;
+       interface ledsWires        = leds_device.wires;
+       interface jtagWires        = jtag_device.wires;   
 
     endinterface
                

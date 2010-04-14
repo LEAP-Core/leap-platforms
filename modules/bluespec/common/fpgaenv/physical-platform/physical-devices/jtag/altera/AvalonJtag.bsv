@@ -1,4 +1,5 @@
 import ClientServer::*;
+import Clocks::*;
 import Connectable::*;
 import FIFOF::*;
 import GetPut::*;
@@ -53,16 +54,21 @@ interface JTAG_DRIVER;
    method ActionValue#(JTAGWord) receive();
 endinterface
 
+interface JTAG_WIRES;
+   method Bit#(1) dummy_wire;
+endinterface
+
 interface JTAG_DEVICE;
    interface JTAG_DRIVER driver;
+   interface JTAG_WIRES  wires;
 endinterface  
 
-module mkAvalonJtagDriver#(Clock rawClock, Reset rawReset) (JTAG_DRIVER);
+module mkAvalonJtagDriver#(Clock rawClock, Reset rawReset) (JTAG_DEVICE);
    
    Clock sysClock <- exposeCurrentClock();
    Reset sysReset <- exposeCurrentReset();
    
-   AvalonMasterInverseWires#(32,32)  driver    <- mkAvalonMasterDriver(clocked_by rawClock, reset_by rawReset);
+   AvalonMasterInverseWires#(32,32)  drivers   <- mkAvalonMasterDriver(clocked_by rawClock, reset_by rawReset);
    AvalonMaster#(32, 32)             master    <- mkAvalonMasterDualDomain(sysClock, sysReset, clocked_by rawClock, reset_by rawReset);
    FIFOF#(JTAGWord)                  inQ       <- mkFIFOF();
    FIFOF#(JTAGWord)                  outQ      <- mkFIFOF();
@@ -71,8 +77,9 @@ module mkAvalonJtagDriver#(Clock rawClock, Reset rawReset) (JTAG_DRIVER);
    Reg#(Bit#(16))                    wrSpace   <- mkReg(0);
    Reg#(Bool)                        waitRdRsp <- mkReg(False);
    Reg#(Bool)                        waitWrRsp <- mkReg(False);
+   let  out_wire <- mkNullCrossingWire(noClock(), drivers.readdatavalid, clocked_by rawClock);
    
-   mkConnection(driver, master.masterWires);
+   mkConnection(drivers, master.masterWires);
    
    rule toggleIsRead;
       isRead <= !isRead;
@@ -123,15 +130,23 @@ module mkAvalonJtagDriver#(Clock rawClock, Reset rawReset) (JTAG_DRIVER);
             waitWrRsp <= False;
          end
    endrule
-      
-   method Action send(JTAGWord word);
-      inQ.enq(word);
-   endmethod
    
-   method ActionValue#(JTAGWord) receive();
-      outQ.deq();
-      return outQ.first();
-   endmethod
+   interface JTAG_DRIVER driver;
+      method Action send(JTAGWord word);
+         inQ.enq(word);
+      endmethod
+      
+      method ActionValue#(JTAGWord) receive();
+         outQ.deq();
+         return outQ.first();
+      endmethod
+   endinterface
+   
+   interface JTAG_WIRES wires;
+      method Bit#(1) dummy_wire;
+         return out_wire;
+      endmethod
+   endinterface
       
 endmodule
 
@@ -139,6 +154,7 @@ module mkJtagDevice#(Clock rawClock, Reset rawReset) (JTAG_DEVICE);
    
    let jtagDriver <- mkAvalonJtagDriver(rawClock, rawReset);
    
-   interface driver = jtagDriver;
+   interface driver = jtagDriver.driver;
+   interface wires  = jtagDriver.wires;
    
 endmodule

@@ -48,10 +48,6 @@ Packagehint=platforms
 File=config/pm/hasim/submodels/fpgaenv/librl-bsv.apm
 Packagehint=platforms
 
-[Single-Ended Crystal Clocks Device]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/single-ended/single-ended-clocks-device.awb
-Packagehint=platforms
-
 [Common Physical Platform Utilities]
 File=modules/bluespec/common/fpgaenv/physical-platform/utils/utils.awb
 Packagehint=platforms
@@ -65,7 +61,7 @@ File=modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian/umf-litt
 Packagehint=platforms
 
 [ArriaII GX JTAG/Requires]
-clocks_device=Single-Ended Crystal Clocks Device
+clocks_device=Single-Ended Crystal Clocks Device (ALTERA)
 physical_platform_utils=Common Physical Platform Utilities
 led_device=General LED Device
 jtag_device=Altera JTAG
@@ -91,7 +87,7 @@ Packagehint=platforms
 physical_channel=JTAG Physical Channel
 
 [Standard Virtual Devices]
-File=config/pm/hasim/submodels/fpgaenv/std-virtual-devices.apm
+File=config/pm/hasim/submodels/fpgaenv/std-virtual-devices-null-mem.apm
 Packagehint=platforms
 
 [Low Level Platform Interface Hybrid]
@@ -104,14 +100,10 @@ remote_memory=Null Remote Memory
 channelio=Basic Virtual Channel Multiplexer
 rrr=RRR Clients and Servers
 physical_platform_debugger=Null Physical Platform Debugger
-local_mem=Local Memory Interface using BRAM
+local_mem=NULL Local Memory Interface
 
 [Null Remote Memory]
 File=modules/bluespec/common/fpgaenv/low-level-platform-interface/remote-memory/null/null-remote-memory.awb
-Packagehint=platforms
-
-[Local Memory Interface using BRAM]
-File=modules/bluespec/common/fpgaenv/low-level-platform-interface/local-mem/local-mem-bram.awb
 Packagehint=platforms
 
 [RRR Common Module]
@@ -164,7 +156,15 @@ register_mapper=Register Mapping Utilities
 File=modules/bluespec/common/fpgaenv/physical-platform/utils/altera/altera_utils.awb
 Packagehint=platforms
 
-[Single-Ended Crystal Clocks Device/Params]
-MODEL_CLOCK_DIVIDER=1
-MODEL_CLOCK_MULTIPLIER=1
+[Single-Ended Crystal Clocks Device (ALTERA)/Params]
+MODEL_CLOCK_DIVIDER=5
+MODEL_CLOCK_MULTIPLIER=2
 CRYSTAL_CLOCK_FREQ=125
+
+[Single-Ended Crystal Clocks Device (ALTERA)]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/single-ended/single-ended-clocks-device-altera.awb
+Packagehint=platforms
+
+[NULL Local Memory Interface]
+File=modules/bluespec/common/fpgaenv/low-level-platform-interface/local-mem/local-mem-null.awb
+Packagehint=platforms
