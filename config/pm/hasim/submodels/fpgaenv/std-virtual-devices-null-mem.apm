@@ -14,18 +14,10 @@ DefaultRunOpts=
 DefaultAttributes=platforms
 model=Standard Virtual Devices (No Memory Service)
 
-[Hybrid Front Panel]
-File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid/hybrid-fp.awb
-Packagehint=platforms
-
-
-
-
 
 [Starter Virtual Device]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/starter/starter-device.awb
 Packagehint=platforms
-
 
 [Base Common Devices/Requires]
 stats_device=Stats Device
@@ -58,13 +50,15 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/debug-scan-device/debug-scan-device.awb
 Packagehint=platforms
 
-
-
 [Standard Virtual Devices (No Memory Service)/Requires]
 starter_device=Starter Virtual Device
 common_utility_devices=Base Common Devices
-front_panel=Hybrid Front Panel
+front_panel=Physical ARRIA II Front Panel
 
 [Standard Virtual Devices (No Memory Service)]
 File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/std-virtual-devices-null-mem.awb
+Packagehint=platforms
+
+[Physical ARRIA II Front Panel]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/arriaII/arriaII-fp.awb
 Packagehint=platforms
