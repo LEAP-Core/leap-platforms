@@ -16,7 +16,7 @@ class PostSynthesize():
     altera_vqm = moduleList.env.Command(
       altera_apm_name + '.vqm',
       moduleList.topModule.moduleDependency['SYNTHESIS'],
-      'mv $SOURCE $TARGET')
+      'cp $SOURCE $TARGET')
 
     newPrjFile = open(altera_apm_name + '.temp.qsf','w')
 
