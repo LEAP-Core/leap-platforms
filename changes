@@ -9413,3 +9413,14 @@ Directory modules/project
 
 Added support for patching XST mishandling of Bluespec's inout naming
 syntax. This enables us to unify ucf syntax across tools.
+
+----------
+kfleming    Date: Thu Apr 15 15:42:53 EDT 2010  CSN: CSN-platforms-402
+                  Thu Apr 15 19:42:53 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled
+ xilinx.sdf                Locally Modified          401 
+ htg-v5-pcie-enabled.sdc   Locally Modified          401 
+
+Fixed some Synplify synthesis parameters

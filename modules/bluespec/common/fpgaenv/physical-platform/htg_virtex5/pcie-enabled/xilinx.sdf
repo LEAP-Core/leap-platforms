@@ -12,7 +12,6 @@ set_option -resource_sharing 1
 #set_option -use_fsm_explorer 1
 
 #map options
-set_option -frequency 300.000
 set_option -vendor_xcompatible_mode 0
 set_option -vendor_xcompatible_mode 0
 set_option -run_prop_extract 1
