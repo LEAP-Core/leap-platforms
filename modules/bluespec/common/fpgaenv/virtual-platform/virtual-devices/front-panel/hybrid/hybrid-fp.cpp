@@ -292,7 +292,7 @@ FRONT_PANEL_SERVER_CLASS::syncOutputs()
 
 FRONT_PANEL_COMMAND_SWITCHES_CLASS::FRONT_PANEL_COMMAND_SWITCHES_CLASS() :
     showFrontPanel(false),
-    showLEDsOnStdOut(false),
+    showLEDsOnStdOut(true),
     COMMAND_SWITCH_OPTIONAL_STRING_CLASS("showfp")
 {
 }
@@ -304,8 +304,8 @@ FRONT_PANEL_COMMAND_SWITCHES_CLASS::~FRONT_PANEL_COMMAND_SWITCHES_CLASS()
 void
 FRONT_PANEL_COMMAND_SWITCHES_CLASS::ProcessSwitchVoid()
 {
-    showFrontPanel = true;
-    showLEDsOnStdOut = false;
+    showFrontPanel = false;
+    showLEDsOnStdOut = true;
 }
 
 void

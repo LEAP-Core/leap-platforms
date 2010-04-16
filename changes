@@ -9424,3 +9424,13 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-ena
  htg-v5-pcie-enabled.sdc   Locally Modified          401 
 
 Fixed some Synplify synthesis parameters
+
+----------
+kfleming    Date: Fri Apr 16 01:44:40 EDT 2010  CSN: CSN-platforms-406
+                  Fri Apr 16 05:44:40 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid
+ hybrid-fp.cpp             Locally Modified          405 
+
+Modified fp to default to display to stdout.
