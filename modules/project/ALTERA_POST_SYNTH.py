@@ -39,7 +39,7 @@ class PostSynthesize():
       ['cat $SOURCES > $TARGET',
        'rm ' + altera_apm_name + '.temp.qsf'])
 
-   # generate sof
+    # generate sof
     altera_sof = moduleList.env.Command(
       altera_apm_name + '.sof',
       altera_vqm + altera_qsf,
@@ -48,4 +48,16 @@ class PostSynthesize():
        'quartus_sta ' + altera_apm_name,
        'quartus_asm ' + altera_apm_name])
 
-    moduleList.topModule.moduleDependency['LOADER'] = [altera_sof]
+    moduleList.topModule.moduleDependency['BIT'] = [altera_sof]
+
+    # 
+    altera_loader = moduleList.env.Command(
+      moduleList.apmName + '_hw.errinfo',
+      moduleList.swExe + moduleList.topModule.moduleDependency['BIT'],
+      [ '@ln -fs ' + moduleList.swExeOrTarget + ' ' + moduleList.apmName,
+        SCons.Script.Delete(moduleList.apmName + '_hw.exe'),
+        SCons.Script.Delete(moduleList.apmName + '_hw.vexe'),
+        '@echo "++++++++++++ Post-Place & Route ++++++++"',
+        'touch ' + moduleList.apmName + '_hw.errinfo'])
+    
+    moduleList.topModule.moduleDependency['LOADER'] = [altera_loader]
