@@ -22,6 +22,41 @@
 
 import Clocks::*;
 
+
+function Integer gcd(Integer a, Integer b);
+  // Sanity check args
+  Integer result = 0;
+  if(a < 0 || b < 0)
+    begin
+      let err = error("Illegal arguments to GCD");
+    end
+  
+  if(b == 0)
+    begin 
+      result = a;
+    end
+  else if(a==0)
+    begin
+      result = b;
+    end  
+  else if(a>b)
+    begin
+      result = gcd(a,a-b);
+    end
+  else
+    begin
+      result = gcd(b,b-a);
+    end
+
+  return result;
+endfunction
+
+
+function Integer lcm(Integer a, Integer b);
+  return (a*b)/gcd(a,b);
+endfunction
+
+
 interface UserClock;
     interface Clock clk;
     interface Reset rst;

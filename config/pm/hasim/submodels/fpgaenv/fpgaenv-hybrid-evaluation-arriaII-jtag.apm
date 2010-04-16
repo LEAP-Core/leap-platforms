@@ -17,14 +17,14 @@ model=FPGA Environment
 [FPGA Environment/Requires]
 virtual_platform=Standard Virtual Platform
 fpga_components=Hardware FPGA Components for ArriaII
-librl_bsv=RL Bluespec Library
+librl_bsv=Altera RL Bluespec Library
 
 [Standard Virtual Platform]
 File=modules/bluespec/common/fpgaenv/virtual-platform/std-virtual-platform.awb
 Packagehint=platforms
 
 [Standard Virtual Platform/Requires]
-virtual_devices=Standard Virtual Devices
+virtual_devices=Standard Virtual Devices (No Memory Service)
 low_level_platform_interface=Low Level Platform Interface Hybrid
 umf=Little-Endian Unified Message Format
 
@@ -42,10 +42,6 @@ Packagehint=platforms
 
 [Basic Virtual Channel Multiplexer]
 File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/basic/basic-channelio.awb
-Packagehint=platforms
-
-[RL Bluespec Library]
-File=config/pm/hasim/submodels/fpgaenv/librl-bsv.apm
 Packagehint=platforms
 
 [Common Physical Platform Utilities]
@@ -85,10 +81,6 @@ Packagehint=platforms
 
 [Basic Virtual Channel Multiplexer/Requires]
 physical_channel=JTAG Physical Channel
-
-[Standard Virtual Devices]
-File=config/pm/hasim/submodels/fpgaenv/std-virtual-devices-null-mem.apm
-Packagehint=platforms
 
 [Low Level Platform Interface Hybrid]
 File=modules/bluespec/common/fpgaenv/low-level-platform-interface/hybrid-llpi.awb
@@ -167,4 +159,30 @@ Packagehint=platforms
 
 [NULL Local Memory Interface]
 File=modules/bluespec/common/fpgaenv/low-level-platform-interface/local-mem/local-mem-null.awb
+Packagehint=platforms
+
+[Altera RL Bluespec Library/Requires]
+altera_utils=Common Altera Platform Utilities
+librl_bsv_storage=RL Bluespec Storage Library
+librl_bsv_base=RL Bluespec Base Library
+librl_bsv_cache=RL Bluespec Cache Managers
+
+[RL Bluespec Storage Library]
+File=modules/bluespec/librl/storage/librl-bsv-storage.awb
+Packagehint=platforms
+
+[RL Bluespec Cache Managers]
+File=modules/bluespec/librl/storage/cache/librl-cache.awb
+Packagehint=platforms
+
+[Altera RL Bluespec Library]
+File=modules/bsv-libraries/bluespec/librl-mit/librl-mit.awb
+Packagehint=bsv-libraries
+
+[RL Bluespec Base Library]
+File=modules/bluespec/librl/base/librl-bsv-base.awb
+Packagehint=platforms
+
+[Standard Virtual Devices (No Memory Service)]
+File=config/pm/hasim/submodels/fpgaenv/std-virtual-devices-null-mem.apm
 Packagehint=platforms

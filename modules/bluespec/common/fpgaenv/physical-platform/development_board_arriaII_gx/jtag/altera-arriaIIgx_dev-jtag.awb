@@ -3,7 +3,7 @@
 %desc ArriaII GX JTAG
 
 %provides physical_platform	
-%requires clocks_device led_device jtag_device physical_platform_utils altera_utils
+%requires clocks_device led_device jtag_device physical_platform_utils 
 
 %sources -t BSV -v PUBLIC  altera-arriaIIgx_dev-jtag.bsv
 %sources -t H   -v PUBLIC  altera-arriaIIgx_dev-jtag.h

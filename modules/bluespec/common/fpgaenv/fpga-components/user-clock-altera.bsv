@@ -23,3 +23,14 @@ module mkUserClock_Ratio#(Integer inFreq,
     parameter CR_CLKFX_DIVIDE = clockDivider;
 
 endmodule
+
+
+module mkUserClock_PLL#(Integer inFreq,
+                        Integer outFreq)
+    // Interface:
+        (UserClock);
+   let lcmValue = lcm(inFreq,outFreq);
+
+   mkUserClock_Ratio(inFreq, lcmValue/inFreq, lcmValue/outFreq);
+
+endmodule

@@ -9434,3 +9434,20 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front
  hybrid-fp.cpp             Locally Modified          405 
 
 Modified fp to default to display to stdout.
+
+----------
+kfleming    Date: Fri Apr 16 18:10:55 EDT 2010  CSN: CSN-platforms-407
+                  Fri Apr 16 22:10:55 UTC 2010
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-hybrid-evaluation-arriaII-jtag.apm Locally Modified          406 
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ user-clock.bsv            Locally Modified          406 
+ user-clock-altera.bsv     Locally Modified          406 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/development_board_arriaII_gx/jtag
+ altera-arriaIIgx_dev-jtag.awb Locally Modified          406 
+
+Added functions to calculate LCD/GCD, making a simplier version of mkUserClock_PLL.  This is not guaranteed to produce working PLL implemenations, but it should do a good job. 
