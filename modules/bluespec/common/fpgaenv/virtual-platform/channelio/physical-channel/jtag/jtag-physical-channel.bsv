@@ -47,6 +47,7 @@ module mkPhysicalChannel#(PHYSICAL_DRIVERS drivers)
    
    rule sendToJtag (jtagOutgoingCount != no_jtag_words);
       JTAGWord x = truncate(jtagOutgoing);
+      drivers.jtagDriver.send(x);
       jtagOutgoing <= jtagOutgoing >> valueOf(SizeOf#(JTAGWord));
       jtagOutgoingCount <= jtagOutgoingCount + 1;
    endrule
