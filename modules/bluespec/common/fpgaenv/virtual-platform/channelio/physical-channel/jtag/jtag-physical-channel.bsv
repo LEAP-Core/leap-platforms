@@ -30,7 +30,7 @@ interface PHYSICAL_CHANNEL;
         
 endinterface
 
-typedef Bit#(TLog#(TAdd#(TDiv#(SizeOf#(UMF_CHUNK),SizeOf#(JTAGWord)),1))) UMF_COUNTER;
+typedef Bit#(TLog#(TAdd#(TDiv#(SizeOf#(UMF_CHUNK),4),1))) UMF_COUNTER;
 
 // module
 module mkPhysicalChannel#(PHYSICAL_DRIVERS drivers)
@@ -38,7 +38,7 @@ module mkPhysicalChannel#(PHYSICAL_DRIVERS drivers)
         (PHYSICAL_CHANNEL);
    
    // no. jtag words to assemble a umf chunk
-   UMF_COUNTER no_jtag_words = fromInteger(valueof(SizeOf#(UMF_CHUNK))/valueOf(SizeOf#(JTAGWord)));
+   UMF_COUNTER no_jtag_words = fromInteger(valueof(SizeOf#(UMF_CHUNK))/4);
 
    Reg#(UMF_CHUNK)      jtagIncoming      <- mkReg(0);
    Reg#(UMF_COUNTER)    jtagIncomingCount <- mkReg(0); 
@@ -46,15 +46,16 @@ module mkPhysicalChannel#(PHYSICAL_DRIVERS drivers)
    Reg#(UMF_COUNTER)    jtagOutgoingCount <- mkReg(no_jtag_words);       
    
    rule sendToJtag (jtagOutgoingCount != no_jtag_words);
-      JTAGWord x = truncate(jtagOutgoing);
-      drivers.jtagDriver.send(x);
-      jtagOutgoing <= jtagOutgoing >> valueOf(SizeOf#(JTAGWord));
+      Bit#(4) x = truncate(jtagOutgoing);
+      jtagOutgoing <= jtagOutgoing >> 4;
+      JTAGWord jtag_x = zeroExtend(x) + 64;
+      drivers.jtagDriver.send(jtag_x);
       jtagOutgoingCount <= jtagOutgoingCount + 1;
    endrule
    
    rule recvFromJtag (jtagIncomingCount != no_jtag_words);
       JTAGWord x <- drivers.jtagDriver.receive();
-      jtagIncoming <= (jtagIncoming << valueOf(SizeOf#(JTAGWord))) + zeroExtend(x);
+      jtagIncoming <= (jtagIncoming << 4) + (zeroExtend(x) - 64);
       jtagIncomingCount <= jtagIncomingCount + 1;
    endrule
 
