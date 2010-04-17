@@ -183,7 +183,6 @@ PHYSICAL_CHANNEL_CLASS::Write(UMF_MESSAGE message){
      } else {
         mod_header[i] = ((header[i/2] >> 4) & 15) + 64;
      }
-     fprintf(errfd,"write mod_header[%d]: %x %x\n",i,mod_header[i],header[i/2]);
   }        
 
   //write header to pipe
@@ -206,12 +205,10 @@ PHYSICAL_CHANNEL_CLASS::Write(UMF_MESSAGE message){
        } else {
           mod_chunk[i] = ((chunk_bytes[i/2] >> 4) & 15) + 64;
        }
-       fprintf(errfd,"write mod_chunk[%d]: %x %x\n",i,mod_chunk[i],chunk_bytes[i/2]);
     }        
     write(output,(const char*)mod_chunk, UMF_CHUNK_BYTES*2);
   }
 
-  fprintf(errfd,"finish fucking while loop\n");
   // de-allocate message
   delete message;
   fflush(errfd);
