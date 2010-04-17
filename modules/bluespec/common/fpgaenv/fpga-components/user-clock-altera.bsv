@@ -31,6 +31,6 @@ module mkUserClock_PLL#(Integer inFreq,
         (UserClock);
    let lcmValue = lcm(inFreq,outFreq);
 
-   mkUserClock_Ratio(inFreq, lcmValue/inFreq, lcmValue/outFreq);
-
+  let m <- mkUserClock_Ratio(inFreq, lcmValue/inFreq, lcmValue/outFreq);
+  return m;
 endmodule

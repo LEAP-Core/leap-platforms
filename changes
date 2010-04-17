@@ -9451,3 +9451,14 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/development_board_ar
  altera-arriaIIgx_dev-jtag.awb Locally Modified          406 
 
 Added functions to calculate LCD/GCD, making a simplier version of mkUserClock_PLL.  This is not guaranteed to produce working PLL implemenations, but it should do a good job. 
+
+----------
+kfleming    Date: Sat Apr 17 15:44:15 EDT 2010  CSN: CSN-platforms-412
+                  Sat Apr 17 19:44:15 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ user-clock.bsv            Locally Modified          411 
+ user-clock-altera.bsv     Locally Modified          411 
+
+Corrected error in GCD code. Seems to be correct for synthesis now.

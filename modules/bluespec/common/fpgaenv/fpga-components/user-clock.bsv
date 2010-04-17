@@ -24,28 +24,27 @@ import Clocks::*;
 
 
 function Integer gcd(Integer a, Integer b);
-  // Sanity check args
-  Integer result = 0;
-  if(a < 0 || b < 0)
+    // Sanity check args
+    Integer result = 0;
+    if(a < 0 || b < 0)
     begin
-      let err = error("Illegal arguments to GCD");
-    end
-  
-  if(b == 0)
+        let err = error("Illegal arguments to GCD");
+    end 
+    else if(b == 0)
     begin 
-      result = a;
+        result = a;
     end
-  else if(a==0)
+    else if(a == 0)
     begin
-      result = b;
+        result = b;
     end  
-  else if(a>b)
+    else if(a > b)
     begin
-      result = gcd(a,a-b);
+        result = gcd(b,a-b);
     end
-  else
+    else
     begin
-      result = gcd(b,b-a);
+        result = gcd(a,b-a);
     end
 
   return result;
