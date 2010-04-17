@@ -43,6 +43,7 @@ class PHYSICAL_CHANNEL_CLASS: public PLATFORMS_MODULE_CLASS
   FILE* errfd;
   int input;
   int output;
+  int pid;
 
   void   readPipe();
 

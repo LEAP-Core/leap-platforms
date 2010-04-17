@@ -57,7 +57,6 @@ PHYSICAL_CHANNEL_CLASS::PHYSICAL_CHANNEL_CLASS(
 {
   int     child_to_parent[2];
   int     parent_to_child[2];
-  int     pid;
 
   incomingMessage = NULL;
 
@@ -111,8 +110,9 @@ PHYSICAL_CHANNEL_CLASS::PHYSICAL_CHANNEL_CLASS(
 PHYSICAL_CHANNEL_CLASS::~PHYSICAL_CHANNEL_CLASS()
 {
   // we should probably trap the signal as well to gracefully kill our child
-  close(input);
-  close(output);
+   kill(pid,SIGTERM);
+   close(input);
+   close(output);
 }
 
 // blocking read
