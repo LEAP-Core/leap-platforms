@@ -50,12 +50,21 @@ class PostSynthesize():
 
     moduleList.topModule.moduleDependency['BIT'] = [altera_sof]
 
-    
+    # generate the download program
+    newDownloadFile = open(moduleList.buildDirectory + '/config/' + moduleList.apmName + '.download.temp','w')
+    newDownloadFile.write('#!/bin/sh\n')
+    newDownloadFile.write('nios2-configure-sof ' + altera_apm_name + '.sof\n')
+    newDownloadFile.close()
 
-    # 
+    altera_download = moduleList.env.Command(
+      moduleList.buildDirectory + '/config/' + moduleList.apmName + '.download',
+      moduleList.buildDirectory + '/config/' + moduleList.apmName + '.download.temp',
+      ['cp $SOURCE $TARGET',
+       'chmod 755 $TARGET'])
+
     altera_loader = moduleList.env.Command(
       moduleList.apmName + '_hw.errinfo',
-      moduleList.swExe + moduleList.topModule.moduleDependency['BIT'],
+      moduleList.swExe + moduleList.topModule.moduleDependency['BIT'] + altera_download,
       [ '@ln -fs ' + moduleList.swExeOrTarget + ' ' + moduleList.apmName,
         SCons.Script.Delete(moduleList.apmName + '_hw.exe'),
         SCons.Script.Delete(moduleList.apmName + '_hw.vexe'),

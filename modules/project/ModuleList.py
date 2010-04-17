@@ -24,6 +24,7 @@ class ModuleList:
     print "constructing moduleList\n"
     self.env = env
     self.arguments = arguments
+    self.buildDirectory = env['DEFS']['BUILD_DIR']
     self.compileDirectory = env['DEFS']['TMP_XILINX_DIR']
     givenVerilogs = Utils.clean_split(env['DEFS']['GIVEN_VERILOGS'], sep = ' ') +  Utils.clean_split(env['DEFS']['GEN_VS'], sep = ' ') 
     givenNGCs = Utils.clean_split(env['DEFS']['GIVEN_NGCS'], sep = ' ') 
