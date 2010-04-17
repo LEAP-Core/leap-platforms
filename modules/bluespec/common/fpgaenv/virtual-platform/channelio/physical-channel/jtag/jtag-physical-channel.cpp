@@ -82,6 +82,7 @@ PHYSICAL_CHANNEL_CLASS::PHYSICAL_CHANNEL_CLASS(
         dup2(parent_to_child[0], fileno(stdin));
         dup2(child_to_parent[1], fileno(stdout));
 
+        fprintf(errfd, "Lunaching nios2-terminal\n"); 
         execlp("nios2-terminal", "nios2-terminal", NULL);
     }
     else
@@ -93,6 +94,17 @@ PHYSICAL_CHANNEL_CLASS::PHYSICAL_CHANNEL_CLASS(
         output = parent_to_child[1];
 
     }
+
+  int i = 0;
+  char temp;
+  int returnVal;
+  while(i < UMF_CHUNK_BYTES*2) {
+     while((returnVal = read(input, &temp,sizeof(char))) < 1) {}
+     i = (temp == i + 65) ? i+1 : 0;
+  }
+  
+  fprintf(errfd, "get starting sequence\n");
+  
 }
 
 // destructor
@@ -108,6 +120,7 @@ UMF_MESSAGE
 PHYSICAL_CHANNEL_CLASS::Read(){
   // blocking loop
   fprintf(errfd,"In read\n");    
+  fflush(errfd);
   while (true){
     // check if message is ready
     if (incomingMessage && !incomingMessage->CanAppend()) {
@@ -134,7 +147,7 @@ PHYSICAL_CHANNEL_CLASS::TryRead(){
   FD_ZERO(&readFile);
   FD_SET(input, &readFile); 
   
-  select(1,&readFile,NULL,NULL, &time);
+  select(input+1,&readFile,NULL,NULL, &time);
 
   //select says we're okay
   if(FD_ISSET(input,&readFile)) {
@@ -158,12 +171,23 @@ void
 PHYSICAL_CHANNEL_CLASS::Write(UMF_MESSAGE message){
   // construct header
   unsigned char header[UMF_CHUNK_BYTES];
+  unsigned char mod_header[UMF_CHUNK_BYTES*2];
   message->EncodeHeader(header);
 
   msg_count_out++;
   fprintf(errfd,"attempting to write msg %d of length %d: %x\n", msg_count_out,message->GetLength(),*header);    
+  
+  for (int i = 0; i < UMF_CHUNK_BYTES*2; i++) {
+     if (i % 2 == 0) {
+        mod_header[i] = (header[i/2] & 15) + 64 ;
+     } else {
+        mod_header[i] = ((header[i/2] >> 4) & 15) + 64;
+     }
+     fprintf(errfd,"write mod_header[%d]: %x %x\n",i,mod_header[i],header[i/2]);
+  }        
+
   //write header to pipe
-  write(output,(const char *)header, UMF_CHUNK_BYTES);
+  write(output,(const char *)mod_header, UMF_CHUNK_BYTES*2);
 
   // write message data to pipe
   // NOTE: hardware demarshaller expects chunk pattern to start from most
@@ -172,10 +196,22 @@ PHYSICAL_CHANNEL_CLASS::Write(UMF_MESSAGE message){
   message->StartReverseExtract();
   while (message->CanReverseExtract()){
     UMF_CHUNK chunk = message->ReverseExtractChunk();
+    unsigned char* chunk_bytes;;
+    unsigned char mod_chunk[UMF_CHUNK_BYTES*2];
+    chunk_bytes = (unsigned char*) &chunk;
     fprintf(errfd,"attempting to write %x\n",chunk);    
-    write(output,(const char*)&chunk, sizeof(UMF_CHUNK));
+    for (int i = 0; i < UMF_CHUNK_BYTES*2; i++) {
+       if (i % 2 == 0) {
+          mod_chunk[i] = (chunk_bytes[i/2] & 15) + 64 ;
+       } else {
+          mod_chunk[i] = ((chunk_bytes[i/2] >> 4) & 15) + 64;
+       }
+       fprintf(errfd,"write mod_chunk[%d]: %x %x\n",i,mod_chunk[i],chunk_bytes[i/2]);
+    }        
+    write(output,(const char*)mod_chunk, UMF_CHUNK_BYTES*2);
   }
 
+  fprintf(errfd,"finish fucking while loop\n");
   // de-allocate message
   delete message;
   fflush(errfd);
@@ -196,12 +232,11 @@ PHYSICAL_CHANNEL_CLASS::readPipe(){
     msg_count_in++;
     fprintf(errfd, "readPipe forming header: %d\n", msg_count_in);
 
-    for(int i = 0; i <  UMF_CHUNK_BYTES; i++) {
-      char temp;
+    for(int i = 0; i <  UMF_CHUNK_BYTES*2; i++) {
+        char temp;
       int returnVal;
       while((returnVal = read(input,&temp,sizeof(char))) < 1) {} // Block :(
-      header[i] = temp;
-      fprintf(errfd, "readPipe header[%d]: %x\n",i,temp);
+      header[i/2] = ((temp%16)*16)+(header[i/2]/16);
     }
 
     // create a new message
@@ -218,12 +253,11 @@ PHYSICAL_CHANNEL_CLASS::readPipe(){
     // we will read exactly one chunk
     unsigned char buf[UMF_CHUNK_BYTES]; 
     int bytes_requested = UMF_CHUNK_BYTES;
-    for(int i = 0; i <  UMF_CHUNK_BYTES; i++) {
+    for(int i = 0; i <  UMF_CHUNK_BYTES*2; i++) {
       char temp;
       int returnVal;
       while((returnVal = read(input,&temp,sizeof(char))) < 1) {} // Block :(
-      buf[i] = temp;
-      fprintf(errfd, "readPipe header[%d]: %x\n",i,temp);
+      buf[i/2] = (buf[i/2]/16) + ((temp%16)*16);
     }
 
     fprintf(errfd, "readPipe chunk: %x\n",*((int*)buf));

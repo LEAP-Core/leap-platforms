@@ -43,23 +43,33 @@ module mkPhysicalChannel#(PHYSICAL_DRIVERS drivers)
    Reg#(UMF_CHUNK)      jtagIncoming      <- mkReg(0);
    Reg#(UMF_COUNTER)    jtagIncomingCount <- mkReg(0); 
    Reg#(UMF_CHUNK)      jtagOutgoing      <- mkReg(0);
-   Reg#(UMF_COUNTER)    jtagOutgoingCount <- mkReg(no_jtag_words);       
+   Reg#(UMF_COUNTER)    jtagOutgoingCount <- mkReg(0);       
+   Reg#(Bool)           init              <- mkReg(False);
    
-   rule sendToJtag (jtagOutgoingCount != no_jtag_words);
+   // send the first character
+   rule sendInit (!init);
+      drivers.jtagDriver.send(zeroExtend(jtagOutgoingCount)+65);
+      jtagOutgoingCount <= jtagOutgoingCount + 1;
+      if (jtagOutgoingCount == no_jtag_words - 1)
+         init <= True;
+   endrule
+   
+   rule sendToJtag (init && jtagOutgoingCount != no_jtag_words);
       Bit#(4) x = truncate(jtagOutgoing);
       jtagOutgoing <= jtagOutgoing >> 4;
-      JTAGWord jtag_x = zeroExtend(x) + 64;
+      JTAGWord jtag_x = zeroExtend(x) ^ 64;
       drivers.jtagDriver.send(jtag_x);
       jtagOutgoingCount <= jtagOutgoingCount + 1;
    endrule
    
    rule recvFromJtag (jtagIncomingCount != no_jtag_words);
       JTAGWord x <- drivers.jtagDriver.receive();
-      jtagIncoming <= (jtagIncoming << 4) + (zeroExtend(x) - 64);
+      Bit#(4) truncated_x = truncate(x);
+      jtagIncoming <= (jtagIncoming >> 4) ^ {truncated_x,0};
       jtagIncomingCount <= jtagIncomingCount + 1;
    endrule
 
-   method Action write(UMF_CHUNK data) if (jtagOutgoingCount == no_jtag_words);
+   method Action write(UMF_CHUNK data) if (jtagOutgoingCount == no_jtag_words && init);
       jtagOutgoing <= data;
       jtagOutgoingCount <= 0;
    endmethod

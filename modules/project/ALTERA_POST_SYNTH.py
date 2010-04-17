@@ -50,6 +50,8 @@ class PostSynthesize():
 
     moduleList.topModule.moduleDependency['BIT'] = [altera_sof]
 
+    
+
     # 
     altera_loader = moduleList.env.Command(
       moduleList.apmName + '_hw.errinfo',
