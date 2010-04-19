@@ -61,10 +61,10 @@ clocks_device=Single-Ended Crystal Clocks Device (ALTERA)
 physical_platform_utils=Common Physical Platform Utilities
 led_device=General LED Device
 jtag_device=Altera JTAG
-altera_utils=Common Altera Platform Utilities
+altera_jtag_physical_mapping=ArriaII Dev Board JTAG Mapping
 
 [ArriaII GX JTAG]
-File=modules/bluespec/common/fpgaenv/physical-platform/development_board_arriaII_gx/jtag/altera-arriaIIgx_dev-jtag.awb
+File=modules/bluespec/common/fpgaenv/physical-platform/development_board_arriaII_gx/jtag/altera-jtag.awb
 Packagehint=platforms
 
 [Hardware FPGA Components for ArriaII]
@@ -148,11 +148,6 @@ register_mapper=Register Mapping Utilities
 File=modules/bluespec/common/fpgaenv/physical-platform/utils/altera/altera_utils.awb
 Packagehint=platforms
 
-[Single-Ended Crystal Clocks Device (ALTERA)/Params]
-MODEL_CLOCK_DIVIDER=5
-MODEL_CLOCK_MULTIPLIER=2
-CRYSTAL_CLOCK_FREQ=125
-
 [Single-Ended Crystal Clocks Device (ALTERA)]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/single-ended/single-ended-clocks-device-altera.awb
 Packagehint=platforms
@@ -185,4 +180,8 @@ Packagehint=platforms
 
 [Standard Virtual Devices (No Memory Service)]
 File=config/pm/hasim/submodels/fpgaenv/std-virtual-devices-null-mem.apm
+Packagehint=platforms
+
+[ArriaII Dev Board JTAG Mapping]
+File=modules/bluespec/common/fpgaenv/physical-platform/development_board_arriaII_gx/jtag/arriaII_dev/altera-arriaIIgx_dev-jtag.awb
 Packagehint=platforms

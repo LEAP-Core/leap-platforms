@@ -1,0 +1,14 @@
+
+%name ArriaII GX JTAG
+%desc ArriaII GX JTAG
+
+%provides physical_platform	
+%requires clocks_device led_device jtag_device physical_platform_utils altera_jtag_physical_mapping
+
+%sources -t BSV -v PUBLIC  altera-jtag.bsv
+%sources -t H   -v PUBLIC  altera-jtag.h
+%sources -t CPP -v PRIVATE altera-jtag.cpp
+
+
+
+

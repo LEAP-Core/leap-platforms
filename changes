@@ -9462,3 +9462,34 @@ Directory modules/bluespec/common/fpgaenv/fpga-components
  user-clock-altera.bsv     Locally Modified          411 
 
 Corrected error in GCD code. Seems to be correct for synthesis now.
+
+----------
+kfleming    Date: Mon Apr 19 19:57:57 EDT 2010  CSN: CSN-platforms-413
+                  Mon Apr 19 23:57:57 UTC 2010
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-hybrid-evaluation-arriaII-jtag.apm Locally Modified          412 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/development_board_arriaII_gx/jtag
+ altera-arriaIIgx_dev-jtag.bsv Locally Removed           412 
+ jtag.sdf                  Locally Removed           412 
+ altera-jtag.h             Locally Added               - 
+ altera-jtag.awb           Locally Added               - 
+ altera-jtag.bsv           Locally Added               - 
+ altera-arriaIIgx_dev-jtag-pins.qsf Locally Removed           412 
+ altera-arriaIIgx_dev-jtag.cpp Locally Removed           412 
+ altera-arriaIIgx_dev-jtag.h Locally Removed           412 
+ altera-jtag.cpp           Locally Added               - 
+ jtag.sdc                  Locally Removed           412 
+ altera-arriaIIgx_dev-jtag.awb Locally Removed           412 
+ altera-arriaIIgx_dev-jtag.qsf Locally Removed           412 
+ arriaII_dev/              Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/development_board_arriaII_gx/jtag/arriaII_dev
+ jtag.sdf                  Locally Added               - 
+ altera-arriaIIgx_dev-jtag-pins.qsf Locally Added               - 
+ jtag.sdc                  Locally Added               - 
+ altera-arriaIIgx_dev-jtag.qsf Locally Added               - 
+
+Swapped around files in altera jtag to prepare for the upcoming, new jtag targets (huntsman wireless board, airblue 2.0)
