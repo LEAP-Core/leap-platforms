@@ -9493,3 +9493,13 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/development_board_ar
  altera-arriaIIgx_dev-jtag.qsf Locally Added               - 
 
 Swapped around files in altera jtag to prepare for the upcoming, new jtag targets (huntsman wireless board, airblue 2.0)
+
+----------
+kfleming    Date: Mon Apr 19 20:55:54 EDT 2010  CSN: CSN-platforms-414
+                  Tue Apr 20 00:55:54 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/development_board_arriaII_gx/jtag/arriaII_dev
+ altera-arriaIIgx_dev-jtag.awb Locally Added               0 
+
+Forgot awb file.
