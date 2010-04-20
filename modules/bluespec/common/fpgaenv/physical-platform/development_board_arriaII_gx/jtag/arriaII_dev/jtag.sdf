@@ -15,14 +15,17 @@ set_option -use_fsm_explorer 1
 set_option -vendor_xcompatible_mode 0
 set_option -vendor_xcompatible_mode 0
 set_option -run_prop_extract 1
-set_option -fanout_limit 10000
+set_option -fanout_limit 100
 set_option -pipe 1
 set_option -update_models_cp 0
+set_option -disable_io_insertion 1
 set_option -verification_mode 0
 set_option -retiming 1
 set_option -no_sequential_opt 0
 set_option -fixgatedclocks 3
 set_option -fixgeneratedclocks 3
+set_option -quartus_version 9.1
+set_option -syn_altera_model on
 
 
 #sequential_optimizations options

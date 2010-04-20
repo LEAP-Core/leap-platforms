@@ -185,3 +185,7 @@ Packagehint=platforms
 [ArriaII Dev Board JTAG Mapping]
 File=modules/bluespec/common/fpgaenv/physical-platform/development_board_arriaII_gx/jtag/arriaII_dev/altera-arriaIIgx_dev-jtag.awb
 Packagehint=platforms
+
+[Single-Ended Crystal Clocks Device (ALTERA)/Params]
+MODEL_CLOCK_MULTIPLIER=2
+CRYSTAL_CLOCK_FREQ=125
