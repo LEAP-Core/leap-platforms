@@ -9503,3 +9503,14 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/development_board_ar
  altera-arriaIIgx_dev-jtag.awb Locally Added               0 
 
 Forgot awb file.
+
+----------
+kfleming    Date: Wed Apr 21 10:23:07 EDT 2010  CSN: CSN-platforms-418
+                  Wed Apr 21 14:23:07 UTC 2010
+
+
+Directory modules/project
+ Synplify.py               Locally Modified          417 
+ XST.py                    Locally Modified          417 
+
+Fixed typo relating to basicinout filter.

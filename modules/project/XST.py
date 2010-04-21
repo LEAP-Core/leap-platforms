@@ -30,8 +30,7 @@ class Synthesize():
         SCons.Script.Clean(w,  moduleList.compileDirectory + '/' + module.wrapperName() + '.srp')
     
 
-    #patch top verilog
-    os.system('$BLUESPECDIR/lib/bin/basicinout ' + moduleList.topModule.buildPath + '/' + moduleList.topModule.wrapperName() + '.v');     
+
 
     topSRP = moduleList.compileDirectory + '/' + moduleList.topModule.wrapperName() + '.srp'
 
@@ -40,6 +39,7 @@ class Synthesize():
         moduleList.topModule.moduleDependency['VERILOG'] +  moduleList.getAllDependencies('VERILOG_STUB') + moduleList.topModule.moduleDependency['XST'],
         [ SCons.Script.Delete(topSRP),
           SCons.Script.Delete(moduleList.compileDirectory + '/' + moduleList.apmName + '_xst.xrpt'),
+           os.environ['BLUESPECDIR'] + '/bin/basicinout ' + 'hw/' + moduleList.topModule.buildPath + '/.bsc/' + moduleList.topModule.wrapperName() + '.v',     #patch top verilog
           'xst -intstyle silent -ifn config/' + moduleList.topModule.wrapperName() + '.xst -ofn ' + topSRP,
           '@echo xst ' + moduleList.apmName + ' build complete.' ])    
 
