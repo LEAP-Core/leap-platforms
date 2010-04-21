@@ -1,0 +1,12 @@
+set_location_assignment PIN_B12 -to CLK
+set_location_assignment PIN_Y1 -to RST_N
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to RST_N
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to CLK
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to ledsWires_LED[3]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to ledsWires_LED[2]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to ledsWires_LED[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to ledsWires_LED[0]
+set_location_assignment PIN_AB16 -to ledsWires_LED[3]
+set_location_assignment PIN_V13 -to ledsWires_LED[2]
+set_location_assignment PIN_D22 -to ledsWires_LED[1]
+set_location_assignment PIN_D21 -to ledsWires_LED[0]
