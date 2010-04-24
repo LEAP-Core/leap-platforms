@@ -9514,3 +9514,17 @@ Directory modules/project
  XST.py                    Locally Modified          417 
 
 Fixed typo relating to basicinout filter.
+
+----------
+kfleming    Date: Fri Apr 23 20:59:06 EDT 2010  CSN: CSN-platforms-419
+                  Sat Apr 24 00:59:06 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/serial
+ SerialStream.cc           Locally Removed           418 
+ serial-physical-channel.awb Locally Modified          418 
+ SerialStreamBuf.cpp       Locally Added               - 
+ SerialStreamBuf.cc        Locally Removed           418 
+ SerialStream.cpp          Locally Added               - 
+
+Fixed broken serial physical channel
