@@ -34,6 +34,7 @@ defs = {
     'GIVEN_UCFS'         : '@GIVEN_UCFS@',
     'GIVEN_QSFS'         : '@GIVEN_QSFS@',
     'GIVEN_SDCS'         : '@GIVEN_SDCS@',
+    'GIVEN_DATAS'        : '@GIVEN_DATAS@',
     'GEN_BAS'            : '@GEN_BAS@',
     'GEN_VS'             : '@GEN_VS@',
     'GEN_CXXS'           : 'schedule.cxx @GEN_CXXS@',
@@ -252,7 +253,8 @@ exe = env.Command(
     [ '@ln -fs $SOURCE $TARGET',
       '@ln -fs ' + SW_EXE_OR_TARGET + ' ' + APM_NAME,
       Delete(APM_NAME + '_hw.vexe'),
-      Delete(APM_NAME + '_hw.errinfo') ])
+      Delete(APM_NAME + '_hw.errinfo'),
+      Copy(TMP_BSC_DIR, env['DEFS']['GIVEN_DATAS']) ])
 
 env.Alias('exe', exe)
 
