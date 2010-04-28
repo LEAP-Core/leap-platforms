@@ -9538,3 +9538,14 @@ Directory modules/project
  SCons.top.pipeline.template Locally Modified          420 
 
 Patched new DATA intializer type by removing from build rule.  This takes care of the empty string case more easily.  
+
+----------
+mcadler     Date: Wed Apr 28 14:36:32 EDT 2010  CSN: CSN-platforms-422
+                  Wed Apr 28 18:36:32 UTC 2010
+
+
+Directory modules/bluespec/librl/storage
+ fifo-scoreboard.bsv       Locally Modified          421 
+
+Use LUTRAM instead of register vectors for managing ready bits.  Also
+eliminate a vector-wide XOR when a 1-bit XOR will suffice.

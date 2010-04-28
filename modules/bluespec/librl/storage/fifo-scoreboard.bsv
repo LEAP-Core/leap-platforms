@@ -73,8 +73,8 @@ module mkScoreboardFIFOF
     // reqVec and readyVec are used to determine whether an entry's data is
     // ready.  When ready, the bits corresponding to an entry match.  Using
     // separate vectors for enq() and deq() avoids write contention.
-    Reg#(Vector#(t_NUM_ENTRIES, Bool)) reqVec <- mkReg(replicate(False));
-    Reg#(Vector#(t_NUM_ENTRIES, Bool)) readyVec <- mkReg(replicate(False));
+    LUTRAM#(Bit#(TLog#(t_NUM_ENTRIES)), Bool) reqVec <- mkLUTRAMU();
+    LUTRAM#(Bit#(TLog#(t_NUM_ENTRIES)), Bool) readyVec <- mkLUTRAMU();
 
     // Value flowing out from the FIFO to first() / deq().
     RWire#(t_DATA) exitVal <- mkRWire();
@@ -84,19 +84,35 @@ module mkScoreboardFIFOF
     function isNotEmpty() = (nEntries.value() != 0);
 
 
+    Reg#(Bool) didInit <- mkReg(False);
+    Reg#(Bit#(TLog#(t_NUM_ENTRIES))) initIdx <- mkReg(0);
+
+    rule doInit (! didInit);
+        reqVec.upd(initIdx, False);
+        readyVec.upd(initIdx, False);
+
+        if (initIdx == fromInteger(valueOf(TSub#(t_NUM_ENTRIES, 1))))
+        begin
+            didInit <= True;
+        end
+
+        initIdx <= initIdx + 1;
+    endrule
+
+
     //
     // Send the outbound, oldest, value out on a wire instead of reading
     // the values in the methods below to avoid painfully slow Bluespec
     // scheduler attempts to see through subscripting.
     //
     (* fire_when_enabled, no_implicit_conditions *)
-    rule checkOldest (True);
+    rule checkOldest (didInit);
         //
         // To be ready there must be an entry in the queue and the reqVec bit
         // must match the readyVec bit for the oldest entry.
         //
-        Bit#(t_NUM_ENTRIES) r = pack(reqVec) ^ pack(readyVec);
-        oldestIsReady <= isNotEmpty() && (r[nextDeq] == 0);
+        Bool ready = (reqVec.sub(nextDeq) == readyVec.sub(nextDeq));
+        oldestIsReady <= isNotEmpty() && ready;
     endrule
 
     (* fire_when_enabled, no_implicit_conditions *)
@@ -105,12 +121,48 @@ module mkScoreboardFIFOF
     endrule
 
 
-    method ActionValue#(t_SCOREBOARD_FIFO_ENTRY_ID) enq() if (isNotFull());
+    //
+    // Rules supporting methods.  Here to avoid exposing a LUTRAM in a method.
+    //
+
+    //
+    // allocSlot --
+    //     Allocate a slot for the enq() method.  This rule must fire in the
+    //     same cycle as the corresponding enq() or the slot may appear data
+    //     ready before the data arrives.
+    //
+    RWire#(t_SCOREBOARD_FIFO_ENTRY_ID) allocSlot <- mkRWire();
+    (* no_implicit_conditions *)
+    (* fire_when_enabled *)
+    rule doAllocSlot (didInit &&& allocSlot.wget() matches tagged Valid .slot);
+        // Mark slot not data ready
+        reqVec.upd(slot, ! reqVec.sub(slot));
+    endrule
+
+
+    //
+    // valueReady --
+    //     Data has arrived for a slot.
+    //
+    RWire#(t_SCOREBOARD_FIFO_ENTRY_ID) valueSlot <- mkRWire();
+    (* no_implicit_conditions *)
+    (* fire_when_enabled *)
+    rule valueReady (didInit &&& valueSlot.wget() matches tagged Valid .slot);
+        // Mark slot data ready
+        readyVec.upd(slot, reqVec.sub(slot));
+    endrule
+
+
+    //
+    // Methods
+    //
+
+    method ActionValue#(t_SCOREBOARD_FIFO_ENTRY_ID) enq() if (didInit && isNotFull());
         nEntries.up();
 
         // Mark FIFO slot as waiting for data
         let slot = nextEnq;
-        reqVec[slot] <= ! reqVec[slot];
+        allocSlot.wset(slot);
     
         // Update next slot pointer
         nextEnq <= slot + 1;
@@ -119,10 +171,10 @@ module mkScoreboardFIFOF
     endmethod
 
     method Action setValue(t_SCOREBOARD_FIFO_ENTRY_ID id, t_DATA data);
+        valueSlot.wset(id);
+
         // Write value to buffer
         values[id] <= data;
-        // Mark slot data ready
-        readyVec[id] <= reqVec[id];
     endmethod
 
     method t_DATA first() if (exitVal.wget() matches tagged Valid .v);
@@ -172,8 +224,8 @@ module mkBRAMScoreboardFIFOF
     // reqVec and readyVec are used to determine whether an entry's data is
     // ready.  When ready, the bits corresponding to an entry match.  Using
     // separate vectors for enq() and deq() avoids write contention.
-    Reg#(Vector#(t_NUM_ENTRIES, Bool)) reqVec <- mkReg(replicate(False));
-    Reg#(Vector#(t_NUM_ENTRIES, Bool)) readyVec <- mkReg(replicate(False));
+    LUTRAM#(Bit#(TLog#(t_NUM_ENTRIES)), Bool) reqVec <- mkLUTRAMU();
+    LUTRAM#(Bit#(TLog#(t_NUM_ENTRIES)), Bool) readyVec <- mkLUTRAMU();
 
     // Value flowing out from the FIFO to first() / deq().
     FIFOF#(Tuple2#(t_DATA, t_SCOREBOARD_FIFO_ENTRY_ID)) exitValQ <- mkBypassFIFOF();
@@ -188,18 +240,34 @@ module mkBRAMScoreboardFIFOF
     function isNotEmpty() = (nEntries.value() != 0);
 
 
+    Reg#(Bool) didInit <- mkReg(False);
+    Reg#(Bit#(TLog#(t_NUM_ENTRIES))) initIdx <- mkReg(0);
+
+    rule doInit (! didInit);
+        reqVec.upd(initIdx, False);
+        readyVec.upd(initIdx, False);
+
+        if (initIdx == fromInteger(valueOf(TSub#(t_NUM_ENTRIES, 1))))
+        begin
+            didInit <= True;
+        end
+
+        initIdx <= initIdx + 1;
+    endrule
+
+
     //
     // Receive values.  This code could be in the setValue method but putting
     // it in a rule allows for more local scheduling control.
     //
-    rule recieveValues (True);
+    rule receiveValues (didInit);
         match {.id, .data} = setValueQ.first();
         setValueQ.deq();
 
         // Write value to buffer
         values.write(id, data);
         // Mark slot data ready
-        readyVec[id] <= reqVec[id];
+        readyVec.upd(id, reqVec.sub(id));
     
         // Forward value to bypass logic.
         bypassValue.wset(tuple2(id, data));
@@ -210,13 +278,13 @@ module mkBRAMScoreboardFIFOF
     // Compute whether oldest is ready to a wire to simplify scheduling predicates.
     //
     (* fire_when_enabled, no_implicit_conditions *)
-    rule checkOldest (True);
+    rule checkOldest (didInit);
         //
         // To be ready there must be an entry in the queue and the reqVec bit
         // must match the readyVec bit for the oldest entry.
         //
-        Bit#(t_NUM_ENTRIES) r = pack(reqVec) ^ pack(readyVec);
-        oldestIsReady <= isNotEmpty() && (r[nextDeq] == 0);
+        Bool ready = (reqVec.sub(nextDeq) == readyVec.sub(nextDeq));
+        oldestIsReady <= isNotEmpty() && ready;
     endrule
 
     //
@@ -257,12 +325,35 @@ module mkBRAMScoreboardFIFOF
     endrule
 
 
+    //
+    // Rules supporting methods.  Here to avoid exposing a LUTRAM in a method.
+    //
+
+    //
+    // allocSlot --
+    //     Allocate a slot for the enq() method.  This rule must fire in the
+    //     same cycle as the corresponding enq() or the slot may appear data
+    //     ready before the data arrives.
+    //
+    RWire#(t_SCOREBOARD_FIFO_ENTRY_ID) allocSlot <- mkRWire();
+    (* no_implicit_conditions *)
+    (* fire_when_enabled *)
+    rule doAllocSlot (didInit &&& allocSlot.wget() matches tagged Valid .slot);
+        // Mark slot not data ready
+        reqVec.upd(slot, ! reqVec.sub(slot));
+    endrule
+
+
+    //
+    // Methods
+    //
+
     method ActionValue#(t_SCOREBOARD_FIFO_ENTRY_ID) enq() if (isNotFull());
         nEntries.up();
 
         // Mark FIFO slot as waiting for data
         let slot = nextEnq;
-        reqVec[slot] <= ! reqVec[slot];
+        allocSlot.wset(slot);
     
         // Update next slot pointer
         nextEnq <= slot + 1;
