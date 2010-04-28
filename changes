@@ -9528,3 +9528,13 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-ch
  SerialStream.cpp          Locally Added               - 
 
 Fixed broken serial physical channel
+
+----------
+kfleming    Date: Tue Apr 27 21:28:29 EDT 2010  CSN: CSN-platforms-421
+                  Wed Apr 28 01:28:29 UTC 2010
+
+
+Directory modules/project
+ SCons.top.pipeline.template Locally Modified          420 
+
+Patched new DATA intializer type by removing from build rule.  This takes care of the empty string case more easily.  
