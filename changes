@@ -9549,3 +9549,21 @@ Directory modules/bluespec/librl/storage
 
 Use LUTRAM instead of register vectors for managing ready bits.  Also
 eliminate a vector-wide XOR when a 1-bit XOR will suffice.
+
+----------
+mcadler     Date: Wed Apr 28 22:43:53 EDT 2010  CSN: CSN-platforms-423
+                  Thu Apr 29 02:43:53 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-mem-scratch.bsv    Locally Modified          422 
+
+Tweak the streaming read code for uncached scratchpads to behave the way it
+should have in the first place.  The old code didn't record a read line until
+the data was returned by the host.  By then it was too late, since all
+streaming requests for a line are most likely generated before the line
+is returned from host memory.
+
+The new code tracks the most recent read line request.  If the new request
+matches the old line, the request bypasses the host memory pipeline and
+is returned from a shared buffer once the data arrives.

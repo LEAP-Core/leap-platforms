@@ -98,6 +98,12 @@ SCRATCHPAD_HYBRID_REQ
 typedef struct
 {
     Bool fromCentralCache;
+
+    // For streaming, uncached reads:  this request is from the same line
+    // as the previous read.  Use the last line buffer instead of consuming
+    // a read response from the host.
+    Bool mergedWithLastLineReq;
+
     SCRATCHPAD_WORD_IDX wordIdx;
     SCRATCHPAD_MEM_ADDRESS addr;
     SCRATCHPAD_REF_INFO refInfo;
@@ -441,7 +447,7 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
     LUTRAM#(SCRATCHPAD_PORT_NUM, Maybe#(t_LINE_ADDR)) uncachedLastReadAddr <- mkLUTRAM(tagged Invalid);
     // Data
     LUTRAM#(SCRATCHPAD_PORT_NUM,
-            Maybe#(t_SCRATCHPAD_LINE)) uncachedLastReadBuf <- mkLUTRAMU();
+            t_SCRATCHPAD_LINE) uncachedLastReadBuf <- mkLUTRAMU();
 
     //
     // uncachedWriteReq --
@@ -479,7 +485,7 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
                 storeLine(sb_mask, h_addr, sb_val);
 
                 uncachedStoreBufAddr.upd(port, tagged Invalid);
-                debugLog.record($format("uncachedWriteReq: Flush SB entry, addr=0x%x, mask=%b", l_addr, pack(sb_mask)));
+                debugLog.record($format("port %0d: uncachedWriteReq: Flush SB entry, addr=0x%x, mask=%b", port, l_addr, pack(sb_mask)));
             end
             else
             begin
@@ -499,7 +505,7 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
                                                             new_mask));
 
                 uncachedReqQ.deq();
-                debugLog.record($format("uncachedWriteReq: Merge SB entry, addr=0x%x, w_idx=%d, val=0x%x, mask=%b", l_addr, word_idx, pack(bytes_out), new_mask));
+                debugLog.record($format("port %0d: uncachedWriteReq: Merge SB entry, addr=0x%x, w_idx=%d, val=0x%x, mask=%b", port, l_addr, word_idx, pack(bytes_out), new_mask));
             end
         end
         else
@@ -517,14 +523,14 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
                 uncachedStoreBuf[w].upd(port, tuple2(w_req.val, mask));
             end
 
-            debugLog.record($format("uncachedWriteReq: New SB entry, addr=0x%x, w_idx=%d, val=0x%x, mask=%b", l_addr, word_idx, w_req.val, w_req.byteMask));
+            debugLog.record($format("port %0d: uncachedWriteReq: New SB entry, addr=0x%x, w_idx=%d, val=0x%x, mask=%b", port, l_addr, word_idx, w_req.val, w_req.byteMask));
 
             // Invalidate the read buffer if it matches the new address
             if (uncachedLastReadAddr.sub(port) matches tagged Valid .r_addr &&&
                 r_addr == l_addr)
             begin
                 uncachedLastReadAddr.upd(port, tagged Invalid);
-                debugLog.record($format("uncachedWriteReq: Inval matching read buf"));
+                debugLog.record($format("port %0d: uncachedWriteReq: Inval matching read buf", port));
             end
         end
     endrule
@@ -572,7 +578,7 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
                 // Hit.  Return the store buffer.
                 uncachedReqQ.deq();
                 uncachedReadRspQ.enq(tuple3(r_req.addr, sb_val[w_idx], r_req.refInfo));
-                debugLog.record($format("uncachedReadReq: SB hit, addr=0x%x, idx=%0d, val=0x%x, mask=%b", l_addr, w_idx, sb_val[w_idx], pack(r_req.byteMask)));
+                debugLog.record($format("port %0d: uncachedReadReq: SB hit, addr=0x%x, idx=%0d, val=0x%x, mask=%b", port, l_addr, w_idx, sb_val[w_idx], pack(r_req.byteMask)));
             end
             else
             begin
@@ -581,17 +587,29 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
                 storeLine(sb_mask, h_addr, sb_val);
 
                 uncachedStoreBufAddr.upd(port, tagged Invalid);
-                debugLog.record($format("uncachedReadReq: Flush SB entry, addr=0x%x, mask=%b", l_addr, pack(sb_mask)));
+                debugLog.record($format("port %0d: uncachedReadReq: Flush SB entry, addr=0x%x, mask=%b", port, l_addr, pack(sb_mask)));
             end
         end
         else if (uncachedLastReadAddr.sub(port) matches tagged Valid .lr_addr &&&
-                 lr_addr == l_addr &&&
-                 uncachedLastReadBuf.sub(port) matches tagged Valid .lr_val)
+                 lr_addr == l_addr)
         begin
-            // Requested line is already in the last read buffer.
+            //
+            // Streaming read: the requested line was already requested by the
+            // last read.  Don't ask the host again.  Instead, use the last
+            // line cache.
+            //
             uncachedReqQ.deq();
-            uncachedReadRspQ.enq(tuple3(r_req.addr, lr_val[w_idx], r_req.refInfo));
-            debugLog.record($format("uncachedReadReq: last read hit, addr=0x%x, idx=%0d, val=0x%x", l_addr, w_idx, lr_val[w_idx]));
+
+            // Record reference metadata for use when the value comes back.
+            SCRATCHPAD_HYBRID_READ_INFO info;
+            info.fromCentralCache = False;
+            info.mergedWithLastLineReq = True;
+            info.addr = r_req.addr;
+            info.wordIdx = w_idx;
+            info.refInfo = r_req.refInfo;
+            readReqInfoQ.enq(info);
+
+            debugLog.record($format("port %0d: uncachedReadReq: Stream addr=0x%x", port, l_addr));
         end
         else
         begin
@@ -604,36 +622,19 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
             let h_addr = hostAddrFromLineAddr(port, l_addr);
             scratchpad_rrr.makeRequest_LoadLine(h_addr);
 
-            // Store reference metadata for use when the value comes back.
+            // Reference metadata for use when the value comes back.
             // Responses from the system are ordered.
             SCRATCHPAD_HYBRID_READ_INFO info;
             info.fromCentralCache = False;
+            info.mergedWithLastLineReq = False;
             info.addr = r_req.addr;
             info.wordIdx = w_idx;
             info.refInfo = r_req.refInfo;
             readReqInfoQ.enq(info);
 
-            //
-            // Update the last read buffer by writing the address of the read
-            // but marking the value invalid.  This protocol resolves a race
-            // between the value returning from the host and possible writes
-            // to the line between now and the value returning from the host.
-            // If the address is currently valid but the data is not there
-            // must be some other read already in flight.  Don't update the
-            // address in that case since it could permit caching of stale
-            // data.  (Load A, Load B, Store A, Load A, Load A could wind
-            // up caching the result of the first Load A and using it for
-            // the last Load A of the response for the first Load A arrives
-            // after the request for the next to last Load A.
-            //
-            if (! isValid(uncachedLastReadAddr.sub(port)) ||
-                isValid(uncachedLastReadBuf.sub(port)))
-            begin
-                uncachedLastReadAddr.upd(port, tagged Valid l_addr);
-                uncachedLastReadBuf.upd(port, tagged Invalid);
-            end
+            uncachedLastReadAddr.upd(port, tagged Valid l_addr);
 
-            debugLog.record($format("uncachedReadReq: Read addr=0x%x", l_addr));
+            debugLog.record($format("port %0d: uncachedReadReq: Read addr=0x%x", port, l_addr));
         end
     endrule
 
@@ -650,28 +651,37 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
         let port = info.refInfo.portNum;
         let l_addr = scratchpadLineAddr(info.addr);
 
-        let r <- scratchpad_rrr.getResponse_LoadLine();
-
-        // Only one word from the line is expected.  Pick the right one.
         t_SCRATCHPAD_LINE line;
-        line[0] = r.data0;
-        line[1] = r.data1;
-        line[2] = r.data2;
-        line[3] = r.data3;
-        let v = line[info.wordIdx];
+        String read_source;
 
-        // One entry streaming read cache.  Only update the cache if the
-        // address still matches this line.  If a write arrived while the
-        // read is being serviced it would have invalidated the line.
-        if (uncachedLastReadAddr.sub(port) matches tagged Valid .lr_addr &&&
-            lr_addr == l_addr)
+        if (! info.mergedWithLastLineReq)
         begin
-            uncachedLastReadBuf.upd(port, tagged Valid line);
+            // Consume response from host
+            read_source = "host";
+
+            let r <- scratchpad_rrr.getResponse_LoadLine();
+
+            line[0] = r.data0;
+            line[1] = r.data1;
+            line[2] = r.data2;
+            line[3] = r.data3;
+
+            // Record the line in case it is reused by later reads.
+            uncachedLastReadBuf.upd(port, line);
+        end
+        else
+        begin
+            // Re-use previous response
+            read_source = "stream";
+
+            line = uncachedLastReadBuf.sub(port);
         end
 
-        debugLog.record($format("uncachedReadResp: val=0x%x", pack(v)));
-
+        // Only one word from the line is expected.  Pick the right one.
+        let v = line[info.wordIdx];
         uncachedReadRspQ.enq(tuple3(info.addr, v, info.refInfo));
+
+        debugLog.record($format("port %0d: uncachedReadResp %s: val=0x%x", port, read_source, pack(v)));
     endrule
 
 
