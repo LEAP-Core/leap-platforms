@@ -9567,3 +9567,29 @@ is returned from host memory.
 The new code tracks the most recent read line request.  If the new request
 matches the old line, the request bypasses the host memory pipeline and
 is returned from a shared buffer once the data arrives.
+
+----------
+kfleming    Date: Thu Apr 29 13:41:13 EDT 2010  CSN: CSN-platforms-424
+                  Thu Apr 29 17:41:13 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/serial
+ serial-physical-channel-8bit.cpp Locally Added               0 
+ serial-physical-channel-8bit.bsv Locally Added               0 
+ serial-physical-channel-8bit.awb Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/serial
+ physical-serial/          Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/serial/physical-serial
+ opb_uartlite_core.vhd     Locally Added               0 
+ opb_uartlite_rx.vhd       Locally Added               0 
+ serial-device.h           Locally Added               0 
+ srl_fifo.vhd              Locally Added               0 
+ opb_uartlite_tx.vhd       Locally Added               0 
+ baudrate.vhd              Locally Added               0 
+ uart-import.bsv           Locally Added               0 
+ serial-device.cpp         Locally Added               0 
+ serial-device-physical.awb Locally Added               0 
+
+Added light-weight uart device

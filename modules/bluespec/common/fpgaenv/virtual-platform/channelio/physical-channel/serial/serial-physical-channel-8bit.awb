@@ -1,0 +1,20 @@
+
+%name HiPerf Serial Physical Channel 
+%desc HiPerf Serial Physical Channel
+
+%provides physical_channel
+
+%sources -t BSV -v PUBLIC   serial-physical-channel-8bit.bsv
+%sources -t H   -v PUBLIC   serial-physical-channel.h
+%sources -t CPP -v PUBLIC   serial-physical-channel-8bit.cpp
+%sources -t CPP -v PUBLIC   PosixSignalDispatcher.cpp
+%sources -t H   -v PUBLIC   PosixSignalDispatcher.h
+%sources -t H   -v PUBLIC   PosixSignalHandler.h
+%sources -t CPP -v PUBLIC   SerialPort.cpp
+%sources -t H   -v PUBLIC   SerialPort.h
+%sources -t CPP -v PUBLIC   SerialStreamBuf.cpp
+%sources -t H   -v PUBLIC   SerialStreamBuf.h
+%sources -t CPP -v PUBLIC   SerialStream.cpp
+%sources -t H   -v PUBLIC   SerialStream.h
+
+
