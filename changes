@@ -9593,3 +9593,13 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ser
  serial-device-physical.awb Locally Added               0 
 
 Added light-weight uart device
+
+----------
+kfleming    Date: Thu Apr 29 15:51:49 EDT 2010  CSN: CSN-platforms-425
+                  Thu Apr 29 19:51:49 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/serial/physical-serial
+ opb_uartlite_core.vhd     Locally Modified          424 
+
+Tweaked DTR, stability now greatly enhanced

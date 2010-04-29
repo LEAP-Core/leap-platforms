@@ -232,7 +232,7 @@ begin  -- architecture IMP
   TX_Buffer_Empty <= TxBufferEmpty and not(CTS);
   RTS <= RxDataPresent;
   RX_Data_Present <= RxDataPresent;
-  DTR <= not(Reset);                     
+  DTR <= not(Reset) or RxDataPresent;                     
   -----------------------------------------------------------------------------
   -- Instanciating the BaudRate module
   -----------------------------------------------------------------------------
