@@ -39,7 +39,7 @@ class NGD():
         # or guarantee their safety, just delete them.
         SCons.Script.Delete('xlnx_auto_0.ise'),
         SCons.Script.Delete('xlnx_auto_0_xdb'),
-        'ngdbuild -p ' + fpga_part_xilinx + ' -sd ' + moduleList.env['DEFS']['ROOT_DIR_HW_MODEL'] + ' -uc ' + xilinx_apm_name + '.ucf ' + bmm + ' $SOURCE $TARGET',
+        'ngdbuild -aul -p ' + fpga_part_xilinx + ' -sd ' + moduleList.env['DEFS']['ROOT_DIR_HW_MODEL'] + ' -uc ' + xilinx_apm_name + '.ucf ' + bmm + ' $SOURCE $TARGET',
         SCons.Script.Move(moduleList.compileDirectory + '/netlist.lst', 'netlist.lst') ])
 
     moduleList.topModule.moduleDependency['NGD'] = [xilinx_ngd]

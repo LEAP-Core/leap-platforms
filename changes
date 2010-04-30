@@ -9603,3 +9603,16 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ser
  opb_uartlite_core.vhd     Locally Modified          424 
 
 Tweaked DTR, stability now greatly enhanced
+
+----------
+kfleming    Date: Fri Apr 30 16:10:41 EDT 2010  CSN: CSN-platforms-426
+                  Fri Apr 30 20:10:41 UTC 2010
+
+
+Directory modules/project
+ XILINX_NGD.py             Locally Modified          425 
+
+
+
+Added -aul file - this assists in the case that we use fully LOC'ed
+controllers, but the tools proceed to do some slight renaming.  
