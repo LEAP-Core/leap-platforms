@@ -20,19 +20,11 @@ class PostSynthesize():
       
     NGD(moduleList)
 
-    moduleList.dump()
-
     MAP(moduleList)
-
-    moduleList.dump()
 
     PAR(moduleList)
 
-    moduleList.dump()
-
     BITGEN(moduleList)
-
-    moduleList.dump()
 
     LOADER(moduleList)
     

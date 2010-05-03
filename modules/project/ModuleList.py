@@ -69,7 +69,6 @@ class ModuleList:
 
     for module in self.synthBoundaries:
       # check to see if this is the top module (has no parent)
-      module.dump()
       if(module.parent == ''): 
         self.topModule = module
       else:

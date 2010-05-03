@@ -9691,3 +9691,17 @@ Directory modules/project
  xilinx_bmm.awb            Locally Removed           426 
 
 Reorganized python files
+
+----------
+kfleming    Date: Mon May  3 12:47:51 EDT 2010  CSN: CSN-platforms-428
+                  Mon May  3 16:47:51 UTC 2010
+
+
+Directory modules/project
+ SCons.top.pipeline.template Locally Modified          427 
+ ModuleList.py             Locally Modified          427 
+
+Directory modules/project/xilinx
+ XILINX_POST_SYNTH.py      Locally Modified          427 
+
+Removed some data structure dumpes now that the build pipeline is fairly stable.
