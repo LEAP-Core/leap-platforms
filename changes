@@ -9616,3 +9616,78 @@ Directory modules/project
 
 Added -aul file - this assists in the case that we use fully LOC'ed
 controllers, but the tools proceed to do some slight renaming.  
+
+----------
+kfleming    Date: Mon May  3 12:09:57 EDT 2010  CSN: CSN-platforms-427
+                  Mon May  3 16:09:57 UTC 2010
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-hybrid-xupv2-serial.apm Locally Modified          426 
+
+Directory modules/project
+ xilinx_ucf.awb            Locally Removed           426 
+ xilinx_map.awb            Locally Removed           426 
+ project-pipeline.awb      Locally Modified          426 
+ xilinx_par.awb            Locally Removed           426 
+ synplify.sdc              Locally Removed           426 
+ xst.awb                   Locally Removed           426 
+ synopsis/                 Locally Added               0 
+
+Directory modules/project/synopsis
+ Synplify.py               Locally Added               - 
+ synplify.awb              Locally Added               - 
+ synplify.sdc              Locally Added               - 
+
+Directory modules/project
+ XILINX_LOADER.py          Locally Removed           426 
+ XILINX_BMM.py             Locally Removed           426 
+ project-hybrid.awb        Locally Modified          426 
+ XILINX_MAP.py             Locally Removed           426 
+ XILINX_UCF.py             Locally Removed           426 
+ Synplify.py               Locally Removed           426 
+ XST.py                    Locally Removed           426 
+ altera/                   Locally Added               0 
+
+Directory modules/project/altera
+ ALTERA_POST_SYNTH.py      Locally Added               - 
+ altera_post_synth.awb     Locally Added               - 
+
+Directory modules/project
+ altera_post_synth.awb     Locally Removed           426 
+ xilinx/                   Locally Added               0 
+
+Directory modules/project/xilinx
+ xilinx_ucf.awb            Locally Added               - 
+ xilinx_map.awb            Locally Added               - 
+ xilinx_par.awb            Locally Added               - 
+ xst.awb                   Locally Added               - 
+ XILINX_LOADER.py          Locally Added               - 
+ XILINX_NGD.py             Locally Added               - 
+ XILINX_BITGEN.py          Locally Added               - 
+ XILINX_POST_SYNTH.py      Locally Added               - 
+ XILINX_BMM.py             Locally Added               - 
+ XILINX_UCF.py             Locally Added               - 
+ XILINX_MAP.py             Locally Added               - 
+ XILINX_PAR.py             Locally Added               - 
+ XST.py                    Locally Added               - 
+ xilinx_loader.awb         Locally Added               - 
+ xilinx_bitgen.awb         Locally Added               - 
+ xilinx_ngd.awb            Locally Added               - 
+ xilinx_post_synth.awb     Locally Added               - 
+ xilinx_bmm.awb            Locally Added               - 
+
+Directory modules/project
+ xilinx_bitgen.awb         Locally Removed           426 
+ synplify.awb              Locally Removed           426 
+ ALTERA_POST_SYNTH.py      Locally Removed           426 
+ XILINX_BITGEN.py          Locally Removed           426 
+ XILINX_NGD.py             Locally Removed           426 
+ XILINX_POST_SYNTH.py      Locally Removed           426 
+ XILINX_PAR.py             Locally Removed           426 
+ xilinx_loader.awb         Locally Removed           426 
+ xilinx_ngd.awb            Locally Removed           426 
+ xilinx_post_synth.awb     Locally Removed           426 
+ xilinx_bmm.awb            Locally Removed           426 
+
+Reorganized python files

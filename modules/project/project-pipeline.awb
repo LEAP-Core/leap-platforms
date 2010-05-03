@@ -17,7 +17,7 @@
 %public  project-hybrid-main.h
 %private project-hybrid-main.cpp
 %public  hardware-done.h
-%sources -t SDC -v PRIVATE synplify.sdc
+
 
 %library lib/libasim/libasim.a
 

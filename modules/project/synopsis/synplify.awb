@@ -9,4 +9,5 @@
 %provides synthesis_tool
 
 %scons %library Synplify.py
+%sources -t SDC -v PRIVATE synplify.sdc
 
