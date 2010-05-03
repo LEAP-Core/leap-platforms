@@ -445,10 +445,12 @@ PseudoDMA(
     switch (methodID)
     {
       case METHOD_ID_StoreWord:
+      {
         instance->StoreWord(u64msg[2], u64msg[1], u64msg[0]);
         return true;
-
+      }
       case METHOD_ID_StoreLine:
+      {
         UINT64 byteMask = u64msg[5];
 
         if ((byteMask & 0xf0f0f0f0f0f0f0f0) == 0xf0f0f0f0f0f0f0f0)
@@ -464,8 +466,9 @@ PseudoDMA(
         }
 
         return true;
-
+      }
       case METHOD_ID_LoadLine:
+      {
         static PHYSICAL_CHANNEL_CLASS::PSEUDO_DMA_READ_RESP_CLASS r;
         static bool did_init = false;
         static UMF_MESSAGE_CLASS m;
@@ -493,6 +496,7 @@ PseudoDMA(
         // Only handle reads here when tracing is off.  When tracing is on
         // the RRR method will be called.
         return ! instance->IsTracing(1);
+        }
     }
 
     // Request not handled by pseudoDMA

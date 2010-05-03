@@ -9725,3 +9725,21 @@ Add a pseudo-DMA path for scratchpad references that bypasses channel I/O
 and RRR, communicating directly with the channel driver.  The code is only
 used when the channel I/O driver defines the preprocessor variable
 PSEUDO_DMA_ENABLED.
+
+----------
+pellauer    Date: Mon May  3 16:38:17 EDT 2010  CSN: CSN-platforms-430
+                  Mon May  3 20:38:17 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-mem-scratch.cpp    Locally Modified          429 
+
+
+* Adding braces to legs of switch statements. GHC has apparently decided to 
+  crack down on variables declared in switch statements without legs. Adding
+  braces is harmlessly backwards compatible, so let's go for that.
+  
+
+Michael P.
+
+                                                                                  down
