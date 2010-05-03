@@ -9705,3 +9705,23 @@ Directory modules/project/xilinx
  XILINX_POST_SYNTH.py      Locally Modified          427 
 
 Removed some data structure dumpes now that the build pipeline is fairly stable.
+
+----------
+mcadler     Date: Mon May  3 14:24:55 EDT 2010  CSN: CSN-platforms-429
+                  Mon May  3 18:24:55 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-mem-scratch.cpp    Locally Modified          428 
+ hybrid-mem-scratch.rrr    Locally Modified          428 
+ hybrid-mem-scratch.h      Locally Modified          428 
+ hybrid-mem-scratch.bsv    Locally Modified          428 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian
+ umf-little-endian.cpp     Locally Modified          428 
+ umf-little-endian.h       Locally Modified          428 
+
+Add a pseudo-DMA path for scratchpad references that bypasses channel I/O
+and RRR, communicating directly with the channel driver.  The code is only
+used when the channel I/O driver defines the preprocessor variable
+PSEUDO_DMA_ENABLED.

@@ -40,32 +40,12 @@
 
 using namespace std;
 
-// constructors
-UMF_MESSAGE_CLASS::UMF_MESSAGE_CLASS()
-{
-    Clear();
-}
-
-// destructor
-UMF_MESSAGE_CLASS::~UMF_MESSAGE_CLASS()
-{
-}
-
 // init
 void
 UMF_MESSAGE_CLASS::Init(
     PLATFORMS_MODULE p)
 {
     parent = p;
-}
-
-// clear all message data
-inline void
-UMF_MESSAGE_CLASS::Clear()
-{
-    length     = 0;
-    readIndex  = 0;
-    writeIndex = 0;
 }
 
 // allocate a new message: pipe through to the allocator
@@ -76,9 +56,6 @@ UMF_MESSAGE_CLASS::operator new(size_t size)
 
     // ask allocator to give us a new message
     UMF_MESSAGE retval = UMF_ALLOCATOR_CLASS::GetInstance()->New();
-
-    // optional: initialize
-    retval->Clear();
 
     return retval;
 }

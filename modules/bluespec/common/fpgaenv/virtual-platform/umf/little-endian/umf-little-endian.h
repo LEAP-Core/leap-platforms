@@ -81,7 +81,7 @@ class UMF_MESSAGE_CLASS: public PLATFORMS_MODULE_CLASS,
     UMF_MESSAGE next;
     
   public:
-    // constructors and destructor
+    // constructor and destructor
     UMF_MESSAGE_CLASS();
     ~UMF_MESSAGE_CLASS();
     
@@ -166,6 +166,28 @@ class UMF_MESSAGE_CLASS: public PLATFORMS_MODULE_CLASS,
 //
 // Inline, performance critical routines...
 //
+
+// constructor
+inline
+UMF_MESSAGE_CLASS::UMF_MESSAGE_CLASS()
+{
+    Clear();
+}
+
+// destructor
+inline
+UMF_MESSAGE_CLASS::~UMF_MESSAGE_CLASS()
+{
+}
+
+// clear all message data
+inline void
+UMF_MESSAGE_CLASS::Clear()
+{
+    length     = 0;
+    readIndex  = 0;
+    writeIndex = 0;
+}
 
 // decode header from chunk
 inline void

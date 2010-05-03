@@ -37,9 +37,18 @@
 #include "asim/provides/scratchpad_memory.h"
 #include "asim/rrr/service_ids.h"
 
-
 // service instantiation
 SCRATCHPAD_MEMORY_SERVER_CLASS SCRATCHPAD_MEMORY_SERVER_CLASS::instance;
+
+#ifdef PSEUDO_DMA_ENABLED
+
+static bool PseudoDMA(
+    int methodID,
+    int length,
+    const void *msg,
+    PHYSICAL_CHANNEL_CLASS::PSEUDO_DMA_READ_RESP &resp);
+
+#endif
 
 // constructor
 SCRATCHPAD_MEMORY_SERVER_CLASS::SCRATCHPAD_MEMORY_SERVER_CLASS()
@@ -65,6 +74,12 @@ SCRATCHPAD_MEMORY_SERVER_CLASS::SCRATCHPAD_MEMORY_SERVER_CLASS()
 
     sprintf(fmt, "0%dx", sizeof(SCRATCHPAD_MEMORY_WORD) * 2);
     fmt_data = Format("0x", fmt);
+
+#ifdef PSEUDO_DMA_ENABLED
+    PHYSICAL_CHANNEL_CLASS::RegisterPseudoDMAHandler(0,
+                                                     SCRATCHPAD_MEMORY_SERVICE_ID,
+                                                     &PseudoDMA);
+#endif
 }
 
 // destructor
@@ -110,6 +125,13 @@ SCRATCHPAD_MEMORY_SERVER_CLASS::Cleanup()
 }
 
 
+inline bool
+SCRATCHPAD_MEMORY_SERVER_CLASS::IsTracing(int level)
+{
+    return TRACING(level);
+}
+
+
 //
 // RRR requests
 //
@@ -139,6 +161,26 @@ void SCRATCHPAD_MEMORY_SERVER_CLASS::InitRegion(
     ASSERT(regionBase[regionID] != MAP_FAILED, "Scratchpad mmap failed: region " << regionID << " nWords " << nWords << " (errno " << errno << ")");
 }
 
+
+//
+// GetMemPtr --
+//     Return a pointer to the memory holding address.
+//
+void *
+SCRATCHPAD_MEMORY_SERVER_CLASS::GetMemPtr(
+    SCRATCHPAD_MEMORY_ADDR addr)
+{
+    // Burst the incoming address into a region ID and a pointer to the line.
+    UINT32 region = regionID(addr);
+    SCRATCHPAD_MEMORY_WORD* mem = regionBase[region] + regionOffset(addr);
+    
+    ASSERTX(regionBase[region] != NULL);
+    ASSERTX(regionOffset(addr) < regionWords[region]);
+
+    return mem;
+}
+
+
 //
 // Load --
 //
@@ -150,14 +192,17 @@ SCRATCHPAD_MEMORY_SERVER_CLASS::LoadLine(
     UINT32 region = regionID(addr);
     SCRATCHPAD_MEMORY_WORD* line = regionBase[region] + regionOffset(addr);
     
-    T1("\tSCRATCHPAD load  region " << region << ": r_addr " << fmt_addr(regionOffset(addr)));
-
     ASSERTX(regionBase[region] != NULL);
     ASSERTX(regionOffset(addr) < regionWords[region]);
 
-    for (UINT32 i = 0; i < SCRATCHPAD_WORDS_PER_LINE; i++)
+    if (TRACING(1))
     {
-        T1("\t\tL " << i << ":\t" << fmt_data(*(line + i)));
+        T1("\tSCRATCHPAD load  region " << region << ": r_addr " << fmt_addr(regionOffset(addr)));
+
+        for (UINT32 i = 0; i < SCRATCHPAD_WORDS_PER_LINE; i++)
+        {
+            T1("\t\tL " << i << ":\t" << fmt_data(*(line + i)));
+        }
     }
 
     OUT_TYPE_LoadLine v;
@@ -190,10 +235,10 @@ void
 SCRATCHPAD_MEMORY_SERVER_CLASS::StoreLine(
     UINT64 byteMask,
     SCRATCHPAD_MEMORY_ADDR addr,
-    SCRATCHPAD_MEMORY_WORD data0,
-    SCRATCHPAD_MEMORY_WORD data1,
+    SCRATCHPAD_MEMORY_WORD data3,
     SCRATCHPAD_MEMORY_WORD data2,
-    SCRATCHPAD_MEMORY_WORD data3)
+    SCRATCHPAD_MEMORY_WORD data1,
+    SCRATCHPAD_MEMORY_WORD data0)
 {
     // Burst the incoming address into a region ID and a pointer to the line.
     UINT32 region = regionID(addr);
@@ -329,6 +374,33 @@ SCRATCHPAD_MEMORY_SERVER_CLASS::StoreWord(
 }
 
 
+void
+SCRATCHPAD_MEMORY_SERVER_CLASS::StoreLineUnmasked(
+    SCRATCHPAD_MEMORY_ADDR addr,
+    const SCRATCHPAD_MEMORY_WORD *data)
+{
+    // Burst the incoming address into a region ID and a pointer to the line.
+    UINT32 region = regionID(addr);
+    SCRATCHPAD_MEMORY_WORD *store_line = regionBase[region] + regionOffset(addr);
+    
+    ASSERTX(regionBase[region] != NULL);
+    ASSERTX(regionOffset(addr) < regionWords[region]);
+
+    memcpy(store_line, data, sizeof(SCRATCHPAD_MEMORY_WORD) * 4);
+
+    if (TRACING(1))
+    {
+        T1("\tSCRATCHPAD store line, region " << region
+                                              << ": r_addr " << fmt_addr(regionOffset(addr)));
+
+        for (UINT32 i = 0; i < SCRATCHPAD_WORDS_PER_LINE; i++)
+        {
+            T1("\t\tS 0:\t" << fmt_data(*(store_line + i)));
+        }
+    }
+}
+
+
 //
 // Convert a bit mask appropriate for maskmovq (high bit of each byte)
 // to a full mask for each byte.
@@ -343,3 +415,88 @@ SCRATCHPAD_MEMORY_SERVER_CLASS::FullByteMask(
     mask |= pos_mask;
     return mask;
 }
+
+
+
+
+// ========================================================================
+//
+// Some low level channel I/O drivers that do not support real DMA allow
+// the scratchpad code to register a pseudo-DMA path.  (E.g. The Nallatech
+// ACP driver.)  This path is significantly faster as it bypasses the
+// channel I/O and RRR stacks.
+//
+// ========================================================================
+
+#ifdef PSEUDO_DMA_ENABLED
+
+static bool
+PseudoDMA(
+    int methodID,
+    int length,
+    const void *msg,
+    PHYSICAL_CHANNEL_CLASS::PSEUDO_DMA_READ_RESP &resp)
+{
+    const UINT64 *u64msg = (const UINT64*) msg;
+    const SCRATCHPAD_MEMORY_SERVER instance = &SCRATCHPAD_MEMORY_SERVER_CLASS::instance;
+
+    resp = NULL;
+
+    switch (methodID)
+    {
+      case METHOD_ID_StoreWord:
+        instance->StoreWord(u64msg[2], u64msg[1], u64msg[0]);
+        return true;
+
+      case METHOD_ID_StoreLine:
+        UINT64 byteMask = u64msg[5];
+
+        if ((byteMask & 0xf0f0f0f0f0f0f0f0) == 0xf0f0f0f0f0f0f0f0)
+        {
+            // All bytes written.  Use fast path.
+            instance->StoreLineUnmasked(u64msg[4], u64msg);
+        }
+        else
+        {
+            // Partial (masked) write.  Slow path.
+            instance->StoreLine(byteMask, u64msg[4], u64msg[3],
+                                u64msg[2], u64msg[1], u64msg[0]);
+        }
+
+        return true;
+
+      case METHOD_ID_LoadLine:
+        static PHYSICAL_CHANNEL_CLASS::PSEUDO_DMA_READ_RESP_CLASS r;
+        static bool did_init = false;
+        static UMF_MESSAGE_CLASS m;
+
+        // Initialize the constant portions of the response on the first pass
+        if (! did_init)
+        {
+            did_init = true;
+
+            m.Clear();
+            m.SetLength(32);
+            m.SetServiceID(SCRATCHPAD_MEMORY_SERVICE_ID);
+            m.SetMethodID(METHOD_ID_LoadLine);
+
+            // UMF header components
+            r.header = m.EncodeHeader();
+            r.msgBytes = 32;
+        }
+
+        // Pointer to the requested memory
+        r.msg = instance->GetMemPtr(u64msg[0]);
+
+        resp = &r;
+
+        // Only handle reads here when tracing is off.  When tracing is on
+        // the RRR method will be called.
+        return ! instance->IsTracing(1);
+    }
+
+    // Request not handled by pseudoDMA
+    return false;
+}
+
+#endif

@@ -23,6 +23,7 @@
 #include "asim/mesg.h"
 #include "asim/trace.h"
 
+#include "asim/provides/physical_channel.h"
 #include "asim/provides/rrr.h"
 #include "asim/dict/VDEV.h"
 
@@ -49,10 +50,12 @@ class SCRATCHPAD_MEMORY_SERVER_CLASS: public RRR_SERVER_CLASS,
                                       public PLATFORMS_MODULE_CLASS,
                                       public TRACEABLE_CLASS
 {
-  private:
+  public:
 
     // self-instantiation
     static SCRATCHPAD_MEMORY_SERVER_CLASS instance;
+
+  private:
 
     // stubs
     RRR_SERVER_STUB serverStub;
@@ -91,22 +94,28 @@ class SCRATCHPAD_MEMORY_SERVER_CLASS: public RRR_SERVER_CLASS,
     void   Uninit();
     void   Cleanup();
 
+    bool   IsTracing(int level);
 
     // RRR request methods
     void InitRegion(UINT32 regionID, UINT32 regionEndIdx);
+
+    void *GetMemPtr(SCRATCHPAD_MEMORY_ADDR addr);
 
     OUT_TYPE_LoadLine LoadLine(SCRATCHPAD_MEMORY_ADDR addr);
 
     void StoreLine(UINT64 byteMask,
                    SCRATCHPAD_MEMORY_ADDR addr,
-                   SCRATCHPAD_MEMORY_WORD data0,
-                   SCRATCHPAD_MEMORY_WORD data1,
+                   SCRATCHPAD_MEMORY_WORD data3,
                    SCRATCHPAD_MEMORY_WORD data2,
-                   SCRATCHPAD_MEMORY_WORD data3);
+                   SCRATCHPAD_MEMORY_WORD data1,
+                   SCRATCHPAD_MEMORY_WORD data0);
 
     void StoreWord(UINT64 byteMask,
                    SCRATCHPAD_MEMORY_ADDR addr,
                    SCRATCHPAD_MEMORY_WORD data);
+
+    void StoreLineUnmasked(SCRATCHPAD_MEMORY_ADDR addr,
+                           const SCRATCHPAD_MEMORY_WORD *data);
 };
 
 // Now that the server class is defined the RRR wrapper can be loaded.

@@ -6,6 +6,19 @@
 
 service SCRATCHPAD_MEMORY
 {
+    // ********************************************************************
+    //
+    // RRR sends arguments from the FPGA to the host in reverse order in
+    // memory.  FPGA -> host array elements are reversed here so lines
+    // appear in host memory in order.
+    //
+    // Host -> FPGA arrays are stored in RRR chunks in reverse order but
+    // then reversed again before being sent to the FPGA.  (I don't know
+    // why.)  Host -> FPGA arrays are passed in this code in normal
+    // order so that data can be copied directly from memory.
+    //
+    // ********************************************************************
+
     server sw (cpp, method) <- hw (bsv, method)
     {
         // Request regionWords scratchpad words for scratchpad region regionID.
@@ -23,10 +36,10 @@ service SCRATCHPAD_MEMORY
         //
         method StoreLine (in UINT64[64] byteMask,
                           in UINT64[64] addr,
-                          in UINT64[64] data0,
-                          in UINT64[64] data1,
+                          in UINT64[64] data3,
                           in UINT64[64] data2,
-                          in UINT64[64] data3);
+                          in UINT64[64] data1,
+                          in UINT64[64] data0);
 
         //
         // Store Word --

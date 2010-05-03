@@ -279,10 +279,10 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
             //
             scratchpad_rrr.makeRequest_StoreLine(maskmovqMask(mask),
                                                  hostAddr,
-                                                 val[0],
-                                                 val[1],
+                                                 val[3],
                                                  val[2],
-                                                 val[3]);
+                                                 val[1],
+                                                 val[0]);
         end
         else
         begin
