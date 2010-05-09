@@ -10,9 +10,11 @@ class UCF():
 
     xilinx_apm_name = moduleList.compileDirectory + '/' + moduleList.apmName
     # Concatenate UCF files
+    for ucf in  moduleList.topModule.moduleDependency['UCF']:
+      print 'found ucf: ' + ucf + '\n'
     xilinx_ucf = moduleList.env.Command(
       xilinx_apm_name + '.ucf',
-      Utils.clean_split(moduleList.env['DEFS']['GIVEN_UCFS'], sep = ' '),
+      moduleList.topModule.moduleDependency['UCF'],
       'cat $SOURCES > $TARGET')
 
-    moduleList.topModule.moduleDependency['UCFS'] = [xilinx_ucf]
+    moduleList.topModule.moduleDependency['UCF'] = [xilinx_ucf]

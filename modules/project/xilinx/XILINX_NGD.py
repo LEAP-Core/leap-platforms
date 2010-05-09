@@ -12,9 +12,11 @@ class NGD():
     xilinx_apm_name = moduleList.compileDirectory + '/' + moduleList.apmName
 
     # Concatenate UCF files
+    for ucf in  moduleList.topModule.moduleDependency['UCF']:
+      print 'ngd found ucf: ' + ucf + '\n' 
     xilinx_ucf = moduleList.env.Command(
       xilinx_apm_name + '.ucf',
-      Utils.clean_split(moduleList.env['DEFS']['GIVEN_UCFS'], sep = ' '),
+      moduleList.topModule.moduleDependency['UCF'],
       'cat $SOURCES > $TARGET')
 
     if len(moduleList.env['DEFS']['GIVEN_BMMS']) != 0:

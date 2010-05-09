@@ -9743,3 +9743,21 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memor
 Michael P.
 
                                                                                   down
+
+----------
+kfleming    Date: Sun May  9 14:32:16 EDT 2010  CSN: CSN-platforms-431
+                  Sun May  9 18:32:16 UTC 2010
+
+
+Directory modules/project/synopsis
+ Synplify.py               Locally Modified          430 
+
+Directory modules/project
+ ModuleList.py             Locally Modified          430 
+
+Directory modules/project/xilinx
+ XILINX_NGD.py             Locally Modified          430 
+ XILINX_UCF.py             Locally Modified          430 
+
+
+Added support for synplify's generated UCF.  Not including this file can sometimes hang xilinx mapper.  

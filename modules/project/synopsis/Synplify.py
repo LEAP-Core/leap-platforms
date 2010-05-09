@@ -58,8 +58,7 @@ class Synthesize(ProjectDependency):
     fileArray = moduleList.getAllDependencies('VERILOG') + moduleList.getAllDependencies('VHD')# + moduleList.getAllDependencies('NGC')  
     for file in fileArray:
       if(type(file) is str):
-        newPrjFile.write(_generate_synplify_include(file))
-        print "Adding " + _generate_synplify_include(file) + " for " + file
+        newPrjFile.write(_generate_synplify_include(file))        
       else:
         print type(file)
         print "is not a string"
@@ -80,9 +79,6 @@ class Synthesize(ProjectDependency):
     newPrjFile.write('add_file -constraint  \"$env(BUILD_DIR)/' + moduleList.compileDirectory + '/' + moduleList.apmName + '.sdc\"\n')
     newPrjFile.write('set_option -constraint -enable  \"$env(BUILD_DIR)/' + moduleList.compileDirectory + '/' + moduleList.apmName + '.sdc\"\n')
 
-
-
-
     #write the tail end of the options file to actually do the synthesis
      
     newPrjFile.write('set_option -top_module '+ moduleList.topModule.wrapperName()+'\n')
@@ -96,14 +92,20 @@ class Synthesize(ProjectDependency):
     newPrjFile.close();
     prjFile.close();
 
+    # Synplify sometimes produces a synplify .ucf, but we should 
+    # write to it, incase synplify doesn't.
+    synplifyUCF = moduleList.compileDirectory + '/synplicity.ucf'
+    moduleList.topModule.moduleDependency['UCF'] = [synplifyUCF] + moduleList.topModule.moduleDependency['UCF']    
+
 
     # Now that we've set up the world let's compile
 
     top_netlist = moduleList.env.Command(
-        moduleList.compileDirectory + '/' +  moduleList.topModule.wrapperName() + '.edf',
+        [moduleList.compileDirectory + '/' +  moduleList.topModule.wrapperName() + '.edf'] + [synplifyUCF],
         moduleList.topModule.moduleDependency['VERILOG'] + ['config/' + moduleList.apmName + '.synplify.prj'] ,
         [ SCons.Script.Delete(moduleList.compileDirectory + '/' + moduleList.apmName  + '.srr'),
-          SCons.Script.Delete(moduleList.compileDirectory + '/' + moduleList.apmName  + '_xst.xrpt'),          
+          SCons.Script.Delete(moduleList.compileDirectory + '/' + moduleList.apmName  + '_xst.xrpt'), 
+          'touch ' + synplifyUCF,         
           'synplify_pro -batch config/' + moduleList.apmName + '.modified.synplify.prj' ])
     SCons.Script.Clean(top_netlist,moduleList.compileDirectory + '/' + moduleList.apmName + '.srp')
     SCons.Script.Clean(top_netlist,'config/' + moduleList.apmName + '.modified.synplify.prj')
