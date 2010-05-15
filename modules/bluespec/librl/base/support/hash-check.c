@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2008 Intel Corporation
+// Copyright (C) 2010 Intel Corporation
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -16,202 +16,56 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-//
-// Bit hash functions designed to produce outputs with higher entropy than
-// the inputs.
-//
-// All the functions here preserve two important properties:
-//   1.  They always return the same number of bits as the input.
-//   2.  There is a unique output for every unique input.
-// Given these properties it is legal to hash an address, use some bits of
-// the result as a cache set index and use the remaining result bits as a
-// tag.  It is not necessary to use the whole input as the tag.  Note,
-// however, that the hash function is not reversible.  A writeback cache
-// can't recover the original address from a tag/set derived from a hash.
-//
-//
-// The first function, hashBits, tries to pick the best hash available for
-// input sizes up to 128 bits.  The remaining functions hash specific sizes.
-//
-//
-//
-// For each hash function there is also an inverse function that converts
-// from the hashed value back to the original.  The inverse is computed
-// as the inverse of the matrix formed by the bit masks for the hash
-// functions.  The hash[] vector forms the rows and the bits participating
-// in the hash form the columns.
-//
-
 
 //
-// hashBits --
-//     Pick the best hash available for the input size.  All of the input bits
-//     participate in the hash for the lower bits, even the inputs beyond the
-//     base hash function's reach.  The assumption is that the low bits of the
-//     result will be used as a set index and the remainder may be the tag.
+// Brute force check of hash functions to confirm that each input hashes
+// to a unique output and that the inverse functions are correct.
 //
-function Bit#(n) hashBits(Bit#(n) x);
-    let n_bits = valueOf(n);
-    // Work at 128 bits, maximum.  Assume some optimization phase will drop
-    // high zero bits.
-    Bit#(128) h = zeroExtendNP(x);
-
-    //
-    // Pick the hash function nearest in size to the input.
-    //
-
-    if (n_bits >= 32)
-    begin
-        // Bits beyond the base hash function participate in the hash of the
-        // low bits, while still preserving the property that all inputs have
-        // unique outputs.
-        //
-        // Rotate the values before including them by XOR so contiguous bits
-        // in the original value aren't combined.
-        if (n_bits > 32)
-        begin
-            h[18:0]  = h[18:0] ^ h[63:45];
-            h[31:19] = h[31:19] ^ h[44:32];
-        end
-        if (n_bits > 64)
-        begin
-            h[12:0]  = h[12:0] ^ h[63:51];
-            h[31:13] = h[31:13] ^ h[50:32];
-        end
-        if (n_bits > 96)
-        begin
-            h[8:0]  = h[8:0] ^ h[63:55];
-            h[31:9] = h[31:9] ^ h[54:32];
-        end
-
-        h[31:0] = hash32(h[31:0]);
-    end
-    else if (n_bits >= 24)
-    begin
-        if (n_bits > 24)
-            h[7:0] = h[7:0] ^ reverseBits(h[31:24]);
-
-        h[23:0] = hash24(h[23:0]);
-    end
-    else if (n_bits >= 16)
-    begin
-        if (n_bits > 16)
-            h[7:0] = h[7:0] ^ reverseBits(h[23:16]);
-
-        h[15:0] = hash16(h[15:0]);
-    end
-    else if (n_bits >= 8)
-    begin
-        if (n_bits > 8)
-        begin
-            h[4:0] = h[4:0] ^ h[15:11];
-            h[7:5] = h[7:5] ^ h[10:8];
-        end
-
-        h[7:0] = hash8(h[7:0]);
-    end
-    else if (n_bits == 7)
-    begin
-        h[6:0] = hash7(h[6:0]);
-    end
-    else if (n_bits == 6)
-    begin
-        h[5:0] = hash6(h[5:0]);
-    end
-    else if (n_bits == 5)
-    begin
-        h[4:0] = hash5(h[4:0]);
-    end
-    else if (n_bits == 4)
-    begin
-        h[3:0] = hash4(h[3:0]);
-    end
-    
-    return truncateNP(h);
-endfunction
-
-
-// Inverse of hashBits
-function Bit#(n) hashBits_inv(Bit#(n) x);
-    let n_bits = valueOf(n);
-    Bit#(128) h = zeroExtendNP(x);
-
-    if (n_bits >= 32)
-    begin
-        h[31:0] = hash32_inv(h[31:0]);
-
-        if (n_bits > 32)
-        begin
-            h[18:0]  = h[18:0] ^ h[63:45];
-            h[31:19] = h[31:19] ^ h[44:32];
-        end
-        if (n_bits > 64)
-        begin
-            h[12:0]  = h[12:0] ^ h[63:51];
-            h[31:13] = h[31:13] ^ h[50:32];
-        end
-        if (n_bits > 96)
-        begin
-            h[8:0]  = h[8:0] ^ h[63:55];
-            h[31:9] = h[31:9] ^ h[54:32];
-        end
-    end
-    else if (n_bits >= 24)
-    begin
-        h[23:0] = hash24_inv(h[23:0]);
-
-        if (n_bits > 24)
-            h[7:0] = h[7:0] ^ reverseBits(h[31:24]);
-    end
-    else if (n_bits >= 16)
-    begin
-        h[15:0] = hash16_inv(h[15:0]);
-
-        if (n_bits > 16)
-            h[7:0] = h[7:0] ^ reverseBits(h[23:16]);
-    end
-    else if (n_bits >= 8)
-    begin
-        h[7:0] = hash8_inv(h[7:0]);
-
-        if (n_bits > 8)
-        begin
-            h[4:0] = h[4:0] ^ h[15:11];
-            h[7:5] = h[7:5] ^ h[10:8];
-        end
-    end
-    else if (n_bits == 7)
-    begin
-        h[6:0] = hash7_inv(h[6:0]);
-    end
-    else if (n_bits == 6)
-    begin
-        h[5:0] = hash6_inv(h[5:0]);
-    end
-    else if (n_bits == 5)
-    begin
-        h[4:0] = hash5_inv(h[4:0]);
-    end
-    else if (n_bits == 4)
-    begin
-        h[3:0] = hash4_inv(h[3:0]);
-    end
-    
-    return truncateNP(h);
-endfunction
-
-
-
-//
-// The remaining functions hash specific sizes.
+// Hash functions are used in hash-bits.bsv in the parent directory.
 //
 
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
 
-function Bit#(32) hash32(Bit#(32) d);
-    //
-    // CRC-32 (IEEE802.3), polynomial 0 1 2 4 5 7 8 10 11 12 16 22 23 26 32.
-    //
-    Bit#(32) hash;
+uint32_t bits[0x8000000];
+
+uint8_t getBit(uint32_t b)
+{
+    uint32_t idx = b / 32;
+    uint32_t mask = 1;
+
+    if ((b & 31) != 0)
+        mask <<= (b & 31);
+
+    return (bits[idx] & mask) ? 1 : 0;
+}
+
+
+void setBit(uint32_t b)
+{
+    uint32_t idx = b / 32;
+    uint32_t mask = 1;
+
+    if ((b & 31) != 0)
+        mask <<= (b & 31);
+
+    bits[idx] |= mask;
+}
+
+uint32_t crc32(uint32_t in)
+{
+    uint8_t d[32], hash[32];
+    uint32_t in_r = in;
+    uint32_t out = 0;
+    int i;
+
+    for (i = 0; i < 32; i++)
+    {
+        d[i] = in_r & 1;
+        in_r >>= 1;
+    }
+
     hash[0] = d[31] ^ d[30] ^ d[29] ^ d[28] ^ d[26] ^ d[25] ^ d[24] ^ 
               d[16] ^ d[12] ^ d[10] ^ d[9] ^ d[6] ^ d[0];
     hash[1] = d[28] ^ d[27] ^ d[24] ^ d[17] ^ d[16] ^ d[13] ^ d[12] ^ 
@@ -287,16 +141,29 @@ function Bit#(32) hash32(Bit#(32) d);
     hash[31] = d[31] ^ d[30] ^ d[29] ^ d[28] ^ d[27] ^ d[25] ^ d[24] ^ 
                d[23] ^ d[15] ^ d[11] ^ d[9] ^ d[8] ^ d[5];
 
-    return hash;
+    for (i = 31; i >= 0; i--)
+    {
+        out <<= 1;
+        out |= hash[i];
+    }
 
-endfunction
+    return out;
+}
 
 
-function Bit#(32) hash32_inv(Bit#(32) d);
-    //
-    // Inverse of hash32
-    //
-    Bit#(32) hash;
+uint32_t crc32inv(uint32_t in)
+{
+    uint8_t d[32], hash[32];
+    uint32_t in_r = in;
+    uint32_t out = 0;
+    int i;
+
+    for (i = 0; i < 32; i++)
+    {
+        d[i] = in_r & 1;
+        in_r >>= 1;
+    }
+
     hash[0] = d[31] ^ d[29] ^ d[27] ^ d[25] ^ d[23] ^ d[21] ^ d[20] ^
               d[16] ^ d[14] ^ d[9] ^ d[5] ^ d[2] ^ d[1];
     hash[1] = d[31] ^ d[30] ^ d[29] ^ d[28] ^ d[27] ^ d[26] ^ d[25] ^
@@ -381,16 +248,29 @@ function Bit#(32) hash32_inv(Bit#(32) d);
     hash[31] = d[31] ^ d[30] ^ d[28] ^ d[26] ^ d[24] ^ d[22] ^ d[20] ^
                d[19] ^ d[15] ^ d[13] ^ d[8] ^ d[4] ^ d[1] ^ d[0];
 
-    return hash;
+    for (i = 31; i >= 0; i--)
+    {
+        out <<= 1;
+        out |= hash[i];
+    }
 
-endfunction
+    return out;
+}
 
 
-function Bit#(24) hash24(Bit#(24) d);
-    //
-    // CRC-24, polynomial 0 1 3 4 5 6 7 10 11 14 17 18 23 24.
-    //
-    Bit#(24) hash;
+uint32_t crc24(uint32_t in)
+{
+    uint8_t d[32], hash[32];
+    uint32_t in_r = in;
+    uint32_t out = 0;
+    int i;
+
+    for (i = 0; i < 24; i++)
+    {
+        d[i] = in_r & 1;
+        in_r >>= 1;
+    }
+
     hash[0] = d[23] ^ d[22] ^ d[21] ^ d[20] ^ d[19] ^ d[18] ^ d[17] ^ 
               d[16] ^ d[14] ^ d[10] ^ d[5] ^ d[4] ^ d[3] ^ d[2] ^ 
               d[1] ^ d[0];
@@ -440,16 +320,29 @@ function Bit#(24) hash24(Bit#(24) d);
                d[15] ^ d[13] ^ d[9] ^ d[4] ^ d[3] ^ d[2] ^ d[1] ^ 
                d[0];
 
-    return hash;
+    for (i = 23; i >= 0; i--)
+    {
+        out <<= 1;
+        out |= hash[i];
+    }
 
-endfunction
+    return out;
+}
 
 
-function Bit#(24) hash24_inv(Bit#(24) d);
-    //
-    // Inverse of hash24
-    //
-    Bit#(24) hash;
+uint32_t crc24inv(uint32_t in)
+{
+    uint8_t d[32], hash[32];
+    uint32_t in_r = in;
+    uint32_t out = 0;
+    int i;
+
+    for (i = 0; i < 24; i++)
+    {
+        d[i] = in_r & 1;
+        in_r >>= 1;
+    }
+
     hash[0] = d[23] ^ d[22] ^ d[19] ^ d[17] ^ d[14] ^ d[13] ^ d[12] ^
               d[9] ^ d[7] ^ d[6] ^ d[1] ^ d[0];
     hash[1] = d[22] ^ d[20] ^ d[19] ^ d[18] ^ d[17] ^ d[15] ^ d[12] ^
@@ -499,16 +392,29 @@ function Bit#(24) hash24_inv(Bit#(24) d);
     hash[23] = d[23] ^ d[22] ^ d[21] ^ d[18] ^ d[16] ^ d[13] ^ d[12] ^
                d[11] ^ d[8] ^ d[6] ^ d[5] ^ d[0];
 
-    return hash;
+    for (i = 23; i >= 0; i--)
+    {
+        out <<= 1;
+        out |= hash[i];
+    }
 
-endfunction
+    return out;
+}
 
 
-function Bit#(16) hash16(Bit#(16) d);
-    //
-    // CRC-16, polynomial 0 2 15 16.
-    //
-    Bit#(16) hash;
+uint32_t crc16(uint32_t in)
+{
+    uint8_t d[32], hash[32];
+    uint32_t in_r = in;
+    uint32_t out = 0;
+    int i;
+
+    for (i = 0; i < 16; i++)
+    {
+        d[i] = in_r & 1;
+        in_r >>= 1;
+    }
+
     hash[0] = d[15] ^ d[13] ^ d[12] ^ d[11] ^ d[10] ^ d[9] ^ d[8] ^
               d[7] ^ d[6] ^ d[5] ^ d[4] ^ d[3] ^ d[2] ^ d[1] ^ d[0];
     hash[1] = d[14] ^ d[13] ^ d[12] ^ d[11] ^ d[10] ^ d[9] ^ d[8] ^
@@ -529,16 +435,29 @@ function Bit#(16) hash16(Bit#(16) d);
     hash[15] = d[15] ^ d[14] ^ d[12] ^ d[11] ^ d[10] ^ d[9] ^ d[8] ^
                d[7] ^ d[6] ^ d[5] ^ d[4] ^ d[3] ^ d[2] ^ d[1] ^ d[0];
 
-    return hash;
+    for (i = 15; i >= 0; i--)
+    {
+        out <<= 1;
+        out |= hash[i];
+    }
 
-endfunction
+    return out;
+}
 
 
-function Bit#(16) hash16_inv(Bit#(16) d);
-    //
-    // Inverse of hash16
-    //
-    Bit#(16) hash;
+uint32_t crc16inv(uint32_t in)
+{
+    uint8_t d[32], hash[32];
+    uint32_t in_r = in;
+    uint32_t out = 0;
+    int i;
+
+    for (i = 0; i < 16; i++)
+    {
+        d[i] = in_r & 1;
+        in_r >>= 1;
+    }
+
     hash[0] = d[14] ^ d[12] ^ d[10] ^ d[8] ^ d[6] ^ d[4] ^ d[2] ^
               d[1];
     hash[1] = d[15] ^ d[13] ^ d[11] ^ d[9] ^ d[7] ^ d[5] ^ d[3] ^
@@ -570,171 +489,29 @@ function Bit#(16) hash16_inv(Bit#(16) d);
     hash[15] = d[15] ^ d[13] ^ d[11] ^ d[9] ^ d[7] ^ d[5] ^ d[3] ^
                d[1] ^ d[0];
 
-    return hash;
+    for (i = 15; i >= 0; i--)
+    {
+        out <<= 1;
+        out |= hash[i];
+    }
 
-endfunction
-
-
-function Bit#(8) hash8(Bit#(8) d);
-    //
-    // CRC-8 (ATM HEC), polynomial 0 1 2 8.
-    //
-    Bit#(8) hash;
-    hash[0] = d[7] ^ d[6] ^ d[0];
-    hash[1] = d[6] ^ d[1] ^ d[0];
-    hash[2] = d[6] ^ d[2] ^ d[1] ^ d[0];
-    hash[3] = d[7] ^ d[3] ^ d[2] ^ d[1];
-    hash[4] = d[4] ^ d[3] ^ d[2];
-    hash[5] = d[5] ^ d[4] ^ d[3];
-    hash[6] = d[6] ^ d[5] ^ d[4];
-    hash[7] = d[7] ^ d[6] ^ d[5];
-
-    return hash;
-
-endfunction
+    return out;
+}
 
 
-function Bit#(8) hash8_inv(Bit#(8) d);
-    //
-    // Inverse of hash8
-    //
-    Bit#(8) hash;
-    hash[0] = d[7] ^ d[5] ^ d[4] ^ d[2] ^ d[1] ^ d[0];
-    hash[1] = d[7] ^ d[6] ^ d[4] ^ d[3];
-    hash[2] = d[2] ^ d[1];
-    hash[3] = d[3] ^ d[2] ^ d[0];
-    hash[4] = d[4] ^ d[3] ^ d[1] ^ d[0];
-    hash[5] = d[5] ^ d[4] ^ d[2] ^ d[1];
-    hash[6] = d[6] ^ d[5] ^ d[3] ^ d[2] ^ d[0];
-    hash[7] = d[7] ^ d[6] ^ d[4] ^ d[3] ^ d[1] ^ d[0];
+uint32_t crc8(uint32_t in)
+{
+    uint8_t d[32], hash[32];
+    uint32_t in_r = in;
+    uint32_t out = 0;
+    int i;
 
-    return hash;
+    for (i = 0; i < 8; i++)
+    {
+        d[i] = in_r & 1;
+        in_r >>= 1;
+    }
 
-endfunction
-
-
-//
-// Multiple variants of 8 bit hashes, useful for Bloom filters.
-//
-
-function Bit#(8) hash8a(Bit#(8) d);
-    //
-    // CRC-8 (CCITT), polynomial 0 2 3 7 8.
-    //
-    Bit#(8) hash;
-    hash[0] = d[4] ^ d[3] ^ d[2] ^ d[1] ^ d[0];
-    hash[1] = d[5] ^ d[4] ^ d[3] ^ d[2] ^ d[1];
-    hash[2] = d[6] ^ d[5] ^ d[1] ^ d[0];
-    hash[3] = d[7] ^ d[6] ^ d[4] ^ d[3] ^ d[0];
-    hash[4] = d[7] ^ d[5] ^ d[4] ^ d[1];
-    hash[5] = d[6] ^ d[5] ^ d[2];
-    hash[6] = d[7] ^ d[6] ^ d[3];
-    hash[7] = d[7] ^ d[3] ^ d[2] ^ d[1] ^ d[0];
-
-    return hash;
-
-endfunction
-
-function Bit#(8) hash8a_inv(Bit#(8) d);
-    //
-    // Inverse of hash8a
-    //
-    Bit#(8) hash;
-    hash[0] = d[6] ^ d[5] ^ d[4] ^ d[0];
-    hash[1] = d[7] ^ d[6] ^ d[5] ^ d[1] ^ d[0];
-    hash[2] = d[7] ^ d[5] ^ d[4] ^ d[2] ^ d[1];
-    hash[3] = d[4] ^ d[3] ^ d[2];
-    hash[4] = d[5] ^ d[4] ^ d[3] ^ d[0];
-    hash[5] = d[6] ^ d[5] ^ d[4] ^ d[1];
-    hash[6] = d[7] ^ d[6] ^ d[5] ^ d[2];
-    hash[7] = d[7] ^ d[5] ^ d[4] ^ d[3];
-
-    return hash;
-
-endfunction
-
-
-function Bit#(8) hash8b(Bit#(8) d);
-    //
-    // CRC-8 (Dallas/Maxim), polynomial 0 4 5 8.
-    //
-    Bit#(8) hash;
-    hash[0] = d[6] ^ d[4] ^ d[3] ^ d[0];
-    hash[1] = d[7] ^ d[5] ^ d[4] ^ d[1];
-    hash[2] = d[6] ^ d[5] ^ d[2];
-    hash[3] = d[7] ^ d[6] ^ d[3];
-    hash[4] = d[7] ^ d[6] ^ d[3] ^ d[0];
-    hash[5] = d[7] ^ d[6] ^ d[3] ^ d[1] ^ d[0];
-    hash[6] = d[7] ^ d[4] ^ d[2] ^ d[1];
-    hash[7] = d[5] ^ d[3] ^ d[2];
-
-    return hash;
-
-endfunction
-
-
-function Bit#(8) hash8b_inv(Bit#(8) d);
-    //
-    // Inverse of hash8b
-    //
-    Bit#(8) hash;
-    hash[0] = d[4] ^ d[3];
-    hash[1] = d[5] ^ d[4];
-    hash[2] = d[6] ^ d[5] ^ d[0];
-    hash[3] = d[7] ^ d[6] ^ d[1];
-    hash[4] = d[7] ^ d[4] ^ d[3] ^ d[2] ^ d[0];
-    hash[5] = d[5] ^ d[1] ^ d[0];
-    hash[6] = d[6] ^ d[2] ^ d[1];
-    hash[7] = d[7] ^ d[3] ^ d[2];
-
-    return hash;
-
-endfunction
-
-
-function Bit#(8) hash8c(Bit#(8) d);
-    //
-    // CRC-8 (SAE J1850), polynomial 0 2 3 4 8.
-    //
-    Bit#(8) hash;
-    hash[0] = d[6] ^ d[5] ^ d[4] ^ d[0];
-    hash[1] = d[7] ^ d[6] ^ d[5] ^ d[1];
-    hash[2] = d[7] ^ d[5] ^ d[4] ^ d[2] ^ d[0];
-    hash[3] = d[4] ^ d[3] ^ d[1] ^ d[0];
-    hash[4] = d[6] ^ d[2] ^ d[1] ^ d[0];
-    hash[5] = d[7] ^ d[3] ^ d[2] ^ d[1];
-    hash[6] = d[4] ^ d[3] ^ d[2];
-    hash[7] = d[5] ^ d[4] ^ d[3];
-
-    return hash;
-
-endfunction
-
-
-function Bit#(8) hash8c_inv(Bit#(8) d);
-    //
-    // Inverse of hash8c
-    //
-    Bit#(8) hash;
-    hash[0] = d[6] ^ d[5] ^ d[1] ^ d[0];
-    hash[1] = d[7] ^ d[6] ^ d[2] ^ d[1] ^ d[0];
-    hash[2] = d[7] ^ d[6] ^ d[5] ^ d[3] ^ d[2];
-    hash[3] = d[7] ^ d[5] ^ d[4] ^ d[3] ^ d[1];
-    hash[4] = d[4] ^ d[2] ^ d[1];
-    hash[5] = d[5] ^ d[3] ^ d[2];
-    hash[6] = d[6] ^ d[4] ^ d[3];
-    hash[7] = d[7] ^ d[5] ^ d[4] ^ d[0];
-
-    return hash;
-
-endfunction
-
-
-function Bit#(8) hash8d(Bit#(8) d);
-    //
-    // CRC-8, polynomial 0 2 4 6 7 8.
-    //
-    Bit#(8) hash;
     hash[0] = d[7] ^ d[6] ^ d[3] ^ d[1] ^ d[0];
     hash[1] = d[7] ^ d[4] ^ d[2] ^ d[1];
     hash[2] = d[7] ^ d[6] ^ d[5] ^ d[2] ^ d[1] ^ d[0];
@@ -744,16 +521,29 @@ function Bit#(8) hash8d(Bit#(8) d);
     hash[6] = d[7] ^ d[4] ^ d[2] ^ d[1] ^ d[0];
     hash[7] = d[7] ^ d[6] ^ d[5] ^ d[2] ^ d[0];
 
-    return hash;
+    for (i = 7; i >= 0; i--)
+    {
+        out <<= 1;
+        out |= hash[i];
+    }
 
-endfunction
+    return out;
+}
 
 
-function Bit#(8) hash8d_inv(Bit#(8) d);
-    //
-    // Inverse of hash8d
-    //
-    Bit#(8) hash;
+uint32_t crc8inv(uint32_t in)
+{
+    uint8_t d[32], hash[32];
+    uint32_t in_r = in;
+    uint32_t out = 0;
+    int i;
+
+    for (i = 0; i < 8; i++)
+    {
+        d[i] = in_r & 1;
+        in_r >>= 1;
+    }
+
     hash[0] = d[6] ^ d[1];
     hash[1] = d[7] ^ d[2];
     hash[2] = d[6] ^ d[3] ^ d[1] ^ d[0];
@@ -763,16 +553,29 @@ function Bit#(8) hash8d_inv(Bit#(8) d);
     hash[6] = d[7] ^ d[6] ^ d[5] ^ d[4] ^ d[0];
     hash[7] = d[7] ^ d[5] ^ d[0];
 
-    return hash;
+    for (i = 7; i >= 0; i--)
+    {
+        out <<= 1;
+        out |= hash[i];
+    }
 
-endfunction
+    return out;
+}
 
 
-function Bit#(7) hash7(Bit#(7) d);
-    //
-    // CRC-7, polynomial 0 3 7.
-    //
-    Bit#(7) hash;
+uint32_t crc7(uint32_t in)
+{
+    uint8_t d[32], hash[32];
+    uint32_t in_r = in;
+    uint32_t out = 0;
+    int i;
+
+    for (i = 0; i < 7; i++)
+    {
+        d[i] = in_r & 1;
+        in_r >>= 1;
+    }
+
     hash[0] = d[4] ^ d[0];
     hash[1] = d[5] ^ d[1];
     hash[2] = d[6] ^ d[2];
@@ -781,16 +584,29 @@ function Bit#(7) hash7(Bit#(7) d);
     hash[5] = d[6] ^ d[5] ^ d[2];
     hash[6] = d[6] ^ d[3];
 
-    return hash;
+    for (i = 6; i >= 0; i--)
+    {
+        out <<= 1;
+        out |= hash[i];
+    }
 
-endfunction
+    return out;
+}
 
 
-function Bit#(7) hash7_inv(Bit#(7) d);
-    //
-    // Inverse of hash7
-    //
-    Bit#(7) hash;
+uint32_t crc7inv(uint32_t in)
+{
+    uint8_t d[32], hash[32];
+    uint32_t in_r = in;
+    uint32_t out = 0;
+    int i;
+
+    for (i = 0; i < 7; i++)
+    {
+        d[i] = in_r & 1;
+        in_r >>= 1;
+    }
+
     hash[0] = d[4] ^ d[1] ^ d[0];
     hash[1] = d[5] ^ d[2] ^ d[1];
     hash[2] = d[6] ^ d[3] ^ d[2] ^ d[0];
@@ -799,16 +615,29 @@ function Bit#(7) hash7_inv(Bit#(7) d);
     hash[5] = d[5] ^ d[2];
     hash[6] = d[6] ^ d[3] ^ d[0];
 
-    return hash;
+    for (i = 6; i >= 0; i--)
+    {
+        out <<= 1;
+        out |= hash[i];
+    }
 
-endfunction
+    return out;
+}
 
 
-function Bit#(6) hash6(Bit#(6) d);
-    //
-    // CRC-6 (ITU), polynomial 0 1 6.
-    //
-    Bit#(6) hash;
+uint32_t crc6(uint32_t in)
+{
+    uint8_t d[32], hash[32];
+    uint32_t in_r = in;
+    uint32_t out = 0;
+    int i;
+
+    for (i = 0; i < 6; i++)
+    {
+        d[i] = in_r & 1;
+        in_r >>= 1;
+    }
+
     hash[0] = d[5] ^ d[0];
     hash[1] = d[5] ^ d[1] ^ d[0];
     hash[2] = d[2] ^ d[1];
@@ -816,16 +645,29 @@ function Bit#(6) hash6(Bit#(6) d);
     hash[4] = d[4] ^ d[3];
     hash[5] = d[5] ^ d[4];
 
-    return hash;
+    for (i = 5; i >= 0; i--)
+    {
+        out <<= 1;
+        out |= hash[i];
+    }
 
-endfunction
+    return out;
+}
 
 
-function Bit#(6) hash6_inv(Bit#(6) d);
-    //
-    // Inverse of hash6
-    //
-    Bit#(6) hash;
+uint32_t crc6inv(uint32_t in)
+{
+    uint8_t d[32], hash[32];
+    uint32_t in_r = in;
+    uint32_t out = 0;
+    int i;
+
+    for (i = 0; i < 6; i++)
+    {
+        d[i] = in_r & 1;
+        in_r >>= 1;
+    }
+
     hash[0] = d[5] ^ d[4] ^ d[3] ^ d[2] ^ d[1];
     hash[1] = d[1] ^ d[0];
     hash[2] = d[2] ^ d[1] ^ d[0];
@@ -833,68 +675,168 @@ function Bit#(6) hash6_inv(Bit#(6) d);
     hash[4] = d[4] ^ d[3] ^ d[2] ^ d[1] ^ d[0];
     hash[5] = d[5] ^ d[4] ^ d[3] ^ d[2] ^ d[1] ^ d[0];
 
-    return hash;
+    for (i = 5; i >= 0; i--)
+    {
+        out <<= 1;
+        out |= hash[i];
+    }
 
-endfunction
+    return out;
+}
 
 
-function Bit#(5) hash5(Bit#(5) d);
-    //
-    // CRC-5 (USB), polynomial 0 2 5.
-    //
-    Bit#(5) hash;
+uint32_t crc5(uint32_t in)
+{
+    uint8_t d[32], hash[32];
+    uint32_t in_r = in;
+    uint32_t out = 0;
+    int i;
+
+    for (i = 0; i < 5; i++)
+    {
+        d[i] = in_r & 1;
+        in_r >>= 1;
+    }
+
     hash[0] = d[3] ^ d[0];
     hash[1] = d[4] ^ d[1];
     hash[2] = d[3] ^ d[2] ^ d[0];
     hash[3] = d[4] ^ d[3] ^ d[1];
     hash[4] = d[4] ^ d[2];
 
-    return hash;
+    for (i = 4; i >= 0; i--)
+    {
+        out <<= 1;
+        out |= hash[i];
+    }
 
-endfunction
+    return out;
+}
 
 
-function Bit#(5) hash5_inv(Bit#(5) d);
-    //
-    // Inverse of hash5
-    //
-    Bit#(5) hash;
+uint32_t crc5inv(uint32_t in)
+{
+    uint8_t d[32], hash[32];
+    uint32_t in_r = in;
+    uint32_t out = 0;
+    int i;
+
+    for (i = 0; i < 5; i++)
+    {
+        d[i] = in_r & 1;
+        in_r >>= 1;
+    }
+
     hash[0] = d[3] ^ d[1] ^ d[0];
     hash[1] = d[4] ^ d[2] ^ d[1] ^ d[0];
     hash[2] = d[2] ^ d[0];
     hash[3] = d[3] ^ d[1];
     hash[4] = d[4] ^ d[2] ^ d[0];
 
-    return hash;
+    for (i = 4; i >= 0; i--)
+    {
+        out <<= 1;
+        out |= hash[i];
+    }
 
-endfunction
+    return out;
+}
 
 
-function Bit#(4) hash4(Bit#(4) d);
-    //
-    // CRC-4 (ITU), polynomial 0 1 4.
-    //
-    Bit#(4) hash;
+uint32_t crc4(uint32_t in)
+{
+    uint8_t d[32], hash[32];
+    uint32_t in_r = in;
+    uint32_t out = 0;
+    int i;
+
+    for (i = 0; i < 4; i++)
+    {
+        d[i] = in_r & 1;
+        in_r >>= 1;
+    }
+
     hash[0] = d[3] ^ d[0];
     hash[1] = d[3] ^ d[1] ^ d[0];
     hash[2] = d[2] ^ d[1];
     hash[3] = d[3] ^ d[2];
 
-    return hash;
+    for (i = 3; i >= 0; i--)
+    {
+        out <<= 1;
+        out |= hash[i];
+    }
 
-endfunction
+    return out;
+}
 
 
-function Bit#(4) hash4_inv(Bit#(4) d);
-    //
-    // Inverse of hash4
-    //
-    Bit#(4) hash;
+uint32_t crc4inv(uint32_t in)
+{
+    uint8_t d[32], hash[32];
+    uint32_t in_r = in;
+    uint32_t out = 0;
+    int i;
+
+    for (i = 0; i < 4; i++)
+    {
+        d[i] = in_r & 1;
+        in_r >>= 1;
+    }
+
     hash[0] = d[3] ^ d[2] ^ d[1];
     hash[1] = d[1] ^ d[0];
     hash[2] = d[2] ^ d[1] ^ d[0];
     hash[3] = d[3] ^ d[2] ^ d[1] ^ d[0];
 
-    return hash;
+    for (i = 3; i >= 0; i--)
+    {
+        out <<= 1;
+        out |= hash[i];
+    }
 
-endfunction
+    return out;
+}
+
+
+main()
+{
+    uint64_t i;
+    uint64_t c, c_inv;
+
+    uint64_t max = 0x100 >> 1;
+
+    for (i = 0; i < max; i++)
+    {
+        if ((i & 0xffffff) == 0)
+        {
+            fprintf(stderr, "0x%08x\n", (uint32_t)i);
+        }
+
+        c = crc7((uint32_t)i);
+        c_inv = crc7inv(c);
+
+        if (i != c_inv)
+        {
+            fprintf(stderr, "0x%08x => 0x%08x => 0x%08x inverse failed\n", (uint32_t)i, c, c_inv);
+            exit(1);
+        }
+
+        if (getBit(c))
+        {
+            fprintf(stderr, "0x%08x => 0x%08x already set\n", (uint32_t)i, c);
+            exit(1);
+        }
+
+        setBit(c);
+    }
+
+    for (i = 0; i < max / 32; i++)
+    {
+        if (bits[i] != 0xffffffff)
+        {
+            fprintf(stderr, "Unexpected (%d):  0x%08x\n", i, bits[i]);
+            exit(1);
+        }
+    }
+}

@@ -9761,3 +9761,26 @@ Directory modules/project/xilinx
 
 
 Added support for synplify's generated UCF.  Not including this file can sometimes hang xilinx mapper.  
+
+----------
+mcadler     Date: Sat May 15 09:54:51 EDT 2010  CSN: CSN-platforms-432
+                  Sat May 15 13:54:51 UTC 2010
+
+
+Directory modules/bluespec/librl/base
+ hash-bits.bsv             Locally Modified          431 
+ support/                  Locally Added               0 
+
+Directory modules/bluespec/librl/base/support
+ hash-check.c              Locally Added               0 
+ hash-inverse.c            Locally Added               0 
+ README                    Locally Added               0 
+
+- Tweak the hash function for > 32 bits.  It still does not use a hash larger
+  than 32 bits and continues just to XOR higher bits into the low 32 bits
+  before doing the hash.  A 64 bit hash is just too expensive.  The tweak
+  rearranges the way the high bits are combined with the low bits so that
+  bit 32 no longer gets XORed with its neighbor, bit 31.
+
+- Add the C files used to build the inverse hashes in case they are needed
+  later.
