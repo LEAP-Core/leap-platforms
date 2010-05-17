@@ -9784,3 +9784,15 @@ Directory modules/bluespec/librl/base/support
 
 - Add the C files used to build the inverse hashes in case they are needed
   later.
+
+----------
+mcadler     Date: Mon May 17 15:05:45 EDT 2010  CSN: CSN-platforms-433
+                  Mon May 17 19:05:45 UTC 2010
+
+
+Directory modules/project
+ SCons.top.template        Locally Modified          432 
+
+The latest Bluesim script expects the shared library with the simulated code
+to be in the same directory as the wrapper shell script.  Link to the shared
+library just as we link to the wrapper.
