@@ -23,7 +23,7 @@ import Vector::*;
 `include "physical_platform_utils.bsh"
 
 `define PIPE_NULL       1
-`define POLL_INTERVAL   32
+`define POLL_INTERVAL   0
 
 // BDPI imports
 import "BDPI" function Action                 pipe_init();
