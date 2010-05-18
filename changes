@@ -9807,3 +9807,14 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/uni
 
 
 Set pipe waiting parameter to 0 from 32.  This appeared to needlessly slow rrr-heavy applications.
+
+----------
+kfleming    Date: Tue May 18 19:57:12 EDT 2010  CSN: CSN-platforms-435
+                  Tue May 18 23:57:12 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/rrr_common
+ demarshaller.bsv          Locally Modified          434 
+
+
+Applied patch to demarshaller suggested by Jacob Schwartz.  This patch works around the Bluespec hang in expanded.

@@ -2,6 +2,7 @@ import Vector::*;
 import FIFO::*;
 
 `include "asim/provides/umf.bsh"
+`include "asim/provides/librl_bsv_base.bsh"
 
 // DeMarshaller
 
@@ -108,19 +109,9 @@ module mkDeMarshaller
     method ActionValue#(out_T) readAndDelete() if (state == STATE_queueing &&
                                                    chunksRemaining == 0);
     
-        Bit#(out_SZ) final_val = 0;
-      
-        // this is where the good stuff happens
-        // fill in the result one bit at a time
-        for (Integer x = 0; x < valueof(out_SZ); x = x + 1)
-        begin
-        
-            Integer j = x / valueof(in_SZ);
-            Integer k = x % valueof(in_SZ);
-            final_val[x] = chunks[j][k];
-      
-        end
-        
+ 
+        Bit#(out_SZ) final_val = truncateNP(pack(readVReg(chunks)));
+         
         // switch to idle state
         state <= STATE_idle;
     
