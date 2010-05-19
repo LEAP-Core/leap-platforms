@@ -6,7 +6,9 @@
 %desc FPGA Build Pipeline
 %attributes tool
 
-%provides fpga_build_pipeline
+%provides build_pipeline
 
 %requires synthesis_tool
 %requires post_synthesis_tool
+
+%scons %library FPGAPipeline.py

@@ -18,6 +18,7 @@ model=FPGA Environment
 virtual_platform=Standard Virtual Platform
 fpga_components=Hardware FPGA Components for ArriaII
 librl_bsv=Altera RL Bluespec Library
+build_pipeline=FPGA Build Pipeline
 
 [Standard Virtual Platform]
 File=modules/bluespec/common/fpgaenv/virtual-platform/std-virtual-platform.awb
@@ -188,4 +189,20 @@ CRYSTAL_CLOCK_FREQ=40
 
 [Airblue 1.0 Cyclone III JTAG Mapping]
 File=modules/bluespec/common/fpgaenv/physical-platform/airblue_cycloneiii/airblue_cycloneiii-jtag.awb
+Packagehint=platforms
+
+[FPGA Build Pipeline]
+File=modules/project/pipelines/fpga-build-pipeline.awb
+Packagehint=platforms
+
+[Synplify Synthesis Tool]
+File=modules/project/synopsis/synplify.awb
+Packagehint=platforms
+
+[FPGA Build Pipeline/Requires]
+post_synthesis_tool=Altera Post-synthesis Toolchain
+synthesis_tool=Synplify Synthesis Tool
+
+[Altera Post-synthesis Toolchain]
+File=modules/project/altera/altera_post_synth.awb
 Packagehint=platforms

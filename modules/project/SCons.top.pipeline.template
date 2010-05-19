@@ -5,8 +5,7 @@ import re
 import sys
 import string
 from model import  *
-from synthesis_tool import  *
-from post_synthesis_tool import *
+from build_pipeline import  *
 
 
 SetOption('implicit_cache', 1)
@@ -316,15 +315,9 @@ moduleList = ModuleList(env, ARGUMENTS)
 
 #moduleList.dump()                      
 
-Synthesize(moduleList)
+Build(moduleList)
 
-print "finish configuring Synthesize \n"
-#moduleList.dump()                      
 
-PostSynthesize(moduleList)
-
-print "finish configuring PostSynthesize \n"
-#moduleList.dump()
 
 
 # Use a cached post par ncd to guide map and par?  This is off by default since
@@ -345,86 +338,6 @@ print "finish configuring PostSynthesize \n"
 #     smartguide = ''
 
 
-# # Map
-# xilinx_map = env.Command(
-#     [ XILINX_APM_NAME + '_map.ncd', XILINX_APM_NAME + '.pcf' ],
-#     moduleList.getAllDependencies('NGD'),
-#     [ Delete(XILINX_APM_NAME + '_map.map'),
-#       Delete(XILINX_APM_NAME + '_map.mrp'),
-#       Delete(XILINX_APM_NAME + '_map.ncd'),
-#       Delete(XILINX_APM_NAME + '_map.ngm'),
-#       Delete(XILINX_APM_NAME + '_map.psr'),
-#       'map -cm balanced -timing ' + smartguide + ' -t ' + env['DEFS']['COST_TABLE'] + ' ' +  env['DEFS']['MAP_OPTIONS'] + ' -logic_opt on -ol high -register_duplication -retiming on -pr b -c 100 -p ' + FPGA_PART_XILINX + ' -o $TARGET $SOURCE ' + XILINX_APM_NAME + '.pcf' ])
-
-# Clean(xilinx_map, TMP_XILINX_DIR + '/xilinx_device_details.xml')
-
-
-
-
-# # Place and route
-# xilinx_par = env.Command(
-#     XILINX_APM_NAME + '_par.ncd',
-#     xilinx_map,
-#     [ Delete(XILINX_APM_NAME + '_par.pad'),
-#       Delete(XILINX_APM_NAME + '_par.par'),
-#       Delete(XILINX_APM_NAME + '_par.ptwx'),
-#       Delete(XILINX_APM_NAME + '_par.unroutes'),
-#       Delete(XILINX_APM_NAME + '_par.xpi'),
-#       Delete(XILINX_APM_NAME + '_par_pad.csv'),
-#       Delete(XILINX_APM_NAME + '_par_pad.txt'),
-#       'par -w -ol high ' + smartguide + ' -t ' + env['DEFS']['COST_TABLE'] + ' ' + XILINX_APM_NAME + '_map.ncd $TARGET ' + XILINX_APM_NAME + '.pcf',
-#       Copy(smartguide_cache_dir + '/' + smartguide_cache_file, '$TARGET') ])
-
-
-# # Generate the FPGA timing report -- this report isn't built by default.  Use
-# # the "timing" target to generate it
-# xilinx_trce = env.Command(
-#     XILINX_APM_NAME + '_par.twr',
-#     [ xilinx_par, XILINX_APM_NAME + '.pcf' ],
-#     'trce -e 100 $SOURCES -o $TARGET')
-
-
-
-# if len(env['DEFS']['GIVEN_ELFS']) != 0:
-#     elf = ' -bd ' + str.join(' -bd ',clean_split(env['DEFS']['GIVEN_ELFS'], sep = ' '))
-# else:
-#     elf = ''
-
-
-
-
-# # Generate the FPGA image
-# xilinx_bit = env.Command(
-#     XILINX_APM_NAME + '_par.bit',
-#     [ 'config/' + APM_NAME + '.ut', xilinx_par],
-#     [ Delete('config/signature.sh'),
-#       'bitgen ' + elf + ' -f $SOURCES $TARGET ' + XILINX_APM_NAME + '.pcf' ])
-
-# Depends(xilinx_bit, clean_split(env['DEFS']['GIVEN_ELFS'], sep = ' '));
-
-# # Generate the signature for the FPGA image
-# signature = env.Command(
-#     'config/signature.sh',
-#     xilinx_bit,
-#     [ '@echo \'#!/bin/sh\' > $TARGET',
-#       '@echo signature=\\"' + APM_NAME + '-`md5sum $SOURCE | sed \'s/ .*//\'`\\" >> $TARGET' ])
-
-# #
-# # The final step must leave a few files in well-known locations since they are
-# # used by the run scripts.  APM_NAME is the software side, if there is one.
-# #
-# loader = env.Command(
-#     APM_NAME + '_hw.errinfo',
-#     signature + SW_EXE + xilinx_trce,
-#     [ '@ln -fs ' + SW_EXE_OR_TARGET + ' ' + APM_NAME,
-#       Delete(APM_NAME + '_hw.exe'),
-#       Delete(APM_NAME + '_hw.vexe'),
-#       '@echo "++++++++++++ Post-Place & Route ++++++++"',
-#       '@' + awb_resolver('tools/scripts/hasim-xilinx-summary') + ' ' +
-#           XILINX_APM_NAME + '_map.map ' +
-#           XILINX_APM_NAME + '_par.par ' +
-#           APM_NAME + '_hw.errinfo' ])
-      
 env.Alias('bit', moduleList.topModule.moduleDependency['LOADER'])
 # env.Alias('bit', loader)
 

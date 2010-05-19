@@ -11,7 +11,6 @@
 %requires application_env 
 %requires fpgaenv
 %requires project_common
-%requires fpga_build_pipeline
 
 %public  project-hybrid-main.bsv
 %public  project-hybrid-main.h

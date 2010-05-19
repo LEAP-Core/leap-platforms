@@ -18,6 +18,7 @@ model=FPGA Environment
 virtual_platform=Standard Virtual Platform
 fpga_components=Hardware FPGA Components for Virtex 5
 librl_bsv=RL Bluespec Library
+build_pipeline=FPGA Build Pipeline
 
 [Standard Virtual Platform]
 File=modules/bluespec/common/fpgaenv/virtual-platform/std-virtual-platform.awb
@@ -136,3 +137,46 @@ Packagehint=platforms
 
 [RRR Clients and Servers/Requires]
 rrr_common=RRR Common Module
+
+[FPGA Build Pipeline]
+File=modules/project/pipelines/fpga-build-pipeline.awb
+Packagehint=platforms
+
+[Xilinx BITGEN]
+File=modules/project/xilinx/xilinx_bitgen.awb
+Packagehint=platforms
+
+[Xilinx LOADER]
+File=modules/project/xilinx/xilinx_loader.awb
+Packagehint=platforms
+
+[Xilinx NGD]
+File=modules/project/xilinx/xilinx_ngd.awb
+Packagehint=platforms
+
+[FPGA Build Pipeline/Requires]
+post_synthesis_tool=Xilinx Post-synthesis Toolchain
+synthesis_tool=XST Synthesis Tool
+
+[XST Synthesis Tool]
+File=modules/project/xilinx/xst.awb
+Packagehint=platforms
+
+[Xilinx Post-synthesis Toolchain]
+File=modules/project/xilinx/xilinx_post_synth.awb
+Packagehint=platforms
+
+[Xilinx PAR]
+File=modules/project/xilinx/xilinx_par.awb
+Packagehint=platforms
+
+[Xilinx Post-synthesis Toolchain/Requires]
+xilinx_ngd=Xilinx NGD
+xilinx_bitgen=Xilinx BITGEN
+xilinx_par=Xilinx PAR
+xilinx_map=Xilinx MAP
+xilinx_loader=Xilinx LOADER
+
+[Xilinx MAP]
+File=modules/project/xilinx/xilinx_map.awb
+Packagehint=platforms

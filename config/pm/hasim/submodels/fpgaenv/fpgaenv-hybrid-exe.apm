@@ -22,6 +22,7 @@ Packagehint=platforms
 virtual_platform=Standard Virtual Platform
 fpga_components=Software FPGA Components
 librl_bsv=RL Bluespec Library
+build_pipeline=BlueSim Build Pipeline
 
 [Standard Virtual Platform]
 File=modules/bluespec/common/fpgaenv/virtual-platform/std-virtual-platform.awb
@@ -119,3 +120,7 @@ Packagehint=platforms
 
 [RRR Clients and Servers/Requires]
 rrr_common=RRR Common Module
+
+[BlueSim Build Pipeline]
+File=modules/project/pipelines/sim-build-pipeline.awb
+Packagehint=platforms
