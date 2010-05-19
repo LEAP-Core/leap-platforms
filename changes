@@ -9871,3 +9871,15 @@ Directory modules/project
  build-pipeline.awb        Locally Removed           436 
 
 Moved build pipeline into the fpgaenv, but the build pipeline will not be used unless the top level model is pipeline build.  
+
+----------
+kfleming    Date: Wed May 19 12:09:58 EDT 2010  CSN: CSN-platforms-438
+                  Wed May 19 16:09:58 UTC 2010
+
+
+Directory modules/project/pipelines
+ sim-build-pipeline.awb    Locally Added               0 
+ SimulationPipeline.py     Locally Added               0 
+ FPGAPipeline.py           Locally Added               0 
+
+Added missing build pipeline files. 
