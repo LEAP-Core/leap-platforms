@@ -36,6 +36,7 @@ interface LUTRAM#(type index_t, type data_t);
 
     method Action upd(index_t addr, data_t d);
     method data_t sub(index_t addr);
+    method Bool initialized();
 
 endinterface: LUTRAM
 
@@ -57,6 +58,7 @@ module mkLUTRAMU_RegFile
     //
     method Action upd(index_t addr, data_t d) = mem.upd(addr, d);
     method data_t sub(index_t addr) = mem.sub(addr);
+    method Bool initialized() = True;
 endmodule
 
 
@@ -87,6 +89,7 @@ module mkLUTRAMU_Async
 
     method Action upd(index_t addr, data_t d) = mem.upd(tweakAddr(addr), d);
     method data_t sub(index_t addr) = mem.sub(tweakAddr(addr));
+    method Bool initialized() = True;
 endmodule
 
 
@@ -141,15 +144,15 @@ module mkLUTRAMWith#(function data_t initfunc(index_t idx))
     // Initialize storage
     //
 
-    Reg#(Bool) initialized <- mkReg(False);
+    Reg#(Bool) initializedR <- mkReg(False);
     Reg#(index_t) init_idx <- mkReg(minBound);
 
-    rule initializing (!initialized);
+    rule initializing (!initializedR);
         mem.upd(init_idx, initfunc(init_idx));
 
         // Hack to avoid needing Eq proviso for comparison
         index_t max = maxBound;
-        initialized <= (pack(init_idx) == pack(max));
+        initializedR <= (pack(init_idx) == pack(max));
 
         // Hack to avoid needing Arith proviso
         init_idx <= unpack(pack(init_idx) + 1);
@@ -159,13 +162,15 @@ module mkLUTRAMWith#(function data_t initfunc(index_t idx))
     // Access methods
     //
 
-    method Action upd(index_t addr, data_t d) if (initialized);
+    method Action upd(index_t addr, data_t d) if (initializedR);
         mem.upd(addr, d);
     endmethod
 
-    method data_t sub(index_t addr) if (initialized);
+    method data_t sub(index_t addr) if (initializedR);
         return mem.sub(addr);
     endmethod
+    
+    method Bool initialized() = initializedR;
 
 endmodule
 

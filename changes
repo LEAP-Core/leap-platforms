@@ -9818,3 +9818,21 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/rrr_common
 
 
 Applied patch to demarshaller suggested by Jacob Schwartz.  This patch works around the Bluespec hang in expanded.
+
+----------
+pellauer    Date: Wed May 19 00:26:34 EDT 2010  CSN: CSN-platforms-436
+                  Wed May 19 04:26:34 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ lutram.bsv                Locally Modified          435 
+
+
+* Expose LUTRAM initialized state as a method. This was necessary because the 
+  Bluespec compiler unexepectedly changed the schedule of my design in 
+  response to changing some buffer sizes. As with a FIFOF there should be no
+  reason for most users to check it, but it does allow the multiplexed LUTRAM
+  to remove the scheduling ambiguity.
+  
+Michael P.
+
