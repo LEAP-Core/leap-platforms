@@ -9883,3 +9883,30 @@ Directory modules/project/pipelines
  FPGAPipeline.py           Locally Added               0 
 
 Added missing build pipeline files. 
+
+----------
+mcadler     Date: Thu May 20 07:33:49 EDT 2010  CSN: CSN-platforms-439
+                  Thu May 20 11:33:49 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ hardware-fpga-components-arriaII.awb Locally Modified          438 
+ lutram.bsv                Locally Modified          438 
+ hardware-fpga-components-virtex2.awb Locally Modified          438 
+ hardware-fpga-components-virtex5.awb Locally Modified          438 
+ lutram.v                  Locally Modified          438 
+
+Add a LUTRAM_MULTI_READ: a flavor of LUTRAM with explicit naming of read
+ports.  Method names are based on LUTRAM with port and module naming
+similar to multi-read-port BRAM.
+
+Bluespec's RegFile implementation is the basis for the standard LUTRAM.
+The compiler allocates up to 5 read ports based simply on finding calls
+to the sub() method.  It makes no effort to take advantage of scheduling
+constraints to combine clients of read ports.  Read ports are
+expensive!  Xilinx LUT memory usage doubles to add a second read port
+and LUT memory usage continues to grow linearly as ports are added.
+
+The new implementation allocates only dual port (one read and one write)
+LUT memory.  A further refinement could allocate a mixture of quad and
+dual ported memory, as appropriate.

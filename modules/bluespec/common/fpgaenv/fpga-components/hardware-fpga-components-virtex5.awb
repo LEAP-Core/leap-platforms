@@ -13,6 +13,7 @@
 %public clock-buffers.bsv
 
 %private Bram.v
+%private lutram.v
 %private user-clock-xilinx-virtex5.v
 %private user-clock-pll-virtex5.v
 %private clock-buffers.v
