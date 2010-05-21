@@ -8,7 +8,7 @@ set_option -part_companion ""
 #compilation/mapping options
 set_option -default_enum_encoding default
 set_option -resource_sharing 1
-set_option -use_fsm_explorer 1
+#set_option -use_fsm_explorer 1
 
 #map options
 #set_option -frequency 50.000
