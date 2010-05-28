@@ -254,7 +254,8 @@ if len(clean_split(env['DEFS']['GEN_VS'], sep = ' '))> 0:
 exe = env.Command(
     APM_NAME + '_hw.exe',
     sbin + SW_EXE,
-    [ '@ln -fs $SOURCE $TARGET',
+    [ '@ln -fs ${SOURCE} ${TARGET}',
+      '@ln -fs ${SOURCE}.so ${TARGET}.so',
       '@ln -fs ' + SW_EXE_OR_TARGET + ' ' + APM_NAME,
       Delete(APM_NAME + '_hw.vexe'),
       Delete(APM_NAME + '_hw.errinfo') ])

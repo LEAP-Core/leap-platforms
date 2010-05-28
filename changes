@@ -9924,3 +9924,13 @@ Directory modules/project/pipelines
 
 
 Fixed the pipeline simulation build
+
+----------
+kfleming    Date: Thu May 27 23:56:39 EDT 2010  CSN: CSN-platforms-441
+                  Fri May 28 03:56:39 UTC 2010
+
+
+Directory modules/project
+ SCons.top.pipeline.template Locally Modified          440 
+
+Added linking of Bluespec .so to pipeline build.  
