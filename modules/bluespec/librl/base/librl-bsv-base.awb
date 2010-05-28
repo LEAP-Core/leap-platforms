@@ -13,6 +13,7 @@
 %public fifo-functions.bsv
 %public fifo-merge.bsv
 %public hash-bits.bsv
+%public lfsr.bsv
 %public memory-interface.bsv
 %public memory-pack.bsv
 

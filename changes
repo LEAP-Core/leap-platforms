@@ -9934,3 +9934,18 @@ Directory modules/project
  SCons.top.pipeline.template Locally Modified          440 
 
 Added linking of Bluespec .so to pipeline build.  
+
+----------
+mcadler     Date: Fri May 28 16:59:27 EDT 2010  CSN: CSN-platforms-442
+                  Fri May 28 20:59:27 UTC 2010
+
+
+Directory modules/bluespec/librl/base
+ lfsr.bsv                  Locally Added               0 
+ librl-bsv-base.awb        Locally Modified          441 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-mem-scratch.bsv    Locally Modified          441 
+
+- Add a variety of LFSR feed polynomials.
+- Manage scratchpad LUTRAM ports.

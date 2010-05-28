@@ -434,20 +434,21 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
     //
 
     // Addresses
-    LUTRAM#(SCRATCHPAD_PORT_NUM, Maybe#(t_LINE_ADDR)) uncachedStoreBufAddr <- mkLUTRAM(tagged Invalid);
+    LUTRAM_MULTI_READ#(1, SCRATCHPAD_PORT_NUM, Maybe#(t_LINE_ADDR)) uncachedStoreBufAddr <- mkMultiReadLUTRAM(tagged Invalid);
     // Data and masks
     Vector#(SCRATCHPAD_WORDS_PER_LINE,
-            LUTRAM#(SCRATCHPAD_PORT_NUM,
-                    Tuple2#(SCRATCHPAD_MEM_VALUE,
-                            SCRATCHPAD_MEM_MASK))) uncachedStoreBuf <- replicateM(mkLUTRAMU());
+            LUTRAM_MULTI_READ#(1, SCRATCHPAD_PORT_NUM,
+                               Tuple2#(SCRATCHPAD_MEM_VALUE,
+                                       SCRATCHPAD_MEM_MASK))) uncachedStoreBuf <-
+        replicateM(mkMultiReadLUTRAMU());
 
     //
     // One line read cache to catch streaming reads.
     //
-    LUTRAM#(SCRATCHPAD_PORT_NUM, Maybe#(t_LINE_ADDR)) uncachedLastReadAddr <- mkLUTRAM(tagged Invalid);
+    LUTRAM_MULTI_READ#(1, SCRATCHPAD_PORT_NUM, Maybe#(t_LINE_ADDR)) uncachedLastReadAddr <- mkMultiReadLUTRAM(tagged Invalid);
     // Data
-    LUTRAM#(SCRATCHPAD_PORT_NUM,
-            t_SCRATCHPAD_LINE) uncachedLastReadBuf <- mkLUTRAMU();
+    LUTRAM_MULTI_READ#(1, SCRATCHPAD_PORT_NUM,
+                       t_SCRATCHPAD_LINE) uncachedLastReadBuf <- mkMultiReadLUTRAMU();
 
     //
     // uncachedWriteReq --
@@ -460,7 +461,7 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
         let l_addr = scratchpadLineAddr(w_req.addr);
         let word_idx = scratchpadWordIdx(w_req.addr);
 
-        if (uncachedStoreBufAddr.sub(port) matches tagged Valid .sb_addr)
+        if (uncachedStoreBufAddr.readPorts[0].sub(port) matches tagged Valid .sb_addr)
         begin
             // Get the store buffer data and mask.  It will either be flushed
             // to the host or merged with the new data.
@@ -468,7 +469,7 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
             t_SCRATCHPAD_LINE_MASK sb_mask = newVector();
             for (Integer w = 0; w < valueOf(SCRATCHPAD_WORDS_PER_LINE); w = w + 1)
             begin
-                match {.val, .bmask} = uncachedStoreBuf[w].sub(port);
+                match {.val, .bmask} = uncachedStoreBuf[w].readPorts[0].sub(port);
                 sb_val[w] = val;
                 sb_mask[w] = bmask;
             end
@@ -526,7 +527,7 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
             debugLog.record($format("port %0d: uncachedWriteReq: New SB entry, addr=0x%x, w_idx=%d, val=0x%x, mask=%b", port, l_addr, word_idx, w_req.val, w_req.byteMask));
 
             // Invalidate the read buffer if it matches the new address
-            if (uncachedLastReadAddr.sub(port) matches tagged Valid .r_addr &&&
+            if (uncachedLastReadAddr.readPorts[0].sub(port) matches tagged Valid .r_addr &&&
                 r_addr == l_addr)
             begin
                 uncachedLastReadAddr.upd(port, tagged Invalid);
@@ -548,7 +549,7 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
         let l_addr = scratchpadLineAddr(r_req.addr);
         let w_idx = scratchpadWordIdx(r_req.addr);
 
-        if (uncachedStoreBufAddr.sub(port) matches tagged Valid .sb_addr &&&
+        if (uncachedStoreBufAddr.readPorts[0].sub(port) matches tagged Valid .sb_addr &&&
             sb_addr == l_addr)
         begin
             // Address being read is in the store buffer!
@@ -558,7 +559,7 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
             t_SCRATCHPAD_LINE_MASK sb_mask = newVector();
             for (Integer w = 0; w < valueOf(SCRATCHPAD_WORDS_PER_LINE); w = w + 1)
             begin
-                match {.val, .bmask} = uncachedStoreBuf[w].sub(port);
+                match {.val, .bmask} = uncachedStoreBuf[w].readPorts[0].sub(port);
                 sb_val[w] = val;
                 sb_mask[w] = bmask;
             end
@@ -590,7 +591,7 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
                 debugLog.record($format("port %0d: uncachedReadReq: Flush SB entry, addr=0x%x, mask=%b", port, l_addr, pack(sb_mask)));
             end
         end
-        else if (uncachedLastReadAddr.sub(port) matches tagged Valid .lr_addr &&&
+        else if (uncachedLastReadAddr.readPorts[0].sub(port) matches tagged Valid .lr_addr &&&
                  lr_addr == l_addr)
         begin
             //
@@ -674,7 +675,7 @@ module mkMemoryVirtualDevice#(LowLevelPlatformInterface llpi,
             // Re-use previous response
             read_source = "stream";
 
-            line = uncachedLastReadBuf.sub(port);
+            line = uncachedLastReadBuf.readPorts[0].sub(port);
         end
 
         // Only one word from the line is expected.  Pick the right one.
