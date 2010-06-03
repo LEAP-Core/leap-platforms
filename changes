@@ -9949,3 +9949,34 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memor
 
 - Add a variety of LFSR feed polynomials.
 - Manage scratchpad LUTRAM ports.
+
+----------
+kfleming    Date: Thu Jun  3 18:10:45 EDT 2010  CSN: CSN-platforms-444
+                  Thu Jun  3 22:10:45 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ hardware-fpga-components-virtex2.awb Locally Modified          443 
+ hardware-fpga-components-virtex5.awb Locally Modified          443 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/jtag/xilinx
+ jtag-device-physical.awb  Locally Added               0 
+ debug/                    Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/jtag/xilinx/debug
+ jtag-debug.h              Locally Added               0 
+ jtag-debug.awb            Locally Added               0 
+ jtag-debug.bsv            Locally Added               0 
+ jtag-debug-server.h       Locally Added               0 
+ jtag-debug.cpp            Locally Added               0 
+ jtag-debug.rrr            Locally Added               0 
+ jtag-debug-server.cpp     Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/jtag/xilinx
+ jtag-import.bsv           Locally Added               0 
+ mdm.vhd                   Locally Modified          443 
+
+
+Added more body for xilinx jtag, added string parameters for xilinx
+families.  These paramaters tend to be sprinkled amoung xilinx
+sources, so I added them.

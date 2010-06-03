@@ -1,0 +1,13 @@
+service JTAGDEBUG
+{
+    server hw (bsv, method) <- sw (cpp, method)
+    {
+        method GetChar     (in UINT8[8] inchar, out UINT8[8] outchar);
+    };
+
+    server sw (cpp, method) <- hw (bsv, method)
+    {
+        method PutChar     (in UINT8[8] char);
+    };
+
+}

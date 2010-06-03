@@ -19,3 +19,7 @@
 
 %param SYNTH 1            "Synthesize it to FPGAs"
 %param BROKEN_REGFILE 1   "0 if RegFile synthesizes correctly.  Nonzero for Xilinx Xst < version 11."
+%param XILINX_FAMILY "virtex5"  "Xilinx parameter describing the fpga architecture"
+
+
+
