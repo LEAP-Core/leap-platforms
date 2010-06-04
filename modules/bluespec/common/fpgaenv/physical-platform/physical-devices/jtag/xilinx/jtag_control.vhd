@@ -74,8 +74,8 @@ use IEEE.numeric_std.all;
 
 entity JTAG_CONTROL is
   generic (
-    C_MB_DBG_PORTS  : integer;
-    C_USE_UART      : integer;
+    C_MB_DBG_PORTS  : integer := 0;
+    C_USE_UART      : integer := 1;
     C_UART_WIDTH    : integer := 8;
     C_USE_FSL       : integer := 0;
     C_FSL_DATA_SIZE : integer := 32;

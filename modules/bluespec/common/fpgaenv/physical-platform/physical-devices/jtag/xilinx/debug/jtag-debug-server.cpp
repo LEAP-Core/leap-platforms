@@ -59,3 +59,11 @@ JTAGDEBUG_SERVER_CLASS::PutChar(
   printf("Got %x from JTAG\n", payload);
 }
 
+// F2HOneWayMsg
+void
+JTAGDEBUG_SERVER_CLASS::StatusUpdate(
+				    UINT8 payload)
+{
+  printf("Got %x on status update from JTAG\n", payload);
+}
+

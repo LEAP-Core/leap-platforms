@@ -90,7 +90,7 @@ entity MDM is
     C_SPLB_SUPPORT_BURSTS : integer                   := 0;
     C_OPB_DWIDTH          : integer                   := 32;
     C_OPB_AWIDTH          : integer                   := 32;
-    C_MB_DBG_PORTS        : integer                   := 1;
+    C_MB_DBG_PORTS        : integer                   := 0;
     C_USE_UART            : integer                   := 1;
     C_UART_WIDTH          : integer                   := 8;
     C_WRITE_FSL_PORTS     : integer                   := 0

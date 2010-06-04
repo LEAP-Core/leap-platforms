@@ -1,30 +1,3 @@
-/*****************************************************************************
- * rrrtest.cpp
- *
- * Copyright (C) 2008 Intel Corporation
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-*/
-
-//
-// @file rrrtest.cpp
-// @brief RRR Test System
-//
-// @author Angshuman Parashar
-//
-
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
@@ -43,7 +16,7 @@ HYBRID_APPLICATION_CLASS::HYBRID_APPLICATION_CLASS(
     VIRTUAL_PLATFORM vp)
 {
   // instantiate client stub
-  clientStub = new RRRTEST_CLIENT_STUB_CLASS(NULL);
+  clientStub = new JTAGDEBUG_CLIENT_STUB_CLASS(NULL);
 }
 
 // destructor
@@ -61,10 +34,10 @@ HYBRID_APPLICATION_CLASS::Init()
 void
 HYBRID_APPLICATION_CLASS::Main()
 {
-  int i;
+  int i = 0;
   printf ("Entering JTAG test. XMD should be running....\n");
   while(1) {
-    UINT8 returned = clientStub->PutChar((UINT8)++i);
-    printf("Put in $x got back %x\n", i, returned);
+    UINT8 returned = clientStub->GetChar((UINT8)++i);
+    printf("Put in %x got back %x\n", i, returned);
   }
 }

@@ -14,7 +14,9 @@ typedef Bit#(8) JTAGWord;
 
 interface JTAG_DRIVER;
     method Action send(JTAGWord word);
+    method Bool notFull(); 
     method ActionValue#(JTAGWord) receive();
+    method Bool notEmpty(); 
 endinterface
 
 // JTAG_WIRES
@@ -41,8 +43,10 @@ endinterface
 interface PRIMITIVE_JTAG_DEVICE;
 
     method Action send(JTAGWord word);
+    method Bool notFull(); 
 
     method ActionValue#(JTAGWord) receive();
+    method Bool notEmpty();
 
     method Action clearRXFIFO();
     method Action clearTXFIFO();
@@ -59,28 +63,32 @@ import "BVI" MDM = module mkPrimitiveJTAGDevice
 
 
     method send(TX_Data)
-                      ready(TX_Buffer_Empty)
+                      ready(TX_Buffer_Empty) 
                       enable(Write_TX_FIFO) 
                       clocked_by (clk) reset_by (rst);
-    
+
+    method TX_Buffer_Empty notFull(); 
+
     method RX_Data receive()
                    ready(RX_Data_Present)
                    enable(Read_RX_FIFO)
                    clocked_by (clk) reset_by (rst);
+
+    method RX_Data_Present notEmpty();
    
     method clearRXFIFO() enable(Reset_RX_FIFO)  clocked_by (clk) reset_by (rst);
    
     method clearTXFIFO() enable(Reset_TX_FIFO)  clocked_by (clk) reset_by (rst);
 
     schedule send C       (send);
-    schedule send CF      (receive,clearRXFIFO,clearTXFIFO);
+    schedule send CF      (receive,clearRXFIFO,clearTXFIFO,notEmpty,notFull);
    
     schedule receive C       (receive);
-    schedule receive CF      (send,clearRXFIFO,clearTXFIFO);
+    schedule receive CF      (send,clearRXFIFO,clearTXFIFO,notEmpty,notFull);
 
-    schedule clearRXFIFO CF  (receive,send,clearRXFIFO,clearTXFIFO);
+    schedule (clearTXFIFO,clearRXFIFO,notEmpty,notFull) CF  (receive,send,clearRXFIFO,clearTXFIFO,notEmpty,notFull);
 
-    schedule clearTXFIFO CF      (receive,send,clearRXFIFO,clearTXFIFO);
+    
 
 endmodule
 
@@ -98,6 +106,9 @@ module mkJTAGDevice#(Clock raw_clock, Reset raw_reset) (JTAG_DEVICE);
            let data <- primitiveJTAGDevice.receive();
            return data;
         endmethod
+
+        method notFull = primitiveJTAGDevice.notFull;
+        method notEmpty = primitiveJTAGDevice.notEmpty;
 
     endinterface
 

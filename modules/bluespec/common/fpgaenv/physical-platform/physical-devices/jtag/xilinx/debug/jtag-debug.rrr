@@ -8,6 +8,7 @@ service JTAGDEBUG
     server sw (cpp, method) <- hw (bsv, method)
     {
         method PutChar     (in UINT8[8] inchar);
+        method StatusUpdate  (in UINT8[8] inchar);
     };
 
 }

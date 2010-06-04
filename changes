@@ -10027,3 +10027,26 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/jta
 
 
 JTAG controller now synthesizes for virtex 5
+
+----------
+keflemin    Date: Fri Jun  4 20:05:37 EDT 2010  CSN: CSN-platforms-447
+                  Sat Jun  5 00:05:37 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/jtag/xilinx
+ jtag_control.vhd          Locally Modified          446 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/jtag/xilinx/debug
+ jtag-debug.bsv            Locally Modified          446 
+ jtag-debug-server.h       Locally Modified          446 
+ jtag-debug.cpp            Locally Modified          446 
+ jtag-debug.rrr            Locally Modified          446 
+ jtag-debug-server.cpp     Locally Modified          446 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/jtag/xilinx
+ jtag-import.bsv           Locally Modified          446 
+ mdm.vhd                   Locally Modified          446 
+
+
+
+Jtag now compiles and partly runs.  

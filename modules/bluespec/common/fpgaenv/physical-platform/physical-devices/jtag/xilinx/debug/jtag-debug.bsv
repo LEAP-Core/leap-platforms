@@ -25,6 +25,9 @@ module mkApplication#(VIRTUAL_PLATFORM vp)();
     //Instantiate Jtag
     JTAG_DEVICE jtag <- mkJTAGDevice(clock,reset);
 
+    Reg#(Bool) lastNotFull  <-  mkReg(False);
+    Reg#(Bool) lastNotEmpty <-  mkReg(False);
+
     rule handleGetChar;
       let char <- serverStub.acceptRequest_GetChar();
       //Only have 4 bits here
@@ -36,6 +39,15 @@ module mkApplication#(VIRTUAL_PLATFORM vp)();
     rule handlePutChar;
       let char <- jtag.driver.receive();
       clientStub.makeRequest_PutChar(char);
+    endrule
+
+    rule handleStatus; 
+      lastNotFull <= jtag.driver.notFull;
+      lastNotEmpty <= jtag.driver.notEmpty;
+      if(jtag.driver.notFull != lastNotFull || jtag.driver.notEmpty != lastNotEmpty)
+        begin
+          clientStub.makeRequest_StatusUpdate({0,pack(jtag.driver.notFull),pack(lastNotFull),pack(jtag.driver.notEmpty),pack(lastNotEmpty)});
+        end
     endrule
 
 endmodule

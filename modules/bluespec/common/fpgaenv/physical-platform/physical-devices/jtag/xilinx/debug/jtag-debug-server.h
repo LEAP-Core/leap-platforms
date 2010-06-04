@@ -40,6 +40,7 @@ class JTAGDEBUG_SERVER_CLASS: public RRR_SERVER_CLASS,
   // RRR service methods
   //
   void   PutChar(UINT8 charin);
+  void   StatusUpdate(UINT8 charin);
 
 };
 
