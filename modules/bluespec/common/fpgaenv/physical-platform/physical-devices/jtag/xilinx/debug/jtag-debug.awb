@@ -5,7 +5,7 @@
 %requires jtag_device
 
 %sources -t RRR -v PRIVATE jtag-debug.rrr
-%sources -t BSV -v PRIVATE jtag-debug.bsv
+%sources -t BSV -v PUBLIC  jtag-debug.bsv
 %sources -t H   -v PUBLIC  jtag-debug.h
 %sources -t CPP -v PUBLIC  jtag-debug.cpp
 %sources -t H   -v PUBLIC  jtag-debug-server.h

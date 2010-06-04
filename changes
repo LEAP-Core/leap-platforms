@@ -9980,3 +9980,26 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/jta
 Added more body for xilinx jtag, added string parameters for xilinx
 families.  These paramaters tend to be sprinkled amoung xilinx
 sources, so I added them.
+
+----------
+keflemin    Date: Thu Jun  3 20:33:08 EDT 2010  CSN: CSN-platforms-445
+                  Fri Jun  4 00:33:08 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/jtag/xilinx
+ srl_fifo.vhd              Locally Removed           444 
+ jtag-device.cpp           Locally Added               0 
+ jtag-device-physical.awb  Locally Modified          444 
+ jtag_control.vhd          Locally Modified          444 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/jtag/xilinx/debug
+ jtag-debug.awb            Locally Modified          444 
+ jtag-debug.bsv            Locally Modified          444 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/jtag/xilinx
+ jtag_srl_fifo.vhd         Locally Added               - 
+ jtag-device.h             Locally Added               0 
+
+
+Fixed numerous compilation bugs.  Still has some issue compiling the
+xilinx primitives.

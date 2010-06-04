@@ -7,7 +7,7 @@
 %sources -t BSV -v PUBLIC jtag-import.bsv
 
 %sources -t VHD   -v PRIVATE mdm.vhd
-%sources -t VHD   -v PRIVATE jtag_core.vhd
+%sources -t VHD   -v PRIVATE jtag_control.vhd
 %sources -t VHD   -v PRIVATE jtag_srl_fifo.vhd
 
 %sources -t H   -v PUBLIC  jtag-device.h

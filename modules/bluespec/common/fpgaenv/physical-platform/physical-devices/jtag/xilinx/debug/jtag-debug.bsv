@@ -13,25 +13,28 @@
 
 module mkApplication#(VIRTUAL_PLATFORM vp)();
 
+    Clock clock <- exposeCurrentClock();
+    Reset reset <- exposeCurrentReset();
+
     LowLevelPlatformInterface llpi = vp.llpint;
     
     // instantiate stubs
     ServerStub_JTAGDEBUG serverStub <- mkServerStub_JTAGDEBUG(llpi.rrrServer);
-    ClientStub_JTAGDEBUG clientStub <- mkServerStub_JTAGDEBUG(llpi.rrrClient);
+    ClientStub_JTAGDEBUG clientStub <- mkClientStub_JTAGDEBUG(llpi.rrrClient);
 
     //Instantiate Jtag
-    JTAGDevice jtag <- mkJTAGDevice();
+    JTAG_DEVICE jtag <- mkJTAGDevice(clock,reset);
 
     rule handleGetChar;
       let char <- serverStub.acceptRequest_GetChar();
       //Only have 4 bits here
       let txChar = {4'h4,truncate(char)}; 
-      jtag.send(txChar);
+      jtag.driver.send(txChar);
       serverStub.sendResponse_GetChar(txChar);
     endrule
 
     rule handlePutChar;
-      let char <- jtag.receive();
+      let char <- jtag.driver.receive();
       clientStub.makeRequest_PutChar(char);
     endrule
 

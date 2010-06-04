@@ -139,11 +139,6 @@ entity JTAG_CONTROL is
 
 end entity JTAG_CONTROL;
 
-library unisim;
-use unisim.vcomponents.all;
-
-library mdm_v1_00_d;
-use mdm_v1_00_d.SRL_FIFO;
 
 architecture IMP of JTAG_CONTROL is
 
