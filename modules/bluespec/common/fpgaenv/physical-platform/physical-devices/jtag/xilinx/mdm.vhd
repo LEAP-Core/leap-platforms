@@ -71,6 +71,9 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
 
+library unisim;
+use unisim.vcomponents.all;
+
 entity MDM is
   generic (
     C_FAMILY              : string                    := "virtex2";
@@ -101,13 +104,13 @@ entity MDM is
     Reset_RX_FIFO   : in  std_logic;
     RX_Data         : out std_logic_vector(0 to C_UART_WIDTH-1);
     RX_Data_Present : out std_logic;
-    RX_BUFFER_FULL  : out std_logic;
+    --RX_BUFFER_FULL  : out std_logic;
     
     Write_TX_FIFO   : in  std_logic;
     Reset_TX_FIFO   : in  std_logic;
     TX_Data         : in  std_logic_vector(0 to C_UART_WIDTH-1);
-    TX_Buffer_Full  : out std_logic;
-    TX_Buffer_Empty : out std_logic;
+    --TX_Buffer_Full  : out std_logic;
+    TX_Buffer_Empty : out std_logic
         
   );
 
@@ -117,6 +120,19 @@ architecture IMP of MDM is
 
   constant C_FSL_DATA_SIZE : integer := 32;
 
+  component BSCAN
+      port (
+        TDO     : in  std_logic;
+        UPDATE  : out std_logic;
+        SHIFT   : out std_logic;
+        RESET   : out std_logic;
+        TDI     : out std_logic;
+        SEL     : out std_logic;
+        DRCK    : out std_logic;
+        CAPTURE : out std_logic
+        );
+  end component BSCAN;
+  
   component JTAG_CONTROL
     generic (
       C_MB_DBG_PORTS  :    integer := 0;
@@ -182,16 +198,7 @@ architecture IMP of MDM is
 
     );
   end component JTAG_CONTROL;
-  
-  constant Virtex2P_Based : boolean := equalIgnoreCase(C_FAMILY, "virtex2p");
-  constant Virtex4_Based : boolean := equalIgnoreCase(C_FAMILY, "virtex4") or  equalIgnoreCase(C_FAMILY, "qvirtex4") or equalIgnoreCase(C_FAMILY, "qrvirtex4");
-  constant Virtex5_Based : boolean := equalIgnoreCase(C_FAMILY, "virtex5") or equalIgnoreCase(C_FAMILY, "qrvirtex5");
 
-  constant Spartan3_Based     : boolean := equalIgnoreCase(C_FAMILY, "spartan3") or equalIgnoreCase(C_FAMILY, "aspartan3");
-  constant Spartan3E_Based    : boolean := equalIgnoreCase(C_FAMILY, "spartan3e") or equalIgnoreCase(C_FAMILY, "aspartan3e");
-  constant Spartan3A_Based    : boolean := equalIgnoreCase(C_FAMILY, "spartan3a") or equalIgnoreCase(C_FAMILY, "aspartan3a");
-  constant Spartan3ADSP_Based : boolean := equalIgnoreCase(C_FAMILY, "spartan3adsp") or equalIgnoreCase(C_FAMILY, "aspartan3adsp");
-                                                           
   -- MDM signals
   signal tdi     : std_logic;
   signal reset   : std_logic;
@@ -210,98 +217,36 @@ architecture IMP of MDM is
   signal drck1_i  : std_logic;
   signal update_i : std_logic;
 
-  signal read_RX_FIFO      : std_logic;
-  signal reset_RX_FIFO     : std_logic;
+  signal read_RX_FIFO_i      : std_logic;
+  signal reset_RX_FIFO_i     : std_logic;
+  signal RstInv : std_logic;
+  
+  signal rx_Data_i         : std_logic_vector(0 to 7);
+  signal rx_Data_Present_i : std_logic;
+  signal rx_BUFFER_FULL_i  : std_logic;
 
-  signal rx_Data         : std_logic_vector(0 to 7);
-  signal rx_Data_Present : std_logic;
-  signal rx_BUFFER_FULL  : std_logic;
-
-  signal write_TX_FIFO   : std_logic;
-  signal reset_TX_FIFO   : std_logic;
-  signal tx_BUFFER_FULL  : std_logic;
-  signal tx_Buffer_Empty : std_logic;
-
-
-  attribute period           : string;
-  attribute period of update : signal is "200 ns";
-
-  attribute buffer_type                : string;
-  attribute buffer_type of update_i    : signal is "none";
-  attribute buffer_type of update      : signal is "none";
-  attribute buffer_type of MDM_Core_I1 : label is "none";
+  signal tx_Data_i         : std_logic_vector(0 to 7);
+  signal write_TX_FIFO_i   : std_logic;
+  signal reset_TX_FIFO_i   : std_logic;
+  signal tx_BUFFER_FULL_i  : std_logic;
+  signal tx_Buffer_Empty_i : std_logic;
 
 begin  -- architecture IMP
-
-  read_RX_FIFO <= Read_RX_FIFO ;
-  reset_RX_FIFO <= Reset_RX_FIFO; 
-  RX_Data         <= rx_Data;
-  RX_Data_Present <= rx_Data_Present; 
-  RX_BUFFER_FULL <= rx_BUFFER_FULL;
+  RstInv <= not Rst;
   
-  write_TX_FIFO <= Write_TX_FIFO;
-  reset_TX_FIFO <= Reset_TX_FIFO;
-  TX_Data         <= tx_Data;
-  TX_Buffer_Full  <= tx_Buffer_Full;
-  TX_Buffer_Empty <= tx_Buffer_Empty;
+  read_RX_FIFO_i <= Read_RX_FIFO;
+  reset_RX_FIFO_i <= Reset_RX_FIFO; 
+  RX_Data         <= rx_Data_i;
+  RX_Data_Present <= rx_Data_Present_i; 
+  --RX_BUFFER_FULL <= rx_BUFFER_FULL_i;
   
-  Use_Spartan3 : if (Spartan3_Based or Spartan3E_Based) generate
-    BSCAN_SPARTAN3_I : BSCAN_SPARTAN3
-      port map (
-        UPDATE  => update_i,            -- [out std_logic]
-        SHIFT   => shift,               -- [out std_logic]
-        RESET   => reset,               -- [out std_logic]
-        TDI     => tdi,                 -- [out std_logic]
-        SEL1    => open,                -- [out std_logic]
-        DRCK1   => open,             -- [out std_logic]
-        SEL2    => sel,                 -- [out std_logic]
-        DRCK2   => drck_i,              -- [out std_logic]
-        CAPTURE => capture,             -- [out std_logic]
-        TDO1    => '0',                -- [in  std_logic]
-        TDO2    => tdo                  -- [in  std_logic]
-      );
-  end generate Use_Spartan3;
-
-  Use_Spartan3A : if (Spartan3A_Based or Spartan3ADSP_Based) generate
-    BSCAN_SPARTAN3A_I : BSCAN_SPARTAN3A
-      port map (
-        TCK     => open,                -- [out std_logic]
-        TMS     => open,                -- [out std_logic]
-        CAPTURE => capture,             -- [out std_logic]
-        UPDATE  => update_i,            -- [out std_logic]
-        SHIFT   => shift,               -- [out std_logic]
-        RESET   => reset,               -- [out std_logic]
-        TDI     => tdi,                 -- [out std_logic]
-        SEL1    => open,                -- [out std_logic]
-        SEL2    => sel,                 -- [out std_logic]
-        DRCK1   => open,             -- [out std_logic]
-        DRCK2   => drck_i,              -- [out std_logic]
-        TDO1    => '0',                -- [in  std_logic]
-        TDO2    => tdo                  -- [in  std_logic]
-      );
-  end generate Use_Spartan3A;
-
-  Use_Virtex2 : if (Virtex2P_Based) generate
-    BSCAN_Virtex2_I : BSCAN_VIRTEX2
-      port map (
-        CAPTURE => capture,             -- [out std_logic]
-        DRCK1   => open,             -- [out std_logic]
-        DRCK2   => drck_i,              -- [out std_logic]
-        RESET   => reset,               -- [out std_logic]
-        SEL1    => open,                -- [out std_logic]
-        SEL2    => sel,                 -- [out std_logic]
-        SHIFT   => shift,               -- [out std_logic]
-        TDI     => tdi,                 -- [out std_logic]
-        UPDATE  => update_i,            -- [out std_logic]
-        TDO1    => '0',                -- [in  std_logic]
-        TDO2    => tdo                  -- [in  std_logic]
-      );
-  end generate Use_Virtex2;
+  write_TX_FIFO_i <= Write_TX_FIFO;
+  reset_TX_FIFO_i <= Reset_TX_FIFO;
+  tx_Data_i <= TX_Data;
+  --TX_Buffer_Full  <= tx_Buffer_Full_i;
+  TX_Buffer_Empty <= tx_Buffer_Empty_i;
   
-  Use_Virtex4 : if (Virtex4_Based) generate
-    BSCAN_VIRTEX4_I : BSCAN_VIRTEX4
-      generic map (
-        JTAG_CHAIN => C_JTAG_CHAIN)
+  BSCAN_VIRTEX5_I : BSCAN
       port map (
         TDO     => tdo,                 -- [in  std_logic]
         UPDATE  => update_i,            -- [out std_logic]
@@ -311,34 +256,6 @@ begin  -- architecture IMP
         SEL     => sel,                 -- [out std_logic]
         DRCK    => drck_i,              -- [out std_logic]
         CAPTURE => capture);            -- [out std_logic]
-
-    -- Ground signals pretending to be CHAIN 1
-    -- This does not actually use CHAIN 1
-   
-    -- tdo1 is unused
-
-  end generate Use_Virtex4;
-
-  Use_Virtex5 : if (Virtex5_Based) generate
-    BSCAN_VIRTEX5_I : BSCAN_VIRTEX5
-      generic map (
-        JTAG_CHAIN => C_JTAG_CHAIN)
-      port map (
-        TDO     => tdo,                 -- [in  std_logic]
-        UPDATE  => update_i,            -- [out std_logic]
-        SHIFT   => shift,               -- [out std_logic]
-        RESET   => reset,               -- [out std_logic]
-        TDI     => tdi,                 -- [out std_logic]
-        SEL     => sel,                 -- [out std_logic]
-        DRCK    => drck_i,              -- [out std_logic]
-        CAPTURE => capture);            -- [out std_logic]
-
-    -- Ground signals pretending to be CHAIN 1
-    -- This does not actually use CHAIN 1
-   
-    -- tdo1 is unused
-
-  end generate Use_Virtex5;
 
 --  drck1 <= drck1_i;
   
@@ -365,14 +282,12 @@ begin  -- architecture IMP
         C_MB_DBG_PORTS  => C_MB_DBG_PORTS,
         C_USE_UART      => C_USE_UART,
         C_UART_WIDTH    => C_UART_WIDTH,
-        C_USE_FSL       => C_USE_FSL,        -- [integer]
-        C_FSL_DATA_SIZE => C_FSL_DATA_SIZE,  -- [integer]
-        C_EN_WIDTH      => C_EN_WIDTH
+        C_FSL_DATA_SIZE => C_FSL_DATA_SIZE  -- [integer]
       )
       port map (
         -- Global signals
         Clk             => Clk,         -- [in  std_logic]
-        Rst             => ~Rst,         -- [in  std_logic] BSV is negative edge
+        Rst             => RstInv,         -- [in  std_logic] BSV is negative edge
 
 
         Clear_Ext_BRK => '0',  -- [in  std_logic]
@@ -381,17 +296,17 @@ begin  -- architecture IMP
         Debug_SYS_Rst => open,  -- [out std_logic]
         Debug_Rst     => open,    -- [out std_logic]
 
-        Read_RX_FIFO    => read_RX_FIFO,     -- [in  std_logic]
-        Reset_RX_FIFO   => reset_RX_FIFO,    -- [in  std_logic]
-        RX_Data         => rx_Data,          -- [out std_logic_vector(0 to 7)]
-        RX_Data_Present => rx_Data_Present,  -- [out std_logic]
-        RX_BUFFER_FULL  => rx_BUFFER_FULL,   -- [out std_logic]
+        Read_RX_FIFO    => read_RX_FIFO_i,     -- [in  std_logic]
+        Reset_RX_FIFO   => reset_RX_FIFO_i,    -- [in  std_logic]
+        RX_Data         => rx_Data_i,          -- [out std_logic_vector(0 to 7)]
+        RX_Data_Present => rx_Data_Present_i,  -- [out std_logic]
+        RX_BUFFER_FULL  => rx_BUFFER_FULL_i,   -- [out std_logic]
 
-        Write_TX_FIFO   => write_TX_FIFO,  -- [in  std_logic]
-        Reset_TX_FIFO   => reset_TX_FIFO,  -- [in  std_logic]
-        TX_Data         => tx_Buffer_Data,  -- [in  std_logic_vector(0 to 7)]
-        TX_Buffer_Full  => tx_Buffer_Full,  -- [out std_logic]
-        TX_Buffer_Empty => tx_Buffer_Empty,  -- [out std_logic]
+        Write_TX_FIFO   => write_TX_FIFO_i,  -- [in  std_logic]
+        Reset_TX_FIFO   => reset_TX_FIFO_i,  -- [in  std_logic]
+        TX_Data         => tx_Data_i,  -- [in  std_logic_vector(0 to 7)]
+        TX_Buffer_Full  => tx_Buffer_Full_i,  -- [out std_logic]
+        TX_Buffer_Empty => tx_Buffer_Empty_i,  -- [out std_logic]
 
               -- JTAG signals
         TDI     => tdi,                   -- [in  std_logic]
@@ -406,8 +321,8 @@ begin  -- architecture IMP
         -- MicroBlaze Debug Signals
         MB_Debug_Enabled => open,  -- [out std_logic_vector(7 downto 0)]
         Dbg_Clk          => open,    -- [out std_logic]
-        Dbg_TDI          => '0',    -- [in  std_logic]
-        Dbg_TDO          => open,    -- [out std_logic]
+--        Dbg_TDI          => '0',    -- [in  std_logic]
+--        Dbg_TDO          => open,    -- [out std_logic]
         Dbg_Reg_En       => open,  -- [out std_logic_vector(0 to 4)]
         Dbg_Capture      => open,  -- [out std_logic]
         Dbg_Shift        => open,  -- [out std_logic]
@@ -415,7 +330,7 @@ begin  -- architecture IMP
 
         FSL0_S_Clk     => open,
         FSL0_S_Read    => open,
-        FSL0_S_Data    => '0',
+--        FSL0_S_Data    => '0000000000000000',
         FSL0_S_Control => '0',
         FSL0_S_Exists  => '0',
         FSL0_M_Clk     => open,

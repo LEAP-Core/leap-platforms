@@ -10003,3 +10003,27 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/jta
 
 Fixed numerous compilation bugs.  Still has some issue compiling the
 xilinx primitives.
+
+----------
+kfleming    Date: Fri Jun  4 13:25:52 EDT 2010  CSN: CSN-platforms-446
+                  Fri Jun  4 17:25:52 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ bscan-virtex5.v           Locally Added               0 
+ hardware-fpga-components-virtex5.awb Locally Modified          445 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/jtag/xilinx
+ jtag_control.vhd          Locally Modified          445 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/jtag/xilinx/debug
+ jtag-debug-server.h       Locally Modified          445 
+ jtag-debug.rrr            Locally Modified          445 
+ jtag-debug-server.cpp     Locally Modified          445 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/jtag/xilinx
+ jtag-import.bsv           Locally Modified          445 
+ mdm.vhd                   Locally Modified          445 
+
+
+JTAG controller now synthesizes for virtex 5

@@ -53,7 +53,7 @@ JTAGDEBUG_SERVER_CLASS::Cleanup()
 
 // F2HOneWayMsg
 void
-JTAGDEBUG_SERVER_CLASS::F2HOneWayMsg1(
+JTAGDEBUG_SERVER_CLASS::PutChar(
 				    UINT8 payload)
 {
   printf("Got %x from JTAG\n", payload);

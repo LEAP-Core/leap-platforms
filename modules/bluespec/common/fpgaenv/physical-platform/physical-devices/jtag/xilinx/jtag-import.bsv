@@ -53,8 +53,6 @@ endinterface
 import "BVI" MDM = module mkPrimitiveJTAGDevice
     // interface:
                  (PRIMITIVE_JTAG_DEVICE);
-    parameter C_CLK_FREQ = `XILINX_FAMILY;
-
     // Clocks and reset are handled by the UCF for now
     default_clock clk(Clk);
     default_reset rst(Rst);

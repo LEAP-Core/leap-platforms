@@ -1,5 +1,5 @@
 -------------------------------------------------------------------------------
--- $Id: jtag_control.vhd,v 1.1.2.1 2008/06/26 19:59:12 tshui Exp $
+-- $Id: jtag_control.vhd,v 1.1.4.1 2009/04/07 23:12:54 jece Exp $
 -------------------------------------------------------------------------------
 -- jtag_control.vhd - Entity and architecture
 --
@@ -43,8 +43,8 @@
 --
 -------------------------------------------------------------------------------
 -- Author:          goran
--- Revision:        $Revision: 1.1.2.1 $
--- Date:            $Date: 2008/06/26 19:59:12 $
+-- Revision:        $Revision: 1.1.4.1 $
+-- Date:            $Date: 2009/04/07 23:12:54 $
 --
 -- History:
 --   goran  2003-02-13    First Version
@@ -138,6 +138,9 @@ entity JTAG_CONTROL is
     );
 
 end entity JTAG_CONTROL;
+
+library unisim;
+use unisim.vcomponents.all;
 
 
 architecture IMP of JTAG_CONTROL is
@@ -654,7 +657,7 @@ begin  -- architecture IMP
   begin  -- process Execute_UART_Command
     if data_cmd = '0' then 
       execute <= '0';
-    elsif UPDATE = '1' then
+    elsif UPDATE'event and UPDATE = '1' then
       if (command = UART_READ_BYTE) or
         (command = UART_WRITE_BYTE) then
         execute <= '1';
