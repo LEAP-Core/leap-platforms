@@ -37,7 +37,9 @@ HYBRID_APPLICATION_CLASS::Main()
   int i = 0;
   printf ("Entering JTAG test. XMD should be running....\n");
   while(1) {
-    UINT8 returned = clientStub->GetChar((UINT8)++i);
+    printf("Putting in %x", i);
+    UINT8 returned = clientStub->GetChar((UINT8)i);
     printf("Put in %x got back %x\n", i, returned);
+    i ++;
   }
 }

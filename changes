@@ -10050,3 +10050,22 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/jta
 
 
 Jtag now compiles and partly runs.  
+
+----------
+keflemin    Date: Sun Jun  6 12:45:22 EDT 2010  CSN: CSN-platforms-448
+                  Sun Jun  6 16:45:22 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/jtag/xilinx
+ jtag-device-physical.awb  Locally Modified          447 
+ mdm_core.vhd              Locally Modified          447 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/jtag/xilinx/debug
+ jtag-debug.bsv            Locally Modified          447 
+ jtag-debug.cpp            Locally Modified          447 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/jtag/xilinx
+ mdm.vhd                   Locally Modified          447 
+
+
+JTAG debugger operational.  Running it requires the use of the Xilinx XMD program terminal, as will any physical channel based on the jtag.  Interestingly, multiple JTAGs can be instantiated and used simulatneously (4 on the virtex 5 110t).

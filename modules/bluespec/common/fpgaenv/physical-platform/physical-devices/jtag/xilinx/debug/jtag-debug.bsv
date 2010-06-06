@@ -28,7 +28,9 @@ module mkApplication#(VIRTUAL_PLATFORM vp)();
     Reg#(Bool) lastNotFull  <-  mkReg(False);
     Reg#(Bool) lastNotEmpty <-  mkReg(False);
 
-    rule handleGetChar;
+    Reg#(Bool) synced <- mkReg(False);
+
+    rule handleGetChar(synced);
       let char <- serverStub.acceptRequest_GetChar();
       //Only have 4 bits here
       let txChar = {4'h4,truncate(char)}; 
@@ -39,15 +41,18 @@ module mkApplication#(VIRTUAL_PLATFORM vp)();
     rule handlePutChar;
       let char <- jtag.driver.receive();
       clientStub.makeRequest_PutChar(char);
+      synced <= True;
     endrule
 
     rule handleStatus; 
       lastNotFull <= jtag.driver.notFull;
       lastNotEmpty <= jtag.driver.notEmpty;
-      if(jtag.driver.notFull != lastNotFull || jtag.driver.notEmpty != lastNotEmpty)
-        begin
+    endrule
+ 
+    rule sendStatus (jtag.driver.notFull != lastNotFull || jtag.driver.notEmpty != lastNotEmpty);
+       
           clientStub.makeRequest_StatusUpdate({0,pack(jtag.driver.notFull),pack(lastNotFull),pack(jtag.driver.notEmpty),pack(lastNotEmpty)});
-        end
+        
     endrule
 
 endmodule
