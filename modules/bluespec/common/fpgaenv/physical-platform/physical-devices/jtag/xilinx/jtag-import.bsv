@@ -1,6 +1,7 @@
 import Vector::*;
 import Clocks::*;
 import LevelFIFO::*;
+import FIFOF::*;
 
 `include "physical_platform_utils.bsh"
 `include "fpga_components.bsh"
@@ -92,23 +93,83 @@ import "BVI" MDM = module mkPrimitiveJTAGDevice
 
 endmodule
 
-module mkJTAGDevice#(Clock raw_clock, Reset raw_reset) (JTAG_DEVICE);
+
+module mkJTAGDevice#(SOFT_RESET_TRIGGER soft_reset, Clock rawClock, Reset rawReset) (JTAG_DEVICE);
+    
+    FIFOF#(JTAGWord) sendfifo <- mkSizedFIFOF(16);
+    FIFOF#(JTAGWord) receivefifo <- mkSizedFIFOF(16);
+
+    // Periodically send out some garbage data to flush out xilinx
+    Reg#(Bit#(10)) counter <- mkReg(0);
+    Reg#(Bool) flushing <- mkReg(False);
+    Reg#(Bit#(6)) numberToFlush <- mkReg(32); // some magic number from XMD
+    Reg#(Bool) needToFlush <- mkReg(False);
 
     PRIMITIVE_JTAG_DEVICE primitiveJTAGDevice <- mkPrimitiveJTAGDevice();
   
+    rule sendConnect(!flushing);
+        primitiveJTAGDevice.send(sendfifo.first);
+        sendfifo.deq;
+        if(numberToFlush - 1 != 0) // complete frame...
+          begin
+            numberToFlush <= numberToFlush - 1;
+            needToFlush <= True;
+          end
+        else
+          begin
+            numberToFlush <= 32;
+            needToFlush <= False;
+          end
+
+        counter <= 0;
+    endrule
+ 
+    rule flushingFrame(flushing);
+      if(numberToFlush - 1 != 0) 
+        begin
+          numberToFlush <= numberToFlush - 1;
+        end
+      else
+        begin 
+          numberToFlush <= 32;
+          flushing <= False;
+          needToFlush <= False;
+        end
+      primitiveJTAGDevice.send(10);
+    endrule
+
+    // we trigger a soft reset if we ever see a 'z', ascii 122    
+    rule receiveConnect;
+        let data <- primitiveJTAGDevice.receive();
+        receivefifo.enq(data);
+    endrule
+
+    rule countUp(!sendfifo.notEmpty && needToFlush && !flushing); // If there is data waiting, it doesn't count
+      counter <= counter + 1;
+      if(counter + 1 == 0) 
+        begin
+          flushing <= True;
+        end 
+    endrule
+
     interface JTAG_DRIVER driver;
 
+        
         method Action send(JTAGWord data);
-            primitiveJTAGDevice.send(data);
+            sendfifo.enq(data);
         endmethod
 
         method ActionValue#(JTAGWord) receive();
-           let data <- primitiveJTAGDevice.receive();
-           return data;
+            receivefifo.deq;
+            if(receivefifo.first == 122) 
+              begin
+                soft_reset.reset();		
+              end
+            return receivefifo.first;
         endmethod
 
-        method notFull = primitiveJTAGDevice.notFull;
-        method notEmpty = primitiveJTAGDevice.notEmpty;
+        method notFull = sendfifo.notFull;
+        method notEmpty = receivefifo.notEmpty;
 
     endinterface
 

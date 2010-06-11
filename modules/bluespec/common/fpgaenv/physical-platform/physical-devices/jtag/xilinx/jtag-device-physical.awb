@@ -1,6 +1,6 @@
 
-%name JTAG Physical Device (physical)
-%desc JTAG Physical Device (physical)
+%name Xilinx JTAG Physical Device 
+%desc Xilinx JTAG Physical Device 
 
 %provides jtag_device
 

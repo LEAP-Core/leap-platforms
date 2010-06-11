@@ -36,6 +36,7 @@
 
 #include "asim/provides/physical_channel.h"
 #include "asim/provides/umf.h"
+#include "asim/provides/jtag_device.h"
 
 using namespace std;
 
@@ -55,64 +56,67 @@ PHYSICAL_CHANNEL_CLASS::PHYSICAL_CHANNEL_CLASS(
     PHYSICAL_DEVICES d) :
     PLATFORMS_MODULE_CLASS(p)
 {
-  int     child_to_parent[2];
-  int     parent_to_child[2];
+  jtagDevice = new JTAG_DEVICE_CLASS(p);
 
+  errfd = fopen("./error_messages_phy_channel", "w");
   incomingMessage = NULL;
 
-  // open serial device. As it's non-blocking we should hold until we
-  // have a physical connection
-  errfd = fopen("./error_messages", "w");
-
-
-  //spawn a process
-  if (pipe(child_to_parent) < 0 || pipe(parent_to_child) < 0)
-  {
-      parent->CallbackExit(1);
-  }
-
-  pid = fork();
-  if (pid == 0)
-  {
-        // child
-        close(child_to_parent[0]);
-        close(parent_to_child[1]);
-
-        dup2(parent_to_child[0], fileno(stdin));
-        dup2(child_to_parent[1], fileno(stdout));
-
-        fprintf(errfd, "Lunaching nios2-terminal\n"); 
-        execlp("nios2-terminal", "nios2-terminal", NULL);
-    }
-    else
-    {
-        // parent
-        close(child_to_parent[1]);
-        close(parent_to_child[0]);
-        input = child_to_parent[0];
-        output = parent_to_child[1];
-
-    }
-
-  int i = 0;
+  // suck starting sequence out of jtag
+  int handshakeStage = 0;
   char temp;
   int returnVal;
-  while(i < UMF_CHUNK_BYTES*2) {
-     while((returnVal = read(input, &temp,sizeof(char))) < 1) {}
-     i = (temp == i + 65) ? i+1 : 0;
+  int probes = 0;
+  int reset = 0;
+  char password[8] = {'a','b','c','d','e','f','g','h'};
+  char counterword[9] = {'A','B','C','D','E','F','G','H','I'};
+  // Reset the handshake
+  jtagDevice->Write(counterword+8,sizeof(char));
+
+  while(handshakeStage < UMF_CHUNK_BYTES*2) {
+    probes = 0;
+     // Probe for data        
+    while(!jtagDevice->Probe() && !reset) {
+      sleep(1); // 1ms is long enough
+      fprintf(errfd, "probing\n");
+      fflush(errfd);
+      probes++;
+      if(probes == 10) {
+        probes = 0;
+        fprintf(errfd, "reset handshake\n");
+        jtagDevice->Write(counterword+8,sizeof(char));
+      }
+    }
+    
+
+     jtagDevice->Read(&temp,sizeof(char));
+
+ 
+     if(temp == 'a' && !reset) {
+       reset = 1;
+       jtagDevice->Write(counterword+8,sizeof(char));
+     }
+     else if(temp == password[handshakeStage]) {
+       jtagDevice->Write(counterword+handshakeStage,sizeof(char));
+       handshakeStage++;             
+     } else if (temp == 'a'){
+       // drain them
+     } else {
+       jtagDevice->Write(counterword+8,sizeof(char));
+       handshakeStage = 0;    
+       fprintf(errfd, "reset handshake\n");
+     }
+     fprintf(errfd, "got init char %d\n", temp);
+     fflush(errfd);
   }
-  
-  fprintf(errfd, "get starting sequence\n");
-  
+
+  fprintf(errfd, "got starting sequence\n");
+  fflush(errfd);
 }
 
 // destructor
 PHYSICAL_CHANNEL_CLASS::~PHYSICAL_CHANNEL_CLASS()
 {
   // we should probably trap the signal as well to gracefully kill our child
-   kill(pid,SIGTERM);
-   close(input);
-   close(output);
 }
 
 // blocking read
@@ -141,19 +145,11 @@ PHYSICAL_CHANNEL_CLASS::Read(){
 UMF_MESSAGE
 PHYSICAL_CHANNEL_CLASS::TryRead(){   
   // We must check if there's new data. This will give us more and stop if we're full.
-  fd_set readFile;
-  struct timeval time = {0,0};  
-
-  FD_ZERO(&readFile);
-  FD_SET(input, &readFile); 
-  
-  select(input+1,&readFile,NULL,NULL, &time);
-
-  //select says we're okay
-  if(FD_ISSET(input,&readFile)) {
+    
+  fflush(errfd);    
+  if(jtagDevice->Probe()) {
     readPipe();
   }
-
 
   // now see if we have a complete message
   if (incomingMessage && !incomingMessage->CanAppend()){
@@ -186,7 +182,7 @@ PHYSICAL_CHANNEL_CLASS::Write(UMF_MESSAGE message){
   }        
 
   //write header to pipe
-  write(output,(const char *)mod_header, UMF_CHUNK_BYTES*2);
+  jtagDevice->Write((const char *)mod_header, UMF_CHUNK_BYTES*2);
 
   // write message data to pipe
   // NOTE: hardware demarshaller expects chunk pattern to start from most
@@ -206,7 +202,7 @@ PHYSICAL_CHANNEL_CLASS::Write(UMF_MESSAGE message){
           mod_chunk[i] = ((chunk_bytes[i/2] >> 4) & 15) + 64;
        }
     }        
-    write(output,(const char*)mod_chunk, UMF_CHUNK_BYTES*2);
+    jtagDevice->Write((const char*)mod_chunk, UMF_CHUNK_BYTES*2);
   }
 
   // de-allocate message
@@ -232,7 +228,7 @@ PHYSICAL_CHANNEL_CLASS::readPipe(){
     for(int i = 0; i <  UMF_CHUNK_BYTES*2; i++) {
         char temp;
       int returnVal;
-      while((returnVal = read(input,&temp,sizeof(char))) < 1) {} // Block :(
+      while((returnVal = jtagDevice->Read(&temp,sizeof(char))) < 1) {} // Block :(
       header[i/2] = ((temp%16)*16)+(header[i/2]/16);
     }
 
@@ -253,7 +249,7 @@ PHYSICAL_CHANNEL_CLASS::readPipe(){
     for(int i = 0; i <  UMF_CHUNK_BYTES*2; i++) {
       char temp;
       int returnVal;
-      while((returnVal = read(input,&temp,sizeof(char))) < 1) {} // Block :(
+      while((returnVal = jtagDevice->Read(&temp,sizeof(char))) < 1) {} // Block :(
       buf[i/2] = (buf[i/2]/16) + ((temp%16)*16);
     }
 

@@ -6,6 +6,7 @@ import GetPut::*;
 
 `include "asim/provides/avalon.bsh"
 `include "asim/provides/register_mapper.bsh"
+`include "physical_platform_utils.bsh"
 
 typedef Bit#(8) JTAGWord;
 
@@ -150,7 +151,7 @@ module mkAvalonJtagDriver#(Clock rawClock, Reset rawReset) (JTAG_DEVICE);
       
 endmodule
 
-module mkJtagDevice#(Clock rawClock, Reset rawReset) (JTAG_DEVICE);
+module mkJtagDevice#(SOFT_RESET_TRIGGER reset, Clock rawClock, Reset rawReset) (JTAG_DEVICE);
    
    let jtagDriver <- mkAvalonJtagDriver(rawClock, rawReset);
    

@@ -10069,3 +10069,61 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/jta
 
 
 JTAG debugger operational.  Running it requires the use of the Xilinx XMD program terminal, as will any physical channel based on the jtag.  Interestingly, multiple JTAGs can be instantiated and used simulatneously (4 on the virtex 5 110t).
+
+----------
+keflemin    Date: Fri Jun 11 18:27:15 EDT 2010  CSN: CSN-platforms-449
+                  Fri Jun 11 22:27:15 UTC 2010
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-hybrid-htg-v5-jtag.apm Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/jtag
+ jtag-physical-channel.cpp Locally Modified          448 
+ jtag-physical-channel.h   Locally Modified          448 
+ jtag-physical-channel.bsv Locally Modified          448 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/jtag
+ htg-v5-jtag.h             Locally Added               - 
+ htg-v5-jtag.bsv           Locally Added               - 
+ htg-v5-pcie-enabled.sdc   Locally Removed           448 
+ htg-v5-pcie-enabled.awb   Locally Removed           448 
+ htg-v5-pcie-enabled.ucf   Locally Removed           448 
+ htg-v5-pcie-enabled.cpp   Locally Removed           448 
+ htg-v5-pcie-enabled-synplify.awb Locally Removed           448 
+ htg-v5-jtag.sdc           Locally Added               - 
+ htg-v5-jtag.awb           Locally Added               - 
+ htg-v5-pcie-enabled.h     Locally Removed           448 
+ htg-v5-pcie-enabled-synplify.ucf Locally Removed           448 
+ htg-v5-jtag.ucf           Locally Added               - 
+ htg-v5-pcie-enabled.bsv   Locally Removed           448 
+ htg-v5-jtag.cpp           Locally Added               - 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/jtag/altera
+ AvalonJtag.bsv            Locally Modified          448 
+ jtag-device.cpp           Locally Added               0 
+ jtag-device.h             Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/jtag/xilinx
+ jtag-device.cpp           Locally Modified          448 
+ jtag-device-physical.awb  Locally Modified          448 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/jtag/xilinx/debug
+ jtag-debug.bsv            Locally Modified          448 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/jtag/xilinx
+ jtag-import.bsv           Locally Modified          448 
+ jtag-device.h             Locally Modified          448 
+
+
+Functional JTAG Physical Channel for Xilinx devices.  This can be used
+on any Virtex chip for activities such as debugging faster physical
+channels.  The speed is low (~100B/s), but can probably be improved
+with a little effort. 
+
+XMD is a pretty terrible tool.  For the JTAG to operate, it requires
+frequent user input in the form of carriage returns.  It also requires
+the hardware to write at least 32 bytes before XMD will deign to read
+its buffer.  Just another example of a fine Xilinx tool. 
+
+

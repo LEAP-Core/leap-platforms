@@ -23,7 +23,7 @@ module mkApplication#(VIRTUAL_PLATFORM vp)();
     ClientStub_JTAGDEBUG clientStub <- mkClientStub_JTAGDEBUG(llpi.rrrClient);
 
     //Instantiate Jtag
-    JTAG_DEVICE jtag <- mkJTAGDevice(clock,reset);
+    JTAG_DEVICE jtag <- mkJTAGDevice(?,clock,reset);
 
     Reg#(Bool) lastNotFull  <-  mkReg(False);
     Reg#(Bool) lastNotEmpty <-  mkReg(False);

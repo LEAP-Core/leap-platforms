@@ -16,43 +16,40 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-#ifndef __PHYSICAL_CHANNEL__
-#define __PHYSICAL_CHANNEL__
-
 #include <stdio.h>
+#include <unistd.h>
+#include <strings.h>
+#include <assert.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <sys/select.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/wait.h>
+#include <signal.h>
+#include <string.h>
+#include <errno.h>
+#include <iostream>
 
-#include "asim/provides/umf.h"
-#include "asim/provides/physical_platform.h"
+#include "platforms-module.h"
+
+#include "asim/provides/command_switches.h"
 #include "asim/provides/jtag_device.h"
 
+void forkJTAGCommunication() {
+    execlp("nios2-terminal", "nios2-terminal", NULL);
+}
 
-// ============================================
-//               Physical Channel              
-// ============================================
-
-class PHYSICAL_CHANNEL_CLASS: public PLATFORMS_MODULE_CLASS
-{
-
-  private:
- 
-  int msg_count_in, msg_count_out;
-
-  // incomplete incoming read message
-  UMF_MESSAGE incomingMessage;
+void establishJTAGConnection(int inpipe, int outpipe) {
+  // This serves to flush out any spurious data
+  int i = 0;
+  char temp;
+  int returnVal;
+  while(i < UMF_CHUNK_BYTES*2) {
+     while((returnVal = read(inpipe, &temp,sizeof(char))) < 1) {}
+     i = (temp == i + 65) ? i+1 : 0;
+  }
   
-  JTAG_DEVICE jtagDevice;
-  FILE* errfd;
 
-  void   readPipe();
+}
 
-  public:
-
-    PHYSICAL_CHANNEL_CLASS(PLATFORMS_MODULE, PHYSICAL_DEVICES);
-    ~PHYSICAL_CHANNEL_CLASS();
-    
-    UMF_MESSAGE Read();             // blocking read
-    UMF_MESSAGE TryRead();          // non-blocking read
-    void        Write(UMF_MESSAGE); // write
-};
-
-#endif

@@ -19,9 +19,11 @@
 #ifndef __JTAG__
 #define __JTAG__
 
+#include <stdio.h>
+
 #include "platforms-module.h"
 #include "asim/provides/umf.h"
-
+#include <pthread.h>
 
 // ============================================
 //       JTAG Physical Device
@@ -30,6 +32,19 @@ typedef class JTAG_DEVICE_CLASS* JTAG_DEVICE;
 class JTAG_DEVICE_CLASS: public PLATFORMS_MODULE_CLASS
 {
   private:
+    int pid_XMD;
+    int sockfd;
+    int xmdReader; 
+    int input;
+    int output;
+    int parent_to_XMD[2];
+    int jtag_to_blank[2];
+    FILE* errfd;
+    FILE* xmdfd;
+    int killThreads;
+    pthread_t pollThread;
+    pthread_t blankRemoveThread;
+    pthread_t XMDWriterThread;
 
   public:
     JTAG_DEVICE_CLASS(PLATFORMS_MODULE);
@@ -38,8 +53,8 @@ class JTAG_DEVICE_CLASS: public PLATFORMS_MODULE_CLASS
     void Cleanup();                    // cleanup
     void Uninit();                     // uninit
     bool Probe();                      // probe for data
-    void Read(unsigned char*, int);    // blocking read
-    void Write(unsigned char*, int);   // write
+    int  Read(char*, int);    // nonblocking read
+    int  Write(const char*, int);   // write
 };
 
 #endif
