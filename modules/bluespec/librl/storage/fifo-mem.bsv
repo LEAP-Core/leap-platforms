@@ -180,3 +180,65 @@ module mkMemoryFIFOF#(NumTypeParam#(n_ENTRIES) p, MEMORY_IFC#(Bit#(TLog#(n_ENTRI
         return funcFIFO_IDX_notFull(state);
     endmethod
 endmodule
+
+
+
+module mkSizedLUTRAMFIFOF#(NumTypeParam#(t_DEPTH) dummy) 
+  //
+  //interface:
+              (FIFOF#(data_T))
+  provisos
+          (Bits#(data_T, data_SZ));
+
+  LUTRAM#(Bit#(TLog#(t_DEPTH)), data_T) rs <- mkLUTRAMU();
+  
+  COUNTER#(TLog#(t_DEPTH)) head <- mkLCounter(0);
+  COUNTER#(TLog#(t_DEPTH)) tail <- mkLCounter(0);
+
+  Bool full  = head.value() == (tail.value() + 1);
+  Bool empty = head.value() == tail.value();
+    
+  method Action enq(data_T d) if (!full);
+  
+    rs.upd(tail.value(), d);
+    tail.up();
+   
+  endmethod  
+  
+  method data_T first() if (!empty);
+    
+    return rs.sub(head.value());
+  
+  endmethod   
+  
+  method Action deq();
+  
+    head.up();
+    
+  endmethod
+
+  method Action clear();
+  
+    tail.setC(0);
+    head.setC(0);
+    
+  endmethod
+
+  method Bool notEmpty();
+    return !empty;
+  endmethod
+  
+  method Bool notFull();
+    return !full;
+  endmethod
+
+endmodule
+
+module mkSizedLUTRAMFIFO#(NumTypeParam#(t_DETPH) dummy) (FIFO#(data_T))
+  provisos
+          (Bits#(data_T, data_SZ));
+
+    let q <- mkSizedFIFOF_DRAM(dummy);
+    return fifofToFifo(q);
+
+endmodule

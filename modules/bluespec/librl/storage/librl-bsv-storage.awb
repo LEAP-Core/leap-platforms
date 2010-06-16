@@ -7,5 +7,4 @@
 
 %public fifo-mem.bsv
 %public fifo-scoreboard.bsv
-%public fpga-fifos.bsv
 %public memory-heap.bsv

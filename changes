@@ -10127,3 +10127,20 @@ the hardware to write at least 32 bytes before XMD will deign to read
 its buffer.  Just another example of a fine Xilinx tool. 
 
 
+
+----------
+pellauer    Date: Wed Jun 16 14:35:32 EDT 2010  CSN: CSN-platforms-450
+                  Wed Jun 16 18:35:32 UTC 2010
+
+
+Directory modules/bluespec/librl/storage
+ librl-bsv-storage.awb     Locally Modified          449 
+ fifo-mem.bsv              Locally Modified          449 
+ fpga-fifos.bsv            Locally Removed           449 
+
+
+* Add mkLUTRAMSizedFIFO to fifo-mem.bsv
+
+* Remove obsolete fpga-fifos.bsv file. Seems to be unused.
+
+Michael P.
