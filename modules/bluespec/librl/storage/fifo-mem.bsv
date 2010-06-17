@@ -24,6 +24,7 @@ import FIFO::*;
 import FIFOF::*;
 import SpecialFIFOs::*;
 
+`include "asim/provides/fpga_components.bsh"
 `include "asim/provides/librl_bsv_base.bsh"
 
 
@@ -238,7 +239,7 @@ module mkSizedLUTRAMFIFO#(NumTypeParam#(t_DETPH) dummy) (FIFO#(data_T))
   provisos
           (Bits#(data_T, data_SZ));
 
-    let q <- mkSizedFIFOF_DRAM(dummy);
+    let q <- mkSizedLUTRAMFIFOF(dummy);
     return fifofToFifo(q);
 
 endmodule

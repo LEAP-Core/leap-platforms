@@ -10144,3 +10144,20 @@ Directory modules/bluespec/librl/storage
 * Remove obsolete fpga-fifos.bsv file. Seems to be unused.
 
 Michael P.
+
+----------
+pellauer    Date: Thu Jun 17 12:29:00 EDT 2010  CSN: CSN-platforms-451
+                  Thu Jun 17 16:29:00 UTC 2010
+
+
+Directory modules/bluespec/librl/storage
+ fifo-mem.bsv              Locally Modified          450 
+
+
+* Apparently deleting that file had an unexpected side effect: it was the only
+place in librl_storage to #include fpga_components. It turns out that other 
+files were relying on this #include. So commenting the contents of the file out
+worked (since I didn't think to comment out the #includes) but actually
+deleting it did not.
+
+Michael P.
