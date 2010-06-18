@@ -10161,3 +10161,24 @@ worked (since I didn't think to comment out the #includes) but actually
 deleting it did not.
 
 Michael P.
+
+----------
+pellauer    Date: Fri Jun 18 17:21:35 EDT 2010  CSN: CSN-platforms-452
+                  Fri Jun 18 21:21:35 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ lutram.bsv                Locally Modified          451 
+ lutram.v                  Locally Modified          451 
+
+
+* Scheduling fix-up. The Bluespec scheduler stopped noticing that things were
+  mutually exclusive again, particularly with regards to "initialization" 
+  events. So now we use a method that writes a wire that feeds a rule. We
+  can put whatever attributes we want on the rule, so everything is happy
+  and the hardware is unchanged. MANY fewer warnings are issued though.
+
+* Remove the "initialized" field from LUTRAMs. This was my last attempt at a fix 
+  and it wasn't as succesful as the Wire approach.
+  
+Michael P.

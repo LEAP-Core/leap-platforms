@@ -15,7 +15,6 @@
 module LUTRAMUDualPort(CLK,
                        RST_N,
                        CLK_GATE,
-                       INIT,
                        ADDR_IN, D_IN, WE,
                        ADDR_1, D_OUT_1
                        );
@@ -33,8 +32,6 @@ module LUTRAMUDualPort(CLK,
 
    input [addr_width - 1 : 0]  ADDR_1;
    output [data_width - 1 : 0] D_OUT_1;
-
-   output                      INIT;
 
    // synthesis attribute ram_style of arr is distributed
    reg [data_width - 1 : 0]    arr[lo:hi];
@@ -61,8 +58,6 @@ module LUTRAMUDualPort(CLK,
      end // always@ (posedge CLK)
 
    assign D_OUT_1 = arr[ADDR_1];
-
-   assign INIT = 1;
 
    // synopsys translate_off
    always@(posedge CLK)

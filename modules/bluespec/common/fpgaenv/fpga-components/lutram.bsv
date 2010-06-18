@@ -35,7 +35,6 @@ import RegFile::*;
 interface LUTRAM#(type t_ADDR, type t_DATA);
     method Action upd(t_ADDR addr, t_DATA d);
     method t_DATA sub(t_ADDR addr);
-    method Bool initialized();
 endinterface: LUTRAM
 
 //
@@ -56,7 +55,6 @@ module mkLUTRAMU_RegFile
     //
     method Action upd(t_ADDR addr, t_DATA d) = mem.upd(addr, d);
     method t_DATA sub(t_ADDR addr) = mem.sub(addr);
-    method Bool initialized() = True;
 endmodule
 
 
@@ -87,7 +85,6 @@ module mkLUTRAMU_Async
 
     method Action upd(t_ADDR addr, t_DATA d) = mem.upd(tweakAddr(addr), d);
     method t_DATA sub(t_ADDR addr) = mem.sub(tweakAddr(addr));
-    method Bool initialized() = True;
 endmodule
 
 
@@ -144,6 +141,7 @@ module mkLUTRAMWith#(function t_DATA initfunc(t_ADDR idx))
 
     Reg#(Bool) initialized_m <- mkReg(False);
     Reg#(t_ADDR) init_idx <- mkReg(minBound);
+    Wire#(Tuple2#(t_ADDR, t_DATA)) writeW <- mkWire();
 
     rule initializing (! initialized_m);
         mem.upd(init_idx, initfunc(init_idx));
@@ -155,20 +153,28 @@ module mkLUTRAMWith#(function t_DATA initfunc(t_ADDR idx))
         // Hack to avoid needing Arith proviso
         init_idx <= unpack(pack(init_idx) + 1);
     endrule
+    
+    (* fire_when_enabled *)
+    rule doWrite (initialized_m);
+    
+        match {.addr, .d} = writeW;
+        mem.upd(addr, d);
+    
+    endrule
 
     //
     // Access methods
     //
 
     method Action upd(t_ADDR addr, t_DATA d) if (initialized_m);
-        mem.upd(addr, d);
+        // The Bluesec scheduler is having a really hard time with the conflicting updates.
+        // In order to make its life easier we use a wire and clearly ME rules.
+        writeW <= tuple2(addr, d);
     endmethod
 
     method t_DATA sub(t_ADDR addr) if (initialized_m);
         return mem.sub(addr);
     endmethod
-    
-    method Bool initialized() = initialized_m;
 
 endmodule
 
@@ -222,8 +228,6 @@ endinterface: LUTRAM_READER_IFC
 interface LUTRAM_MULTI_READ#(numeric type n_READERS, type t_ADDR, type t_DATA);
     method Action upd(t_ADDR addr, t_DATA d);
     interface Vector#(n_READERS, LUTRAM_READER_IFC#(t_ADDR, t_DATA)) readPorts;
-
-    method Bool initialized();
 endinterface: LUTRAM_MULTI_READ
 
 
@@ -243,12 +247,10 @@ import "BVI" LUTRAMUDualPort = module mkLUTRAMUDualPort
 
     method D_OUT_1 sub(ADDR_1);
     method upd(ADDR_IN, D_IN) enable(WE);
-    method INIT initialized();
 
     schedule upd C upd;
     schedule sub C sub;
     schedule upd CF sub;
-    schedule initialized CF (sub, upd, initialized);
 endmodule
 
 
@@ -310,7 +312,6 @@ module mkMultiReadLUTRAMU
 
     interface readPorts = portsLocal;
 
-    method Bool initialized() = True;
 endmodule
 
 
@@ -368,7 +369,6 @@ module mkMultiReadLUTRAMWith#(function t_DATA initfunc(t_ADDR idx))
 
     interface readPorts = portsLocal;
 
-    method Bool initialized() = initialized_m;
 endmodule
 
 
