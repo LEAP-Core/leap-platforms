@@ -38,12 +38,25 @@ endinterface
 
 
 //
+// mkDebugFileNull --
+//     Null debug file, will drop everything on the floor. 
+//
+module mkDebugFileNull#(String fname)
+    // interface:
+    (DEBUG_FILE);
+    method record = ?;
+endmodule
+
+
+//
 // mkDebugFile --
 //     Standard simulation debugging file.
 //
 module mkDebugFile#(String fname)
     // interface:
-        (DEBUG_FILE);
+    (DEBUG_FILE);
+
+`ifndef SYNTH
 
     COUNTER#(32) fpga_cycle <- mkLCounter(0);
 
@@ -71,14 +84,13 @@ module mkDebugFile#(String fname)
         $fflush(debugLog);
     endmethod
 
-endmodule
+`else
 
-//
-// mkDebugFileNull --
-//     Null debug file, will drop everything on the floor. 
-//
-module mkDebugFileNull#(String fname)
-    // interface:
-        (DEBUG_FILE);
-    method record = ?;
+    // No point in wasting space on debug file for synthesized build.  Xst
+    // doesn't get rid of it all.
+    DEBUG_FILE n <- mkDebugFileNull(fname);
+    return n;
+
+`endif
+
 endmodule

@@ -10182,3 +10182,33 @@ Directory modules/bluespec/common/fpgaenv/fpga-components
   and it wasn't as succesful as the Wire approach.
   
 Michael P.
+
+----------
+mcadler     Date: Wed Jun 23 07:44:00 EDT 2010  CSN: CSN-platforms-454
+                  Wed Jun 23 11:44:00 UTC 2010
+
+
+Directory modules/bluespec/librl/base
+ debug-file.bsv            Locally Modified          453 
+ memory-pack.bsv           Locally Modified          453 
+
+- Many to 1 memory packing had an easy deadlock pattern.  The write path must
+  do a read-modify-write to update the container.  Because of the module
+  hierarchy, the RMW path shares read port 0.  If read requests come in that
+  fill the read port 0 output buffer then no writes (RMWs) can fire.
+
+  Adding a separate read port for RMW is not an option because of the module
+  hierarchy.  The underlying structure has already been instantiated and the
+  many to 1 packing is supposed to be transparent.
+
+  Solution:
+    1. All read ports are limited to N outstanding requests.  Currently N is
+       set to match the corresponding limit in scratchpads.
+    2. Provide local buffering for read port 0 results so the underlying
+       shared read port never deadlocks with the wrong data.
+
+  Performance with scratchpads should be unchanged, since the scratchpad
+  was already limiting the number of read requests in flight.
+
+- Debug file: for synthesized builds always use the null implementation.
+  Xst was not eliminating the whole thing and fan-out was a timing problem.

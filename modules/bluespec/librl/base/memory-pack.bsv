@@ -37,6 +37,15 @@ import SpecialFIFOs::*;
 `include "asim/provides/librl_bsv_base.bsh"
 
 //
+// Number of slots in read state buffers.  This value controls the number
+// of reads that may be in flight.  It is likely you want this value to be
+// equal to (definitely not greater than) the number of scratchpad port ROB
+// slots.
+//
+typedef 8 MEM_PACK_READ_SLOTS;
+
+
+//
 // Compute the number of objects of desired type that can fit inside a container
 // type.  To simplify addressing, the computed number of objects per container
 // or containers per object will always be a power of 2.  Thus the maximum wasted
@@ -272,7 +281,28 @@ module mkMemPackManyTo1#(MEMORY_MULTI_READ_IFC#(n_READERS, t_CONTAINER_ADDR, t_C
     //
     // Beware!  The FIFOs are unguarded so there can be no predicates on methods
     // below such as the memory's notEmpty method.
-    Vector#(n_READERS, FIFOF#(PACK_REQ_INFO#(t_DATA_SZ, t_CONTAINER_DATA_SZ))) readReqInfoQ <- replicateM(mkUGSizedFIFOF(4));
+    FIFOF#(PACK_REQ_INFO#(t_DATA_SZ, t_CONTAINER_DATA_SZ)) readReqInfoQ[valueOf(n_READERS)];
+
+    // Track the number of reads in flight to prevent deadlocks in which a
+    // client needs to do a write following a series of queued reads.
+    COUNTER_Z#(TLog#(MEM_PACK_READ_SLOTS)) readReqCnt[valueOf(n_READERS)];
+
+    for (Integer p = 0; p < valueOf(n_READERS); p = p + 1)
+    begin
+        readReqCnt[p] <- mkLCounter_Z(fromInteger(valueOf(TSub#(MEM_PACK_READ_SLOTS, 1))));
+
+        // Port 0 gets one extra slot for the RMW
+        if (p == 0)
+            readReqInfoQ[p] <- mkUGSizedFIFOF(1 + valueOf(MEM_PACK_READ_SLOTS));
+        else
+            readReqInfoQ[p] <- mkUGSizedFIFOF(valueOf(MEM_PACK_READ_SLOTS));
+    end
+
+    //
+    // Read port 0 is shared with the RMW pipeline.  To avoid deadlock, this
+    // module must provide local buffering of read results.
+    //
+    FIFOF#(t_DATA) readResultPort0Q <- mkSizedFIFOF(valueOf(MEM_PACK_READ_SLOTS));
 
     // Writes must be read-modify-write.  Read the full container, update the
     // object, and write it back.  We must be careful of read/write ordering
@@ -364,16 +394,70 @@ module mkMemPackManyTo1#(MEMORY_MULTI_READ_IFC#(n_READERS, t_CONTAINER_ADDR, t_C
 
 
     //
+    // processReadPort0Rsp --
+    //     The RMW pipeline shares read port 0.  The pipelines will deadlock
+    //     if read port 0 is blocked for true reads.  Providing a local buffer
+    //     for all possible outstanding read requests breaks the dependence.
+    //
+    rule processReadPort0Rsp (readReqInfoQ[0].notEmpty() &&
+                              ! readReqInfoQ[0].first().isReadForWrite);
+        let o_idx = readReqInfoQ[0].first().objIdx;
+        readReqInfoQ[0].deq();
+
+        readReqCnt[0].up();
+
+        let d <- containerMem.readPorts[0].readRsp();
+        t_PACKED_CONTAINER pack_data = unpack(truncateNP(pack(d)));
+        readResultPort0Q.enq(unpack(truncateNP(pack_data[o_idx])));
+    endrule
+
+
+    //
     // Methods
     //
     Vector#(n_READERS, MEMORY_READER_IFC#(t_ADDR, t_DATA)) portsLocal = newVector();
 
-    for(Integer p = 0; p < valueOf(n_READERS); p = p + 1)
+    //
+    // Port 0 read response has local buffering in order to
+    // avoid deadlock.  The underlying port is shared with
+    // the read-modify-write pipeline.
+    //
+    portsLocal[0] =
+        interface MEMORY_READER_IFC#(t_ADDR, t_DATA);
+            method Action readReq(t_ADDR addr) if (! readReqCnt[0].isZero());
+                incomingReqQ.ports[0].enq(addr);
+                readReqCnt[0].down();
+            endmethod
+
+            method ActionValue#(t_DATA) readRsp();
+                let d = readResultPort0Q.first();
+                readResultPort0Q.deq();
+
+                return d;
+            endmethod
+
+            method t_DATA peek();
+                return readResultPort0Q.first();
+            endmethod
+
+            method Bool notEmpty();
+                return readResultPort0Q.notEmpty();
+            endmethod
+
+            method Bool notFull() = incomingReqQ.ports[0].notFull();
+        endinterface;
+
+
+    //
+    // Read response for ports other than 0 can uses the underlying ports.
+    //
+    for (Integer p = 1; p < valueOf(n_READERS); p = p + 1)
     begin
         portsLocal[p] =
             interface MEMORY_READER_IFC#(t_ADDR, t_DATA);
-                method Action readReq(t_ADDR addr);
+                method Action readReq(t_ADDR addr) if (! readReqCnt[p].isZero());
                     incomingReqQ.ports[p].enq(addr);
+                    readReqCnt[p].down();
                 endmethod
 
                 method ActionValue#(t_DATA) readRsp() if (readReqInfoQ[p].notEmpty() &&
@@ -381,6 +465,8 @@ module mkMemPackManyTo1#(MEMORY_MULTI_READ_IFC#(n_READERS, t_CONTAINER_ADDR, t_C
                     let o_idx = readReqInfoQ[p].first().objIdx;
                     readReqInfoQ[p].deq();
     
+                    readReqCnt[p].up();
+
                     // The compiler ought to be able to detect that this method and rule
                     // finishRMW are mutually exclusive due to their predicates.  For some
                     // reason it does not.  The schedHack wire seems to quiet the warnings.
