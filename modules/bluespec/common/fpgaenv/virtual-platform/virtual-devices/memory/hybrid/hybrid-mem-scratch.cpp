@@ -444,12 +444,12 @@ PseudoDMA(
 
     switch (methodID)
     {
-      case METHOD_ID_StoreWord:
+      case SCRATCHPAD_MEMORY_METHOD_ID_StoreWord:
       {
         instance->StoreWord(u64msg[2], u64msg[1], u64msg[0]);
         return true;
       }
-      case METHOD_ID_StoreLine:
+      case SCRATCHPAD_MEMORY_METHOD_ID_StoreLine:
       {
         UINT64 byteMask = u64msg[5];
 
@@ -467,7 +467,7 @@ PseudoDMA(
 
         return true;
       }
-      case METHOD_ID_LoadLine:
+      case SCRATCHPAD_MEMORY_METHOD_ID_LoadLine:
       {
         static PHYSICAL_CHANNEL_CLASS::PSEUDO_DMA_READ_RESP_CLASS r;
         static bool did_init = false;
@@ -481,7 +481,7 @@ PseudoDMA(
             m.Clear();
             m.SetLength(32);
             m.SetServiceID(SCRATCHPAD_MEMORY_SERVICE_ID);
-            m.SetMethodID(METHOD_ID_LoadLine);
+            m.SetMethodID(SCRATCHPAD_MEMORY_METHOD_ID_LoadLine);
 
             // UMF header components
             r.header = m.EncodeHeader();

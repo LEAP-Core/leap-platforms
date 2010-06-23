@@ -10212,3 +10212,13 @@ Directory modules/bluespec/librl/base
 
 - Debug file: for synthesized builds always use the null implementation.
   Xst was not eliminating the whole thing and fan-out was a timing problem.
+
+----------
+mcadler     Date: Wed Jun 23 18:57:11 EDT 2010  CSN: CSN-platforms-455
+                  Wed Jun 23 22:57:11 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-mem-scratch.cpp    Locally Modified          454 
+
+Update METHOD_ID names following Angshuman's RRR changes.
