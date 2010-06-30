@@ -95,7 +95,8 @@ module mkPhysicalPlatform
     LEDS_DEVICE#(`NUMBER_LEDS)         leds_device       <- mkLEDsDevice(clocked_by clk, reset_by rst);
 
     //This must be clocked by the raw  clock 
-    JTAG_DEVICE jtag_device <- mkJtagDevice(clocks_device.driver.rawClock, 
+    JTAG_DEVICE jtag_device <- mkJtagDevice(?,
+                                            clocks_device.driver.rawClock, 
                                             clocks_device.driver.rawReset, 
                                             clocked_by clk, 
                                             reset_by   rst);    

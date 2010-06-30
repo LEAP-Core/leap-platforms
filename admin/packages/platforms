@@ -6,5 +6,5 @@ Lock=asim-platforms
 Description=Description of platforms
 Name=platforms
 Tag=HEAD
-CSN=CSN-platforms-455
+CSN=CSN-platforms-456
 Dependencies=hasim/HEAD

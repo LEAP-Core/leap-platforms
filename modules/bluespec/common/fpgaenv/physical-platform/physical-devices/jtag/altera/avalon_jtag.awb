@@ -18,6 +18,9 @@
 %sources -t ALTERA_VERILOG -v PRIVATE mkAvalonWrapperInstance_0.v
 %sources -t ALTERA_VERILOG -v PRIVATE mkAvalonWrapperInstance.v
 
+%sources -t H   -v PUBLIC  jtag-device.h
+%sources -t CPP -v PUBLIC  jtag-device.cpp
+
 %param JTAG_BASE_ADDR 0 "Base address of the memory mapped jtag"
 
 %AWB_END

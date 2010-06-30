@@ -10222,3 +10222,20 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memor
  hybrid-mem-scratch.cpp    Locally Modified          454 
 
 Update METHOD_ID names following Angshuman's RRR changes.
+
+----------
+kfleming    Date: Wed Jun 30 16:47:46 EDT 2010  CSN: CSN-platforms-456
+                  Wed Jun 30 20:47:46 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/development_board_arriaII_gx/jtag
+ altera-jtag.bsv           Locally Modified          455 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/jtag/altera
+ jtag-device.cpp           Locally Modified          455 
+ jtag-device.h             Locally Modified          455 
+ avalon_jtag.awb           Locally Modified          455 
+
+
+Resurrected the altera JTAG physical channel using the unified
+jtag-channel driver.  Now Xilinx and Altera share most of the JTAG codes. 

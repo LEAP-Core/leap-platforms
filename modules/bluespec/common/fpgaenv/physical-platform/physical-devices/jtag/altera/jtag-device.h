@@ -19,10 +19,36 @@
 #ifndef __JTAG__
 #define __JTAG__
 
+#include <stdio.h>
+
 #include "platforms-module.h"
 #include "asim/provides/umf.h"
+#include <pthread.h>
 
-void forkJTAGCommunication(); 
-void establishJTAGConnection(int inpipe, int outpipe); 
+// ============================================
+//       JTAG Physical Device
+// ============================================
+typedef class JTAG_DEVICE_CLASS* JTAG_DEVICE;
+class JTAG_DEVICE_CLASS: public PLATFORMS_MODULE_CLASS
+{
+  private:
+    int parent_to_nios[2];
+    int nios_to_parent[2];
+    int pid_NIOS;
+    FILE* errfd;
+    FILE* niosfd;
+    int input;
+    int output;
+
+  public:
+    JTAG_DEVICE_CLASS(PLATFORMS_MODULE);
+    ~JTAG_DEVICE_CLASS();
+
+    void Cleanup();                    // cleanup
+    void Uninit();                     // uninit
+    bool Probe();                      // probe for data
+    int  Read(char*, int);    // nonblocking read
+    int  Write(const char*, int);   // write
+};
 
 #endif
