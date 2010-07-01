@@ -1,0 +1,88 @@
+
+[Global]
+SaveParameters=0
+Description=Standard Virtual Devices (Local Scratchpad Memory)
+File=std-virtual-devices-local-scratchpad
+Version=2.1
+Type=HAsim
+Name=Standard Virtual Devices (Local Scratchpad Memory)
+Class=Asim::Model
+DefaultBenchmark=
+DefaultRunOpts=
+
+[Model]
+DefaultAttributes=platforms
+model=Standard Virtual Devices
+
+[Hybrid Front Panel]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid/hybrid-fp.awb
+Packagehint=platforms
+
+[Standard Virtual Devices]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/std-virtual-devices.awb
+Packagehint=platforms
+
+[Standard Virtual Devices/Requires]
+front_panel=Hybrid Front Panel
+scratchpad_memory=Local Memory Scratchpad Memory Device
+central_cache=NULL Central Cache
+shared_memory=Null Shared Memory
+starter_device=Starter Virtual Device
+common_utility_devices=Base Common Devices
+
+
+
+[Starter Virtual Device]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/starter/starter-device.awb
+Packagehint=platforms
+
+[Null Shared Memory]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/shared-memory/null/null-shared-memory.awb
+Packagehint=platforms
+
+[Base Common Devices/Requires]
+stats_device=Stats Device
+dynamic_parameters_device=Dynamic Parameters Device
+streams_device=Hybrid Streams Device
+assertions_device=Assertions Device
+debug_scan_device=Debug Scan Device
+
+[Base Common Devices]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/common-utility-devices.awb
+Packagehint=platforms
+
+[Dynamic Parameters Device]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/dynamic-parameters-device/dynamic-parameters-device.awb
+Packagehint=platforms
+
+[Hybrid Streams Device]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/streams-device/hybrid-streams.awb
+Packagehint=platforms
+
+[Assertions Device]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/assertions-device/assertions-device.awb
+Packagehint=platforms
+
+[Stats Device]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/stats-device/stats-device.awb
+Packagehint=platforms
+
+[Debug Scan Device]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/debug-scan-device/debug-scan-device.awb
+Packagehint=platforms
+
+
+[Scratchpad Memory Common Definitions]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/common/mem-scratch-common.awb
+Packagehint=platforms
+
+[Local Memory Scratchpad Memory Device/Requires]
+scratchpad_memory_common=Scratchpad Memory Common Definitions
+
+[NULL Central Cache]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/central-cache/null-central-cache.awb
+Packagehint=platforms
+
+[Local Memory Scratchpad Memory Device]
+File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/local/local-mem-scratch.awb
+Packagehint=platforms

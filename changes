@@ -10239,3 +10239,15 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/jta
 
 Resurrected the altera JTAG physical channel using the unified
 jtag-channel driver.  Now Xilinx and Altera share most of the JTAG codes. 
+
+----------
+mcadler     Date: Wed Jun 30 22:05:42 EDT 2010  CSN: CSN-platforms-457
+                  Thu Jul  1 02:05:42 UTC 2010
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-hybrid-exe-local-scratchpad.apm Locally Added               0 
+ std-virtual-devices-local-scratchpad.apm Locally Added               0 
+
+Add configurations with scratchpads that use local memory (not hybrid and no
+central cache.)
