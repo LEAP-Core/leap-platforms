@@ -25,17 +25,13 @@ File=modules/bluespec/common/fpgaenv/virtual-platform/std-virtual-platform.awb
 Packagehint=platforms
 
 [Standard Virtual Platform/Requires]
-virtual_devices=Standard Virtual Devices
+virtual_devices=Standard Virtual Devices (No Memory Service)
 low_level_platform_interface=Low Level Platform Interface Hybrid
 umf=Little-Endian Unified Message Format
 
 [FPGA Environment]
 File=modules/bluespec/common/fpgaenv/fpga-environment.awb
 Packagehint=platforms
-
-[Standard Virtual Devices]
-File=config/pm/mit-6.375/virtex2-virtual-devices.apm
-Packagehint=mit-6.375
 
 [RRR Clients and Servers]
 File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic/basic-rrr.awb
@@ -86,7 +82,7 @@ serial_device=Serial Physical Device (physical)
 physical_platform_utils=Common Physical Platform Utilities
 led_device=General LED Device
 switch_device=General Switch Device
-ddr_sdram_device=NULL DDR SDRAM Physical Device
+ddr_sdram_device=DDR SDRAM Physical Device
 
 [XUP Virtex 2 Serial]
 File=modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup/serial/xilinx-xup-serial.awb
@@ -120,10 +116,6 @@ Packagehint=platforms
 [Null Physical Platform Debugger]
 File=modules/bluespec/common/fpgaenv/physical-platform/debuggers/null/null-debugger.awb
 Packagehint=platforms
-
-[NULL DDR SDRAM Physical Device]
-File=modules/bluespec/mit-6.375/lab6/ddr-sdram-null/ddr-sdram-device.awb
-Packagehint=mit-6.375
 
 [RRR Common Module]
 File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/rrr_common/rrr_common.awb
@@ -181,4 +173,12 @@ xilinx_loader=Xilinx LOADER
 
 [Xilinx MAP]
 File=modules/project/xilinx/xilinx_map.awb
+Packagehint=platforms
+
+[DDR SDRAM Physical Device]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr/ddr-sdram-device.awb
+Packagehint=platforms
+
+[Standard Virtual Devices (No Memory Service)]
+File=config/pm/hasim/submodels/fpgaenv/std-virtual-devices-null-mem.apm
 Packagehint=platforms

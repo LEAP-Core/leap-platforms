@@ -10251,3 +10251,16 @@ Directory config/pm/hasim/submodels/fpgaenv
 
 Add configurations with scratchpads that use local memory (not hybrid and no
 central cache.)
+
+----------
+kfleming    Date: Thu Jul  1 22:57:28 EDT 2010  CSN: CSN-platforms-458
+                  Fri Jul  2 02:57:28 UTC 2010
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-hybrid-xupv2-serial.apm Locally Modified          457 
+ fpgaenv-hybrid-xupv2-serial-synplify.apm Locally Removed           457 
+ fpgaenv-hybrid-xupv2-serial-chanIO-loopback.apm Locally Removed           457 
+
+
+Removed dependencies on MIT 6.375
