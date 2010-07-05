@@ -1,0 +1,32 @@
+MODEL "SyncFIFO" keep_hierarchy = true;
+MODEL "SyncFIFO" optimize_primitives = no;
+
+BEGIN MODEL "SyncFIFO"
+  NET "dD_OUT" keep = true;
+  NET "fifoMem" keep = true;
+  NET "sGEnqPtr" keep = true;
+  NET "sGEnqPtr1" keep = true;
+  NET "dGDeqPtr" keep = true;
+  NET "dGDeqPtr1" keep = true;
+  NET "sEnqPtrIndx" keep = true;
+  NET "dDeqPtrIndx" keep = true;
+  NET "fifoMem" S = true;
+  NET "dD_OUT" S = true;
+  NET "sGEnqPtr" S = true;
+  NET "sGEnqPtr1" S = true;
+  NET "dGDeqPtr" S = true;
+  NET "dGDeqPtr1" S = true;
+  NET "sEnqPtrIndx" S = true;
+  NET "dDeqPtrIndx" S = true;
+  NET "dD_OUT" equivalent_register_removal = false;
+  NET "fifoMem" equivalent_register_removal = false;
+  NET "sGEnqPtr" equivalent_register_removal = false;
+  NET "sGEnqPtr1" equivalent_register_removal = false;
+  NET "dGDeqPtr"  equivalent_register_removal = false;
+  NET "dGDeqPtr1" equivalent_register_removal = false;
+  NET "sEnqPtrIndx" equivalent_register_removal = false;
+  NET "dDeqPtrIndx" equivalent_register_removal = false;
+END;
+
+
+

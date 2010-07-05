@@ -82,6 +82,7 @@ class ModuleList:
     self.topModule.moduleDependency['NGC'] = givenNGCs
     self.topModule.moduleDependency['VHD'] = givenVHDs
     self.topModule.moduleDependency['UCF'] =  Utils.clean_split(self.env['DEFS']['GIVEN_UCFS'], sep = ' ')
+    self.topModule.moduleDependency['XCF'] =  Utils.clean_split(self.env['DEFS']['GIVEN_XCFS'], sep = ' ')
     self.topModule.moduleDependency['SDC'] = Utils.clean_split(env['DEFS']['GIVEN_SDCS'], sep = ' ')
     self.topModule.moduleDependency['VERILOG_STUB'] = ['hw/' + self.topModule.buildPath + '/.bsc/mk_' + self.topModule.name + '_Wrapper_stub.v'] 
     # deal with other modules

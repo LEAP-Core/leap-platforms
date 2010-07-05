@@ -19,6 +19,8 @@
 %private clock-buffers.v
 %private bscan-virtex5.v
 
+%sources -t XCF -v PRIVATE xilinx.xcf
+
 %param --global COST_TABLE 1 "Xilinx place and route cost table"
 
 %param SYNTH 1            "Synthesize it to FPGAs"

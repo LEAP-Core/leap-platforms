@@ -10264,3 +10264,22 @@ Directory config/pm/hasim/submodels/fpgaenv
 
 
 Removed dependencies on MIT 6.375
+
+----------
+kfleming    Date: Mon Jul  5 18:17:02 EDT 2010  CSN: CSN-platforms-459
+                  Mon Jul  5 22:17:02 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ xilinx.xcf                Locally Added               0 
+ hardware-fpga-components-virtex5.awb Locally Modified          458 
+
+Directory modules/project
+ SCons.top.pipeline.template Locally Modified          458 
+ ModuleList.py             Locally Modified          458 
+
+Directory modules/project/xilinx
+ XST.py                    Locally Modified          458 
+
+
+Added support for xcf file type in the pipeline build.  This type allows us to specify ucf constraints to xst directly, allowing us to instantiate unused clock-domain crossings without confusing downstream tools (ngdbuild in particular).  This has the potential to collapse code related to physical platform, as unused physical devices will not crash ngdbuild.   

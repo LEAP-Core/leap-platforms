@@ -30,6 +30,7 @@ defs = {
     'GIVEN_CS'           : '@GIVEN_CS@',
     'GIVEN_VERILOGS'           : '@GIVEN_VERILOGS@',
     'GIVEN_ALTERAVS'     : '@GIVEN_ALTERA_VERILOGS@',
+    'GIVEN_XCFS'         : '@GIVEN_XCFS@',
     'GIVEN_UCFS'         : '@GIVEN_UCFS@',
     'GIVEN_QSFS'         : '@GIVEN_QSFS@',
     'GIVEN_SDCS'         : '@GIVEN_SDCS@',
