@@ -8,6 +8,8 @@
 %sources -t BSV -v PUBLIC  differential-clocks-device.bsv
 %sources -t VHD -v PRIVATE differential-clocks-device.vhd
 
+%param --global MODEL_CLOCK_FREQ 50  "Desired model clock frequency (integer)."
+
 %param CRYSTAL_CLOCK_FREQ 100 "Input (Crystal) Clock Frequency"
 
 %param --global MODEL_CLOCK_MULTIPLIER 1   "Clock multiplier (integer).  Model clock freq = crystal freq * (multiplier / divider)."

@@ -8,7 +8,10 @@
 %sources -t BSV -v PUBLIC  single-ended-clocks-device.bsv
 %sources -t VHD -v PRIVATE single-ended-clocks-device.vhd
 
+%param --global MODEL_CLOCK_FREQ 75  "Desired model clock frequency (integer)."
+
 %param CRYSTAL_CLOCK_FREQ 50 "Input (Crystal) Clock Frequency"
 
 %param --global MODEL_CLOCK_MULTIPLIER 3   "Clock multiplier (integer).  Model clock freq = crystal freq * (multiplier / divider)."
 %param --global MODEL_CLOCK_DIVIDER    2   "Clock divider (integer).  Model clock freq = crystal freq * (multiplier / divider)."
+

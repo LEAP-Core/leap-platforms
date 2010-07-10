@@ -195,14 +195,14 @@ CRYSTAL_CLOCK_FREQ=125
 File=modules/project/pipelines/fpga-build-pipeline.awb
 Packagehint=platforms
 
-[Synplify Synthesis Tool]
-File=modules/project/synopsis/synplify.awb
-Packagehint=platforms
-
 [FPGA Build Pipeline/Requires]
 post_synthesis_tool=Altera Post-synthesis Toolchain
-synthesis_tool=Synplify Synthesis Tool
+synthesis_tool=XST Synthesis Tool
 
 [Altera Post-synthesis Toolchain]
 File=modules/project/altera/altera_post_synth.awb
+Packagehint=platforms
+
+[XST Synthesis Tool]
+File=modules/project/xilinx/xst.awb
 Packagehint=platforms

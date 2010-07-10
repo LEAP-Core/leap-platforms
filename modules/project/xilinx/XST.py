@@ -12,13 +12,18 @@ class Synthesize():
 
     # string together the xcf, sort of like the ucf
     # Concatenate UCF files
-    for xcf in  moduleList.topModule.moduleDependency['XCF']:
-      print 'xst found xcf: ' + xcf + '\n' 
-
-    xilinx_xcf = moduleList.env.Command(
-      moduleList.compileDirectory + '/' + moduleList.topModule.wrapperName()+ '.xcf',
-      moduleList.topModule.moduleDependency['XCF'],
-      'cat $SOURCES > $TARGET')
+    if('XCF' in moduleList.topModule.moduleDependency):
+      for xcf in  moduleList.topModule.moduleDependency['XCF']:
+        print 'xst found xcf: ' + xcf + '\n' 
+      xilinx_xcf = moduleList.env.Command(
+        moduleList.compileDirectory + '/' + moduleList.topModule.wrapperName()+ '.xcf',
+        moduleList.topModule.moduleDependency['XCF'],
+        'cat $SOURCES > $TARGET')
+    else:
+      xilinx_xcf = moduleList.env.Command(
+        moduleList.compileDirectory + '/' + moduleList.topModule.wrapperName()+ '.xcf',
+        [],
+        'touch $TARGET')
 
     ## tweak top xst file
     newXSTFile = open('config/' + moduleList.topModule.wrapperName() + '.modified.xst','w')

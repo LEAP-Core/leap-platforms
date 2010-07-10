@@ -4,5 +4,10 @@
 
 %provides clocks_device
 
+%param --global MODEL_CLOCK_FREQ 75  "Desired model clock frequency (integer)."
+
+%param CRYSTAL_CLOCK_FREQ 50 "Input (Crystal) Clock Frequency"
+
+
 %sources -t BSV -v PUBLIC  null-clocks-device.bsv
 

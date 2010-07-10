@@ -10283,3 +10283,40 @@ Directory modules/project/xilinx
 
 
 Added support for xcf file type in the pipeline build.  This type allows us to specify ucf constraints to xst directly, allowing us to instantiate unused clock-domain crossings without confusing downstream tools (ngdbuild in particular).  This has the potential to collapse code related to physical platform, as unused physical devices will not crash ngdbuild.   
+
+----------
+kfleming    Date: Sat Jul 10 18:04:36 EDT 2010  CSN: CSN-platforms-460
+                  Sat Jul 10 22:04:36 UTC 2010
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-hybrid-evaluation-arriaII-jtag.apm Locally Modified          459 
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ user-clock-sim.bsv        Locally Added               0 
+ user-clock.bsv            Locally Modified          459 
+ software-fpga-components.awb Locally Modified          459 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/simulation
+ sim-clocks-device.awb     Locally Modified          459 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/null
+ null-clocks-device.awb    Locally Modified          459 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/differential
+ differential-clocks-device.awb Locally Modified          459 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/single-ended
+ single-ended-clocks-device.awb Locally Modified          459 
+
+Directory modules/project/pipelines
+ FPGAPipeline.py           Locally Modified          459 
+
+Directory modules/project/xilinx
+ XST.py                    Locally Modified          459 
+
+
+Altered clocks devices to have CRYSTAL_CLOCK parameter, and added a
+ratioed clock simulation model, since this device now appears in user
+codes (OFDM).  Also fixed pipeline build to function if no XCF files
+are available.

@@ -7,8 +7,9 @@ from post_synthesis_tool import *
 
 class Build(ProjectDependency):
   def __init__(self, moduleList):
+    moduleList.dump()
     Synthesize(moduleList)
-
+    moduleList.dump()
     print "finish configuring Synthesize \n"
   
 
