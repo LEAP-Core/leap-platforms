@@ -1,0 +1,12 @@
+#/********************************************************************
+#* Python libraries for XST synthesis tool
+#********************************************************************/
+
+%name XST Synthesis Tool - no basicio run
+%desc XST Synthesis Tool - no basicio run
+%attributes tool
+
+%provides synthesis_tool
+
+%scons %library XSTnobasicio.py
+

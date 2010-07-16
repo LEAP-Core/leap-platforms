@@ -10,5 +10,6 @@
 
 %requires synthesis_tool
 %requires post_synthesis_tool
+%requires mcd_tool
 
 %scons %library FPGAPipeline.py

@@ -1,0 +1,13 @@
+#/********************************************************************
+#* Python libraries for XST synthesis tool
+#********************************************************************/
+
+%name Simple MCD Tool
+%desc Sloppily generates UCFs for MCD build 
+
+%attributes tool
+
+%provides mcd_tool
+
+%scons %library MCD.py
+

@@ -155,6 +155,7 @@ Packagehint=platforms
 [FPGA Build Pipeline/Requires]
 post_synthesis_tool=Xilinx Post-synthesis Toolchain
 synthesis_tool=Synplify Synthesis Tool
+mcd_tool=Simple MCD Tool
 
 [Xilinx Post-synthesis Toolchain]
 File=modules/project/xilinx/xilinx_post_synth.awb
@@ -181,4 +182,8 @@ Packagehint=platforms
 
 [Standard Virtual Devices (No Memory Service)]
 File=config/pm/hasim/submodels/fpgaenv/std-virtual-devices-null-mem.apm
+Packagehint=platforms
+
+[Simple MCD Tool]
+File=modules/project/bluespec/mcd.awb
 Packagehint=platforms

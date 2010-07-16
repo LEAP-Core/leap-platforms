@@ -10320,3 +10320,50 @@ Altered clocks devices to have CRYSTAL_CLOCK parameter, and added a
 ratioed clock simulation model, since this device now appears in user
 codes (OFDM).  Also fixed pipeline build to function if no XCF files
 are available.
+
+----------
+kfleming    Date: Fri Jul 16 11:26:06 EDT 2010  CSN: CSN-platforms-461
+                  Fri Jul 16 15:26:06 UTC 2010
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-hybrid-xupv2-serial.apm Locally Modified          460 
+ hasim-fpgaenv-htg-v5-pcie.apm Locally Modified          460 
+ fpgaenv-hybrid-evaluation-arriaII-jtag.apm Locally Modified          460 
+ fpgaenv-htg-hwonly.apm    Locally Modified          460 
+ fpgaenv-hybrid-htg-v5-pcie.apm Locally Modified          460 
+ hasim-fpgaenv-null.apm    Locally Modified          460 
+ fpgaenv-cycloneiii-jtag.apm Locally Modified          460 
+ hasim-fpgaenv-xup.apm     Locally Modified          460 
+ fpgaenv-hybrid-htg-v5-jtag.apm Locally Modified          460 
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ xilinx.xcf                Locally Modified          460 
+
+Directory modules/project/pipelines
+ fpga-build-pipeline.awb   Locally Modified          460 
+ FPGAPipeline.py           Locally Modified          460 
+
+Directory modules/project
+ bluespec/                 Locally Added               0 
+
+Directory modules/project/bluespec
+ MCD.py                    Locally Added               0 
+ mcd.awb                   Locally Added               0 
+
+Directory modules/project/xilinx
+ xst-nobasicio.awb         Locally Added               0 
+ XILINX_NGD.py             Locally Modified          460 
+ XSTnobasicio.py           Locally Added               - 
+
+
+Added a few build tools, most notably the mcd build tool, which
+injects ucf constraints if MCD codes are detected.  Eventually, we
+should make this handle all known synchronization primitives, but it
+currently does not.  
+
+Also added new XST build which does not invoke the basicio script on
+the top level verilog.  This points to a reorganization, making the
+basicio invocation a first class citizen.
+
+

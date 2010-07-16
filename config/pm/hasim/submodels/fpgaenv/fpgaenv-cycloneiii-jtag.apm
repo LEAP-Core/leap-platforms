@@ -202,7 +202,12 @@ Packagehint=platforms
 [FPGA Build Pipeline/Requires]
 post_synthesis_tool=Altera Post-synthesis Toolchain
 synthesis_tool=Synplify Synthesis Tool
+mcd_tool=Simple MCD Tool
 
 [Altera Post-synthesis Toolchain]
 File=modules/project/altera/altera_post_synth.awb
+Packagehint=platforms
+
+[Simple MCD Tool]
+File=modules/project/bluespec/mcd.awb
 Packagehint=platforms

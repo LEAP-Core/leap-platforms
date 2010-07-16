@@ -12,8 +12,8 @@ class NGD():
     xilinx_apm_name = moduleList.compileDirectory + '/' + moduleList.apmName
 
     # Concatenate UCF files
-    for ucf in  moduleList.topModule.moduleDependency['UCF']:
-      print 'ngd found ucf: ' + ucf + '\n' 
+    #for ucf in  moduleList.topModule.moduleDependency['UCF']:
+    #  print 'ngd found ucf: ' + ucf + '\n' 
     xilinx_ucf = moduleList.env.Command(
       xilinx_apm_name + '.ucf',
       moduleList.topModule.moduleDependency['UCF'],

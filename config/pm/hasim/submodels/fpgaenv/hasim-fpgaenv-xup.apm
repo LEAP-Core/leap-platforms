@@ -45,35 +45,16 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/null/null-rrr.awb
 Packagehint=platforms
 
-[XUP Physical Platform]
-File=modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup/xup-physical-platform.awb
-Packagehint=platforms
 
-[XUP Physical Platform/Requires]
-led_device=General LED Device
-button_device=General Button Device
-switch_device=General Switch Device
-physical_platform_utils=Common Physical Platform Utilities
-clocks_device=Single-Ended Crystal Clocks Device
 
-[General Switch Device]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/switches/general-switch-device.awb
-Packagehint=platforms
 
-[General LED Device]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/leds/general-led-device.awb
-Packagehint=platforms
 
-[General Button Device]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/buttons/general-button-device.awb
-Packagehint=platforms
 
 [Null Unified Message Format]
 File=modules/bluespec/common/fpgaenv/virtual-platform/umf/null/null-umf.awb
 Packagehint=platforms
 
 [Low Level Platform Interface Hardware-Only/Requires]
-physical_platform=XUP Physical Platform
 channelio=Null Channel IO Module
 rrr=Null RRR Module
 physical_platform_debugger=Null Physical Platform Debugger
@@ -95,13 +76,7 @@ Packagehint=platforms
 File=config/pm/hasim/submodels/fpgaenv/librl-bsv.apm
 Packagehint=platforms
 
-[Common Physical Platform Utilities]
-File=modules/bluespec/common/fpgaenv/physical-platform/utils/utils.awb
-Packagehint=platforms
 
-[Single-Ended Crystal Clocks Device]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/single-ended/single-ended-clocks-device.awb
-Packagehint=platforms
 
 [Hardware FPGA Components for Virtex 2]
 File=modules/bluespec/common/fpgaenv/fpga-components/hardware-fpga-components-virtex2.awb
@@ -133,6 +108,7 @@ Packagehint=platforms
 [FPGA Build Pipeline/Requires]
 post_synthesis_tool=Xilinx Post-synthesis Toolchain
 synthesis_tool=XST Synthesis Tool
+mcd_tool=Simple MCD Tool
 
 [XST Synthesis Tool]
 File=modules/project/xilinx/xst.awb
@@ -155,4 +131,8 @@ xilinx_loader=Xilinx LOADER
 
 [Xilinx MAP]
 File=modules/project/xilinx/xilinx_map.awb
+Packagehint=platforms
+
+[Simple MCD Tool]
+File=modules/project/bluespec/mcd.awb
 Packagehint=platforms
