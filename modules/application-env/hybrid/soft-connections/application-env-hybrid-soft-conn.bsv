@@ -28,6 +28,6 @@ module mkApplicationEnv#(VIRTUAL_PLATFORM vp)
     
     // Instantiate the wrapper and connect all soft connections.
     // Dangling connections are errors.
-    let wr <- instantiateWithConnections(mkWrappedApplication(vp));
+    let wr <- liftModule(instantiateWithConnections(mkWrappedApplication(vp)));
 
 endmodule

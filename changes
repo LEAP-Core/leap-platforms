@@ -10367,3 +10367,14 @@ the top level verilog.  This points to a reorganization, making the
 basicio invocation a first class citizen.
 
 
+
+----------
+keflemin    Date: Tue Jul 20 20:06:03 EDT 2010  CSN: CSN-platforms-462
+                  Wed Jul 21 00:06:03 UTC 2010
+
+
+Directory modules/application-env/hybrid/soft-connections
+ application-env-hybrid-soft-conn.bsv Locally Modified          461 
+
+
+Added a liftModule to drop the Module leavings of the soft connections code. 
