@@ -10392,3 +10392,14 @@ Refined clock generation to ensure that we try to eliminate
 instantiating DCMs as much as possible.  Also, the case of
 instantiating a DCM with multiplier = 1 has been removed, since this
 chokes downstream tools.
+
+----------
+keflemin    Date: Wed Jul 21 20:14:55 EDT 2010  CSN: CSN-platforms-464
+                  Thu Jul 22 00:14:55 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ user-clock.bsv            Locally Modified          463 
+
+
+Fixed egregious typo in user clocks.  Don't know how it passed regression.
