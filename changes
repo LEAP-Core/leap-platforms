@@ -10378,3 +10378,17 @@ Directory modules/application-env/hybrid/soft-connections
 
 
 Added a liftModule to drop the Module leavings of the soft connections code. 
+
+----------
+keflemin    Date: Wed Jul 21 12:44:52 EDT 2010  CSN: CSN-platforms-463
+                  Wed Jul 21 16:44:52 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ user-clock.bsv            Locally Modified          462 
+
+
+Refined clock generation to ensure that we try to eliminate
+instantiating DCMs as much as possible.  Also, the case of
+instantiating a DCM with multiplier = 1 has been removed, since this
+chokes downstream tools.

@@ -78,8 +78,17 @@ endmodule
 module mkUserClock_DivideByTwo
     // Interface:
         (UserClock);
+    let clk <- mkUserClock_Divider(2);
+    return clk;
 
-    let divider <- mkClockDivider(2);
+endmodule
+
+// bluesim as well as verilog
+module mkUserClock_Divider#(Integer divisor)
+    // Interface:
+        (UserClock);
+
+    let divider <- mkClockDivider(divisor);
     let usr_reset <- mkAsyncResetFromCR(0, divider.slowClock);
 
     interface clk = divider.slowClock;
@@ -99,24 +108,25 @@ module mkUserClock#(Integer inFreq, Integer clockMultiplier, Integer clockDivide
 
     UserClock clk = ?;
 
+   // let's deal with relative primes...
+   let mult = clockMultiplier/gcd(clockMultiplier,clockDivider); 
+   let div  = clockDivider/gcd(clockMultiplier,clockDivider); 
+
   `ifdef SYNTH
 
     // FPGA synthesis...
 
-    if (clockMultiplier ==  clockDivider)
+    if (mult ==  div)
         clk <- mkUserClock_Same;
-    else if (clockMultiplier == 2 && clockDivider == 1)
-        clk <- mkUserClock_Ratio(inFreq, clockMultiplier*2, clockDivider*2);
-    else if (clockMultiplier == 1 && clockDivider == 2)
-        clk <- mkUserClock_DivideByTwo;
+    else if (mult) // We can use a divider here....
+        clk <- mkUserClock_Divider(div);
     else
-        clk <- mkUserClock_Ratio(inFreq, clockMultiplier, clockDivider);
-
+        clk <- mkUserClock_Ratio(inFreq, mult, div);
   `else
 
     // Clock ratios make no sense in Bluesim
 
-    clk <- mkUserClock_Ratio(inFreq, clockMultiplier, clockDivider);
+    clk <- mkUserClock_Ratio(inFreq, mult, div);
 
   `endif
 
@@ -124,17 +134,6 @@ module mkUserClock#(Integer inFreq, Integer clockMultiplier, Integer clockDivide
 
 endmodule
 
-//
-// mkUserClockFromCrystal --
-//   Generate a user clock based on the on-board crystal that is multiplied
-//   by clockMultiplier and divided by clockDivider.
-//
-// module mkUserClockFromCrystal#(Integer clockMultiplier, Integer clockDivider)
-//         (UserClock);
 
-//     let clk <- mkUserClock(`CRYSTAL_CLOCK_FREQ, clockMultiplier, clockDivider);
-//     return clk;
-
-// endmodule
 
 
