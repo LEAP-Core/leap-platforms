@@ -10403,3 +10403,34 @@ Directory modules/bluespec/common/fpgaenv/fpga-components
 
 
 Fixed egregious typo in user clocks.  Don't know how it passed regression.
+
+----------
+keflemin    Date: Sun Jul 25 15:06:10 EDT 2010  CSN: CSN-platforms-465
+                  Sun Jul 25 19:06:10 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/jtag
+ jtag-physical-channel.cpp Locally Modified          464 
+ jtag-physical-channel.h   Locally Modified          464 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ arbiters.bsv              Locally Modified          464 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/jtag/xilinx
+ jtag-device.cpp           Locally Modified          464 
+ jtag-device.h             Locally Modified          464 
+
+Directory modules/project
+ SCons.top.template        Locally Modified          464 
+
+
+Adjusted when the jtag connection gets brought up, ensuring that this
+occurs after any fpga programming step (by way of waiting until a data
+transfer request comes through).  Eventually, we'll build an expanded
+system for dealing with FPGA programming.  
+
+I also added the -aul and -aut options to improve multiple tool
+compatibility.  Those writing physical platform modules should watch
+carefully as missing top level connections will be warnings, rather
+than errors.  It is probably best to remove this option when
+developing a physical platform.

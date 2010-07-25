@@ -42,8 +42,11 @@ class PHYSICAL_CHANNEL_CLASS: public PLATFORMS_MODULE_CLASS
   
   JTAG_DEVICE jtagDevice;
   FILE* errfd;
+  int initialized;
 
   void   readPipe();
+
+  void   InitLocal();
 
   public:
 

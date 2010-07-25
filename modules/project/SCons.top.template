@@ -473,7 +473,7 @@ xilinx_ngd = env.Command(
       # or guarantee their safety, just delete them.
       Delete('xlnx_auto_0.ise'),
       Delete('xlnx_auto_0_xdb'),
-      'ngdbuild -p ' + FPGA_PART_XILINX + ' -sd ' + env['DEFS']['ROOT_DIR_HW_MODEL'] + ' -uc ' + XILINX_APM_NAME + '.ucf ' + bmm + ' $SOURCE $TARGET',
+      'ngdbuild -aul -aut -p ' + FPGA_PART_XILINX + ' -sd ' + env['DEFS']['ROOT_DIR_HW_MODEL'] + ' -uc ' + XILINX_APM_NAME + '.ucf ' + bmm + ' $SOURCE $TARGET',
       Move(TMP_XILINX_DIR + '/netlist.lst', 'netlist.lst') ])
 
 

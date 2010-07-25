@@ -50,11 +50,32 @@ module mkStaticArbiter
     
 endmodule
 
+// 
+// Wrapper for RR arbiter - with size 1, we can simply build a static 
+// arbiter.
+//
+module mkRoundRobinArbiter
+    // interface:
+    (ARBITER#(bits_T))
+    provisos (Log#(bits_T, TLog#(bits_T)),
+              Add#(1, a, bits_T));
+    ARBITER#(bits_T) arbiter = ?;
+    if(valueof(bits_T) < 2) 
+      begin
+        arbiter <- mkStaticArbiter();
+      end
+    else
+      begin 
+        arbiter <- mkRoundRobinArbiterMultiBit();
+      end
+
+    return arbiter;
+endmodule
 
 //
 // Round-robin arbiter
 //
-module mkRoundRobinArbiter
+module mkRoundRobinArbiterMultiBit
     // interface:
     (ARBITER#(bits_T))
     provisos (Log#(bits_T, TLog#(bits_T)),

@@ -57,6 +57,14 @@ PHYSICAL_CHANNEL_CLASS::PHYSICAL_CHANNEL_CLASS(
     PLATFORMS_MODULE_CLASS(p)
 {
   jtagDevice = new JTAG_DEVICE_CLASS(p);
+  initialized = 0;
+}
+
+// only initialize the physical channel after enough of the infrastructure has
+// been pulled up to ensure that the FPGA got programmed.
+
+void
+PHYSICAL_CHANNEL_CLASS::InitLocal() {
 
   errfd = fopen("./error_messages_phy_channel", "w");
   incomingMessage = NULL;
@@ -111,6 +119,7 @@ PHYSICAL_CHANNEL_CLASS::PHYSICAL_CHANNEL_CLASS(
 
   fprintf(errfd, "got starting sequence\n");
   fflush(errfd);
+  initialized = 1;
 }
 
 // destructor
@@ -123,6 +132,10 @@ PHYSICAL_CHANNEL_CLASS::~PHYSICAL_CHANNEL_CLASS()
 UMF_MESSAGE
 PHYSICAL_CHANNEL_CLASS::Read(){
   // blocking loop
+  if(!initialized) {
+    InitLocal();
+  }
+
   fprintf(errfd,"In read\n");    
   fflush(errfd);
   while (true){
@@ -145,6 +158,11 @@ PHYSICAL_CHANNEL_CLASS::Read(){
 UMF_MESSAGE
 PHYSICAL_CHANNEL_CLASS::TryRead(){   
   // We must check if there's new data. This will give us more and stop if we're full.
+
+  if(!initialized) {
+    InitLocal();
+  }
+
     
   fflush(errfd);    
   if(jtagDevice->Probe()) {
@@ -165,6 +183,10 @@ PHYSICAL_CHANNEL_CLASS::TryRead(){
 // write
 void
 PHYSICAL_CHANNEL_CLASS::Write(UMF_MESSAGE message){
+  if(!initialized) {
+    InitLocal();
+  }
+
   // construct header
   unsigned char header[UMF_CHUNK_BYTES];
   unsigned char mod_header[UMF_CHUNK_BYTES*2];

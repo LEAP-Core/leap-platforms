@@ -51,6 +51,7 @@ class JTAG_DEVICE_CLASS: public PLATFORMS_MODULE_CLASS
     ~JTAG_DEVICE_CLASS();
 
     void Cleanup();                    // cleanup
+    void Init();                      // uninit
     void Uninit();                     // uninit
     bool Probe();                      // probe for data
     int  Read(char*, int);    // nonblocking read

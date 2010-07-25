@@ -104,6 +104,12 @@ JTAG_DEVICE_CLASS::JTAG_DEVICE_CLASS(
     PLATFORMS_MODULE p) :
         PLATFORMS_MODULE_CLASS(p)
 {
+  // nothing to do here
+}
+
+void
+JTAG_DEVICE_CLASS::Init()
+{
 
   killThreads = 0;
 
