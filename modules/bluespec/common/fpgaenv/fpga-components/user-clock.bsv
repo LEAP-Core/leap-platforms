@@ -96,6 +96,17 @@ module mkUserClock_Divider#(Integer divisor)
 
 endmodule
 
+module mkUserClockFromFrequency#(Integer inFreq,
+                                 Integer outFreq)
+    // Interface:
+        (UserClock);
+   let lcmValue = lcm(inFreq,outFreq);
+
+  let m <- mkUserClock_Ratio(inFreq, lcmValue/inFreq, lcmValue/outFreq);
+  return m;
+endmodule
+
+
 //
 // mkUserClock --
 //   Generate a user clock based on the incoming frequency that is multiplied

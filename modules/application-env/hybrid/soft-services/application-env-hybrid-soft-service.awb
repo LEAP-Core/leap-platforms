@@ -1,0 +1,14 @@
+%name Soft Services Hybrid Application Environment
+%desc Soft Services Hybrid Application Environment
+
+%attributes connected hybrid
+
+%provides application_env
+
+%requires connected_application
+%requires platform_services
+%requires soft_services
+
+%public  application-env-hybrid-soft-service.bsv
+%public  application-env-hybrid-soft-service.h
+%private application-env-hybrid-soft-service.cpp

@@ -10434,3 +10434,24 @@ compatibility.  Those writing physical platform modules should watch
 carefully as missing top level connections will be warnings, rather
 than errors.  It is probably best to remove this option when
 developing a physical platform.
+
+----------
+keflemin    Date: Mon Aug  2 21:09:26 EDT 2010  CSN: CSN-platforms-466
+                  Tue Aug  3 01:09:26 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ user-clock.bsv            Locally Modified          465 
+
+Directory modules/application-env/hybrid
+ soft-services/            Locally Added               0 
+
+Directory modules/application-env/hybrid/soft-services
+ application-env-hybrid-soft-service.cpp Locally Added               0 
+ application-env-hybrid-soft-service.h Locally Added               0 
+ application-env-hybrid-soft-service.awb Locally Added               0 
+ application-env-hybrid-soft-service.bsv Locally Added               0 
+
+
+
+Added top level for soft-services.
