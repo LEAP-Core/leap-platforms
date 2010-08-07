@@ -10455,3 +10455,15 @@ Directory modules/application-env/hybrid/soft-services
 
 
 Added top level for soft-services.
+
+----------
+keflemin    Date: Fri Aug  6 20:38:55 EDT 2010  CSN: CSN-platforms-467
+                  Sat Aug  7 00:38:55 UTC 2010
+
+
+Directory modules/project
+ SCons.top.pipeline.template Locally Modified          466 
+
+
+Removed gsl dependencies from build pipeline.  This link step was
+subsumed by the better descriptional quality of the library link step.

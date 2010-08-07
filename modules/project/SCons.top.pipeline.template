@@ -39,7 +39,7 @@ defs = {
     'GEN_VS'             : '@GEN_VS@',
     'GEN_CXXS'           : 'schedule.cxx @GEN_CXXS@',
     'GEN_HS'             : 'schedule.h @GEN_HS@',
-    'LDFLAGS'            : '-L /usr/lib64/curses -L /usr/lib/curses -l gsl -l gslcblas',
+    'LDFLAGS'            : '-L /usr/lib64/curses -L /usr/lib/curses',
     'M5_BUILD_DIR'       : '@M5_BUILD_DIR@',    # Defined if m5 simulator is present
     'MAKE_ALL_TARGET'    : '@MAKE_ALL_TARGET@',
     'MAP_OPTIONS'        : '@MAP_OPTIONS@',
