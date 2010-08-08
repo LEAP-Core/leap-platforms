@@ -130,7 +130,7 @@ for bsv in WRAPPER_BSVS.split():
 
     # Parse the log, generate a stub file
     stub_name = bsv.replace('.bsv', '_con_size.bsh')
-    stub = env.Command(stub_name, log, 'hasim-connect --dynsize $SOURCE $TARGET')
+    stub = env.Command(stub_name, log, 'hasim-connect --softservice --dynsize $SOURCE $TARGET')
 
     ##
     ## Now we are ready for the real build
@@ -182,7 +182,7 @@ for s in SUBDIRS.split():
     # Connection file derived from subdirectory build
     c = env.Command(s + '.bsv',
                     sd,
-                    'hasim-connect ' + APM_FILE + ' $TARGET')
+                    'hasim-connect --softservice ' + APM_FILE + ' $TARGET')
 
     # Build rule for the connection file
     env.BSC_SUBD(TMP_BSC_DIR + '/' + s + '.bo', c)

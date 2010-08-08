@@ -10467,3 +10467,22 @@ Directory modules/project
 
 Removed gsl dependencies from build pipeline.  This link step was
 subsumed by the better descriptional quality of the library link step.
+
+----------
+keflemin    Date: Sun Aug  8 18:10:06 EDT 2010  CSN: CSN-platforms-468
+                  Sun Aug  8 22:10:06 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/null
+ null-clocks-device.awb    Locally Modified          467 
+
+Directory modules/project
+ SCons.hw.pipeline.template Locally Modified          467 
+
+
+Added Clock Multiplier and Divider parameters to null clocks device to
+pass check in clocks soft service.  I wonder if these parameters might
+be removed in all models at some point.  
+
+Modified pipeline build to use the soft connection switch to awb.
+This turns on clock route-through code generation.
