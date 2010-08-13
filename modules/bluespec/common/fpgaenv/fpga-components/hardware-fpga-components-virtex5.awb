@@ -11,6 +11,8 @@
 %public user-clock.bsv user-clock-pll-virtex5.bsv
 %public user-clock-xilinx.bsv
 %public clock-buffers.bsv
+%public floating-point-import.bsv
+%public floating-point-accel.bsv
 
 %private Bram.v
 %private lutram.v
@@ -18,6 +20,28 @@
 %private user-clock-pll-virtex5.v
 %private clock-buffers.v
 %private bscan-virtex5.v
+
+%private fp_add.v
+%private fp_mul.v
+%private fp_div.v
+%private fp_sqrt.v
+%private fp_cmp.v
+%private fp_cvt_s_to_d.v
+%private fp_cvt_i_to_d.v
+%private fp_cvt_d_to_s.v
+%private fp_cvt_i_to_s.v
+%private fp_cvt_d_to_i.v
+
+%private fp_add.ngc
+%private fp_mul.ngc
+%private fp_div.ngc
+%private fp_sqrt.ngc
+%private fp_cmp.ngc
+%private fp_cvt_s_to_d.ngc
+%private fp_cvt_i_to_d.ngc
+%private fp_cvt_d_to_s.ngc
+%private fp_cvt_i_to_s.ngc
+%private fp_cvt_d_to_i.ngc
 
 %sources -t XCF -v PRIVATE xilinx.xcf
 

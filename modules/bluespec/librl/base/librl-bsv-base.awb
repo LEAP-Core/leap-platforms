@@ -16,6 +16,7 @@
 %public lfsr.bsv
 %public memory-interface.bsv
 %public memory-pack.bsv
+%public guarded-pipelines.bsv
 
 %include --type=verilog @BLUESPECDIR@/Verilog/
 

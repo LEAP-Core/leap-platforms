@@ -10519,3 +10519,43 @@ environment/platform/connection - rudimentary IR classes.
 
 This will soon turn in to a build step for constructing multi-fpga
 implementations.  
+
+----------
+pellauer    Date: Fri Aug 13 14:09:38 EDT 2010  CSN: CSN-platforms-470
+                  Fri Aug 13 18:09:38 UTC 2010
+
+
+Directory modules/bluespec/librl/base
+ guarded-pipelines.bsv     Locally Added               0 
+ librl-bsv-base.awb        Locally Modified          469 
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ fp_sqrt.v                 Locally Added               0 
+ fp_add.ngc                Locally Added               0 
+ fp_cvt_i_to_s.ngc         Locally Added               0 
+ fp_mul.ngc                Locally Added               0 
+ fp_cvt_i_to_d.v           Locally Added               0 
+ fp_cvt_d_to_i.ngc         Locally Added               0 
+ fp_cmp.v                  Locally Added               0 
+ fp_div.v                  Locally Added               0 
+ fp_cvt_s_to_d.v           Locally Added               0 
+ fp_cvt_d_to_s.ngc         Locally Added               0 
+ fp_cvt_i_to_s.v           Locally Added               0 
+ fp_add.v                  Locally Added               0 
+ fp_sqrt.ngc               Locally Added               0 
+ fp_mul.v                  Locally Added               0 
+ floating-point-accel.bsv  Locally Added               0 
+ floating-point-import.bsv Locally Added               0 
+ fp_cvt_d_to_i.v           Locally Added               0 
+ fp_cvt_i_to_d.ngc         Locally Added               0 
+ hardware-fpga-components-virtex5.awb Locally Modified          469 
+ fp_cmp.ngc                Locally Added               0 
+ fp_cvt_d_to_s.v           Locally Added               0 
+ fp_div.ngc                Locally Added               0 
+ fp_cvt_s_to_d.ngc         Locally Added               0 
+
+
+* Add Xilinx floating-point cores to hardware FPGA components.
+* Add  "guarded pipeline" support -- generically wrap any syncrhonous pipeline
+  into a buffer-reserving latency-insensitive version. This is used to wrap
+  all the floating point cores.
