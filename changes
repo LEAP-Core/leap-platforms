@@ -10486,3 +10486,36 @@ be removed in all models at some point.
 
 Modified pipeline build to use the soft connection switch to awb.
 This turns on clock route-through code generation.
+
+----------
+kfleming    Date: Fri Aug 13 11:59:04 EDT 2010  CSN: CSN-platforms-469
+                  Fri Aug 13 15:59:04 UTC 2010
+
+
+Directory modules/project
+ multifpga/                Locally Added               0 
+
+Directory modules/project/multifpga
+ multitest.py              Locally Added               0 
+ connection.py             Locally Added               0 
+ multilex.py               Locally Added               0 
+ environment.py            Locally Added               0 
+ platform.py               Locally Added               0 
+ multiparse.py             Locally Added               0 
+
+
+Added python code for reading a multiple fpga specification and
+generating routing tables for each node based on the specified
+connections.  The main intent of this code is to provide a per-fpga
+Bluespec function describing node routing path.  Currently the
+generatated routing tables are very simple - directed dijkstra nearest
+neighbors.  The code also provides some rudimentatry legality checks
+for the user specified graph.  This code requires ply and pygraph
+libraries for python.
+
+multi*.py - parser/lexer for input language
+
+environment/platform/connection - rudimentary IR classes.  
+
+This will soon turn in to a build step for constructing multi-fpga
+implementations.  
