@@ -20,3 +20,4 @@ class BITGEN():
     SCons.Script.Depends(xilinx_bit, Utils.clean_split(moduleList.env['DEFS']['GIVEN_ELFS'], sep = ' '));
 
     moduleList.topModule.moduleDependency['BIT'] = [xilinx_bit]
+    moduleList.topDependency = moduleList.topDependency + [xilinx_bit]     

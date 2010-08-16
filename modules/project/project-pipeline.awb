@@ -25,6 +25,7 @@
 %scons %library ModuleList.py
 %scons %library Module.py
 %scons %library Utils.py
+%scons %library CommandLine.py
 %scons %library ProjectDependency.py
 %scons %hw      SCons.hw.pipeline.template
 %scons %sw      SCons.sw.pipeline.template

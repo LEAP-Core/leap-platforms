@@ -1,0 +1,13 @@
+#/********************************************************************
+#* Python libraries for XST synthesis tool
+#********************************************************************/
+
+%name Software build tool
+%desc Build for software side of hybrid system
+
+%attributes tool
+
+%provides software_tool
+
+%scons %library software.py
+

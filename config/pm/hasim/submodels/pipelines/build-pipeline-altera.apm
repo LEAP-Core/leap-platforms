@@ -1,0 +1,51 @@
+
+[Global]
+SaveParameters=0
+Description=FPGA Build Pipeline Altera
+File=build-pipeline-altera
+Version=2.1
+Type=HAsim
+Name=FPGA Build Pipeline Altera
+Class=Asim::Model
+DefaultBenchmark=
+DefaultRunOpts=
+
+[Model]
+DefaultAttributes=altera build pipeline
+model=FPGA Build Pipeline
+
+[FPGA Build Pipeline]
+File=modules/project/pipelines/fpga-build-pipeline.awb
+Packagehint=platforms
+
+[FPGA Build Pipeline/Requires]
+post_synthesis_tool=Altera Post-synthesis Toolchain
+synthesis_tool=Synplify Synthesis Tool
+mcd_tool=Simple MCD Tool
+software_tool=Software build tool
+iface_tool=Interface builder
+bsv_tool=BSV Build Tool (First Phase)
+
+[Simple MCD Tool]
+File=modules/project/bluespec/mcd.awb
+Packagehint=platforms
+
+[Interface builder]
+File=modules/project/iface/iface.awb
+Packagehint=platforms
+
+[Software build tool]
+File=modules/project/software/software.awb
+Packagehint=platforms
+
+[BSV Build Tool (First Phase)]
+File=modules/project/bluespec/bsv.awb
+Packagehint=platforms
+
+[Synplify Synthesis Tool]
+File=modules/project/synopsis/synplify.awb
+Packagehint=platforms
+
+[Altera Post-synthesis Toolchain]
+File=modules/project/altera/altera_post_synth.awb
+Packagehint=platforms

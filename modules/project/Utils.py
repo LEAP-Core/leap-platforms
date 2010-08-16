@@ -58,7 +58,7 @@ def transform_string_list(str, sep, prefix, suffix):
 ##
 def bsc_bdir_prune(env, str, sep, match):
     t = clean_split(str, sep)
-    if (env['DEFS']['BSC_VERSION'] >= 15480):
+    if (getBluespecVersion() >= 15480):
         try:
             while 1:
                 i = t.index(match)
@@ -102,3 +102,22 @@ def get_bluespec_verilog(env):
         if((file != 'main.v') and (file != 'ConstrainedRandom.v')):
             resultArray.append(bluespecdir + '/Verilog/' + file)
     return resultArray
+
+
+def getBluespecVersion():
+    # What is the Bluespec compiler version?
+    bsc_version = 0
+
+    bsc_ostream = os.popen('bsc -verbose')
+    ver_regexp = re.compile('^Bluespec Compiler, version.*\(build ([0-9]+),')
+    for ln in bsc_ostream.readlines():
+        m = ver_regexp.match(ln)
+        if (m):
+            bsc_version = int(m.group(1))
+    bsc_ostream.close()
+
+    if bsc_version == 0:
+        print "Failed to get Bluespec compiler version"
+        sys.exit(1)
+
+    return bsc_version

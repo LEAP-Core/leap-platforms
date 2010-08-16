@@ -1,0 +1,13 @@
+#/********************************************************************
+#* Python libraries for XST synthesis tool
+#********************************************************************/
+
+%name BSV Bluesim Build Tool
+%desc Builds a bluesim executable
+
+%attributes tool
+
+%provides bluesim_tool
+
+%scons %library bluesim.py
+

@@ -70,34 +70,6 @@ env['DEFS']['ROOT_DIR_HW_MODEL'] = env['DEFS']['ROOT_DIR_HW'] + '/' + \
 env['DEFS']['ROOT_DIR_SW_MODEL'] = env['DEFS']['ROOT_DIR_SW'] + '/' + \
                                    env['DEFS']['ROOT_DIR_MODEL'];
 
-utility_names = []
-
-############################################################################
-############################################################################
-##
-## Build the interface files first
-##
-############################################################################
-############################################################################
-
-if os.path.isfile('iface/SConstruct'):
-    cmd = 'cd iface; scons'
-    if env.GetOption('clean'):
-        cmd += ' -c'
-    s = os.system(cmd)
-    if (s & 0xffff) != 0:
-        print 'Aborting due to iface submodel errors'
-        sys.exit(1)
-
-
-############################################################################
-############################################################################
-##
-## SCons configuration.
-##
-############################################################################
-############################################################################
-
 ##
 ## env.Clone() is new as of 0.97.  It used to be called Copy().
 ##
@@ -116,184 +88,12 @@ except AttributeError:
 ############################################################################
 ############################################################################
 
-# Bluespec compains about signature mismatches if we use this to avoid
-# recompiling across synthesis boundaries.
-#TargetSignatures('content')
-
 APM_NAME = env['DEFS']['APM_NAME']
-BSC = env['DEFS']['BSC']
-BSC_FLAGS_SIM = env['DEFS']['BSC_FLAGS_SIM']
-BSC_FLAGS_VERILOG = env['DEFS']['BSC_FLAGS_VERILOG']
-LDFLAGS = env['DEFS']['LDFLAGS']
-TMP_BSC_DIR = env['DEFS']['TMP_BSC_DIR']
-WORKSPACE_ROOT = env['DEFS']['WORKSPACE_ROOT']
-
-##
-## DEBUG or OPT build?  User can override the workspace default rule by
-## specifying either OPT=1 or DEBUG=1 on the scons command line.
-##
-if (int(ARGUMENTS.get('OPT', 0))):
-    DEBUG = 0
-elif (int(ARGUMENTS.get('DEBUG', 0))):
-    DEBUG = 1
-else:
-    DEBUG = int(awb_resolver('-config=debug'))
-
-##
-## Enable tracing (software side debugging)?  Always enabled in debug mode.
-##
-TRACE = int(ARGUMENTS.get('TRACE', 0))
-if (DEBUG):
-    TRACE = 1
 
 ##
 ## Override Xilinx COST_TABLE with command line
 ##
 env['DEFS']['COST_TABLE'] = ARGUMENTS.get('COST_TABLE', env['DEFS']['COST_TABLE'])
-
-##
-## Build events into model?
-##
-enable_events = int(ARGUMENTS.get('EVENTS', -1))
-if (enable_events == -1):
-    enable_events = int(awb_resolver('-config=events'))
-
-if (enable_events == 0):
-    bsc_events_flag = '-D HASIM_EVENTS_ENABLED=False'
-    cpp_events_flag = ''
-else:
-    bsc_events_flag = '-D HASIM_EVENTS_ENABLED=True'
-    cpp_events_flag = '-DHASIM_EVENTS_ENABLED'
-
-BSC_FLAGS_VERILOG += ' ' + bsc_events_flag
-env['DEFS']['BSC_FLAGS_VERILOG'] = BSC_FLAGS_VERILOG
-
-BSC_FLAGS_SIM += ' ' + bsc_events_flag
-env['DEFS']['BSC_FLAGS_SIM'] = BSC_FLAGS_SIM
-
-
-ROOT_WRAPPER_SYNTH_ID = 'mk_' + env['DEFS']['ROOT_DIR_MODEL'] + '_Wrapper'
-
-if env['DEFS']['GIVEN_CS'] != '':
-    SW_EXE_OR_TARGET = env['DEFS']['ROOT_DIR_SW'] + '/obj/' + APM_NAME + '_sw.exe'
-    SW_EXE = [SW_EXE_OR_TARGET]
-else:
-    SW_EXE_OR_TARGET = '$TARGET'
-    SW_EXE = []
-
-
-# What is the Bluespec compiler version?
-bsc_version = 0
-
-bsc_ostream = os.popen('bsc -verbose')
-ver_regexp = re.compile('^Bluespec Compiler, version.*\(build ([0-9]+),')
-for ln in bsc_ostream.readlines():
-    m = ver_regexp.match(ln)
-    if (m):
-        bsc_version = int(m.group(1))
-bsc_ostream.close()
-
-if bsc_version == 0:
-    print "Failed to get Bluespec compiler version"
-    sys.exit(1)
-
-env['DEFS']['BSC_VERSION'] = bsc_version
-
-
-############################################################################
-##
-## Rules for HW subdirectory.  These are shared by all targets.
-##
-############################################################################
-env['DEFS']['CWD_REL'] = env['DEFS']['ROOT_DIR_HW_MODEL']
-env['DEFS']['BSC_FLAGS'] = env['DEFS']['BSC_FLAGS_VERILOG']
-Export('env '+ " ".join(utility_names))
-wrapper_v = SConscript([env['DEFS']['ROOT_DIR_HW_MODEL'] + '/SConscript'])
-
-BuildDir(TMP_BSC_DIR, '.', duplicate=0)
-env['ENV']['BUILD_DIR'] = env['DEFS']['BUILD_DIR']  # need to set the builddir for synplify
-
-
-############################################################################
-##
-## Rules for building a Bluesim EXE.
-##
-############################################################################
-
-bsc_sim_command = BSC + ' ' + BSC_FLAGS_SIM + ' ' + LDFLAGS + ' -o $TARGET'
-
-if (env['DEFS']['BSC_VERSION'] >= 13013):
-    # 2008.01.A compiler allows us to pass C++ arguments.
-    if (DEBUG):
-        bsc_sim_command += ' -Xc++ -O0'
-    else:
-        bsc_sim_command += ' -Xc++ -O1'
-
-bsc_sim_command += \
-    ' -sim -e ' + ROOT_WRAPPER_SYNTH_ID + ' -simdir ' + \
-    TMP_BSC_DIR + ' ' + env['DEFS']['GEN_BAS'] + ' ' + env['DEFS']['GIVEN_BAS'] + \
-    ' ' + env['DEFS']['BDPI_CS']
-
-sbin = env.Command(
-    TMP_BSC_DIR + '/' + APM_NAME + '_hw.exe',
-    wrapper_v + clean_split(env['DEFS']['GIVEN_VERILOGS'], sep = ' ') + clean_split(env['DEFS']['BDPI_CS'], sep=' '),
-    bsc_sim_command)
-
-if env.GetOption('clean'):
-    os.system('rm -rf .bsc')
-
-# If we have bsc data files, copy them over to the .bsc directory 
-
-if len(clean_split(env['DEFS']['GEN_VS'], sep = ' '))> 0:
-   Copy(TMP_BSC_DIR, env['DEFS']['GIVEN_DATAS']) 
-
-#
-# The final step must leave a few well known names:
-#   APM_NAME must be the software side, if there is one.  If there isn't, then
-#   it must be the Bluesim image.
-#
-exe = env.Command(
-    APM_NAME + '_hw.exe',
-    sbin + SW_EXE,
-    [ '@ln -fs ${SOURCE} ${TARGET}',
-      '@ln -fs ${SOURCE}.so ${TARGET}.so',
-      '@ln -fs ' + SW_EXE_OR_TARGET + ' ' + APM_NAME,
-      Delete(APM_NAME + '_hw.vexe'),
-      Delete(APM_NAME + '_hw.errinfo') ])
-
-env.Alias('exe', exe)
-
-
-
-############################################################################
-##
-## Rules for building a Verilog simulation vexe
-##
-############################################################################
-
-vexe_gen_command = \
-    BSC + ' ' + BSC_FLAGS_VERILOG + ' -vdir ' + env['DEFS']['ROOT_DIR_HW'] + '/' + env['DEFS']['ROOT_DIR_MODEL'] + '/' + env['DEFS']['TMP_BSC_DIR'] + \
-    ' -o $TARGET -verilog -e ' + ROOT_WRAPPER_SYNTH_ID + \
-    ' $SOURCES ' + env['DEFS']['GIVEN_BAS']
-
-vbin = env.Command(
-    TMP_BSC_DIR + '/' + APM_NAME + '_hw.vexe',
-    clean_split(env['DEFS']['GEN_VS'], sep = ' ') + clean_split(env['DEFS']['GIVEN_VERILOGS'], sep = ' ') + clean_split(env['DEFS']['GIVEN_VHDS'], sep = ' ')  + clean_split(env['DEFS']['BDPI_CS'], sep=' '),
-    [ vexe_gen_command,
-      Delete('directc.sft') ])
-
-
-vexe = env.Command(
-    APM_NAME + '_hw.vexe',
-    vbin + SW_EXE,
-    [ '@echo "#!/bin/sh" > $TARGET',
-      '@echo "./$SOURCE +bscvcd \$*" >> $TARGET',
-      '@chmod a+x $TARGET',
-      '@ln -fs ' + SW_EXE_OR_TARGET + ' ' + APM_NAME,
-      Delete(APM_NAME + '_hw.exe'),
-      Delete(APM_NAME + '_hw.errinfo') ])
-
-env.Alias('vexe', vexe)
 
 
 
@@ -304,44 +104,16 @@ env.Alias('vexe', vexe)
 ############################################################################
 
 TMP_XILINX_DIR = env['DEFS']['TMP_XILINX_DIR']
-XILINX_APM_NAME = TMP_XILINX_DIR + '/' + APM_NAME
-
-SYNTH_TOP = env['DEFS']['SYNTH_TOP']
-XILINX_SYNTH_TOP = TMP_XILINX_DIR + '/' + SYNTH_TOP
-
-FPGA_PART_XILINX = env['DEFS']['FPGA_PART_XILINX']
-
-wrapper_builds = []
 
 moduleList = ModuleList(env, ARGUMENTS)
 
-#moduleList.dump()                      
+moduleList.dump()                      
 
+# we will build whatever the user wants us to build
 Build(moduleList)
 
-
-
-
-# Use a cached post par ncd to guide map and par?  This is off by default since
-# the smart guide option can make place & route fail when it otherwise would have
-# worked.  It doesn't always improve run time, either.  To turn on smart guide
-# either define the environment variable USE_SMARTGUIDE or set
-# USE_SMARTGUIDE on the scons command line to a non-zero value.
-
-# smartguide_cache_dir = env['DEFS']['WORKSPACE_ROOT'] + '/var/xilinx_ncd'
-# smartguide_cache_file = APM_NAME + '_par.ncd'
-# if not os.path.isdir(smartguide_cache_dir):
-#     os.mkdir(smartguide_cache_dir)
-
-# if ((int(ARGUMENTS.get('USE_SMARTGUIDE', 0)) or env['ENV'].has_key('USE_SMARTGUIDE')) and
-#     (FindFile(APM_NAME + '_par.ncd', [smartguide_cache_dir]) != None)):
-#     smartguide = ' -smartguide ' +  smartguide_cache_dir + '/' + smartguide_cache_file
-# else:
-#     smartguide = ''
-
-
-env.Alias('bit', moduleList.topModule.moduleDependency['LOADER'])
-# env.Alias('bit', loader)
+#Set as default the aggregation of deps
+Default(moduleList.topDependency)
 
 
 ##
@@ -352,138 +124,6 @@ if env.GetOption('clean'):
     os.system('rm -f APM_NAME')
 
 
-############################################################################
-##
-## Rules for building the software side.  Invoke scripts in subdirectories
-## to define the objects needing to be built.  The final link is defined
-## here.
-##
-############################################################################
-
-def host_defs():
-    hostos = one_line_cmd('uname -s')
-    hostmachine = one_line_cmd('uname -m')
-
-    if (hostos == 'FreeBSD'):
-        hflags = '-DHOST_FREEBSD'
-    else:
-        hflags = '-DHOST_LINUX'
-        if (hostmachine == 'ia64'):
-            hflags += ' -DHOST_LINUX_IA64'
-        else:
-            hflags += ' -DHOST_LINUX_X86'
-
-    return hflags
 
 
-if SW_EXE != []:
-    inc_paths = clean_split(env['DEFS']['SW_INC_DIRS'], sep = ' ')
-    libs = clean_split(env['DEFS']['SW_LIBS'], sep = ' ')
-    cc_flags = host_defs()
-    cc_flags += ' ' + cpp_events_flag
-    if (DEBUG):
-        cc_flags += ' -DASIM_ENABLE_ASSERTIONS'
-    if (TRACE):
-        cc_flags += ' -DASIM_ENABLE_TRACE'
-    cc_flags += ' -DAPM_NAME=\\"' + APM_NAME + '\\"'
-
-    ##
-    ## These will be defined if the m5 simulator is part of the model
-    ##
-    M5_BUILD_DIR = env['DEFS']['M5_BUILD_DIR'] 
-    if (M5_BUILD_DIR != ''):
-        # m5 needs Python library
-        inc_paths += [ os.path.join(sys.exec_prefix, 'include', 'python' + sys.version[:3]) ]
-        python_zip = os.path.join(awb_resolver(M5_BUILD_DIR), 'm5py.zip')
-
-        cc_flags += ' -DTRACING_ON=1'
-        if (env['DEFS']['SIMULATED_ISA'] != ''):
-            cc_flags += ' -DTHE_ISA=' + env['DEFS']['SIMULATED_ISA'] + '_ISA'
-
-        if (DEBUG):
-            cc_flags += ' -DDEBUG'
-            # Swap the optimized m5 library for a debugging one
-            tmp_libs = []
-            for lib in libs:
-                if (os.path.basename(lib) == 'libm5_opt.a'):
-                    tmp_libs += [ os.path.join(os.path.dirname(lib), 'libm5_debug.a') ]
-                else:
-                    tmp_libs += [ lib ]
-            libs = tmp_libs
-
-    if (DEBUG):
-        copt_flags = '-ggdb3 '
-    else:
-        copt_flags = '-g -O2 '
-
-    # CPPPATH defines both gcc include path and dependence path for
-    # SCons.  The '#' forces paths to be relative to the root of the build.
-    sw_env = env.Clone(CCFLAGS = copt_flags + cc_flags,
-                       LINKFLAGS = copt_flags,
-                       CPPPATH = [ '#/' + env['DEFS']['ROOT_DIR_SW_INC'],
-                                   '#/' + env['DEFS']['ROOT_DIR_HW_MODEL'],
-                                   '#/iface/build/include',
-                                   '.' ] + inc_paths)
-
-    sw_env['DEFS']['CWD_REL'] = sw_env['DEFS']['ROOT_DIR_SW_MODEL']
-
-    Export('sw_env '+ " ".join(utility_names))
-    sw_build_dir = sw_env['DEFS']['ROOT_DIR_SW'] + '/obj'
-    sw_objects = SConscript([env['DEFS']['ROOT_DIR_SW_MODEL'] + '/SConscript'],
-                            build_dir = sw_build_dir,
-                            duplicate = 0)
-
-    sw_libpath = [ '.' ]
-    sw_link_libs = [ 'pthread' ]
-
-    sw_link_tgt = SW_EXE
-
-
-    ##
-    ## m5 needs libz, libmysqlclient and Python library
-    ##
-    if (M5_BUILD_DIR != ''):
-        sw_link_libs += [ 'z' ]
-
-        if (os.path.exists(os.path.join(sys.exec_prefix, 'lib' , 'libmysqlclient.a'))):
-            sw_link_libs += [ 'mysqlclient' ]
-        elif (os.path.exists(os.path.join(sys.exec_prefix, 'lib', 'mysql' , 'libmysqlclient.a'))):
-            sw_link_libs += [ 'mysqlclient' ]
-
-        # m5 needs python
-        sw_libpath += [ os.path.join(sys.exec_prefix, 'lib') ]
-        sw_link_libs += [ 'python' + sys.version[:3] ]
-
-        # m5 links a temporary file then adds Python code
-        sw_link_tgt = [ SW_EXE[0] + '.no_python' ]
-
-
-    ##
-    ## Put libs on the list of objects twice as a hack to work around the
-    ## inability to specify the order of %library declarations across separate
-    ## awb files.  Unix ld only searches libraries in command line order.
-    ##
-    sw_exe = sw_env.Program(sw_link_tgt, sw_objects + libs + libs, LIBPATH=sw_libpath, LIBS=sw_link_libs)
-
-    if (M5_BUILD_DIR != ''):
-        ##
-        ## Define a simple SCons builder to concatenate files.  Used to append the
-        ## Python zip archive to the executable.
-        ##
-        concat_builder = Builder(action = Action(['cat $SOURCES > $TARGET',
-                                                  'chmod +x $TARGET']))
-        sw_env.Append(BUILDERS = { 'Concat' : concat_builder })
-
-        # Append Python code to the binary
-        sw_exe = sw_env.Concat(SW_EXE, [ sw_exe, python_zip ])
-
-############################################################################
-############################################################################
-
-##
-## Set a default target
-##
-if (env['DEFS']['MAKE_ALL_TARGET'] != ''):
-    Default(env['DEFS']['MAKE_ALL_TARGET'])
-else:
-    Default(exe)
+    

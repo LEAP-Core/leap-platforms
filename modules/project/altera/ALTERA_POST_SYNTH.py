@@ -72,3 +72,4 @@ class PostSynthesize():
         'touch ' + moduleList.apmName + '_hw.errinfo'])
     
     moduleList.topModule.moduleDependency['LOADER'] = [altera_loader]
+    moduleList.topDependency = moduleList.topDependency + [altera_loader]     

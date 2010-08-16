@@ -10559,3 +10559,85 @@ Directory modules/bluespec/common/fpgaenv/fpga-components
 * Add  "guarded pipeline" support -- generically wrap any syncrhonous pipeline
   into a buffer-reserving latency-insensitive version. This is used to wrap
   all the floating point cores.
+
+----------
+keflemin    Date: Mon Aug 16 17:14:55 EDT 2010  CSN: CSN-platforms-471
+                  Mon Aug 16 21:14:55 UTC 2010
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-hybrid-exe.apm    Locally Modified          470 
+
+Directory config/pm/hasim/submodels
+ pipelines/                Locally Added               0 
+
+Directory config/pm/hasim/submodels/pipelines
+ build-pipeline-altera.apm Locally Added               0 
+ build-pipeline-xilinx.apm Locally Added               0 
+ build-pipeline-bluesim.apm Locally Added               0 
+
+Directory modules/project
+ project-pipeline.awb      Locally Modified          470 
+ Utils.py                  Locally Modified          470 
+
+Directory modules/project/pipelines
+ verilog-build-pipeline.awb Locally Added               0 
+ sim-build-pipeline.awb    Locally Modified          470 
+ SimulationPipeline.py     Locally Modified          470 
+ VerilogPipeline.py        Locally Added               0 
+ fpga-build-pipeline.awb   Locally Modified          470 
+ FPGAPipeline.py           Locally Modified          470 
+
+Directory modules/project
+ SCons.top.pipeline.template Locally Modified          470 
+ iface/                    Locally Added               0 
+
+Directory modules/project/iface
+ iface.awb                 Locally Added               0 
+ iface.py                  Locally Added               0 
+
+Directory modules/project
+ verilog/                  Locally Added               0 
+
+Directory modules/project/verilog
+ VERILOG.PY                Locally Added               0 
+ verilog.py                Locally Added               0 
+
+Directory modules/project
+ ModuleList.py             Locally Modified          470 
+
+Directory modules/project/altera
+ ALTERA_POST_SYNTH.py      Locally Modified          470 
+
+Directory modules/project/xilinx
+ XILINX_LOADER.py          Locally Modified          470 
+ XILINX_BITGEN.py          Locally Modified          470 
+
+Directory modules/project
+ software/                 Locally Added               0 
+
+Directory modules/project/software
+ software.py               Locally Added               0 
+ software.awb              Locally Added               0 
+
+Directory modules/project/bluespec
+ bsv-exe.awb               Locally Added               0 
+ BSV.py                    Locally Added               0 
+ bsv.awb                   Locally Added               0 
+ bluesim.py                Locally Added               0 
+
+Directory modules/project
+ CommandLine.py            Locally Added               0 
+
+
+
+This large checkin (I seem to be fond of these lately) refactors large
+portions of the build pipeline code.  This change has been anticipated
+for some time, but the needs of the multifpga build branch have
+finally required it to happen.  This code is also needed for my
+attempt to support the fish-class simulators.  The basic idea is that
+all the functionality that was in SCons.top has been logically
+partitioned into sub builds.  The only thing which has not been
+changed are the sw and hw sub-scons.  These will eventually turn into
+SCons functions, finally enabling us to get the build deps right (as
+opposed to the current amorphous blob-o-deps we get from the sub-scons).

@@ -32,8 +32,10 @@ class ModuleList:
     self.apmName = env['DEFS']['APM_NAME']
     self.moduleList = []
     self.synthBoundaries = env['DEFS']['SYNTH_BOUNDARIES']
-    self.wrapper_v = env.SConscript([env['DEFS']['ROOT_DIR_HW_MODEL'] + '/SConscript'])
+    #We should be invoking this elsewhere?
+    #self.wrapper_v = env.SConscript([env['DEFS']['ROOT_DIR_HW_MODEL'] + '/SConscript'])
 
+    # this really doesn't belong here. 
     if env['DEFS']['GIVEN_CS'] != '':
       SW_EXE_OR_TARGET = env['DEFS']['ROOT_DIR_SW'] + '/obj/' + self.apmName + '_sw.exe'
       SW_EXE = [SW_EXE_OR_TARGET]
@@ -42,6 +44,13 @@ class ModuleList:
       SW_EXE = []
     self.swExeOrTarget = SW_EXE_OR_TARGET
     self.swExe = SW_EXE
+
+    self.swIncDir = Utils.clean_split(env['DEFS']['SW_INC_DIRS'], sep = ' ')
+    self.swLibs = Utils.clean_split(env['DEFS']['SW_LIBS'], sep = ' ')
+    self.m5BuildDir = env['DEFS']['M5_BUILD_DIR'] 
+    self.rootDirSw = env['DEFS']['ROOT_DIR_SW_MODEL']
+    self.rootDirInc = env['DEFS']['ROOT_DIR_SW_INC']
+
 
     if len(env['DEFS']['GIVEN_ELFS']) != 0:
       elf = ' -bd ' + str.join(' -bd ',Utils.clean_split(env['DEFS']['GIVEN_ELFS'], sep = ' '))
@@ -93,7 +102,7 @@ class ModuleList:
       module.moduleDependency['NGC'] = givenNGCs
       module.moduleDependency['VHD'] = givenVHDs
       module.moduleDependency['VERILOG_STUB'] = ['hw/' + module.buildPath + '/.bsc/mk_' + module.name + '_Wrapper_stub.v']     
-    
+    self.topDependency=[]
     
   def getAllDependencies(self, key):
     # we must check to see if the dependencies actually exist.

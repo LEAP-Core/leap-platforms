@@ -1,0 +1,13 @@
+#/********************************************************************
+#* Python libraries for XST synthesis tool
+#********************************************************************/
+
+%name BSV Build Tool (First Phase)
+%desc This tool builds Bluespec modules in sub directories
+
+%attributes tool
+
+%provides bsv_tool
+
+%scons %library BSV.py
+

@@ -45,3 +45,4 @@ class LOADER():
         moduleList.apmName + '_hw.errinfo' ])
 
     moduleList.topModule.moduleDependency['LOADER'] = [loader]
+    moduleList.topDependency = moduleList.topDependency + [loader]     

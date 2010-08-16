@@ -2,14 +2,14 @@
 #* Generic FPGA build pipeline
 #********************************************************************/
 
-%name BlueSim Build Pipeline
-%desc BlueSim Build Pipeline
+%name IVerilog Build Pipeline
+%desc IVerilog Build Pipeline
 %attributes tool
 
 %provides build_pipeline
 %requires bsv_tool
 %requires iface_tool
 %requires software_tool
-%requires bluesim_tool
+%requires verilog_tool
 
-%scons %library SimulationPipeline.py
+%scons %library VerilogPipeline.py

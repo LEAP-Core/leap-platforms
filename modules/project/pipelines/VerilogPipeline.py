@@ -13,6 +13,6 @@ class Build(ProjectDependency):
     #build interface first 
     Iface(moduleList)
     BSV(moduleList)
-    Bluesim(moduleList)
     Software(moduleList)
+    Verilog(moduleList)
     #Return something useful to the top level
