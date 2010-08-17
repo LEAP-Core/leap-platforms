@@ -1,0 +1,80 @@
+
+[Global]
+SaveParameters=0
+Description=FPGA Build Pipeline Xilinx (Synplify)
+File=build-pipeline-xilinx-synplify
+Version=2.1
+Type=HAsim
+Name=FPGA Build Pipeline Xilinx (Synplify)
+Class=Asim::Model
+DefaultBenchmark=
+DefaultRunOpts=
+
+[Model]
+DefaultAttributes=bluespec acp-m2c
+model=FPGA Build Pipeline
+
+[FPGA Build Pipeline]
+File=modules/project/pipelines/fpga-build-pipeline.awb
+Packagehint=platforms
+
+[Xilinx BITGEN]
+File=modules/project/xilinx/xilinx_bitgen.awb
+Packagehint=platforms
+
+[Xilinx LOADER]
+File=modules/project/xilinx/xilinx_loader.awb
+Packagehint=platforms
+
+[Xilinx NGD]
+File=modules/project/xilinx/xilinx_ngd.awb
+Packagehint=platforms
+
+[FPGA Build Pipeline/Requires]
+post_synthesis_tool=Xilinx Post-synthesis Toolchain
+synthesis_tool=Synplify Synthesis Tool
+mcd_tool=Simple MCD Tool
+software_tool=Software build tool
+iface_tool=Interface builder
+bsv_tool=BSV Build Tool (First Phase)
+
+[Xilinx Post-synthesis Toolchain]
+File=modules/project/xilinx/xilinx_post_synth.awb
+Packagehint=platforms
+
+[Xilinx PAR]
+File=modules/project/xilinx/xilinx_par.awb
+Packagehint=platforms
+
+[Xilinx Post-synthesis Toolchain/Requires]
+xilinx_ngd=Xilinx NGD
+xilinx_bitgen=Xilinx BITGEN
+xilinx_par=Xilinx PAR
+xilinx_map=Xilinx MAP
+xilinx_loader=Xilinx LOADER
+
+[Xilinx MAP]
+File=modules/project/xilinx/xilinx_map.awb
+Packagehint=platforms
+
+
+[Simple MCD Tool]
+File=modules/project/bluespec/mcd.awb
+Packagehint=platforms
+
+[Interface builder]
+File=modules/project/iface/iface.awb
+Packagehint=platforms
+
+[Software build tool]
+File=modules/project/software/software.awb
+Packagehint=platforms
+
+[BSV Build Tool (First Phase)]
+File=modules/project/bluespec/bsv.awb
+Packagehint=platforms
+
+
+[Synplify Synthesis Tool]
+File=modules/project/synopsis/synplify.awb
+Packagehint=platforms

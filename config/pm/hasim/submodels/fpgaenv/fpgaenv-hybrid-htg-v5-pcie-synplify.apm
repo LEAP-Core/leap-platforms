@@ -18,6 +18,7 @@ model=FPGA Environment
 virtual_platform=Standard Virtual Platform
 fpga_components=Hardware FPGA Components for Virtex 5
 librl_bsv=RL Bluespec Library
+build_pipeline=FPGA Build Pipeline
 
 [Standard Virtual Platform]
 File=modules/bluespec/common/fpgaenv/virtual-platform/std-virtual-platform.awb
@@ -136,3 +137,7 @@ Packagehint=platforms
 
 [RRR Clients and Servers/Requires]
 rrr_common=RRR Common Module
+
+[FPGA Build Pipeline]
+File=config/pm/hasim/submodels/pipelines/build-pipeline-xilinx-synplify.apm
+Packagehint=platforms

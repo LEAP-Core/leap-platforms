@@ -45,11 +45,6 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/null/null-rrr.awb
 Packagehint=platforms
 
-
-
-
-
-
 [Null Unified Message Format]
 File=modules/bluespec/common/fpgaenv/virtual-platform/umf/null/null-umf.awb
 Packagehint=platforms
@@ -59,6 +54,7 @@ channelio=Null Channel IO Module
 rrr=Null RRR Module
 physical_platform_debugger=Null Physical Platform Debugger
 local_mem=NULL Local Memory Interface
+physical_platform=XUP Virtex 2 Serial
 
 [Low Level Platform Interface Hardware-Only]
 File=modules/bluespec/common/fpgaenv/low-level-platform-interface/hwonly-llpi.awb
@@ -76,8 +72,6 @@ Packagehint=platforms
 File=config/pm/hasim/submodels/fpgaenv/librl-bsv.apm
 Packagehint=platforms
 
-
-
 [Hardware FPGA Components for Virtex 2]
 File=modules/bluespec/common/fpgaenv/fpga-components/hardware-fpga-components-virtex2.awb
 Packagehint=platforms
@@ -90,49 +84,42 @@ Packagehint=platforms
 rrr_common=RRR Common Module
 
 [FPGA Build Pipeline]
-File=modules/project/pipelines/fpga-build-pipeline.awb
+File=config/pm/hasim/submodels/pipelines/build-pipeline-xilinx.apm
 Packagehint=platforms
 
-[Xilinx BITGEN]
-File=modules/project/xilinx/xilinx_bitgen.awb
+
+[Serial Physical Device (physical)]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/serial/physical-serial/serial-device-physical.awb
 Packagehint=platforms
 
-[Xilinx LOADER]
-File=modules/project/xilinx/xilinx_loader.awb
+[XUP Virtex 2 Serial/Requires]
+clocks_device=Single-Ended Crystal Clocks Device
+serial_device=Serial Physical Device (physical)
+physical_platform_utils=Common Physical Platform Utilities
+led_device=General LED Device
+switch_device=General Switch Device
+ddr_sdram_device=NULL DDR SDRAM Physical Device
+
+[Common Physical Platform Utilities]
+File=modules/bluespec/common/fpgaenv/physical-platform/utils/utils.awb
 Packagehint=platforms
 
-[Xilinx NGD]
-File=modules/project/xilinx/xilinx_ngd.awb
+[XUP Virtex 2 Serial]
+File=modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup/serial/xilinx-xup-serial.awb
 Packagehint=platforms
 
-[FPGA Build Pipeline/Requires]
-post_synthesis_tool=Xilinx Post-synthesis Toolchain
-synthesis_tool=XST Synthesis Tool
-mcd_tool=Simple MCD Tool
+[NULL DDR SDRAM Physical Device]
+File=modules/bluespec/mit-6.375/lab6/ddr-sdram-null/ddr-sdram-device.awb
+Packagehint=mit-6.375
 
-[XST Synthesis Tool]
-File=modules/project/xilinx/xst.awb
+[General Switch Device]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/switches/general-switch-device.awb
 Packagehint=platforms
 
-[Xilinx Post-synthesis Toolchain]
-File=modules/project/xilinx/xilinx_post_synth.awb
+[General LED Device]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/leds/general-led-device.awb
 Packagehint=platforms
 
-[Xilinx PAR]
-File=modules/project/xilinx/xilinx_par.awb
-Packagehint=platforms
-
-[Xilinx Post-synthesis Toolchain/Requires]
-xilinx_ngd=Xilinx NGD
-xilinx_bitgen=Xilinx BITGEN
-xilinx_par=Xilinx PAR
-xilinx_map=Xilinx MAP
-xilinx_loader=Xilinx LOADER
-
-[Xilinx MAP]
-File=modules/project/xilinx/xilinx_map.awb
-Packagehint=platforms
-
-[Simple MCD Tool]
-File=modules/project/bluespec/mcd.awb
+[Single-Ended Crystal Clocks Device]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/single-ended/single-ended-clocks-device.awb
 Packagehint=platforms

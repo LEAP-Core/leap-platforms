@@ -168,5 +168,5 @@ File=modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/com
 Packagehint=platforms
 
 [BlueSim Build Pipeline]
-File=modules/project/pipelines/sim-build-pipeline.awb
+File=config/pm/hasim/submodels/pipelines/build-pipeline-bluesim.apm
 Packagehint=platforms

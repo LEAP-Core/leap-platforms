@@ -192,22 +192,6 @@ MODEL_CLOCK_MULTIPLIER=2
 CRYSTAL_CLOCK_FREQ=125
 
 [FPGA Build Pipeline]
-File=modules/project/pipelines/fpga-build-pipeline.awb
+File=config/pm/hasim/submodels/pipelines/build-pipeline-altera.apm
 Packagehint=platforms
 
-[FPGA Build Pipeline/Requires]
-post_synthesis_tool=Altera Post-synthesis Toolchain
-synthesis_tool=XST Synthesis Tool
-mcd_tool=Simple MCD Tool
-
-[Altera Post-synthesis Toolchain]
-File=modules/project/altera/altera_post_synth.awb
-Packagehint=platforms
-
-[XST Synthesis Tool]
-File=modules/project/xilinx/xst.awb
-Packagehint=platforms
-
-[Simple MCD Tool]
-File=modules/project/bluespec/mcd.awb
-Packagehint=platforms

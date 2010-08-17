@@ -10641,3 +10641,30 @@ partitioned into sub builds.  The only thing which has not been
 changed are the sw and hw sub-scons.  These will eventually turn into
 SCons functions, finally enabling us to get the build deps right (as
 opposed to the current amorphous blob-o-deps we get from the sub-scons).
+
+----------
+keflemin    Date: Tue Aug 17 14:17:52 EDT 2010  CSN: CSN-platforms-472
+                  Tue Aug 17 18:17:52 UTC 2010
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-hybrid-xupv2-serial.apm Locally Modified          471 
+ fpgaenv-hybrid-htg-v5-pcie-synplify.apm Locally Modified          471 
+ fpgaenv-hybrid-evaluation-arriaII-jtag.apm Locally Modified          471 
+ hasim-fpgaenv-htg-v5-pcie.apm Locally Modified          471 
+ fpgaenv-htg-hwonly.apm    Locally Modified          471 
+ fpgaenv-hybrid-exe.apm    Locally Modified          471 
+ fpgaenv-hybrid-exe-local-scratchpad.apm Locally Modified          471 
+ fpgaenv-hybrid-exe-serial-ChanIO-loopback.apm Locally Modified          471 
+ hasim-fpgaenv-hybrid-sim.apm Locally Modified          471 
+ fpgaenv-hybrid-htg-v5-pcie.apm Locally Modified          471 
+ hasim-fpgaenv-null.apm    Locally Modified          471 
+ fpgaenv-cycloneiii-jtag.apm Locally Modified          471 
+ hasim-fpgaenv-xup.apm     Locally Modified          471 
+ fpgaenv-hybrid-htg-v5-jtag.apm Locally Modified          471 
+
+Directory config/pm/hasim/submodels/pipelines
+ build-pipeline-xilinx-synplify.apm Locally Added               0 
+
+
+Fixed broken apms from yesterday's check in.
