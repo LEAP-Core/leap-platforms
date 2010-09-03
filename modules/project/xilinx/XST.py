@@ -12,7 +12,7 @@ class Synthesize():
 
     # string together the xcf, sort of like the ucf
     # Concatenate UCF files
-    if('XCF' in moduleList.topModule.moduleDependency):
+    if('XCF' in moduleList.topModule.moduleDependency and len(moduleList.topModule.moduleDependency['XCF']) > 0):
       for xcf in  moduleList.topModule.moduleDependency['XCF']:
         print 'xst found xcf: ' + xcf + '\n' 
       xilinx_xcf = moduleList.env.Command(

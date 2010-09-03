@@ -10668,3 +10668,14 @@ Directory config/pm/hasim/submodels/pipelines
 
 
 Fixed broken apms from yesterday's check in.
+
+----------
+kfleming    Date: Thu Sep  2 23:40:01 EDT 2010  CSN: CSN-platforms-473
+                  Fri Sep  3 03:40:01 UTC 2010
+
+
+Directory modules/project/xilinx
+ XST.py                    Locally Modified          472 
+
+
+Fixed zero-length list bug in XST.py
