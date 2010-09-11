@@ -10679,3 +10679,13 @@ Directory modules/project/xilinx
 
 
 Fixed zero-length list bug in XST.py
+
+----------
+kfleming    Date: Sat Sep 11 15:57:13 EDT 2010  CSN: CSN-platforms-474
+                  Sat Sep 11 19:57:13 UTC 2010
+
+
+Directory modules/bluespec/librl/base
+ memory-interface.bsv      Locally Modified          473 
+
+Added sized safe reader memory interface.  This was needed to allieviate one of many performance bottlenecks in h.264.

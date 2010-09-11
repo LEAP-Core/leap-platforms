@@ -599,3 +599,41 @@ module mkSafeMemoryReader#(MEMORY_READER_IFC#(t_ADDR, t_DATA) unsafeReader) (MEM
 
 endmodule
 
+
+//
+// mkSizedSafeMemoryReader --
+//     A wrapper for memory reader that guarantees output buffer space
+//     before issuing a request to memory.  This helps in deadlock avoidance,
+//     by guaranteeing that memory responses are drained, in the case that a 
+//     memory is shared by several readers.  Unlike the preceding non-size module,
+//     this one takes a size parameter, but doesn't have the LFIFOF. This might 
+//     introduce some latency
+//
+module mkSafeSizedMemoryReader#(NumTypeParam#(n_ENTRIES) p, MEMORY_READER_IFC#(t_ADDR, t_DATA) unsafeReader) (MEMORY_READER_IFC#(t_ADDR, t_DATA))
+    provisos(Bits#(t_DATA, t_DATA_SZ));
+  
+    // State elements.  Notice that bypass/loopy fifo usage preserves performance
+    FIFOF#(Bit#(0)) tokenFIFO <- mkSizedFIFOF(valueof(n_ENTRIES));
+    FIFOF#(t_DATA) outputFIFO <- mkSizedBypassFIFOF(valueof(n_ENTRIES));
+    
+    rule response;
+        t_DATA data <- unsafeReader.readRsp;
+        outputFIFO.enq(data);
+    endrule
+
+    method Action readReq(t_ADDR addr);
+        tokenFIFO.enq(0);
+        unsafeReader.readReq(addr);
+    endmethod
+
+    method ActionValue#(t_DATA) readRsp();
+        tokenFIFO.deq;
+        outputFIFO.deq;
+        return outputFIFO.first;
+    endmethod
+
+    method peek = outputFIFO.first;
+    method notEmpty = outputFIFO.notEmpty;
+    method notFull = tokenFIFO.notFull;
+
+endmodule
