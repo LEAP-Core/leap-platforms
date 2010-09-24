@@ -10689,3 +10689,14 @@ Directory modules/bluespec/librl/base
  memory-interface.bsv      Locally Modified          473 
 
 Added sized safe reader memory interface.  This was needed to allieviate one of many performance bottlenecks in h.264.
+
+----------
+mcadler     Date: Fri Sep 24 10:32:05 EDT 2010  CSN: CSN-platforms-475
+                  Fri Sep 24 14:32:05 UTC 2010
+
+
+Directory modules/bluespec/librl/storage/cache
+ rl-set-assoc-cache.bsv    Locally Modified          474 
+
+Fix pipelining of requests.  The metadata read request pipeline was too small,
+only allowing two outstanding requests.  Now allows 16.
