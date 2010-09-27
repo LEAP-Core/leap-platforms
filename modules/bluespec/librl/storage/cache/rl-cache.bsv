@@ -23,6 +23,9 @@
 interface RL_CACHE_STATS;
     method Bool readHit();
     method Bool readMiss();
+    method Bool readRecentLineHit();     // Caches may have internal recent line
+                                         // caches to optimize repeat accesses
+                                         // to the same line.
     method Bool writeHit();
     method Bool writeMiss();
     method Bool invalEntry();            // Invalidate due to capacity

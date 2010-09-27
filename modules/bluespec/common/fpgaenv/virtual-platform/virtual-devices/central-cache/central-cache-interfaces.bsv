@@ -241,12 +241,6 @@ endinterface: CENTRAL_CACHE_VIRTUAL_DEVICE
 //
 // Central cache statistics interface
 //
-interface CENTRAL_CACHE_RECENT_LINE_STATS;
-    method Bool readHit();
-    method Bool readMiss();
-endinterface: CENTRAL_CACHE_RECENT_LINE_STATS
-
 interface CENTRAL_CACHE_STATS;
     interface RL_CACHE_STATS cacheStats;
-    interface CENTRAL_CACHE_RECENT_LINE_STATS recentLineStats;
 endinterface:  CENTRAL_CACHE_STATS

@@ -649,6 +649,7 @@ module mkCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(t_CACHE_ADDR, t_CACHE_WORD,
     interface RL_CACHE_STATS stats;
         method Bool readHit() = readHitW;
         method Bool readMiss() = readMissW;
+        method Bool readRecentLineHit() = False;    
         method Bool writeHit() = writeHitW;
         method Bool writeMiss() = False;
         method Bool invalEntry() = False;
@@ -730,6 +731,7 @@ module mkNullCacheDirectMapped#(RL_DM_CACHE_SOURCE_DATA#(t_CACHE_ADDR, t_CACHE_W
     interface RL_CACHE_STATS stats;
         method Bool readHit() = False;
         method Bool readMiss() = False;
+        method Bool readRecentLineHit() = False;    
         method Bool writeHit() = False;
         method Bool writeMiss() = False;
         method Bool invalEntry() = False;

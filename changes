@@ -10700,3 +10700,26 @@ Directory modules/bluespec/librl/storage/cache
 
 Fix pipelining of requests.  The metadata read request pipeline was too small,
 only allowing two outstanding requests.  Now allows 16.
+
+----------
+mcadler     Date: Mon Sep 27 15:58:03 EDT 2010  CSN: CSN-platforms-476
+                  Mon Sep 27 19:58:03 UTC 2010
+
+
+Directory modules/bluespec/librl/storage/cache
+ rl-direct-mapped-cache.bsv Locally Modified          475 
+ rl-set-assoc-cache.bsv    Locally Modified          475 
+ rl-cache.bsv              Locally Modified          475 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/central-cache
+ central-cache-interfaces.bsv Locally Modified          475 
+ local-mem-central-cache.bsv Locally Modified          475 
+
+- Improve buffering for central cache RAM latency, trying to keep more in flight
+  for pipelined memory.
+- Move the recent read line cache into the set associative cache implementation.
+  This greatly simplifies the central cache code and eliminates a filter that
+  blocked the request queue when faced with multiple references to the same line.
+  The penalty is longer latency on recent line hits.  This should be offset
+  by improved line-conflict handling (next check-in) that will shunt requests
+  to in-flight lines to a side buffer.

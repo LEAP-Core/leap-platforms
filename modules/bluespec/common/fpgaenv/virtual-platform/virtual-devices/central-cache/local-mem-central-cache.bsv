@@ -69,11 +69,7 @@ module mkCentralCache#(LowLevelPlatformInterface llpi)
               // 3 for the 3 ways in each set and one for a set's tag.
               Alias#(Bit#(TSub#(LOCAL_MEM_LINE_ADDR_SZ, 2)),  // 4 regions per set
                      t_CENTRAL_CACHE_SET_IDX),
-              Bits#(t_CENTRAL_CACHE_SET_IDX, t_CENTRAL_CACHE_SET_IDX_SZ),
-
-              // Index and tag of local, recently read, line cache
-              Alias#(Bit#(`CENTRAL_CACHE_LINE_RESP_CACHE_IDX_BITS), t_RECENT_READ_CACHE_IDX),
-              Alias#(Bit#(TSub#(t_CENTRAL_CACHE_INTERNAL_ADDR_SZ, `CENTRAL_CACHE_LINE_RESP_CACHE_IDX_BITS)), t_RECENT_READ_CACHE_TAG));
+              Bits#(t_CENTRAL_CACHE_SET_IDX, t_CENTRAL_CACHE_SET_IDX_SZ));
 
     DEBUG_FILE debugLog <- (`CENTRAL_CACHE_DEBUG_ENABLE == 1)?
                            mkDebugFile("memory_central_cache.out"):
@@ -124,81 +120,20 @@ module mkCentralCache#(LowLevelPlatformInterface llpi)
                             TExp#(t_CENTRAL_CACHE_SET_IDX_SZ),
                             3) cacheLocalData <- mkLocalMemCacheData(llpi, debugLogInt);
 
+    NumTypeParam#(`CENTRAL_CACHE_LINE_RESP_CACHE_IDX_BITS) nRecentReadCacheIdxBits = ?;
+    NumTypeParam#(0) nTagExtraLowBits = ?;
     RL_SA_CACHE#(Bit#(t_CENTRAL_CACHE_INTERNAL_ADDR_SZ),
                  CENTRAL_CACHE_WORD,
                  CENTRAL_CACHE_WORDS_PER_LINE,
-                 CENTRAL_CACHE_REF_INFO,
-                 0) cache <- mkCacheSetAssoc(backingConnection.sourceData,
-                                             cacheLocalData,
-                                             debugLogInt);
+                 CENTRAL_CACHE_REF_INFO
+                 ) cache <- mkCacheSetAssoc(backingConnection.sourceData,
+                                            cacheLocalData,
+                                            nRecentReadCacheIdxBits,
+                                            nTagExtraLowBits,
+                                            debugLogInt);
 
     // Manage routing of flush/inval ACK back to requesting port
     FIFO#(CENTRAL_CACHE_PORT_NUM) flushAckRespQ <- mkFIFO();
-
-    PulseWire recentLineReadHitW  <- mkPulseWire();
-    PulseWire recentLineReadMissW <- mkPulseWire();
-
-    // ====================================================================
-    //
-    // Data structures for local, recently read, line cache.  The recent
-    // line cache is private to this module and is designed to hit quickly
-    // for clients streaming through memory, requesting multiple words
-    // from a line.
-    //
-    // The main cache returns a full line but the response to the client is
-    // just a word.  Cache the entire line response in a BRAM.  The main
-    // cache may be relatively slow if it is stored in DDR, so this can be
-    // a big savings.
-    //
-    // ====================================================================
-
-    Reg#(Bool) enableLineCache <- mkRegU();
-
-    // Storage for recent line cache.  Each entry has a global valid bit,
-    // a tag and the line.  The line has individual valid bits for each word.
-    LUTRAM#(t_RECENT_READ_CACHE_IDX, Bool) recentReadCacheValid <- mkLUTRAM(False);
-    BRAM#(t_RECENT_READ_CACHE_IDX,
-          Tuple2#(t_RECENT_READ_CACHE_TAG,
-                  Vector#(CENTRAL_CACHE_WORDS_PER_LINE, Maybe#(CENTRAL_CACHE_WORD))))
-        recentReadCache <- mkBRAM();
-
-    //
-    // Line filter to make sure that reads and writes stay ordered in
-    // the recent read cache.  To save hardware, don't allow hashed (Bloom)
-    // filters since the ID will already be hashed.  The ID is based on the
-    // hashed idx associated with a line's address.
-    //
-    COUNTING_FILTER#(t_RECENT_READ_CACHE_IDX) readReqFilter <- mkCountingFilter(False, debugLog);
-
-    //
-    // Indexing function for recent read cache.
-    //
-    function Tuple2#(t_RECENT_READ_CACHE_TAG, t_RECENT_READ_CACHE_IDX) recentReadTagAndIdx(Bit#(t_CENTRAL_CACHE_INTERNAL_ADDR_SZ) addr);
-        return unpack(hashBits(addr));
-    endfunction
-
-
-    //
-    // Convenience function to confirm that a line isn't locked for read
-    // and to invalidate an entry in the recent read cache.
-    //
-    function ActionValue#(Bool) recentReadInvalLine(Bit#(t_CENTRAL_CACHE_INTERNAL_ADDR_SZ) addr);
-    actionvalue
-        match {.tag, .idx} = recentReadTagAndIdx(addr);
-
-        if (readReqFilter.notSet(idx))
-        begin
-            recentReadCacheValid.upd(idx, False);
-            return True;
-        end
-        else
-        begin
-            dbgReqLineLocked <= True;
-            return False;
-        end
-    endactionvalue
-    endfunction
-
 
     //
     // addPortToAddr --
@@ -229,18 +164,12 @@ module mkCentralCache#(LowLevelPlatformInterface llpi)
         CENTRAL_CACHE_PORT_NUM port = zeroExtend(reqQ.firstPortID());
         let addr = addPortToAddr(port, r.addr);
 
-        // Process only of no read to a possibly conflicting line is in flight.
-        // recentReadInvalLine checks that no read is in flight and clears
-        // the cached recent read value.
-        let line_not_locked <- recentReadInvalLine(addr);
-        if (line_not_locked)
-        begin
-            reqQ.deq();
+        reqQ.deq();
 
-            debugLog.record($format("port %0d: write addr=0x%x, refInfo=0x%x, wIdx=%d, val=0x%x", port, r.addr, r.refInfo, r.wordIdx, r.val));
-            cache.write(addr, r.val, r.wordIdx, r.refInfo);
-        end
+        debugLog.record($format("port %0d: write addr=0x%x, refInfo=0x%x, wIdx=%d, val=0x%x", port, r.addr, r.refInfo, r.wordIdx, r.val));
+        cache.write(addr, r.val, r.wordIdx, r.refInfo);
     endrule
+
 
     (* conservative_implicit_conditions *)
     rule processInvalReq (initialized &&&
@@ -249,21 +178,18 @@ module mkCentralCache#(LowLevelPlatformInterface llpi)
         CENTRAL_CACHE_PORT_NUM port = zeroExtend(reqQ.firstPortID());
         let addr = addPortToAddr(port, r.addr);
 
-        let line_not_locked <- recentReadInvalLine(addr);
-        if (line_not_locked)
+        reqQ.deq();
+
+        debugLog.record($format("port %0d: inval addr=0x%x, refInfo=0x%x, ack=%d", port, r.addr, r.refInfo, r.sendAck));
+        cache.invalReq(addr, r.sendAck, r.refInfo);
+
+        if (r.sendAck)
         begin
-            reqQ.deq();
-
-            debugLog.record($format("port %0d: inval addr=0x%x, refInfo=0x%x, ack=%d", port, r.addr, r.refInfo, r.sendAck));
-            cache.invalReq(addr, r.sendAck, r.refInfo);
-
-            if (r.sendAck)
-            begin
-                // Keep track of ACK requests for routing back to the port
-                flushAckRespQ.enq(port);
-            end
+            // Keep track of ACK requests for routing back to the port
+            flushAckRespQ.enq(port);
         end
     endrule
+
 
     (* conservative_implicit_conditions *)
     rule processFlushReq (initialized &&&
@@ -272,21 +198,18 @@ module mkCentralCache#(LowLevelPlatformInterface llpi)
         CENTRAL_CACHE_PORT_NUM port = zeroExtend(reqQ.firstPortID());
         let addr = addPortToAddr(port, r.addr);
 
-        let line_not_locked <- recentReadInvalLine(addr);
-        if (line_not_locked)
+        reqQ.deq();
+
+        debugLog.record($format("port %0d: flush addr=0x%x, refInfo=0x%x, ack=%d", port, r.addr, r.refInfo, r.sendAck));
+        cache.flushReq(addr, r.sendAck, r.refInfo);
+
+        if (r.sendAck)
         begin
-            reqQ.deq();
-
-            debugLog.record($format("port %0d: flush addr=0x%x, refInfo=0x%x, ack=%d", port, r.addr, r.refInfo, r.sendAck));
-            cache.flushReq(addr, r.sendAck, r.refInfo);
-
-            if (r.sendAck)
-            begin
-                // Keep track of ACK requests for routing back to the port
-                flushAckRespQ.enq(port);
-            end
+            // Keep track of ACK requests for routing back to the port
+            flushAckRespQ.enq(port);
         end
     endrule
+
 
     // ====================================================================
     //
@@ -294,15 +217,12 @@ module mkCentralCache#(LowLevelPlatformInterface llpi)
     //
     // ====================================================================
 
-    FIFO#(Tuple3#(CENTRAL_CACHE_PORT_NUM, CENTRAL_CACHE_READ_REQ, Bool)) recentLineCheckQ <- mkFIFO();
-
     // Route read responses back to the correct port.
     FIFOF#(Tuple2#(CENTRAL_CACHE_PORT_NUM, CENTRAL_CACHE_READ_RESP)) readRespQ <- mkBypassFIFOF();
 
     //
     // processReadReq --
-    //     First stage of read pipeline.  Lock the line so no writes can pass.
-    //     Then check the recently read line cache.
+    //     Forward read requests to the cache.
     //
     (* conservative_implicit_conditions *)
     rule processReadReq (initialized &&&
@@ -311,76 +231,14 @@ module mkCentralCache#(LowLevelPlatformInterface llpi)
         CENTRAL_CACHE_PORT_NUM port = zeroExtend(reqQ.firstPortID());
         let addr = addPortToAddr(port, r.addr);
 
-        match {.tag, .idx} = recentReadTagAndIdx(addr);
+        reqQ.deq();
 
-        Bool ok = True;
-        if (enableLineCache)
-        begin
-            ok <- readReqFilter.insert(idx);
-            dbgReqLineLocked <= ! ok;
-        end
+        debugLog.record($format("port %0d: readReq addr=0x%x, wordIdx=0x%x, refInfo=0x%x", port, r.addr, r.wordIdx, r.refInfo));
+        cache.readReq(addr, r.wordIdx, r.refInfo);
 
-        if (ok)
-        begin
-            reqQ.deq();
-
-            debugLog.record($format("port %0d: readReq addr=0x%x, wordIdx=0x%x, refInfo=0x%x", port, r.addr, r.wordIdx, r.refInfo));
-
-            let valid = recentReadCacheValid.sub(idx);
-            recentReadCache.readReq(idx);
-            recentLineCheckQ.enq(tuple3(port, r, valid));
-        end
+        dbgCacheReadsInFlight.up();
     endrule
-    
-    //
-    // checkRecentLine --
-    //     Second stage of read request.  Did it hit in the recent line cache?
-    //
-    (* conservative_implicit_conditions *)
-    rule checkRecentLine (True);
-        // Incoming request
-        match {.port, .req, .read_cache_valid} = recentLineCheckQ.first();
-        recentLineCheckQ.deq();
-        
-        // Recently read cache value
-        match {.recent_tag, .recent_line} <- recentReadCache.readRsp();
-        
-        let addr = addPortToAddr(port, req.addr);
-        match {.desired_tag, .idx} = recentReadTagAndIdx(addr);
 
-        // Check that entry is valid, tag matches and word is valid.
-        if (enableLineCache &&&
-            read_cache_valid &&&
-            desired_tag == recent_tag &&&
-            recent_line[req.wordIdx] matches tagged Valid .val)
-        begin
-            // Hit!  Skip the main cache and return the value.
-            recentLineReadHitW.send();
-
-            CENTRAL_CACHE_READ_RESP resp;
-            resp.val = val;
-            resp.addr = req.addr;
-            resp.wordIdx = req.wordIdx;
-            resp.refInfo = req.refInfo;
-
-            // Forward data to the correct port
-            readRespQ.enq(tuple2(port, resp));
-
-            // Done with line.  Release it.
-            readReqFilter.remove(idx);
-
-            debugLog.record($format("port %0d: recent readResp addr=0x%x, wordIdx=0x%x, refInfo=0x%x", port, req.addr, req.wordIdx, req.refInfo));
-        end
-        else
-        begin
-            // Miss.  Ask the central cache.
-            recentLineReadMissW.send();
-
-            cache.readReq(addr, req.wordIdx, req.refInfo);
-            dbgCacheReadsInFlight.up();
-            debugLog.record($format("port %0d: cache readReq addr=0x%x, wordIdx=0x%x, refInfo=0x%x", port, req.addr, req.wordIdx, req.refInfo));
-        end
-    endrule
 
     // Descending urgency for sub-components that can't see each other
     (* descending_urgency = "cache.handleWrite, cacheLocalData.forwardDataReq" *)
@@ -388,24 +246,11 @@ module mkCentralCache#(LowLevelPlatformInterface llpi)
     //
     // cacheReadResp --
     //     Optional 3rd stage of read request.  Forward main cache response to
-    //     the client port and write the line to the recently read cache.
+    //     the client port.
     //
-    (* descending_urgency = "cacheReadResp, checkRecentLine, processFlushReq, processInvalReq, processWriteReq" *)
     rule cacheReadResp (True);
         let d <- cache.readResp();
         dbgCacheReadsInFlight.down();
-
-        // Cache read result for this line locally in case other words will be
-        // read soon.
-        match {.tag, .idx} = recentReadTagAndIdx(d.addr);
-        recentReadCacheValid.upd(idx, True);
-        recentReadCache.write(idx, tuple2(tag, d.words));
-
-        // Done with line.  Release it.
-        if (enableLineCache)
-        begin
-            readReqFilter.remove(idx);
-        end
 
         //
         // Convert internal cache response to port-specific response.
@@ -514,20 +359,12 @@ module mkCentralCache#(LowLevelPlatformInterface llpi)
 
     method Action init(RL_SA_CACHE_MODE mode, Bool enableRecentLineCache) if (! initialized);
         cache.setCacheMode(mode);
-        enableLineCache <= enableRecentLineCache;
+        cache.setRecentLineCacheMode(enableRecentLineCache);
         initialized <= True;
     endmethod
     
     interface CENTRAL_CACHE_STATS stats;
-    
         interface cacheStats = cache.stats;
-        interface CENTRAL_CACHE_RECENT_LINE_STATS recentLineStats;
-        
-            method Bool readHit() = recentLineReadHitW;
-            method Bool readMiss() = recentLineReadMissW;
-
-        endinterface
-    
     endinterface
 endmodule
 
@@ -848,7 +685,7 @@ module mkLocalMemCacheData#(LowLevelPlatformInterface llpi, DEBUG_FILE debugLog)
     // ====================================================================
 
     FIFOF#(t_SET_METADATA) readMetadataRespQ <- mkFIFOF();
-    COUNTER#(2) readMetadataCnt <- mkLCounter(2);
+    COUNTER#(4) readMetadataCnt <- mkLCounter(8);
 
     rule forwardMetadataResp (True);
         let d <- memory.readPorts[valueOf(t_METADATA_READ_PORT)].readLineRsp();
