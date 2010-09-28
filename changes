@@ -10723,3 +10723,22 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/centr
   The penalty is longer latency on recent line hits.  This should be offset
   by improved line-conflict handling (next check-in) that will shunt requests
   to in-flight lines to a side buffer.
+
+----------
+mcadler     Date: Tue Sep 28 10:19:28 EDT 2010  CSN: CSN-platforms-477
+                  Tue Sep 28 14:19:28 UTC 2010
+
+
+Directory modules/bluespec/librl/storage/cache
+ rl-set-assoc-cache.bsv    Locally Modified          476 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/central-cache
+ local-mem-central-cache.bsv Locally Modified          476 
+
+- Add a side buffer to the set associative cache.  New requests to a set
+  already in flight used to block the request queue.  Now up to 8 are
+  buffered on the side.  For now, requests come out of this conflict queue
+  FIFO to avoid having to search for the youngest request for a given set.
+
+- Fix a deadlock in the central cache local memory handler introduced in the
+  last check-in.

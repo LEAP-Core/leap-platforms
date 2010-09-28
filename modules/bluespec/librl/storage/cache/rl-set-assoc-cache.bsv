@@ -263,6 +263,15 @@ endinterface: RL_SA_CACHE_LOCAL_DATA
 // ===================================================================
 
 //
+// Size of the conflicting reference holding queue.  Results may be returned
+// out of order.  Only one request to a given line may be in flight.  Shunt
+// conflicting requests to a side queue in order to allow other non-conflicting
+// requests to proceed.
+//
+typedef 8 RL_SA_CONFLICTQ_ENTRIES;
+typedef Bit#(TLog#(RL_SA_CONFLICTQ_ENTRIES)) RL_SA_CONFLICTQ_IDX;
+
+//
 // Data to be written to the cache.
 //
 typedef struct
@@ -770,9 +779,39 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
     // ====================================================================
 
     //
+    // Maintain a side buffer of requests to cache sets that already have
+    // in-flight conflicting requests.  This allows non-conflicting requests
+    // to proceed.
+    //
+
+    if (valueOf(TExp#(TLog#(RL_SA_CONFLICTQ_ENTRIES))) != valueOf(RL_SA_CONFLICTQ_ENTRIES))
+    begin
+        error("RL_SA_CONFLICTQ_ENTRIES must be a power of 2");
+    end
+
+    FIFO#(Tuple2#(t_CACHE_REQ_BASE, t_CACHE_REQ)) conflictSideBufQ
+        <- mkSizedFIFO(valueOf(RL_SA_CONFLICTQ_ENTRIES));
+
+    Reg#(Vector#(RL_SA_CONFLICTQ_ENTRIES, Maybe#(t_CACHE_SET_IDX))) conflictSideSets
+        <- mkReg(replicate(tagged Invalid));
+
+    Reg#(Bit#(TLog#(RL_SA_CONFLICTQ_ENTRIES))) conflictSideIdxW <- mkReg(0);
+    Reg#(Bit#(TLog#(RL_SA_CONFLICTQ_ENTRIES))) conflictSideIdxR <- mkReg(0);
+
+
+    //
+    // setInConflictQ --
+    //     Is the set already in the conflict side buffer?
+    //
+    function Bool setInConflictQ(t_CACHE_SET_IDX set);
+        return elem(tagged Valid set, conflictSideSets);
+    endfunction
+
+
+    //
     // handleIncomingReq0 --
     //     Only one request may be active per set.  The set filter monitors
-    //     active requests to also non-conflicting requests to proceed.
+    //     active requests to allow non-conflicting requests to proceed.
     //
     (* conservative_implicit_conditions *)
     rule handleIncomingReq0 (True);
@@ -781,7 +820,90 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
         let tag = req_base.tag;
         let set = req_base.set;
 
-        let success <- setFilter.insert(set);
+        // Is the recent read line entry locked due to BRAM read/write conflict?
+        // In some BRAM implementations, read and write of the same entry
+        // produces unpredictable read results.
+        let recent_idx = recentLineIdx(tag, set);
+        let recent_lock = recentLineWriteLock.wget();
+        Bool recent_idx_locked =
+              (isValid(recent_lock) && (recent_idx == validValue(recent_lock)));
+
+        Bool send_to_reqQ = False;
+        Bool send_to_conflictQ = False;
+
+        //
+        // Is the set already in the conflict queue?  If yes, this new request
+        // must also follow the same path.  This forces references to the same
+        // address to stay ordered.
+        //
+        if (setInConflictQ(set))
+        begin
+            // Force request down conflict path.
+            debugLog.record($format("  Already conflicts: addr=0x%x, set=0x%x", debugAddrFromTag(tag, set), set));
+            send_to_conflictQ = True;
+        end
+        else if (! recent_idx_locked)
+        begin
+            // Is the set busy?
+            let success <- setFilter.insert(set);
+            if (success)
+                send_to_reqQ = True;
+            else
+                send_to_conflictQ = True;
+        end
+
+        // Dequeue incoming request if it is going somewhere
+        if (send_to_reqQ || send_to_conflictQ)
+        begin
+            newReqQ.deq();
+        end
+
+        if (send_to_reqQ)
+        begin
+            debugLog.record($format("  FWD to ReqQ: addr=0x%x, set=0x%x", debugAddrFromTag(tag, set), set));
+
+            // Read the current state of the recent line cache for the set.
+            recentLineCache.readReq(recent_idx);
+
+            processReqQ0.enq(tuple2(req_base, req));
+        end
+
+        if (send_to_conflictQ)
+        begin
+            //
+            // Set is busy.  Store it off to the side to keep the pipeline going.
+            //
+            debugLog.record($format("  FWD to ConflictQ: addr=0x%x, set=0x%x", debugAddrFromTag(tag, set), set));
+
+            conflictSideBufQ.enq(tuple2(req_base, req));
+
+            // The conflict queue is a bit more complicated because all in-flight
+            // sets must be tracked.
+            let idx = conflictSideIdxW;
+            conflictSideSets[idx] <= tagged Valid set;
+            conflictSideIdxW <= idx + 1;
+        end
+    endrule
+
+
+    //
+    // handleReadyConflict --
+    //     Is the head of the conflict queue ready to go?  Favor it over
+    //     processing a new request above.
+    //
+    //     The predicate on the rule is a just a messy way of testing that
+    //     the head of the conflictQ is no longer in the setFilter busy
+    //     group.  Without the predicate, Bluespec will always pick
+    //     this rule over handleIncomingReqQ0, even when the head of the
+    //     conflictQ can't be forwarded.
+    //
+    (* conservative_implicit_conditions *)
+    (* descending_urgency = "handleReadyConflict, handleIncomingReq0" *)
+    rule handleReadyConflict (setFilter.notSet(tpl_1(conflictSideBufQ.first()).set));
+        match {.req_base, .req} = conflictSideBufQ.first();
+
+        let tag = req_base.tag;
+        let set = req_base.set;
 
         // Is the recent read line entry locked due to BRAM read/write conflict?
         // In some BRAM implementations, read and write of the same entry
@@ -789,16 +911,25 @@ module mkCacheSetAssoc#(RL_SA_CACHE_SOURCE_DATA#(Bit#(t_CACHE_ADDR_SZ), t_CACHE_
         let recent_idx = recentLineIdx(tag, set);
         let recent_lock = recentLineWriteLock.wget();
         Bool recent_idx_locked =
-            (isValid(recent_lock) && (recent_idx == validValue(recent_lock)));
+              (isValid(recent_lock) && (recent_idx == validValue(recent_lock)));
 
-        if (success && ! recent_idx_locked)
+        if (! recent_idx_locked)
         begin
-            newReqQ.deq();
+            // Is the set busy?
+            let success <- setFilter.insert(set);
+            if (success)
+            begin
+                debugLog.record($format("  ConflictQ to ReqQ: addr=0x%x, set=0x%x", debugAddrFromTag(tag, set), set));
 
-            // Read the current state of the recent line cache for the set.
-            recentLineCache.readReq(recent_idx);
-            
-            processReqQ0.enq(tuple2(req_base, req));
+                conflictSideBufQ.deq();
+                let idx = conflictSideIdxR;
+                conflictSideSets[idx] <= tagged Invalid;
+                conflictSideIdxR <= idx + 1;
+
+                recentLineCache.readReq(recent_idx);
+
+                processReqQ0.enq(tuple2(req_base, req));
+            end
         end
     endrule
 

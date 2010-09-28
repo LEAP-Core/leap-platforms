@@ -684,7 +684,7 @@ module mkLocalMemCacheData#(LowLevelPlatformInterface llpi, DEBUG_FILE debugLog)
     //
     // ====================================================================
 
-    FIFOF#(t_SET_METADATA) readMetadataRespQ <- mkFIFOF();
+    FIFOF#(t_SET_METADATA) readMetadataRespQ <- mkSizedFIFOF(8);
     COUNTER#(4) readMetadataCnt <- mkLCounter(8);
 
     rule forwardMetadataResp (True);
