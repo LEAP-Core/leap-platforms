@@ -32,7 +32,7 @@ Packagehint=platforms
 
 [FPGA Build Pipeline/Requires]
 post_synthesis_tool=Xilinx Post-synthesis Toolchain
-synthesis_tool=XST Synthesis Tool
+synthesis_tool=XST Synthesis Tool - no basicio run
 mcd_tool=Simple MCD Tool
 software_tool=Software build tool
 iface_tool=Interface builder
@@ -57,9 +57,6 @@ xilinx_loader=Xilinx LOADER
 File=modules/project/xilinx/xilinx_map.awb
 Packagehint=platforms
 
-[XST Synthesis Tool]
-File=modules/project/xilinx/xst.awb
-Packagehint=platforms
 
 [Simple MCD Tool]
 File=modules/project/bluespec/mcd.awb
@@ -77,3 +74,7 @@ Packagehint=platforms
 File=modules/project/bluespec/bsv.awb
 Packagehint=platforms
 
+
+[XST Synthesis Tool - no basicio run]
+File=modules/project/xilinx/xst-nobasicio.awb
+Packagehint=platforms

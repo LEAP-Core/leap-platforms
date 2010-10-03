@@ -102,7 +102,7 @@ module mkUserClockFromFrequency#(Integer inFreq,
         (UserClock);
    let lcmValue = lcm(inFreq,outFreq);
 
-  let m <- mkUserClock_Ratio(inFreq, lcmValue/inFreq, lcmValue/outFreq);
+  let m <- mkUserClock(inFreq, lcmValue/inFreq, lcmValue/outFreq);
   return m;
 endmodule
 
