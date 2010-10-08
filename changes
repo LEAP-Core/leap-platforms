@@ -10761,3 +10761,33 @@ mkUserClock_Ratio.  As such, we were not inferring clock dividers.
 
 I also removed the basicio call from the default xilinx pipeline.
 Basicio is useful only when using synplify.  
+
+----------
+kfleming    Date: Fri Oct  8 17:24:21 EDT 2010  CSN: CSN-platforms-479
+                  Fri Oct  8 21:24:21 UTC 2010
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-hybrid-xup-v5-jtag.apm Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform
+ xilinx_xupV5/             Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5
+ jtag/                     Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/jtag
+ xilinx-xup-jtag.awb       Locally Added               0 
+ xilinx-xup-jtag.bsv       Locally Added               0 
+ xilinx.download           Locally Added               0 
+ xilinx.ut                 Locally Added               0 
+ xilinx.sdc                Locally Added               0 
+ xilinx-xup-jtag.ucf       Locally Added               0 
+ xilinx.sdf                Locally Added               0 
+ xilinx.xst                Locally Added               0 
+ xilinx-xup-jtag.cpp       Locally Added               0 
+ xilinx-xup-jtag.h         Locally Added               0 
+
+
+
+A basic JTAG platform for XUPV5.  

@@ -1,0 +1,130 @@
+
+[Global]
+SaveParameters=0
+Description=Hybrid HTG-v5-JTAG FPGA Environment
+File=fpgaenv-hybrid-xup-v5-jtag
+Version=2.1
+Type=HAsim
+Name=Hybrid XUP-v5-JTAG FPGA Environment
+Class=Asim::Model
+DefaultBenchmark=
+DefaultRunOpts=
+
+[Model]
+DefaultAttributes=bluespec htg-v5-jtag
+model=FPGA Environment
+
+[FPGA Environment/Requires]
+virtual_platform=Standard Virtual Platform
+fpga_components=Hardware FPGA Components for Virtex 5
+librl_bsv=RL Bluespec Library
+build_pipeline=FPGA Build Pipeline
+
+[Standard Virtual Platform]
+File=modules/bluespec/common/fpgaenv/virtual-platform/std-virtual-platform.awb
+Packagehint=platforms
+
+[Standard Virtual Platform/Requires]
+virtual_devices=Standard Virtual Devices
+low_level_platform_interface=Low Level Platform Interface Hybrid
+umf=Little-Endian Unified Message Format
+
+[FPGA Environment]
+File=modules/bluespec/common/fpgaenv/fpga-environment.awb
+Packagehint=platforms
+
+[Standard Virtual Devices]
+File=config/pm/hasim/submodels/fpgaenv/std-virtual-devices.apm
+Packagehint=platforms
+
+[RRR Clients and Servers]
+File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic/basic-rrr.awb
+Packagehint=platforms
+
+[Basic Virtual Channel Multiplexer]
+File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/basic/basic-channelio.awb
+Packagehint=platforms
+
+[Basic Virtual Channel Multiplexer/Requires]
+physical_channel=JTAG Physical Channel
+
+[Low Level Platform Interface Hybrid]
+File=modules/bluespec/common/fpgaenv/low-level-platform-interface/hybrid-llpi.awb
+Packagehint=platforms
+
+[Low Level Platform Interface Hybrid/Requires]
+physical_platform=XUP Virtex 5 JTAG
+channelio=Basic Virtual Channel Multiplexer
+rrr=RRR Clients and Servers
+physical_platform_debugger=Null Physical Platform Debugger
+local_mem=NULL Local Memory Interface
+remote_memory=Null Remote Memory
+
+[RL Bluespec Library]
+File=config/pm/hasim/submodels/fpgaenv/librl-bsv.apm
+Packagehint=platforms
+
+[Single-Ended Crystal Clocks Device]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/single-ended/single-ended-clocks-device.awb
+Packagehint=platforms
+
+[Common Physical Platform Utilities]
+File=modules/bluespec/common/fpgaenv/physical-platform/utils/utils.awb
+Packagehint=platforms
+
+[Null Physical Platform Debugger]
+File=modules/bluespec/common/fpgaenv/physical-platform/debuggers/null/null-debugger.awb
+Packagehint=platforms
+
+[Hardware FPGA Components for Virtex 5]
+File=modules/bluespec/common/fpgaenv/fpga-components/hardware-fpga-components-virtex5.awb
+Packagehint=platforms
+
+[Little-Endian Unified Message Format]
+File=modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian/umf-little-endian.awb
+Packagehint=platforms
+
+[RRR Common Module]
+File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/rrr_common/rrr_common.awb
+Packagehint=platforms
+
+[RRR Clients and Servers/Requires]
+rrr_common=RRR Common Module
+
+[FPGA Build Pipeline]
+File=config/pm/hasim/submodels/pipelines/build-pipeline-xilinx.apm
+Packagehint=platforms
+
+[JTAG Physical Channel]
+File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/jtag/jtag-physical-channel.awb
+Packagehint=platforms
+
+[Xilinx JTAG Physical Device]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/jtag/xilinx/jtag-device-physical.awb
+Packagehint=platforms
+
+[Null Remote Memory]
+File=modules/bluespec/common/fpgaenv/low-level-platform-interface/remote-memory/null/null-remote-memory.awb
+Packagehint=platforms
+
+[XUP Virtex 5 JTAG/Requires]
+clocks_device=Single-Ended Crystal Clocks Device
+physical_platform_utils=Common Physical Platform Utilities
+jtag_device=Xilinx JTAG Physical Device
+
+[XUP Virtex 5 JTAG]
+File=modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/jtag/xilinx-xup-jtag.awb
+Packagehint=platforms
+
+[NULL Local Memory Interface]
+File=modules/bluespec/common/fpgaenv/low-level-platform-interface/local-mem/local-mem-null.awb
+Packagehint=platforms
+
+[Single-Ended Crystal Clocks Device/Params]
+MODEL_CLOCK_DIVIDER=4
+CRYSTAL_CLOCK_FREQ=100
+
+[NULL Local Memory Interface/Params]
+LOCAL_MEM_WORDS_PER_LINE=4
+LOCAL_MEM_WORD_BITS=64
+LOCAL_MEM_ADDR_BITS=26

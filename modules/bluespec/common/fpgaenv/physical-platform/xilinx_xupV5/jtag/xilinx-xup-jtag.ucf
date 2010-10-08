@@ -1,0 +1,11 @@
+Net CLK LOC=AH15;
+Net CLK IOSTANDARD = LVCMOS25;
+Net RST_N LOC=E9;
+Net RST_N IOSTANDARD = LVTTL;
+## System level constraints
+Net CLK TNM_NET = CLK;
+TIMESPEC TS_sys_clk_pin = PERIOD CLK 10000 ps;
+Net RST_N TIG;
+ 
+
+
