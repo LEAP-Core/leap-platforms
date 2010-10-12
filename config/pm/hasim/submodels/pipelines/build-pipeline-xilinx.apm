@@ -57,7 +57,6 @@ xilinx_loader=Xilinx LOADER
 File=modules/project/xilinx/xilinx_map.awb
 Packagehint=platforms
 
-
 [Simple MCD Tool]
 File=modules/project/bluespec/mcd.awb
 Packagehint=platforms
@@ -73,7 +72,6 @@ Packagehint=platforms
 [BSV Build Tool (First Phase)]
 File=modules/project/bluespec/bsv.awb
 Packagehint=platforms
-
 
 [XST Synthesis Tool - no basicio run]
 File=modules/project/xilinx/xst-nobasicio.awb

@@ -12,7 +12,7 @@ class Synthesize():
 
     # string together the xcf, sort of like the ucf
     # Concatenate UCF files
-    if('XCF' in moduleList.topModule.moduleDependency):
+    if('XCF' in moduleList.topModule.moduleDependency and len(moduleList.topModule.moduleDependency['XCF']) > 0):
       for xcf in  moduleList.topModule.moduleDependency['XCF']:
         print 'xst found xcf: ' + xcf + '\n' 
       xilinx_xcf = moduleList.env.Command(
@@ -35,7 +35,7 @@ class Synthesize():
     oldXSTFile.close();
 
 
-    for module in moduleList.moduleList:    
+    for module in moduleList.synthBoundaries():    
         # we must tweak the xst files of the internal module list
         # to prevent the insertion of iobuffers
         newXSTFile = open('config/' + module.wrapperName() + '.modified.xst','w')
@@ -45,9 +45,15 @@ class Synthesize():
         newXSTFile.write('-uc  '+ moduleList.env['DEFS']['BUILD_DIR'] + '/' + moduleList.compileDirectory + '/' + moduleList.topModule.wrapperName()+ '.xcf\n');
         newXSTFile.close();
         oldXSTFile.close();
+        print 'For ' + module.name + ' explicit vlog: ' + str(module.moduleDependency['VERILOG'])
+        # need to sort these?  SCons complains about it.
+        vlogStubs = moduleList.getAllDependencies('VERILOG_STUB')
+        vlogStubs.sort()
+        vlog = module.moduleDependency['VERILOG']
+        vlog.sort()
         w = moduleList.env.Command(
             moduleList.compileDirectory + '/' + module.wrapperName() + '.ngc',
-            module.moduleDependency['VERILOG'] + moduleList.getAllDependencies('VERILOG_STUB')  + module.moduleDependency['XST'] + moduleList.topModule.moduleDependency['XST']+xilinx_xcf,
+            vlog + vlogStubs + module.moduleDependency['XST'] + moduleList.topModule.moduleDependency['XST'] + xilinx_xcf,
             [ SCons.Script.Delete(moduleList.compileDirectory + '/' + module.wrapperName() + '.srp'),
               SCons.Script.Delete(moduleList.compileDirectory + '/' + module.wrapperName() + '_xst.xrpt'),
               'xst -intstyle silent -ifn config/' + module.wrapperName() + '.modified.xst -ofn ' + moduleList.compileDirectory + '/' + module.wrapperName() + '.srp',

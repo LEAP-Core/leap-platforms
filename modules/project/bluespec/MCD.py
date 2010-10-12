@@ -46,7 +46,7 @@ class MCD():
   def __init__(self, moduleList):
    
     # concat the modules and the top
-    allModules = [moduleList.topModule] + moduleList.moduleList
+    allModules = [moduleList.topModule] + moduleList.synthBoundaries()
     self.mcdUCFFile = 'config/' + moduleList.topModule.wrapperName() + '.mcd.ucf' 
 
     # determine what the logfile paths will be

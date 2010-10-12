@@ -3,8 +3,14 @@
 import os
 import sys
 import string
+import pygraph
+import pygraph.algorithms.sorting
 import Module
 import Utils
+
+def checkSynth(module):
+  return module.isSynthBoundary
+
 
 class ModuleList:
   
@@ -26,12 +32,12 @@ class ModuleList:
     self.arguments = arguments
     self.buildDirectory = env['DEFS']['BUILD_DIR']
     self.compileDirectory = env['DEFS']['TMP_XILINX_DIR']
-    givenVerilogs = Utils.clean_split(env['DEFS']['GIVEN_VERILOGS'], sep = ' ') +  Utils.clean_split(env['DEFS']['GEN_VS'], sep = ' ') 
+    givenVerilogs = Utils.clean_split(env['DEFS']['GIVEN_VERILOGS'], sep = ' ') 
     givenNGCs = Utils.clean_split(env['DEFS']['GIVEN_NGCS'], sep = ' ') 
     givenVHDs = Utils.clean_split(env['DEFS']['GIVEN_VHDS'], sep = ' ') 
     self.apmName = env['DEFS']['APM_NAME']
     self.moduleList = []
-    self.synthBoundaries = env['DEFS']['SYNTH_BOUNDARIES']
+    synthBoundaries = env['DEFS']['SYNTH_BOUNDARIES']
     #We should be invoking this elsewhere?
     #self.wrapper_v = env.SConscript([env['DEFS']['ROOT_DIR_HW_MODEL'] + '/SConscript'])
 
@@ -76,33 +82,43 @@ class ModuleList:
     else:
       self.smartguide = ''
 
-    for module in self.synthBoundaries:
+    # deal with other modules
+
+    for module in self.moduleList:
+      module.moduleDependency['VERILOG'] = givenVerilogs
+      module.moduleDependency['BA'] = []
+      module.moduleDependency['VERILOG_STUB'] = []
+      module.moduleDependency['NGC'] = givenNGCs
+      module.moduleDependency['VHD'] = givenVHDs
+
+    for module in synthBoundaries:
+      # each module has a generated bsv
       # check to see if this is the top module (has no parent)
       if(module.parent == ''): 
         self.topModule = module
       else:
-        print "adding " + module.name + " to module list" 
         self.moduleList.append(module)
+      #This should be done in xst process 
+      module.moduleDependency['XST'] = ['config/' + module.wrapperName() + '.xst']
+      module.moduleDependency['VERILOG'] = ['hw/' + module.buildPath + '/.bsc/mk_' + module.name + '_Wrapper.v'] + givenVerilogs + Utils.get_bluespec_verilog(env)
+      module.moduleDependency['BA'] = []
+
 
     #Notice that we call get_bluespec_verilog here this will
     #eventually called by the BLUESPEC build rule
     self.topModule.moduleDependency['XST'] = ['config/' + self.topModule.wrapperName() + '.xst']
     self.topModule.moduleDependency['VERILOG'] = ['hw/' + self.topModule.buildPath + '/.bsc/mk_' + self.topModule.name + '_Wrapper.v'] + givenVerilogs + Utils.get_bluespec_verilog(env)
+    self.topModule.moduleDependency['VERILOG_STUB'] = []
     self.topModule.moduleDependency['NGC'] = givenNGCs
     self.topModule.moduleDependency['VHD'] = givenVHDs
     self.topModule.moduleDependency['UCF'] =  Utils.clean_split(self.env['DEFS']['GIVEN_UCFS'], sep = ' ')
     self.topModule.moduleDependency['XCF'] =  Utils.clean_split(self.env['DEFS']['GIVEN_XCFS'], sep = ' ')
     self.topModule.moduleDependency['SDC'] = Utils.clean_split(env['DEFS']['GIVEN_SDCS'], sep = ' ')
-    self.topModule.moduleDependency['VERILOG_STUB'] = ['hw/' + self.topModule.buildPath + '/.bsc/mk_' + self.topModule.name + '_Wrapper_stub.v'] 
-    # deal with other modules
+    self.topModule.moduleDependency['BA'] = []
 
-    for module in self.moduleList:
-      module.moduleDependency['XST'] = ['config/' + module.wrapperName() + '.xst']
-      module.moduleDependency['VERILOG'] = ['hw/' + module.buildPath + '/.bsc/mk_' + module.name + '_Wrapper.v'] + givenVerilogs + Utils.get_bluespec_verilog(env)
-      module.moduleDependency['NGC'] = givenNGCs
-      module.moduleDependency['VHD'] = givenVHDs
-      module.moduleDependency['VERILOG_STUB'] = ['hw/' + module.buildPath + '/.bsc/mk_' + module.name + '_Wrapper_stub.v']     
     self.topDependency=[]
+    self.graphize()
+    self.graphizeSynth()
     
   def getAllDependencies(self, key):
     # we must check to see if the dependencies actually exist.
@@ -114,6 +130,106 @@ class ModuleList:
         allDeps += module.moduleDependency[key]
 
     if(len(allDeps) == 0):
-      sys.stderr.write("Warning, no dependencies were found")
+      sys.stderr.write("Warning: no dependencies were found")
 
     return allDeps
+
+  # walk down the source tree from the given module to its leaves, 
+  # which are either true leaves or underlying synth boundaries. 
+  def getSynthBoundaryDependencies(self, module, key):
+    # we must check to see if the dependencies actually exist.
+    allDesc = self.getSynthBoundaryDescendents(module)
+
+    # grab my deps
+    allDeps = []
+    for desc in allDesc:
+      if(desc.moduleDependency.has_key(key)):
+        allDeps += desc.moduleDependency[key]
+
+    if(len(allDeps) == 0):
+      sys.stderr.write("Warning: no dependencies were found")
+    
+    return allDeps
+
+  # returns the synthesis children of a given module.
+  def getSynthBoundaryChildren(self, module):
+    return self.graphSynth.neighbors(module)    
+
+  # get everyone below this synth boundary
+  # this is a recursive call
+  def getSynthBoundaryDescendents(self, module):
+    return self.getSynthBoundaryDescendentsHelper(True, module)
+           
+  ### FIX ME
+  def getSynthBoundaryDescendentsHelper(self, ignoreSynth, module): 
+    allDeps = []
+
+    if(module.isSynthBoundary and not ignoreSynth):
+      return allDeps
+
+    # else return me
+    allDeps = [module]
+
+    neighbors = self.graph.neighbors(module)
+    for neighbor in neighbors:
+      allDeps += self.getSynthBoundaryDescendentsHelper(False,neighbor) 
+
+    return allDeps
+
+  # We carry around two representations of the source tree.  One is the 
+  # original representation of the module tree, which will be helpful in 
+  # gathering the sources of various modules.  The second is a tree of synthesis
+  # boundaries, helpful, obviously, in actually constructing things.  
+  
+  def graphize(self):
+    self.graph = pygraph.digraph()
+    modules = [self.topModule] + self.moduleList
+    # first, we must add all the nodes. Only then can we add all the edges
+    self.graph.add_nodes(modules)
+
+    # here we have a strictly directed graph, so we need only insert directed edges
+    for module in modules:
+      def checkParent(child):
+        if module.name == child.parent:
+          return True
+        else:
+          return False
+
+      children = filter(checkParent, modules)
+      for child in children:
+        self.graph.add_edge(module,child) 
+  # and this concludes the graph build
+
+
+  # returns a dependency based topological sort of the source tree 
+  def topologicalOrder(self):
+       return pygraph.algorithms.sorting.topological_sorting(self.graph)
+
+  def graphizeSynth(self):
+    self.graphSynth = pygraph.digraph()
+    modulesUnfiltered = [self.topModule] + self.moduleList
+    # first, we must add all the nodes. Only then can we add all the edges
+    # filter by synthesis boundaries
+    modules = filter(checkSynth, modulesUnfiltered)
+    self.graphSynth.add_nodes(modules)
+
+    # here we have a strictly directed graph, so we need only insert directed edges
+    for module in modules:
+      def checkParent(child):
+        if module.name == child.synthParent:
+          return True
+        else:
+          return False
+
+      children = filter(checkParent, modules)
+      for child in children:
+        self.graphSynth.add_edge(module,child) 
+  # and this concludes the graph build
+
+
+  # returns a dependency based topological sort of the source tree 
+  def topologicalOrderSynth(self):
+    return pygraph.algorithms.sorting.topological_sorting(self.graphSynth)
+
+  def synthBoundaries(self):
+    return filter(checkSynth, self.moduleList)

@@ -34,8 +34,15 @@ class Synthesize():
     newXSTFile.close();
     oldXSTFile.close();
 
+    print 'synthBoundaries:'
+    for module in moduleList.synthBoundaries():    
+      print module.name + ' '
+      print module.moduleDependency['VERILOG']
 
-    for module in moduleList.moduleList:    
+    print moduleList.getAllDependencies('VERILOG_STUB')   
+    
+
+    for module in moduleList.synthBoundaries():    
         # we must tweak the xst files of the internal module list
         # to prevent the insertion of iobuffers
         newXSTFile = open('config/' + module.wrapperName() + '.modified.xst','w')

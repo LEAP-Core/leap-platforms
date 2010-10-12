@@ -92,11 +92,10 @@ def awb_resolver(arg):
 def get_bluespec_verilog(env):
     resultArray = []
     bluespecdir = env['ENV']['BLUESPECDIR']
-    print 'bluespecdir: ' + bluespecdir
     
     fileProc = subprocess.Popen(["ls", "-1", bluespecdir + '/Verilog/'], stdout = subprocess.PIPE)
     fileList = fileProc.stdout.read()
-    print fileList
+    #print fileList
     fileArray = clean_split(fileList, sep = '\n')
     for file in fileArray:
         if((file != 'main.v') and (file != 'ConstrainedRandom.v')):
@@ -121,3 +120,10 @@ def getBluespecVersion():
         sys.exit(1)
 
     return bsc_version
+
+# useful for reconstructing synthesis boundary dependencies
+# returns a list of elements with exactly the argument filepath 
+def checkFilePath(prefix, path):
+   (filepath,filname) = os.path.split(path)
+   return prefix == path
+

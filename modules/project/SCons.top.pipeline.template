@@ -107,8 +107,6 @@ TMP_XILINX_DIR = env['DEFS']['TMP_XILINX_DIR']
 
 moduleList = ModuleList(env, ARGUMENTS)
 
-moduleList.dump()                      
-
 # we will build whatever the user wants us to build
 Build(moduleList)
 

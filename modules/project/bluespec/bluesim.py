@@ -9,7 +9,7 @@ from bsv_tool import *
 class Bluesim():
 
   def __init__(self, moduleList):
-
+    print "Alive in Bluesim" 
     # get rid of this at some point - since we know we're in 
     # bluesim, we should be able to do the right thing.
     APM_NAME = moduleList.env['DEFS']['APM_NAME']
@@ -35,7 +35,8 @@ class Bluesim():
 
     sbin = moduleList.env.Command(
         TMP_BSC_DIR + '/' + APM_NAME + '_hw.exe',
-        moduleList.getAllDependencies('VERILOG') +  moduleList.getAllDependencies('BDPI_CS'),
+        moduleList.getAllDependencies('BA') + 
+        moduleList.getAllDependencies('BDPI_CS'),
         bsc_sim_command)
 
     if moduleList.env.GetOption('clean'):
@@ -50,6 +51,7 @@ class Bluesim():
     #   APM_NAME must be the software side, if there is one.  If there isn't, then
     #   it must be the Bluesim image.
     #
+    print "ModuleList desp : " + str(moduleList.swExe)
     exe = moduleList.env.Command(
         APM_NAME + '_hw.exe',
         sbin + moduleList.swExe,

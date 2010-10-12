@@ -7,6 +7,7 @@
 reserved = {
     'platform': 'PLATFORM',
     'endplatform': 'ENDPLATFORM',
+    'unknown': 'UNKOWN',
     }
 
 tokens = [ 'RARROW', 'LARROW', 'SEMICOLON',
@@ -20,6 +21,7 @@ t_PERIOD = r'\.'
 t_SEMICOLON = r';'
 t_PLATFORM = r'platform'
 t_ENDPLATFORM = r'endplatform'
+t_ENDPLATFORM = r'unknown'
 
 def t_NAME(t):
     r'[a-zA-Z_][a-zA-Z0-9_]*'

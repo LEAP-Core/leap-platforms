@@ -6,7 +6,7 @@ from multiparse import *
 lex.lex()
 yacc.yacc()
 
-errors = [1,1,1,1,1]
+errors = [1,1,1,1,1,1]
 
 platform0 = ' platform FPGA0; FPGA1 -> drivers.fromfpga1; FPGA1 <- drivers.tofpga1; endplatform '
 
@@ -71,6 +71,21 @@ if(tables[0]['FPGA1']['FPGA2'] == 'drivers.tofpga0' and
    tables[0]['FPGA1']['FPGA3'] == 'drivers.tofpga0' and
    tables[0]['FPGA1']['FPGA0'] == 'drivers.tofpga0'):
     errors[4] = 0
+
+
+# check that frontend correctly handles 
+
+platform0 = ' platform unknown; FPGA1 -> drivers.fromfpga1; FPGA2 <- drivers.tofpga2; endplatform\n '
+
+platform1 = ' platform FPGA1; unknown <- drivers.tofpga0; FPGA2 -> drivers.fromfpga2;endplatform\n '
+
+platform2 = ' platform FPGA2; unknown -> drivers.fromfpga0; FPGA1 <- drivers.tofpga1; endplatform\n '
+
+try:
+    res = yacc.parse(platform0 + platform1 + platform2)
+except (IndexError,SyntaxError):
+    errors[5] = 0 
+
 
 count = 1
 for error in errors:

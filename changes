@@ -10791,3 +10791,48 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/jtag
 
 
 A basic JTAG platform for XUPV5.  
+
+----------
+kfleming    Date: Tue Oct 12 19:11:18 EDT 2010  CSN: CSN-platforms-480
+                  Tue Oct 12 23:11:18 UTC 2010
+
+
+Directory config/pm/hasim/submodels/pipelines
+ build-pipeline-xilinx.apm Locally Modified          479 
+
+Directory modules/project
+ Utils.py                  Locally Modified          479 
+
+Directory modules/project/multifpga
+ multitest.py              Locally Modified          479 
+ multilex.py               Locally Modified          479 
+
+Directory modules/project
+ SCons.top.pipeline.template Locally Modified          479 
+ ModuleList.py             Locally Modified          479 
+
+Directory modules/project/xilinx
+ XSTnobasicio.py           Locally Modified          479 
+ XST.py                    Locally Modified          479 
+
+Directory modules/project
+ Module.py                 Locally Modified          479 
+
+Directory modules/project/bluespec
+ BSV.py                    Locally Modified          479 
+ bluesim.py                Locally Modified          479 
+ MCD.py                    Locally Modified          479 
+
+Directory modules/application-env/hybrid/soft-connections
+ application-env-hybrid-soft-conn.awb Locally Modified          479 
+
+
+Major rework of pipeline build to bring BSV builds into the new
+compilation scheme. We no longer use the recursive sub-SCons files but
+do a synthesis-boundary by synthesis-boundary build in the top level
+SCons.  Also changed are the depenedencies for building NGC files for
+XST.  We now depend only on the stub verilog files, which means that
+changes in one boundary _do_not_ force a rebuild of all boundaries.
+This can yield substantial build speedups. Also, bluesim builds should
+no longer depend on verilog sources, helping cut down on license usage. 
+
