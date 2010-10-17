@@ -32,6 +32,9 @@
 %private fp_cvt_i_to_s.v
 %private fp_cvt_d_to_i.v
 
+%sources -t BSV -v PUBLIC  clock-import.bsv
+%sources -t VERILOG -v PRIVATE clock_import.v
+
 %private fp_add.ngc
 %private fp_mul.ngc
 %private fp_div.ngc

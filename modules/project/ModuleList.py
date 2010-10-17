@@ -4,6 +4,7 @@ import os
 import sys
 import string
 import pygraph
+from pygraph.classes.digraph import digraph
 import pygraph.algorithms.sorting
 import Module
 import Utils
@@ -182,7 +183,7 @@ class ModuleList:
   # boundaries, helpful, obviously, in actually constructing things.  
   
   def graphize(self):
-    self.graph = pygraph.digraph()
+    self.graph = digraph()
     modules = [self.topModule] + self.moduleList
     # first, we must add all the nodes. Only then can we add all the edges
     self.graph.add_nodes(modules)
@@ -197,7 +198,7 @@ class ModuleList:
 
       children = filter(checkParent, modules)
       for child in children:
-        self.graph.add_edge(module,child) 
+        self.graph.add_edge((module,child)) 
   # and this concludes the graph build
 
 
@@ -206,7 +207,7 @@ class ModuleList:
        return pygraph.algorithms.sorting.topological_sorting(self.graph)
 
   def graphizeSynth(self):
-    self.graphSynth = pygraph.digraph()
+    self.graphSynth = digraph()
     modulesUnfiltered = [self.topModule] + self.moduleList
     # first, we must add all the nodes. Only then can we add all the edges
     # filter by synthesis boundaries
@@ -223,7 +224,7 @@ class ModuleList:
 
       children = filter(checkParent, modules)
       for child in children:
-        self.graphSynth.add_edge(module,child) 
+        self.graphSynth.add_edge((module,child)) 
   # and this concludes the graph build
 
 

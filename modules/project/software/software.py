@@ -89,7 +89,7 @@ class Software():
                                 duplicate = 0)
     
         sw_libpath = [ '.' ]
-        sw_link_libs = [ 'pthread' ]
+        sw_link_libs = [ 'pthread', 'dl' ]
     
         sw_link_tgt = moduleList.swExe
     

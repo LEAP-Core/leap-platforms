@@ -1,0 +1,29 @@
+
+%name XUP Virtex 5 PCIE
+%desc XUP Virtex 5 PCIE
+
+%provides physical_platform	
+%requires clocks_device pcie_device physical_platform_utils
+
+%sources -t BSV -v PUBLIC  xilinx-xup-pcie.bsv
+%sources -t H   -v PUBLIC  xilinx-xup-pcie.h
+%sources -t CPP -v PRIVATE xilinx-xup-pcie.cpp
+%sources -t UCF -v PRIVATE xilinx-xup-pcie.ucf
+
+%sources -t UT  -v PRIVATE xilinx.ut
+%sources -t XST -v PRIVATE xilinx.xst
+%sources -t SDF -v PUBLIC xilinx.sdf
+%sources -t SDC -v PUBLIC xilinx.sdc
+%sources -t DOWNLOAD -v PRIVATE xilinx.download
+
+%param --global MAKE_ALL_TARGET      bit       "Target of 'make all'.  Most likely bit, exe or vexe."
+
+%param FPGA_PART_XILINX   "xc5vlx110tff1136-1" "FPGA Part ID (XST)"
+%param FPGA_TECHNOLOGY    "Virtex5"             "FPGA Technology (Synplify)"
+%param FPGA_PART_SYNPLIFY "XC5VLX110T"          "FPGA Part (Synplify)"
+%param FPGA_SPEED         "-1"                  "FPGA Speed Grade (Synplify)"
+%param FPGA_PACKAGE       "FF1136"              "FPGA Package (Synplify)"
+%param FPGA_POSITION      5                     "FPGA Position (in Xilinx iMPACT)"
+%param MAP_OPTIONS        "-global_opt on"      "Extra Map Options"
+%param SYNTHESIS_TOOL     "xst"                 "Synthesis tool, xst or synplify_pro supported"
+

@@ -10836,3 +10836,77 @@ changes in one boundary _do_not_ force a rebuild of all boundaries.
 This can yield substantial build speedups. Also, bluesim builds should
 no longer depend on verilog sources, helping cut down on license usage. 
 
+
+----------
+kfleming    Date: Sun Oct 17 15:03:01 EDT 2010  CSN: CSN-platforms-481
+                  Sun Oct 17 19:03:01 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ hardware-fpga-components-arriaII.awb Locally Modified          480 
+ clock_import.v            Locally Added               0 
+ clock-import.bsv          Locally Added               0 
+ hardware-fpga-components-virtex2.awb Locally Modified          480 
+ hardware-fpga-components-virtex5.awb Locally Modified          480 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel
+ pcie-bluespec/            Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/pcie-bluespec
+ pcie-bluespec-physical-channel.cpp Locally Added               0 
+ pcie-bluespec-physical-channel.h Locally Added               0 
+ pcie-bluespec-physical-channel.awb Locally Added               0 
+ pcie-bluespec-physical-channel.bsv Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5
+ pcie/                     Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/pcie
+ xilinx-xup-pcie.ucf       Locally Added               0 
+ xilinx.download           Locally Added               0 
+ xilinx.ut                 Locally Added               0 
+ xilinx.sdc                Locally Added               0 
+ xilinx-xup-pcie.cpp       Locally Added               0 
+ xilinx.sdf                Locally Added               0 
+ xilinx.xst                Locally Added               0 
+ xilinx-xup-pcie.h         Locally Added               0 
+ xilinx-xup-pcie.awb       Locally Added               0 
+ xilinx-xup-pcie.bsv       Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices
+ pci-express-bluespec/     Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express-bluespec
+ pcie-import.bsv           Locally Added               0 
+ pcie-device.h             Locally Added               0 
+ pcie_endpoint.v           Locally Added               0 
+ PioFifo.bsv               Locally Added               0 
+ Bridge.bsv                Locally Added               0 
+ pcie_endpoint.ngc         Locally Added               0 
+ server.cpp                Locally Added               0 
+ pcie-wrapper.bsv          Locally Added               0 
+ pcie-bluespec.awb         Locally Added               0 
+ LLVirtex5PCIE.bsv         Locally Added               0 
+ pcie_endpoint.xco         Locally Added               0 
+ pcie-device.ucf           Locally Added               0 
+ server.h                  Locally Added               0 
+ pcie-device.cpp           Locally Added               0 
+
+Directory modules/project
+ ModuleList.py             Locally Modified          480 
+
+Directory modules/project/software
+ software.py               Locally Modified          480 
+
+
+
+Intermediate check-in of PCIE support for XUPV5.  This code does
+appear to scale to other Xilinx boards, something that might be useful
+in the future.  Also included is a minor rework of the build pipeline
+which raises our compatibility with pygraph to version 1.8.  This was
+needed because earlier versions of pygraph can no longer be built, but
+it does break backwards compatibility.  This should be okay moving
+forward, but I would like to have an automatic way of building a
+python enviroment. 
+
+

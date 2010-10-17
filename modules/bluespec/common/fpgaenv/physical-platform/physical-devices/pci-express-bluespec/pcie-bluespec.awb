@@ -1,0 +1,29 @@
+
+%name Bluespec PCIE Device
+%desc Bluespec PCIE Device 
+
+%provides pcie_device
+
+%sources -t BSV -v PUBLIC pcie-import.bsv
+%sources -t BSV -v PUBLIC Bridge.bsv
+%sources -t BSV -v PUBLIC LLVirtex5PCIE.bsv
+%sources -t BSV -v PUBLIC PioFifo.bsv
+
+%sources -t NGC -v PRIVATE pcie_endpoint.ngc
+%sources -t VERILOG -v PRIVATE pcie_endpoint.v
+%sources -t UCF -v PRIVATE pcie-device.ucf
+
+%sources -t H   -v PUBLIC  pcie-device.h
+%sources -t CPP -v PUBLIC  pcie-device.cpp
+%sources -t H   -v PUBLIC  server.h
+%sources -t CPP -v PUBLIC  server.cpp
+
+%generated -t VERILOG  mkBridge.v
+%generated -t BA mkBridge.ba
+
+%library libscemi.a
+
+
+
+
+

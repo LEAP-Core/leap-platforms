@@ -1,0 +1,15 @@
+
+%name Bluespec PCIE Physical Channel 
+%desc Bluespec PCIE Physical Channel
+
+%provides physical_channel
+
+%sources -t BSV -v PUBLIC   pcie-bluespec-physical-channel.bsv
+%sources -t H   -v PUBLIC   pcie-bluespec-physical-channel.h
+%sources -t CPP -v PUBLIC   pcie-bluespec-physical-channel.cpp
+
+
+
+
+
+
