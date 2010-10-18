@@ -10910,3 +10910,24 @@ forward, but I would like to have an automatic way of building a
 python enviroment. 
 
 
+
+----------
+kfleming    Date: Sun Oct 17 22:55:00 EDT 2010  CSN: CSN-platforms-482
+                  Mon Oct 18 02:55:00 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ clock_import.v            Locally Modified          481 
+ clock-import.bsv          Locally Modified          481 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/pcie-bluespec
+ pcie-bluespec-physical-channel.bsv Locally Modified          481 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express-bluespec
+ pcie-import.bsv           Locally Modified          481 
+ Bridge.bsv                Locally Modified          481 
+ pcie-bluespec.awb         Locally Modified          481 
+ pcie-device.ucf           Locally Modified          481 
+
+
+Modifications to pcie code.  It nearly makes timing at this point. 

@@ -41,16 +41,8 @@ INST "*/BU2/U0/pcie_ep0/pcie_blk/pcie_mim_wrapper_i/bram_tl_rx/generate_tdp2[0].
 # Timing requirements and related constraints.
 #
          
-#NET    "m_vp_llpi_phys_plat_pcie_device_sys_clk_buf_O" TNM_NET = sys_clk;
-#TIMESPEC TS_sys_clk = PERIOD sys_clk 100 MHz;
+NET "CLK_pcieWires_clockPCIE" PERIOD = 10ns;
 
-
-#NET m_vp_llpi_phys_plat_pcie_device_sys_clk_buf_O PERIOD = 10ns;
-NET "m_vp_llpi_phys_plat_pcie_device_pcieClockP_clk_in" TNM_NET = "fpgaClk200MHzP";
-TIMESPEC "TS_fpgaClk200MHzP" = PERIOD "fpgaClk200MHzP" 10 ns HIGH 50%; 
-
-NET "m_vp_llpi_phys_plat_pcie_device_pcieClockN_clk_in" TNM_NET = "fpgaClk200MHzN";
-TIMESPEC "TS_fpgaClk200MHzN" = PERIOD "fpgaClk200MHzN" 10 ns HIGH 50%; 
 
 NET "*/BU2/U0/pcie_ep0/pcie_blk/SIO/.pcie_gt_wrapper_i/gt_refclk_out" TNM_NET = "MGTCLK" ;
 
@@ -70,8 +62,8 @@ NET    "pcieWires_leds[2]"                                           LOC = H18  
 NET    "pcieWires_leds[1]"                                           LOC = F6   | IOSTANDARD = LVCMOS33;
 NET    "pcieWires_leds[0]"                                           LOC = T10  | IOSTANDARD = LVCMOS33;
 
-NET    "RDY_pcieWires_pcie_clk_p"                                 LOC = AF4 | DIFF_TERM = TRUE ;
-NET    "RDY_pcieWires_pcie_clk_n"                                 LOC = AF3 | DIFF_TERM = TRUE;
+NET    "EN_pcieWires_pcie_clk_p"                                 LOC = AF4 | DIFF_TERM = TRUE;
+NET    "EN_pcieWires_pcie_clk_n"                                 LOC = AF3 | DIFF_TERM = TRUE;
 
 ######################################################################################################
 # CLOCK CONSTRAINTS

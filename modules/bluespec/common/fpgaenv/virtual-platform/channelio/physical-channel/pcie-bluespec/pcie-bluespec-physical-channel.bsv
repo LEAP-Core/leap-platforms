@@ -44,7 +44,7 @@ module mkPhysicalChannel#(PHYSICAL_DRIVERS drivers)
    Reg#(UMF_CHUNK)      jtagIncoming      <- mkReg(0);
    Reg#(UMF_COUNTER)    jtagIncomingCount <- mkReg(0); 
    Reg#(UMF_CHUNK)      jtagOutgoing      <- mkReg(0);
-   Reg#(UMF_COUNTER)    jtagOutgoingCount <- mkReg(0);       
+   Reg#(UMF_COUNTER)    jtagOutgoingCount <- mkReg(no_jtag_words);       
 
    rule sendToJtag (jtagOutgoingCount != no_jtag_words);
       Bit#(8) x = truncate(jtagOutgoing);

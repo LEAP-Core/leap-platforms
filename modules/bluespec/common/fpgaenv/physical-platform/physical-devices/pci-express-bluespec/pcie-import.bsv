@@ -23,8 +23,10 @@ endinterface
 // where the UCF file ties them to pins.
 interface PCIE_WIRES;
 
+  (* always_ready *)
   method Action pcie_clk_n();  
 
+  (* always_ready *)
   method Action pcie_clk_p();  
 
   method Bit#(8) leds();
@@ -68,10 +70,10 @@ module mkPCIEDevice#(Clock rawClock, Reset rawReset) (PCIE_DEVICE);
 
     // Need a real clock rate
     // We'll sneak in the clocks and convert them 
-    Bridge bridge <- mkBridge(sys_clk_buf, 
-                              clk,
-                              pcieReset);
-  
+    Bridge bridge <- liftModule(mkBridge(sys_clk_buf, 
+                                         clk,
+                                         pcieReset));
+   
     //Create the syncfifos
 
     interface PCIE_DRIVER driver;
@@ -88,9 +90,9 @@ module mkPCIEDevice#(Clock rawClock, Reset rawReset) (PCIE_DEVICE);
     endinterface
 
     interface PCIE_WIRES  wires;
-      method pcie_clk_n = pcieClockP.clock_wire;  
+      method pcie_clk_n = pcieClockN.clock_wire;  
 
-      method pcie_clk_p = pcieClockN.clock_wire;  
+      method pcie_clk_p = pcieClockP.clock_wire;  
 
       method leds = bridge.leds;
 

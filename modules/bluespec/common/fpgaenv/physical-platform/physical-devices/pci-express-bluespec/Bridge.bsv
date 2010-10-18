@@ -16,8 +16,7 @@ interface Bridge;
    method ActionValue#(Bit#(8)) dispResp;
 endinterface
 
-(* synthesize, no_default_clock, no_default_reset *)
-module mkBridge#(Clock pci_sys_clk, Clock refclk_100, Reset pci_sys_reset_n)
+module [Module] mkBridge#(Clock pci_sys_clk, Clock refclk_100, Reset pci_sys_reset_n)
                 (Bridge);
 
    (* doc = "synthesis attribute buffer_type of piov5_pcie_ep_trn_clk is \"none\"" *)
@@ -26,15 +25,11 @@ module mkBridge#(Clock pci_sys_clk, Clock refclk_100, Reset pci_sys_reset_n)
 				                       ,pci_sys_reset_n
 				                       ,refclk_100);
 
-   ReadOnly#(Bool) _isLinkUp         <- mkNullCrossing(noClock, piov5.isLinkUp);
-   ReadOnly#(Bool) _isOutOfReset     <- mkNullCrossing(noClock, piov5.isOutOfReset);
-   ReadOnly#(Bool) _isClockAdvancing <- mkNullCrossing(noClock, piov5.isClockAdvancing);
-
    interface pcie = piov5.pcie;
 
-   method leds = zeroExtend({pack(_isClockAdvancing)
-			    ,pack(_isOutOfReset)
-			    ,pack(_isLinkUp)
+   method leds = zeroExtend({pack(piov5.isLinkUp)
+			    ,pack(piov5.isOutOfReset)
+			    ,pack(piov5.isClockAdvancing)
 			    });
 
    method req = piov5.req;

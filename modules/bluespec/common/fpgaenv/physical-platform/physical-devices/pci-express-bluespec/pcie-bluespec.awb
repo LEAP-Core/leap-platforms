@@ -18,9 +18,6 @@
 %sources -t H   -v PUBLIC  server.h
 %sources -t CPP -v PUBLIC  server.cpp
 
-%generated -t VERILOG  mkBridge.v
-%generated -t BA mkBridge.ba
-
 %library libscemi.a
 
 
