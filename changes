@@ -10931,3 +10931,24 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci
 
 
 Modifications to pcie code.  It nearly makes timing at this point. 
+
+----------
+
+----------
+kfleming    Date: Mon Oct 25 20:16:39 EDT 2010  CSN: CSN-platforms-483
+                  Tue Oct 26 00:16:39 UTC 2010
+
+
+Directory admin
+ mytags                    Locally Modified          482 
+
+Directory modules/project
+ SCons.top.pipeline.template Locally Modified          482 
+ SCons.top.template        Locally Modified          482 
+
+Directory .
+ changes                   Locally Modified          482 
+
+
+Added a helpful warning about the realtive positioning of leap and
+platforms in the build scripts.

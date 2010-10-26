@@ -53,6 +53,22 @@ defs = {
     'WORKSPACE_ROOT'     : '@WORKSPACE_ROOT@',
 }
 
+# let's see if we can find hasim-dict
+hasim_exists = 1
+hasim_ostream = os.popen('hasim-dict')
+hasim_regexp = re.compile('^asimstarter')
+for ln in hasim_ostream.readlines():
+    m = hasim_regexp.match(ln)
+    if (m):
+        hasim_exists = 0
+hasim_ostream.close()
+
+if hasim_exists == 0:
+    print "Can't find hasim tools - if you're using LEAP, make sure leap appears ahead of platforms in your awb.config.  This requirement will disappear soon"
+    sys.exit(1)
+
+
+
 # Propagate environment from external state
 env = Environment(ENV = os.environ, DEFS = defs)
 env['ENV']['SHELL'] = '/bin/sh'
