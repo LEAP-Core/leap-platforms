@@ -73,8 +73,8 @@ UMF_MESSAGE
 PHYSICAL_CHANNEL_CLASS::Read(){
   // blocking loop
 
-  fprintf(errfd,"In read\n");    
-  fflush(errfd);
+  //fprintf(errfd,"In read\n");    
+  //fflush(errfd);
   while (true){
     // check if message is ready
     if (incomingMessage && !incomingMessage->CanAppend()) {
@@ -96,7 +96,7 @@ UMF_MESSAGE
 PHYSICAL_CHANNEL_CLASS::TryRead(){   
   // We must check if there's new data. This will give us more and stop if we're full.
 
-  fflush(errfd);    
+  //fflush(errfd);    
   if(pcieDevice->Probe()) {
     readPipe();
   }
@@ -121,7 +121,7 @@ PHYSICAL_CHANNEL_CLASS::Write(UMF_MESSAGE message){
   message->EncodeHeader(header);
 
   msg_count_out++;
-  fprintf(errfd,"attempting to write msg %d of length %d: %x\n", msg_count_out,message->GetLength(),*header);    
+  //fprintf(errfd,"attempting to write msg %d of length %d: %x\n", msg_count_out,message->GetLength(),*header);    
   
   //write header to pipe
   pcieDevice->Write((const char *)header, UMF_CHUNK_BYTES);
@@ -133,13 +133,13 @@ PHYSICAL_CHANNEL_CLASS::Write(UMF_MESSAGE message){
   message->StartReverseExtract();
   while (message->CanReverseExtract()){
     UMF_CHUNK chunk = message->ReverseExtractChunk();
-    fprintf(errfd,"attempting to write %x\n",chunk);    
+    //fprintf(errfd,"attempting to write %x\n",chunk);    
     pcieDevice->Write((const char*)&chunk, UMF_CHUNK_BYTES);
   }
 
   // de-allocate message
   delete message;
-  fflush(errfd);
+  //fflush(errfd);
 }
 
 //=========================================================================================
@@ -147,15 +147,15 @@ PHYSICAL_CHANNEL_CLASS::Write(UMF_MESSAGE message){
 void
 PHYSICAL_CHANNEL_CLASS::readPipe(){
   // determine if we are starting a new message
-  fprintf(errfd, "entering readPipe\n");
-  fflush(errfd);
+  //fprintf(errfd, "entering readPipe\n");
+  //fflush(errfd);
   if (incomingMessage == NULL)    {
     // new message: read header
     unsigned char header[UMF_CHUNK_BYTES];
     // If we have no data to beginwith, bail.
 
     msg_count_in++;
-    fprintf(errfd, "readPipe forming header: %d\n", msg_count_in);
+    //fprintf(errfd, "readPipe forming header: %d\n", msg_count_in);
 
     for(int i = 0; i <  UMF_CHUNK_BYTES; i++) {
         char temp;
@@ -185,8 +185,8 @@ PHYSICAL_CHANNEL_CLASS::readPipe(){
       buf[i] = temp;
     }
 
-    fprintf(errfd, "readPipe chunk: %x\n",*((int*)buf));
-    fflush(errfd);
+    //fprintf(errfd, "readPipe chunk: %x\n",*((int*)buf));
+    //fflush(errfd);
 
     // This is not correct, perhaps
     if (incomingMessage->BytesUnwritten() < UMF_CHUNK_BYTES){
@@ -196,8 +196,8 @@ PHYSICAL_CHANNEL_CLASS::readPipe(){
     // append read bytes into message
     incomingMessage->AppendBytes(bytes_requested, buf);
   }
-  fprintf(errfd,"exiting readPipe\n");
-  fflush(errfd);
+  //fprintf(errfd,"exiting readPipe\n");
+  //fflush(errfd);
 }
 
 

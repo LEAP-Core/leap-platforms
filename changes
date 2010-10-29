@@ -10993,3 +10993,18 @@ Directory modules/project
 
 Completed support for Bluespec's PCIE device.  Now passes rrrtest.
 These means awb can probably support all designs that bluespec supports by simply changing some parameters.  We can now operate the XUPV5.
+
+----------
+kfleming    Date: Fri Oct 29 18:42:03 EDT 2010  CSN: CSN-platforms-485
+                  Fri Oct 29 22:42:03 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/pcie-bluespec
+ pcie-bluespec-physical-channel.cpp Locally Modified          484 
+
+
+Removed some debugging code, PCIE link now 4x faster.  There's a lot
+more optimization that can be done here (I think we're leaving ~10-20x
+of easy optimization on the table for future generations).  Removing
+software layers and exploiting a wider (say 64-bit) interface will be
+key.
