@@ -25,7 +25,7 @@ interface CLOCK_IMPORTER;
 
     // Wires to be sent to the top level
 
-    (* always_ready *)
+    //(* always_ready *)
 
     method Action clock_wire();
 
@@ -38,8 +38,8 @@ import "BVI" clock_import = module mkClockImporter
     // interface:
                  (CLOCK_IMPORTER);
 
-//    default_clock no_clock;
-//    default_reset no_reset;
+    default_clock no_clock;
+    default_reset no_reset;
   
     output_clock clock(clk_out);
   

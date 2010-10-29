@@ -104,7 +104,7 @@ PCIE_DEVICE_CLASS::Read(
     serverRecvSys(buf+i);
   }
 
-  return 0;  
+  return bytes_requested;  
 }
 
 // write
@@ -113,11 +113,13 @@ PCIE_DEVICE_CLASS::Write(
     const char* buf,
     int bytes_requested)
 {
+  //  fprintf (stderr, "PCIE_DEVICE_CLASS Write\n");
+  fflush(stderr);
   for(int i = 0; i < bytes_requested; i++) {
     serverSendSys(buf+i);
   }
 
-  return 0;
+  return bytes_requested;
 }
 
 

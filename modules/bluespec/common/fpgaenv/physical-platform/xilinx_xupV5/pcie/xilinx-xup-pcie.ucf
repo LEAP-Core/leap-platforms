@@ -27,7 +27,9 @@ NET    "CLK"                                    LOC = AH15 | IOSTANDARD = LVCMOS
 # CLOCK CONSTRAINTS
 ######################################################################################################
 
-NET    "CLK" TNM_NET = refclk_100;
+#NET "CLK" = period 10ns; 
+
+NET "CLK" TNM_NET = refclk_100;
 TIMESPEC TS_refclk_100 = PERIOD refclk_100 100 MHz HIGH 50 % INPUT_JITTER 500 ps;
 
 ######################################################################################################

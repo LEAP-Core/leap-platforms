@@ -23,15 +23,13 @@ endinterface
 // where the UCF file ties them to pins.
 interface PCIE_WIRES;
 
-  (* always_ready *)
   method Action pcie_clk_n();  
 
-  (* always_ready *)
   method Action pcie_clk_p();  
 
   method Bit#(8) leds();
 
-  interface Reset reset;
+//  interface Reset reset;
   interface Clock clock;
   interface Clock clockPCIE;
   interface PCIE_EXP#(1) pcie_exp;
@@ -66,23 +64,68 @@ module mkPCIEDevice#(Clock rawClock, Reset rawReset) (PCIE_DEVICE);
 
     // make a pretty ASync reset from the incoming rst...
 
-    Reset pcieReset <- mkAsyncReset(1,rst,sys_clk_buf); 
+    Reg#(Bit#(7)) count <- mkReg(~0);
 
+    MakeResetIfc localResetFast <- mkReset(0,False,clk);
+    Reset combinedReset <- mkResetEither(rst, localResetFast.new_rst);
+    Reset pcieReset <- mkAsyncReset(0,combinedReset,sys_clk_buf); 
+    //Reset pcieReset <- mkAsyncReset(0,combinedReset,sys_clk_buf); 
+
+
+    rule countDown(count > 0);
+      count <= count - 1;
+      if(count > 64) 
+        begin
+          localResetFast.assertReset();
+        end
+    endrule
+
+
+
+    (* doc = "synthesis attribute keep of m_vp_llpi_phys_plat_pcie_device_sys_clk_buf_O is \"true\";" *)
+    (* doc = "synthesis attribute S of m_vp_llpi_phys_plat_pcie_device_pcieBury_rxn_in is \"true\";" *)
+    (* doc = "synthesis attribute S of m_vp_llpi_phys_plat_pcie_device_pcieBury_rxp_in is \"true\";" *)
+    (* doc = "synthesis attribute S of m_vp_llpi_phys_plat_pcie_device_pcieBury_txn_in is \"true\";" *)
+    (* doc = "synthesis attribute S of m_vp_llpi_phys_plat_pcie_device_pcieBury_txp_in is \"true\";" *)
+ 
+    (* doc = "synthesis attribute S of m_vp_llpi_phys_plat_pcie_device_pcieBury_rxn_out is \"true\";" *)
+    (* doc = "synthesis attribute S of m_vp_llpi_phys_plat_pcie_device_pcieBury_rxp_out is \"true\";" *)
+    (* doc = "synthesis attribute S of m_vp_llpi_phys_plat_pcie_device_pcieBury_txn_out is \"true\";" *)
+    (* doc = "synthesis attribute S of m_vp_llpi_phys_plat_pcie_device_pcieBury_txp_out is \"true\";" *)
     // Need a real clock rate
     // We'll sneak in the clocks and convert them 
     Bridge bridge <- liftModule(mkBridge(sys_clk_buf, 
                                          clk,
                                          pcieReset));
+	
    
-    //Create the syncfifos
+    // build a pcie bury
+    PCIE_BURY pcieBury <- mkPCIE_BURY(clocked_by sys_clk_buf, 
+                                      reset_by pcieReset); 
+
+    Reg#(Bit#(1)) txn;
+
+    rule drivePCIE;      
+      pcieBury.txn_bsv(bridge.pcie.txn);
+      pcieBury.txp_bsv(bridge.pcie.txp);
+      bridge.pcie.rxp(pcieBury.rxp_bsv);
+      bridge.pcie.rxn(pcieBury.rxn_bsv);
+    endrule
+
+    //Create the yncfifos
+    // XXX blast data out...
+    //rule sendData;
+    //  let data <- bridge.resp();
+    //  bridge.req(data);
+    //endrule
 
     interface PCIE_DRIVER driver;
 
-        method Action send(PCIEWord data);
-            bridge.req(data);
+        method Action send(PCIEWord data) if(count == 0);
+           bridge.req(data);
         endmethod
 
-        method ActionValue#(PCIEWord) receive();
+        method ActionValue#(PCIEWord) receive() if(count == 0);
            let data <- bridge.resp();
            return data;
         endmethod
@@ -96,10 +139,15 @@ module mkPCIEDevice#(Clock rawClock, Reset rawReset) (PCIE_DEVICE);
 
       method leds = bridge.leds;
 
-      interface reset = rst;
+      //interface reset = rst;
       interface clock = clk;
-      interface clockPCIE = sys_clk_buf;
-      interface pcie_exp = bridge.pcie;    
+      interface clockPCIE = pcieBury.clock;
+      interface PCIE_EXP pcie_exp;
+        method rxp = pcieBury.rxp_wire;
+        method rxn = pcieBury.rxn_wire;
+        method txp = pcieBury.txp_wire;
+        method txn = pcieBury.txn_wire;
+      endinterface
     endinterface
 
 endmodule

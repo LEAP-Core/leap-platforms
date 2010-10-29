@@ -60,6 +60,11 @@ module mkPhysicalChannel#(PHYSICAL_DRIVERS drivers)
       jtagIncomingCount <= jtagIncomingCount + 1;
    endrule
 
+   /*rule loopback;
+      PCIEWord x <- drivers.pcieDriver.receive();
+      drivers.pcieDriver.send(x);
+   endrule*/
+
    method Action write(UMF_CHUNK data) if (jtagOutgoingCount == no_jtag_words);
       jtagOutgoing <= data;
       jtagOutgoingCount <= 0;

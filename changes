@@ -10952,3 +10952,44 @@ Directory .
 
 Added a helpful warning about the realtive positioning of leap and
 platforms in the build scripts.
+
+----------
+kfleming    Date: Fri Oct 29 17:59:04 EDT 2010  CSN: CSN-platforms-484
+                  Fri Oct 29 21:59:04 UTC 2010
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-hybrid-xup-v5-pcie.apm Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ clock-import.bsv          Locally Modified          483 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/pcie-bluespec
+ pcie-bluespec-physical-channel.cpp Locally Modified          483 
+ pcie-bluespec-physical-channel.bsv Locally Modified          483 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/pcie
+ xilinx-xup-pcie.ucf       Locally Modified          483 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express-bluespec
+ pcie-import.bsv           Locally Modified          483 
+ pcie_endpoint.v           Locally Modified          483 
+ pcie_bury.v               Locally Added               0 
+ Bridge.bsv                Locally Modified          483 
+ server.cpp                Locally Modified          483 
+ pcie-bluespec.awb         Locally Modified          483 
+ pcie-device.ucf           Locally Modified          483 
+ pcie-device.xcf           Locally Added               0 
+ pcie-device.cpp           Locally Modified          483 
+ pcie_bury.bsv             Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/single-ended
+ single-ended-clocks-device.bsv Locally Modified          483 
+
+Directory modules/project
+ SCons.top.template        Locally Modified          483 
+
+
+
+Completed support for Bluespec's PCIE device.  Now passes rrrtest.
+These means awb can probably support all designs that bluespec supports by simply changing some parameters.  We can now operate the XUPV5.

@@ -41,7 +41,9 @@ INST "*/BU2/U0/pcie_ep0/pcie_blk/pcie_mim_wrapper_i/bram_tl_rx/generate_tdp2[0].
 # Timing requirements and related constraints.
 #
          
-NET "CLK_pcieWires_clockPCIE" PERIOD = 10ns;
+
+NET "*sys_clk_buf_O" PERIOD = 10ns;
+
 
 
 NET "*/BU2/U0/pcie_ep0/pcie_blk/SIO/.pcie_gt_wrapper_i/gt_refclk_out" TNM_NET = "MGTCLK" ;
@@ -62,8 +64,8 @@ NET    "pcieWires_leds[2]"                                           LOC = H18  
 NET    "pcieWires_leds[1]"                                           LOC = F6   | IOSTANDARD = LVCMOS33;
 NET    "pcieWires_leds[0]"                                           LOC = T10  | IOSTANDARD = LVCMOS33;
 
-NET    "EN_pcieWires_pcie_clk_p"                                 LOC = AF4 | DIFF_TERM = TRUE;
-NET    "EN_pcieWires_pcie_clk_n"                                 LOC = AF3 | DIFF_TERM = TRUE;
+NET    "EN_pcieWires_pcie_clk_p"                                 LOC = AF4;
+NET    "EN_pcieWires_pcie_clk_n"                                 LOC = AF3;
 
 ######################################################################################################
 # CLOCK CONSTRAINTS

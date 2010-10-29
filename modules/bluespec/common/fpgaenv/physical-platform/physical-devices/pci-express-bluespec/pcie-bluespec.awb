@@ -8,9 +8,12 @@
 %sources -t BSV -v PUBLIC Bridge.bsv
 %sources -t BSV -v PUBLIC LLVirtex5PCIE.bsv
 %sources -t BSV -v PUBLIC PioFifo.bsv
+%sources -t BSV -v PUBLIC pcie_bury.bsv
 
 %sources -t NGC -v PRIVATE pcie_endpoint.ngc
+%sources -t XCF -v PRIVATE pcie-device.xcf
 %sources -t VERILOG -v PRIVATE pcie_endpoint.v
+%sources -t VERILOG -v PRIVATE pcie_bury.v
 %sources -t UCF -v PRIVATE pcie-device.ucf
 
 %sources -t H   -v PUBLIC  pcie-device.h

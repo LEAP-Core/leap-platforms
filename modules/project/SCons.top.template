@@ -694,7 +694,7 @@ if SW_EXE != []:
                             duplicate = 0)
 
     sw_libpath = [ '.' ]
-    sw_link_libs = [ 'pthread' ]
+    sw_link_libs = [ 'pthread', 'dl' ]
 
     sw_link_tgt = SW_EXE
 

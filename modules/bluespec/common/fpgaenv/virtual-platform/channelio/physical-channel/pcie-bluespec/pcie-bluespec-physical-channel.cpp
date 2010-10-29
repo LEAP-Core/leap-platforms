@@ -58,6 +58,7 @@ PHYSICAL_CHANNEL_CLASS::PHYSICAL_CHANNEL_CLASS(
 {
   pcieDevice = new PCIE_DEVICE_CLASS(p);
   initialized = 0;
+  errfd = fopen("./error_messages_phy_channel", "w");
 }
 
 
@@ -117,22 +118,13 @@ PHYSICAL_CHANNEL_CLASS::Write(UMF_MESSAGE message){
   
   // construct header
   unsigned char header[UMF_CHUNK_BYTES];
-  unsigned char mod_header[UMF_CHUNK_BYTES*2];
   message->EncodeHeader(header);
 
   msg_count_out++;
   fprintf(errfd,"attempting to write msg %d of length %d: %x\n", msg_count_out,message->GetLength(),*header);    
   
-  for (int i = 0; i < UMF_CHUNK_BYTES*2; i++) {
-     if (i % 2 == 0) {
-        mod_header[i] = (header[i/2] & 15) + 64 ;
-     } else {
-        mod_header[i] = ((header[i/2] >> 4) & 15) + 64;
-     }
-  }        
-
   //write header to pipe
-  pcieDevice->Write((const char *)mod_header, UMF_CHUNK_BYTES*2);
+  pcieDevice->Write((const char *)header, UMF_CHUNK_BYTES);
 
   // write message data to pipe
   // NOTE: hardware demarshaller expects chunk pattern to start from most
@@ -141,18 +133,8 @@ PHYSICAL_CHANNEL_CLASS::Write(UMF_MESSAGE message){
   message->StartReverseExtract();
   while (message->CanReverseExtract()){
     UMF_CHUNK chunk = message->ReverseExtractChunk();
-    unsigned char* chunk_bytes;;
-    unsigned char mod_chunk[UMF_CHUNK_BYTES*2];
-    chunk_bytes = (unsigned char*) &chunk;
     fprintf(errfd,"attempting to write %x\n",chunk);    
-    for (int i = 0; i < UMF_CHUNK_BYTES*2; i++) {
-       if (i % 2 == 0) {
-          mod_chunk[i] = (chunk_bytes[i/2] & 15) + 64 ;
-       } else {
-          mod_chunk[i] = ((chunk_bytes[i/2] >> 4) & 15) + 64;
-       }
-    }        
-    pcieDevice->Write((const char*)mod_chunk, UMF_CHUNK_BYTES*2);
+    pcieDevice->Write((const char*)&chunk, UMF_CHUNK_BYTES);
   }
 
   // de-allocate message
@@ -175,11 +157,11 @@ PHYSICAL_CHANNEL_CLASS::readPipe(){
     msg_count_in++;
     fprintf(errfd, "readPipe forming header: %d\n", msg_count_in);
 
-    for(int i = 0; i <  UMF_CHUNK_BYTES*2; i++) {
+    for(int i = 0; i <  UMF_CHUNK_BYTES; i++) {
         char temp;
       int returnVal;
       while((returnVal = pcieDevice->Read(&temp,sizeof(char))) < 1) {} // Block :(
-      header[i/2] = ((temp%16)*16)+(header[i/2]/16);
+      header[i] = temp;
     }
 
     // create a new message
@@ -196,15 +178,15 @@ PHYSICAL_CHANNEL_CLASS::readPipe(){
     // we will read exactly one chunk
     unsigned char buf[UMF_CHUNK_BYTES]; 
     int bytes_requested = UMF_CHUNK_BYTES;
-    for(int i = 0; i <  UMF_CHUNK_BYTES*2; i++) {
+    for(int i = 0; i <  UMF_CHUNK_BYTES; i++) {
       char temp;
       int returnVal;
       while((returnVal = pcieDevice->Read(&temp,sizeof(char))) < 1) {} // Block :(
-      buf[i/2] = (buf[i/2]/16) + ((temp%16)*16);
+      buf[i] = temp;
     }
 
     fprintf(errfd, "readPipe chunk: %x\n",*((int*)buf));
-    
+    fflush(errfd);
 
     // This is not correct, perhaps
     if (incomingMessage->BytesUnwritten() < UMF_CHUNK_BYTES){

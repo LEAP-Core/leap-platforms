@@ -83,7 +83,7 @@ UInt32 poppedData;
 void serverStart()
 {
     dataPopped = 0;
-
+    fprintf (stderr, "Hello from sever start\n");
     char *dev_file = "/dev/bsemu0";
 	pcie_dev = open(dev_file, O_RDWR);
 	if (pcie_dev < 0) {
@@ -154,12 +154,15 @@ void serverFinish()
 
 void serverSendSys(const char* byte)
 {
+  //   fprintf (stderr, "serverSendSys\n");
+    fflush(stderr);
     UInt32 extendedByte = (UInt32) (*byte);
     UInt32 wCount;
     UInt32 newWCount;
     do {
         wCount = pBar1->bar2_wpkt_count;
         pBar2->sys_lo = extendedByte;
+        //fprintf (stderr, "sent data %x\n", extendedByte);
         newWCount = pBar1->bar2_wpkt_count;
     } while(newWCount == wCount);
 }
@@ -170,6 +173,12 @@ bool serverTestSys() {
   if(!dataPopped) {
     poppedData = pBar2->sys_lo;
     dataPopped = (poppedData != 0xdeaddead);
+    if(dataPopped) {
+      //fprintf (stderr, "test got data %x\n", poppedData);
+      //      for(int i = 0; i < 32; i++) {
+      //	fprintf (stderr, "pBar2[%d] %x\n", i, *(((UInt32*)pBar2)+i));
+      //}
+    }
   }
 
   return dataPopped;
@@ -177,11 +186,14 @@ bool serverTestSys() {
 
 void serverRecvSys(char* byte)
 {
-
     if(!dataPopped) {
       do {
         poppedData = pBar2->sys_lo;
       } while (poppedData == 0xdeaddead);
+      //fprintf (stderr, "got recv data %x\n", poppedData);
+      //for(int i = 0; i < 32; i++) {
+      //	fprintf (stderr, "pBar2[%d] %x\n", i, *(((UInt32*)pBar2)+i));
+      //}
     }
 
     dataPopped = 0;
