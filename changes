@@ -11008,3 +11008,15 @@ more optimization that can be done here (I think we're leaving ~10-20x
 of easy optimization on the table for future generations).  Removing
 software layers and exploiting a wider (say 64-bit) interface will be
 key.
+
+----------
+kfleming    Date: Sat Oct 30 17:01:41 EDT 2010  CSN: CSN-platforms-486
+                  Sat Oct 30 21:01:41 UTC 2010
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-hybrid-xup-v5-pcie-altera.apm Locally Added               0 
+
+
+
+Added an altera libraries version of the xup V5.

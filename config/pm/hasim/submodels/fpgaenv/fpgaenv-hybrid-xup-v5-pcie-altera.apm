@@ -1,0 +1,191 @@
+
+[Global]
+SaveParameters=0
+Description=Hybrid Altera HTG-v5 PCIE FPGA Environment
+File=fpgaenv-hybrid-xup-v5-pcie-altera
+Version=2.1
+Type=HAsim
+Name=Hybrid Altera XUP-v5 PCIE FPGA Environment
+Class=Asim::Model
+DefaultBenchmark=
+DefaultRunOpts=
+
+[Model]
+DefaultAttributes=bluespec htg-v5-jtag
+model=FPGA Environment
+
+[FPGA Environment/Requires]
+virtual_platform=Standard Virtual Platform
+fpga_components=Hardware FPGA Components for Virtex 5
+librl_bsv=Altera RL Bluespec Library
+build_pipeline=FPGA Build Pipeline
+
+[Standard Virtual Platform]
+File=modules/bluespec/common/fpgaenv/virtual-platform/std-virtual-platform.awb
+Packagehint=platforms
+
+[Standard Virtual Platform/Requires]
+virtual_devices=Standard Virtual Devices
+low_level_platform_interface=Low Level Platform Interface Hybrid
+umf=Little-Endian Unified Message Format
+
+[FPGA Environment]
+File=modules/bluespec/common/fpgaenv/fpga-environment.awb
+Packagehint=platforms
+
+[Standard Virtual Devices]
+File=config/pm/hasim/submodels/fpgaenv/std-virtual-devices.apm
+Packagehint=platforms
+
+[RRR Clients and Servers]
+File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic/basic-rrr.awb
+Packagehint=platforms
+
+[Basic Virtual Channel Multiplexer]
+File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/basic/basic-channelio.awb
+Packagehint=platforms
+
+[Basic Virtual Channel Multiplexer/Requires]
+physical_channel=Bluespec PCIE Physical Channel
+
+[Low Level Platform Interface Hybrid]
+File=modules/bluespec/common/fpgaenv/low-level-platform-interface/hybrid-llpi.awb
+Packagehint=platforms
+
+[Low Level Platform Interface Hybrid/Requires]
+physical_platform=XUP Virtex 5 PCIE
+channelio=Basic Virtual Channel Multiplexer
+rrr=RRR Clients and Servers
+physical_platform_debugger=Null Physical Platform Debugger
+local_mem=NULL Local Memory Interface
+remote_memory=Null Remote Memory
+
+[Single-Ended Crystal Clocks Device]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/single-ended/single-ended-clocks-device.awb
+Packagehint=platforms
+
+[Common Physical Platform Utilities]
+File=modules/bluespec/common/fpgaenv/physical-platform/utils/utils.awb
+Packagehint=platforms
+
+[Null Physical Platform Debugger]
+File=modules/bluespec/common/fpgaenv/physical-platform/debuggers/null/null-debugger.awb
+Packagehint=platforms
+
+[Hardware FPGA Components for Virtex 5]
+File=modules/bluespec/common/fpgaenv/fpga-components/hardware-fpga-components-virtex5.awb
+Packagehint=platforms
+
+[Little-Endian Unified Message Format]
+File=modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian/umf-little-endian.awb
+Packagehint=platforms
+
+[RRR Common Module]
+File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/rrr_common/rrr_common.awb
+Packagehint=platforms
+
+[RRR Clients and Servers/Requires]
+rrr_common=RRR Common Module
+
+[FPGA Build Pipeline]
+File=config/pm/hasim/submodels/pipelines/build-pipeline-xilinx.apm
+Packagehint=platforms
+
+[Null Remote Memory]
+File=modules/bluespec/common/fpgaenv/low-level-platform-interface/remote-memory/null/null-remote-memory.awb
+Packagehint=platforms
+
+[NULL Local Memory Interface]
+File=modules/bluespec/common/fpgaenv/low-level-platform-interface/local-mem/local-mem-null.awb
+Packagehint=platforms
+
+[Single-Ended Crystal Clocks Device/Params]
+MODEL_CLOCK_DIVIDER=4
+CRYSTAL_CLOCK_FREQ=100
+
+[NULL Local Memory Interface/Params]
+LOCAL_MEM_WORDS_PER_LINE=4
+LOCAL_MEM_WORD_BITS=64
+LOCAL_MEM_ADDR_BITS=26
+
+[XUP Virtex 5 PCIE/Requires]
+pcie_device=Bluespec PCIE Device
+clocks_device=Single-Ended Crystal Clocks Device
+physical_platform_utils=Common Physical Platform Utilities
+
+[XUP Virtex 5 PCIE]
+File=modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/pcie/xilinx-xup-pcie.awb
+Packagehint=platforms
+
+[Bluespec PCIE Physical Channel]
+File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/pcie-bluespec/pcie-bluespec-physical-channel.awb
+Packagehint=platforms
+
+[Bluespec PCIE Device]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express-bluespec/pcie-bluespec.awb
+Packagehint=platforms
+
+[Register Mapping Utilities]
+File=modules/bsv-libraries/bluespec/RegisterMapper/src/register_mapper.awb
+Packagehint=bsv-libraries
+
+[FIFO Utility]
+File=modules/bsv-libraries/bluespec/FIFOUtility/fifo_utility.awb
+Packagehint=bsv-libraries
+
+[Vector Utilities]
+File=modules/bsv-libraries/bluespec/VectorUtils/vector_utils.awb
+Packagehint=bsv-libraries
+
+[Altera RL Bluespec Library/Requires]
+altera_utils=Common Altera Platform Utilities
+librl_bsv_storage=RL Bluespec Storage Library
+librl_bsv_base=RL Bluespec Base Library
+librl_bsv_cache=RL Bluespec Cache Managers
+
+[Debug Utilities]
+File=modules/bsv-libraries/bluespec/Debug/debug_utils.awb
+Packagehint=bsv-libraries
+
+[RL Bluespec Storage Library]
+File=modules/bluespec/librl/storage/librl-bsv-storage.awb
+Packagehint=platforms
+
+[Avalon Bus Intefaces]
+File=modules/bsv-libraries/bluespec/Avalon/src/avalon.awb
+Packagehint=bsv-libraries
+
+[RegisterLibrary]
+File=modules/bsv-libraries/bluespec/Register/src/register_library.awb
+Packagehint=bsv-libraries
+
+[CBus Utilities]
+File=modules/bsv-libraries/bluespec/CBusUtils/c_bus_utils.awb
+Packagehint=bsv-libraries
+
+[Register Mapping Utilities/Requires]
+register_library=RegisterLibrary
+
+[RL Bluespec Cache Managers]
+File=modules/bluespec/librl/storage/cache/librl-cache.awb
+Packagehint=platforms
+
+[Altera RL Bluespec Library]
+File=modules/bsv-libraries/bluespec/librl-mit/librl-mit.awb
+Packagehint=bsv-libraries
+
+[Common Altera Platform Utilities/Requires]
+c_bus_utils=CBus Utilities
+fifo_utils=FIFO Utility
+vector_utils=Vector Utilities
+avalon=Avalon Bus Intefaces
+debug_utils=Debug Utilities
+register_mapper=Register Mapping Utilities
+
+[RL Bluespec Base Library]
+File=modules/bluespec/librl/base/librl-bsv-base.awb
+Packagehint=platforms
+
+[Common Altera Platform Utilities]
+File=modules/bluespec/common/fpgaenv/physical-platform/utils/altera/altera_utils.awb
+Packagehint=platforms
