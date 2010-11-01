@@ -13,5 +13,5 @@
 %public  application-env-hybrid-soft-conn.h
 %private application-env-hybrid-soft-conn.cpp
 
-%param SYNTH_BOUNDARY mkConnectedApplication "name of synthesis boundary"
+
 

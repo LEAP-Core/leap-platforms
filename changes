@@ -11020,3 +11020,14 @@ Directory config/pm/hasim/submodels/fpgaenv
 
 
 Added an altera libraries version of the xup V5.
+
+----------
+kfleming    Date: Mon Nov  1 14:14:58 EDT 2010  CSN: CSN-platforms-487
+                  Mon Nov  1 18:14:58 UTC 2010
+
+
+Directory modules/application-env/hybrid/soft-connections
+ application-env-hybrid-soft-conn.awb Locally Modified          486 
+
+
+Removed spurious synthesis boundary.  This prevented building some designs.
