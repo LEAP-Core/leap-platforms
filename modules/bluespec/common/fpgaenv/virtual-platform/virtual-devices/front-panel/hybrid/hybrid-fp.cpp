@@ -73,7 +73,7 @@ FRONT_PANEL_SERVER_CLASS::Init(
         dup2(parent_to_child[0], STDIN);
         dup2(child_to_parent[1], STDOUT);
 
-        execlp("hasim-front-panel", "hasim-front-panel", NULL);
+        execlp("leap-front-panel", "leap-front-panel", NULL);
     }
     else
     {
