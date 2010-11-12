@@ -65,7 +65,7 @@ jtag_device=Altera JTAG
 altera_jtag_physical_mapping=Airblue 1.0 Cyclone III JTAG Mapping
 
 [ArriaII GX JTAG]
-File=modules/bluespec/common/fpgaenv/physical-platform/development_board_arriaII_gx/jtag/altera-jtag.awb
+File=modules/bluespec/common/fpgaenv/physical-platform/altera_jtag/jtag/altera-jtag.awb
 Packagehint=platforms
 
 [Hardware FPGA Components for ArriaII]

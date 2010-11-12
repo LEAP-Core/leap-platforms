@@ -1,0 +1,7 @@
+set_location_assignment PIN_R3 -to CLK
+set_instance_assignment -name IO_STANDARD LVDS -to CLK
+set_location_assignment PIN_T29 -to RST_N
+set_location_assignment PIN_AJ6  -to ledsWires_LED[0]
+set_location_assignment PIN_AK5  -to ledsWires_LED[1]
+set_location_assignment PIN_AJ5  -to ledsWires_LED[2]
+set_location_assignment PIN_AJ4  -to ledsWires_LED[3]

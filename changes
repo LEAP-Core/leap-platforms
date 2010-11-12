@@ -11042,3 +11042,71 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front
 
 Use leap-front-panel instead of hasim-front-panel as the
 hybrid front panel.
+
+----------
+kfleming    Date: Thu Nov 11 23:49:49 EST 2010  CSN: CSN-platforms-489
+                  Fri Nov 12 04:49:49 UTC 2010
+
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-hybrid-evaluation-arriaII-jtag.apm Locally Modified          488 
+ fpgaenv-cycloneiii-jtag.apm Locally Modified          488 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/jtag
+ altera/                   Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/jtag/altera
+ jtag-physical-channel.cpp Locally Added               0 
+ jtag-physical-channel.h   Locally Added               0 
+ jtag-physical-channel.awb Locally Added               0 
+ jtag-physical-channel.bsv Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform
+ development_board_arriaII_gx/ Locally Removed           488 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/development_board_arriaII_gx
+ jtag/                     Locally Removed           488 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/development_board_arriaII_gx/jtag
+ altera-jtag.h             Locally Removed           488 
+ altera-jtag.awb           Locally Removed           488 
+ altera-jtag.bsv           Locally Removed           488 
+ altera-jtag.cpp           Locally Removed           488 
+ arriaII_dev/              Locally Removed           488 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/development_board_arriaII_gx/jtag/arriaII_dev
+ jtag.sdf                  Locally Removed           488 
+ altera-arriaIIgx_dev-jtag-pins.qsf Locally Removed           488 
+ jtag.sdc                  Locally Removed           488 
+ altera-arriaIIgx_dev-jtag.awb Locally Removed           488 
+ altera-arriaIIgx_dev-jtag.qsf Locally Removed           488 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/jtag/altera
+ avalon_jtag.awb           Locally Modified          488 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/altera_jtag/jtag
+ de2/                      Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/altera_jtag/jtag/de2
+ jtag.sdf                  Locally Added               0 
+ altera-de2-jtag-pins.qsf  Locally Added               0 
+ altera-de2-jtag.awb       Locally Added               0 
+ altera-de2-jtag.qsf       Locally Added               0 
+ jtag.sdc                  Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/altera_jtag/jtag
+ de3/                      Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/altera_jtag/jtag/de3
+ jtag.sdf                  Locally Added               0 
+ altera-de3-jtag-pins.qsf  Locally Added               0 
+ altera-de3-jtag.awb       Locally Added               0 
+ altera-de3-jtag.qsf       Locally Added               0 
+ jtag.sdc                  Locally Added               0 
+
+
+Resurrected the altera jtag by reverting to old driver code.  Not a
+great solution, but I don't have time to investigate why the combined
+driver is not working.  Added support for DE2, DE3 boards.  I haven't
+tested yet as the DE2 is not hooked up and I haven't got the Synplify
+parameters for the DE3.  

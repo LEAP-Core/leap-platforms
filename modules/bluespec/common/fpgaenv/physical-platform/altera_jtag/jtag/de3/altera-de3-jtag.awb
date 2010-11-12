@@ -1,0 +1,23 @@
+
+%name DE3 Dev Board JTAG Mapping
+%desc DE3 Dev Board JTAG Mapping
+
+%provides altera_jtag_physical_mapping	
+
+%sources -t QSF -v PUBLIC  altera-de3-jtag.qsf
+%sources -t QSF -v PUBLIC  altera-de3-jtag-pins.qsf
+
+%sources -t SDF -v PUBLIC jtag.sdf
+%sources -t SDC -v PUBLIC jtag.sdc
+
+%param --global MAKE_ALL_TARGET      bit       "Target of 'make all'.  Most likely bit, exe or vexe."
+
+%param FPGA_PART_ALTERA   "???"             "FPGA Part ID (XST)"
+%param FPGA_TECHNOLOGY    "ARRIAII-GX"      "FPGA Technology (Synplify)"
+%param FPGA_PART_SYNPLIFY "EP2AGX125E"      "FPGA Part (Synplify)"
+%param FPGA_SPEED         "-4"              "FPGA Speed Grade (Synplify)"
+%param FPGA_PACKAGE       "FC35"            "FPGA Package (Synplify)"
+%param FPGA_POSITION      3                 "FPGA Position (in Xilinx iMPACT)"
+%param MAP_OPTIONS        ""                "Extra Map Options"
+
+

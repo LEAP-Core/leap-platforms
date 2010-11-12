@@ -65,7 +65,7 @@ jtag_device=Altera JTAG
 altera_jtag_physical_mapping=ArriaII Dev Board JTAG Mapping
 
 [ArriaII GX JTAG]
-File=modules/bluespec/common/fpgaenv/physical-platform/development_board_arriaII_gx/jtag/altera-jtag.awb
+File=modules/bluespec/common/fpgaenv/physical-platform/altera_jtag/jtag/altera-jtag.awb
 Packagehint=platforms
 
 [Hardware FPGA Components for ArriaII]
@@ -76,12 +76,8 @@ Packagehint=platforms
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/jtag/altera/avalon_jtag.awb
 Packagehint=platforms
 
-[JTAG Physical Channel]
-File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/jtag/jtag-physical-channel.awb
-Packagehint=platforms
-
 [Basic Virtual Channel Multiplexer/Requires]
-physical_channel=JTAG Physical Channel
+physical_channel=Altera JTAG Physical Channel
 
 [Low Level Platform Interface Hybrid]
 File=modules/bluespec/common/fpgaenv/low-level-platform-interface/hybrid-llpi.awb
@@ -184,7 +180,7 @@ File=config/pm/hasim/submodels/fpgaenv/std-virtual-devices-null-mem.apm
 Packagehint=platforms
 
 [ArriaII Dev Board JTAG Mapping]
-File=modules/bluespec/common/fpgaenv/physical-platform/development_board_arriaII_gx/jtag/arriaII_dev/altera-arriaIIgx_dev-jtag.awb
+File=modules/bluespec/common/fpgaenv/physical-platform/altera_jtag/jtag/arriaII_dev/altera-arriaIIgx_dev-jtag.awb
 Packagehint=platforms
 
 [Single-Ended Crystal Clocks Device (ALTERA)/Params]
@@ -193,5 +189,8 @@ CRYSTAL_CLOCK_FREQ=125
 
 [FPGA Build Pipeline]
 File=config/pm/hasim/submodels/pipelines/build-pipeline-altera.apm
-Packagehint=platforms
+Packagehint=leap
 
+[Altera JTAG Physical Channel]
+File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/jtag/altera/jtag-physical-channel.awb
+Packagehint=platforms
