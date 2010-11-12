@@ -1,5 +1,4 @@
 set_location_assignment PIN_T33 -to CLK
-set_instance_assignment -name IO_STANDARD LVDS -to CLK
 set_location_assignment PIN_U31 -to RST_N
 set_location_assignment PIN_AD1  -to ledsWires_LED[0]
 set_location_assignment PIN_AC1  -to ledsWires_LED[1]

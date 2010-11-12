@@ -1,0 +1,195 @@
+
+[Global]
+SaveParameters=0
+Description=Hybrid evaluation-de3-JTAG FPGA Environment
+File=fpgaenv-de3-jtag
+Version=2.1
+Type=Leap
+Name=Hybrid evaluation-de3-JTAG FPGA Environment
+Class=Asim::Model
+DefaultBenchmark=
+DefaultRunOpts=
+
+[Model]
+DefaultAttributes=bluespec altera
+model=FPGA Environment
+
+[FPGA Environment/Requires]
+virtual_platform=Standard Virtual Platform
+fpga_components=Hardware FPGA Components for ArriaII
+librl_bsv=Altera RL Bluespec Library
+build_pipeline=FPGA Build Pipeline
+
+[Standard Virtual Platform]
+File=modules/bluespec/common/fpgaenv/virtual-platform/std-virtual-platform.awb
+Packagehint=platforms
+
+[Standard Virtual Platform/Requires]
+virtual_devices=Standard Virtual Devices (No Memory Service)
+low_level_platform_interface=Low Level Platform Interface Hybrid
+umf=Little-Endian Unified Message Format
+
+[FPGA Environment]
+File=modules/bluespec/common/fpgaenv/fpga-environment.awb
+Packagehint=platforms
+
+[General LED Device]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/leds/general-led-device.awb
+Packagehint=platforms
+
+[RRR Clients and Servers]
+File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic/basic-rrr.awb
+Packagehint=platforms
+
+[Basic Virtual Channel Multiplexer]
+File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/basic/basic-channelio.awb
+Packagehint=platforms
+
+[Common Physical Platform Utilities]
+File=modules/bluespec/common/fpgaenv/physical-platform/utils/utils.awb
+Packagehint=platforms
+
+[Null Physical Platform Debugger]
+File=modules/bluespec/common/fpgaenv/physical-platform/debuggers/null/null-debugger.awb
+Packagehint=platforms
+
+[Little-Endian Unified Message Format]
+File=modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian/umf-little-endian.awb
+Packagehint=platforms
+
+[ArriaII GX JTAG/Requires]
+clocks_device=Single-Ended Crystal Clocks Device (ALTERA)
+physical_platform_utils=Common Physical Platform Utilities
+led_device=General LED Device
+jtag_device=Altera JTAG
+altera_jtag_physical_mapping=DE3 Dev Board JTAG Mapping
+
+[ArriaII GX JTAG]
+File=modules/bluespec/common/fpgaenv/physical-platform/altera_jtag/jtag/altera-jtag.awb
+Packagehint=platforms
+
+[Hardware FPGA Components for ArriaII]
+File=modules/bluespec/common/fpgaenv/fpga-components/hardware-fpga-components-arriaII.awb
+Packagehint=platforms
+
+[Altera JTAG]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/jtag/altera/avalon_jtag.awb
+Packagehint=platforms
+
+[Basic Virtual Channel Multiplexer/Requires]
+physical_channel=Altera JTAG Physical Channel
+
+[Low Level Platform Interface Hybrid]
+File=modules/bluespec/common/fpgaenv/low-level-platform-interface/hybrid-llpi.awb
+Packagehint=platforms
+
+[Low Level Platform Interface Hybrid/Requires]
+physical_platform=ArriaII GX JTAG
+remote_memory=Null Remote Memory
+channelio=Basic Virtual Channel Multiplexer
+rrr=RRR Clients and Servers
+physical_platform_debugger=Null Physical Platform Debugger
+local_mem=NULL Local Memory Interface
+
+[Null Remote Memory]
+File=modules/bluespec/common/fpgaenv/low-level-platform-interface/remote-memory/null/null-remote-memory.awb
+Packagehint=platforms
+
+[RRR Common Module]
+File=modules/bluespec/common/fpgaenv/virtual-platform/rrr/rrr_common/rrr_common.awb
+Packagehint=platforms
+
+[RRR Clients and Servers/Requires]
+rrr_common=RRR Common Module
+
+[Avalon Bus Intefaces]
+File=modules/bsv-libraries/bluespec/Avalon/src/avalon.awb
+Packagehint=bsv-libraries
+
+[Register Mapping Utilities]
+File=modules/bsv-libraries/bluespec/RegisterMapper/src/register_mapper.awb
+Packagehint=bsv-libraries
+
+[FIFO Utility]
+File=modules/bsv-libraries/bluespec/FIFOUtility/fifo_utility.awb
+Packagehint=bsv-libraries
+
+[Vector Utilities]
+File=modules/bsv-libraries/bluespec/VectorUtils/vector_utils.awb
+Packagehint=bsv-libraries
+
+[Debug Utilities]
+File=modules/bsv-libraries/bluespec/Debug/debug_utils.awb
+Packagehint=bsv-libraries
+
+[RegisterLibrary]
+File=modules/bsv-libraries/bluespec/Register/src/register_library.awb
+Packagehint=bsv-libraries
+
+[CBus Utilities]
+File=modules/bsv-libraries/bluespec/CBusUtils/c_bus_utils.awb
+Packagehint=bsv-libraries
+
+[Register Mapping Utilities/Requires]
+register_library=RegisterLibrary
+
+[Common Altera Platform Utilities/Requires]
+c_bus_utils=CBus Utilities
+fifo_utils=FIFO Utility
+vector_utils=Vector Utilities
+avalon=Avalon Bus Intefaces
+debug_utils=Debug Utilities
+register_mapper=Register Mapping Utilities
+
+[Common Altera Platform Utilities]
+File=modules/bluespec/common/fpgaenv/physical-platform/utils/altera/altera_utils.awb
+Packagehint=platforms
+
+[Single-Ended Crystal Clocks Device (ALTERA)]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/single-ended/single-ended-clocks-device-altera.awb
+Packagehint=platforms
+
+[NULL Local Memory Interface]
+File=modules/bluespec/common/fpgaenv/low-level-platform-interface/local-mem/local-mem-null.awb
+Packagehint=platforms
+
+[Altera RL Bluespec Library/Requires]
+altera_utils=Common Altera Platform Utilities
+librl_bsv_storage=RL Bluespec Storage Library
+librl_bsv_base=RL Bluespec Base Library
+librl_bsv_cache=RL Bluespec Cache Managers
+
+[RL Bluespec Storage Library]
+File=modules/bluespec/librl/storage/librl-bsv-storage.awb
+Packagehint=platforms
+
+[RL Bluespec Cache Managers]
+File=modules/bluespec/librl/storage/cache/librl-cache.awb
+Packagehint=platforms
+
+[Altera RL Bluespec Library]
+File=modules/bsv-libraries/bluespec/librl-mit/librl-mit.awb
+Packagehint=bsv-libraries
+
+[RL Bluespec Base Library]
+File=modules/bluespec/librl/base/librl-bsv-base.awb
+Packagehint=platforms
+
+[Standard Virtual Devices (No Memory Service)]
+File=config/pm/hasim/submodels/fpgaenv/std-virtual-devices-null-mem.apm
+Packagehint=platforms
+
+[Single-Ended Crystal Clocks Device (ALTERA)/Params]
+MODEL_CLOCK_MULTIPLIER=2
+
+[FPGA Build Pipeline]
+File=config/pm/hasim/submodels/pipelines/build-pipeline-altera.apm
+Packagehint=leap
+
+[Altera JTAG Physical Channel]
+File=modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/jtag/altera/jtag-physical-channel.awb
+Packagehint=platforms
+
+[DE3 Dev Board JTAG Mapping]
+File=modules/bluespec/common/fpgaenv/physical-platform/altera_jtag/jtag/de3/altera-de3-jtag.awb
+Packagehint=platforms
