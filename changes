@@ -11136,3 +11136,17 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/altera_jtag/jtag/de3
 Corrected DE* qsf and synthesis parameters, and added environment
 APMs.  I can build working hello world designs for both of these
 platforms.
+
+----------
+kfleming    Date: Mon Nov 15 13:43:02 EST 2010  CSN: CSN-platforms-491
+                  Mon Nov 15 18:43:02 UTC 2010
+
+
+Directory modules/application-env/hybrid/soft-services
+ application-env-hybrid-soft-service.bsv Locally Modified          490 
+
+
+
+Added some new dependencies to fix build error in the hybrid soft
+services build.  I think there's a better fix for this, which I will
+try to commit soon.
