@@ -11150,3 +11150,16 @@ Directory modules/application-env/hybrid/soft-services
 Added some new dependencies to fix build error in the hybrid soft
 services build.  I think there's a better fix for this, which I will
 try to commit soon.
+
+----------
+mstsvetk    Date: Tue Nov 30 13:10:24 MSK 2010  CSN: CSN-platforms-492
+                  Tue Nov 30 10:10:24 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/serial
+ serial-physical-channel-loopback.bsv Locally Modified          491 
+ serial-physical-channel-loopback.awb Locally Modified          491 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/serial/physical-serial
+ uart-import.bsv           Locally Modified          491 
+

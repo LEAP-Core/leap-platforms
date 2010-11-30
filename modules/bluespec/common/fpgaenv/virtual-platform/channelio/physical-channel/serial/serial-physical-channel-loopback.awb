@@ -12,9 +12,9 @@
 %sources -t H -v PUBLIC    PosixSignalHandler.h
 %sources -t CPP -v PRIVATE  SerialPort.cpp
 %sources -t H -v PUBLIC    SerialPort.h
-%sources -t CPP -v PRIVATE    SerialStreamBuf.cc
+%sources -t CPP -v PRIVATE    SerialStreamBuf.cpp
 %sources -t H -v PUBLIC   SerialStreamBuf.h
-%sources -t CPP -v PRIVATE    SerialStream.cc
+%sources -t CPP -v PRIVATE    SerialStream.cpp
 %sources -t H -v PUBLIC   SerialStream.h
 
 

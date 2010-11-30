@@ -20,6 +20,7 @@
 `include "serial_device.bsh"
 `include "umf.bsh"
 
+
 import FIFO::*;
 
 // ============== Physical Channel ===============
@@ -39,7 +40,7 @@ module mkPhysicalChannel#(PHYSICAL_DRIVERS drivers)
     
     // shortcut to drivers
     SERIAL_DRIVER serialDriver = drivers.serialDriver;
-    FIFO#(UMF_CHUNK) loopfifo <- mkSizedFIFO(16);
+    FIFO#(Bit#(8)) loopfifo <- mkSizedFIFO(16);
     
     rule enqueue;
       let data <- serialDriver.receive;

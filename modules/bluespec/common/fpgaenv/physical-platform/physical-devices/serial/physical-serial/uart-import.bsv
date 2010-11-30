@@ -2,6 +2,7 @@ import Vector::*;
 import Clocks::*;
 import LevelFIFO::*;
 
+`include "clocks_device.bsh"
 `include "physical_platform_utils.bsh"
 
 typedef Bit#(8) SerialWord;
@@ -82,11 +83,21 @@ interface PRIMITIVE_SERIAL_DEVICE;
 endinterface
 
 // Deal with reset polarity
-import "BVI" OPB_UARTLITE_Core = module mkPrimitiveSerialDevice#(Integer clk_rate)
+import "BVI" OPB_UARTLITE_Core = module mkPrimitiveSerialDevice#(
+                                    Integer data_bits, 
+                                    Integer clk_rate, 
+                                    Integer baudrate, 
+                                    Integer use_parity, 
+                                    Integer odd_parity )
     // interface:
                  (PRIMITIVE_SERIAL_DEVICE);
+                                    
+    parameter C_DATA_BITS = data_bits;
     parameter C_CLK_FREQ = clk_rate;
-
+    parameter C_BAUDRATE = baudrate;                                
+    parameter C_USE_PARITY = use_parity;
+    parameter C_ODD_PARITY = odd_parity;
+                                    
     // Clocks and reset are handled by the UCF for now
     default_clock clk(Clk);
     default_reset rst(Reset);
@@ -138,9 +149,11 @@ endmodule
 
 
 module mkSerialDevice#(Clock raw_clock, Reset raw_reset) (SERIAL_DEVICE);
-
-    // Need a real clock rate 
-    PRIMITIVE_SERIAL_DEVICE primitiveSerialDevice <- mkPrimitiveSerialDevice(100 * 1000000);
+   
+    //
+    // Need a SerialWord data bits, reference clock rate, baudrate, use/not use parity bit, odd/even parity
+    // 
+    PRIMITIVE_SERIAL_DEVICE primitiveSerialDevice <- mkPrimitiveSerialDevice( 8, `MODEL_CLOCK_FREQ * 1000000, 115200, 0, 1);
   
     //Create the syncfifos
 
