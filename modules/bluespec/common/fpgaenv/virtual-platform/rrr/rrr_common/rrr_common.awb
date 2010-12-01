@@ -1,7 +1,0 @@
-%name RRR Common Module
-%desc RRR Common Module
-
-%provides rrr_common
-
-%sources -t BSV -v PUBLIC marshaller.bsv
-%sources -t BSV -v PUBLIC demarshaller.bsv

@@ -1,6 +1,0 @@
-
-%name Graphical Serial Console
-%desc Graphical Serial Console
-
-%provides console
-

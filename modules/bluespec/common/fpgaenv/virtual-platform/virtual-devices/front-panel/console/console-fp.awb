@@ -1,7 +1,0 @@
-
-%name Console Front Panel
-%desc Console Front Panel
-
-%provides front_panel
-
-%public NullFP.bsv

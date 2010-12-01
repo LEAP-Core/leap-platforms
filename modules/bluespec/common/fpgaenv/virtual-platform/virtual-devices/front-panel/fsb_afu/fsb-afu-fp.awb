@@ -1,7 +1,0 @@
-
-%name Physical FSB AFU Front Panel
-%desc Physical FSB AFU Front Panel
-
-%provides front_panel
-
-%public FSB_AFU_FP.bsv

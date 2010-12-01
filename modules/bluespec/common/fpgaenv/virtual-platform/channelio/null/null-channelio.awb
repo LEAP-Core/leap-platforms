@@ -1,7 +1,0 @@
-
-%name Null Channel IO Module
-%desc Null Channel IO Module
-
-%provides channelio
-
-%sources -t BSV -v PUBLIC NullChannelIO.bsv

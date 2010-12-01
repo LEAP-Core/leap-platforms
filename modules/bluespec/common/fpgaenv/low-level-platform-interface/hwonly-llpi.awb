@@ -1,8 +1,0 @@
-%name Low Level Platform Interface Hardware-Only
-%desc Low Level Platform Interface for Hardware-Only Models
-
-%provides low_level_platform_interface
-
-%requires rrr channelio local_mem physical_platform physical_platform_debugger
-
-%public llpi.bsv

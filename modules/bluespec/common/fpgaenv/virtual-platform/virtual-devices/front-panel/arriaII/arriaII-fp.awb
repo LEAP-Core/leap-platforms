@@ -1,7 +1,0 @@
-
-%name Physical ARRIA II Front Panel
-%desc Physical ARRIA II Front Panel
-
-%provides front_panel
-
-%public ARRIAIIFP.bsv

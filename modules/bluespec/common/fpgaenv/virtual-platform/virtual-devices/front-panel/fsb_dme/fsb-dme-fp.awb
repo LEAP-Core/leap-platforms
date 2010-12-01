@@ -1,7 +1,0 @@
-
-%name Physical FSB DME Front Panel
-%desc Physical FSB DME Front Panel
-
-%provides front_panel
-
-%public FSB_DME_FP.bsv

@@ -1,7 +1,0 @@
-
-%name Physical XUP Front Panel
-%desc Physical XUP Front Panel
-
-%provides front_panel
-
-%public XUPFP.bsv

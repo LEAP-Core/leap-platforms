@@ -11163,3 +11163,811 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-ch
 Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/serial/physical-serial
  uart-import.bsv           Locally Modified          491 
 
+
+----------
+mpellaue    Date: Wed Dec  1 14:48:37 EST 2010  CSN: CSN-platforms-493
+                  Wed Dec  1 19:48:37 UTC 2010
+
+
+Directory config/pm
+ hasim/                    Locally Removed           492 
+
+Directory config/pm/hasim
+ submodels/                Locally Removed           492 
+
+Directory config/pm/hasim/submodels
+ fpgaenv/                  Locally Removed           492 
+
+Directory config/pm/hasim/submodels/fpgaenv
+ fpgaenv-hybrid-xupv2-serial.apm Locally Removed           492 
+ fpgaenv-hybrid-htg-v5-pcie-synplify.apm Locally Removed           492 
+ hasim-fpgaenv-htg-v5-pcie.apm Locally Removed           492 
+ fpgaenv-hybrid-evaluation-arriaII-jtag.apm Locally Removed           492 
+ xup-virtual-devices.apm   Locally Removed           492 
+ fpgaenv-de2-jtag.apm      Locally Removed           492 
+ fpgaenv-de3-jtag.apm      Locally Removed           492 
+ std-virtual-devices-null-mem.apm Locally Removed           492 
+ fpgaenv-hybrid-exe.apm    Locally Removed           492 
+ fpgaenv-htg-hwonly.apm    Locally Removed           492 
+ fpgaenv-hybrid-xup-v5-pcie.apm Locally Removed           492 
+ fpgaenv-hybrid-exe-local-scratchpad.apm Locally Removed           492 
+ fpgaenv-hybrid-exe-serial-ChanIO-loopback.apm Locally Removed           492 
+ fpgaenv-hybrid-xup-v5-jtag.apm Locally Removed           492 
+ hasim-fpgaenv-hybrid-sim.apm Locally Removed           492 
+ fpgaenv-hybrid-xup-v5-pcie-altera.apm Locally Removed           492 
+ fpgaenv-hybrid-htg-v5-pcie.apm Locally Removed           492 
+ librl-bsv.apm             Locally Removed           492 
+ hasim-fpgaenv-null.apm    Locally Removed           492 
+ fpgaenv-cycloneiii-jtag.apm Locally Removed           492 
+ std-virtual-devices.apm   Locally Removed           492 
+ hasim-fpgaenv-xup.apm     Locally Removed           492 
+ fpgaenv-hybrid-htg-v5-jtag.apm Locally Removed           492 
+ std-virtual-devices-local-scratchpad.apm Locally Removed           492 
+
+Directory config/pm/hasim/submodels
+ pipelines/                Locally Removed           492 
+
+Directory config/pm/hasim/submodels/pipelines
+ build-pipeline-xilinx-synplify.apm Locally Removed           492 
+ build-pipeline-altera.apm Locally Removed           492 
+ build-pipeline-xilinx.apm Locally Removed           492 
+ build-pipeline-bluesim.apm Locally Removed           492 
+
+Directory config/pm/platforms
+ tests/                    Locally Removed           492 
+
+Directory config/pm/platforms/tests
+ chanIO_loopback_sim.apm   Locally Removed           492 
+ chanIO_loopback_xup2.apm  Locally Removed           492 
+
+Directory modules/bluespec
+ librl/                    Locally Removed           492 
+
+Directory modules/bluespec/librl
+ storage/                  Locally Removed           492 
+
+Directory modules/bluespec/librl/storage
+ cache/                    Locally Removed           492 
+
+Directory modules/bluespec/librl/storage/cache
+ rl-direct-mapped-cache.bsv Locally Removed           492 
+ rl-set-assoc-cache.bsv    Locally Removed           492 
+ rl-cache.bsv              Locally Removed           492 
+ rl-tiny-cache.bsv         Locally Removed           492 
+ librl-cache.awb           Locally Removed           492 
+
+Directory modules/bluespec/librl/storage
+ librl-bsv-storage.awb     Locally Removed           492 
+ fifo-mem.bsv              Locally Removed           492 
+ memory-heap.bsv           Locally Removed           492 
+ fifo-scoreboard.bsv       Locally Removed           492 
+
+Directory modules/bluespec/librl
+ librl-bsv.awb             Locally Removed           492 
+ librl-bsv.bsh             Locally Removed           492 
+ base/                     Locally Removed           492 
+
+Directory modules/bluespec/librl/base
+ bluespec-common.prj       Locally Removed           492 
+ fifo-functions.bsv        Locally Removed           492 
+ bluespec-def.bsv          Locally Removed           492 
+ guarded-pipelines.bsv     Locally Removed           492 
+ counters.bsv              Locally Removed           492 
+ debug-file.bsv            Locally Removed           492 
+ README                    Locally Removed           492 
+ lfsr.bsv                  Locally Removed           492 
+ memory-interface.bsv      Locally Removed           492 
+ counting-filter.bsv       Locally Removed           492 
+ extends.bsv               Locally Removed           492 
+ fifo-merge.bsv            Locally Removed           492 
+ hash-bits.bsv             Locally Removed           492 
+ support/                  Locally Removed           492 
+
+Directory modules/bluespec/librl/base/support
+ hash-check.c              Locally Removed           492 
+ README                    Locally Removed           492 
+ hash-inverse.c            Locally Removed           492 
+
+Directory modules/bluespec/librl/base
+ librl-bsv-base.awb        Locally Removed           492 
+ memory-pack.bsv           Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv
+ toplevel-wires/           Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/toplevel-wires
+ fsb_dme/                  Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/toplevel-wires/fsb_dme
+ fsb-dme-toplevel-wires.awb Locally Removed           492 
+ fsb_dme.ucf               Locally Removed           492 
+ FSB_DME_TopLevelWires.bsv Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/toplevel-wires
+ fsb_afu/                  Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/toplevel-wires/fsb_afu
+ fsb_afu.ucf               Locally Removed           492 
+ FSB_AFU_TopLevelWires.bsv Locally Removed           492 
+ fsb-afu-toplevel-wires.awb Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/toplevel-wires
+ null/                     Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/toplevel-wires/null
+ null-toplevel-wires.awb   Locally Removed           492 
+ NullTopLevelWires.bsv     Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/toplevel-wires
+ xilinx/                   Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/toplevel-wires/xilinx
+ htg-v5-pcie-toplevel-wires.awb Locally Removed           492 
+ xilinx.download           Locally Removed           492 
+ xilinx.ut                 Locally Removed           492 
+ htg-v5-pcie-TopLevelWires.bsv Locally Removed           492 
+ xup-toplevel-wires.awb    Locally Removed           492 
+ htg-v5-pcie.ucf           Locally Removed           492 
+ xup-TopLevelWires.bsv     Locally Removed           492 
+ xilinx.xst                Locally Removed           492 
+ xup.ucf                   Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv
+ low-level-platform-interface/ Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/low-level-platform-interface
+ platforms-module.h        Locally Removed           492 
+ remote-memory/            Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/low-level-platform-interface/remote-memory
+ pci-express-dma/          Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/low-level-platform-interface/remote-memory/pci-express-dma
+ remote-memory-pcie-dma.cpp Locally Removed           492 
+ remote-memory-pcie-dma.h  Locally Removed           492 
+ remote-memory-pcie-dma.awb Locally Removed           492 
+ remote-memory-pcie-dma.bsv Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/low-level-platform-interface/remote-memory
+ null/                     Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/low-level-platform-interface/remote-memory/null
+ null-remote-memory.h      Locally Removed           492 
+ null-remote-memory.awb    Locally Removed           492 
+ null-remote-memory.bsv    Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/low-level-platform-interface
+ llpi.cpp                  Locally Removed           492 
+ local-mem/                Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/low-level-platform-interface/local-mem
+ local-mem-null.awb        Locally Removed           492 
+ local-mem-ddr2.awb        Locally Removed           492 
+ local-mem-null.bsv        Locally Removed           492 
+ local-mem-ddr2.bsv        Locally Removed           492 
+ local-mem-bram.awb        Locally Removed           492 
+ local-mem-interface.bsv   Locally Removed           492 
+ local-mem-bram.bsv        Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/low-level-platform-interface
+ hwonly-llpi.awb           Locally Removed           492 
+ llpi.h                    Locally Removed           492 
+ hybrid-llpi.awb           Locally Removed           492 
+ llpi.bsv                  Locally Removed           492 
+ platforms-module.cpp      Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform
+ channelio/                Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio
+ basic/                    Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/basic
+ basic-channelio.cpp       Locally Removed           492 
+ basic-channelio.h         Locally Removed           492 
+ basic-channelio.awb       Locally Removed           492 
+ basic-channelio.bsv       Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio
+ physical-channel/         Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel
+ pcie-dma/                 Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/pcie-dma
+ dma-physical-channel.cpp  Locally Removed           492 
+ dma-physical-channel.h    Locally Removed           492 
+ dma-physical-channel.awb  Locally Removed           492 
+ dma-physical-channel.bsv  Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel
+ serial/                   Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/serial
+ serial-physical-channel-loopback.bsv Locally Removed           492 
+ serial-physical-channel.cpp Locally Removed           492 
+ SerialStream.h            Locally Removed           492 
+ serial-physical-channel-8bit.cpp Locally Removed           492 
+ PosixSignalHandler.h      Locally Removed           492 
+ serial-physical-channel.h Locally Removed           492 
+ serial-physical-channel.bsv Locally Removed           492 
+ PosixSignalDispatcher.cpp Locally Removed           492 
+ serial-physical-channel-8bit.bsv Locally Removed           492 
+ PosixSignalDispatcher.h   Locally Removed           492 
+ serial-physical-channel-loopback.awb Locally Removed           492 
+ SerialPort.cpp            Locally Removed           492 
+ serial-physical-channel.awb Locally Removed           492 
+ SerialStreamBuf.cpp       Locally Removed           492 
+ SerialPort.h              Locally Removed           492 
+ serial-physical-channel-8bit.awb Locally Removed           492 
+ SerialStream.cpp          Locally Removed           492 
+ SerialStreamBuf.h         Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel
+ pcie-bluespec/            Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/pcie-bluespec
+ pcie-bluespec-physical-channel.cpp Locally Removed           492 
+ pcie-bluespec-physical-channel.h Locally Removed           492 
+ pcie-bluespec-physical-channel.awb Locally Removed           492 
+ pcie-bluespec-physical-channel.bsv Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel
+ jtag/                     Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/jtag
+ jtag-physical-channel.cpp Locally Removed           492 
+ altera/                   Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/jtag/altera
+ jtag-physical-channel.cpp Locally Removed           492 
+ jtag-physical-channel.h   Locally Removed           492 
+ jtag-physical-channel.awb Locally Removed           492 
+ jtag-physical-channel.bsv Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/jtag
+ jtag-physical-channel.h   Locally Removed           492 
+ jtag-physical-channel.awb Locally Removed           492 
+ jtag-physical-channel.bsv Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel
+ pcie-csr/                 Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/pcie-csr
+ pcie-physical-channel.cpp Locally Removed           492 
+ pcie-physical-channel.h   Locally Removed           492 
+ pcie-physical-channel.awb Locally Removed           492 
+ pcie-physical-channel.bsv Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel
+ sim/                      Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/physical-channel/sim
+ sim-physical-channel.awb  Locally Removed           492 
+ sim-physical-channel.bsv  Locally Removed           492 
+ sim-physical-channel.cpp  Locally Removed           492 
+ sim-physical-channel.h    Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio
+ unix/                     Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/unix
+ unix-channelio.c          Locally Removed           492 
+ unix-channelio.awb        Locally Removed           492 
+ UNIXChannelIO.bsv         Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio
+ loopback/                 Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/loopback
+ loopback-channelio.awb    Locally Removed           492 
+ loopback-channelio.bsv    Locally Removed           492 
+ loopback-channelio.cpp    Locally Removed           492 
+ loopback-channelio.h      Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio
+ null/                     Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/channelio/null
+ null-channelio.awb        Locally Removed           492 
+ NullChannelIO.bsv         Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform
+ std-virtual-platform.cpp  Locally Removed           492 
+ rrr/                      Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr
+ basic/                    Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/basic
+ basic-rrr-client.cpp      Locally Removed           492 
+ basic-rrr-server.bsv      Locally Removed           492 
+ arbiters.bsv              Locally Removed           492 
+ basic-rrr-common.bsh      Locally Removed           492 
+ basic-rrr-client.h        Locally Removed           492 
+ basic-rrr-client.bsv      Locally Removed           492 
+ basic-rrr-server.cpp      Locally Removed           492 
+ basic-rrr.awb             Locally Removed           492 
+ basic-rrr-server.h        Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr
+ null/                     Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/null
+ null-rrr-client.h         Locally Removed           492 
+ null-rrr-server.cpp       Locally Removed           492 
+ null-rrr.awb              Locally Removed           492 
+ null-rrr.bsv              Locally Removed           492 
+ null-rrr-server.h         Locally Removed           492 
+ null-rrr.bsh              Locally Removed           492 
+ null-rrr-client.cpp       Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr
+ rrr_common/               Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/rrr/rrr_common
+ marshaller.bsv            Locally Removed           492 
+ rrr_common.awb            Locally Removed           492 
+ demarshaller.bsv          Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform
+ virtual-devices/          Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices
+ std-virtual-devices.cpp   Locally Removed           492 
+ starter/                  Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/starter
+ starter-device.cpp        Locally Removed           492 
+ starter-device.rrr        Locally Removed           492 
+ starter-device.h          Locally Removed           492 
+ starter-device.awb        Locally Removed           492 
+ starter-device.bsv        Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices
+ std-virtual-devices.h     Locally Removed           492 
+ front-panel/              Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel
+ fsb_dme/                  Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/fsb_dme
+ fsb-dme-fp.awb            Locally Removed           492 
+ FSB_DME_FP.bsv            Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel
+ arriaII/                  Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/arriaII
+ ARRIAIIFP.bsv             Locally Removed           492 
+ arriaII-fp.awb            Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel
+ hybrid/                   Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/hybrid
+ hybrid-fp.cpp             Locally Removed           492 
+ hybrid-fp-command-switches.cpp Locally Removed           492 
+ hybrid-fp.rrr             Locally Removed           492 
+ hybrid-fp.h               Locally Removed           492 
+ hybrid-fp.awb             Locally Removed           492 
+ hybrid-fp.bsv             Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel
+ console/                  Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/console
+ NullFP.bsv                Locally Removed           492 
+ console-fp.awb            Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel
+ fsb_afu/                  Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/fsb_afu
+ FSB_AFU_FP.bsv            Locally Removed           492 
+ fsb-afu-fp.awb            Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel
+ graphical/                Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/graphical
+ graphical-fp.awb          Locally Removed           492 
+ GraphicalFP.bsv           Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel
+ htg_v5_pcie/              Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/htg_v5_pcie
+ htg-v5-pcie-fp.awb        Locally Removed           492 
+ HTGv5PCIeFP.bsv           Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel
+ xup/                      Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/front-panel/xup
+ xup-fp.awb                Locally Removed           492 
+ XUPFP.bsv                 Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices
+ std-virtual-device-interfaces.bsv Locally Removed           492 
+ null-virtual-devices.awb  Locally Removed           492 
+ std-virtual-devices.bsv   Locally Removed           492 
+ common/                   Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common
+ common-utility-devices.h  Locally Removed           492 
+ common-utility-devices.awb Locally Removed           492 
+ dynamic-parameters-device/ Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/dynamic-parameters-device
+ dynamic-parameters-device.dic Locally Removed           492 
+ dynamic-parameters-device.cpp Locally Removed           492 
+ dynamic-parameters-device.rrr Locally Removed           492 
+ dynamic-parameters-device.h Locally Removed           492 
+ dynamic-parameters-device.awb Locally Removed           492 
+ dynamic-parameters-device.bsv Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common
+ common-utility-devices.bsv Locally Removed           492 
+ debug-scan-device/        Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/debug-scan-device
+ debug-scan-device.dic     Locally Removed           492 
+ debug-scan-device.cpp     Locally Removed           492 
+ debug-scan-device.rrr     Locally Removed           492 
+ debug-scan-device.h       Locally Removed           492 
+ debug-scan-device.awb     Locally Removed           492 
+ debug-scan-device.bsv     Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common
+ assertions-device/        Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/assertions-device
+ assertions-device.awb     Locally Removed           492 
+ assertions-device.bsv     Locally Removed           492 
+ assertions-device.dic     Locally Removed           492 
+ assertions-device.cpp     Locally Removed           492 
+ assertions-device.rrr     Locally Removed           492 
+ assertions-device.h       Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common
+ common-utility-null.h     Locally Removed           492 
+ common-utility-null.awb   Locally Removed           492 
+ common-utility-devices.cpp Locally Removed           492 
+ common-utility-null.bsv   Locally Removed           492 
+ stats-device/             Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/stats-device
+ stats-device.rrr          Locally Removed           492 
+ stats-device.h            Locally Removed           492 
+ stats-device.awb          Locally Removed           492 
+ stats-device.bsv          Locally Removed           492 
+ stats-device.dic          Locally Removed           492 
+ stats-device.cpp          Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common
+ streams-device/           Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/common/streams-device
+ streams-common.bsh        Locally Removed           492 
+ hybrid-streams-services.rrr Locally Removed           492 
+ hybrid-streams.h          Locally Removed           492 
+ hybrid-streams.awb        Locally Removed           492 
+ hybrid-streams.bsv        Locally Removed           492 
+ streamid.dic              Locally Removed           492 
+ streams.dic               Locally Removed           492 
+ hybrid-streams.cpp        Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices
+ central-cache/            Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/central-cache
+ central-cache-interfaces.bsv Locally Removed           492 
+ local-mem-central-cache.awb Locally Removed           492 
+ local-mem-central-cache.bsv Locally Removed           492 
+ central-cache-backing-store.bsv Locally Removed           492 
+ null-central-cache.awb    Locally Removed           492 
+ null-central-cache.bsv    Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices
+ std-virtual-devices-null-mem.awb Locally Removed           492 
+ std-virtual-devices.dic   Locally Removed           492 
+ null-starter/             Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/null-starter
+ null-starter-device.awb   Locally Removed           492 
+ starter-device.cpp        Locally Removed           492 
+ starter-device.h          Locally Removed           492 
+ starter-device.bsv        Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices
+ null-virtual-devices.cpp  Locally Removed           492 
+ console/                  Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/console
+ console-serial/           Locally Removed           492 
+ graphical-serial/         Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/console/graphical-serial
+ graphical-serial.awb      Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/console
+ null-serial/              Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/console/null-serial
+ null-serial.awb           Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/console
+ xup-serial/               Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices
+ null-virtual-devices.h    Locally Removed           492 
+ std-virtual-devices.awb   Locally Removed           492 
+ null-virtual-devices.bsv  Locally Removed           492 
+ memory/                   Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory
+ hybrid/                   Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/hybrid
+ hybrid-mem-scratch.dic    Locally Removed           492 
+ hybrid-mem-scratch.cpp    Locally Removed           492 
+ hybrid-mem-scratch.rrr    Locally Removed           492 
+ hybrid-mem-scratch.h      Locally Removed           492 
+ hybrid-mem-scratch.awb    Locally Removed           492 
+ hybrid-mem-scratch.bsv    Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory
+ common/                   Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/common
+ mem-scratch-common.awb    Locally Removed           492 
+ mem-scratch-common-interfaces.bsv Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory
+ local/                    Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/memory/local
+ local-mem-scratch.awb     Locally Removed           492 
+ local-mem-scratch.bsv     Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices
+ std-virtual-devices-null-mem.bsv Locally Removed           492 
+ shared-memory/            Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/shared-memory
+ standard/                 Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/shared-memory/standard
+ standard-shared-memory-server.cpp Locally Removed           492 
+ standard-shared-memory.h  Locally Removed           492 
+ standard-shared-memory.awb Locally Removed           492 
+ standard-shared-memory.bsv Locally Removed           492 
+ standard-shared-memory-server.h Locally Removed           492 
+ standard-shared-memory.cpp Locally Removed           492 
+ standard-shared-memory.rrr Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/shared-memory
+ null/                     Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/shared-memory/null
+ null-shared-memory.h      Locally Removed           492 
+ null-shared-memory.awb    Locally Removed           492 
+ null-shared-memory.bsv    Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices
+ streams/                  Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/virtual-devices/streams
+ streams-common.bsh        Locally Removed           492 
+ hybrid-streams-services.rrr Locally Removed           492 
+ hybrid-streams.h          Locally Removed           492 
+ hybrid-streams.awb        Locally Removed           492 
+ hybrid-streams.bsv        Locally Removed           492 
+ streamid.dic              Locally Removed           492 
+ simulation-streams.awb    Locally Removed           492 
+ simulation-streams.bsv    Locally Removed           492 
+ streams.dic               Locally Removed           492 
+ hybrid-streams.cpp        Locally Removed           492 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform
+ std-virtual-platform.h    Locally Removed           492 
+ std-virtual-platform.awb  Locally Removed           492 
+ std-virtual-platform.bsv  Locally Removed           492 
+ fast-virtual-platform.awb Locally Removed           492 
+
+Directory modules
+ project/                  Locally Removed           492 
+
+Directory modules/project
+ SCons.hw.pipeline.template Locally Removed           492 
+ project-pipeline.awb      Locally Removed           492 
+ synopsis/                 Locally Removed           492 
+
+Directory modules/project/synopsis
+ Synplify.py               Locally Removed           492 
+ synplify.awb              Locally Removed           492 
+ synplify.sdc              Locally Removed           492 
+
+Directory modules/project
+ Utils.py                  Locally Removed           492 
+ pipelines/                Locally Removed           492 
+
+Directory modules/project/pipelines
+ verilog-build-pipeline.awb Locally Removed           492 
+ sim-build-pipeline.awb    Locally Removed           492 
+ SimulationPipeline.py     Locally Removed           492 
+ VerilogPipeline.py        Locally Removed           492 
+ fpga-build-pipeline.awb   Locally Removed           492 
+ FPGAPipeline.py           Locally Removed           492 
+
+Directory modules/project
+ multifpga/                Locally Removed           492 
+
+Directory modules/project/multifpga
+ multitest.py              Locally Removed           492 
+ connection.py             Locally Removed           492 
+ multilex.py               Locally Removed           492 
+ environment.py            Locally Removed           492 
+ platform.py               Locally Removed           492 
+ multiparse.py             Locally Removed           492 
+
+Directory modules/project
+ project-hybrid-main.cpp   Locally Removed           492 
+ Makefile.top.template     Locally Removed           492 
+ project-hw.awb            Locally Removed           492 
+ ProjectDependency.py      Locally Removed           492 
+ project-hw-main.bsv       Locally Removed           492 
+ project-hybrid.awb        Locally Removed           492 
+ SCons.top.pipeline.template Locally Removed           492 
+ project-sw-main.h         Locally Removed           492 
+ hardware-done.h           Locally Removed           492 
+ verilog/                  Locally Removed           492 
+
+Directory modules/project/verilog
+ VERILOG.PY                Locally Removed           492 
+ verilog.py                Locally Removed           492 
+
+Directory modules/project
+ iface/                    Locally Removed           492 
+
+Directory modules/project/iface
+ iface.awb                 Locally Removed           492 
+ iface.py                  Locally Removed           492 
+
+Directory modules/project
+ ModuleList.py             Locally Removed           492 
+ altera/                   Locally Removed           492 
+
+Directory modules/project/altera
+ ALTERA_POST_SYNTH.py      Locally Removed           492 
+ altera_post_synth.awb     Locally Removed           492 
+
+Directory modules/project
+ xilinx/                   Locally Removed           492 
+
+Directory modules/project/xilinx
+ xilinx_ucf.awb            Locally Removed           492 
+ xilinx_map.awb            Locally Removed           492 
+ xilinx_par.awb            Locally Removed           492 
+ xst.awb                   Locally Removed           492 
+ XILINX_LOADER.py          Locally Removed           492 
+ xst-nobasicio.awb         Locally Removed           492 
+ XILINX_BITGEN.py          Locally Removed           492 
+ XILINX_NGD.py             Locally Removed           492 
+ XILINX_POST_SYNTH.py      Locally Removed           492 
+ XSTnobasicio.py           Locally Removed           492 
+ XILINX_BMM.py             Locally Removed           492 
+ XILINX_MAP.py             Locally Removed           492 
+ XILINX_UCF.py             Locally Removed           492 
+ XILINX_PAR.py             Locally Removed           492 
+ XST.py                    Locally Removed           492 
+ xilinx_loader.awb         Locally Removed           492 
+ xilinx_ngd.awb            Locally Removed           492 
+ xilinx_bitgen.awb         Locally Removed           492 
+ xilinx_post_synth.awb     Locally Removed           492 
+ xilinx_bmm.awb            Locally Removed           492 
+
+Directory modules/project
+ Module.py                 Locally Removed           492 
+ SCons.hw.template         Locally Removed           492 
+ SCons.dict.template       Locally Removed           492 
+ SCons.sw.template         Locally Removed           492 
+ software/                 Locally Removed           492 
+
+Directory modules/project/software
+ software.py               Locally Removed           492 
+ software.awb              Locally Removed           492 
+
+Directory modules/project
+ SCons.sw.pipeline.template Locally Removed           492 
+ project-hybrid-main.h     Locally Removed           492 
+ project-sw-main.cpp       Locally Removed           492 
+ project-hybrid-main.bsv   Locally Removed           492 
+ SCons.top.template        Locally Removed           492 
+ bluespec/                 Locally Removed           492 
+
+Directory modules/project/bluespec
+ BSV.py                    Locally Removed           492 
+ bsv-exe.awb               Locally Removed           492 
+ bsv.awb                   Locally Removed           492 
+ bluesim.py                Locally Removed           492 
+ MCD.py                    Locally Removed           492 
+ mcd.awb                   Locally Removed           492 
+
+Directory modules/project
+ project-sw.awb            Locally Removed           492 
+ SCons.iface.template      Locally Removed           492 
+ CommandLine.py            Locally Removed           492 
+
+Directory modules
+ application-env/          Locally Removed           492 
+
+Directory modules/application-env
+ hybrid/                   Locally Removed           492 
+
+Directory modules/application-env/hybrid
+ base/                     Locally Removed           492 
+
+Directory modules/application-env/hybrid/base
+ application-env-hybrid-base.cpp Locally Removed           492 
+ application-env-hybrid-base.h Locally Removed           492 
+ application-env-hybrid-base.awb Locally Removed           492 
+ application-env-hybrid-base.bsv Locally Removed           492 
+
+Directory modules/application-env/hybrid
+ soft-connections/         Locally Removed           492 
+
+Directory modules/application-env/hybrid/soft-connections
+ application-env-hybrid-soft-conn.h Locally Removed           492 
+ application-env-hybrid-soft-conn.awb Locally Removed           492 
+ application-env-hybrid-soft-conn.bsv Locally Removed           492 
+ default-sw/               Locally Removed           492 
+
+Directory modules/application-env/hybrid/soft-connections/default-sw
+ connected-application-default-sw.h Locally Removed           492 
+ connected-application-default-sw.awb Locally Removed           492 
+ connected-application-default-sw.bsv Locally Removed           492 
+
+Directory modules/application-env/hybrid/soft-connections
+ application-env-hybrid-soft-conn.cpp Locally Removed           492 
+
+Directory modules/application-env/hybrid
+ soft-services/            Locally Removed           492 
+
+Directory modules/application-env/hybrid/soft-services
+ application-env-hybrid-soft-service.cpp Locally Removed           492 
+ application-env-hybrid-soft-service.h Locally Removed           492 
+ application-env-hybrid-soft-service.awb Locally Removed           492 
+ application-env-hybrid-soft-service.bsv Locally Removed           492 
+
+Directory modules/application-env
+ hw-only/                  Locally Removed           492 
+
+Directory modules/application-env/hw-only
+ base/                     Locally Removed           492 
+
+Directory modules/application-env/hw-only/base
+ application-env-hw-only-base.awb Locally Removed           492 
+ application-env-hw-only-base.bsv Locally Removed           492 
+
+
+Moved the following layers to the leap repository:
+* librl
+* virtual_platforms (including rrr, channelio, llpi, virtual_devices)
+* fpgaenv APMs (except for an MIT 6.3.75 outlier which was causing warnings, and needs to be addressed.)
+
+Removed things that now live in leap:
+* project
+* application-env
+
+Removed some obsolete code:
+* old old dme/afu stuff.
+
+Stuff that still lives in platforms:
+* physical devices
+* hasim-fpga-ctrl (needs to be addressed).
+* fpga components
+* umf
+
+Michael P.

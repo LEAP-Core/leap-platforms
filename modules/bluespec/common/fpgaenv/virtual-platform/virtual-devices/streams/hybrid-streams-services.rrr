@@ -1,7 +1,0 @@
-service STREAMS
-{
-    server sw (cpp, method) <- hw (bsv, method)
-    {
-        method Print(in UINT32[32] streamID, in UINT32[32] stringID, in UINT32[32] payload0, in UINT32[32] payload1);
-    };
-};
