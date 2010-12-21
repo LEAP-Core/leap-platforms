@@ -380,7 +380,7 @@ void pipe_write(unsigned char handle, unsigned long long data)
 {   
     int bytes_written;
     unsigned char databuf[BDPI_CHUNK_BYTES];
-    unsigned int mask;
+    unsigned long long mask;
     int i;
     Channel *channel;
 

@@ -11971,3 +11971,15 @@ Stuff that still lives in platforms:
 * umf
 
 Michael P.
+
+----------
+pellauer    Date: Tue Dec 21 17:01:17 EST 2010  CSN: CSN-platforms-494
+                  Tue Dec 21 22:01:17 UTC 2010
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe
+ unix-pipe-device-bdpi.c   Locally Modified          493 
+
+
+* Applying Andrey Eefimov's patch to fix UMF_CHUNK_BYTES when set to 8.
+
