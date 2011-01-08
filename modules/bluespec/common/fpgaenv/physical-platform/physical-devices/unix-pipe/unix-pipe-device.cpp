@@ -145,8 +145,8 @@ UNIX_PIPE_DEVICE_CLASS::Init()
             argv[0] = new char[hw_exe.length() + 1];
             strcpy(argv[0], hw_exe.c_str());
 
-            // Wait for Bluesim license
-            argv[1] = "-w";
+            // Feed in the simulator arguments
+            argv[1] = SIMULATOR_ARGS;
 
             // Copy remaining argv pointers, including trailing NULL
             for (int i = 0; i < bluesimSwitches.BluesimArgc() + 1; i++)

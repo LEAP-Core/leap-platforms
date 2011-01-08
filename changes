@@ -11983,3 +11983,16 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/uni
 
 * Applying Andrey Eefimov's patch to fix UMF_CHUNK_BYTES when set to 8.
 
+
+----------
+kfleming    Date: Sat Jan  8 01:45:39 EST 2011  CSN: CSN-platforms-495
+                  Sat Jan  8 06:45:39 UTC 2011
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe
+ unix-pipe-device.awb      Locally Modified          494 
+ unix-pipe-device.cpp      Locally Modified          494 
+
+
+Added simulator arguments as a paramenter.  Verilog simulators don't
+expect -w as a command line argument.
