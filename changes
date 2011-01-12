@@ -11996,3 +11996,16 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/uni
 
 Added simulator arguments as a paramenter.  Verilog simulators don't
 expect -w as a command line argument.
+
+----------
+pellauer    Date: Wed Jan 12 16:46:09 EST 2011  CSN: CSN-platforms-496
+                  Wed Jan 12 21:46:09 UTC 2011
+
+
+Directory modules/bluespec/common/fpgaenv
+ fpga-environment.awb      Locally Removed           495 
+
+
+* Moving fpga-environmnet.awb to LEAP.
+
+Michael P.
