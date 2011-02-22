@@ -12053,3 +12053,23 @@ not an issue for XUPv5 and XUPv2, but other platforms may not have an
 available 100Mhz oscillator.  2) I need more robust flow control
 enable/disable as some platforms, including XUPv5, do not support HW
 flow control.
+
+----------
+kfleming    Date: Tue Feb 22 16:36:31 EST 2011  CSN: CSN-platforms-498
+                  Tue Feb 22 21:36:31 UTC 2011
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/serial/ublaze-serial
+ serial-device-ublaze.awb  Locally Modified          497 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/serial/physical-serial
+ opb_uartlite_core.vhd     Locally Modified          497 
+ uart-import.bsv           Locally Modified          497 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/serial/ucf
+ serial-device-ucf-xupv2.awb Locally Modified          497 
+ serial-device-ucf-xupv5.awb Locally Modified          497 
+
+
+
+Added support to enable/disable HW flow control for serial devices as an awb parameter

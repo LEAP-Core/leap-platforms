@@ -229,6 +229,8 @@ architecture IMP of OPB_UARTLITE_Core is
 
 begin  -- architecture IMP
 
+  -- here we are making an assumption about CTS
+  -- I think we can still drop data in some cases
   TX_Buffer_Empty <= TxBufferEmpty and not(CTS);
   RTS <= RxDataPresent;
   RX_Data_Present <= RxDataPresent;

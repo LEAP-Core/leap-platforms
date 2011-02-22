@@ -4,6 +4,7 @@ import LevelFIFO::*;
 
 `include "clocks_device.bsh"
 `include "physical_platform_utils.bsh"
+`include "serial_device_ucf.bsh"
 
 typedef Bit#(8) SerialWord;
         
@@ -146,9 +147,21 @@ import "BVI" OPB_UARTLITE_Core = module mkPrimitiveSerialDevice#(
 
 endmodule
 
-
-
 module mkSerialDevice#(Clock raw_clock, Reset raw_reset) (SERIAL_DEVICE);
+  SERIAL_DEVICE dev = ?;
+  if(`HW_FLOW_CONTROL == 1)
+    begin
+      dev <- mkSerialDeviceHWFlowControl();
+    end
+  else 
+    begin
+      dev <- mkSerialDeviceNoFlowControl();
+    end
+  return dev;
+endmodule
+
+
+module mkSerialDeviceHWFlowControl (SERIAL_DEVICE);
    
     //
     // Need a SerialWord data bits, reference clock rate, baudrate, use/not use parity bit, odd/even parity
@@ -176,6 +189,42 @@ module mkSerialDevice#(Clock raw_clock, Reset raw_reset) (SERIAL_DEVICE);
         method serial_rts = primitiveSerialDevice.serial_rts;
         method serial_cts = primitiveSerialDevice.serial_cts;
         method serial_dtr = primitiveSerialDevice.serial_dtr;
+    endinterface
+
+endmodule
+
+
+module mkSerialDeviceNoFlowControl (SERIAL_DEVICE);
+   
+    //
+    // Need a SerialWord data bits, reference clock rate, baudrate, use/not use parity bit, odd/even parity
+    // 
+    PRIMITIVE_SERIAL_DEVICE primitiveSerialDevice <- mkPrimitiveSerialDevice( 8, `MODEL_CLOCK_FREQ * 1000000, 115200, 0, 1);
+  
+    // Since we have no flow control, we need to drive CTS low
+    rule driveCTS;
+       primitiveSerialDevice.serial_cts(0);      
+    endrule
+
+    interface SERIAL_DRIVER driver;
+
+        method Action send(SerialWord data);
+            primitiveSerialDevice.send(data);
+        endmethod
+
+        method ActionValue#(SerialWord) receive();
+           let data <- primitiveSerialDevice.receive();
+           return data;
+        endmethod
+
+    endinterface
+
+    interface SERIAL_WIRES  wires;
+        method serial_rx = primitiveSerialDevice.serial_rx;
+        method serial_tx = primitiveSerialDevice.serial_tx;
+        method serial_rts = ?;
+        method serial_cts = ?;
+        method serial_dtr = ?;
     endinterface
 
 endmodule

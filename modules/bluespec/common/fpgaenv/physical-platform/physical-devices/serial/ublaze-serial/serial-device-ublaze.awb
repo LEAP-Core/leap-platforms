@@ -3,6 +3,7 @@
 %desc Serial Physical Device (uBlaze-based)
 
 %provides serial_device
+%provides serial_device_ucf
 
 %sources -t BSV -v PUBLIC serial-device.bsv
 

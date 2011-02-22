@@ -6,4 +6,7 @@
 
 %sources -t UCF -v PUBLIC serial-xupv5.ucf
 
+%param HW_FLOW_CONTROL 0 "Hardware Flow Control is Enabled"
+
+
  
