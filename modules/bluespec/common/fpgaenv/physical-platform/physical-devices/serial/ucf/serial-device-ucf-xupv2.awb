@@ -1,0 +1,9 @@
+
+%name Serial Physical Device XUPV2 UCF 
+%desc Serial Physical Device XUPV2 UCF 
+
+%provides serial_device_ucf
+
+%sources -t UCF -v PUBLIC serial-xupv2.ucf
+
+ 

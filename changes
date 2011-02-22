@@ -12009,3 +12009,47 @@ Directory modules/bluespec/common/fpgaenv
 * Moving fpga-environmnet.awb to LEAP.
 
 Michael P.
+
+----------
+kfleming    Date: Mon Feb 21 23:48:45 EST 2011  CSN: CSN-platforms-497
+                  Tue Feb 22 04:48:45 UTC 2011
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5
+ serial/                   Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/serial
+ xilinx.download           Locally Added               0 
+ xilinx.ut                 Locally Added               0 
+ xilinx-xup-serial.cpp     Locally Added               0 
+ xilinx.sdc                Locally Added               0 
+ xilinx.sdf                Locally Added               0 
+ xilinx-xup-serial.h       Locally Added               0 
+ xilinx.xst                Locally Added               0 
+ xilinx-xup-serial.awb     Locally Added               0 
+ xilinx-xup-serial.bsv     Locally Added               0 
+ xilinx-xup-serial.ucf     Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup/serial
+ xilinx-xup-serial.ucf     Locally Modified          496 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/serial/physical-serial
+ serial-device-physical.awb Locally Modified          496 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/serial
+ ucf/                      Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/serial/ucf
+ serial-xupv5.ucf          Locally Added               0 
+ serial-device-ucf-xupv2.awb Locally Added               0 
+ serial-device-ucf-xupv5.awb Locally Added               0 
+ serial-xupv2.ucf          Locally Added               0 
+
+
+Added xupv5 serial device.  Since serial is a general device, I
+reorganized it to depend on a platform-specific ucf.  Some more work
+is needed.  1) we need to ensure a constant 100Mhz clock - this is
+not an issue for XUPv5 and XUPv2, but other platforms may not have an
+available 100Mhz oscillator.  2) I need more robust flow control
+enable/disable as some platforms, including XUPv5, do not support HW
+flow control.

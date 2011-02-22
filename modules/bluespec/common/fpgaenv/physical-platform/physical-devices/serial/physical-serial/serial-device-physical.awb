@@ -4,6 +4,8 @@
 
 %provides serial_device
 
+%requires serial_device_ucf
+
 %sources -t BSV -v PUBLIC uart-import.bsv
 
 %sources -t VHD   -v PRIVATE baudrate.vhd
