@@ -15,7 +15,7 @@ driver:
 
 .PHONY install:
 install:
-	mkdir -p $(PREFIX)/bin $(PREFIX)/dev $(PREFIX)/kernel $(PREFIX)/reservations
+	mkdir -p $(PREFIX)/bin $(PREFIX)/dev $(PREFIX)/kernel $(PREFIX)/reservations $(PREFIX)/local
 	install --owner=root --group=root --mode=4555 hasim-fpga-ctrl $(PREFIX)/bin
 	install --owner=root --group=root --mode=555 init-hasim-fpga /etc/init.d/hasim-fpga
 	chkconfig hasim-fpga on

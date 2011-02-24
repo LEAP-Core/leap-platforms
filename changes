@@ -12126,3 +12126,15 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/altera_jtag/jtag/arr
  altera-arriaIIgx_dev-jtag.awb Locally Modified          499 
 
 Fixed bit/"bit" typo in apms
+
+----------
+kfleming    Date: Thu Feb 24 18:52:43 EST 2011  CSN: CSN-platforms-501
+                  Thu Feb 24 23:52:43 UTC 2011
+
+
+Directory drivers/linux/hasim
+ hasim-fpga-ctrl.c         Locally Modified          500 
+ Makefile                  Locally Modified          500 
+
+
+Updated hasim-fpga-ctrl to have a hook for an arbitrary configuration program.

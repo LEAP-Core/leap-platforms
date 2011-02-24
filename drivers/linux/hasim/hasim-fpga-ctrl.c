@@ -64,6 +64,7 @@ static int req_reset = 0;
 static int req_set_signature = 0;
 static int req_get_signature = 0;
 static int req_get_state = 0;
+static int req_configure = 0;
 static int force = 0;
 static int query_status = 0;
 
@@ -587,6 +588,25 @@ void program_pci()
     set_fpga_device_access(0, 0);
 }
 
+//
+// configure --
+//   Runs an FPGA specific configuration script located in the $(PREFIX)/local directory.
+//
+//   Tasks:
+//     - Run arbitrary system configuration script for specific FPGA
+//
+void configure(const char* script)
+{
+    char *command = (char*)malloc(sizeof(char)*(strlen(PREFIX)+strlen("local")+strlen(script)));
+    strcpy(command,PREFIX"/local/");
+    strcat(command,script);
+    change_current_reservation(STATE_ACTIVE, NULL);
+    set_prog_cable_access(0, 0);
+    set_fpga_device_access(1, 0);
+    execl(command,NULL);
+    // we don't return from here
+}
+
 
 //
 // activate_pci --
@@ -660,11 +680,13 @@ int main(int argc, char *argv[])
     int opt;
     int opt_idx;
     char *signature = NULL;
+    char *script    = NULL;
 
     enum OPTS
     {
         OPT_DUMMY,          // 0 position -- not used
-        OPT_SIGNATURE
+        OPT_SIGNATURE,
+        OPT_CONFIGURE_DEVICE
     };
 
     while (1)
@@ -681,6 +703,7 @@ int main(int argc, char *argv[])
             { "setsignature", required_argument, NULL, OPT_SIGNATURE },
             { "getsignature", no_argument, &req_get_signature, 1 },
             { "getstate", no_argument, &req_get_state, 1 },
+            { "configure", required_argument, NULL, OPT_CONFIGURE_DEVICE },
             { 0, 0, 0, 0 }
         };
 
@@ -699,6 +722,12 @@ int main(int argc, char *argv[])
             if (signature == NULL) error("strdup() failed");
             break;
 
+          case OPT_CONFIGURE_DEVICE:
+            req_configure = 1;
+            script = strdup(optarg);
+            if (script == NULL) error("strdup() failed");
+            break;
+
           default:
             usage();
         }
@@ -715,6 +744,7 @@ int main(int argc, char *argv[])
         req_set_signature +
         req_get_signature +
         req_get_state +
+        req_configure +
         query_status != 1)
     {
         usage();
@@ -728,6 +758,7 @@ int main(int argc, char *argv[])
     if (req_set_signature) change_current_reservation(STATE_PROGRAM, signature);
     if (req_get_signature) current_reservation_state(stdout, SHOW_STATE_SIGNATURE);
     if (req_get_state) current_reservation_state(stdout, SHOW_STATE_STATUS);
+    if (req_configure) configure(script);
     if (query_status) current_reservation_state(stdout, SHOW_STATE_ALL);
 
     exit(0);
