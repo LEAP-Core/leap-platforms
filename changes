@@ -12073,3 +12073,56 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ser
 
 
 Added support to enable/disable HW flow control for serial devices as an awb parameter
+
+----------
+kfleming    Date: Thu Feb 24 15:54:45 EST 2011  CSN: CSN-platforms-500
+                  Thu Feb 24 20:54:45 UTC 2011
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/serial
+ xilinx-xup-serial.awb     Locally Modified          499 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/pcie
+ xilinx-xup-pcie.awb       Locally Modified          499 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/jtag
+ xilinx-xup-jtag.awb       Locally Modified          499 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/pcie-sata
+ xilinx-xup-pcie-sata.awb  Locally Modified          499 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/sata
+ xilinx-xup-sata.awb       Locally Modified          499 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup/serial
+ xilinx-xup-serial.awb     Locally Modified          499 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup/jtag
+ xilinx-xup-jtag.awb       Locally Modified          499 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/jtag
+ htg-v5-jtag.awb           Locally Modified          499 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-disabled
+ htg-v5-pcie-disabled.awb  Locally Modified          499 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled
+ htg-v5-pcie-enabled-synplify.awb Locally Modified          499 
+ htg-v5-pcie-enabled.awb   Locally Modified          499 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/airblue_cycloneiii
+ airblue_cycloneiii-jtag.awb Locally Modified          499 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/null
+ null-physical-platfrom.awb Locally Modified          499 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/altera_jtag/jtag/de2
+ altera-de2-jtag.awb       Locally Modified          499 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/altera_jtag/jtag/de3
+ altera-de3-jtag.awb       Locally Modified          499 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/altera_jtag/jtag/arriaII_dev
+ altera-arriaIIgx_dev-jtag.awb Locally Modified          499 
+
+Fixed bit/"bit" typo in apms

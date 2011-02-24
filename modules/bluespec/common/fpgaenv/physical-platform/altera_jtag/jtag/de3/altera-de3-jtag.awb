@@ -10,7 +10,7 @@
 %sources -t SDF -v PUBLIC jtag.sdf
 %sources -t SDC -v PUBLIC jtag.sdc
 
-%param --global MAKE_ALL_TARGET      bit       "Target of 'make all'.  Most likely bit, exe or vexe."
+%param --global MAKE_ALL_TARGET "bit"       "Target of 'make all'.  Most likely bit, exe or vexe."
 
 %param FPGA_PART_ALTERA   "???"             "FPGA Part ID (XST)"
 %param FPGA_TECHNOLOGY    "STRATIXIII"      "FPGA Technology (Synplify)"

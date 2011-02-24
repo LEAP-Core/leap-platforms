@@ -13,6 +13,6 @@
 %public  htg-v5-pcie-disabled.bsv
 %private htg-v5-pcie-disabled.ucf
 
-%param --global MAKE_ALL_TARGET      bit       "Target of 'make all'.  Most likely bit, exe or vexe."
+%param --global MAKE_ALL_TARGET "bit"       "Target of 'make all'.  Most likely bit, exe or vexe."
 
 %param MAP_OPTIONS   "-global_opt on"    "Extra Xilinx Map Options"
