@@ -12163,3 +12163,14 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/sata
 
 
 Updated sata platform to export XUPV5 FPGA_PLATFORM
+
+----------
+kfleming    Date: Fri Feb 25 12:13:43 EST 2011  CSN: CSN-platforms-504
+                  Fri Feb 25 17:13:43 UTC 2011
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/pcie-sata
+ xilinx-xup-pcie-sata.awb  Locally Modified          503 
+
+
+Added FPGA_PLATFORM to pcie-sata platform.
