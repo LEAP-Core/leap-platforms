@@ -12138,3 +12138,17 @@ Directory drivers/linux/hasim
 
 
 Updated hasim-fpga-ctrl to have a hook for an arbitrary configuration program.
+
+----------
+kfleming    Date: Thu Feb 24 19:43:42 EST 2011  CSN: CSN-platforms-502
+                  Fri Feb 25 00:43:42 UTC 2011
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/pcie
+ xilinx-xup-pcie.awb       Locally Modified          501 
+
+
+Added SOFT_RESET property to pcie awb, freeing us from modifying the
+run script for those platforms which do not support soft reset.
+
+Finally.
