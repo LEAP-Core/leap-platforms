@@ -12152,3 +12152,14 @@ Added SOFT_RESET property to pcie awb, freeing us from modifying the
 run script for those platforms which do not support soft reset.
 
 Finally.
+
+----------
+kfleming    Date: Fri Feb 25 11:35:18 EST 2011  CSN: CSN-platforms-503
+                  Fri Feb 25 16:35:18 UTC 2011
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/sata
+ xilinx-xup-sata.awb       Locally Modified          502 
+
+
+Updated sata platform to export XUPV5 FPGA_PLATFORM
