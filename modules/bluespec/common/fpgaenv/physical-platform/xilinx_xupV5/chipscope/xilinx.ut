@@ -1,0 +1,3 @@
+-w
+-g DebugBitstream:No
+-g TdoPin:PullNone

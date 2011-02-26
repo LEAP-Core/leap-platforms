@@ -1,0 +1,11 @@
+%name Chipscope Device
+%desc Chipscope Device 
+
+%provides chipscope_device
+
+%sources -t BSV -v PUBLIC XUPV5_CHIPSCOPES.bsv
+
+%sources -t NGC -v PRIVATE icon.ngc
+%sources -t NGC -v PRIVATE ila.ngc
+%sources -t NGC -v PRIVATE shared_vio.ngc
+%sources -t VERILOG -v PRIVATE chipscope_ip.v

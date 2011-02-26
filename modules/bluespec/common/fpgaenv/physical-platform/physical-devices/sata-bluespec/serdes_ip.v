@@ -196,6 +196,11 @@ module serdes_ip #
     wire            rxrecclk_dcm2_locked_i;
     wire            rxrecclk_dcm2_reset_i;
     wire            tile0_rxrecclk1_to_dcm_i;
+
+    //--------------------------- Register Declarations  ---------------------------------
+
+    reg [9:0]       rst_cnt;
+    reg             rst_state; 
            
     //--------------------------------- User Clocks ---------------------------
     
@@ -285,7 +290,7 @@ module serdes_ip #
 
     // Wire all PLLLKDET signals to the top level as output ports
    assign  PLLLKDET_OUT = tile0_plllkdet_i;
-   assign  tile0_gtpreset_i = !gtpreset_n_in;
+   assign  tile0_gtpreset_i = rst_state;
    
    assign  rxcharisk0_out = tile0_rxcharisk0_i;
    assign  rxdisperr0_out = tile0_rxdisperr0_i;
@@ -391,7 +396,31 @@ module serdes_ip #
         .TILE0_TXPOLARITY0_IN           (tile0_txpolarity0_i),
         .TILE0_TXPOLARITY1_IN           (tile0_txpolarity1_i)
     );
-   
+
+   always @(posedge grefclk_i)
+     begin
+        if (!gtpreset_n_in)
+          begin
+             rst_cnt <= 10'h000; // rst for 256 cycles
+             rst_state <= 1'b0; // rst
+          end	
+        else
+          begin
+             if (!tile0_plllkdet_i || rst_state) // count up if during reset of pll not detected
+               begin
+                  rst_cnt <= rst_cnt + 1;
+               end
+             else // reset counter if pll detected
+               begin
+                  rst_cnt <= 10'h00;
+               end
+             if (rst_cnt == 10'h3ff)
+               begin
+                  rst_state <= !rst_state;
+               end
+          end // else: !if(!gtpreset_n_in)
+     end // always @ (posedge grefclk_i)   
+
 endmodule
 
 

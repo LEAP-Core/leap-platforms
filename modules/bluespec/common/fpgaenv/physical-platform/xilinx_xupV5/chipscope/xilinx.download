@@ -1,0 +1,6 @@
+setMode -bscan
+setCable -p auto
+identify
+assignfile -p @FPGA_POSITION@ -file .xilinx/@APM_NAME@_par.bit
+program -p @FPGA_POSITION@
+quit

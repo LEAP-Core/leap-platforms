@@ -4,14 +4,9 @@
 %provides sata_device
 
 %sources -t BSV -v PUBLIC DiffClock.bsv
-%sources -t BSV -v PUBLIC XUPV5_CHIPSCOPES.bsv
 %sources -t BSV -v PUBLIC XUPV5_SERDES.bsv
 %sources -t BSV -v PUBLIC XUPV5_SERDES_UG.bsv
 
-%sources -t NGC -v PRIVATE icon.ngc
-%sources -t NGC -v PRIVATE ila.ngc
-%sources -t NGC -v PRIVATE shared_vio.ngc
-%sources -t VERILOG -v PRIVATE chipscope_ip.v
 %sources -t VERILOG -v PRIVATE diff_clock.v
 %sources -t VERILOG -v PRIVATE mgt_usrclk_source.v
 %sources -t VERILOG -v PRIVATE serdes_ip.v
