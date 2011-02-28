@@ -27,6 +27,16 @@ function XUPV5_SERDES_WORD serdesWord(XUPV5_SERDES_BYTE msb, XUPV5_SERDES_BYTE l
    return XUPV5_SERDES_WORD {msb: msb, lsb: lsb};
 endfunction
 
+function Maybe#(t) extractData(XUPV5_SERDES_WORD word)
+   provisos (Bits#(t,16));
+   let retval = tagged Invalid;
+   if(!word.msb.isK && !word.lsb.isK) 
+     begin
+       retval = tagged Valid (unpack({word.msb.data, word.lsb.data}));
+     end
+   return retval;
+endfunction
+
 function Tuple2#(Bit#(2), Bit#(16)) packTxWord (XUPV5_SERDES_WORD tx_word);
    Bit#(2)  txcharisk = {pack(tx_word.msb.isK), pack(tx_word.lsb.isK)};
    Bit#(16) txdata = {tx_word.msb.data, tx_word.lsb.data};

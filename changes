@@ -12174,3 +12174,14 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/pcie-sa
 
 
 Added FPGA_PLATFORM to pcie-sata platform.
+
+----------
+kfleming    Date: Mon Feb 28 13:42:00 EST 2011  CSN: CSN-platforms-506
+                  Mon Feb 28 18:42:00 UTC 2011
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/sata-bluespec
+ XUPV5_SERDES.bsv          Locally Modified          505 
+
+
+Added a function for processing SERDES data. 
