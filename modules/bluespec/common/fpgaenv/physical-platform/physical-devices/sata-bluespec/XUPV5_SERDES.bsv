@@ -43,15 +43,15 @@ function Tuple2#(Bit#(2), Bit#(16)) packTxWord (XUPV5_SERDES_WORD tx_word);
    return tuple2(txcharisk, txdata);
 endfunction
 
-function XUPV5_SERDES_WORD unpackRxWord (Bit#(2) is_error, Bit#(2) is_k, Bit#(16) rx_data);
+function XUPV5_SERDES_WORD unpackRxWord (Bit#(2) is_error, Bit#(2) is_k, Bit#(16) rx_data, XUPV5_SERDES_BYTE comma);
    XUPV5_SERDES_BYTE rx0;
    XUPV5_SERDES_BYTE rx1;
    if (is_error[0] == 1)
-      rx0 = serdesControl(0);
+      rx0 = comma;
    else
       rx0 = XUPV5_SERDES_BYTE{isK: unpack(is_k[0]), data: rx_data[7:0]};
    if (is_error[1] == 1)
-      rx1 = serdesControl(0);
+      rx1 = comma;
    else
       rx1 = XUPV5_SERDES_BYTE{isK: unpack(is_k[1]), data: rx_data[15:8]};
    return serdesWord(rx1, rx0);
@@ -197,78 +197,59 @@ module mkXUPV5_SERDES_DEVICE#(XUPV5_SERDES_BYTE comma, // comma definition
       ug_device.txcharisk1_in(txcharisk);
    endrule
       
-   rule xfer_recv_data0_odd (rx0_odd_aligned);
-      let rx_word = unpackRxWord(ug_device.rxdisperr0_out, ug_device.rxcharisk0_out, ug_device.rxdata0_out);
+//    rule xfer_recv_data0 (True);
+//       let rx_word = unpackRxWord(ug_device.rxdisperr0_out, ug_device.rxcharisk0_out, ug_device.rxdata0_out);
+//       recv_data0_lsb.enq(rx_word.lsb);
+//       recv_data0_msb.enq(rx_word.msb);
+//    endrule
+   
+
+   rule xfer_recv_data0 (True);
+      let rx_word = unpackRxWord(ug_device.rxdisperr0_out, ug_device.rxcharisk0_out, ug_device.rxdata0_out, comma);
+      let lsb_not_comma = rx_word.lsb != comma;
+      let msb_not_comma = rx_word.msb != comma;
+      Maybe#(XUPV5_SERDES_BYTE) fst_byte = (lsb_not_comma) ? tagged Valid rx_word.lsb : (msb_not_comma) ? tagged Valid rx_word.msb : tagged Invalid;
+      Maybe#(XUPV5_SERDES_BYTE) snd_byte = (lsb_not_comma && msb_not_comma) ? tagged Valid rx_word.msb : tagged Invalid; 
       // swap q for odd aligned
-      let lsb_q = recv_data0_msb;
-      let msb_q = recv_data0_lsb;
-      let lsb_not_comma = rx_word.lsb != comma;
-      let msb_not_comma = rx_word.msb != comma;
-      if (lsb_not_comma) // if first is comma, assume the 2nd will be too and don't enq anything (skip commas)
+      let fst_q = rx0_odd_aligned ? recv_data0_msb : recv_data0_lsb; 
+      let snd_q = rx0_odd_aligned ? recv_data0_lsb : recv_data0_msb;
+      if (isValid(fst_byte)) 
          begin
-            lsb_q.enq(rx_word.lsb);
+            fst_q.enq(fromMaybe(?,fst_byte));
          end
-      if (lsb_not_comma && msb_not_comma) 
+      if (isValid(snd_byte)) // a new pair should only happen when both are not comma
          begin
-            msb_q.enq(rx_word.msb);
+            snd_q.enq(fromMaybe(?,snd_byte));
          end
-      rx0_odd_aligned <= !lsb_not_comma || msb_not_comma;
+      if (unpack(pack(lsb_not_comma)^pack(msb_not_comma)))
+         begin
+            rx0_odd_aligned <= !rx0_odd_aligned; // if only enq one element, flip this variable
+         end
    endrule
-
-   rule xfer_recv_data0_not_odd (!rx0_odd_aligned);
-      let rx_word = unpackRxWord(ug_device.rxdisperr0_out, ug_device.rxcharisk0_out, ug_device.rxdata0_out);
-      let lsb_not_comma = rx_word.lsb != comma;
+   
+   rule xfer_recv_data1 (True);
+      let rx_word = unpackRxWord(ug_device.rxdisperr1_out, ug_device.rxcharisk1_out, ug_device.rxdata1_out, comma);
+      let lsb_not_comma = rx_word.lsb != comma; // swapped because odd aligned
       let msb_not_comma = rx_word.msb != comma;
-      let new_rx0_odd_aligned = !lsb_not_comma && msb_not_comma; // odd aligned
-      let msb_q = new_rx0_odd_aligned ? recv_data0_lsb : recv_data0_msb;
-      let lsb_q = new_rx0_odd_aligned ? recv_data0_msb : recv_data0_lsb;
-      if (lsb_not_comma && msb_not_comma) // only enq lsb if both not commas
-         begin
-            lsb_q.enq(rx_word.lsb);
-         end
-      if (msb_not_comma)
-         begin
-            msb_q.enq(rx_word.msb);
-         end
-      rx0_odd_aligned <= new_rx0_odd_aligned;
-   endrule
-
-
-   rule xfer_recv_data1_odd (rx1_odd_aligned);
-      let rx_word = unpackRxWord(ug_device.rxdisperr1_out, ug_device.rxcharisk1_out, ug_device.rxdata1_out);
+      Maybe#(XUPV5_SERDES_BYTE) fst_byte = (lsb_not_comma) ? tagged Valid rx_word.lsb : (msb_not_comma) ? tagged Valid rx_word.msb : tagged Invalid;
+      Maybe#(XUPV5_SERDES_BYTE) snd_byte = (lsb_not_comma && msb_not_comma) ? tagged Valid rx_word.msb : tagged Invalid; 
       // swap q for odd aligned
-      let lsb_q = recv_data1_msb;
-      let msb_q = recv_data1_lsb;
-      let lsb_not_comma = rx_word.lsb != comma;
-      let msb_not_comma = rx_word.msb != comma;
-      if (lsb_not_comma) // if first is comma, assume the 2nd will be too and don't enq anything (skip commas)
+      let fst_q = rx1_odd_aligned ? recv_data1_msb : recv_data1_lsb; 
+      let snd_q = rx1_odd_aligned ? recv_data1_lsb : recv_data1_msb;
+      if (isValid(fst_byte)) 
          begin
-            lsb_q.enq(rx_word.lsb);
+            fst_q.enq(fromMaybe(?,fst_byte));
          end
-      if (lsb_not_comma && msb_not_comma) 
+      if (isValid(snd_byte)) // a new pair should only happen when both are not comma
          begin
-            msb_q.enq(rx_word.msb);
+            snd_q.enq(fromMaybe(?,snd_byte));
          end
-      rx1_odd_aligned <= !lsb_not_comma || msb_not_comma;
+      if (unpack(pack(lsb_not_comma)^pack(msb_not_comma)))
+         begin
+            rx1_odd_aligned <= !rx1_odd_aligned; // if only enq one element, flip this variable
+         end
    endrule
-
-   rule xfer_recv_data1_not_odd (!rx1_odd_aligned);
-      let rx_word = unpackRxWord(ug_device.rxdisperr1_out, ug_device.rxcharisk1_out, ug_device.rxdata1_out);
-      let lsb_not_comma = rx_word.lsb != comma;
-      let msb_not_comma = rx_word.msb != comma;
-      let new_rx1_odd_aligned = !lsb_not_comma && msb_not_comma; // odd aligned
-      let msb_q = new_rx1_odd_aligned ? recv_data1_lsb : recv_data1_msb;
-      let lsb_q = new_rx1_odd_aligned ? recv_data1_msb : recv_data1_lsb;
-      if (lsb_not_comma && msb_not_comma) // only enq lsb if both not commas
-         begin
-            lsb_q.enq(rx_word.lsb);
-         end
-      if (msb_not_comma)
-         begin
-            msb_q.enq(rx_word.msb);
-         end
-      rx1_odd_aligned <= new_rx1_odd_aligned;
-   endrule   
+   
 
    interface XUPV5_SERDES_WIRES wires;
       method serdes_clk_n = diff_clk_device.clk_n_in;
