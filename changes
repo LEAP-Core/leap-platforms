@@ -12185,3 +12185,15 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/sat
 
 
 Added a function for processing SERDES data. 
+
+----------
+kfleming    Date: Wed Mar 16 11:07:26 EDT 2011  CSN: CSN-platforms-508
+                  Wed Mar 16 15:07:26 UTC 2011
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express-bluespec
+ Bridge.bsv                Locally Modified          507 
+
+
+
+Throw PCIE wires across a null crossing.

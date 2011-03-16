@@ -29,9 +29,16 @@ module [Module] mkBridge#(Clock pci_sys_clk, Clock refclk_100, Reset pci_sys_res
 				                       ,pci_sys_reset_n
 				                       ,refclk_100);
 
+
    // Let's blink some lights for fun
    Reg#(Bit#(32)) count <- mkReg(0);
    Reg#(Bit#(1)) led <- mkReg(0); 
+
+   let ledsWire <- mkNullCrossingWire(noClock,zeroExtend({led
+                            ,pack(piov5.isLinkUp)
+			    ,pack(piov5.isOutOfReset)
+			    ,pack(piov5.isClockAdvancing)               
+			    }));
 
    rule tick;
      if(count == `MODEL_CLOCK_FREQ*1000000) 
@@ -47,11 +54,7 @@ module [Module] mkBridge#(Clock pci_sys_clk, Clock refclk_100, Reset pci_sys_res
 
    interface pcie = piov5.pcie;
 
-   method leds = zeroExtend({led
-                            ,pack(piov5.isLinkUp)
-			    ,pack(piov5.isOutOfReset)
-			    ,pack(piov5.isClockAdvancing)               
-			    });
+   method leds = ledsWire;
 
    method req = piov5.req;
    method resp = piov5.resp;
