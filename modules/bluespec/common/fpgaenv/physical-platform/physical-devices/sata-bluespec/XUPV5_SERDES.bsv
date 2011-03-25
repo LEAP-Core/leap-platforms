@@ -144,6 +144,8 @@ module mkXUPV5_SERDES_DEVICE#(XUPV5_SERDES_BYTE comma, // comma definition
    Reg#(Bool)     rx1_odd_aligned  <- mkReg(False, reset_by rxusrrst1, clocked_by rxusrclk1); 
 
    XUPV5_SERDES_WORD commas = serdesWord(comma, comma); 
+   let idle = 28;
+   XUPV5_SERDES_WORD idles = serdesWord(serdesControl(idle), serdesControl(idle)); 
    
    // should use bram fifos when put on awb
    FIFOF#(XUPV5_SERDES_WORD) send_data0     <- mkSizedFIFOF(10, reset_by txusrrst, clocked_by txusrclk);
@@ -172,9 +174,13 @@ module mkXUPV5_SERDES_DEVICE#(XUPV5_SERDES_BYTE comma, // comma definition
             tx_word = packTxWord(send_data0.first());
             send_data0.deq();
          end
-      else
+      else if(send_comma)
          begin
             tx_word = packTxWord(commas);
+         end            
+      else
+         begin
+            tx_word = packTxWord(idles);
          end            
       match {.txcharisk, .txdata} = tx_word;
       ug_device.txdata0_in(txdata);
@@ -188,10 +194,15 @@ module mkXUPV5_SERDES_DEVICE#(XUPV5_SERDES_BYTE comma, // comma definition
             tx_word = packTxWord(send_data1.first());
             send_data1.deq();
          end
-      else
+      else if(send_comma)
          begin
             tx_word = packTxWord(commas);
          end            
+      else
+         begin
+            tx_word = packTxWord(idles);
+         end            
+
       match {.txcharisk, .txdata} = tx_word;
       ug_device.txdata1_in(txdata);
       ug_device.txcharisk1_in(txcharisk);

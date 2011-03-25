@@ -12197,3 +12197,15 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci
 
 
 Throw PCIE wires across a null crossing.
+
+----------
+kfleming    Date: Fri Mar 25 14:14:56 EDT 2011  CSN: CSN-platforms-509
+                  Fri Mar 25 18:14:56 UTC 2011
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/sata-bluespec
+ serdes_ip.v               Locally Modified          508 
+ XUPV5_SERDES.bsv          Locally Modified          508 
+
+
+Increased the timeout for synchronization, tweaked the comma/idle values to improve transmission to the TLK2701

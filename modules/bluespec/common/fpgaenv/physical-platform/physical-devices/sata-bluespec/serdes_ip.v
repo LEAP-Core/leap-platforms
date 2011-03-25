@@ -199,7 +199,7 @@ module serdes_ip #
 
     //--------------------------- Register Declarations  ---------------------------------
 
-    reg [9:0]       rst_cnt;
+    reg [19:0]       rst_cnt;
     reg             rst_state; 
            
     //--------------------------------- User Clocks ---------------------------
@@ -401,7 +401,7 @@ module serdes_ip #
      begin
         if (!gtpreset_n_in)
           begin
-             rst_cnt <= 10'h000; // rst for 256 cycles
+             rst_cnt <= 20'h000; // rst for 256 cycles
              rst_state <= 1'b0; // rst
           end	
         else
@@ -412,11 +412,15 @@ module serdes_ip #
                end
              else // reset counter if pll detected
                begin
-                  rst_cnt <= 10'h00;
+                  rst_cnt <= 20'h00;
                end
-             if (rst_cnt == 10'h3ff)
+             if (rst_cnt == 20'h3ff)
                begin
                   rst_state <= !rst_state;
+               end
+             else
+	       begin
+                  rst_state <= rst_state;
                end
           end // else: !if(!gtpreset_n_in)
      end // always @ (posedge grefclk_i)   
