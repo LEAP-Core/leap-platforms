@@ -12209,3 +12209,24 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/sat
 
 
 Increased the timeout for synchronization, tweaked the comma/idle values to improve transmission to the TLK2701
+
+----------
+mcadler     Date: Wed Apr  6 16:22:06 EDT 2011  CSN: CSN-platforms-511
+                  Wed Apr  6 20:22:06 UTC 2011
+
+
+Directory drivers/linux/hasim
+ hasim-fpga-ctrl.c         Locally Removed           510 
+ leap-fpga-ctrl.c          Locally Added               - 
+ Makefile                  Locally Modified          510 
+ init-hasim-fpga           Locally Removed           510 
+ init-leap-fpga            Locally Added               - 
+
+- Fix gaping security holes in --command:
+  - Don't allow .. anywhere in the string (even in the middle of a file name)
+  - Don't allow ~ anywhere in the string
+  - Check for unreasonably long script name before calling malloc
+- Rename from hasim to leap
+- PREFIX now set only in Makefile
+
+Installation still defaults to /usr/hasim but it will now be easier to change.

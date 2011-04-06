@@ -1,5 +1,5 @@
 //
-// hasim-fpga-ctrl
+// leap-fpga-ctrl
 //
 //   Control the user's ability to program an FPGA.  This program will be
 //   setuid root so it can enable/disable buses, change protections on
@@ -14,14 +14,13 @@
 //   Author: Michael Adler
 //
 
-#define PREFIX "/usr/hasim/"
-#define FPGA_DEV   PREFIX "dev/fpga0"
-#define PCIE_POWER PREFIX "dev/pcie_fpga_power0"
-#define USB_PROG   PREFIX "dev/usb_programming_cable0"
-#define RES_FILE   PREFIX "reservations/fpga0"
+#define FPGA_DEV   PREFIX "/dev/fpga0"
+#define PCIE_POWER PREFIX "/dev/pcie_fpga_power0"
+#define USB_PROG   PREFIX "/dev/usb_programming_cable0"
+#define RES_FILE   PREFIX "/reservations/fpga0"
 
 #define KERNEL_MOD      "pchnl"
-#define KERNEL_MOD_PATH PREFIX "kernel/" KERNEL_MOD ".ko"
+#define KERNEL_MOD_PATH PREFIX "/kernel/" KERNEL_MOD ".ko"
 #define KERNEL_DEV      "/dev/" KERNEL_MOD
 
 #include <stdio.h>
@@ -72,7 +71,7 @@ static int query_status = 0;
 
 void error(char *msg)
 {
-    fprintf(stderr, "hasim-fpga-ctrl: %s\n", msg);
+    fprintf(stderr, "leap-fpga-ctrl: %s\n", msg);
     exit(1);
 }
 
@@ -188,7 +187,7 @@ void change_current_reservation(FPGA_STATE_T newState, char *newSignature)
             // Adding a signature.  Old state must also be PROGRAM.
             if (oldState != STATE_PROGRAM)
             {
-                fprintf(stderr, "hasim-fpga-ctrl: Must be in PROGRAM state to add a signature\n");
+                fprintf(stderr, "leap-fpga-ctrl: Must be in PROGRAM state to add a signature\n");
                 exit(1);
             }
             strncpy(signature, newSignature, sizeof(signature));
@@ -221,13 +220,13 @@ void change_current_reservation(FPGA_STATE_T newState, char *newSignature)
         {
             error("Failed to map owner UID to name");
         }
-        fprintf(stderr, "hasim-fpga-ctrl: FPGA locked by %s\n", pw->pw_name);
+        fprintf(stderr, "leap-fpga-ctrl: FPGA locked by %s\n", pw->pw_name);
         exit(1);
     }
 
     if ((oldState == STATE_FREE) && (newState > STATE_RESERVED))
     {
-        fprintf(stderr, "hasim-fpga-ctrl: Reservation required\n");
+        fprintf(stderr, "leap-fpga-ctrl: Reservation required\n");
         exit(1);
     }
     else
@@ -385,7 +384,7 @@ void set_pci_state(FPGA_STATE_T state)
         //
         if (kernel_driver_is_loaded())
         {
-            printf("hasim-fpga-ctrl: Unloading kernel driver...\n");
+            printf("leap-fpga-ctrl: Unloading kernel driver...\n");
             do_system("/sbin/rmmod", KERNEL_MOD_PATH);
         }
     }
@@ -415,14 +414,14 @@ void set_pci_state(FPGA_STATE_T state)
         if ((pciState == req) && ! hadError)
         {
             // Done
-            printf("hasim-fpga-ctrl: PCIe bus is %s...\n",
+            printf("leap-fpga-ctrl: PCIe bus is %s...\n",
                    (req == '0') ? "off" : "on");
             break;
         }
 
         if (retries == 0)
         {
-            printf("hasim-fpga-ctrl: Turing %s PCIe bus...\n",
+            printf("leap-fpga-ctrl: Turing %s PCIe bus...\n",
                    (req == '0') ? "off" : "on");
         }
 
@@ -433,7 +432,7 @@ void set_pci_state(FPGA_STATE_T state)
         if (f == -1) error("Failed to open PCIe power control file " PCIE_POWER);
         if (write(f, &req, 1) != 1)
         {
-            fprintf(stderr, "hasim-fpga-ctrl: errno = %d\n", errno);
+            fprintf(stderr, "leap-fpga-ctrl: errno = %d\n", errno);
             fprintf(stderr, "Write failed to PCIe power control file %s\n", PCIE_POWER);
             hadError = 1;
         }
@@ -465,7 +464,7 @@ void set_pci_state(FPGA_STATE_T state)
         //
         if (! kernel_driver_is_loaded())
         {
-            printf("hasim-fpga-ctrl: Loading kernel driver...\n");
+            printf("leap-fpga-ctrl: Loading kernel driver...\n");
             do_system("/sbin/insmod", KERNEL_MOD_PATH);
         }
 
@@ -510,11 +509,11 @@ void set_prog_cable_access(int user_access, int quiet)
         // Protection isn't what we want.  Change it.
         if (! quiet)
         {
-            printf("hasim-fpga-ctrl: %s programming cable...\n", msg);
+            printf("leap-fpga-ctrl: %s programming cable...\n", msg);
         }
         if (chmod(USB_PROG, prot) == -1)
         {
-            fprintf(stderr, "hasim-fpga-ctrl: Failed to change protection of %s\n", USB_PROG);
+            fprintf(stderr, "leap-fpga-ctrl: Failed to change protection of %s\n", USB_PROG);
             exit(1);
         }
     }
@@ -542,11 +541,11 @@ void set_fpga_device_access(int user_access, int quiet)
         // Protection isn't what we want.  Change it.
         if (! quiet)
         {
-            printf("hasim-fpga-ctrl: %s FPGA device access...\n", msg);
+            printf("leap-fpga-ctrl: %s FPGA device access...\n", msg);
         }
         if (chmod(FPGA_DEV, prot) == -1)
         {
-            fprintf(stderr, "hasim-fpga-ctrl: Failed to change protection of %s\n", FPGA_DEV);
+            fprintf(stderr, "leap-fpga-ctrl: Failed to change protection of %s\n", FPGA_DEV);
             exit(1);
         }
     }
@@ -597,9 +596,30 @@ void program_pci()
 //
 void configure(const char* script)
 {
-    char *command = (char*)malloc(sizeof(char)*(strlen(PREFIX)+strlen("local")+strlen(script)));
-    strcpy(command,PREFIX"/local/");
-    strcat(command,script);
+    char *command;
+    struct stat statb;
+
+    size_t len = strlen(script);
+    if (len > 1024) error("configure script path too long");
+
+    // Privilege escalation attempt.  These tests are conservative, disallowing
+    // potentially devious patterns anywhere in the string.
+    if (strstr(script, "..") != NULL) error("dream on");
+    if (strstr(script, "~") != NULL) error("dream on");
+
+    command = (char*)malloc(sizeof(char) *
+                            (strlen(PREFIX) + strlen("/local/") + len));
+    strcpy(command, PREFIX"/local/");
+    strcat(command, script);
+
+    // Does the file exist?
+    if ((stat(command, &statb) == -1) ||
+        ! S_ISREG(statb.st_mode))
+    {
+        fprintf(stderr, "Can't find command script: %s\n", command);
+        error("aborting");
+    }
+
     change_current_reservation(STATE_ACTIVE, NULL);
     set_prog_cable_access(0, 0);
     set_fpga_device_access(1, 0);
@@ -660,14 +680,15 @@ void reset()
 
 void usage()
 {
-    fprintf(stderr, "Usage: hasim-fpga-ctrl <--reserve |\n");
-    fprintf(stderr, "                        --program |\n");
-    fprintf(stderr, "                        --activate |\n");
-    fprintf(stderr, "                        --drop-reservation |\n");
-    fprintf(stderr, "                        --reset |\n");
-    fprintf(stderr, "                        --setsignature |\n");
-    fprintf(stderr, "                        --getsignature |\n");
-    fprintf(stderr, "                        --status>\n\n");
+    fprintf(stderr, "Usage: leap-fpga-ctrl <--reserve |\n");
+    fprintf(stderr, "                       --program |\n");
+    fprintf(stderr, "                       --activate |\n");
+    fprintf(stderr, "                       --configure <script> |\n");
+    fprintf(stderr, "                       --drop-reservation |\n");
+    fprintf(stderr, "                       --reset |\n");
+    fprintf(stderr, "                       --setsignature |\n");
+    fprintf(stderr, "                       --getsignature |\n");
+    fprintf(stderr, "                       --status>\n\n");
     fprintf(stderr, "    --force may be specified to override other user's reservations\n");
     fprintf(stderr, "\n");
     current_reservation_state(stderr, SHOW_STATE_ALL);

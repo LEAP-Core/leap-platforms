@@ -1,10 +1,11 @@
 PREFIX = /usr/hasim
 
 CFLAGS = -O2
+CPPFLAGS = -DPREFIX='"$(PREFIX)"'
 
-all: hasim-fpga-ctrl driver
+all: leap-fpga-ctrl driver
 
-hasim-fpga-ctrl: hasim-fpga-ctrl.o
+leap-fpga-ctrl: leap-fpga-ctrl.o
 
 .PHONY driver:
 driver:
@@ -16,8 +17,8 @@ driver:
 .PHONY install:
 install:
 	mkdir -p $(PREFIX)/bin $(PREFIX)/dev $(PREFIX)/kernel $(PREFIX)/reservations $(PREFIX)/local
-	install --owner=root --group=root --mode=4555 hasim-fpga-ctrl $(PREFIX)/bin
-	install --owner=root --group=root --mode=555 init-hasim-fpga /etc/init.d/hasim-fpga
+	install --owner=root --group=root --mode=4555 leap-fpga-ctrl $(PREFIX)/bin
+	install --owner=root --group=root --mode=555 init-leap-fpga /etc/init.d/leap-fpga
 	chkconfig hasim-fpga on
 	install kernel/pchnl.ko $(PREFIX)/kernel
 	cp -f README.dev $(PREFIX)/dev/README
@@ -25,5 +26,5 @@ install:
 .PHONY clean:
 clean:
 	@rm -rf *.o
-	@rm -rf hasim-fpga-ctrl
+	@rm -rf leap-fpga-ctrl
 	@(cd kernel; $(MAKE) $(MFLAGS) clean)

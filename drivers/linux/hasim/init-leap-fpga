@@ -3,17 +3,17 @@
 #
 # Author: Michael Adler
 #
-# /etc/init.d/hasim-fpga
+# /etc/init.d/leap-fpga
 #
-# description: init script for resetting HAsim FPGA state
+# description: init script for resetting LEAP FPGA state
 ### BEGIN INIT INFO
-# Provides:          hasim-fpga
+# Provides:          leap-fpga
 # Required-Start:    $remote_fs
 # Required-Stop:
 # Default-Start:     1 2 3 5 S
 # Default-Stop:
 # X-UnitedLinux-Default-Enabled: yes
-# Description:       reset the FPGA for HAsim
+# Description:       reset the FPGA for LEAP
 ### END INIT INFO
 
 . /etc/rc.status
@@ -25,11 +25,11 @@ rc_reset
 case "$1" in
   start|b|stop)
 	echo -n "Resetting FPGA state"
-        /usr/hasim/bin/hasim-fpga-ctrl --reset --force
+        /usr/hasim/bin/leap-fpga-ctrl --reset --force
 	rc_status -v
 	;;
   status)
-        /usr/hasim/bin/hasim-fpga-ctrl --status
+        /usr/hasim/bin/leap-fpga-ctrl --status
 	;;
   *)
 	echo "Usage: $0 {start|status|stop}"
