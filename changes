@@ -12257,3 +12257,21 @@ Directory drivers/linux/leap-fpga-ctrl
  init-leap-fpga            Locally Added               - 
 
 Move leap-fpga-ctrl to its own build tree, separate from drivers.
+
+----------
+mcadler     Date: Wed Apr  6 22:16:30 EDT 2011  CSN: CSN-platforms-513
+                  Thu Apr  7 02:16:30 UTC 2011
+
+
+Directory drivers/linux/hasim
+ kernel/                   Locally Removed           512 
+
+Directory drivers/linux/hasim/kernel
+ pchnl_if.h                Locally Removed           512 
+ pchnl_main.c              Locally Removed           512 
+ pchnl_if.awb              Locally Removed           512 
+ Makefile                  Locally Removed           512 
+ README                    Locally Removed           512 
+ pchnl_main.h              Locally Removed           512 
+
+Driver is specific to Virtex-5 PCIe.
