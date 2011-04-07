@@ -12230,3 +12230,30 @@ Directory drivers/linux/hasim
 - PREFIX now set only in Makefile
 
 Installation still defaults to /usr/hasim but it will now be easier to change.
+
+----------
+mcadler     Date: Wed Apr  6 22:00:32 EDT 2011  CSN: CSN-platforms-512
+                  Thu Apr  7 02:00:32 UTC 2011
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/debuggers/null
+ null-debugger.cpp         Locally Modified          511 
+
+Directory drivers/linux/hasim
+ leap-fpga-ctrl.c          Locally Removed           511 
+ README.dev                Locally Removed           511 
+ Makefile                  Locally Removed           511 
+ README                    Locally Removed           511 
+ init-leap-fpga            Locally Removed           511 
+
+Directory drivers/linux
+ leap-fpga-ctrl/           Locally Added               0 
+
+Directory drivers/linux/leap-fpga-ctrl
+ leap-fpga-ctrl.c          Locally Added               - 
+ README.dev                Locally Added               - 
+ Makefile                  Locally Added               - 
+ README                    Locally Added               - 
+ init-leap-fpga            Locally Added               - 
+
+Move leap-fpga-ctrl to its own build tree, separate from drivers.
