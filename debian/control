@@ -1,0 +1,27 @@
+Source: leap-platforms
+Section: devel
+Priority: optional
+Maintainer: Joel Emer <emer@csail.mit.edu>
+Build-Depends: debhelper (>= 7), autotools-dev
+Standards-Version: 3.7.2
+
+Package: leap-platforms
+Architecture: all
+Depends: leap-platforms-11.04
+Description: Dependency package for Leap platforms environment
+ Dependency package for the Leap platforms environment
+Section: devel
+
+Package: leap-platforms-11.04
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, leap-platforms-bin
+Description: Sharable package for the Leap platforms
+  AWB modules for the leap platforms
+Section: devel
+
+Package: leap-platforms-bin
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, awb
+Description: Executables for the Leap platforms environement
+ Core executables for Leap platforms
+Section: devel

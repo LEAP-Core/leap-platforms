@@ -12275,3 +12275,92 @@ Directory drivers/linux/hasim/kernel
  pchnl_main.h              Locally Removed           512 
 
 Driver is specific to Virtex-5 PCIe.
+
+----------
+joel        Date: Sat Apr  9 13:53:56 EDT 2011  CSN: CSN-platforms-1
+                  Sat Apr  9 17:53:56 UTC 2011
+
+
+Directory .
+ configure                 Locally Added               0 
+
+Directory debian
+ leap-platforms-bin.postrm Locally Added               0 
+ leap-platforms-bin.preinst Locally Added               0 
+ control                   Locally Added               0 
+ leap-platforms-bin.prerm  Locally Added               0 
+ compat                    Locally Added               0 
+ leap-platforms-bin.docs   Locally Added               0 
+ changelog                 Locally Added               0 
+ copyright                 Locally Added               0 
+ rules                     Locally Added               0 
+ leap-platforms-bin.dirs   Locally Added               0 
+ leap-platforms-bin.postinst Locally Added               0 
+ README.Debian             Locally Added               0 
+
+Directory .
+ debian/                   Locally Added               0 
+ Makefile.in               Locally Added               0 
+
+Directory include
+ config.h.in               Locally Added               0 
+ stamp-h1                  Locally Added               0 
+ config.h                  Locally Added               0 
+
+Directory .
+ include/                  Locally Added               0 
+ configure.in              Locally Added               0 
+
+Directory scripts
+ mkinstalldirs             Locally Added               0 
+ depcomp                   Locally Added               0 
+ compile                   Locally Added               0 
+ missing                   Locally Added               0 
+ config.guess              Locally Added               0 
+ config.sub                Locally Added               0 
+ ltmain.sh                 Locally Added               0 
+ install-sh                Locally Added               0 
+
+Directory .
+ scripts/                  Locally Added               0 
+
+Directory admin/packages
+ platforms                 Locally Modified          513 
+
+Directory .
+ README                    Locally Added               0 
+
+Directory tools
+ Makefile.in               Locally Added               0 
+ platforms/                Locally Added               0 
+
+Directory tools/platforms
+ Makefile.in               Locally Added               0 
+ Makefile.am               Locally Added               0 
+ leap-fpga-control/        Locally Added               0 
+
+Directory tools/platforms/leap-fpga-control
+ Makefile.in               Locally Added               0 
+ Makefile.am               Locally Added               0 
+ leap-fpga-control.c       Locally Added               0 
+
+Directory tools
+ Makefile.am               Locally Added               0 
+
+Directory .
+ tools/                    Locally Added               0 
+ INSTALL                   Locally Added               0 
+ Makefile.am               Locally Added               0 
+ aclocal.m4                Locally Added               0 
+ ./                        Locally Modified          513 
+
+Added the autoconfig framework to platforms like the other
+packages (hopefully to soon be replaced with a simpler cleaner
+scons-based system).
+
+Also added debian package build files and configured them to
+create v11.04.
+
+A location (tools/platforms/leap-fpga-control) was created
+for leap-fpga-control, but the program there is a dummy...
+

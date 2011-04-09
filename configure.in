@@ -1,0 +1,70 @@
+dnl Process this file with autoconf to produce a configure script.
+AC_INIT([ASIM leap-platforms], [0.6], [joel.emer@intel.com], [leap-platforms])
+AC_PREREQ(2.59) dnl required autoconf version
+AC_CONFIG_SRCDIR([admin/packages/platforms])
+dnl AC_INIT(admin/packages/platforms)
+
+dnl Installation defaults
+dnl AC_PREFIX_DEFAULT(/usr/local)
+AC_PREFIX_PROGRAM(asimstarter)
+
+AC_CONFIG_AUX_DIR(scripts)
+
+AM_INIT_AUTOMAKE([1.8.3 foreign subdir-objects]) dnl automake version + options
+AM_CONFIG_HEADER(include/config.h)
+
+# pull all flags together
+AM_CXXFLAGS='$(WARNFLAGS) $(OPTFLAGS) $(ARCHFLAGS)'
+AM_LDFLAGS='$(ARCHFLAGS)'
+AC_SUBST(AM_CXXFLAGS)
+AC_SUBST(AM_LDFLAGS)
+
+
+AC_SUBST(package)
+package=platforms
+
+dnl Get release tag out of package file.
+dnl The tag is assumed to be in a line that looks like: Tag=<tagname>
+AC_SUBST(release)
+release=`grep '^Tag=' ./admin/packages/$package | sed 's/Tag=//'`
+
+
+configdir='${sysconfdir}/asim/${release}'
+AC_SUBST(configdir)
+
+
+packagedir='${datadir}/asim/packages'
+AC_SUBST(packagedir)
+
+
+codedir='${packagedir}/${package}/${release}'
+AC_SUBST(codedir)
+
+# This is where architecture dependent info is placed
+#tooldir='${libexecdir}/asim/${release}'
+# For now we always treat the release for tools as HEAD
+tooldir='${libexecdir}/asim/HEAD'
+AC_SUBST(tooldir)
+
+dnl Checks for programs.
+AC_PROG_CC
+AC_PROG_CXX
+AC_PROG_LN_S
+AC_PROG_INSTALL
+
+dnl Check for scons
+AC_CHECK_PROG(have_scons, scons, yes)
+if test "X$have_scons" == "X"; then
+   AC_MSG_ERROR([Scons is needed to build leap-platforms programs])
+fi
+
+# tools -  toplevel
+AC_CONFIG_FILES(tools/Makefile)
+
+# tools/platforms
+AC_CONFIG_FILES(tools/platforms/Makefile)
+
+# tools/platforms/leap-fpga-control
+AC_CONFIG_FILES(tools/platforms/leap-fpga-control/Makefile)
+
+AC_OUTPUT(Makefile)

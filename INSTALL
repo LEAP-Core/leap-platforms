@@ -1,0 +1,8 @@
+
+The following sequence should work:
+
+% ./configure --prefix=<installation directory>
+% make
+% sudo make install
+% sudo make install-package
+
