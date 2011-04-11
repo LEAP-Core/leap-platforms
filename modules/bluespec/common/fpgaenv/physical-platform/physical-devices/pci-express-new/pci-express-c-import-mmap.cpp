@@ -9,6 +9,8 @@
 #include <sys/mman.h>
 #include <sys/ioctl.h>
 
+#include "asim/syntax.h"
+#include "asim/provides/physical_platform_utils.h"
 #include "asim/provides/pci_express_device.h"
 #include "asim/provides/pci_express_driver_header.h"
 
@@ -22,8 +24,39 @@ PCIE_DEVICE_CLASS::PCIE_DEVICE_CLASS(
     PLATFORMS_MODULE p) :
         PLATFORMS_MODULE_CLASS(p)
 {
+    deviceMap = NULL;
+    systemCSR_Write = NULL;
+    systemCSR_Read = NULL;
+    commonCSRs = NULL;
+    dmaBuffer_H2F = NULL;
+    dmaBuffer_F2H = NULL;
+}
+
+
+PCIE_DEVICE_CLASS::~PCIE_DEVICE_CLASS()
+{
+    Cleanup();
+}
+
+
+void
+PCIE_DEVICE_CLASS::Init()
+{
+    static bool did_init = false;
+
+    if (did_init) return;
+    did_init = true;
+
     // obtain a descriptor for the driver
-    driverFD = open("/dev/pchnl", O_RDWR);
+    const char *dev_path = "/dev/pchnl";
+    if (! FPGA_DEV_PATH.empty())
+    {
+        dev_path = FPGA_DEV_PATH.c_str();
+    }
+
+    printf("Opening device %s...\n", dev_path);
+
+    driverFD = open(dev_path, O_RDWR);
     if (driverFD < 0)
     {
         perror("pcie device: unable to open driver");
@@ -55,10 +88,6 @@ PCIE_DEVICE_CLASS::PCIE_DEVICE_CLASS(
     ResetFPGA();
 }
 
-PCIE_DEVICE_CLASS::~PCIE_DEVICE_CLASS()
-{
-    Cleanup();
-}
 
 // override default chain-uninit method because
 // we need to do something special

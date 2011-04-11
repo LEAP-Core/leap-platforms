@@ -12364,3 +12364,59 @@ create v11.04.
 A location (tools/platforms/leap-fpga-control) was created
 for leap-fpga-control, but the program there is a dummy...
 
+
+----------
+mcadler     Date: Sun Apr 10 21:48:15 EDT 2011  CSN: CSN-platforms-515
+                  Mon Apr 11 01:48:15 UTC 2011
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/utils
+ utils.awb                 Locally Modified          514 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup/serial
+ xilinx-xup-serial.awb     Locally Modified          514 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup/jtag
+ xilinx-xup-jtag.awb       Locally Modified          514 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-disabled
+ htg-v5-pcie-disabled.awb  Locally Modified          514 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/jtag
+ htg-v5-jtag.awb           Locally Modified          514 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled
+ htg-v5-pcie-enabled.awb   Locally Modified          514 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express-new
+ pci-express-c-import-mmap.cpp Locally Modified          514 
+ pci-express-c-import-mmap.h Locally Modified          514 
+
+Directory drivers/linux/leap-fpga-ctrl
+ leap-fpga-ctrl.c          Locally Modified          514 
+ iniparser.h               Locally Added               0 
+ config-sample             Locally Added               0 
+ dictionary.c              Locally Added               0 
+ README.dev                Locally Removed           514 
+ dictionary.h              Locally Added               0 
+ Makefile                  Locally Modified          514 
+ init-leap-fpga            Locally Modified          514 
+ iniparser.c               Locally Added               0 
+
+Significant changes to leap-fpga-ctrl:
+
+- Support for multiple FPGAs on a single host.  leap-fpga-ctrl will now find
+  a free device among multiple.
+- Replace /usr/hasim link tree with a single config file that describes
+  all FPGAs on a host.
+- Change configure script mechanism.  A single well known script name
+  (based on the FPGA class) is invoked with parameters requesting some action.
+- Use paths more appropriate to Linux.
+
+- Tag XUPv2 and HTG-V5-PCIe configurations with FPGA requests.
+
+- Take the path of an FPGA device on the command line instead of embedding
+  the path in C++ code.
+
+  
+

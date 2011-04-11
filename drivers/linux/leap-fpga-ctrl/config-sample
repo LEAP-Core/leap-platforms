@@ -1,0 +1,27 @@
+##
+## Configuration file describing FPGA devices
+##
+
+# Device names must be unique but are otherwise just for display
+[HTG-Virtex5-PCIe.0]
+# Class is used to match a model configuration with a hardware device type
+class = HTG-V5-PCIe
+
+# The device driver's permissions will be modified to permit write access
+# by the user after a successful reservation
+dev = /dev/pchnl
+
+# Optional field: programming cable for writing bitfile to FPGA
+prog-cable = /dev/windrvr6
+
+# Optional field: hot-plug controller for enabling/disabling while programming
+power-ctrl = /sys/bus/pci/slots/1/power
+
+# Optional kernel module.  If specified, the module will be loaded after
+# programming the device and unloaded when the device is released.
+kernel-module-name = pchnl
+kernel-module-path = /usr/hasim/kernel/pchnl.ko
+
+[ACP.2]
+class = ACP
+dev = /dev/acp2

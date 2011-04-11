@@ -25,11 +25,12 @@ rc_reset
 case "$1" in
   start|b|stop)
 	echo -n "Resetting FPGA state"
-        /usr/hasim/bin/leap-fpga-ctrl --reset --force
+        rm -rf /var/lock/leap
+        mkdir -p /var/lock/leap
 	rc_status -v
 	;;
   status)
-        /usr/hasim/bin/leap-fpga-ctrl --status
+        /usr/bin/leap-fpga-ctrl --status
 	;;
   *)
 	echo "Usage: $0 {start|status|stop}"

@@ -84,6 +84,7 @@ class PCIE_DEVICE_CLASS: public PLATFORMS_MODULE_CLASS
     ~PCIE_DEVICE_CLASS();
     
     void     Cleanup();
+    void     Init();
     void     Uninit();
 
     // CSR interface

@@ -6,3 +6,4 @@
 
 %sources -t BSV -v PUBLIC  soft-reset.bsv
 
+%param --dynamic FPGA_DEV_PATH  ""  "FPGA device(s) allocated (comma separated)"

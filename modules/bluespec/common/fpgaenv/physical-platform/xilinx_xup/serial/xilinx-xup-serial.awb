@@ -25,5 +25,6 @@
 %param FPGA_PACKAGE       "FF896"           "FPGA Package (Synplify)"
 %param FPGA_POSITION      3                 "FPGA Position (in Xilinx iMPACT)"
 %param MAP_OPTIONS        ""                "Extra Map Options"
-%param SYNTHESIS_TOOL     "xst"                "Synthesis tool, xst or synplify_pro supported"
+%param SYNTHESIS_TOOL     "xst"             "Synthesis tool, xst or synplify_pro supported"
 
+%param FPGA_PLATFORM      "XUPv2"           "FPGA Platform"
