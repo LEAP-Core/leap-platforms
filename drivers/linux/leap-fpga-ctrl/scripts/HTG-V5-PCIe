@@ -1,0 +1,35 @@
+#!/bin/sh
+
+##
+## Configuration script for HTG-V5-PCIe FPGA boards.
+##
+
+function usage()
+{
+    echo "Usage: $0 <program|activate> <driver>"
+    exit 1
+}
+
+if [ $# -ne 2 ]; then
+    usage
+fi
+
+arg_command="$1"
+arg_driver="$2"
+
+case "$arg_command" in
+  program)
+    ##
+    ## Prepare the FPGA for programming.  Turns off the PCIe bus.
+    ##
+    echo "Programming device: $2"
+    ;;
+
+  activate)
+    ##
+    ## Activate the FPGA following programming.  Turn on the PCIe bus and load
+    ## the kernel driver.
+    ##
+    echo "Activating device: $2"
+    ;;
+esac

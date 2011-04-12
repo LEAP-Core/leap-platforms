@@ -12420,3 +12420,21 @@ Significant changes to leap-fpga-ctrl:
 
   
 
+
+----------
+mcadler     Date: Mon Apr 11 22:16:52 EDT 2011  CSN: CSN-platforms-516
+                  Tue Apr 12 02:16:52 UTC 2011
+
+
+Directory drivers/linux/leap-fpga-ctrl
+ scripts/                  Locally Added               0 
+
+Directory drivers/linux/leap-fpga-ctrl/scripts
+ HTG-V5-PCIe               Locally Added               0 
+
+Directory drivers/linux/leap-fpga-ctrl
+ Makefile                  Locally Modified          515 
+
+- Fix file permissions
+- Add a sample configuration script supporting both the "program" and "activate"
+  commands.  I'll fill in the details later.
