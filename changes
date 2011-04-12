@@ -12458,3 +12458,58 @@ errors were being treated as commas.  We now pass these erroneous
 symbols on and rely on upper layers to notice the problem.  Also, I
 added some synthesis flags which seem to improve Virtex5 timing.
 
+
+----------
+jsemer      Date: Tue Apr 12 17:56:01 EDT 2011  CSN: CSN-platforms-518
+                  Tue Apr 12 21:56:01 UTC 2011
+
+
+Directory .
+ configure                 Locally Modified          517 
+
+Directory debian
+ changelog                 Locally Modified          517 
+
+Directory .
+ Makefile.in               Locally Modified          517 
+
+Directory aux-scripts
+ mkinstalldirs             Locally Added               - 
+ depcomp                   Locally Added               - 
+ compile                   Locally Added               - 
+ missing                   Locally Added               - 
+ config.guess              Locally Added               - 
+ config.sub                Locally Added               - 
+ ltmain.sh                 Locally Added               - 
+ install-sh                Locally Added               - 
+
+Directory .
+ aux-scripts/              Locally Added               0 
+ configure.in              Locally Modified          517 
+
+Directory scripts
+ mkinstalldirs             Locally Removed           517 
+ depcomp                   Locally Removed           517 
+ compile                   Locally Removed           517 
+ missing                   Locally Removed           517 
+ config.guess              Locally Removed           517 
+ config.sub                Locally Removed           517 
+ ltmain.sh                 Locally Removed           517 
+ install-sh                Locally Removed           517 
+
+Directory .
+ scripts/                  Locally Removed           517 
+
+Directory tools
+ Makefile.in               Locally Modified          517 
+
+Directory tools/platforms
+ Makefile.in               Locally Modified          517 
+
+Directory tools/platforms/leap-fpga-control
+ Makefile.in               Locally Modified          517 
+
+Directory .
+ ./                        Locally Modified          517 
+
+Move the autoconf scripts from scripts/ to aux-scripts/.
