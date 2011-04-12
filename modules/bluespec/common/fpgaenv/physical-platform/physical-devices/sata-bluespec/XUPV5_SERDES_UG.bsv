@@ -17,6 +17,8 @@ interface XUPV5_SERDES_DEVICE_UG;
    (* always_ready *)
    method Bit#(16) rxdata0_out();
    (* always_ready *)
+   method Bit#(16) total_reset_out();
+   (* always_ready *)
    method Bit#(2) rxcharisk1_out();
    (* always_ready *)
    method Bit#(2) rxdisperr1_out();
@@ -57,6 +59,7 @@ module mkXUPV5_SERDES_DEVICE_UG (XUPV5_SERDES_DEVICE_UG);
    method rxcharisk0_out rxcharisk0_out reset_by(no_reset) clocked_by(rxusrclk0);
    method rxdisperr0_out rxdisperr0_out reset_by(no_reset) clocked_by(rxusrclk0);
    method rxdata0_out rxdata0_out reset_by(no_reset) clocked_by(rxusrclk0);
+   method total_reset_out total_reset_out reset_by(no_reset) clocked_by(rxusrclk0);
    method rxcharisk1_out rxcharisk1_out reset_by(no_reset) clocked_by(rxusrclk1);
    method rxdisperr1_out rxdisperr1_out reset_by(no_reset) clocked_by(rxusrclk1);
    method rxdata1_out rxdata1_out reset_by(no_reset) clocked_by(rxusrclk1);
@@ -69,10 +72,10 @@ module mkXUPV5_SERDES_DEVICE_UG (XUPV5_SERDES_DEVICE_UG);
              txn_out, txp_out, rxcharisk0_out, rxdisperr0_out,
              rxdata0_out, rxcharisk1_out, rxdisperr1_out, rxdata1_out,
              plllkdet_out, txcharisk0_in, txdata0_in,
-             txcharisk1_in, txdata1_in) CF
+             txcharisk1_in, txdata1_in, total_reset_out) CF
             (rxn_in, rxp_in, 
              txn_out, txp_out, rxcharisk0_out, rxdisperr0_out,
              rxdata0_out, rxcharisk1_out, rxdisperr1_out, rxdata1_out,
-             plllkdet_out, txcharisk0_in, txdata0_in,
-             txcharisk1_in, txdata1_in);   
+             plllkdet_out, txcharisk0_in, txdata0_in, 
+             txcharisk1_in, txdata1_in, total_reset_out);   
 endmodule

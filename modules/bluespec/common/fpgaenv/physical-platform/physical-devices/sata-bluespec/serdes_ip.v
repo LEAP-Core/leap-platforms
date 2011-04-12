@@ -98,7 +98,8 @@ module serdes_ip #
     rxusrclk0_out, // rxusrclk0
     rxusrclk1_out, // rxusrclk1
     resetdone0_out,
-    resetdone1_out
+    resetdone1_out,
+    total_reset_out
 );
 
 // synthesis attribute X_CORE_INFO of SERDES_TOP is "gtpwizard_v1_10, Coregen v11.2";
@@ -129,7 +130,8 @@ module serdes_ip #
     output          rxusrclk1_out; // rxusrclk1
     output          resetdone0_out;
     output          resetdone1_out;
-    
+    output [15:0]   total_reset_out;
+     
 
 //**************************** Wire Declarations ******************************
 
@@ -397,12 +399,17 @@ module serdes_ip #
         .TILE0_TXPOLARITY1_IN           (tile0_txpolarity1_i)
     );
 
+   reg [15:0] 	    total_reset;
+   
+   assign total_reset_out = total_reset;
+   
    always @(posedge grefclk_i)
      begin
         if (!gtpreset_n_in)
           begin
              rst_cnt <= 20'h000; // rst for 256 cycles
              rst_state <= 1'b0; // rst
+	     total_reset <= 0;	     
           end	
         else
           begin
@@ -417,6 +424,7 @@ module serdes_ip #
              if (rst_cnt == 20'h3ff)
                begin
                   rst_state <= !rst_state;
+		  total_reset <= total_reset + 1;		 
                end
              else
 	       begin

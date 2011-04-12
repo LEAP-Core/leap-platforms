@@ -12438,3 +12438,23 @@ Directory drivers/linux/leap-fpga-ctrl
 - Fix file permissions
 - Add a sample configuration script supporting both the "program" and "activate"
   commands.  I'll fill in the details later.
+
+----------
+kfleming    Date: Mon Apr 11 22:49:54 EDT 2011  CSN: CSN-platforms-517
+                  Tue Apr 12 02:49:54 UTC 2011
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/pcie
+ xilinx.sdf                Locally Modified          516 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/sata-bluespec
+ XUPV5_SERDES_UG.bsv       Locally Modified          516 
+ serdes_ip.v               Locally Modified          516 
+ XUPV5_SERDES.bsv          Locally Modified          516 
+
+
+Added some instrumentation to the SERDES hardware.  Fixed bug in which
+errors were being treated as commas.  We now pass these erroneous
+symbols on and rely on upper layers to notice the problem.  Also, I
+added some synthesis flags which seem to improve Virtex5 timing.
+

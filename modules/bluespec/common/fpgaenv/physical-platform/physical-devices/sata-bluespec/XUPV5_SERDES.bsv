@@ -46,13 +46,17 @@ endfunction
 function XUPV5_SERDES_WORD unpackRxWord (Bit#(2) is_error, Bit#(2) is_k, Bit#(16) rx_data, XUPV5_SERDES_BYTE comma);
    XUPV5_SERDES_BYTE rx0;
    XUPV5_SERDES_BYTE rx1;
-   if (is_error[0] == 1)
-      rx0 = comma;
-   else
+   /*if (is_error[0] == 1)
+     begin
+       rx0 = comma;
+     end	    
+   else*/
       rx0 = XUPV5_SERDES_BYTE{isK: unpack(is_k[0]), data: rx_data[7:0]};
-   if (is_error[1] == 1)
-      rx1 = comma;
-   else
+   /*if (is_error[1] == 1)
+     begin
+       //rx1 = comma;
+     end
+   else*/
       rx1 = XUPV5_SERDES_BYTE{isK: unpack(is_k[1]), data: rx_data[15:8]};
    return serdesWord(rx1, rx0);
 endfunction
@@ -101,6 +105,9 @@ interface XUPV5_SERDES_DRIVER;
    method Action send1(XUPV5_SERDES_WORD tx_word); // txusrclk
    method ActionValue#(XUPV5_SERDES_WORD) receive0(); // rxusrclk0     
    method ActionValue#(XUPV5_SERDES_WORD) receive1(); // rxusrclk1
+   method Bit#(16) total_reset_out(); // total_reset_out
+   method Bit#(32) realignment0(); // realignment0
+   method Bit#(32) errors0(); // realignment0
    (* always_ready *)
    method Bool plllkdet_out();
    interface Clock txusrclk;
@@ -141,7 +148,10 @@ module mkXUPV5_SERDES_DEVICE#(XUPV5_SERDES_BYTE comma, // comma definition
    Reg#(Bool)     send_comma       <- mkReg(True, reset_by txusrrst, clocked_by txusrclk);
    Reg#(Bit#(16)) comma_cnt_down   <- mkReg(fromInteger(comma_length), reset_by txusrrst, clocked_by txusrclk);
    Reg#(Bool)     rx0_odd_aligned  <- mkReg(False, reset_by rxusrrst0, clocked_by rxusrclk0); 
+   Reg#(Bit#(32)) rx0_realignment  <- mkReg(0, reset_by rxusrrst0, clocked_by rxusrclk0); 
+   Reg#(Bit#(32)) rx0_errors  <- mkReg(0, reset_by rxusrrst0, clocked_by rxusrclk0); 
    Reg#(Bool)     rx1_odd_aligned  <- mkReg(False, reset_by rxusrrst1, clocked_by rxusrclk1); 
+   
 
    XUPV5_SERDES_WORD commas = serdesWord(comma, comma); 
    let idle = 28;
@@ -224,6 +234,9 @@ module mkXUPV5_SERDES_DEVICE#(XUPV5_SERDES_BYTE comma, // comma definition
       // swap q for odd aligned
       let fst_q = rx0_odd_aligned ? recv_data0_msb : recv_data0_lsb; 
       let snd_q = rx0_odd_aligned ? recv_data0_lsb : recv_data0_msb;
+
+      rx0_errors <= rx0_errors + zeroExtend(ug_device.rxdisperr0_out[0]) + zeroExtend(ug_device.rxdisperr0_out[1]);
+
       if (isValid(fst_byte)) 
          begin
             fst_q.enq(fromMaybe(?,fst_byte));
@@ -232,9 +245,13 @@ module mkXUPV5_SERDES_DEVICE#(XUPV5_SERDES_BYTE comma, // comma definition
          begin
             snd_q.enq(fromMaybe(?,snd_byte));
          end
+      // maybe we should consider something as radical as 
+      // clearing the fifos?
       if (unpack(pack(lsb_not_comma)^pack(msb_not_comma)))
+//      if (lsb_not_comma && !msb_not_comma)
          begin
             rx0_odd_aligned <= !rx0_odd_aligned; // if only enq one element, flip this variable
+            rx0_realignment <= rx0_realignment + 1;
          end
    endrule
    
@@ -256,6 +273,7 @@ module mkXUPV5_SERDES_DEVICE#(XUPV5_SERDES_BYTE comma, // comma definition
             snd_q.enq(fromMaybe(?,snd_byte));
          end
       if (unpack(pack(lsb_not_comma)^pack(msb_not_comma)))
+//      if (!lsb_not_comma && msb_not_comma)
          begin
             rx1_odd_aligned <= !rx1_odd_aligned; // if only enq one element, flip this variable
          end
@@ -302,7 +320,10 @@ module mkXUPV5_SERDES_DEVICE#(XUPV5_SERDES_BYTE comma, // comma definition
       method Bool plllkdet_out();
          return ug_device.plllkdet_out();
       endmethod
-      
+
+      method total_reset_out = ug_device.total_reset_out;
+      method realignment0 = rx0_realignment._read;
+      method errors0()= rx0_errors._read; // realignment0	
       interface txusrclk  = txusrclk;
       interface txusrrst  = txusrrst;
       interface rxusrclk0 = rxusrclk0;
