@@ -7,5 +7,5 @@ Description=Description of platforms
 Name=platforms
 #Tag=HEAD
 Tag=HEAD
-CSN=CSN-platforms-521
+CSN=CSN-platforms-522
 Dependencies=hasim/HEAD

@@ -12624,3 +12624,20 @@ Directory drivers/linux/leap-fpga-ctrl
 
 Move leap-fpga-ctrl to tools/ directory tree and package
 for Ubuntu.
+
+----------
+jsemer      Date: Wed Apr 13 15:46:09 EDT 2011  CSN: CSN-platforms-522
+                  Wed Apr 13 19:46:09 UTC 2011
+
+
+Directory debian
+ changelog                 Locally Modified          521 
+
+Directory drivers/linux
+ leap-fpga-ctrl/           Locally Removed           521 
+
+Directory drivers/linux/leap-fpga-ctrl
+ leap-fpga-ctrl.c          Locally Removed           521 
+ Makefile                  Locally Removed           521 
+
+Finish deleting old leap-fpga-ctrl/ directory.
