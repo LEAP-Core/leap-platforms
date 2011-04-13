@@ -12523,3 +12523,30 @@ Directory .
  Makefile.in               Locally Modified          518 
 
 Small automatic automake induced change.
+
+----------
+jsemer      Date: Wed Apr 13 10:34:49 EDT 2011  CSN: CSN-platforms-520
+                  Wed Apr 13 14:34:49 UTC 2011
+
+
+Directory .
+ configure                 Locally Modified          519 
+ Makefile.in               Locally Modified          519 
+
+Directory include
+ config.h.in               Locally Modified          519 
+ config.h                  Locally Modified          519 
+
+Directory tools
+ Makefile.in               Locally Modified          519 
+
+Directory tools/platforms
+ Makefile.in               Locally Modified          519 
+
+Directory tools/platforms/leap-fpga-control
+ Makefile.in               Locally Modified          519 
+
+Directory .
+ aclocal.m4                Locally Modified          519 
+
+Fix autoconf breakage with an autoreconf.
