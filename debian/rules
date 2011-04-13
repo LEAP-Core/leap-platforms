@@ -42,7 +42,7 @@ endif
 ifneq "$(wildcard /usr/share/misc/config.guess)" ""
 	cp -f /usr/share/misc/config.guess config.guess
 endif
-	./configure $(CROSS) --prefix=/usr --mandir=\$${prefix}/share/man --infodir=\$${prefix}/share/info --sysconfdir=/etc --enable-perl-vendor-install CFLAGS="$(CFLAGS)" LDFLAGS="-Wl,-z,defs"
+	./configure $(CROSS) --prefix=/usr --mandir=\$${prefix}/share/man --infodir=\$${prefix}/share/info --sysconfdir=/etc  CFLAGS="$(CFLAGS)" LDFLAGS="-Wl,-z,defs"
 
 
 #Architecture
@@ -52,7 +52,7 @@ build-arch: build-arch-stamp
 build-arch-stamp:  config.status 
 
 	# Add here commands to compile the arch part of the package.
-	#$(MAKE)
+	$(MAKE)
 	touch $@
 
 build-indep: build-indep-stamp

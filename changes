@@ -12550,3 +12550,77 @@ Directory .
  aclocal.m4                Locally Modified          519 
 
 Fix autoconf breakage with an autoreconf.
+
+----------
+jsemer      Date: Wed Apr 13 15:43:29 EDT 2011  CSN: CSN-platforms-521
+                  Wed Apr 13 19:43:29 UTC 2011
+
+
+Directory .
+ configure                 Locally Modified          520 
+
+Directory debian
+ control                   Locally Modified          520 
+ changelog                 Locally Modified          520 
+ rules                     Locally Modified          520 
+ leap-platforms-bin.dirs   Locally Modified          520 
+
+Directory .
+ Makefile.in               Locally Modified          520 
+
+Directory aux-scripts
+ mkinstalldirs             Locally Modified          520 
+ depcomp                   Locally Modified          520 
+ missing                   Locally Modified          520 
+ install-sh                Locally Modified          520 
+
+Directory include
+ config.h.in               Locally Modified          520 
+ config.h                  Locally Modified          520 
+
+Directory .
+ configure.in              Locally Modified          520 
+
+Directory tools
+ Makefile.in               Locally Modified          520 
+
+Directory tools/platforms
+ Makefile.in               Locally Modified          520 
+ Makefile.am               Locally Modified          520 
+ leap-fpga-control/        Locally Removed           520 
+
+Directory tools/platforms/leap-fpga-control
+ Makefile.in               Locally Removed           520 
+ Makefile.am               Locally Removed           520 
+ leap-fpga-control.c       Locally Removed           520 
+
+Directory tools/platforms/leap-fpga-ctrl
+ leap-fpga-ctrl.c          Locally Added               - 
+ iniparser.h               Locally Added               - 
+ config-sample             Locally Added               - 
+ dictionary.c              Locally Added               - 
+ dictionary.h              Locally Added               - 
+ iniparser.c               Locally Added               - 
+ init-leap-fpga            Locally Added               - 
+ README                    Locally Added               - 
+
+Directory .
+ aclocal.m4                Locally Modified          520 
+
+Directory drivers/linux/leap-fpga-ctrl
+ iniparser.h               Locally Removed           520 
+ config-sample             Locally Removed           520 
+ dictionary.c              Locally Removed           520 
+ scripts/                  Locally Removed           520 
+
+Directory drivers/linux/leap-fpga-ctrl/scripts
+ HTG-V5-PCIe               Locally Removed           520 
+
+Directory drivers/linux/leap-fpga-ctrl
+ dictionary.h              Locally Removed           520 
+ README                    Locally Removed           520 
+ init-leap-fpga            Locally Removed           520 
+ iniparser.c               Locally Removed           520 
+
+Move leap-fpga-ctrl to tools/ directory tree and package
+for Ubuntu.

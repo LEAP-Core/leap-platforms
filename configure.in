@@ -64,7 +64,7 @@ AC_CONFIG_FILES(tools/Makefile)
 # tools/platforms
 AC_CONFIG_FILES(tools/platforms/Makefile)
 
-# tools/platforms/leap-fpga-control
-AC_CONFIG_FILES(tools/platforms/leap-fpga-control/Makefile)
+# tools/platforms/leap-fpga-ctrl
+AC_CONFIG_FILES(tools/platforms/leap-fpga-ctrl/Makefile)
 
 AC_OUTPUT(Makefile)

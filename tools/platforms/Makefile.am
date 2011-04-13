@@ -1,1 +1,1 @@
-SUBDIRS=leap-fpga-control
+SUBDIRS=leap-fpga-ctrl

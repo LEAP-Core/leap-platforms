@@ -21,7 +21,7 @@ Section: devel
 
 Package: leap-platforms-bin
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, awb
+Depends: ${shlibs:Depends}, ${misc:Depends}, awb, chkconfig
 Description: Executables for the Leap platforms environement
  Core executables for Leap platforms
 Section: devel
