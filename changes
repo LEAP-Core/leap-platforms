@@ -12641,3 +12641,13 @@ Directory drivers/linux/leap-fpga-ctrl
  Makefile                  Locally Removed           521 
 
 Finish deleting old leap-fpga-ctrl/ directory.
+
+----------
+mcadler     Date: Wed Apr 13 20:50:39 EDT 2011  CSN: CSN-platforms-523
+                  Thu Apr 14 00:50:39 UTC 2011
+
+
+Directory tools/platforms/leap-fpga-ctrl
+ leap-fpga-ctrl.c          Locally Modified          522 
+
+Add trailing slashes to directory paths.

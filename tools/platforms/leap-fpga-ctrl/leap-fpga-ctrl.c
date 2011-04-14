@@ -15,8 +15,8 @@
 //
 
 #define CFG_FILE   CONFDIR "/config"
-#define CONFIG_DIR SCRIPTSDIR
-#define RES_DIR    LOCKDIR
+#define CONFIG_DIR SCRIPTSDIR "/"
+#define RES_DIR    LOCKDIR "/"
 
 #include <stdio.h>
 #include <stdlib.h>
