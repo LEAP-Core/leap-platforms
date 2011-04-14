@@ -12651,3 +12651,32 @@ Directory tools/platforms/leap-fpga-ctrl
  leap-fpga-ctrl.c          Locally Modified          522 
 
 Add trailing slashes to directory paths.
+
+----------
+joel        Date: Thu Apr 14 08:28:03 EDT 2011  CSN: CSN-platforms-524
+                  Thu Apr 14 12:28:03 UTC 2011
+
+
+Directory debian
+ control                   Locally Modified          523 
+ changelog                 Locally Modified          523 
+ rules                     Locally Modified          523 
+
+Moved locatestate to /var when packaging for Ubuntu. Removed 
+requirement for chkconfig which does not seem to work properly on 
+Ubuntu since they moved to using upstart. So there are two
+things to note:
+
+1) When one wants to manually install in /usr one nieds to use 
+the following configure command:
+
+ % ./configure --prefix=/usr --sysconfdir=/etc/ --localstatedir=/var \
+                --mandir=/usr/share/man --infodir=/usr/share/info
+
+I need to figure out if there is a standard way for autoconf to set
+these dirs when prefix=/usr.
+
+
+2) You need to manually configure the init script /etc/init.d/init-fpga-ctrl.
+On SUSE one can use chkconfig... On Ubuntu it is TBD.
+
