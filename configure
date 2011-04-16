@@ -556,7 +556,7 @@ PACKAGE_STRING='ASIM leap-platforms 0.6'
 PACKAGE_BUGREPORT='joel.emer@intel.com'
 PACKAGE_URL=''
 
-ac_unique_file="admin/packages/platforms"
+ac_unique_file="admin/packages/leap-platforms"
 ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
@@ -2413,7 +2413,7 @@ AM_LDFLAGS='$(ARCHFLAGS)'
 
 
 
-package=platforms
+package=leap-platforms
 
 
 release=`grep '^Tag=' ./admin/packages/$package | sed 's/Tag=//'`
@@ -3865,6 +3865,8 @@ ac_config_files="$ac_config_files tools/platforms/Makefile"
 # tools/platforms/leap-fpga-ctrl
 ac_config_files="$ac_config_files tools/platforms/leap-fpga-ctrl/Makefile"
 
+ac_config_files="$ac_config_files tools/platforms/leap-fpga-ctrl/init/leap-fpga"
+
 
 ac_config_files="$ac_config_files Makefile"
 
@@ -4587,6 +4589,7 @@ do
     "tools/Makefile") CONFIG_FILES="$CONFIG_FILES tools/Makefile" ;;
     "tools/platforms/Makefile") CONFIG_FILES="$CONFIG_FILES tools/platforms/Makefile" ;;
     "tools/platforms/leap-fpga-ctrl/Makefile") CONFIG_FILES="$CONFIG_FILES tools/platforms/leap-fpga-ctrl/Makefile" ;;
+    "tools/platforms/leap-fpga-ctrl/init/leap-fpga") CONFIG_FILES="$CONFIG_FILES tools/platforms/leap-fpga-ctrl/init/leap-fpga" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
 
   *) as_fn_error "invalid argument: \`$ac_config_target'" "$LINENO" 5;;

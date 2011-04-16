@@ -12697,3 +12697,51 @@ Changed package name from 'platforms' to 'leap-platforms'. Even
 though these awb-based modules might be useful in other
 environments than leap, called them just 'platforms' seemed
 too grandious.
+
+----------
+joel        Date: Sat Apr 16 15:36:02 EDT 2011  CSN: CSN-leap-platforms-526
+                  Sat Apr 16 19:36:02 UTC 2011
+
+
+Directory .
+ configure                 Locally Modified          525 
+
+Directory debian
+ leap-platforms-bin.postrm Locally Modified          525 
+ leap-platforms-bin.prerm  Locally Modified          525 
+ changelog                 Locally Modified          525 
+ rules                     Locally Modified          525 
+ leap-platforms-bin.dirs   Locally Modified          525 
+ leap-platforms-bin.postinst Locally Modified          525 
+ leap-platforms-bin.init   Locally Added               0 
+
+Directory .
+ debian/                   Locally Modified          525 
+ Makefile.in               Locally Modified          525 
+ configure.in              Locally Modified          525 
+
+Directory tools/platforms/leap-fpga-ctrl
+ Makefile.in               Locally Modified          525 
+ init/                     Locally Added               0 
+
+Directory tools/platforms/leap-fpga-ctrl/init
+ leap-fpga.in              Locally Added               - 
+
+Directory tools/platforms/leap-fpga-ctrl
+ config-sample             Locally Removed           525 
+ Makefile.am               Locally Modified          525 
+ etc/                      Locally Added               0 
+
+Directory tools/platforms/leap-fpga-ctrl/etc
+ config-sample             Locally Added               - 
+
+Directory tools/platforms/leap-fpga-ctrl
+ init-leap-fpga            Locally Removed           525 
+
+Added packaging support for installing the leap-fpga init 
+script and various associated changes. Since dh_installinit
+would not restrict its changes to the leap-platforms-bin
+package, the pre/post,install/rm operations have been
+manually added to the relevant scripts. The actual install
+of leap-fpga-ctrl and related files are also still done by 
+rules in Makefile.am rather than via debhelper scripts.

@@ -1,4 +1,4 @@
 /etc/leap
-/usr/share/leap
+/etc/init.d
 /usr/share/leap/scripts
 /var/lock/leap

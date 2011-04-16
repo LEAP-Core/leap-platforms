@@ -1,0 +1,65 @@
+#! /bin/sh
+# Copyright (c) 2008 Intel Corp.  All rights reserved.
+#
+# Author: Michael Adler
+#
+# /etc/init.d/leap-fpga
+#
+# description: init script for resetting LEAP FPGA state
+### BEGIN INIT INFO
+# Provides:          leap-fpga
+# Required-Start:    $remote_fs
+# Required-Stop:
+# Default-Start:     1 2 3 5 S
+# Default-Stop:
+# X-UnitedLinux-Default-Enabled: yes
+# Description:       reset the FPGA for LEAP
+### END INIT INFO
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+bindir=@bindir@
+localstatedir=@localstatedir@
+
+lockdir=${localstatedir}/lock/leap
+
+# See how we were called.
+case "$1" in
+  start)
+	echo "Resetting FPGA state"
+        if [ ! -d ${lockdir} ]
+        then
+            mkdir -p ${lockdir}
+        fi
+        rm -rf ${lockdir}/*
+	exit 0
+	;;
+  b)
+        $0 start
+        exit $?
+        ;;
+  stop)
+        $0 start
+        exit $?
+        ;;
+
+  restart)
+        $0 stop
+        $0 start
+        exit $?
+        ;;
+
+  force-reload)
+        exit 0
+        ;;
+
+  status)
+        ${bindir}/leap-fpga-ctrl --status
+        exit 0
+	;;
+
+  *)
+	echo "Usage: $0 {start|status|stop|restart|reload}"
+	exit 1
+        ;;
+esac

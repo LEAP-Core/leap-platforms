@@ -115,7 +115,11 @@ binary-common:
 #	dh_installpam
 #	dh_installmime
 #	dh_python
-#	dh_installinit
+
+#       Was unable to get the following to do what I wanted,
+#       so the init control was added manually.
+#	dh_installinit --package=leap-platforms-bin --name=leap-fpga --onlyscripts
+
 #	dh_installcron
 #	dh_installinfo
 	dh_installman
