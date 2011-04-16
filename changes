@@ -12680,3 +12680,20 @@ these dirs when prefix=/usr.
 2) You need to manually configure the init script /etc/init.d/init-fpga-ctrl.
 On SUSE one can use chkconfig... On Ubuntu it is TBD.
 
+
+----------
+joel        Date: Fri Apr 15 20:35:37 EDT 2011  CSN: CSN-leap-platforms-525
+                  Sat Apr 16 00:35:37 UTC 2011
+
+
+Directory debian
+ changelog                 Locally Modified          524 
+
+Directory admin/packages
+ leap-platforms            Locally Added               - 
+ platforms                 Locally Removed           524 
+
+Changed package name from 'platforms' to 'leap-platforms'. Even
+though these awb-based modules might be useful in other
+environments than leap, called them just 'platforms' seemed
+too grandious.

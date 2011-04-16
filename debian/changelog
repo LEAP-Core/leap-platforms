@@ -1,7 +1,7 @@
-leap-platforms (11.04~svn20110414r524+lucid) lucid; urgency=low
+leap-platforms (11.04~svn20110415r525+lucid) lucid; urgency=low
 
   [ Joel Emer ]
   * r514
      Start of working on v11.04 release
 
- -- Joel Emer <joel@emer.org>  Thu, 14 Apr 2011 06:45:46 -0400
+ -- Joel Emer <joel@emer.org>  Fri, 15 Apr 2011 20:30:56 -0400
