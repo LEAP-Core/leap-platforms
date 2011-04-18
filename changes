@@ -12745,3 +12745,14 @@ package, the pre/post,install/rm operations have been
 manually added to the relevant scripts. The actual install
 of leap-fpga-ctrl and related files are also still done by 
 rules in Makefile.am rather than via debhelper scripts.
+
+----------
+kfleming    Date: Mon Apr 18 15:56:07 EDT 2011  CSN: CSN-leap-platforms-527
+                  Mon Apr 18 19:56:07 UTC 2011
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/sata-bluespec
+ XUPV5_SERDES.bsv          Locally Modified          526 
+
+
+Improved word synchronization in SERDES by fixing bug in the even/odd alignment conditions.  We now align correctly, but we witness spurious alignment events in the odd aligned case when we have back to back control symbols.  These are harmless, and this behavior can be modified. 
