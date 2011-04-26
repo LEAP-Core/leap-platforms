@@ -11,17 +11,6 @@ class = HTG-V5-PCIe
 # by the user after a successful reservation
 dev = /dev/pchnl
 
-# Optional field: programming cable for writing bitfile to FPGA
-prog-cable = /dev/windrvr6
-
-# Optional field: hot-plug controller for enabling/disabling while programming
-power-ctrl = /sys/bus/pci/slots/1/power
-
-# Optional kernel module.  If specified, the module will be loaded after
-# programming the device and unloaded when the device is released.
-kernel-module-name = pchnl
-kernel-module-path = /usr/hasim/kernel/pchnl.ko
-
 [ACP.2]
 class = ACP
 dev = /dev/acp2

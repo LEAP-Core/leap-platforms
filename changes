@@ -12756,3 +12756,25 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/sat
 
 
 Improved word synchronization in SERDES by fixing bug in the even/odd alignment conditions.  We now align correctly, but we witness spurious alignment events in the odd aligned case when we have back to back control symbols.  These are harmless, and this behavior can be modified. 
+
+----------
+mcadler     Date: Tue Apr 26 15:55:23 EDT 2011  CSN: CSN-leap-platforms-528
+                  Tue Apr 26 19:55:23 UTC 2011
+
+
+Directory tools/platforms/leap-fpga-ctrl
+ leap-fpga-ctrl.c          Locally Modified          527 
+
+Directory tools/platforms/leap-fpga-ctrl/scripts
+ HTG-V5-PCIe               Locally Modified          527 
+
+Directory tools/platforms/leap-fpga-ctrl/etc
+ config-sample             Locally Modified          527 
+
+Remove all PCIe power control, driver loading and programming cable control
+from the C program.  Device-specific control is now in the script.  A number
+of fields are now dropped from the configuration file.
+
+HTG-V5-PCIe now handles its own kernel driver loading and PCIe bus control.
+It also can serve as a template for shell scripts running in a setuid root
+environment.  (E.g. -p switch to /bin/sh and making sure PATH is clean.)

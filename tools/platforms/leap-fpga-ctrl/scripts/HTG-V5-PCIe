@@ -1,8 +1,13 @@
-#!/bin/sh
+#!/bin/sh -p
 
 ##
 ## Configuration script for HTG-V5-PCIe FPGA boards.
 ##
+
+# Keep user from messing with PATH when running as root
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+export PATH
+unset LD_LIBRARY_PATH
 
 function usage()
 {
@@ -17,12 +22,32 @@ fi
 arg_command="$1"
 arg_driver="$2"
 
+# Hot-plug controller for enabling/disabling while programming
+power_ctrl="/sys/bus/pci/slots/1/power"
+
+# Kernel module
+kernel_module_path="/usr/hasim/kernel/pchnl.ko"
+kernel_module_name=`basename $kernel_module_path | sed -e 's/.[^.]*$//'`
+
 case "$arg_command" in
   program)
     ##
     ## Prepare the FPGA for programming.  Turns off the PCIe bus.
     ##
-    echo "Programming device: $2"
+    if [ "`grep "^${kernel_module_name} " /proc/modules`" != "" ]; then
+        echo "Unloading kernel driver..."
+        rmmod $kernel_module_path  
+    fi
+
+    if [ "`cat $power_ctrl`" != "0" ]; then
+        echo "Turn off PCIe bus power..."
+        echo 0 > $power_ctrl
+    fi
+
+    # Let the bus settle
+    sleep 2
+
+    echo "Programming device: ${arg_driver}"
     ;;
 
   activate)
@@ -30,6 +55,32 @@ case "$arg_command" in
     ## Activate the FPGA following programming.  Turn on the PCIe bus and load
     ## the kernel driver.
     ##
-    echo "Activating device: $2"
+    if [ "`cat $power_ctrl`" != "1" ]; then
+        echo "Turn on PCIe bus power..."
+        echo 1 > $power_ctrl
+    fi
+
+    # Let the bus settle
+    sleep 2
+
+    # Load the kernel driver
+    if [ "`grep "^${kernel_module_name} " /proc/modules`" = "" ]; then
+        echo "Loading kernel driver..."
+        insmod $kernel_module_path
+    fi
+
+    # Wait for device to appear
+    trips=0
+    while [ ! -c ${arg_driver} ]; do
+        trips=`expr $trips + 1`
+        if [ $trips -eq 15 ]; then
+            echo "Device driver ${kernel_module_path} load failure"
+            exit 1
+        fi
+        sleep 1
+    done
+
+    # Give user access to the device
+    echo "Activating device: ${arg_driver}"
     ;;
 esac

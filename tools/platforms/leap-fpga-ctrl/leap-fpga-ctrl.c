@@ -67,10 +67,6 @@ static int cfg_id = 0;
 static char *cfg_name = NULL;
 static char *cfg_class = NULL;
 static char *cfg_fpga_dev = NULL;
-static char *cfg_power_ctrl = NULL;
-static char *cfg_prog_cable = NULL;
-static char *cfg_kernel_module_name = NULL;
-static char *cfg_kernel_module_path = NULL;
 static char cfg_res_file[1024];
 
 
@@ -101,30 +97,77 @@ void state_print(FILE *f, FPGA_STATE_T state)
 }
 
 
-void do_system(char *cmd, char *arg)
+// ========================================================================
+//
+// Invoke configuration helper script
+//
+// ========================================================================
+
+void invoke_helper_script(FPGA_STATE_T state)
 {
     pid_t pid;
+    struct stat statb;
+    char script[1024];
+    char *cmd;
+
+    //
+    // Not all state changes cause the script to be run
+    //
+    switch (state)
+    {
+      case STATE_PROGRAM:
+        cmd = "program";
+        break;
+
+      case STATE_ACTIVE:
+        cmd = "activate";
+        break;
+
+      default:
+        return;
+    }
+
+    if ((strlen(CONFIG_DIR) + strlen(cfg_class) + 1) >= sizeof(script))
+    {
+        error(1, 0, "Configuration script path too long");
+    }
+
+    strcpy(script, CONFIG_DIR);
+    strcat(script, cfg_class);
+
+    // Does the file exist?
+    if ((stat(script, &statb) == -1) ||
+        ! S_ISREG(statb.st_mode))
+    {
+        return;
+    }
 
     pid = fork();
     if (pid == -1) error(1, 0, "fork() failed");
 
     if (pid != 0)
     {
-        // Parent
+        // Parent waits for the child to exit and checks status
         int status;
         wait(&status);
         if (WEXITSTATUS(status) != 0)
         {
-            fprintf(stderr, "Exit status %d from \"%s %s\"\n",
-                    WEXITSTATUS(status),
-                    cmd, arg);
+            error(1, 0, "%s - exit status %d", script, WEXITSTATUS(status));
         }
     }
     else
     {
         // Child
-        execl(cmd, cmd, arg, NULL);
-        exit(1);
+        if (cfg_fpga_dev != NULL)
+        {
+            execl(script, script, cmd, cfg_fpga_dev, NULL);
+        }
+        else 
+        {
+            execl(script, script, cmd, NULL);
+        }
+
+        error(1, errno, "Failed to execute script %s", script);
     }
 }
 
@@ -173,10 +216,6 @@ void cfg_load_dev(int id)
     cfg_name = sec;
     cfg_class = cfg_get_str(sec, "class");
     cfg_fpga_dev = cfg_get_str(sec, "dev");
-    cfg_power_ctrl = cfg_get_str(sec, "power-ctrl");
-    cfg_prog_cable = cfg_get_str(sec, "prog-cable");
-    cfg_kernel_module_name = cfg_get_str(sec, "kernel-module-name");
-    cfg_kernel_module_path = cfg_get_str(sec, "kernel-module-path");
 
     // Device-specific reservation lock file
     if (strlen(RES_DIR) + strlen(sec) + 1 > sizeof(cfg_res_file))
@@ -462,216 +501,6 @@ void current_reservation_state(FILE *of, FPGA_SHOW_STATE_T show)
 
 
 //
-// kernel_driver_is_loaded --
-//   Return true if the kernel driver is loaded
-//
-int kernel_driver_is_loaded()
-{
-    int is_loaded = 0;
-    char mod_name[128];
-    FILE *mf = fopen("/proc/modules", "r");
-
-    if (cfg_kernel_module_name == NULL) return(1);
-
-    mod_name[sizeof(mod_name) - 1] = 0;
-
-    if (mf == NULL) error(1, 0, "Failed to open /proc/modules");
-
-    while (fscanf(mf, "%20s %*[^\n]", mod_name)> 0)
-    {
-        if (strcmp(mod_name, cfg_kernel_module_name) == 0)
-        {
-            is_loaded = 1;
-            break;
-        }
-    }
-
-    fclose(mf);
-
-    return is_loaded;
-}
-
-
-//
-// set_power_state --
-//   Tell the kernel to enable or disable the FPGA board's bus (e.g. PCIe
-//   hot swap).
-//
-void set_power_state(FPGA_STATE_T state)
-{
-    char req;
-    int f;
-    struct stat statb;
-
-    // Is this a system with power control?
-    if (cfg_power_ctrl == NULL) return;
-
-    if (stat(cfg_power_ctrl, &statb) == -1)
-    {
-        error(1, errno, "Power control %s", cfg_power_ctrl);
-    }
-
-    switch (state)
-    {
-      case STATE_PROGRAM:
-        req = '0';
-        break;
-      case STATE_ACTIVE:
-        req = '1';
-        break;
-      default:
-        error(1, 0, "Unexpected argument to set_power_state()");
-    }
-
-
-    if (state == STATE_PROGRAM)
-    {
-        //
-        // Make sure the kernel driver is unloaded
-        //
-        if (kernel_driver_is_loaded())
-        {
-            fprintf(stderr, "leap-fpga-ctrl: Unloading kernel driver...\n");
-            do_system("/sbin/rmmod", cfg_kernel_module_path);
-        }
-    }
-
-
-    //
-    // Change the power state
-    //
-    int retries = 0;
-    while (1)
-    {
-        int hadError = 0;
-        char powerState;
-
-        //
-        // Is the bus already in the state we want?
-        //
-        f = open(cfg_power_ctrl, O_RDONLY);
-        if (f == -1) error(1, 0, "Failed to open power control file %s", cfg_power_ctrl);
-        if (read(f, &powerState, 1) != 1)
-        {
-            fprintf(stderr, "Read failed from power control file %s\n", cfg_power_ctrl);
-            hadError = 1;
-        }
-        close(f);
-
-        if ((powerState == req) && ! hadError)
-        {
-            // Done
-            fprintf(stderr, "leap-fpga-ctrl: Bus power is %s...\n",
-                   (req == '0') ? "off" : "on");
-            break;
-        }
-
-        if (retries == 0)
-        {
-            fprintf(stderr, "leap-fpga-ctrl: Turing %s bus power...\n",
-                   (req == '0') ? "off" : "on");
-        }
-
-        //
-        // Write request
-        //
-        f = open(cfg_power_ctrl, O_WRONLY);
-        if (f == -1) error(1, 0, "Failed to open power control file %s", cfg_power_ctrl);
-        if (write(f, &req, 1) != 1)
-        {
-            fprintf(stderr, "leap-fpga-ctrl: errno = %d\n", errno);
-            fprintf(stderr, "Write failed to power control file %s\n", cfg_power_ctrl);
-            hadError = 1;
-        }
-        close(f);
-
-        //
-        // Let bus settle
-        //
-        sleep(2);
-
-        retries += 1;
-        if (retries >= 10)
-        {
-            error(1, 0, "Giving up");
-        }
-
-        if (hadError)
-        {
-            fprintf(stderr, "Retrying...\n");
-        }
-    }
-
-    if (state == STATE_ACTIVE)
-    {
-        int trips;
-
-        //
-        // Make sure kernel driver is loaded
-        //
-        if (! kernel_driver_is_loaded())
-        {
-            fprintf(stderr, "leap-fpga-ctrl: Loading kernel driver...\n");
-            do_system("/sbin/insmod", cfg_kernel_module_path);
-        }
-
-        //
-        // Make the kernel driver accessible only to the current user
-        //
-        trips = 0;
-        if (cfg_fpga_dev != NULL)
-        {
-            while (chmod(cfg_fpga_dev, 00600) != 0)
-            {
-                trips += 1;
-                if (trips == 15)
-                {
-                    error(1, 0, "Kernel driver never built device file %s", cfg_fpga_dev);
-                }
-                sleep(1);
-            }
-
-            chown(cfg_fpga_dev, getuid(), -1);
-        }
-    }
-}
-
-
-//
-// set_prog_cable_access --
-//   Pass true to enable and false to disable user access to the programming
-//   cable.
-//
-void set_prog_cable_access(int user_access, int quiet)
-{
-    int prot = user_access ? 00666 : 00444;
-    char *msg = user_access ? "Enabling" : "Disabling";
-    struct stat statb;
-
-    // Programming cable to control?
-    if (cfg_prog_cable == NULL) return;
-
-    if (stat(cfg_prog_cable, &statb) == -1)
-    {
-        error(1, errno, "Programming cable %s", cfg_prog_cable);
-    }
-
-    if ((statb.st_mode & 00777) != prot)
-    {
-        // Protection isn't what we want.  Change it.
-        if (! quiet)
-        {
-            fprintf(stderr, "leap-fpga-ctrl: %s programming cable...\n", msg);
-        }
-        if (chmod(cfg_prog_cable, prot) == -1)
-        {
-            error(1, errno, "Failed to change protection of %s", cfg_prog_cable);
-        }
-    }
-}
-
-
-//
 // set_fpga_device_access --
 //   Pass true to enable and false to disable user access to the fpga device.
 //
@@ -690,7 +519,7 @@ void set_fpga_device_access(int user_access, int quiet)
         error(1, errno, "FPGA device %s", cfg_fpga_dev);
     }
 
-    if ((statb.st_mode & 00777) != prot)
+    if (((statb.st_mode & 00777) != prot) || (statb.st_uid != tgt_uid))
     {
         // Protection isn't what we want.  Change it.
         if (! quiet)
@@ -759,7 +588,6 @@ void reserve(char *class)
         error(1, 0, "Failed to find free device matching requested class");
     }
 
-    set_prog_cable_access(0, 0);
     set_fpga_device_access(0, 0);
 
     // Print the device ID.  Scripts invoking this program will use the device
@@ -779,9 +607,8 @@ void reserve(char *class)
 void program_dev()
 {
     change_current_reservation(STATE_PROGRAM, NULL);
-    set_power_state(STATE_PROGRAM);
-    set_prog_cable_access(1, 0);
     set_fpga_device_access(0, 0);
+    invoke_helper_script(STATE_PROGRAM);
 }
 
 //
@@ -808,40 +635,9 @@ void configure(const char* script)
 //
 void activate_dev()
 {
-    struct stat statb;
-    char script[1024];
-
     change_current_reservation(STATE_ACTIVE, NULL);
-    set_prog_cable_access(0, 0);
+    invoke_helper_script(STATE_ACTIVE);
     set_fpga_device_access(1, 0);
-    set_power_state(STATE_ACTIVE);
-
-    if ((strlen(CONFIG_DIR) + strlen(cfg_class) + 1) >= sizeof(script))
-    {
-        error(1, 0, "Configuration script path too long");
-    }
-
-    strcpy(script, CONFIG_DIR);
-    strcat(script, cfg_class);
-
-    // Does the file exist?
-    if ((stat(script, &statb) == -1) ||
-        ! S_ISREG(statb.st_mode))
-    {
-        return;
-    }
-
-    if (cfg_fpga_dev != NULL)
-    {
-        execl(script, script, "activate", cfg_fpga_dev, NULL);
-    }
-    else 
-    {
-        execl(script, script, "activate", NULL);
-    }
-
-    // we don't return from here
-    error(1, errno, "Failed to execute script %s", script);
 }
 
 
@@ -856,7 +652,6 @@ void activate_dev()
 void drop_reservation()
 {
     change_current_reservation(STATE_FREE, NULL);
-    set_prog_cable_access(0, 0);
     set_fpga_device_access(0, 0);
 }
 
@@ -872,7 +667,6 @@ void drop_reservation()
 void reset()
 {
     change_current_reservation(STATE_RESET, NULL);
-    set_prog_cable_access(0, 1);
     set_fpga_device_access(0, 1);
 }
 
@@ -887,14 +681,6 @@ void get_config(char *req)
         printf("%s\n", cfg_fpga_dev);
     else if (! strcmp(req, "id"))
         printf("%d\n", cfg_id);
-    else if (! strcmp(req, "prog-cable"))
-        printf("%s\n", cfg_prog_cable);
-    else if (! strcmp(req, "power_ctrl"))
-        printf("%s\n", cfg_power_ctrl);
-    else if (! strcmp(req, "kernel-module-name"))
-        printf("%s\n", cfg_kernel_module_name);
-    else if (! strcmp(req, "kernel-module-path"))
-        printf("%s\n", cfg_kernel_module_path);
     else
         error(1, 0, "Unexpected getconfig request (%s)", req);
 }
