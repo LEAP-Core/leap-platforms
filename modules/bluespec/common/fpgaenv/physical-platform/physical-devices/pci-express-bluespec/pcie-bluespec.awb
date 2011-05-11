@@ -13,6 +13,7 @@
 %sources -t NGC -v PRIVATE pcie_endpoint.ngc
 %sources -t XCF -v PRIVATE pcie-device.xcf
 %sources -t VERILOG -v PRIVATE pcie_endpoint.v
+%sources -t VERILOG -v PRIVATE endpoint_blk_plus_v1_14.v
 %sources -t VERILOG -v PRIVATE pcie_bury.v
 %sources -t UCF -v PRIVATE pcie-device.ucf
 

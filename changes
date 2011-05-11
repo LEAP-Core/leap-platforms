@@ -12778,3 +12778,18 @@ of fields are now dropped from the configuration file.
 HTG-V5-PCIe now handles its own kernel driver loading and PCIe bus control.
 It also can serve as a template for shell scripts running in a setuid root
 environment.  (E.g. -p switch to /bin/sh and making sure PATH is clean.)
+
+----------
+kfleming    Date: Tue May 10 20:30:52 EDT 2011  CSN: CSN-leap-platforms-529
+                  Wed May 11 00:30:52 UTC 2011
+
+
+Directory .
+ Makefile.in               Locally Modified          528 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express-bluespec
+ pcie-bluespec.awb         Locally Modified          528 
+ endpoint_blk_plus_v1_14.v Locally Added               0 
+
+
+Hacked around bluespec's renaming of the pcie device primitive.
