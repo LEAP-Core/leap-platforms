@@ -1,0 +1,45 @@
+#!/bin/sh -p
+
+##
+## Configuration script for HTG-V5-PCIe FPGA boards.
+##
+
+# Keep user from messing with PATH when running as root
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+export PATH
+unset LD_LIBRARY_PATH
+
+function usage()
+{
+    echo "Usage: $0 <program|activate> <driver>"
+    exit 1
+}
+
+if [ $# -ne 2 ]; then
+    usage
+fi
+
+arg_command="$1"
+arg_driver="$2"
+
+
+case "$arg_command" in
+  program)
+    echo "Programming device XUPV5\n"
+    ;;
+
+  activate)
+
+    ## Magic shell values
+   echo "Configuring PCI-E"
+
+   setpci -d b100:b5ce COMMAND=7
+   setpci -d b100:b5ce CACHE_LINE_SIZE=10
+   setpci -d b100:b5ce BASE_ADDRESS_0=fb800000
+   setpci -d b100:b5ce BASE_ADDRESS_1=fe000000
+   setpci -d b100:b5ce BASE_ADDRESS_2=fc000000
+   setpci -d b100:b5ce ROM_ADDRESS=fe800000
+
+
+    ;;
+esac

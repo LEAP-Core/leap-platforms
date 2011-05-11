@@ -12793,3 +12793,15 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci
 
 
 Hacked around bluespec's renaming of the pcie device primitive.
+
+----------
+kfleming    Date: Wed May 11 10:30:56 EDT 2011  CSN: CSN-leap-platforms-530
+                  Wed May 11 14:30:56 UTC 2011
+
+
+Directory tools/platforms/leap-fpga-ctrl/scripts
+ XUPV5                     Locally Added               0 
+
+
+Added configuration file for XUPv5.  This config file will not work on all machines, but serves as a template. 
+
