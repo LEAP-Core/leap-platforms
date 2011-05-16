@@ -12805,3 +12805,16 @@ Directory tools/platforms/leap-fpga-ctrl/scripts
 
 Added configuration file for XUPv5.  This config file will not work on all machines, but serves as a template. 
 
+
+----------
+kfleming    Date: Mon May 16 10:07:50 EDT 2011  CSN: CSN-leap-platforms-531
+                  Mon May 16 14:07:50 UTC 2011
+
+
+Directory modules/bluespec/tests/NullConnectedApp
+ AudioProcessor.cpp        Locally Modified          530 
+ AudioProcessor.h          Locally Modified          530 
+
+
+Removed references to channelio so that this null connected
+application can be used in other testing.

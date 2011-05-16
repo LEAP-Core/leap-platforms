@@ -20,13 +20,12 @@ CONNECTED_APPLICATION_CLASS::~CONNECTED_APPLICATION_CLASS()
 void
 CONNECTED_APPLICATION_CLASS::Init()
 {
-  channelio = CHANNELIO_CLASS::getPTR();
+
 }
 
 // main
 void
 CONNECTED_APPLICATION_CLASS::Main()
 {
-  channelio->runTest();
-  exit(0);
+
 }
