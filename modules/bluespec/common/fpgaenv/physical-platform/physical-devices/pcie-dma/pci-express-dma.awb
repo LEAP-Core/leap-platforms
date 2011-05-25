@@ -1,0 +1,12 @@
+%name ML605 PCIe DMA Physical Device
+%desc ML605 PCIe DMA Physical Device
+
+%provides pcie_device
+
+%requires pcie_core
+
+%sources -t BSV     -v PUBLIC pcie_wrapper.bsv
+%sources -t VERILOG -v PRIVATE pcie_dma_app.v
+%sources -t VERILOG -v PRIVATE pcie_dma_device.v
+%sources -t VERILOG -v PRIVATE Xilinx_SyncFIFOLevel_512x64.v
+%sources -t NGC     -v PRIVATE Xilinx_SyncFIFOLevel_512x64.ngc
