@@ -12818,3 +12818,13 @@ Directory modules/bluespec/tests/NullConnectedApp
 
 Removed references to channelio so that this null connected
 application can be used in other testing.
+
+----------
+mcadler     Date: Wed May 25 23:00:03 EDT 2011  CSN: CSN-leap-platforms-533
+                  Thu May 26 03:00:03 UTC 2011
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr2-sdram
+ ddr2-sdram-sync-tig.ucf   Locally Modified          532 
+
+Update timing constraints for latest Bluespec SyncFIFOs.
