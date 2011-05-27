@@ -127,12 +127,18 @@ module mkUserClock#(Integer inFreq, Integer clockMultiplier, Integer clockDivide
 
     // FPGA synthesis...
 
-    if (mult ==  div)
-        clk <- mkUserClock_Same;
-    else if (mult == 1) // We can use a divider here....
-        clk <- mkUserClock_Divider(div);
-    else
-        clk <- mkUserClock_Ratio(inFreq, mult, div);
+    `ifdef VIRTEX6
+	clk <- mkUserClock_Ratio_MMCM(inFreq, mult, div);
+    `else
+    
+	if (mult ==  div)
+    	    clk <- mkUserClock_Same;
+        else if (mult == 1) // We can use a divider here....
+	    clk <- mkUserClock_Divider(div);
+        else
+	    clk <- mkUserClock_Ratio(inFreq, mult, div);
+    `endif
+    
   `else
 
     // Clock ratios make no sense in Bluesim
