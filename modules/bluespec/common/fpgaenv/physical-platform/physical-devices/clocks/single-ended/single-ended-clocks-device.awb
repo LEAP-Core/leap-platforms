@@ -4,7 +4,7 @@
 
 %provides clocks_device
 
-%sources -t BSV -v PUBLIC  single-ended-clocks-vhdl-import.bsv
+%sources -t BSV -v PUBLIC  single-ended-clocks-import.bsv
 %sources -t BSV -v PUBLIC  single-ended-clocks-device.bsv
 %sources -t VERILOG -v PRIVATE single-ended-clocks-device.v
 
