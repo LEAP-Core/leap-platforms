@@ -167,8 +167,8 @@ module mkPCIExpressDevice#(SOFT_RESET_TRIGGER softResetTrigger)
     Bool ready = (state == PCIE_DEVICE_STATE_ready);
 
     // Synchronizers from PCIE to Bluespec.    
-    Reg#(PCIE_CSR_DATA)          sync_csr_h2f_reg0_read_r
-                              <- mkSyncReg(?, prim_pci.pcie_clk, prim_pci.pcie_rst, bsv_clk);
+    SyncFIFOIfc#(PCIE_CSR_DATA) sync_csr_h2f_reg0_read_q
+                              <- mkSyncFIFO(2, prim_pci.pcie_clk, prim_pci.pcie_rst, bsv_clk);
     
     SyncFIFOIfc#(PCIE_CSR_DATA)  sync_csr_read_resp_q
                               <- mkSyncFIFO(2, prim_pci.pcie_clk, prim_pci.pcie_rst, bsv_clk);
@@ -315,7 +315,20 @@ module mkPCIExpressDevice#(SOFT_RESET_TRIGGER softResetTrigger)
 
     rule sync_csr_h2f_reg0_read (True);
     
-        sync_csr_h2f_reg0_read_r <= swapEndian(prim_pci.csr_h2f_reg0_read());
+        sync_csr_h2f_reg0_read_q.enq(swapEndian(prim_pci.csr_h2f_reg0_read()));
+
+    endrule
+        
+    //
+    // copy_csr_reg0 --
+    //    Move the copy of CSR reg 0 to the Bluespec clock domain.
+    //
+    Reg#(PCIE_CSR_DATA) csr_reg0_local <- mkRegU();
+
+    rule copy_csr_reg0 (True);
+
+        sync_csr_h2f_reg0_read_q.deq();
+        csr_reg0_local <= sync_csr_h2f_reg0_read_q.first();
 
     endrule
 
@@ -550,8 +563,13 @@ module mkPCIExpressDevice#(SOFT_RESET_TRIGGER softResetTrigger)
         // System CSR
         
         interface SYSTEM_CSR systemCSR;
-        
-            method _read = sync_csr_h2f_reg0_read_r;
+
+            method PCIE_CSR_DATA _read();
+
+                return csr_reg0_local;
+
+            endmethod
+
         
             method Action _write(PCIE_CSR_DATA d) if (ready);
 

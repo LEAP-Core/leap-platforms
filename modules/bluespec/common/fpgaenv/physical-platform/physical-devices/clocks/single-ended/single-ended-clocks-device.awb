@@ -12,6 +12,4 @@
 
 %param CRYSTAL_CLOCK_FREQ 50 "Input (Crystal) Clock Frequency"
 
-%param --global MODEL_CLOCK_MULTIPLIER 3   "Clock multiplier (integer).  Model clock freq = crystal freq * (multiplier / divider)."
-%param --global MODEL_CLOCK_DIVIDER    2   "Clock divider (integer).  Model clock freq = crystal freq * (multiplier / divider)."
 %param --global RESET_ACTIVE_HIGH      0   "Reset active level polarity: 0 - negative, 1 - positive."

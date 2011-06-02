@@ -12828,3 +12828,44 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr
  ddr2-sdram-sync-tig.ucf   Locally Modified          532 
 
 Update timing constraints for latest Bluespec SyncFIFOs.
+
+----------
+mcadler     Date: Thu Jun  2 15:21:23 EDT 2011  CSN: CSN-leap-platforms-536
+                  Thu Jun  2 19:21:23 UTC 2011
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express-new
+ pci-express-device.bsv    Locally Modified          535 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/simulation
+ sim-clocks-device.awb     Locally Modified          535 
+ sim-clocks-device.bsv     Locally Modified          535 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/null
+ null-clocks-device.awb    Locally Modified          535 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/differential
+ differential-clocks-device.awb Locally Modified          535 
+ differential-clocks-device.bsv Locally Modified          535 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/single-ended
+ single-ended-clocks-device.awb Locally Modified          535 
+ single-ended-clocks-device.bsv Locally Modified          535 
+ single-ended-clocks-device-altera.awb Locally Removed           535 
+ single-ended-clocks-device.vhd Locally Removed           535 
+ single-ended-clocks-device.v Locally Modified          535 
+
+- PCIe SyncReg failed with the latest Bluespec due to a change in timing.
+  Replaced with a SyncFIFO and HTG / Virtex 5 now works.
+
+- Fix single ended clocks check in.  I don't know how the code checked in last
+  week could have worked, syntactically.
+- Removed vhdl for single ended clock since it is replaced by Verilog.
+
+- Removed redundant MODEL_CLOCK_MULTIPLIER / MODEL_CLOCK_DIVIDER parameters
+  from a number of clock generators.  Use MODEL_CLOCK_FREQ and the PLL
+  parameters will be computed automatically.
+
+  NOTE: I did not go through the myriad old, rarely used, models and update
+  their clocks.  Some older models that specified PLL parameters explicitly
+  will now have their frequencies reset to the default.

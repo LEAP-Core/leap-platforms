@@ -1,4 +1,10 @@
-module single_ended_clocks_device #(RESET_ACTIVE_HIGH=0) (clk, rst_n, clk_out, rst_n_out);
+module single_ended_clocks_device(clk,
+                                  rst_n,
+                                  clk_out,
+                                  rst_n_out);
+
+  parameter RESET_ACTIVE_HIGH = 0;
+
   input clk;
   input rst_n;
   output clk_out;

@@ -79,7 +79,7 @@ module mkClocksDevice
     // STAGE 2: no DCM/PLL clock transformations for simulated clocks
     //
     
-    let pllClock <-  mkUserClock_PLL(`CRYSTAL_CLOCK_FREQ,`CRYSTAL_CLOCK_FREQ*`MODEL_CLOCK_MULTIPLIER/`MODEL_CLOCK_DIVIDER);
+    let pllClock <-  mkUserClock_PLL(`CRYSTAL_CLOCK_FREQ, `MODEL_CLOCK_FREQ);
 
     Clock userClock = pllClock.clk;
     Reset userReset = pllClock.rst;

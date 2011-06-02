@@ -91,11 +91,10 @@ module mkClocksDevice
     // STAGE 2: transform the clock using a DCM or PLL as requested by the user
     //
 
-    let userClockPackage <- mkUserClock(`CRYSTAL_CLOCK_FREQ,
-                                        `MODEL_CLOCK_MULTIPLIER,
-                                        `MODEL_CLOCK_DIVIDER,
-                                        clocked_by rawClock,
-                                        reset_by   rawReset);
+    let userClockPackage <- mkUserClockFromFrequency(`CRYSTAL_CLOCK_FREQ,
+                                                     `MODEL_CLOCK_FREQ,
+                                                     clocked_by rawClock,
+                                                     reset_by   rawReset);
     
     Clock userClock = userClockPackage.clk;
     Reset userReset = userClockPackage.rst;
