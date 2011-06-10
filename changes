@@ -12869,3 +12869,17 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clo
   NOTE: I did not go through the myriad old, rarely used, models and update
   their clocks.  Some older models that specified PLL parameters explicitly
   will now have their frequencies reset to the default.
+
+----------
+mcadler     Date: Thu Jun  9 23:22:52 EDT 2011  CSN: CSN-leap-platforms-537
+                  Fri Jun 10 03:22:52 UTC 2011
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ floating-point-accel.bsv  Locally Modified          536 
+
+Single to double precision FP conversion was picking from the wrong bits
+in the Alpha register.
+
+I don't like the Alpha-specific single precision register code being in the
+generic library, but that change can wait for another day.

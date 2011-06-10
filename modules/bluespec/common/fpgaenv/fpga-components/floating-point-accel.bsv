@@ -242,7 +242,7 @@ module mkUnguardedFPCvtStoD
     method Action operate(FP_INPUT in);
         let op = in.operandA;
         // 64-bit "single" to true single.
-        Bit#(32) true_s = {op[63], op[59:52], op[51:29]};
+        Bit#(32) true_s = {op[63:62], op[58:29]};
         fp.operate(true_s);
     endmethod
 
@@ -409,8 +409,9 @@ function Bit#(32) roundToSingle(Bit#(64) d);
 endfunction
 
 
+//
 // Single precision to double, Alpha-ISA style.
-
+//
 function Bit#(64) toDouble(Bit#(32) s);
-        return {toDoubleExp(s), s[22:0], 29'b0};
+    return {toDoubleExp(s), s[22:0], 29'b0};
 endfunction
