@@ -12883,3 +12883,18 @@ in the Alpha register.
 
 I don't like the Alpha-specific single precision register code being in the
 generic library, but that change can wait for another day.
+
+----------
+pellauer    Date: Tue Jun 14 14:58:45 EDT 2011  CSN: CSN-leap-platforms-538
+                  Tue Jun 14 18:58:45 UTC 2011
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/single-ended
+ single-ended-clocks-device-simulation.awb Locally Removed           537 
+ single-ended-clocks-device-simulation.bsv Locally Removed           537 
+ single-ended-clocks-device-verilog-simulation.bsv Locally Removed           537 
+ single-ended-clocks-device-simulation.v Locally Removed           537 
+
+
+All single-edged clock devices have now been unified under the main 
+single-edged clock device. FPGAEnvs will be updated in the next commit.
