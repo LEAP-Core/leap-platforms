@@ -18,6 +18,8 @@
 %private lutram.v
 %private user-clock-xilinx-virtex2.v
 
+%sources -t SDC -v PRIVATE xilinx.sdc
+
 %param --global COST_TABLE 1 "Xilinx place and route cost table"
 
 %param SYNTH 1            "Synthesize it to FPGAs"

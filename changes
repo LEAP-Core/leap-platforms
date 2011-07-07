@@ -12898,3 +12898,17 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clo
 
 All single-edged clock devices have now been unified under the main 
 single-edged clock device. FPGAEnvs will be updated in the next commit.
+
+----------
+mcadler     Date: Thu Jul  7 16:50:14 EDT 2011  CSN: CSN-leap-platforms-539
+                  Thu Jul  7 20:50:14 UTC 2011
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ xilinx.sdc                Locally Added               0 
+ hardware-fpga-components-virtex2.awb Locally Modified          538 
+ hardware-fpga-components-virtex5.awb Locally Modified          538 
+ hardware-fpga-components-virtex6.awb Locally Modified          538 
+
+Add Symplify-specific scripting to store LUTRAMs in LUTs.  I believe the syntax
+is correct, but am not 100% confident.

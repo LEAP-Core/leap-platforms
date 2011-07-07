@@ -15,6 +15,7 @@
 %private lutram.v
 
 %sources -t XCF -v PRIVATE xilinx.xcf
+%sources -t SDC -v PRIVATE xilinx.sdc
 
 %param --global COST_TABLE 1 "Xilinx place and route cost table"
 
