@@ -12912,3 +12912,24 @@ Directory modules/bluespec/common/fpgaenv/fpga-components
 
 Add Symplify-specific scripting to store LUTRAMs in LUTs.  I believe the syntax
 is correct, but am not 100% confident.
+
+----------
+kfleming    Date: Fri Jul 22 16:52:12 EDT 2011  CSN: CSN-leap-platforms-540
+                  Fri Jul 22 20:52:12 UTC 2011
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ shiftreg-sim.bsv          Locally Added               0 
+ shiftreg.bsv              Locally Added               0 
+ shiftreg.v                Locally Added               0 
+ hardware-fpga-components-arriaII.awb Locally Modified          539 
+ software-fpga-components.awb Locally Modified          539 
+ hardware-fpga-components-virtex2.awb Locally Modified          539 
+ hardware-fpga-components-virtex5.awb Locally Modified          539 
+ hardware-fpga-components-virtex6.awb Locally Modified          539 
+
+
+Added a shift register primitive to fpga-components.  This is useful
+in implementing delay lines and fifos, and may represent a more
+efficient implementation of some flavors/parameterizations of mkFIFO.
+

@@ -7,15 +7,18 @@
 
 %public bram.bsv bram-multi-read.bsv
 %public lutram.bsv
+%public lutram.bsv
 %public alu-support.bsv
 %public user-clock.bsv
 %public user-clock-altera.bsv
+%public shiftreg.bsv
 
 %sources -t BSV -v PUBLIC  clock-import.bsv
 %sources -t VERILOG -v PRIVATE clock_import.v
 
 %private Bram.v
 %private lutram.v
+%private shiftreg.v
 %private user-clock-altera-arriaII.v
 
 %param --global COST_TABLE 1 "Xilinx place and route cost table"

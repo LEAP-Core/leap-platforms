@@ -13,6 +13,8 @@
 %public clock-buffers.bsv
 %public floating-point-import.bsv
 %public floating-point-accel.bsv
+%public shiftreg.bsv
+
 
 %private Bram.v
 %private lutram.v
@@ -45,6 +47,7 @@
 %private fp_cvt_d_to_s.ngc
 %private fp_cvt_i_to_s.ngc
 %private fp_cvt_d_to_i.ngc
+%private shiftreg.v
 
 %sources -t XCF -v PRIVATE xilinx.xcf
 %sources -t SDC -v PRIVATE xilinx.sdc

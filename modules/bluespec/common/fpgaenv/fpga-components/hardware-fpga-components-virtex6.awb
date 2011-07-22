@@ -7,12 +7,15 @@
 
 %public bram.bsv bram-multi-read.bsv
 %public lutram.bsv
+%public shiftreg.bsv
+
 
 %public user-clock.bsv user-clock-mmcm-virtex6.bsv user-clock-sim.bsv
 %private user-clock-mmcm-virtex6.v clock_gen.v
 
 %private Bram.v
 %private lutram.v
+%private shiftreg.v
 
 %sources -t XCF -v PRIVATE xilinx.xcf
 %sources -t SDC -v PRIVATE xilinx.sdc

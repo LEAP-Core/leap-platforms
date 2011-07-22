@@ -10,11 +10,13 @@
 %public alu-support.bsv
 %public user-clock.bsv
 %public user-clock-xilinx.bsv
+%public shiftreg.bsv
 
 %sources -t BSV -v PUBLIC  clock-import.bsv
 %sources -t VERILOG -v PRIVATE clock_import.v
 
 %private Bram.v
+%private shiftreg.v
 %private lutram.v
 %private user-clock-xilinx-virtex2.v
 
