@@ -1,0 +1,23 @@
+set -xsthdpdir @TMP_XILINX_DIR@/xst_hdp/@APM_NAME@
+
+run
+-ifmt mixed
+-register_balancing yes
+-lc auto
+-reduce_control_sets auto
+-vlgincdir @BLUESPECDIR@/Verilog
+-ifn config/@APM_NAME@.prj
+-ofn @TMP_XILINX_DIR@/@APM_NAME@
+-ofmt NGC
+-p @FPGA_PART_XILINX@
+-top @APM_NAME@
+-sd {@HW_BUILD_DIR@}
+# [rfadeev] These XST options are used during coregen PCIe synthesis. Probably some of them can improve current XST build flow.
+#-use_dsp48 no
+#-bufg 0
+#-opt_mode SPEED
+#-opt_level 2
+#-max_fanout 100
+#-keep_hierarchy yes
+#-rtlview yes
+#-use_sync_reset yes

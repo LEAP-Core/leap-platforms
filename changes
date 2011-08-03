@@ -12933,3 +12933,29 @@ Added a shift register primitive to fpga-components.  This is useful
 in implementing delay lines and fifos, and may represent a more
 efficient implementation of some flavors/parameterizations of mkFIFO.
 
+
+----------
+kfleming    Date: Wed Aug  3 00:14:45 EDT 2011  CSN: CSN-leap-platforms-541
+                  Wed Aug  3 04:14:45 UTC 2011
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/ml605
+ serial/                   Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/ml605/serial
+ ml605-serial.cpp          Locally Added               0 
+ xilinx.ut                 Locally Added               0 
+ ml605-serial.h            Locally Added               0 
+ xilinx.sdf                Locally Added               0 
+ ml605-serial.awb          Locally Added               0 
+ ml605-serial.bsv          Locally Added               0 
+ ml605-serial.ucf          Locally Added               0 
+ ml605-serial.xst          Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/serial/ucf
+ serial-device-ucf-ml605.awb Locally Added               0 
+ serial-ml605.ucf          Locally Added               0 
+
+
+
+Created an ML605 platform with a serial communications channel attached to it.  The ML605 conveniently has a USB-to-UART connector on it.   

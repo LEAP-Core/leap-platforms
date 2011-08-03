@@ -1,0 +1,12 @@
+
+%name Serial Physical Device ml605 UCF 
+%desc Serial Physical Device ml605 UCF 
+
+%provides serial_device_ucf
+
+%sources -t UCF -v PUBLIC serial-ml605.ucf
+
+%param HW_FLOW_CONTROL 1 "Hardware Flow Control is Enabled"
+
+
+ 

@@ -1,0 +1,29 @@
+
+%name ML605 V6 platform with Serial
+%desc ML605 V6 platform with Serial
+
+%provides physical_platform
+
+%requires clocks_device
+%requires physical_platform_utils
+%requires serial_device
+
+%sources -t BSV -v PUBLIC  ml605-serial.bsv
+%sources -t H   -v PUBLIC  ml605-serial.h
+%sources -t CPP -v PRIVATE ml605-serial.cpp
+%sources -t UCF -v PRIVATE ml605-serial.ucf
+
+%sources -t UT  -v PRIVATE xilinx.ut
+%sources -t XST -v PRIVATE ml605-serial.xst
+%sources -t SDF -v PRIVATE xilinx.sdf
+
+%param --global MAKE_ALL_TARGET      "bit"       "Target of 'make all'.  Most likely bit, exe or vexe."
+
+%param FPGA_PART_XILINX   "xc6vlx240tff1156-1" "FPGA Part ID"
+%param FPGA_POSITION      2                    "FPGA Position (in Xilinx iMPACT)"
+%param MAP_OPTIONS        "-global_opt speed"  "Extra Xilinx Map Options"
+%param FPGA_TECHNOLOGY    "Virtex6"            "FPGA Technology (Synplify)"
+%param FPGA_PART_SYNPLIFY "XC6VLX240T"         "FPGA Part (Synplify)"
+%param FPGA_SPEED         "-1"                 "FPGA Speed Grade (Synplify)"
+%param FPGA_PACKAGE       "FF1156"             "FPGA Package (Synplify)"
+%param SYNTHESIS_TOOL     "xst"                "Synthesis tool, xst or synplify_pro supported"

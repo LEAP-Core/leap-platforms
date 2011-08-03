@@ -1,0 +1,6 @@
+// SERIAL LINES
+
+NET serialWires_serial_rx_serial_rx LOC=J24;
+NET serialWires_serial_tx LOC=J25;
+NET serialWires_serial_cts_serial_cts LOC=T23;
+NET serialWires_serial_rts LOC=T24;
