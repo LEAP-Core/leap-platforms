@@ -44,25 +44,31 @@ typedef TSub#(UMF_CHUNK_BITS,
 typedef struct
 {
     // Filler so packet header is the same size as a chunk.
-    Bit#(UMF_PACKET_HEADER_FILLER_BITS) filler;
+    Bit#(filler_bits) filler;
 
     // Reserved for use by the physical channel
-    UMF_PHY_CHANNEL_PVT phyChannelPvt;
+    Bit#(umf_phy_pvt)      phyChannelPvt;
 
-    UMF_CHANNEL_ID  channelID;
-    UMF_SERVICE_ID  serviceID;
-    UMF_METHOD_ID   methodID;
-    UMF_MSG_LENGTH  numChunks;
+    Bit#(umf_channel_id)   channelID;
+    Bit#(umf_service_id)   serviceID;
+    Bit#(umf_method_id)    methodID;
+    Bit#(umf_message_len)  numChunks;
 }
-UMF_PACKET_HEADER
+GENERIC_UMF_PACKET_HEADER#(numeric type umf_channel_id, numeric type umf_service_id,
+                           numeric type umf_method_id,  numeric type umf_message_len,
+                           numeric type umf_phy_pvt,    numeric type filler_bits)
+                   
     deriving (Eq, Bits);
 
+typedef GENERIC_UMF_PACKET_HEADER#(`UMF_CHANNEL_ID_BITS,`UMF_SERVICE_ID_BITS,`UMF_METHOD_ID_BITS,`UMF_MSG_LENGTH_BITS,`UMF_PHY_CHANNEL_RESERVED_BITS,UMF_PACKET_HEADER_FILLER_BITS) UMF_PACKET_HEADER;
 
 typedef union tagged
 {
-    UMF_PACKET_HEADER UMF_PACKET_header;
-    UMF_CHUNK         UMF_PACKET_dataChunk;
-} UMF_PACKET
-    deriving (Eq, Bits);
+    umf_packet_header UMF_PACKET_header;
+    umf_chunk         UMF_PACKET_dataChunk;
+} GENERIC_UMF_PACKET#(type umf_packet_header, type umf_chunk) 
+  deriving (Eq, Bits);
+
+typedef GENERIC_UMF_PACKET#(UMF_PACKET_HEADER,UMF_CHUNK) UMF_PACKET;
 
 `endif

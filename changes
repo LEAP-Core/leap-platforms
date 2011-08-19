@@ -12959,3 +12959,14 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ser
 
 
 Created an ML605 platform with a serial communications channel attached to it.  The ML605 conveniently has a USB-to-UART connector on it.   
+
+----------
+kfleming    Date: Fri Aug 19 14:47:09 EDT 2011  CSN: CSN-leap-platforms-542
+                  Fri Aug 19 18:47:09 UTC 2011
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian
+ umf-little-endian.bsv     Locally Modified          541 
+
+
+Made umf data types parametric.
