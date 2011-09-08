@@ -24,6 +24,7 @@
  *
  *****************************************************************************/
 
+
 // ****** Bluespec imports ******
 
 import Clocks::*;
@@ -44,6 +45,7 @@ interface PHYSICAL_DRIVERS;
 
     interface CLOCKS_DRIVER                     clocksDriver;
     interface PCIE_DRIVER                       pcieDriver;
+    interface PCIE_CLK_DEV			pcieClkDriver;
 
 endinterface
 
@@ -102,6 +104,7 @@ module mkPhysicalPlatform
 
         interface clocksDriver    = clocks_device.driver;
         interface pcieDriver      = pcie_device.pcie_driver;
+	interface pcieClkDriver	  = pcie_device.pcie_clk_device;
 
     endinterface
 

@@ -12970,3 +12970,29 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian
 
 
 Made umf data types parametric.
+
+----------
+mpellaue    Date: Thu Sep  8 16:49:23 EDT 2011  CSN: CSN-leap-platforms-543
+                  Thu Sep  8 20:49:23 UTC 2011
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/ml605/pcie-dma
+ ml605-v6-pcie-dma.awb     Locally Modified          542 
+ ml605-v6-pcie-dma.sdc     Locally Added               0 
+ ml605-v6-pcie-dma.bsv     Locally Modified          542 
+ ml605-v6-pcie-dma.xst     Locally Modified          542 
+ ml605-v6-pcie-dma.xcf     Locally Modified          542 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pcie-dma
+ BRAM64x512.v              Locally Added               0 
+ Xilinx_SyncFIFOLevel_512x64.v Locally Modified          542 
+ dma_sgl_loader.v          Locally Added               0 
+ BRAM64x512.ngc            Locally Added               0 
+ Xilinx_SyncFIFOLevel_512x64.ngc Locally Modified          542 
+ pcie_dma_device.v         Locally Modified          542 
+ pcie_dma_app.v            Locally Modified          542 
+ pci-express-dma.awb       Locally Modified          542 
+ pcie_wrapper.bsv          Locally Modified          542 
+
+
+* Merging Mikhail's updates to ML605 platform.

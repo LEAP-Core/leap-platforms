@@ -16,6 +16,7 @@
 
 %sources -t UT  -v PRIVATE xilinx.ut
 %sources -t XST -v PRIVATE ml605-v6-pcie-dma.xst
+%sources -t SDC -v PRIVATE ml605-v6-pcie-dma.sdc
 %sources -t SDF -v PRIVATE xilinx.sdf
 
 %param --global MAKE_ALL_TARGET      "bit"       "Target of 'make all'.  Most likely bit, exe or vexe."

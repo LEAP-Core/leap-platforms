@@ -10,3 +10,6 @@
 %sources -t VERILOG -v PRIVATE pcie_dma_device.v
 %sources -t VERILOG -v PRIVATE Xilinx_SyncFIFOLevel_512x64.v
 %sources -t NGC     -v PRIVATE Xilinx_SyncFIFOLevel_512x64.ngc
+%sources -t VERILOG -v PRIVATE BRAM64x512.v
+%sources -t NGC     -v PRIVATE BRAM64x512.ngc
+%sources -t VERILOG -v PRIVATE dma_sgl_loader.v

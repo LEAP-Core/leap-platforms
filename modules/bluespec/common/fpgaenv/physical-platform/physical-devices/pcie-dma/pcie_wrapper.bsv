@@ -47,6 +47,11 @@ interface PCIE_EXP#(numeric type lanes);
     method    Bit#(lanes) txn;
 endinterface: PCIE_EXP
 
+interface PCIE_CLK_DEV;
+    interface Clock pcie_clk;
+    interface Reset pcie_rst;
+endinterface
+
 interface PCIE_DRIVER;
     method ActionValue#(UMF_CHUNK) read();
     method Action write(UMF_CHUNK chunk);
@@ -56,11 +61,13 @@ interface VPCIE_Controller;
     method    Bool             soft_reset();
     interface PCIE_EXP#(8)     pcie_pins;
     interface PCIE_DRIVER      pcie_driver;
+    interface PCIE_CLK_DEV     pcie_clk_device;
 endinterface
 
 interface PCIE_Controller;
     interface PCIE_EXP#(8)     pcie_pins;
     interface PCIE_DRIVER      pcie_driver;
+    interface PCIE_CLK_DEV     pcie_clk_device;
 endinterface
 
 // ****** Modules ******
@@ -68,14 +75,21 @@ endinterface
 // vmkPCIEWrapper
 
 import "BVI" pcie_dma_device =
-module vmkPCIEWrapper#(Clock model_clk, Reset model_rst_n)(VPCIE_Controller);
+module vmkPCIEWrapper#(Clock model_clk, Reset model_rst)(VPCIE_Controller);
 
     default_clock no_clock;
     default_reset no_reset;
 
-    input_clock (model_clk)   = model_clk;
-    input_reset (model_rst_n) = model_rst_n;
+    input_clock (model_clk) = model_clk;
+    input_reset (model_rst_n) = model_rst;
 
+
+    interface PCIE_CLK_DEV pcie_clk_device;
+	output_clock pcie_clk(pcie_clk);
+	output_reset pcie_rst(pcie_rst_n) clocked_by(pcie_clk_device_pcie_clk);
+    endinterface
+
+    
     method SOFT_reset          soft_reset();
 
     interface PCIE_EXP pcie_pins;
@@ -89,9 +103,10 @@ module vmkPCIEWrapper#(Clock model_clk, Reset model_rst_n)(VPCIE_Controller);
         method    tx_n         txn                                                     clocked_by(no_clock)                reset_by(no_reset);
     endinterface
 
+
     interface PCIE_DRIVER pcie_driver;
-        method    DATA_read    read()            enable(EN_read)  ready(RDY_read)  clocked_by(model_clk);
-        method                 write(DATA_write) enable(EN_write) ready(RDY_write) clocked_by(model_clk);
+        method    DATA_read    read()            enable(EN_read)  ready(RDY_read)  clocked_by(pcie_clk_device_pcie_clk);
+        method                 write(DATA_write) enable(EN_write) ready(RDY_write) clocked_by(pcie_clk_device_pcie_clk);
     endinterface
 
     schedule (pcie_pins_pcie_clk_p, pcie_pins_pcie_clk_n, pcie_pins_pcie_reset_n, pcie_pins_rxp, pcie_pins_rxn, pcie_pins_txp, pcie_pins_txn, soft_reset) CF
@@ -105,9 +120,9 @@ endmodule: vmkPCIEWrapper
 
 // mkPCIEWrapper
 
-module mkPCIEWrapper#(SOFT_RESET_TRIGGER softResetTrigger, Clock model_clk, Reset model_rst_n)(PCIE_Controller);
+module mkPCIEWrapper#(SOFT_RESET_TRIGGER softResetTrigger, Clock model_clk, Reset model_rst)(PCIE_Controller);
 
-    let v_pcie_dma_dev <- vmkPCIEWrapper(model_clk, model_rst_n);
+    let v_pcie_dma_dev <- vmkPCIEWrapper(model_clk, model_rst);
 
     rule proceed_soft_reset(v_pcie_dma_dev.soft_reset());
         softResetTrigger.reset();
@@ -116,6 +131,7 @@ module mkPCIEWrapper#(SOFT_RESET_TRIGGER softResetTrigger, Clock model_clk, Rese
     return interface PCIE_Controller
                interface pcie_pins   = v_pcie_dma_dev.pcie_pins;
                interface pcie_driver = v_pcie_dma_dev.pcie_driver;
+	       interface pcie_clk_device= v_pcie_dma_dev.pcie_clk_device;
            endinterface;
 
 endmodule: mkPCIEWrapper

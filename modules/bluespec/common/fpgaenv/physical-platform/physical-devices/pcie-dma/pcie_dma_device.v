@@ -30,8 +30,6 @@
 module pcie_dma_device
 (
     // Bluespec interface
-    input             model_clk,
-    input             model_rst_n,
 
     input             EN_read,
     output            RDY_read,
@@ -54,16 +52,22 @@ module pcie_dma_device
     output [ 7 : 0 ]  tx_p,
     output [ 7 : 0 ]  tx_n,
 
-    output            pcie_fake_clk
+    output            pcie_fake_clk,
+
+    input	      model_clk,
+    input	      model_rst_n,
+
+    output	      pcie_clk,
+    output	      pcie_rst_n
 
 );
 
 // Clock and Reset
-wire            ref_clk;
-wire            pcie_reset_n_c;
-wire            user_clk;
-wire            user_rst_n;
+wire		ref_clk;
+wire		pcie_reset_n_c;
 
+
+//PCIe transaction layer signals
 // Common Transaction Interface
 wire            trn_clk;
 wire            trn_reset_n;
@@ -182,9 +186,15 @@ FDCP #(.INIT(1'b1)) trn_reset_n_i
     .PRE(1'b0)
 );
 
-assign user_clk   = trn_clk;
-assign user_rst_n = trn_reset_n;
 
+assign pcie_rst_n  = trn_reset_n; // in BVI Reset should be active low
+assign pcie_clk = trn_clk;
+
+
+
+//assign cfg_pm_wake_n = 1'b1;
+
+// -------------------------
 // PCI Express Core Instance
 pcie_core core
 (

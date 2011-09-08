@@ -38,32 +38,26 @@
 `timescale 1ns/1ps
 
 module Xilinx_SyncFIFOLevel_512x64(
-  wr_clk,
-  wr_rst,
-  rd_clk,
-  rd_rst,
+  clk,
+  rst,
   din,
   wr_en,
   rd_en,
   dout,
   full,
   empty,
-  rd_data_count,
-  wr_data_count
+  data_count
 );
 
-input wr_clk;
-input wr_rst;
-input rd_clk;
-input rd_rst;
+input clk;
+input rst;
 input [63 : 0] din;
 input wr_en;
 input rd_en;
 output [63 : 0] dout;
 output full;
 output empty;
-output [9 : 0] rd_data_count;
-output [9 : 0] wr_data_count;
+output [9 : 0] data_count;
 
 // synthesis translate_off
 
@@ -91,9 +85,9 @@ output [9 : 0] wr_data_count;
     .C_AXIS_TSTRB_WIDTH(4),
     .C_AXIS_TUSER_WIDTH(4),
     .C_AXIS_TYPE(0),
-    .C_COMMON_CLOCK(0),
+    .C_COMMON_CLOCK(1),
     .C_COUNT_TYPE(0),
-    .C_DATA_COUNT_WIDTH(9),
+    .C_DATA_COUNT_WIDTH(10),
     .C_DEFAULT_VALUE("BlankString"),
     .C_DIN_WIDTH(64),
     .C_DIN_WIDTH_AXIS(1),
@@ -105,7 +99,7 @@ output [9 : 0] wr_data_count;
     .C_DOUT_RST_VAL("0"),
     .C_DOUT_WIDTH(64),
     .C_ENABLE_RLOCS(0),
-    .C_ENABLE_RST_SYNC(0),
+    .C_ENABLE_RST_SYNC(1),
     .C_ERROR_INJECTION_TYPE(0),
     .C_ERROR_INJECTION_TYPE_AXIS(0),
     .C_ERROR_INJECTION_TYPE_RACH(0),
@@ -133,7 +127,7 @@ output [9 : 0] wr_data_count;
     .C_HAS_AXIS_TSTRB(0),
     .C_HAS_AXIS_TUSER(0),
     .C_HAS_BACKUP(0),
-    .C_HAS_DATA_COUNT(0),
+    .C_HAS_DATA_COUNT(1),
     .C_HAS_DATA_COUNTS_AXIS(0),
     .C_HAS_DATA_COUNTS_RACH(0),
     .C_HAS_DATA_COUNTS_RDCH(0),
@@ -150,7 +144,7 @@ output [9 : 0] wr_data_count;
     .C_HAS_PROG_FLAGS_WACH(0),
     .C_HAS_PROG_FLAGS_WDCH(0),
     .C_HAS_PROG_FLAGS_WRCH(0),
-    .C_HAS_RD_DATA_COUNT(1),
+    .C_HAS_RD_DATA_COUNT(0),
     .C_HAS_RD_RST(0),
     .C_HAS_RST(1),
     .C_HAS_SLAVE_CE(0),
@@ -158,9 +152,9 @@ output [9 : 0] wr_data_count;
     .C_HAS_UNDERFLOW(0),
     .C_HAS_VALID(0),
     .C_HAS_WR_ACK(0),
-    .C_HAS_WR_DATA_COUNT(1),
+    .C_HAS_WR_DATA_COUNT(0),
     .C_HAS_WR_RST(0),
-    .C_IMPLEMENTATION_TYPE(2),
+    .C_IMPLEMENTATION_TYPE(0),
     .C_IMPLEMENTATION_TYPE_AXIS(1),
     .C_IMPLEMENTATION_TYPE_RACH(1),
     .C_IMPLEMENTATION_TYPE_RDCH(1),
@@ -258,23 +252,22 @@ output [9 : 0] wr_data_count;
     .C_WRCH_TYPE(0)
   )
   inst (
-    .WR_CLK(wr_clk),
-    .WR_RST(wr_rst),
-    .RD_CLK(rd_clk),
-    .RD_RST(rd_rst),
+    .CLK(clk),
+    .RST(rst),
     .DIN(din),
     .WR_EN(wr_en),
     .RD_EN(rd_en),
     .DOUT(dout),
     .FULL(full),
     .EMPTY(empty),
-    .RD_DATA_COUNT(rd_data_count),
-    .WR_DATA_COUNT(wr_data_count),
+    .DATA_COUNT(data_count),
     .BACKUP(),
     .BACKUP_MARKER(),
-    .CLK(),
-    .RST(),
     .SRST(),
+    .WR_CLK(),
+    .WR_RST(),
+    .RD_CLK(),
+    .RD_RST(),
     .PROG_EMPTY_THRESH(),
     .PROG_EMPTY_THRESH_ASSERT(),
     .PROG_EMPTY_THRESH_NEGATE(),
@@ -290,7 +283,8 @@ output [9 : 0] wr_data_count;
     .ALMOST_EMPTY(),
     .VALID(),
     .UNDERFLOW(),
-    .DATA_COUNT(),
+    .RD_DATA_COUNT(),
+    .WR_DATA_COUNT(),
     .PROG_FULL(),
     .PROG_EMPTY(),
     .SBITERR(),
