@@ -1,3 +1,11 @@
+//
+// Dual-port RAM with false synchronous read.  We do not connect the read
+// output of the port used for writing.
+//
+// Xst seems not to infer block RAM using the synchronous read examples
+// given in the manual, so we use the false synchronous version.
+//
+
 (* ram_style = "block" *)
 
 module Bram
@@ -27,18 +35,13 @@ module Bram
     input  [dataSize-1:0] writeData;
 
     reg [dataSize-1:0] readData;
-
     reg [dataSize-1:0] ram [numRows-1:0];
-
-    always@(posedge CLK)
-    begin
-        if(RST_N)
-            readData <= ram[readAddr];
-    end
 
     always@(posedge CLK)
     begin
         if(writeEnable)
             ram[writeAddr] <= writeData;
+        readData <= ram[readAddr];
     end
+
 endmodule

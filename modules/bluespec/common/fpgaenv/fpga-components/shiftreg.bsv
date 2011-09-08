@@ -17,6 +17,8 @@ import "BVI" shiftreg = module mkUnguardedShiftRegOne#(NumTypeParam#(length) len
     method write(writeData) enable(writeEnable);
 
     schedule write C write;
+    schedule read CF read;
+    schedule read SB write;
 endmodule
 
 

@@ -12996,3 +12996,19 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci
 
 
 * Merging Mikhail's updates to ML605 platform.
+
+----------
+mcadler     Date: Thu Sep  8 17:05:07 EDT 2011  CSN: CSN-leap-platforms-544
+                  Thu Sep  8 21:05:07 UTC 2011
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ Bram.v                    Locally Modified          543 
+ shiftreg.bsv              Locally Modified          543 
+
+- Add scheduling rules to shiftreg to eliminate compiler warnings.
+
+- Code BRAM in exactly the way Xilinx shows a simple dual port BRAM.  In theory
+  this gives us one write port and one read port.  If the addresses on the
+  ports clash, the read value returned is the old value.  I confirmed this
+  works, at least on Virtex 5.
