@@ -61,6 +61,19 @@ interface UserClock;
     interface Reset rst;
 endinterface
 
+
+//
+// USER_CLOCK_VEC --
+//     Designed to map to the output of a PLL, defines multiple output clocks
+//     and a clock locked output.
+//
+interface USER_CLOCK_VEC#(type nClocks);
+    interface Vector#(nClocks, Clock) clks;
+    interface Reset rst;
+    method Bool locked();
+endinterface
+
+
 // bluesim as well as verilog
 module mkUserClock_Same
     // Interface:

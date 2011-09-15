@@ -13028,3 +13028,19 @@ as a new set of commands, rather than an append to the existing set of commands.
 
 This is more of a workaround. The real fix would be to have the XST pipeline
 stage chomp spurious newlines out from the end of the file before appending.
+
+----------
+mcadler     Date: Thu Sep 15 16:34:24 EDT 2011  CSN: CSN-leap-platforms-547
+                  Thu Sep 15 20:34:24 UTC 2011
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ user-clock.bsv            Locally Modified          546 
+ user-clock-pll-virtex5.bsv Locally Modified          546 
+ user-clock-pll-virtex5.v  Locally Modified          546 
+
+Add a more flexible clock interface, USER_CLOCK_VEC, designed to match the
+output of a Xilinx PLL.  Kept the old interface for compatibility.
+
+The new module mkUserClock_2PhasedPLL generates an output clock of the
+requested frequency and a second clock out of phase by the requested amount.

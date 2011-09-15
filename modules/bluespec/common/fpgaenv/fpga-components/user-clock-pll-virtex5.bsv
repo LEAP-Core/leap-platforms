@@ -145,28 +145,47 @@ function Tuple4#(Integer, Integer, Integer, Real) computePLLParams(Real fIN,
         return tuple4(0, fail, 0, 0);
 endfunction
 
+interface PLL_CLOCK;
+    interface Clock clk0;
+    interface Clock clk1;
+    interface Reset rst;
+    method Bool locked();
+endinterface
 
 // verilog only
 import "BVI"
-module mkUserClock_Ratio_PLL#(Integer inFreq,
+module mkUserClock_Ratio_PLL#(Clock clockIn,
+                              Reset resetIn,
+                              Integer inFreq,
                               Integer clockInDivider,
                               Integer clockMultiplier,
-                              Integer clockOutDivider)
+                              Integer clockOutDivider,
+                              Integer clock1Phase)
     // Interface:
-        (UserClock);
+    (PLL_CLOCK);
 
-    default_clock (CLK);
-    default_reset (RST_N);
-    output_clock clk (CLK_OUT);
-    output_reset rst (RST_N_OUT) clocked_by (clk);
+    default_clock no_clock;
+    default_reset no_reset;
+
+    input_clock (CLK) = clockIn;
+    input_reset rstIn(RST_N) = resetIn;
+
+    output_clock clk0 (CLK0_OUT);
+    output_clock clk1 (CLK1_OUT);
+    output_reset rst (RST_N_OUT) clocked_by (clk0);
+
+    method RST_N_OUT locked();
+    schedule locked CF locked;
 
     // Convert frequency (MHz) to period (ns)
     parameter CR_CLKIN_PERIOD = 1000 / inFreq;
     parameter CR_DIVCLK_DIVIDE = clockInDivider;
     parameter CR_CLKFBOUT_MULT = clockMultiplier;
     parameter CR_CLKOUT0_DIVIDE = clockOutDivider;
+    parameter CR_CLKOUT1_PHASE = clock1Phase;
 
 endmodule
+
 
 //
 // mkUserClock_PLL --
@@ -211,10 +230,57 @@ module mkUserClock_PLL#(Integer inFreq,
         messageM(strConcat("PLL CLKOUT0_DIVIDE:   ", integerToString(d_out)));
         messageM(strConcat("PLL Output frequency: ", realToString(out_freq)));
 
-        clk <- mkUserClock_Ratio_PLL(inFreq, d_in, mul, d_out);
+        let in_clk <- exposeCurrentClock();
+        let in_rst <- exposeCurrentReset();
+        let clks <- mkUserClock_Ratio_PLL(in_clk, in_rst, inFreq, d_in, mul, d_out, 0);
+        clk = UserClock {clk: clks.clk0, rst: clks.rst};
     end
 
 
     return clk;
+
+endmodule
+
+
+//
+// mkUserClock_2PhasedPLL --
+//   Generate a user clock based on the incoming frequency that is multiplied
+//   by clockMultiplier and divided by clockDivider.
+//
+//   Generate a 2 phased clock output, with specified phase shift.
+//
+module mkUserClock_2PhasedPLL#(Integer inFreq,
+                               Integer outFreq,
+                               Integer phase)
+    // Interface:
+    (USER_CLOCK_VEC#(2));
+
+    // Compute PLL parameters for desired frequency
+    match {.d_in, .mul, .d_out, .out_freq} = computePLLParams(fromInteger(inFreq),
+                                                              fromInteger(outFreq));
+
+    // Check for errors
+    if (d_in == 0)
+    begin
+        case (mul)
+            1: error("Input frequency is out of legal range");
+            2: error("Output frequency is out of legal range");
+            default: error("Something failed");
+        endcase
+    end
+
+    messageM(strConcat("PLL2 DIVCLK_DIVIDE:    ", integerToString(d_in)));
+    messageM(strConcat("PLL2 CLKFBOUT_MULT:    ", integerToString(mul)));
+    messageM(strConcat("PLL2 CLKOUT0_DIVIDE:   ", integerToString(d_out)));
+    messageM(strConcat("PLL2 Output frequency: ", realToString(out_freq)));
+
+    let in_clk <- exposeCurrentClock();
+    let in_rst <- exposeCurrentReset();
+    let clks <- mkUserClock_Ratio_PLL(in_clk, in_rst, inFreq, d_in, mul, d_out, phase);
+
+    Vector#(2, Clock) clk_vec = newVector();
+    clk_vec[0] = clks.clk0;
+    clk_vec[1] = clks.clk1;
+    return USER_CLOCK_VEC { clks: clk_vec, rst: clks.rst, locked: clks.locked };
 
 endmodule
