@@ -13028,3 +13028,14 @@ as a new set of commands, rather than an append to the existing set of commands.
 
 This is more of a workaround. The real fix would be to have the XST pipeline
 stage chomp spurious newlines out from the end of the file before appending.
+
+----------
+mpellaue    Date: Tue Sep 20 10:32:39 EDT 2011  CSN: CSN-leap-platforms-548
+                  Tue Sep 20 14:32:39 UTC 2011
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/ml605/pcie-dma
+ ml605-v6-pcie-dma.xcf     Locally Modified          547 
+
+
+Backporting Mikhail's ML605 changes to release branch.
