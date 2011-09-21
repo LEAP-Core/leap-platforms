@@ -13039,3 +13039,16 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/ml605/pcie-dma
 
 
 Backporting Mikhail's ML605 changes to release branch.
+
+----------
+pellauer    Date: Wed Sep 21 11:46:49 EDT 2011  CSN: CSN-leap-platforms-550
+                  Wed Sep 21 15:46:49 UTC 2011
+
+
+Directory debian
+ control                   Locally Modified          549 
+ changelog                 Locally Modified          549 
+ rules                     Locally Modified          549 
+
+
+* Update branch's debian control.
