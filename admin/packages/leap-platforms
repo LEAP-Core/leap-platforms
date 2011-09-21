@@ -6,5 +6,5 @@ Lock=asim-platforms
 Description=Description of platforms
 Name=leap-platforms
 Tag=HEAD
-CSN=CSN-leap-platforms-550
+CSN=CSN-leap-platforms-551
 Dependencies=leap/HEAD

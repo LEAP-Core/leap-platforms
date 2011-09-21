@@ -13052,3 +13052,13 @@ Directory debian
 
 
 * Update branch's debian control.
+
+----------
+emer        Date: Wed Sep 21 12:11:40 EDT 2011  CSN: CSN-leap-platforms-551
+                  Wed Sep 21 16:11:40 UTC 2011
+
+
+Directory debian
+ changelog                 Locally Modified          550 
+
+Updates to reflect v11.09 release.
