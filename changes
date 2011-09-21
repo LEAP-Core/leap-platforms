@@ -13073,3 +13073,18 @@ Directory debian
  changelog                 Locally Modified          551 
 
 Do not depend on release 11.06, since it never happened.
+
+----------
+emer        Date: Wed Sep 21 14:50:48 EDT 2011  CSN: CSN-leap-platforms-553
+                  Wed Sep 21 18:50:48 UTC 2011
+
+
+Directory debian
+ changelog                 Locally Modified          552 
+
+Directory admin/packages
+ leap-platforms            Locally Modified          552 
+
+Correct package admin file to identify itself as v11.09 rather
+than HEAD.
+
