@@ -13055,3 +13055,15 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/ml605/pcie-dma
 
 
 Patch from Mikhail. Remove conflicting constraints from ML605.
+
+----------
+emer        Date: Wed Sep 21 19:43:43 EDT 2011  CSN: CSN-leap-platforms-554
+                  Wed Sep 21 23:43:43 UTC 2011
+
+
+Directory debian
+ control                   Locally Modified          553 
+ changelog                 Locally Modified          553 
+ rules                     Locally Modified          553 
+
+Start development of v11.12 release.
