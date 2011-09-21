@@ -1,11 +1,10 @@
-leap-platforms (11.09+fixes~svn20110921r551+lucid) lucid; urgency=low
+leap-platforms (11.09+fixes~svn20110921r552+lucid) lucid; urgency=low
 
   [ Michael Pellauer ]
   * Packaging 11.09 release.
 
   [ Joel Emer ]
   * Start of work on v11.04 release
-  * 
-  * 
 
- -- Joel Emer <emer@csail.mit.edu>  Wed, 21 Sep 2011 12:06:19 -0400
+
+ -- Joel Emer <emer@csail.mit.edu>  Wed, 21 Sep 2011 14:16:55 -0400

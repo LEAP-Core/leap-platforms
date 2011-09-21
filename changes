@@ -13062,3 +13062,14 @@ Directory debian
  changelog                 Locally Modified          550 
 
 Updates to reflect v11.09 release.
+
+----------
+emer        Date: Wed Sep 21 14:25:15 EDT 2011  CSN: CSN-leap-platforms-552
+                  Wed Sep 21 18:25:15 UTC 2011
+
+
+Directory debian
+ control                   Locally Modified          551 
+ changelog                 Locally Modified          551 
+
+Do not depend on release 11.06, since it never happened.

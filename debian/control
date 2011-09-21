@@ -7,7 +7,7 @@ Standards-Version: 3.7.2
 
 Package: leap-platforms
 Architecture: all
-Depends: leap-platforms-11.09, leap-platforms-11.04
+Depends: leap-platforms-11.09
 Description: Dependency package for Leap platforms environment
  Dependency package for the Leap platforms environment
 Section: devel
