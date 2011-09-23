@@ -4,8 +4,14 @@
 
 # Device names must be unique but are otherwise just for display
 [HTG-Virtex5-PCIe.0]
+
 # Class is used to match a model configuration with a hardware device type
 class = HTG-V5-PCIe
+
+# Specifies whether to look for device specific script in /usr/share/leap/scripts/<class>
+# This field must be specified for all devices.
+# Allowed values: yes or no
+has_control_script = yes
 
 # The device driver's permissions will be modified to permit write access
 # by the user after a successful reservation
@@ -13,4 +19,5 @@ dev = /dev/pchnl
 
 [ACP.2]
 class = ACP
+has_control_script = no
 dev = /dev/acp2

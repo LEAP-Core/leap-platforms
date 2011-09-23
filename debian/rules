@@ -127,7 +127,7 @@ binary-common:
 # Do not strip since it gets confused on ublase ucode
 #	dh_strip
 	dh_compress
-	dh_fixperms
+	dh_fixperms -X leap-fpga-ctrl
 #	dh_perl
 	dh_makeshlibs
 	dh_installdeb

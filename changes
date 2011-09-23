@@ -13067,3 +13067,32 @@ Directory debian
  rules                     Locally Modified          553 
 
 Start development of v11.12 release.
+
+----------
+emer        Date: Thu Sep 22 23:11:05 EDT 2011  CSN: CSN-leap-platforms-555
+                  Fri Sep 23 03:11:05 UTC 2011
+
+
+Directory debian
+ changelog                 Locally Modified          554 
+ rules                     Locally Modified          554 
+
+Directory tools/platforms/leap-fpga-ctrl
+ leap-fpga-ctrl.c          Locally Modified          554 
+
+Directory tools/platforms/leap-fpga-ctrl/etc
+ config-sample             Locally Modified          554 
+
+Improved the behavior of leap-fpga-ctrl with respect to the optional control scripts that
+live in <PREFIX>/share/leap/scripts, which do extra operations on hardware devices for
+certain leap-fpga-ctrl commands. Now if you want to use such a script you must enable
+it explictly with a line in the configuration file in <PREFIX>/etc/leap/config. In
+specific, one must have a line of the following form for each device in that file:
+
+has_control_script = yes|no
+
+In order to avoid silent failures all devices must now have such a line in their 
+section of the configuration file. In addition, if the device is specified to have 
+a script and it does not exist, then leap-fpga-ctrl will abort with an error message.
+
+Fixed debian installation so leap-fpga-ctrl is actually installed suid root.
