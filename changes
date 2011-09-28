@@ -13113,3 +13113,51 @@ if the PCIE is not properly configured.
 
 It cannot load or unload the PCIE device driver, though that
 functionality will be coming soon.
+
+----------
+kfleming    Date: Wed Sep 28 15:22:41 EDT 2011  CSN: CSN-leap-platforms-557
+                  Wed Sep 28 19:22:41 UTC 2011
+
+
+Directory drivers/linux
+ hasim/                    Locally Removed           556 
+
+Directory drivers/linux/hasim
+ kernel-pcie-virtex5/      Locally Removed           556 
+
+Directory drivers/linux/hasim/kernel-pcie-virtex5
+ pchnl_if.h                Locally Removed           556 
+ pchnl_main.c              Locally Removed           556 
+ pchnl_if.awb              Locally Removed           556 
+ Makefile                  Locally Removed           556 
+ README                    Locally Removed           556 
+ pchnl_main.h              Locally Removed           556 
+
+Directory drivers/linux/platforms
+ kernel-pcie-virtex5/      Locally Removed           556 
+
+Directory drivers/linux/platforms/kernel-pcie-virtex5
+ pchnl_if.h                Locally Removed           556 
+ pchnl_main.c              Locally Removed           556 
+ pchnl_if.awb              Locally Removed           556 
+ Makefile                  Locally Removed           556 
+ README                    Locally Removed           556 
+ pchnl_main.h              Locally Removed           556 
+
+Directory drivers/linux/platforms
+ xupv5-pcie/               Locally Added               0 
+
+Directory drivers/linux/platforms/xupv5-pcie
+ src/                      Locally Added               0 
+
+Directory drivers/linux/platforms/xupv5-pcie/src
+ main.c                    Locally Added               0 
+ Makefile                  Locally Added               0 
+
+Directory drivers/linux/platforms/xupv5-pcie
+ dkms/                     Locally Added               0 
+
+Directory drivers/linux/platforms/xupv5-pcie/dkms
+ dkms.conf                 Locally Added               0 
+
+Added XUPV5 driver to leap-platforms. Also included conf for dkms.
