@@ -13096,3 +13096,20 @@ section of the configuration file. In addition, if the device is specified to ha
 a script and it does not exist, then leap-fpga-ctrl will abort with an error message.
 
 Fixed debian installation so leap-fpga-ctrl is actually installed suid root.
+
+----------
+kfleming    Date: Tue Sep 27 23:24:17 EDT 2011  CSN: CSN-leap-platforms-556
+                  Wed Sep 28 03:24:17 UTC 2011
+
+
+Directory tools/platforms/leap-fpga-ctrl/scripts
+ XUPV5                     Locally Modified          555 
+
+
+Updated XUPV5 run script to do a more intelligent interrogation of the
+PCIE device.  It can now figure out the magic PCIE memory settings
+without user intervention, and can prompt the user to reboot computer
+if the PCIE is not properly configured.  
+
+It cannot load or unload the PCIE device driver, though that
+functionality will be coming soon.

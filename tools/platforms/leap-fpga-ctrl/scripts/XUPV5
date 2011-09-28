@@ -1,45 +1,93 @@
-#!/bin/sh -p
+#!/usr/bin/perl
 
-##
-## Configuration script for HTG-V5-PCIe FPGA boards.
-##
+#Untaint PATH
+$ENV{'PATH'} = '/bin:/usr/bin';
 
-# Keep user from messing with PATH when running as root
-PATH=/sbin:/bin:/usr/sbin:/usr/bin
-export PATH
-unset LD_LIBRARY_PATH
 
-function usage()
-{
-    echo "Usage: $0 <program|activate> <driver>"
-    exit 1
+if($ARGV[0] =~ /activate/) {
+
+  print "Activating XUPV5\n";
+  # read in the config file
+  if(-e "/tmp/xupv5_magic") {
+     `/usr/bin/setpci -d b100:b5ce COMMAND=7`;
+     `/usr/bin/setpci -d b100:b5ce CACHE_LINE_SIZE=10`;
+     open(CONFIG, "</tmp/xupv5_magic");
+     while (<CONFIG>) {
+	 if(/Region0:(\w+)/) {
+	     #print "Region 0: $1";
+	     `/usr/bin/setpci -d b100:b5ce BASE_ADDRESS_0=$1`;
+	 }
+	 if(/Region1:(\w+)/) {
+	     #print "Region 1: $1";
+	     `/usr/bin/setpci -d b100:b5ce BASE_ADDRESS_1=$1`;
+	 }
+	 if(/Region2:(\w+)/) {
+	     #print "Region 2: $1";
+	     `/usr/bin/setpci -d b100:b5ce BASE_ADDRESS_2=$1`;
+	 }
+	 if(/ROM:(\w+)/) {
+	     #print "ROM: $1";
+	     `/usr/bin/setpci -d b100:b5ce ROM_ADDRESS=$1`;
+	 }
+     }
+  } else {
+      print "***You must now reboot your machine***\n";
+      exit(-1);
+  }
+  print "XUPV5 Activated\n";
 }
 
-if [ $# -ne 2 ]; then
-    usage
-fi
+if($ARGV[0] =~ /program/) {
+  print "Programming XUPV5\n";
 
-arg_command="$1"
-arg_driver="$2"
+  # first let's see if our breadcrumbs exist
 
+  unless(-e "/tmp/xupv5_magic") {
+      my @lines = `/usr/bin/lspci -vv`;   
+      my $in_pcie = 0;
+      my $region0;    
+      my $region1;    
+      my $region2;    
+      my $rom;    
 
-case "$arg_command" in
-  program)
-    echo "Programming device XUPV5\n"
-    ;;
+      foreach my $line (@lines) {
+	  if($line =~ /Device b100:b5ce/) {
+	      $in_pcie = 1;
+	  }
 
-  activate)
+	  if($in_pcie) {
+              print "examining $line";
+	      if($line =~ /Region 0: Memory at (\w+)/) {
+		  $region0 = $1;
+	      }
+	      
+	      if($line =~ /Region 1: Memory at (\w+)/) {
+		  $region1 = $1;
+	      }
+	      
+	      if($line =~ /Region 2: Memory at (\w+)/) {
+		  $region2 = $1;
+	      }
 
-    ## Magic shell values
-   echo "Configuring PCI-E"
-
-   setpci -d b100:b5ce COMMAND=7
-   setpci -d b100:b5ce CACHE_LINE_SIZE=10
-   setpci -d b100:b5ce BASE_ADDRESS_0=fb800000
-   setpci -d b100:b5ce BASE_ADDRESS_1=fe000000
-   setpci -d b100:b5ce BASE_ADDRESS_2=fc000000
-   setpci -d b100:b5ce ROM_ADDRESS=fe800000
-
-
-    ;;
-esac
+	      if($line =~ /ROM at (\w+)/) {
+		  $rom = $1;
+	      }
+          
+	      if($line =~ /Capabilities/) {
+		  $in_pcie = 0;
+	      }
+	  }
+      }
+      
+      if((!defined $region0) || (!defined $region1) || (!defined $region2) || (!defined $rom)) {
+        # we fail..
+        print "Unable to locate Bluespec PCIE device.  We will program the FGPA, but you must reboot you machine when this command completes.\n";   
+      } else {
+	  open(CONFIG, ">/tmp/xupv5_magic");
+          print CONFIG "Region0:$region0\n";
+          print CONFIG "Region1:$region1\n";
+          print CONFIG "Region2:$region2\n";
+          print CONFIG "ROM:$rom\n";
+      }
+  }
+}
