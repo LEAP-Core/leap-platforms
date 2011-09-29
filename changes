@@ -13198,3 +13198,15 @@ by a symbolic link.
 
 Moved htg driver into analagous directory structure to
 xupv5 driver - dkpg.conf file still needed.
+
+----------
+kfleming    Date: Wed Sep 28 21:54:59 EDT 2011  CSN: CSN-leap-platforms-559
+                  Thu Sep 29 01:54:59 UTC 2011
+
+
+Directory tools/platforms/leap-fpga-ctrl/scripts
+ XUPV5                     Locally Modified          558 
+
+
+XUPV5 script now modprobes the bsemu driver automatically.  This makes
+the script full automatic after the initial reboot.
