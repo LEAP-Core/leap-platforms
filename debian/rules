@@ -98,6 +98,8 @@ install-arch:
 
 	$(MAKE) DESTDIR=$(CURDIR)/debian/leap-platforms-$(RELEASE) install-package
 
+	$(MAKE) DESTDIR=$(CURDIR)/debian/leap-platforms-xupv5 RELEASE=$(RELEASE) install-xupv5-dkms
+
 	dh_install -s
 # Must not depend on anything. This is to be called by
 # binary-arch/binary-indep
@@ -119,6 +121,8 @@ binary-common:
 #       Was unable to get the following to do what I wanted,
 #       so the init control was added manually.
 #	dh_installinit --package=leap-platforms-bin --name=leap-fpga --onlyscripts
+
+	dh_dkms -V $(RELEASE)
 
 #	dh_installcron
 #	dh_installinfo

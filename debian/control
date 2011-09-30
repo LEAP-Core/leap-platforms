@@ -2,7 +2,7 @@ Source: leap-platforms
 Section: devel
 Priority: optional
 Maintainer: Joel Emer <emer@csail.mit.edu>
-Build-Depends: debhelper (>= 7), autotools-dev
+Build-Depends: debhelper (>= 7), dkms, autotools-dev
 Standards-Version: 3.7.2
 
 Package: leap-platforms
@@ -21,7 +21,15 @@ Section: devel
 
 Package: leap-platforms-bin
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, awb
+Depends: awb, ${shlibs:Depends}, ${misc:Depends}
 Description: Executables for the Leap platforms environement
- Core executables for Leap platforms
+ Core executables and drivers for Leap platforms
 Section: devel
+
+Package: leap-platforms-xupv5
+Architecture: any
+Depends: dkms (>= 1.95), ${shlibs:Depends}, ${misc:Depends}
+Description: Leap code and drivers for xupv5 boards
+ Leap code and drivers for xupv5 boards
+Section: devel
+

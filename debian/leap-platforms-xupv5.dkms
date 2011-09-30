@@ -1,0 +1,12 @@
+# DKMS configuration kernel module.  -*- sh -*-
+
+# The version is replaced at build time by dh_dkms invoked in debian/rules.
+PACKAGE_NAME="bsemu"
+PACKAGE_VERSION=#MODULE_VERSION#
+
+BUILT_MODULE_NAME[0]="$PACKAGE_NAME"
+AUTOINSTALL=yes
+DEST_MODULE_LOCATION[0]="/updates/dkms/"
+
+MAKE[0]="make"
+CLEAN="make clean"

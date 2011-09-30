@@ -1,4 +1,4 @@
-leap-platforms (11.12~svn20110922r555+lucid) lucid; urgency=low
+leap-platforms (11.12~svn20110929r560+lucid) lucid; urgency=low
 
   [ Joel Emer ]
 
@@ -9,4 +9,8 @@ leap-platforms (11.12~svn20110922r555+lucid) lucid; urgency=low
       Improvements to leap-fpga-ctrl. 
       Installation fixes.
 
- -- Joel Emer <emer@csail.mit.edu>  Thu, 22 Sep 2011 23:10:04 -0400
+  * r560
+      leap-platforms-xup package with dkms driver
+
+
+ -- Joel Emer <emer@csail.mit.edu>  Thu, 29 Sep 2011 17:01:36 -0400
