@@ -5,5 +5,8 @@ leap-platforms (11.09+fixes~svn20110921r553+lucid) lucid; urgency=low
 
   [ Joel Emer ]
   * Start of work on v11.04 release
+  * r555
+      Improvements to leap-fpga-ctrl.
+      Installation fixes.
 
- -- Joel Emer <emer@csail.mit.edu>  Wed, 21 Sep 2011 14:46:50 -0400
+-- Joel Emer <emer@csail.mit.edu>  Wed, 21 Sep 2011 14:46:50 -0400

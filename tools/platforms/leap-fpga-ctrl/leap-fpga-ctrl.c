@@ -66,9 +66,9 @@ static dictionary *cfg = NULL;
 static int cfg_id = 0;
 static char *cfg_name = NULL;
 static char *cfg_class = NULL;
+static int  cfg_has_script = 0;
 static char *cfg_fpga_dev = NULL;
 static char cfg_res_file[1024];
-
 
 void state_print(FILE *f, FPGA_STATE_T state)
 {
@@ -127,9 +127,22 @@ void invoke_helper_script(FPGA_STATE_T state)
         return;
     }
 
+    //
+    // Nothing to do if there is no script
+    //
+
+    if (! cfg_has_script) {
+      if (opt_debug)
+	{
+	  fprintf(stderr, "No device specific configuration script needed\n");
+	}
+
+      return;
+    }
+
     if ((strlen(CONFIG_DIR) + strlen(cfg_class) + 1) >= sizeof(script))
     {
-        error(1, 0, "Configuration script path too long");
+        error(1, 0, "Error - Configuration script path too long");
     }
 
     strcpy(script, CONFIG_DIR);
@@ -139,11 +152,16 @@ void invoke_helper_script(FPGA_STATE_T state)
     if ((stat(script, &statb) == -1) ||
         ! S_ISREG(statb.st_mode))
     {
-        return;
+        error(1, 0, "Error - Requested control script not found");
+    }
+
+    if (opt_debug)
+    {
+      fprintf(stderr, "Invoking device specific configuration script\n");
     }
 
     pid = fork();
-    if (pid == -1) error(1, 0, "fork() failed");
+    if (pid == -1) error(1, 0, "Error - fork() failed");
 
     if (pid != 0)
     {
@@ -152,7 +170,7 @@ void invoke_helper_script(FPGA_STATE_T state)
         wait(&status);
         if (WEXITSTATUS(status) != 0)
         {
-            error(1, 0, "%s - exit status %d", script, WEXITSTATUS(status));
+            error(1, 0, "Error - %s - exit status %d", script, WEXITSTATUS(status));
         }
     }
     else
@@ -167,7 +185,7 @@ void invoke_helper_script(FPGA_STATE_T state)
             execl(script, script, cmd, NULL);
         }
 
-        error(1, errno, "Failed to execute script %s", script);
+        error(1, errno, "Error - Failed to execute script %s", script);
     }
 }
 
@@ -187,7 +205,7 @@ char *cfg_get_str(char *dev, char *key)
 
     if (strlen(dev) + strlen(key) + 2 > sizeof(buf))
     {
-        error(1, 0, "cfg_get_str -- string too long");
+        error(1, 0, "Error - cfg_get_str -- string too long");
     }
 
     strcpy(buf, dev);
@@ -204,10 +222,11 @@ char *cfg_get_str(char *dev, char *key)
 void cfg_load_dev(int id)
 {
     char *sec;
+    char *has_script;
 
     if (id >= iniparser_getnsec(cfg))
     {
-        error(1, 0, "cfg_load_dev -- illegal device ID");
+        error(1, 0, "Error - illegal device ID");
     }
 
     sec = iniparser_getsecname(cfg, id);
@@ -215,12 +234,20 @@ void cfg_load_dev(int id)
     cfg_id = id;
     cfg_name = sec;
     cfg_class = cfg_get_str(sec, "class");
+
+    has_script = cfg_get_str(sec,"has_control_script");
+    if (! has_script)
+    {
+        error(1, 0, "Error - required config file value \"has_control_script\" not found");
+    }
+    cfg_has_script = !strcmp(has_script,"yes");
+
     cfg_fpga_dev = cfg_get_str(sec, "dev");
 
     // Device-specific reservation lock file
     if (strlen(RES_DIR) + strlen(sec) + 1 > sizeof(cfg_res_file))
     {
-        error(1, 0, "cfg_load_dev -- reservation file path too long");
+        error(1, 0, "Error - reservation file path too long");
     }
     strcpy(cfg_res_file, RES_DIR);
     strcat(cfg_res_file, sec);
@@ -237,7 +264,7 @@ void cfg_validate()
     int n_sec = iniparser_getnsec(cfg);
     if (n_sec == 0)
     {
-        error(1, 0, "Configuration file doesn't describe any devices.");
+        error(1, 0, "Error - Configuration file doesn't describe any devices.");
     }
 
     if (opt_debug)
@@ -253,13 +280,13 @@ void cfg_validate()
 
         if (cfg_get_str(dev, "class") == NULL)
         {
-            error(1, 0, "Device %s has no 'class' key", dev);
+            error(1, 0, "Error - Device %s has no 'class' key", dev);
         }
 
         if ((cfg_get_str(dev, "kernel-module-name") != NULL) &&
             (cfg_get_str(dev, "kernel-module-path") == NULL))
         {
-            error(1, 0, "Device %s specifies kernel module name but no path", dev);
+            error(1, 0, "Error - Device %s specifies kernel module name but no path", dev);
         }
     }
 }
@@ -296,7 +323,7 @@ int change_current_reservation(FPGA_STATE_T newState, char *newSignature)
     lockf = open(cfg_res_file, O_RDWR | O_CREAT, 00644);
     if (lockf == -1)
     {
-        error(1, 0, "Failed to open lock file: %s", cfg_res_file);
+        error(1, 0, "Error - Failed to open lock file: %s", cfg_res_file);
     }
 
     // Lock the file so no other processes can take over
@@ -315,7 +342,7 @@ int change_current_reservation(FPGA_STATE_T newState, char *newSignature)
 
         if (n_retry++ == 20)
         {
-            error(1, 0, "Failed to acquire lock file: %s", cfg_res_file);
+            error(1, 0, "Error - Failed to acquire lock file: %s", cfg_res_file);
         }
 
         sleep(1);
@@ -342,7 +369,7 @@ int change_current_reservation(FPGA_STATE_T newState, char *newSignature)
             // Adding a signature.  Old state must also be PROGRAM.
             if (oldState != STATE_PROGRAM)
             {
-                error(1, 0, "Must be in PROGRAM state to add a signature");
+                error(1, 0, "Error - Must be in PROGRAM state to add a signature");
             }
             strncpy(signature, newSignature, sizeof(signature));
             signature[sizeof(signature)-1] = 0;
@@ -397,18 +424,18 @@ int change_current_reservation(FPGA_STATE_T newState, char *newSignature)
             }
             else
             {
-                error(1, 0, "FPGA locked by %s", (pw != NULL) ? pw->pw_name : "<unknown user>");
+                error(1, 0, "Error - FPGA locked by %s", (pw != NULL) ? pw->pw_name : "<unknown user>");
             }
         }
         else
         {
-            error(1, 0, "FPGA locked by %s", (pw != NULL) ? pw->pw_name : "<unknown user>");
+            error(1, 0, "Error - FPGA locked by %s", (pw != NULL) ? pw->pw_name : "<unknown user>");
         }
     }
 
     if ((oldState == STATE_FREE) && (newState > STATE_RESERVED))
     {
-        error(1, 0, "Reservation required");
+        error(1, 0, "Error - Reservation required");
     }
     else
     {
@@ -416,7 +443,7 @@ int change_current_reservation(FPGA_STATE_T newState, char *newSignature)
         rewind(lf);
         if (fprintf(lf, "%d %d %s\n", myUid, newState, signature) < 0)
         {
-            error(1, 0, "Error writing to lock file: %s", cfg_res_file);
+            error(1, 0, "Error - Error writing to lock file: %s", cfg_res_file);
         }
 
         fflush(lf);
@@ -516,7 +543,7 @@ void set_fpga_device_access(int user_access, int quiet)
     if (stat(cfg_fpga_dev, &statb) == -1)
     {
         if (errno == ENOENT) return;
-        error(1, errno, "FPGA device %s", cfg_fpga_dev);
+        error(1, errno, "Error - FPGA device %s", cfg_fpga_dev);
     }
 
     if (((statb.st_mode & 00777) != prot) || (statb.st_uid != tgt_uid))
@@ -524,13 +551,13 @@ void set_fpga_device_access(int user_access, int quiet)
         // Protection isn't what we want.  Change it.
         if (! quiet)
         {
-            fprintf(stderr, "leap-fpga-ctrl: %s FPGA device %s access...\n", msg, cfg_name);
+            fprintf(stderr, " %s FPGA device %s access...\n", msg, cfg_name);
         }
         ;
         if ((chown(cfg_fpga_dev, tgt_uid, -1) == -1) ||
             (chmod(cfg_fpga_dev, prot) == -1))
         {
-            error(1, 0, "Failed to change protection of %s", cfg_fpga_dev);
+            error(1, 0, "Error - Failed to change protection of %s", cfg_fpga_dev);
         }
     }
 }
@@ -554,7 +581,7 @@ void reserve(char *class)
 
     if (class == NULL)
     {
-        error(1, 0, "Reservation class must be specified with --reserve");
+        error(1, 0, "Error - Reservation class must be specified with --reserve");
     }
 
     if (opt_debug)
@@ -585,7 +612,7 @@ void reserve(char *class)
 
     if (res_id == -1)
     {
-        error(1, 0, "Failed to find free device matching requested class");
+        error(1, 0, "Error - Failed to find free device matching requested class");
     }
 
     set_fpga_device_access(0, 0);
@@ -682,7 +709,7 @@ void get_config(char *req)
     else if (! strcmp(req, "id"))
         printf("%d\n", cfg_id);
     else
-        error(1, 0, "Unexpected getconfig request (%s)", req);
+        error(1, 0, "Error - Unexpected getconfig request (%s)", req);
 }
 
 
@@ -704,7 +731,6 @@ void usage()
     fprintf(stderr, "\n");
     exit(1);
 }
-
 
 int main(int argc, char *argv[])
 {
@@ -739,7 +765,7 @@ int main(int argc, char *argv[])
     cfg = iniparser_load(CFG_FILE);
     if (cfg == NULL)
     {
-        error(1, 0, "configuration file load failed");
+        error(1, 0, "Error - configuration file load failed");
     }
 
     while (1)
@@ -787,20 +813,20 @@ int main(int argc, char *argv[])
           case OPT_SIGNATURE:
             req_set_signature = 1;
             signature = strdup(optarg);
-            if (signature == NULL) error(1, 0, "strdup() failed");
+            if (signature == NULL) error(1, 0, "Error - strdup() failed");
             break;
 
           case OPT_GET_CONFIG:
             req_get_config = 1;
             getconfig = strdup(optarg);
-            if (getconfig == NULL) error(1, 0, "strdup() failed");
+            if (getconfig == NULL) error(1, 0, "Error - strdup() failed");
             break;
 
           case OPT_DEVICE_ID:
             req_dev_id = atoi(optarg);
             if ((req_dev_id < 0) || (req_dev_id >= iniparser_getnsec(cfg)))
             {
-                error(1, 0, "Illegal device id");
+                error(1, 0, "Error - Illegal device id");
             }
             break;
 
@@ -835,7 +861,7 @@ int main(int argc, char *argv[])
         cfg_load_dev(req_dev_id);
         if (req_reserve)
         {
-            error(1, 0, "--device-id may not be specified with --reserve");
+            error(1, 0, "Error - --device-id may not be specified with --reserve");
         }
     }
     else if (iniparser_getnsec(cfg) == 1)
@@ -850,7 +876,7 @@ int main(int argc, char *argv[])
     }
     else if (! req_reserve && ! query_status)
     {
-        error(1, 0, "--device-id must be specified");
+        error(1, 0, "Error - --device-id must be specified");
     }
 
     if (req_reset) reset();
