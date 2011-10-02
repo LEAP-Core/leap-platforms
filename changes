@@ -13223,3 +13223,19 @@ by a symbolic link.
 Moved htg driver into analagous directory structure to
 xupv5 driver - dkpg.conf file still needed.
 
+
+----------
+kfleming    Date: Sun Oct  2 16:22:04 EDT 2011  CSN: CSN-leap-platforms-566
+                  Sun Oct  2 20:22:04 UTC 2011
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices
+ pci-express-driver-header/ Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express-driver-header
+ pchnl_if.h                Locally Added               0 
+ pchnl_if.awb              Locally Added               0 
+
+
+Continuation of backport 558.  Forgot to add a directory.
+
