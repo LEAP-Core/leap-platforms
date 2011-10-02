@@ -6,5 +6,5 @@ Lock=asim-platforms
 Description=Description of platforms
 Name=leap-platforms
 Tag=v11.09
-CSN=CSN-leap-platforms-562
+CSN=CSN-leap-platforms-563
 Dependencies=leap/v11.09
