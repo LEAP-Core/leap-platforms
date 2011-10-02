@@ -13144,3 +13144,46 @@ if the PCIE is not properly configured.
 
 It cannot load or unload the PCIE device driver, though that
 functionality will be coming soon.
+
+----------
+kfleming    Date: Sun Oct  2 16:08:10 EDT 2011  CSN: CSN-leap-platforms-564
+                  Sun Oct  2 20:08:10 UTC 2011
+
+
+Directory drivers/linux
+ platforms/                Locally Added               0 
+
+Directory drivers/linux/platforms
+ htg-pcie-virtex5/         Locally Added               0 
+
+Directory drivers/linux/platforms/htg-pcie-virtex5
+ pchnl_if.h                Locally Added               0 
+ pchnl_main.c              Locally Added               0 
+ pchnl_if.awb              Locally Added               0 
+ Makefile                  Locally Added               0 
+ README                    Locally Added               0 
+ pchnl_main.h              Locally Added               0 
+
+Directory drivers/linux/platforms
+ xupv5-pcie/               Locally Added               0 
+
+Directory drivers/linux/platforms/xupv5-pcie
+ src/                      Locally Added               0 
+
+Directory drivers/linux/platforms/xupv5-pcie/src
+ main.c                    Locally Added               0 
+ Makefile                  Locally Added               0 
+
+Directory drivers/linux/platforms/xupv5-pcie
+ dkms/                     Locally Added               0 
+
+Directory drivers/linux/platforms/xupv5-pcie/dkms
+ dkms.conf                 Locally Added               0 
+
+
+Backport
+
+CSN: CSN-leap-platforms-557
+          
+Added XUPV5 driver to leap-platforms. Also included conf for dkms.
+
