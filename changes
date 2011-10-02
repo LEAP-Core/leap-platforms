@@ -13254,3 +13254,31 @@ CSN: CSN-leap-platforms-559
 
 XUPV5 script now modprobes the bsemu driver automatically.  This makes
 the script full automatic after the initial reboot.
+
+----------
+kfleming    Date: Sun Oct  2 16:24:48 EDT 2011  CSN: CSN-leap-platforms-568
+                  Sun Oct  2 20:24:48 UTC 2011
+
+
+Directory .
+ Makefile.in               Locally Modified          567 
+
+Directory debian
+ control                   Locally Modified          567 
+ changelog                 Locally Modified          567 
+ rules                     Locally Modified          567 
+ leap-platforms-xupv5.postinst Locally Added               0 
+ leap-platforms-xupv5.prerm Locally Added               0 
+ leap-platforms-xupv5.dkms Locally Added               0 
+
+Directory .
+ Makefile.am               Locally Modified          567 
+
+
+Backport
+
+CSN: CSN-leap-platforms-560
+          
+Added debian instructions for building the xupv5 pcie
+driver. This driver is now included in the new
+debian package leap-platforms-xupv5.
