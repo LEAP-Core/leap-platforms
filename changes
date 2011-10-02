@@ -13239,3 +13239,18 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci
 
 Continuation of backport 558.  Forgot to add a directory.
 
+
+----------
+kfleming    Date: Sun Oct  2 16:22:50 EDT 2011  CSN: CSN-leap-platforms-567
+                  Sun Oct  2 20:22:50 UTC 2011
+
+
+Directory tools/platforms/leap-fpga-ctrl/scripts
+ XUPV5                     Locally Modified          566 
+
+
+CSN: CSN-leap-platforms-559
+          
+
+XUPV5 script now modprobes the bsemu driver automatically.  This makes
+the script full automatic after the initial reboot.
