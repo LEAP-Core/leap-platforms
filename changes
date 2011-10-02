@@ -13187,3 +13187,39 @@ CSN: CSN-leap-platforms-557
           
 Added XUPV5 driver to leap-platforms. Also included conf for dkms.
 
+
+----------
+kfleming    Date: Sun Oct  2 16:21:23 EDT 2011  CSN: CSN-leap-platforms-565
+                  Sun Oct  2 20:21:23 UTC 2011
+
+
+Directory drivers/linux/platforms/htg-pcie-virtex5
+ src/                      Locally Added               0 
+
+Directory drivers/linux/platforms/htg-pcie-virtex5/src
+ pchnl_if.h                Locally Added               0 
+ pchnl_main.c              Locally Added               0 
+ Makefile                  Locally Added               0 
+ README                    Locally Added               0 
+ pchnl_main.h              Locally Added               0 
+
+Directory drivers/linux/platforms/htg-pcie-virtex5
+ pchnl_if.h                Locally Removed           564 
+ pchnl_main.c              Locally Removed           564 
+ pchnl_if.awb              Locally Removed           564 
+ Makefile                  Locally Removed           564 
+ README                    Locally Removed           564 
+ pchnl_main.h              Locally Removed           564 
+
+
+Backport 
+
+CSN: CSN-leap-platforms-558
+          
+Moved pcie-express header file module out of drivers/ tree
+and into modules/ tree, with actual source file referenced
+by a symbolic link.
+
+Moved htg driver into analagous directory structure to
+xupv5 driver - dkpg.conf file still needed.
+

@@ -1,8 +1,0 @@
-
-%name Driver Header for PCIe Kernel Module
-%desc Driver Header for PCIe Kernel Module
-
-%provides pci_express_driver_header
-
-%sources -t H   -v PUBLIC   pchnl_if.h
-
