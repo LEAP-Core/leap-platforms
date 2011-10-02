@@ -13232,3 +13232,19 @@ Directory .
 Added debian instructions for building the xupv5 pcie
 driver. This driver is now included in the new
 debian package leap-platforms-xupv5.
+
+----------
+kfleming    Date: Sun Oct  2 14:11:53 EDT 2011  CSN: CSN-leap-platforms-561
+                  Sun Oct  2 18:11:53 UTC 2011
+
+
+Directory tools/platforms/leap-fpga-ctrl/scripts
+ XUPV5                     Locally Modified          560 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express-bluespec
+ server.cpp                Locally Modified          560 
+ pcie-bluespec.awb         Locally Modified          560 
+
+
+Added a debug flag to remove driver print outs.  XUPV5 script now
+checks for the /dev/bsemu0 file.
