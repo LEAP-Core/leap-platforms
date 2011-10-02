@@ -24,6 +24,9 @@
 
 %library libscemi.a
 
+%param DEBUG_PCIE      0 "Turn on PCIE Debug."
+
+
 
 
 

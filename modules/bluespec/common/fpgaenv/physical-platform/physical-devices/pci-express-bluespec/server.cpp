@@ -11,7 +11,7 @@
 #include "asim/freelist.h"
 
 #include "asim/provides/umf.h"
-
+#include "asim/provides/pcie_device.h"
 #include "bsv_scemi.h"
 
 #define MAXNUM_PCI_BAR 6
@@ -83,7 +83,7 @@ UInt32 poppedData;
 void serverStart()
 {
     dataPopped = 0;
-    fprintf (stderr, "Hello from sever start\n");
+    //fprintf (stderr, "Hello from sever start\n");
     char *dev_file = "/dev/bsemu0";
 	pcie_dev = open(dev_file, O_RDWR);
 	if (pcie_dev < 0) {
@@ -132,16 +132,14 @@ void serverStart()
 
 	pBar1->command_lo = 0xdeadbeef;
 	pBar1->command_hi = 0xdeadbeef;
-	printf("id = %llx\n",(((UInt64) pBar1->bluespec_id_hi) << 32) | ((UInt64) pBar1->bluespec_id_lo));
-	printf("version = %lx\n",pBar1->scemi_version);
-	printf("loopback = %llx\n",(((UInt64) pBar1->command_hi) << 32) | ((UInt64) pBar1->command_lo));
-	printf("bar1rpkt = %lu\n",pBar1->bar1_rpkt_count);
-	printf("bar1wpkt = %lu\n\n",pBar1->bar1_wpkt_count);
-	//printf("bar2rpkt = %lu\n",pBar1->bar2_rpkt_count);
-	//printf("bar2wpkt = %lu\n\n",pBar1->bar2_wpkt_count);
-	//printf("err_rpkt = %lu\n",pBar1->error_rpkt_count);
-	//printf("err_wpkt = %lu\n\n",pBar1->error_wpkt_count);
-
+        if(DEBUG_PCIE) {
+	    printf("id = %llx\n",(((UInt64) pBar1->bluespec_id_hi) << 32) | ((UInt64) pBar1->bluespec_id_lo));
+	    printf("version = %lx\n",pBar1->scemi_version);
+	    printf("loopback = %llx\n",(((UInt64) pBar1->command_hi) << 32) | ((UInt64) pBar1->command_lo));
+	    printf("bar1rpkt = %lu\n",pBar1->bar1_rpkt_count);
+	    printf("bar1wpkt = %lu\n\n",pBar1->bar1_wpkt_count);
+	   
+	}
 }
 
 void serverFinish()
