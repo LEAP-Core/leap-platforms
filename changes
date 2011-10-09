@@ -13303,3 +13303,17 @@ CSN: CSN-leap-platforms-561
 
 Added a debug flag to remove driver print outs.  XUPV5 script now
 checks for the /dev/bsemu0 file.
+
+----------
+emer        Date: Sun Oct  9 19:45:44 EDT 2011  CSN: CSN-leap-platforms-570
+                  Sun Oct  9 23:45:44 UTC 2011
+
+
+Directory debian
+ changelog                 Locally Modified          569 
+
+Directory .
+ debian/                   Locally Modified          569 
+
+Fix broken debian/changelog and ignore directory for new
+debian package - debian/leap-platforms-xupv5.
