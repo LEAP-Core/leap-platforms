@@ -98,6 +98,8 @@ interface XUPV5_SERDES_DRIVER;
    method Bit#(16) total_reset_out(); // total_reset_out
    method Bit#(32) realignment0(); // realignment0
    method Bit#(32) errors0(); // realignment0
+   method Bit#(32) realignment1(); // realignment0
+   method Bit#(32) errors1(); // realignment0
    (* always_ready *)
    method Bool plllkdet_out();
    interface Clock txusrclk;
@@ -342,6 +344,8 @@ module mkXUPV5_SERDES_DEVICE#(XUPV5_SERDES_BYTE comma, // comma definition
       method total_reset_out = ug_device.total_reset_out;
       method realignment0 = rx0_realignment._read;
       method errors0()= rx0_errors._read; // realignment0	
+      method realignment1 = rx1_realignment._read;
+      method errors1()= rx1_errors._read; // realignment0	
       interface txusrclk  = txusrclk;
       interface txusrrst  = txusrrst;
       interface rxusrclk0 = rxusrclk0;

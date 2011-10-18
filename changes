@@ -13248,3 +13248,17 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci
 
 Added a debug flag to remove driver print outs.  XUPV5 script now
 checks for the /dev/bsemu0 file.
+
+----------
+kfleming    Date: Tue Oct 18 15:28:54 EDT 2011  CSN: CSN-leap-platforms-571
+                  Tue Oct 18 19:28:54 UTC 2011
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/sata-bluespec
+ XUPV5_SERDES.bsv          Locally Modified          570 
+
+
+
+Added debug interface to second SERDES link.  This is part of an
+ongoing effort to build multi-fpga systems composed of several XUPV5.
+
