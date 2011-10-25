@@ -13262,3 +13262,13 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/sat
 Added debug interface to second SERDES link.  This is part of an
 ongoing effort to build multi-fpga systems composed of several XUPV5.
 
+
+----------
+mcadler     Date: Mon Oct 24 22:43:12 EDT 2011  CSN: CSN-leap-platforms-572
+                  Tue Oct 25 02:43:12 UTC 2011
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe
+ unix-pipe-device-bdpi.c   Locally Modified          571 
+
+Support for 64-bit UMF chunks in simulation.

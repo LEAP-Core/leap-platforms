@@ -301,7 +301,7 @@ void pipe_read(unsigned int* resultptr, unsigned char handle)
         /* the following code is endian-agnostic */
         for (i = 0; i < BDPI_CHUNK_BYTES; i++)
         {
-            unsigned int byte = (unsigned int)channel->inputBuffer[channel->ibHead];
+            unsigned long long byte = (unsigned long long)channel->inputBuffer[channel->ibHead];
             retval |= (byte << (i * 8));
             channel->ibHead = channel->ibHead + 1;
         }
