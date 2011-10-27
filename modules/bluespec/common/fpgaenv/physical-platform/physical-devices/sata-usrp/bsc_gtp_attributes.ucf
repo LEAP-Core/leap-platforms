@@ -183,11 +183,12 @@ INST */serdes_i/tile0_serdes_i/gtp_dual_i RX_SLIDE_MODE_1 = "PCS";
 
 ##---------------- RXLoss-of-syncStateMachineAttributes -----------  
 
-INST */serdes_i/tile0_serdes_i/gtp_dual_i RX_LOSS_OF_SYNC_FSM_0 = "FALSE";
+# These were false
+INST */serdes_i/tile0_serdes_i/gtp_dual_i RX_LOSS_OF_SYNC_FSM_0 = "TRUE";
 INST */serdes_i/tile0_serdes_i/gtp_dual_i RX_LOS_INVALID_INCR_0 = 8;
 INST */serdes_i/tile0_serdes_i/gtp_dual_i RX_LOS_THRESHOLD_0 = 128;
 
-INST */serdes_i/tile0_serdes_i/gtp_dual_i RX_LOSS_OF_SYNC_FSM_1 = "FALSE";
+INST */serdes_i/tile0_serdes_i/gtp_dual_i RX_LOSS_OF_SYNC_FSM_1 = "TRUE";
 INST */serdes_i/tile0_serdes_i/gtp_dual_i RX_LOS_INVALID_INCR_1 = 8;
 INST */serdes_i/tile0_serdes_i/gtp_dual_i RX_LOS_THRESHOLD_1 = 128;
 
@@ -205,8 +206,7 @@ INST */serdes_i/tile0_serdes_i/gtp_dual_i CLK_CORRECT_USE_0 = "FALSE";
 INST */serdes_i/tile0_serdes_i/gtp_dual_i CLK_COR_ADJ_LEN_0 = 1;
 INST */serdes_i/tile0_serdes_i/gtp_dual_i CLK_COR_DET_LEN_0 = 1;
 INST */serdes_i/tile0_serdes_i/gtp_dual_i CLK_COR_INSERT_IDLE_FLAG_0 = "FALSE";
-INST */serdes_i/tile0_serdes_i/gtp_dual_i CLK_COR_KEEP_IDLE_0 = "FALSE";
-INST */serdes_i/tile0_serdes_i/gtp_dual_i CLK_COR_MAX_LAT_0 = 18;
+INST */serdes_i/tile0_serdes_i/gtp_dual_i CLK_COR_KEEP_IDLE_0 = "FALSE";INST */serdes_i/tile0_serdes_i/gtp_dual_i CLK_COR_MAX_LAT_0 = 18;
 INST */serdes_i/tile0_serdes_i/gtp_dual_i CLK_COR_MIN_LAT_0 = 16;
 INST */serdes_i/tile0_serdes_i/gtp_dual_i CLK_COR_PRECEDENCE_0 = "TRUE";
 INST */serdes_i/tile0_serdes_i/gtp_dual_i CLK_COR_REPEAT_WAIT_0 = 0;

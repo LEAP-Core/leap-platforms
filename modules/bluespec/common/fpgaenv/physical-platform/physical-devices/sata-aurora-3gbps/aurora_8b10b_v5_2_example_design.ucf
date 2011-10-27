@@ -1,0 +1,117 @@
+  
+##################################################################################
+## (c) Copyright 2008 Xilinx, Inc. All rights reserved.
+##
+## This file contains confidential and proprietary information
+## of Xilinx, Inc. and is protected under U.S. and
+## international copyright and other intellectual property
+## laws.
+##
+## DISCLAIMER
+## This disclaimer is not a license and does not grant any
+## rights to the materials distributed herewith. Except as
+## otherwise provided in a valid license issued to you by
+## Xilinx, and to the maximum extent permitted by applicable
+## law: (1) THESE MATERIALS ARE MADE AVAILABLE "AS IS" AND
+## WITH ALL FAULTS, AND XILINX HEREBY DISCLAIMS ALL WARRANTIES
+## AND CONDITIONS, EXPRESS, IMPLIED, OR STATUTORY, INCLUDING
+## BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, NON-
+## INFRINGEMENT, OR FITNESS FOR ANY PARTICULAR PURPOSE; and
+## (2) Xilinx shall not be liable (whether in contract or tort,
+## including negligence, or under any other theory of
+## liability) for any loss or damage of any kind or nature
+## related to, arising under or in connection with these
+## materials, including for any direct, or any indirect,
+## special, incidental, or consequential loss or damage
+## (including loss of data, profits, goodwill, or any type of
+## loss or damage suffered as a result of any action brought
+## by a third party) even if such damage or loss was
+## reasonably foreseeable or Xilinx had been advised of the
+## possibility of the same.
+##
+## CRITICAL APPLICATIONS
+## Xilinx products are not designed or intended to be fail-
+## safe, or for use in any application requiring fail-safe
+## performance, such as life-support or safety devices or
+## systems, Class III medical devices, nuclear facilities,
+## applications related to the deployment of airbags, or any
+## other applications that could lead to death, personal
+## injury, or severe property or environmental damage
+## (individually and collectively, "Critical
+## Applications"). Customer assumes the sole risk and
+## liability of any use of Xilinx products in Critical
+## Applications, subject only to applicable laws and
+## regulations governing limitations on product liability.
+##
+## THIS COPYRIGHT NOTICE AND DISCLAIMER MUST BE RETAINED AS
+## PART OF THIS FILE AT ALL TIMES.
+## 
+## 
+#################################################################################
+## UCF generated for xc5vlx110t-ff1136-2 device
+##
+##  AURORA_EXAMPLE_UCF
+##
+##
+##  Description: This is the user constraints file for a 1 lane Aurora
+##               core. This module supports the following features:
+##
+##              *   Supports GTP on an ML523 evaluation board
+##
+##
+################################ CLOCK CONSTRAINTS ##############################
+# User Clock Contraint: Value is selected based on the line rate (2.0 Gbps) and lane width (2-Byte)
+NET "user_clk_i" TNM_NET = USER_CLK;
+TIMESPEC TS_USER_CLK_I = PERIOD "USER_CLK" 10.0 ns HIGH 50%;
+# Sync Clock Contraint: Value is selected based on the line rate (2.0 Gbps) and lane width (2-Byte)
+NET sync_clk_i PERIOD = 5.0 ns HIGH 50%;
+
+# 200.0MHz GTP Reference clock contraint 
+NET GTPD0_left_i PERIOD = 5.0 ns HIGH 50%;
+
+# 50MHz board Clock Constraint  
+NET "reset_logic_i/init_clk_i" TNM_NET = INIT_CLK;
+TIMESPEC TS_INIT_CLK = PERIOD "INIT_CLK" 20 ns HIGH 50%;
+
+###### No cross clock domain analysis. Domains are not related ############## 
+TIMESPEC "TS_TIG1" = FROM "INIT_CLK" TO "USER_CLK" TIG; 
+################################ Init Clock Constraint ##########################
+NET INIT_CLK        LOC=AG21;   #50 Mhz Oscillator
+################## GTP CLOCK Locations of the pins on ML523 ###############################
+# GTPD0 : LOC=AL5 --> J97 on Board; LOC=AL4 --> J88 on Board
+# GTPD1 : LOC=AF4 --> J37 on Board; LOC=AF3 --> J28 on Board
+# GTPD2 : LOC=Y4  --> J47 on Board; LOC=Y3  --> J38 on Board
+# GTPD3 : LOC=P4  --> J57 on Board; LOC=P3  --> J48 on Board
+# GTPD4 : LOC=H4  --> J13 on Board; LOC=H3  --> J15 on Board
+# GTPD5 : LOC=E4  --> J77 on Board; LOC=D4  --> J68 on Board
+NET GTPD0_P  LOC=AL7; 
+NET GTPD0_N  LOC=AM7; 
+
+################################ Resets Buttons #################################
+NET RESET           LOC=AF14;   #BUTTON
+NET RESET           PULLUP;
+NET GT_RESET_IN     LOC=AE22;   #BUTTON
+################################ Errors Indicators ##############################
+NET HARD_ERR      LOC=AF24;   #LED
+NET SOFT_ERR      LOC=AG25;   #LED
+NET ERR_COUNT[0]    LOC=AJ25;   #LED
+NET ERR_COUNT[1]    LOC=AH25;   #LED
+NET ERR_COUNT[2]    LOC=AH27;   #LED
+NET ERR_COUNT[3]    LOC=AJ26;   #LED
+NET ERR_COUNT[4]    LOC=AK28;   #LED
+NET ERR_COUNT[5]    LOC=AK27;   #LED
+NET ERR_COUNT[6]    LOC=AA25;   #LED
+NET ERR_COUNT[7]    LOC=AA26;   #LED
+################################ Channel and Lane up Indicators #################
+#This board supports a maximum of 12 lanes
+NET CHANNEL_UP      LOC=AE27;   #LED
+NET LANE_UP         LOC=AE26;   #LED
+##########################  Location of GTP on ML523 ##############################													    
+# X0Y0 -> Tile #122 on Board
+# X0Y1 -> Tile #118 on Board
+# X0Y2 -> Tile #114 on Board
+# X0Y3 -> Tile #112 on Board
+# X0Y4 -> Tile #116 on Board
+# X0Y5 -> Tile #120 on Board
+
+INST aurora_module_i/gtp_wrapper_i/GTP_TILE_INST/gtp_tile_i LOC=GTP_DUAL_X0Y0;

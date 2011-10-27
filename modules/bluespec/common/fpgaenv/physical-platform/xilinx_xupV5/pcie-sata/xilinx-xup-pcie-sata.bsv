@@ -91,14 +91,7 @@ module mkPhysicalPlatform
     // Next, create the physical device that can trigger a soft reset. Pass along the
     // interface to the trigger module that the clocks device has given us.
 
-   XUPV5_SERDES_BYTE comma  = serdesControl(60);
-   XUPV5_SERDES_WORD commas = serdesWord(comma, comma); 
-   XUPV5_SERDES_BYTE idle  = serdesControl(0);
-   XUPV5_SERDES_WORD idles = serdesWord(idle, idle); 
-   XUPV5_SERDES_BYTE eop    = serdesControl(28);
-   XUPV5_SERDES_WORD eops   = serdesWord(eop, eop); 
-   
-   let sata_device <- mkXUPV5_SERDES_DEVICE(comma, 65535, 16);
+   let sata_device <- mkXUPV5_SERDES_DEVICE(65535, 16, clocked_by clk, reset_by rst);
 
 
    PCIE_DEVICE pcie_device <- mkPCIEDevice(clocks_device.driver.rawClock,

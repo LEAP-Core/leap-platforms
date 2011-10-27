@@ -22,7 +22,6 @@ import Clocks::*;
 
 // The Physical Platform for the XUP Virtex 5 with PCIE
 
-`include "serial_device.bsh"
 `include "sata_device.bsh"
 `include "clocks_device.bsh"
 `include "physical_platform_utils.bsh"
@@ -37,7 +36,6 @@ interface PHYSICAL_DRIVERS;
     
     interface CLOCKS_DRIVER                        clocksDriver;
     interface XUPV5_SERDES_DRIVER                  sataDriver;
-    interface SERIAL_DRIVER                        serialDriver;
         
 endinterface
 
@@ -55,7 +53,6 @@ interface TOP_LEVEL_WIRES;
     interface CLOCKS_WIRES                        clocksWires;
     (* prefix = "" *)
     interface XUPV5_SERDES_WIRES                  sataWires;
-    interface SERIAL_WIRES                        serialWires;
 
 endinterface
 
@@ -91,24 +88,8 @@ module mkPhysicalPlatform
     // Next, create the physical device that can trigger a soft reset. Pass along the
     // interface to the trigger module that the clocks device has given us.
 
-   XUPV5_SERDES_BYTE comma  = serdesControl(60);
-   XUPV5_SERDES_WORD commas = serdesWord(comma, comma); 
-   XUPV5_SERDES_BYTE idle  = serdesControl(0);
-   XUPV5_SERDES_WORD idles = serdesWord(idle, idle); 
-   XUPV5_SERDES_BYTE eop    = serdesControl(28);
-   XUPV5_SERDES_WORD eops   = serdesWord(eop, eop); 
-   
-   let sata_device <- mkXUPV5_SERDES_DEVICE(comma, 65535, 16);
+   let sata_device <- mkXUPV5_SERDES_DEVICE(65535, 16, clocked_by clk,reset_by rst);
 
-   SERIAL_DEVICE serial_device <- mkSerialDevice(clocks_device.driver.rawClock,
-                                                 clocks_device.driver.rawReset,
-                                                 clocked_by clk,
-                                                 reset_by rst);
-
-//    PCIE_DEVICE pcie_device <- mkPCIEDevice(clocks_device.driver.rawClock,
-//                                            clocks_device.driver.rawReset,
-//                                            clocked_by clk,
-//                                            reset_by rst);
 
     // Aggregate the drivers
     
@@ -116,7 +97,6 @@ module mkPhysicalPlatform
     
         interface clocksDriver     = clocks_device.driver;
         interface sataDriver       = sata_device.driver;
-        interface serialDriver     = serial_device.driver;
 
     endinterface
     
@@ -126,7 +106,6 @@ module mkPhysicalPlatform
 
         interface clocksWires      = clocks_device.wires;
         interface sataWires        = sata_device.wires;
-        interface serialWires      = serial_device.wires;
 
     endinterface
                

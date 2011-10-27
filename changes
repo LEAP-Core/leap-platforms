@@ -13272,3 +13272,80 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/uni
  unix-pipe-device-bdpi.c   Locally Modified          571 
 
 Support for 64-bit UMF chunks in simulation.
+
+----------
+kfleming    Date: Thu Oct 27 13:01:13 EDT 2011  CSN: CSN-leap-platforms-573
+                  Thu Oct 27 17:01:13 UTC 2011
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/pcie-sata
+ xilinx-xup-pcie-sata.awb  Locally Modified          572 
+ xilinx-xup-pcie-sata.bsv  Locally Modified          572 
+ xilinx-xup-pcie-sata.bsh  Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/sata
+ xilinx-xup-sata.awb       Locally Modified          572 
+ xilinx-xup-sata.bsv       Locally Modified          572 
+ xilinx-xup-sata.bsh       Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices
+ sata-bluespec/            Locally Removed           572 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/sata-bluespec
+ SERDES_TOP.bsv            Locally Removed           572 
+ XUPV5_SERDES_UG.bsv       Locally Removed           572 
+ sata-bluespec.awb         Locally Removed           572 
+ serdes_ip.v               Locally Removed           572 
+ bsc_gtp_attributes.ucf    Locally Removed           572 
+ XUPV5_SERDES.bsv          Locally Removed           572 
+ serdes_tile.v             Locally Removed           572 
+ diff_clock.v              Locally Removed           572 
+ serdes.v                  Locally Removed           572 
+ bsc_serdes_top.ucf        Locally Removed           572 
+ DiffClock.bsv             Locally Removed           572 
+ mgt_usrclk_source.v       Locally Removed           572 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices
+ sata-aurora-3gbps/        Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/sata-aurora-3gbps
+ aurora_8b10b_v5_2_global_logic.v Locally Added               0 
+ aurora_8b10b_v5_2_transceiver_tile.vhd Locally Added               0 
+ aurora_8b10b_v5_2_chbond_count_dec.v Locally Added               0 
+ aurora_8b10b_v5_2_err_detect.v Locally Added               0 
+ aurora_8b10b_v5_2_rx_ll.v Locally Added               0 
+ XUPV5_AURORA_SINGLE_UG.bsv Locally Added               0 
+ aurora_8b10b_v5_2_tx_ll.v Locally Added               0 
+ aurora_8b10b_v5_2_tx_ll_control.v Locally Added               0 
+ sata-aurora.awb           Locally Added               0 
+ aurora_8b10b_v5_2_example_design.v Locally Added               0 
+ aurora_8b10b_v5_2_transceiver_wrapper.v Locally Added               0 
+ aurora_8b10b_v5_2_tx_ll_datapath.v Locally Added               0 
+ aurora_8b10b_v5_2_aurora_lane.v Locally Added               0 
+ aurora_8b10b_v5_2_rx_ll_pdu_datapath.v Locally Added               0 
+ aurora_8b10b_v5_2_reset_logic.v Locally Added               0 
+ aurora_8b10b_v5_2_clock_module.v Locally Added               0 
+ aurora_8b10b_v5_2_lane_init_sm.v Locally Added               0 
+ aurora_8b10b_v5_2_transceiver_wrapper.vhd Locally Added               0 
+ aurora_8b10b_v5_2_idle_and_ver_gen.v Locally Added               0 
+ aurora_8b10b_v5_2_standard_cc_module.v Locally Added               0 
+ aurora_8b10b_v5_2.v       Locally Added               0 
+ aurora_8b10b_v5_2_sym_dec.v Locally Added               0 
+ XUPV5_AURORA_SINGLE.bsv   Locally Added               0 
+ aurora_8b10b_v5_2_channel_init_sm.v Locally Added               0 
+ aurora_8b10b_v5_2_example_design.ucf Locally Added               0 
+ aurora_8b10b_v5_2_sym_gen.v Locally Added               0 
+ aurora_8b10b_v5_2_transceiver_tile.v Locally Added               0 
+ aurora_8b10b_v5_2_rx_stream.v Locally Added               0 
+ aurora_8b10b_v5_2_tx_stream.v Locally Added               0 
+ bsc_serdes_top.ucf        Locally Added               0 
+ aurora_8b10b_v5_2_channel_err_detect.v Locally Added               0 
+
+
+Added an implementation of the Xilinx Aurora inter-chip serial IP and
+support for multi-fpga compilation for a pair of XUPV5.  
+
+The Aurora IP is available for every post Virtex-4 board, including
+the ML605.  The IP introduced in this checkin can be used as a
+template for linking those chips.
+

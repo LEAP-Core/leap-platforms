@@ -117,12 +117,14 @@ interface XUPV5_SERDES_DEVICE;
 endinterface      
 
 (* no_default_clock, no_default_reset *)
-module mkXUPV5_SERDES_DEVICE#(XUPV5_SERDES_BYTE comma, // comma definition
+module mkXUPV5_SERDES_DEVICE#(
                               Integer comma_period,    // how many cycles between commas?
                               Integer comma_length     // how many commas to send each time
                               ) 
    (XUPV5_SERDES_DEVICE);
 
+
+   XUPV5_SERDES_BYTE comma  = serdesControl(60);
    XUPV5_SERDES_WORD commas = serdesWord(comma, comma); 
    let idle = 28;
    XUPV5_SERDES_WORD idles = serdesWord(serdesControl(idle), serdesControl(idle)); 

@@ -1,14 +1,14 @@
-
 %name XUP Virtex 5 SATA
 %desc XUP Virtex 5 SATA
 
 %provides physical_platform	
-%requires clocks_device sata_device physical_platform_utils serial_device
+%requires clocks_device sata_device physical_platform_utils 
 
 %sources -t BSV -v PUBLIC  xilinx-xup-sata.bsv
 %sources -t H   -v PUBLIC  xilinx-xup-sata.h
 %sources -t CPP -v PRIVATE xilinx-xup-sata.cpp
 %sources -t UCF -v PRIVATE xilinx-xup-sata.ucf
+%sources -t BSH -v PUBLIC  xilinx-xup-sata.bsh
 
 %sources -t UT  -v PRIVATE xilinx.ut
 %sources -t XST -v PRIVATE xilinx.xst

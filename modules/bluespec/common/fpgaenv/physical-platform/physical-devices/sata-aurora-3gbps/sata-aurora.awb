@@ -1,0 +1,36 @@
+%name Aurora SATA Device, Single Lane, 3gbps
+%desc Aurora SATA Device, Single Lane, 3gbps 
+
+%provides sata_device
+
+%sources -t BSV -v PUBLIC XUPV5_AURORA_SINGLE.bsv
+%sources -t BSV -v PUBLIC XUPV5_AURORA_SINGLE_UG.bsv
+
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_2_aurora_lane.v
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_2_channel_err_detect.v
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_2_channel_init_sm.v
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_2_chbond_count_dec.v
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_2_err_detect.v
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_2_global_logic.v
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_2_idle_and_ver_gen.v
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_2_lane_init_sm.v
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_2_rx_ll_pdu_datapath.v
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_2_rx_ll.v
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_2_rx_stream.v
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_2_sym_dec.v
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_2_sym_gen.v
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_2_tx_ll_control.v
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_2_tx_ll_datapath.v
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_2_tx_ll.v
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_2_tx_stream.v
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_2.v
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_2_standard_cc_module.v
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_2_transceiver_tile.v
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_2_transceiver_wrapper.v
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_2_example_design.v
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_2_clock_module.v
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_2_reset_logic.v
+
+
+%sources -t UCF -v PRIVATE bsc_serdes_top.ucf
+

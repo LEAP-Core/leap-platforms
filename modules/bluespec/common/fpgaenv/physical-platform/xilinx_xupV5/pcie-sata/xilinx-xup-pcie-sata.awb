@@ -9,6 +9,7 @@
 %sources -t H   -v PUBLIC  xilinx-xup-pcie-sata.h
 %sources -t CPP -v PRIVATE xilinx-xup-pcie-sata.cpp
 %sources -t UCF -v PRIVATE xilinx-xup-pcie-sata.ucf
+%sources -t BSH -v PUBLIC  xilinx-xup-pcie-sata.bsh
 
 %sources -t UT  -v PRIVATE xilinx.ut
 %sources -t XST -v PRIVATE xilinx.xst
