@@ -16,14 +16,15 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-// This module interfaces to the sata cable slot SATA HOST 0 on the
+// This module interfaces to the SMA cables on the
 // XUPV5. However only certain of the generated verilog and ucf files
 // are needed to characterize this interface, and it can be used a model 
 // for high-speed board to board serial on other development boards. The 
 // device interface consists of a simple FIFO with guaranteed transport to
-// the other device. 
+// the other device. This module is slightly complicated by the need to 
+// instantiate dummy serial modules to route clock to the SMA GTP.
+// unguarded interface
 
-// unguard interface
 interface AURORA_SINGLE_DEVICE_UG;
 
     // These are the wires
@@ -33,10 +34,33 @@ interface AURORA_SINGLE_DEVICE_UG;
     method Bit#(1) txn_out();
     (* always_ready *)
     method Bit#(1) txp_out();
+
     (* always_enabled, always_ready *)
     method Action clk_n_in(Bit#(1) clk);
     (* always_enabled, always_ready *)
     method Action clk_p_in(Bit#(1) clk);      
+
+    // Dummy GTP wires
+    method Action rxn_in_dummy0(Bit#(1) rxn);
+    method Action rxp_in_dummy0(Bit#(1) rxp);
+    (* always_ready *)
+    method Bit#(1) txn_out_dummy0();
+    (* always_ready *)
+    method Bit#(1) txp_out_dummy0();
+
+    method Action rxn_in_dummy1(Bit#(1) rxn);
+    method Action rxp_in_dummy1(Bit#(1) rxp);
+    (* always_ready *)
+    method Bit#(1) txn_out_dummy1();
+    (* always_ready *)
+    method Bit#(1) txp_out_dummy1();
+
+    method Action rxn_in_dummy2(Bit#(1) rxn);
+    method Action rxp_in_dummy2(Bit#(1) rxp);
+    (* always_ready *)
+    method Bit#(1) txn_out_dummy2();
+    (* always_ready *)
+    method Bit#(1) txp_out_dummy2();
 
 
     // Data interface 
@@ -61,7 +85,7 @@ import "BVI" aurora_8b10b_v5_2_example_design =
 module mkAURORA_SINGLE_UG (AURORA_SINGLE_DEVICE_UG);
    
     default_clock clk(INIT_CLK);
-    default_reset rst(RESET_N); // Assert high....
+    default_reset rst(RESET_N); 
 
     output_clock aurora_clk(USER_CLK);
     output_reset aurora_rst(USER_RESET);
@@ -70,6 +94,22 @@ module mkAURORA_SINGLE_UG (AURORA_SINGLE_DEVICE_UG);
     method rxp_in(RXP) enable((*inhigh*) rxp_en) reset_by(no_reset) clocked_by(no_clock);
     method TXN txn_out reset_by(no_reset) clocked_by(no_clock); 
     method TXP txp_out reset_by(no_reset) clocked_by(no_clock);
+
+    method rxn_in_dummy0(RXN_dummy_0) enable((*inhigh*) rxn_en_dummy0) reset_by(no_reset) clocked_by(no_clock);
+    method rxp_in_dummy0(RXP_dummy_0) enable((*inhigh*) rxp_en_dummy0) reset_by(no_reset) clocked_by(no_clock);
+    method TXN_dummy_0 txn_out_dummy0 reset_by(no_reset) clocked_by(no_clock); 
+    method TXP_dummy_0 txp_out_dummy0 reset_by(no_reset) clocked_by(no_clock); 
+
+    method rxn_in_dummy1(RXN_dummy_1) enable((*inhigh*) rxn_en_dummy1) reset_by(no_reset) clocked_by(no_clock);
+    method rxp_in_dummy1(RXP_dummy_1) enable((*inhigh*) rxp_en_dummy1) reset_by(no_reset) clocked_by(no_clock);
+    method TXN_dummy_1 txn_out_dummy1 reset_by(no_reset) clocked_by(no_clock); 
+    method TXP_dummy_1 txp_out_dummy1 reset_by(no_reset) clocked_by(no_clock); 
+
+    method rxn_in_dummy2(RXN_dummy_2) enable((*inhigh*) rxn_en_dummy2) reset_by(no_reset) clocked_by(no_clock); 
+    method rxp_in_dummy2(RXP_dummy_2) enable((*inhigh*) rxp_en_dummy2) reset_by(no_reset) clocked_by(no_clock);
+    method TXN_dummy_2 txn_out_dummy2 reset_by(no_reset) clocked_by(no_clock); 
+    method TXP_dummy_2 txp_out_dummy2 reset_by(no_reset) clocked_by(no_clock); 
+
     method clk_n_in(GTPD0_N) enable((*inhigh*)clk_n_in_en) reset_by(no_reset) clocked_by(no_clock);
     method clk_p_in(GTPD0_P) enable((*inhigh*)clk_p_in_en) reset_by(no_reset) clocked_by(no_clock);
 
@@ -88,10 +128,10 @@ module mkAURORA_SINGLE_UG (AURORA_SINGLE_DEVICE_UG);
     method RX_COUNT rx_count;
     method TX_COUNT tx_count;
 
-    schedule (stats, rx_count, tx_count, txn_out, txp_out, channel_up, lane_up, hard_err, soft_err, status) CF
-             (stats, rx_count, tx_count, txn_out, txp_out, channel_up, lane_up, hard_err, soft_err, status);
-    schedule (send) CF (stats, rx_count, tx_count, txn_out, txp_out, channel_up, lane_up, hard_err, soft_err, status, receive);
-    schedule (receive) CF (stats, rx_count, tx_count, txn_out, txp_out, channel_up, lane_up, hard_err, soft_err, status, send);
+    schedule (cc,stats, rx_count, tx_count, txn_out, txp_out, channel_up, lane_up, hard_err, soft_err, status) CF
+             (cc,stats, rx_count, tx_count, txn_out, txp_out, channel_up, lane_up, hard_err, soft_err, status);
+    schedule (send) CF (cc,stats, rx_count, tx_count, txn_out, txp_out, channel_up, lane_up, hard_err, soft_err, status, receive);
+    schedule (receive) CF (cc,stats, rx_count, tx_count, txn_out, txp_out, channel_up, lane_up, hard_err, soft_err, status, send);
     schedule (send) C (send);   
     schedule (receive) C (receive);   
 endmodule

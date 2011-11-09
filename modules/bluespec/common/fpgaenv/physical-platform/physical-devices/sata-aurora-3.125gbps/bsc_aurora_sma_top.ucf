@@ -71,21 +71,22 @@
 
 
 #NET grefclk_i PERIOD = 10.0 ns;
-NET "*GTPD0_left_i" PERIOD = 6.667 ns;
+NET "*GTPD0_left_i" PERIOD = 16 ns;
 
 
 
 ######################### mgt clock module constraints ########################
 
-#NET GREFCLK_N_IN LOC = AG15;
-#NET CLK LOC = AH15;
-NET AURORA_GREFCLK_N_IN LOC = Y3;
-NET AURORA_GREFCLK_P_IN LOC = Y4;
+NET aurora_clk_n_AURORA_GREFCLK_N_IN LOC = H3;
+NET aurora_clk_p_AURORA_GREFCLK_P_IN LOC = H4;
 
 ################################# mgt wrapper constraints #####################
 
 ##---------- Set placement for tile0_rocketio_wrapper_i/GTP_DUAL ------
-INST */aurora_module_i/gtp_wrapper_i/GTP_TILE_INST/gtp_tile_i LOC=GTP_DUAL_X0Y3;
+INST */aurora_module_i/gtp_wrapper_i/GTP_TILE_INST/gtp_tile_i LOC=GTP_DUAL_X0Y5;
+INST */gtp_GTP_DUAL_X0Y5/gtp_dual_i LOC=GTP_DUAL_X0Y4;
+INST */gtp_GTP_DUAL_X0Y6/gtp_dual_i LOC=GTP_DUAL_X0Y6;
+INST */gtp_GTP_DUAL_X0Y7/gtp_dual_i LOC=GTP_DUAL_X0Y7;
 
 
 

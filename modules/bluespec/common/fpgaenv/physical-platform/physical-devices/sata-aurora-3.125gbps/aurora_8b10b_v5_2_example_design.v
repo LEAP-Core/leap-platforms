@@ -75,6 +75,8 @@ module aurora_8b10b_v5_2_example_design #
     CHANNEL_UP,
     RX_COUNT,
     TX_COUNT,
+    //GT_RESET_IN_N, // User reset.  Syspops claim this is uneeded.  We get a reset on reprogram...  Might want to tie to 0...
+
  
     GTPD0_P,
     GTPD0_N,
@@ -108,7 +110,19 @@ module aurora_8b10b_v5_2_example_design #
     RXP,
     RXN,
     TXP,
-    TXN
+    TXN,
+    RXP_dummy_0,
+    RXN_dummy_0,
+    TXP_dummy_0,
+    TXN_dummy_0,
+    RXP_dummy_1,
+    RXN_dummy_1,
+    TXP_dummy_1,
+    TXN_dummy_1,
+    RXP_dummy_2,
+    RXN_dummy_2,
+    TXP_dummy_2,
+    TXN_dummy_2
 );
 
 
@@ -117,7 +131,6 @@ module aurora_8b10b_v5_2_example_design #
     input              RESET_N;
     input              INIT_CLK;
 
-//    input              GT_RESET_IN_N;
     output             HARD_ERR;
     output             SOFT_ERR;
     output  [31:0]     STATUS;
@@ -161,6 +174,20 @@ module aurora_8b10b_v5_2_example_design #
     output             TXP;
     output             TXN;
 
+    // Dummy I/O (sprinkle as needed to satisfy clock routing constraints: AR#33473 
+    input              RXP_dummy_0;
+    input              RXN_dummy_0;
+    output             TXP_dummy_0;
+    output             TXN_dummy_0;
+    input              RXP_dummy_1;
+    input              RXN_dummy_1;
+    output             TXP_dummy_1;
+    output             TXN_dummy_1;
+    input              RXP_dummy_2;
+    input              RXN_dummy_2;
+    output             TXP_dummy_2;
+    output             TXN_dummy_2;
+   
 //**************************External Register Declarations****************************
     reg                HARD_ERR;
     reg                SOFT_ERR;
@@ -221,19 +248,19 @@ module aurora_8b10b_v5_2_example_design #
 	
 //*********************************Main Body of Code**********************************
 
-  assign lane_up_reduce_i  = !(&lane_up_i);
+    assign lane_up_reduce_i  = !(&lane_up_i);
 
-  assign RESET = RESET_N;  // This is active low.
-  assign tx_src_rdy_n_i = !(tx_en && channel_up_i && (!system_reset_i));
-  assign tx_rdy = (!tx_dst_rdy_n_i) && channel_up_i && (!system_reset_i) && !do_cc_i;
-  assign USER_RESET = (!system_reset_i) && RESET;
-  assign GT_RESET_IN = !RESET_N; // this one is active high...
-  assign USER_CLK = user_clk_i;
-  assign rx_rdy = (!rx_src_rdy_n_i) && channel_up_i && (!system_reset_i);
-  assign cc_d_i = do_cc_i;
+    assign RESET = RESET_N;  // This is active low.
+    assign tx_src_rdy_n_i = !(tx_en && channel_up_i && (!system_reset_i));
+    assign tx_rdy = (!tx_dst_rdy_n_i) && channel_up_i && (!system_reset_i) && !do_cc_i;
+    assign USER_RESET = (!system_reset_i) && RESET;
+    assign GT_RESET_IN = !RESET_N; // this one is active high...
+    assign USER_CLK = user_clk_i;
+    assign rx_rdy = (!rx_src_rdy_n_i) && channel_up_i && (!system_reset_i);
+    assign cc_d_i = do_cc_i;
     
 //_______________________________Clock Buffers_________________________________
-wire 	GTPD0_left_i_n;
+    wire 	GTPD0_left_i_n;
    
 
     IBUFDS IBUFDS
@@ -288,15 +315,16 @@ wire 	GTPD0_left_i_n;
 	begin
             if(soft_err_i)
 	    begin
-                 tx_count_next = TX_COUNT + 1; 
+                tx_count_next = TX_COUNT + 1; 
 	    end
+	   
 	    if(rx_rdy)
 	    begin
-                 rx_count_next = RX_COUNT + 1; 
+                rx_count_next = RX_COUNT + 1; 
 	    end
 	end // else: !if(system_reset_i)
        
-        RX_COUNT <= rx_count_next;
+	RX_COUNT <= rx_count_next;
 	TX_COUNT <= tx_count_next;	
     end
 
@@ -373,6 +401,47 @@ wire 	GTPD0_left_i_n;
 
     assign  sync_in_i         =  64'h0;
     assign  reset_i =   system_reset_i;
+
+
+    // We need these guys to feed the clock to the SMA link
+    dummy_gtp gtp_GTP_DUAL_X0Y5
+    (
+        .RXN0_IN(RXN_dummy_0),
+	.RXN1_IN(),
+	.RXP0_IN(RXP_dummy_0),
+	.RXP1_IN(),
+	.CLKIN_IN(GTPD0_left_i),
+	.TXN0_OUT(TXN_dummy_0),
+	.TXN1_OUT(),
+	.TXP0_OUT(TXP_dummy_0),
+	.TXP1_OUT()
+   );
+
+   dummy_gtp gtp_GTP_DUAL_X0Y6
+   (
+	.RXN0_IN(RXN_dummy_1),
+	.RXN1_IN(),
+	.RXP0_IN(RXP_dummy_1),
+	.RXP1_IN(),
+	.CLKIN_IN(GTPD0_left_i),
+	.TXN0_OUT(TXN_dummy_1),
+	.TXN1_OUT(),
+	.TXP0_OUT(TXP_dummy_1),
+	.TXP1_OUT()
+   );
+
+   dummy_gtp gtp_GTP_DUAL_X0Y7
+   (
+	.RXN0_IN(RXN_dummy_2),
+	.RXN1_IN(),
+	.RXP0_IN(RXP_dummy_2),
+	.RXP1_IN(),
+	.CLKIN_IN(GTPD0_left_i),
+	.TXN0_OUT(TXN_dummy_2),
+	.TXN1_OUT(),
+	.TXP0_OUT(TXP_dummy_2),
+	.TXP1_OUT()
+    );
 
 endmodule
 

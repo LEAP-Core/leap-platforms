@@ -13349,3 +13349,86 @@ The Aurora IP is available for every post Virtex-4 board, including
 the ML605.  The IP introduced in this checkin can be used as a
 template for linking those chips.
 
+
+----------
+kfleming    Date: Wed Nov  9 16:18:04 EST 2011  CSN: CSN-leap-platforms-574
+                  Wed Nov  9 21:18:04 UTC 2011
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5
+ pcie-aurora/              Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/pcie-aurora
+ xilinx-xup-pcie-sata.h    Locally Added               0 
+ xilinx-xup-pcie-sata.awb  Locally Added               0 
+ xilinx.download           Locally Added               0 
+ xilinx-xup-pcie-sata.bsv  Locally Added               0 
+ xilinx.ut                 Locally Added               0 
+ xilinx.sdc                Locally Added               0 
+ xilinx-xup-pcie-sata.bsh  Locally Added               0 
+ xilinx-xup-pcie-sata.ucf  Locally Added               0 
+ xilinx.sdf                Locally Added               0 
+ xilinx.xst                Locally Added               0 
+ xilinx-xup-pcie-sata.cpp  Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5
+ sata/                     Locally Removed           573 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/sata
+ xilinx-xup-sata.h         Locally Removed           573 
+ xilinx.download           Locally Removed           573 
+ xilinx.ut                 Locally Removed           573 
+ xilinx-xup-sata.awb       Locally Removed           573 
+ xilinx.sdc                Locally Removed           573 
+ xilinx-xup-sata.bsv       Locally Removed           573 
+ xilinx.sdf                Locally Removed           573 
+ xilinx-xup-sata.bsh       Locally Removed           573 
+ xilinx-xup-sata.ucf       Locally Removed           573 
+ xilinx.xst                Locally Removed           573 
+ xilinx-xup-sata.cpp       Locally Removed           573 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/sata-aurora-3gbps
+ XUPV5_AURORA_SINGLE_UG.bsv Locally Modified          573 
+ sata-aurora.awb           Locally Modified          573 
+ aurora_8b10b_v5_2_example_design.v Locally Modified          573 
+ XUPV5_AURORA_SINGLE.bsv   Locally Modified          573 
+ bsc_serdes_top.ucf        Locally Modified          573 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices
+ sata-aurora-3.125gbps/    Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/sata-aurora-3.125gbps
+ aurora_8b10b_v5_2_global_logic.v Locally Added               0 
+ aurora_8b10b_v5_2.v       Locally Added               0 
+ aurora_8b10b_v5_2_chbond_count_dec.v Locally Added               0 
+ aurora_8b10b_v5_2_err_detect.v Locally Added               0 
+ XUPV5_AURORA_SINGLE_UG.bsv Locally Added               0 
+ aurora_8b10b_v5_2_sym_dec.v Locally Added               0 
+ sata-aurora.awb           Locally Added               0 
+ aurora_8b10b_v5_2_example_design.v Locally Added               0 
+ aurora_8b10b_v5_2_transceiver_wrapper.v Locally Added               0 
+ XUPV5_AURORA_SINGLE.bsv   Locally Added               0 
+ aurora_8b10b_v5_2_aurora_lane.v Locally Added               0 
+ aurora_8b10b_v5_2_channel_init_sm.v Locally Added               0 
+ aurora_8b10b_v5_2_example_design.ucf Locally Added               0 
+ aurora_8b10b_v5_2_reset_logic.v Locally Added               0 
+ aurora_8b10b_v5_2_clock_module.v Locally Added               0 
+ aurora_8b10b_v5_2_sym_gen.v Locally Added               0 
+ aurora_8b10b_v5_2_lane_init_sm.v Locally Added               0 
+ aurora_8b10b_v5_2_transceiver_tile.v Locally Added               0 
+ aurora_8b10b_v5_2_idle_and_ver_gen.v Locally Added               0 
+ aurora_8b10b_v5_2_rx_stream.v Locally Added               0 
+ aurora_8b10b_v5_2_tx_stream.v Locally Added               0 
+ aurora_8b10b_v5_2_channel_err_detect.v Locally Added               0 
+ bsc_aurora_sma_top.ucf    Locally Added               0 
+ aurora_8b10b_v5_2_standard_cc_module.v Locally Added               0 
+
+
+Added several high-speed serial implementations for the XUPV5.  These
+GTP/GTX links are generally available on Xilinx chips and boards, and
+are very useful for board to board communication in the context of a
+multiple FPGA implementation.  Although what I have implemented is
+device specific, in practice porting to different links is
+straightforward (indeed this commit includes two different links on
+the XUPV5).  Also good is that the links seem to be scaling with
+Moore's law in bandwidth and latency.

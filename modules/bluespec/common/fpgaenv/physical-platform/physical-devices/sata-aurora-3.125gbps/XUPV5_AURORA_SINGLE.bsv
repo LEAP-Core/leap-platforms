@@ -16,12 +16,14 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-// This module interfaces to the sata cable slot SATA HOST 0 on the
+// This module interfaces to the SMA cables on the
 // XUPV5. However only certain of the generated verilog and ucf files
 // are needed to characterize this interface, and it can be used a model 
 // for high-speed board to board serial on other development boards. The 
 // device interface consists of a simple FIFO with guaranteed transport to
-// the other device. 
+// the other device. This module is slightly complicated by the need to 
+// instantiate dummy serial modules to route clock to the SMA GTP.
+
 
 import Clocks::*;
 import FIFOF::*;
@@ -30,25 +32,50 @@ import Connectable::*;
 import GetPut::*;
 
 interface AURORA_WIRES;
-    (* prefix = "" *)
-    method Action serdes_clk_n((* port="AURORA_GREFCLK_N_IN" *) Bit#(1) clk_n);
 
-    (* prefix = "" *)      
-    method Action serdes_clk_p((* port="AURORA_GREFCLK_P_IN" *) Bit#(1) clk_p);
+    method Action aurora_clk_n((* port="AURORA_GREFCLK_N_IN" *) Bit#(1) clk_n);
+
+    method Action aurora_clk_p((* port="AURORA_GREFCLK_P_IN" *) Bit#(1) clk_p);
    
-    (* prefix = "" *)      
-    method Action rxn_in((* port="RXN_IN" *) Bit#(1) rxn);
+    method Action aurora_rxn_in((* port="AURORA_RXN_IN" *) Bit#(1) rxn);
 
-    (* prefix = "" *)      
-    method Action rxp_in((* port="RXP_IN" *) Bit#(1) rxp);
+    method Action aurora_rxp_in((* port="AURORA_RXP_IN" *) Bit#(1) rxp);
 
-    (* always_ready *)
-    (* result = "TXN_OUT" *)
-    method Bit#(1) txn_out();
+    (* result = "AURORA_TXN_OUT" *)
+    method Bit#(1) aurora_txn_out();
 
-    (* always_ready *)
-    (* result = "TXP_OUT" *)
-    method Bit#(1) txp_out();
+    (* result = "AURORA_TXP_OUT" *)
+    method Bit#(1) aurora_txp_out();
+
+
+    // Dummy GTP for clocking goodness
+
+    method Action rxn_in_dummy0((* port="RXN_IN_dummy0" *) Bit#(1) rxn);
+    method Action rxp_in_dummy0((* port="RXP_IN_dummy0" *) Bit#(1) rxp);
+
+    (* result = "TXN_OUT_dummy0" *)
+    method Bit#(1) txn_out_dummy0();
+
+    (* result = "TXP_OUT_dummy0" *)
+    method Bit#(1) txp_out_dummy0();
+
+    method Action rxn_in_dummy1((* port="RXN_IN_dummy1" *) Bit#(1) rxn);
+    method Action rxp_in_dummy1((* port="RXP_IN_dummy1" *) Bit#(1) rxp);
+
+    (* result = "TXN_OUT_dummy1" *)
+    method Bit#(1) txn_out_dummy1();
+
+    (* result = "TXP_OUT_dummy1" *)
+    method Bit#(1) txp_out_dummy1();
+
+    method Action rxn_in_dummy2((* port="RXN_IN_dummy2" *) Bit#(1) rxn);
+    method Action rxp_in_dummy2((* port="RXP_IN_dummy2" *) Bit#(1) rxp);
+
+    (* result = "TXN_OUT_dummy2" *)
+    method Bit#(1) txn_out_dummy2();
+
+    (* result = "TXP_OUT_dummy2" *)
+    method Bit#(1) txp_out_dummy2();
       
 endinterface
 
@@ -58,7 +85,7 @@ interface AURORA_DRIVER;
     method Bool                   write_ready(); // txusrclk 
     method ActionValue#(Bit#(16)) read(); // rxusrclk0     
 
-    // These methods are a basic debugging interface
+    // Debugging interface
     method Bit#(1) channel_up;
     method Bit#(1) lane_up;
     method Bit#(1) hard_err;
@@ -112,6 +139,7 @@ module mkAURORA_DEVICE (AURORA_DEVICE);
         begin
             handshakeTXDone <= True;
         end
+
         ug_device.send(handshakeWords[handshakeTX]);
     endrule
 
@@ -139,6 +167,8 @@ module mkAURORA_DEVICE (AURORA_DEVICE);
         ug_device.send(serdes_txfifo.first);
     endrule
 
+
+
     rule rx (handshakeRXDone);  // we always need to receive.  We may want to send a sync word here...
         let data <- ug_device.receive;
         serdes_rxfifo.enq(data);
@@ -147,14 +177,30 @@ module mkAURORA_DEVICE (AURORA_DEVICE);
     rule sendStats;
         ug_device.stats(serdes_txfifo.dCount, serdes_txfifo.dNotEmpty, serdes_txfifo.dNotFull, serdes_rxfifo.sCount, serdes_rxfifo.sNotEmpty, serdes_rxfifo.sNotFull);
     endrule
-  
+   
     interface AURORA_WIRES wires;
-        method serdes_clk_n = ug_device.clk_n_in;
-        method serdes_clk_p = ug_device.clk_p_in;
-        method rxn_in = ug_device.rxn_in;
-        method rxp_in = ug_device.rxp_in;
-        method txn_out = ug_device.txn_out;
-        method txp_out = ug_device.txp_out;
+        method aurora_clk_n = ug_device.clk_n_in;
+        method aurora_clk_p = ug_device.clk_p_in;
+        method aurora_rxn_in = ug_device.rxn_in;
+        method aurora_rxp_in = ug_device.rxp_in;
+        method aurora_txn_out = ug_device.txn_out;
+        method aurora_txp_out = ug_device.txp_out;
+
+        method rxn_in_dummy0 = ug_device.rxn_in_dummy0;
+        method rxp_in_dummy0 = ug_device.rxp_in_dummy0;
+        method txn_out_dummy0 = ug_device.txn_out_dummy0;
+        method txp_out_dummy0 = ug_device.txp_out_dummy0;
+
+        method rxn_in_dummy1 = ug_device.rxn_in_dummy1;
+        method rxp_in_dummy1 = ug_device.rxp_in_dummy1;
+        method txn_out_dummy1 = ug_device.txn_out_dummy1;
+        method txp_out_dummy1 = ug_device.txp_out_dummy1;
+
+        method rxn_in_dummy2 = ug_device.rxn_in_dummy2;
+        method rxp_in_dummy2 = ug_device.rxp_in_dummy2;
+        method txn_out_dummy2 = ug_device.txn_out_dummy2;
+        method txp_out_dummy2 = ug_device.txp_out_dummy2;
+
     endinterface
    
     interface AURORA_DRIVER driver;
