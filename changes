@@ -13432,3 +13432,21 @@ device specific, in practice porting to different links is
 straightforward (indeed this commit includes two different links on
 the XUPV5).  Also good is that the links seem to be scaling with
 Moore's law in bandwidth and latency.
+
+----------
+kfleming    Date: Thu Nov 10 12:10:03 EST 2011  CSN: CSN-leap-platforms-575
+                  Thu Nov 10 17:10:03 UTC 2011
+
+
+Directory .
+ Makefile.in               Locally Modified          574 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/sata-aurora-3gbps
+ XUPV5_AURORA_SINGLE.bsv   Locally Modified          574 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/sata-aurora-3.125gbps
+ XUPV5_AURORA_SINGLE.bsv   Locally Modified          574 
+
+
+
+Changed interface of Aurora interfpga devices to match new style fpga routers.

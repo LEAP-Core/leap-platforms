@@ -83,7 +83,9 @@ endinterface
 interface AURORA_DRIVER;
     method Action                 write(Bit#(16) tx_word); // txusrclk 
     method Bool                   write_ready(); // txusrclk 
-    method ActionValue#(Bit#(16)) read(); // rxusrclk0     
+    method Action                 deq(); // rxusrclk0     
+    method Bit#(16)               first(); // rxusrclk0     
+
 
     // Debugging interface
     method Bit#(1) channel_up;
@@ -204,16 +206,13 @@ module mkAURORA_DEVICE (AURORA_DEVICE);
     endinterface
    
     interface AURORA_DRIVER driver;
-        method Action write(Bit#(16) data);
-            serdes_txfifo.enq(data);
-        endmethod
+        method write = serdes_txfifo.enq;
 
         method write_ready = serdes_txfifo.sNotFull();
 
-        method ActionValue#(Bit#(16)) read();
-            serdes_rxfifo.deq;
-            return serdes_rxfifo.first();
-        endmethod
+        method Action deq = serdes_rxfifo.deq();
+
+        method Bit#(16) first = serdes_rxfifo.first();
 
         method channel_up = ug_device.channel_up;
         method lane_up = ug_device.lane_up;
