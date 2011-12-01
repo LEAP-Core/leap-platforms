@@ -13450,3 +13450,18 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/sat
 
 
 Changed interface of Aurora interfpga devices to match new style fpga routers.
+
+----------
+mcadler     Date: Thu Dec  1 14:24:06 EST 2011  CSN: CSN-leap-platforms-576
+                  Thu Dec  1 19:24:06 UTC 2011
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/utils
+ physical-platform-utils.bsv Locally Added               0 
+ utils.awb                 Locally Modified          575 
+
+Add details to identify an individual FPGA platform uniquely among a multi-FPGA
+set.  The values are defined for all platforms so code can work both in single
+and multiple FPGA environments.
+
+Multi-FPGA configuration/build scripts will set the platform ID automatically.
