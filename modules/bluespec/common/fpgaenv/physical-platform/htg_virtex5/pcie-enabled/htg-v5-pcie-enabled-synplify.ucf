@@ -53,19 +53,19 @@ INST "*/ep/BU2/U0/pcie_ep0/pcie_blk/SIO/.pcie_gt_wrapper_i/GTD[2].GT_i" LOC = GT
 # BlockRAM placement
 #
 
-INST "m_vp_llpi_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk/pcie_mim_wrapper_i/bram_retry/generate_sdp.ram_sdp_inst"      LOC = RAMB36_X3Y12 ;
-INST "m_vp_llpi_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk/pcie_mim_wrapper_i/bram_tl_tx/generate_tdp2[1].ram_tdp2_inst" LOC = RAMB36_X3Y11 ;
-INST "m_vp_llpi_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk/pcie_mim_wrapper_i/bram_tl_rx/generate_tdp2[1].ram_tdp2_inst" LOC = RAMB36_X3Y10 ;
-INST "m_vp_llpi_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk/pcie_mim_wrapper_i/bram_tl_tx/generate_tdp2[0].ram_tdp2_inst" LOC = RAMB36_X3Y9 ;
-INST "m_vp_llpi_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk/pcie_mim_wrapper_i/bram_tl_rx/generate_tdp2[0].ram_tdp2_inst" LOC = RAMB36_X3Y8 ;
+INST "m_llpi_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk/pcie_mim_wrapper_i/bram_retry/generate_sdp.ram_sdp_inst"      LOC = RAMB36_X3Y12 ;
+INST "m_llpi_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk/pcie_mim_wrapper_i/bram_tl_tx/generate_tdp2[1].ram_tdp2_inst" LOC = RAMB36_X3Y11 ;
+INST "m_llpi_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk/pcie_mim_wrapper_i/bram_tl_rx/generate_tdp2[1].ram_tdp2_inst" LOC = RAMB36_X3Y10 ;
+INST "m_llpi_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk/pcie_mim_wrapper_i/bram_tl_tx/generate_tdp2[0].ram_tdp2_inst" LOC = RAMB36_X3Y9 ;
+INST "m_llpi_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk/pcie_mim_wrapper_i/bram_tl_rx/generate_tdp2[0].ram_tdp2_inst" LOC = RAMB36_X3Y8 ;
 
 #
 # Timing critical placements
 #
 
-INST "m_vp_llpi_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk_if/ll_bridge/tx_bridge/tx_bridge/shift_pipe1" LOC = "SLICE_X107Y56" ;
-INST "m_vp_llpi_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk_if/ll_bridge/rx_bridge/arb_inst/completion_available" LOC = "SLICE_X106Y46" ;
-INST "m_vp_llpi_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk_if/cf_bridge/management_interface/mgmt_rdata_d1_3" LOC = "SLICE_X107Y45" ;
+INST "m_llpi_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk_if/ll_bridge/tx_bridge/tx_bridge/shift_pipe1" LOC = "SLICE_X107Y56" ;
+INST "m_llpi_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk_if/ll_bridge/rx_bridge/arb_inst/completion_available" LOC = "SLICE_X106Y46" ;
+INST "m_llpi_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk_if/cf_bridge/management_interface/mgmt_rdata_d1_3" LOC = "SLICE_X107Y45" ;
 ###############################################################################
 # Timing Constraints
 ###############################################################################
@@ -80,7 +80,7 @@ NET "CLK" LOC = "J16" | IOSTANDARD = LVCMOS25;
 NET "CLK" TNM_NET = "CLK" ;
 TIMESPEC "TS_CLK"  = PERIOD "CLK" 50.00 MHz HIGH 50 % ;
 
-NET "m_vp_llpi_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk/SIO/.pcie_gt_wrapper_i/gt_refclk_out[0]" TNM_NET = "MGTCLK" ;
+NET "m_llpi_phys_plat_pci_express_device_prim_pci/ep/BU2/U0/pcie_ep0/pcie_blk/SIO/.pcie_gt_wrapper_i/gt_refclk_out[0]" TNM_NET = "MGTCLK" ;
 TIMESPEC "TS_MGTCLK"  = PERIOD "MGTCLK" 100.00 MHz HIGH 50 % ;
 
 ###############################################################################
@@ -128,5 +128,5 @@ NET "switchesWires_SWITCH[7]" LOC="M26" | IOSTANDARD=LVCMOS25;
 ## hasn't occurred yet, possibly because these signals are tied or are very
 ## close to physical pins.
 
-#INST "*/CAN_FIRE_RL_m_vp_llpi_cio_physicalChannel_recv_read_resp_0_0_a2_0" HLUTNM = "HLUTNM_pcie_random_name_00";
+#INST "*/CAN_FIRE_RL_m_llpi_cio_physicalChannel_recv_read_resp_0_0_a2_0" HLUTNM = "HLUTNM_pcie_random_name_00";
 #INST "m_vp_vdevs_fp_server_stub_dem_state_EN_i_lut6_1" LUTNM = "LUTNM_pcie_random_name_01";

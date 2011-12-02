@@ -13465,3 +13465,26 @@ set.  The values are defined for all platforms so code can work both in single
 and multiple FPGA environments.
 
 Multi-FPGA configuration/build scripts will set the platform ID automatically.
+
+----------
+mcadler     Date: Thu Dec  1 22:44:33 EST 2011  CSN: CSN-leap-platforms-577
+                  Fri Dec  2 03:44:33 UTC 2011
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/jtag
+ htg-v5-jtag.ucf           Locally Modified          576 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled
+ htg-v5-pcie-enabled-synplify.ucf Locally Modified          576 
+ htg-v5-pcie-enabled.ucf   Locally Modified          576 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/serial/ublaze-serial
+ serial-device-ublaze-tig.ucf Locally Modified          576 
+ serial-device-ublaze-tig-synplify.ucf Locally Modified          576 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr
+ ddr_sdram.ucf             Locally Modified          576 
+ ddr_sdram_tig_synplify.ucf Locally Modified          576 
+ ddr_sdram_tig.ucf         Locally Modified          576 
+
+LLPI no longer under virtual platform.

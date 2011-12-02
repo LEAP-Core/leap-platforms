@@ -7,48 +7,48 @@
 
 # SyncFIFO: master command Q
 
-NET "m_vp_llpi_phys_plat_ddr_master_commandQ_dD_OUT[*]"     TIG;
-NET "m_vp_llpi_phys_plat_ddr_master_commandQ/dGDeqPtr[*]"   TIG; 
-NET "m_vp_llpi_phys_plat_ddr_master_commandQ/dGDeqPtr1[*]"  TIG;
-NET "m_vp_llpi_phys_plat_ddr_master_commandQ/sGEnqPtr[*]"   TIG;
-NET "m_vp_llpi_phys_plat_ddr_master_commandQ/sGEnqPtr1[*]"  TIG;
+NET "m_llpi_phys_plat_ddr_master_commandQ_dD_OUT[*]"     TIG;
+NET "m_llpi_phys_plat_ddr_master_commandQ/dGDeqPtr[*]"   TIG; 
+NET "m_llpi_phys_plat_ddr_master_commandQ/dGDeqPtr1[*]"  TIG;
+NET "m_llpi_phys_plat_ddr_master_commandQ/sGEnqPtr[*]"   TIG;
+NET "m_llpi_phys_plat_ddr_master_commandQ/sGEnqPtr1[*]"  TIG;
 
 
 # SyncFIFO: writeQ
-NET "m_vp_llpi_phys_plat_ddr_master_writeQ_dD_OUT[*]"     TIG;
-NET "m_vp_llpi_phys_plat_ddr_master_writeQ/dGDeqPtr[*]"   TIG;
-NET "m_vp_llpi_phys_plat_ddr_master_writeQ/sGEnqPtr[*]"   TIG;
+NET "m_llpi_phys_plat_ddr_master_writeQ_dD_OUT[*]"     TIG;
+NET "m_llpi_phys_plat_ddr_master_writeQ/dGDeqPtr[*]"   TIG;
+NET "m_llpi_phys_plat_ddr_master_writeQ/sGEnqPtr[*]"   TIG;
 
 # SyncFIFO: readQ
 
-NET "m_vp_llpi_phys_plat_ddr_master_readQ_dD_OUT[*]"     TIG;
-NET "m_vp_llpi_phys_plat_ddr_master_readQ/dGDeqPtr[*]"   TIG;
-NET "m_vp_llpi_phys_plat_ddr_master_readQ/dGDeqPtr1[*]"  TIG;
-NET "m_vp_llpi_phys_plat_ddr_master_readQ/sGEnqPtr[*]"   TIG;
-NET "m_vp_llpi_phys_plat_ddr_master_readQ/sGEnqPtr1[*]"  TIG;
+NET "m_llpi_phys_plat_ddr_master_readQ_dD_OUT[*]"     TIG;
+NET "m_llpi_phys_plat_ddr_master_readQ/dGDeqPtr[*]"   TIG;
+NET "m_llpi_phys_plat_ddr_master_readQ/dGDeqPtr1[*]"  TIG;
+NET "m_llpi_phys_plat_ddr_master_readQ/sGEnqPtr[*]"   TIG;
+NET "m_llpi_phys_plat_ddr_master_readQ/sGEnqPtr1[*]"  TIG;
 
 # SyncFIFO: readTokenQ
-#NET "m_vp_llpi_phys_plat_ddr_master_readTokenQ$dD_OUT[*]"     TIG;
-NET "m_vp_llpi_phys_plat_ddr_master_readTokenQ/dGDeqPtr[*]"   TIG;
-NET "m_vp_llpi_phys_plat_ddr_master_readTokenQ/dGDeqPtr1[*]"  TIG;
-NET "m_vp_llpi_phys_plat_ddr_master_readTokenQ/sGEnqPtr[*]"   TIG;
-NET "m_vp_llpi_phys_plat_ddr_master_readTokenQ/sGEnqPtr1[*]"  TIG;
+#NET "m_llpi_phys_plat_ddr_master_readTokenQ$dD_OUT[*]"     TIG;
+NET "m_llpi_phys_plat_ddr_master_readTokenQ/dGDeqPtr[*]"   TIG;
+NET "m_llpi_phys_plat_ddr_master_readTokenQ/dGDeqPtr1[*]"  TIG;
+NET "m_llpi_phys_plat_ddr_master_readTokenQ/sGEnqPtr[*]"   TIG;
+NET "m_llpi_phys_plat_ddr_master_readTokenQ/sGEnqPtr1[*]"  TIG;
 
 
 # SyncReg: clockTicks
 
-#NET "m_vp_llpi_phys_plat_ddr_master_clockTicksSync/sDataSyncIn[*]" TIG; 
-#NET "m_vp_llpi_phys_plat_ddr_master_clockTicksSync/dD_OUT[*]" TIG; 
-#NET "m_vp_llpi_phys_plat_ddr_master_clockTicksSync/sync/sToggleReg" TIG; 
-#NET "m_vp_llpi_phys_plat_ddr_master_clockTicksSync/sync/dSyncReg1" TIG;
+#NET "m_llpi_phys_plat_ddr_master_clockTicksSync/sDataSyncIn[*]" TIG; 
+#NET "m_llpi_phys_plat_ddr_master_clockTicksSync/dD_OUT[*]" TIG; 
+#NET "m_llpi_phys_plat_ddr_master_clockTicksSync/sync/sToggleReg" TIG; 
+#NET "m_llpi_phys_plat_ddr_master_clockTicksSync/sync/dSyncReg1" TIG;
 
 # SyncReg: addrAcksRead
 
-#NET "m_vp_llpi_phys_plat_ddr_master_addrAcksReadSync/sDataSyncIn[*]" TIG;
-#NET "m_vp_llpi_phys_plat_ddr_master_addrAcksReadSync/dD_OUT[*]" TIG;
+#NET "m_llpi_phys_plat_ddr_master_addrAcksReadSync/sDataSyncIn[*]" TIG;
+#NET "m_llpi_phys_plat_ddr_master_addrAcksReadSync/dD_OUT[*]" TIG;
 
 # SyncReg: addrAcksWrite
 
-#NET "m_vp_llpi_phys_plat_ddr_master_addrAcksWriteSync/sDataSyncIn[*]" TIG;
-#NET "m_vp_llpi_phys_plat_ddr_master_addrAcksWriteSync/dD_OUT[*]" TIG;
+#NET "m_llpi_phys_plat_ddr_master_addrAcksWriteSync/sDataSyncIn[*]" TIG;
+#NET "m_llpi_phys_plat_ddr_master_addrAcksWriteSync/dD_OUT[*]" TIG;
 
