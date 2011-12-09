@@ -1,5 +1,5 @@
-%name Aurora Device, Single Lane, 3.125gbps
-%desc Aurora Device, Single Lane, 3.125gbps 
+%name Aurora Device, Single Lane, 3.125gbps (SMA)
+%desc Aurora Device, Single Lane, 3.125gbps (SMA)
 
 %provides aurora_device
 

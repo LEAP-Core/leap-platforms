@@ -13488,3 +13488,14 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr
  ddr_sdram_tig.ucf         Locally Modified          576 
 
 LLPI no longer under virtual platform.
+
+----------
+kfleming    Date: Fri Dec  9 14:33:46 EST 2011  CSN: CSN-leap-platforms-578
+                  Fri Dec  9 19:33:46 UTC 2011
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/sata-aurora-3.125gbps
+ sata-aurora.awb           Locally Modified          577 
+
+
+Changed the metadata in the sata link naming to make them easier to identify in awb. 
