@@ -13499,3 +13499,13 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/sat
 
 
 Changed the metadata in the sata link naming to make them easier to identify in awb. 
+
+----------
+mcadler     Date: Sat Dec 10 16:39:24 EST 2011  CSN: CSN-leap-platforms-579
+                  Sat Dec 10 21:39:24 UTC 2011
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/utils
+ physical-platform-utils.bsv Locally Modified          578 
+
+Make sure the FPGA_PLATFORM_ID is at least 1 bit.
