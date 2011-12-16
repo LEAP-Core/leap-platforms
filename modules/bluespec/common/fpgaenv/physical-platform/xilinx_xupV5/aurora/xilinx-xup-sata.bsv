@@ -22,7 +22,7 @@ import Clocks::*;
 
 // The Physical Platform for the XUP Virtex 5 with PCIE
 
-`include "sata_device.bsh"
+`include "aurora_device.bsh"
 `include "clocks_device.bsh"
 `include "physical_platform_utils.bsh"
 
@@ -35,8 +35,8 @@ import Clocks::*;
 interface PHYSICAL_DRIVERS;
     
     interface CLOCKS_DRIVER                        clocksDriver;
-    interface XUPV5_SERDES_DRIVER                  sataDriver;
-        
+    interface AURORA_DRIVER                        auroraDriver;        
+
 endinterface
 
 // TOP_LEVEL_WIRES
@@ -52,7 +52,7 @@ interface TOP_LEVEL_WIRES;
     (* prefix = "" *)
     interface CLOCKS_WIRES                        clocksWires;
     (* prefix = "" *)
-    interface XUPV5_SERDES_WIRES                  sataWires;
+    interface AURORA_WIRES                        auroraWires;
 
 endinterface
 
@@ -88,15 +88,14 @@ module mkPhysicalPlatform
     // Next, create the physical device that can trigger a soft reset. Pass along the
     // interface to the trigger module that the clocks device has given us.
 
-   let sata_device <- mkXUPV5_SERDES_DEVICE(65535, 16, clocked_by clk,reset_by rst);
-
+   let aurora_device <- mkAURORA_DEVICE(clocked_by clk, reset_by rst);
 
     // Aggregate the drivers
     
     interface PHYSICAL_DRIVERS physicalDrivers;
     
         interface clocksDriver     = clocks_device.driver;
-        interface sataDriver       = sata_device.driver;
+        interface auroraDriver     = aurora_device.driver;
 
     endinterface
     
@@ -105,7 +104,7 @@ module mkPhysicalPlatform
     interface TOP_LEVEL_WIRES topLevelWires;
 
         interface clocksWires      = clocks_device.wires;
-        interface sataWires        = sata_device.wires;
+        interface auroraWires      = aurora_device.wires;
 
     endinterface
                

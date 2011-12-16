@@ -1,2 +1,2 @@
-`include "sata_device.bsh"
+`include "aurora_device.bsh"
 

@@ -30,6 +30,11 @@ import FIFOF::*;
 import FIFOLevel::*;
 import Connectable::*;
 import GetPut::*;
+import Vector::*;
+
+`include "awb/provides/librl_bsv_base.bsh"
+`include "awb/provides/librl_bsv_storage.bsh"
+
 
 interface AURORA_WIRES;
 
@@ -79,12 +84,15 @@ interface AURORA_WIRES;
       
 endinterface
 
-// guard interface
+// guarded interface
+// Notice that we do a 4 to 1 vectorization here.  This is to exploit the high bandwidth of the link relative to our
+// clock frequency.  Ideally, we would choose vectorization intelligently based on MODEL_CLOCK_FREQ and the link
+// bandwidth, but I don't have time for that now, and making it a constant gets most of the performance. 
 interface AURORA_DRIVER;
-    method Action                 write(Bit#(16) tx_word); // txusrclk 
+    method Action                 write(Bit#(63) tx_word); // txusrclk 
     method Bool                   write_ready(); // txusrclk 
     method Action                 deq(); // rxusrclk0     
-    method Bit#(16)               first(); // rxusrclk0     
+    method Bit#(63)               first(); // rxusrclk0     
 
 
     // Debugging interface
@@ -95,6 +103,7 @@ interface AURORA_DRIVER;
     method Bit#(32) status;
     method Bit#(32) rx_count;
     method Bit#(32) tx_count;
+    method Bit#(32) error_count;
     method UInt#(5) rx_fifo_count;
     method UInt#(5) tx_fifo_count;
 
@@ -105,6 +114,8 @@ interface AURORA_DEVICE;
     interface AURORA_WIRES wires;
     interface AURORA_DRIVER driver;
 endinterface      
+
+typedef 16 BufferSize;
 
 module mkAURORA_DEVICE (AURORA_DEVICE);
 
@@ -120,13 +131,15 @@ module mkAURORA_DEVICE (AURORA_DEVICE);
     Reg#(Bit#(16)) ccCycles  <- mkReg(maxBound, clocked_by(ug_device.aurora_clk), reset_by(aurora_rst)); 
     Reg#(Bit#(2)) handshakeRX <- mkReg(0, clocked_by(ug_device.aurora_clk), reset_by(aurora_rst)); 
     Reg#(Bit#(2)) handshakeTX <- mkReg(0, clocked_by(ug_device.aurora_clk), reset_by(aurora_rst)); 
+    COUNTER#(TAdd#(1,TLog#(BufferSize))) txCredits   <- mkLCounter(fromInteger(valueof(BufferSize)), clocked_by(ug_device.aurora_clk), reset_by(aurora_rst)); 
+    COUNTER#(TAdd#(1,TLog#(BufferSize))) rxCredits   <- mkLCounter(fromInteger(valueof(BufferSize)), clocked_by(ug_device.aurora_clk), reset_by(aurora_rst)); 
     Reg#(Bool) handshakeRXDone <- mkReg(False, clocked_by(ug_device.aurora_clk), reset_by(aurora_rst)); 
     Reg#(Bool) handshakeTXDone <- mkReg(False, clocked_by(ug_device.aurora_clk), reset_by(aurora_rst)); 
     Reg#(Bool) ccLast <- mkReg(False, clocked_by(ug_device.aurora_clk), reset_by(aurora_rst)); 
 
-    SyncFIFOCountIfc#(Bit#(16),16) serdes_rxfifo <- mkSyncFIFOCount( ug_device.aurora_clk, aurora_rst, clk);
-    SyncFIFOCountIfc#(Bit#(16),16) serdes_txfifo <- mkSyncFIFOCount( clk, rst, ug_device.aurora_clk);
-
+    SyncFIFOCountIfc#(Bit#(63),BufferSize) serdes_rxfifo <- mkSyncFIFOCount( ug_device.aurora_clk, aurora_rst, clk);
+    SyncFIFOCountIfc#(Bit#(63),BufferSize) serdes_txfifo <- mkSyncFIFOCount( clk, rst, ug_device.aurora_clk);
+    
     rule updateCCLast;
         ccLast <= ug_device.cc;
     endrule
@@ -164,20 +177,53 @@ module mkAURORA_DEVICE (AURORA_DEVICE);
     endrule
 
 
-    rule tx (handshakeTXDone);
+    MARSHALLER#(4,Bit#(16)) marshaller <- mkSimpleMarshaller(clocked_by(ug_device.aurora_clk), 
+                                                                   reset_by(aurora_rst));
+
+    rule tx (handshakeTXDone && txCredits.value > 0);
+        marshaller.enq(unpack({1'b0,serdes_txfifo.first}));
         serdes_txfifo.deq;
-        ug_device.send(serdes_txfifo.first);
+	txCredits.downBy(1);
     endrule
 
+    // We stuffed BufferSize - rxCredits values into the fifo, and now there count values left.
+    // We can send back BufferSize - rxCredits - count values safely.    
+    let returnCount = fromInteger(valueof(BufferSize)) - rxCredits.value() - pack(serdes_rxfifo.sCount);
+    let returnThreshold = fromInteger(valueof(BufferSize)) - 4;
 
+    rule txFC(handshakeTXDone && ((returnCount > 0 && (!serdes_txfifo.dNotEmpty || txCredits.value == 0)) || returnCount > returnThreshold));
+        rxCredits.upBy(returnCount);
+        marshaller.enq(unpack({1'b1,zeroExtend(returnCount)}));
+    endrule
 
-    rule rx (handshakeRXDone);  // we always need to receive.  We may want to send a sync word here...
+    rule txSend (handshakeTXDone);
+        marshaller.deq;
+        ug_device.send(marshaller.first);
+    endrule
+
+    DEMARSHALLER#(4,Bit#(16)) demarshaller <- mkSimpleDemarshaller(clocked_by(ug_device.aurora_clk), 
+                                                                   reset_by(aurora_rst));
+
+    rule rxDemarsh (handshakeRXDone);  // We always need to receive.  Strong assumption that demarshaller has one element. 
         let data <- ug_device.receive;
-        serdes_rxfifo.enq(data);
+        demarshaller.enq(data);
+    endrule
+
+    Bit#(1) flowcontrol = truncateLSB(pack(demarshaller.first()));
+
+    rule rxDoneFC (handshakeRXDone && flowcontrol == 1);  // Strong assumption that demarshaller has one element. 
+        demarshaller.deq;	
+        txCredits.upBy(truncate(pack(demarshaller.first())));
+    endrule     
+
+    rule rxDone (handshakeRXDone && flowcontrol == 0);  // Strong assumption that demarshaller has one element. 
+        demarshaller.deq;
+        rxCredits.downBy(1);
+        serdes_rxfifo.enq(truncate(pack(demarshaller.first())));
     endrule
 
     rule sendStats;
-        ug_device.stats(serdes_txfifo.dCount, serdes_txfifo.dNotEmpty, serdes_txfifo.dNotFull, serdes_rxfifo.sCount, serdes_rxfifo.sNotEmpty, serdes_rxfifo.sNotFull);
+        ug_device.stats(?, handshakeRXDone, handshakeTXDone, ?, serdes_rxfifo.sNotEmpty, serdes_rxfifo.sNotFull);
     endrule
    
     interface AURORA_WIRES wires;
@@ -210,9 +256,9 @@ module mkAURORA_DEVICE (AURORA_DEVICE);
 
         method write_ready = serdes_txfifo.sNotFull();
 
-        method Action deq = serdes_rxfifo.deq();
+        method deq = serdes_rxfifo.deq();
 
-        method Bit#(16) first = serdes_rxfifo.first();
+        method first = serdes_rxfifo.first();
 
         method channel_up = ug_device.channel_up;
         method lane_up = ug_device.lane_up;
@@ -222,6 +268,7 @@ module mkAURORA_DEVICE (AURORA_DEVICE);
         method status = ug_device.status;
         method rx_count = ug_device.rx_count;
         method tx_count = ug_device.tx_count;
+        method error_count = ug_device.error_count;
         method rx_fifo_count = serdes_rxfifo.dCount;
         method tx_fifo_count = serdes_txfifo.sCount;
     endinterface

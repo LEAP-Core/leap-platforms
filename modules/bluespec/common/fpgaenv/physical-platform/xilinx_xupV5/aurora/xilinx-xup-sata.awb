@@ -1,8 +1,8 @@
-%name XUP Virtex 5 SATA
-%desc XUP Virtex 5 SATA
+%name XUP Virtex 5 AURORA
+%desc XUP Virtex 5 AURORA
 
 %provides physical_platform	
-%requires clocks_device sata_device physical_platform_utils 
+%requires clocks_device aurora_device physical_platform_utils 
 
 %sources -t BSV -v PUBLIC  xilinx-xup-sata.bsv
 %sources -t H   -v PUBLIC  xilinx-xup-sata.h

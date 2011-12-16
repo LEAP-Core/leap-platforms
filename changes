@@ -13509,3 +13509,26 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/utils
  physical-platform-utils.bsv Locally Modified          578 
 
 Make sure the FPGA_PLATFORM_ID is at least 1 bit.
+
+----------
+kfleming    Date: Thu Dec 15 22:13:49 EST 2011  CSN: CSN-leap-platforms-580
+                  Fri Dec 16 03:13:49 UTC 2011
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/aurora
+ xilinx-xup-sata.awb       Locally Modified          579 
+ xilinx-xup-sata.bsv       Locally Modified          579 
+ xilinx-xup-sata.bsh       Locally Modified          579 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/sata-aurora-3.125gbps
+ XUPV5_AURORA_SINGLE_UG.bsv Locally Modified          579 
+ aurora_8b10b_v5_2_example_design.v Locally Modified          579 
+ XUPV5_AURORA_SINGLE.bsv   Locally Modified          579 
+
+
+Changed aurora xupv5 platform to actually use the aurora type.  
+
+Added flow control to the SMA Aurora link.  This is a block-style flow
+control.  I have not evaluated its performance yet.  This kind of
+control should be used by all aurora links, and should be seperated
+out from this specific link.

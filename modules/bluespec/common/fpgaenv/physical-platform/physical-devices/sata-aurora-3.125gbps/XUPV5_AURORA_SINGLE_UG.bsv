@@ -74,6 +74,7 @@ interface AURORA_SINGLE_DEVICE_UG;
     method Bit#(32) status;
     method Bit#(32) rx_count;
     method Bit#(32) tx_count;
+    method Bit#(32) error_count;
     method Bool     cc;
 
     interface Clock aurora_clk;
@@ -127,11 +128,12 @@ module mkAURORA_SINGLE_UG (AURORA_SINGLE_DEVICE_UG);
     method STATUS status;
     method RX_COUNT rx_count;
     method TX_COUNT tx_count;
+    method ERROR_COUNT error_count;
 
-    schedule (cc,stats, rx_count, tx_count, txn_out, txp_out, channel_up, lane_up, hard_err, soft_err, status) CF
-             (cc,stats, rx_count, tx_count, txn_out, txp_out, channel_up, lane_up, hard_err, soft_err, status);
-    schedule (send) CF (cc,stats, rx_count, tx_count, txn_out, txp_out, channel_up, lane_up, hard_err, soft_err, status, receive);
-    schedule (receive) CF (cc,stats, rx_count, tx_count, txn_out, txp_out, channel_up, lane_up, hard_err, soft_err, status, send);
+    schedule (cc,stats, error_count, rx_count, tx_count, txn_out, txp_out, channel_up, lane_up, hard_err, soft_err, status) CF
+             (cc,stats, error_count, rx_count, tx_count, txn_out, txp_out, channel_up, lane_up, hard_err, soft_err, status);
+    schedule (send) CF (cc,stats, error_count, rx_count, tx_count, txn_out, txp_out, channel_up, lane_up, hard_err, soft_err, status, receive);
+    schedule (receive) CF (cc,stats, error_count, rx_count, tx_count, txn_out, txp_out, channel_up, lane_up, hard_err, soft_err, status, send);
     schedule (send) C (send);   
     schedule (receive) C (receive);   
 endmodule

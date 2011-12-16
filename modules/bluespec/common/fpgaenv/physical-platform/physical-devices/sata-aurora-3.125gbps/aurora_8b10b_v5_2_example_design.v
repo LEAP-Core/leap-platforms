@@ -75,6 +75,7 @@ module aurora_8b10b_v5_2_example_design #
     CHANNEL_UP,
     RX_COUNT,
     TX_COUNT,
+    ERROR_COUNT,
     //GT_RESET_IN_N, // User reset.  Syspops claim this is uneeded.  We get a reset on reprogram...  Might want to tie to 0...
 
  
@@ -138,6 +139,7 @@ module aurora_8b10b_v5_2_example_design #
     output             CHANNEL_UP;
     output  [31:0]     RX_COUNT;
     output  [31:0]     TX_COUNT;
+    output  [31:0]     ERROR_COUNT;
    
     // Clocks
     input              GTPD0_P;
@@ -196,6 +198,7 @@ module aurora_8b10b_v5_2_example_design #
     reg                CHANNEL_UP;
     reg     [31:0]     RX_COUNT;
     reg     [31:0]     TX_COUNT;
+    reg     [31:0]     ERROR_COUNT;
 //********************************Wire Declarations**********************************
     // Stream TX Interface
 
@@ -234,6 +237,7 @@ module aurora_8b10b_v5_2_example_design #
     wire [15:0] sync_out_i;
     reg  [31:0] rx_count_next;
     reg  [31:0] tx_count_next;
+    reg  [31:0] error_count_next;
    
    
     wire        lane_up_i_i;
@@ -305,15 +309,22 @@ module aurora_8b10b_v5_2_example_design #
     begin
 	rx_count_next = RX_COUNT;
         tx_count_next = TX_COUNT;
+        error_count_next = ERROR_COUNT;
  
 	if(system_reset_i)
 	begin
              rx_count_next = 0;
-	     tx_count_next = 0;	     
+	     tx_count_next = 0;
+             error_count_next = 0;
 	end
 	else
 	begin
-            if(soft_err_i)
+            if(soft_err_i) 
+            begin
+               error_count_next = ERROR_COUNT + 1;	       
+            end	
+     
+            if(tx_en && tx_rdy)
 	    begin
                 tx_count_next = TX_COUNT + 1; 
 	    end
@@ -325,7 +336,9 @@ module aurora_8b10b_v5_2_example_design #
 	end // else: !if(system_reset_i)
        
 	RX_COUNT <= rx_count_next;
-	TX_COUNT <= tx_count_next;	
+	TX_COUNT <= tx_count_next;
+        ERROR_COUNT <= error_count_next;
+
     end
 
 //____________________________Tie off unused signals_______________________________
