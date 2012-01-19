@@ -177,11 +177,11 @@ module mkAURORA_DEVICE (AURORA_DEVICE);
     endrule
 
 
-    MARSHALLER#(4,Bit#(16)) marshaller <- mkSimpleMarshaller(clocked_by(ug_device.aurora_clk), 
-                                                                   reset_by(aurora_rst));
+    MARSHALLER#(Bit#(16), Bit#(64)) marshaller <- mkSimpleMarshaller(clocked_by(ug_device.aurora_clk), 
+                                                                     reset_by(aurora_rst));
 
     rule tx (handshakeTXDone && txCredits.value > 0);
-        marshaller.enq(unpack({1'b0,serdes_txfifo.first}));
+        marshaller.enq({1'b0,serdes_txfifo.first});
         serdes_txfifo.deq;
 	txCredits.downBy(1);
     endrule
@@ -193,7 +193,7 @@ module mkAURORA_DEVICE (AURORA_DEVICE);
 
     rule txFC(handshakeTXDone && ((returnCount > 0 && (!serdes_txfifo.dNotEmpty || txCredits.value == 0)) || returnCount > returnThreshold));
         rxCredits.upBy(returnCount);
-        marshaller.enq(unpack({1'b1,zeroExtend(returnCount)}));
+        marshaller.enq({1'b1,zeroExtend(returnCount)});
     endrule
 
     rule txSend (handshakeTXDone);
@@ -201,25 +201,25 @@ module mkAURORA_DEVICE (AURORA_DEVICE);
         ug_device.send(marshaller.first);
     endrule
 
-    DEMARSHALLER#(4,Bit#(16)) demarshaller <- mkSimpleDemarshaller(clocked_by(ug_device.aurora_clk), 
-                                                                   reset_by(aurora_rst));
+    DEMARSHALLER#(Bit#(16), Bit#(64)) demarshaller <- mkSimpleDemarshaller(clocked_by(ug_device.aurora_clk), 
+                                                                           reset_by(aurora_rst));
 
     rule rxDemarsh (handshakeRXDone);  // We always need to receive.  Strong assumption that demarshaller has one element. 
         let data <- ug_device.receive;
         demarshaller.enq(data);
     endrule
 
-    Bit#(1) flowcontrol = truncateLSB(pack(demarshaller.first()));
+    Bit#(1) flowcontrol = truncateLSB(demarshaller.first());
 
     rule rxDoneFC (handshakeRXDone && flowcontrol == 1);  // Strong assumption that demarshaller has one element. 
         demarshaller.deq;	
-        txCredits.upBy(truncate(pack(demarshaller.first())));
+        txCredits.upBy(truncate(demarshaller.first()));
     endrule     
 
     rule rxDone (handshakeRXDone && flowcontrol == 0);  // Strong assumption that demarshaller has one element. 
         demarshaller.deq;
         rxCredits.downBy(1);
-        serdes_rxfifo.enq(truncate(pack(demarshaller.first())));
+        serdes_rxfifo.enq(truncate(demarshaller.first()));
     endrule
 
     rule sendStats;

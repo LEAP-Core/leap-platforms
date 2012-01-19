@@ -13532,3 +13532,13 @@ Added flow control to the SMA Aurora link.  This is a block-style flow
 control.  I have not evaluated its performance yet.  This kind of
 control should be used by all aurora links, and should be seperated
 out from this specific link.
+
+----------
+mcadler     Date: Thu Jan 19 08:11:24 EST 2012  CSN: CSN-leap-platforms-581
+                  Thu Jan 19 13:11:24 UTC 2012
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/sata-aurora-3.125gbps
+ XUPV5_AURORA_SINGLE.bsv   Locally Modified          580 
+
+Update for changed LibRL marshaller interface.
