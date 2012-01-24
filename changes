@@ -13542,3 +13542,15 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/sat
  XUPV5_AURORA_SINGLE.bsv   Locally Modified          580 
 
 Update for changed LibRL marshaller interface.
+
+----------
+emer        Date: Tue Jan 24 18:48:38 EST 2012  CSN: CSN-leap-platforms-582
+                  Tue Jan 24 23:48:38 UTC 2012
+
+
+Directory debian
+ control                   Locally Modified          581 
+ changelog                 Locally Modified          581 
+ rules                     Locally Modified          581 
+
+Move to version v12.01. Note that version v11.12 was never released.

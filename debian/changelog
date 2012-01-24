@@ -1,16 +1,7 @@
-leap-platforms (11.12~svn20110929r560+lucid) lucid; urgency=low
+leap-platforms (12.01~svn20120124r582+lucid) lucid; urgency=low
 
   [ Joel Emer ]
 
-  * r550
-      Start of work on v11.12 release
+  * Move to version v12.01. Note that version v11.12 was never released.
 
-  * r555
-      Improvements to leap-fpga-ctrl. 
-      Installation fixes.
-
-  * r560
-      leap-platforms-xup package with dkms driver
-
-
- -- Joel Emer <emer@csail.mit.edu>  Thu, 29 Sep 2011 17:01:36 -0400
+ -- Joel Emer <emer@csail.mit.edu>  Tue, 24 Jan 2012 18:46:34 -0500
