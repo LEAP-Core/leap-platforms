@@ -7,28 +7,29 @@ Standards-Version: 3.7.2
 
 Package: leap-platforms
 Architecture: all
-Depends: leap-platforms-12.01, leap-platforms-11.09
+Depends: leap-platforms-12.01
+Recommends: leap-platforms-11.09
 Description: Dependency package for Leap platforms environment
  Dependency package for the Leap platforms environment
 Section: devel
 
 Package: leap-platforms-12.01
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, leap-platforms-bin
+Depends: leap-platforms-bin, ${misc:Depends}
 Description: Sharable package for the Leap platforms
   AWB modules for the leap platforms
 Section: devel
 
 Package: leap-platforms-bin
 Architecture: any
-Depends: awb, ${shlibs:Depends}, ${misc:Depends}
+Depends: awb, ${misc:Depends}
 Description: Executables for the Leap platforms environement
  Core executables and drivers for Leap platforms
 Section: devel
 
 Package: leap-platforms-xupv5
 Architecture: any
-Depends: dkms (>= 1.95), ${shlibs:Depends}, ${misc:Depends}
+Depends: dkms (>= 1.95), ${misc:Depends}
 Description: Leap code and drivers for xupv5 boards
  Leap code and drivers for xupv5 boards
 Section: devel

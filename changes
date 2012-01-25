@@ -13554,3 +13554,14 @@ Directory debian
  rules                     Locally Modified          581 
 
 Move to version v12.01. Note that version v11.12 was never released.
+
+----------
+emer        Date: Wed Jan 25 08:08:33 EST 2012  CSN: CSN-leap-platforms-583
+                  Wed Jan 25 13:08:33 UTC 2012
+
+
+Directory debian
+ control                   Locally Modified          582 
+
+For apt installs, 'recommend' previous shared package release rather
+than 'require' it.
