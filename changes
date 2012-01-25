@@ -13565,3 +13565,24 @@ Directory debian
 
 For apt installs, 'recommend' previous shared package release rather
 than 'require' it.
+
+----------
+emer        Date: Wed Jan 25 15:01:14 EST 2012  CSN: CSN-leap-platforms-584
+                  Wed Jan 25 20:01:14 UTC 2012
+
+
+Directory debian
+ changelog                 Locally Modified          583 
+
+Directory admin/packages
+ leap-platforms            Locally Modified          583 
+
+To alleviate debian package file conflicts, put shared copy of
+repository in a version named directory rather than in HEAD. For
+example:
+
+/usr/share/asim/packages/awb/v12.01
+
+rather than
+
+/usr/share/asim/packages/awb/HEAD

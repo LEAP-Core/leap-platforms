@@ -1,7 +1,7 @@
-leap-platforms (12.01~svn20120124r582+lucid) lucid; urgency=low
+leap-platforms (12.01~svn20120125r584+lucid) lucid; urgency=low
 
   [ Joel Emer ]
 
   * Move to version v12.01. Note that version v11.12 was never released.
 
- -- Joel Emer <emer@csail.mit.edu>  Tue, 24 Jan 2012 18:46:34 -0500
+ -- Joel Emer <emer@csail.mit.edu>  Wed, 25 Jan 2012 15:00:19 -0500
