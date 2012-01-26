@@ -13586,3 +13586,13 @@ example:
 rather than
 
 /usr/share/asim/packages/awb/HEAD
+
+----------
+emer        Date: Thu Jan 26 13:55:03 EST 2012  CSN: CSN-leap-platforms-585
+                  Thu Jan 26 18:55:03 UTC 2012
+
+
+Directory admin/packages
+ leap-platforms            Locally Modified          584 
+
+Mark package as a 'prerelease'
