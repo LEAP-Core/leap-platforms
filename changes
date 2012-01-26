@@ -13596,3 +13596,16 @@ Directory admin/packages
  leap-platforms            Locally Modified          584 
 
 Mark package as a 'prerelease'
+
+----------
+emer        Date: Thu Jan 26 17:11:04 EST 2012  CSN: CSN-leap-platforms-587
+                  Thu Jan 26 22:11:04 UTC 2012
+
+
+Directory debian
+ changelog                 Locally Modified          586 
+
+Directory admin/packages
+ leap-platforms            Locally Modified          586 
+
+Designate as relase v12.01.
