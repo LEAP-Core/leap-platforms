@@ -277,7 +277,7 @@ long bsemu_compat_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 
 struct file_operations bsemu_fops = {
   owner:THIS_MODULE,
-  ioctl:bsemu_ioctl,
+  unlocked_ioctl:bsemu_compat_ioctl,
   compat_ioctl:bsemu_compat_ioctl,
   mmap:bsemu_mmap,
   open:bsemu_open,

@@ -7,5 +7,5 @@ Description=Description of platforms
 Name=leap-platforms
 Tag=v12.01
 Prerelease=1
-CSN=CSN-leap-platforms-585
+CSN=CSN-leap-platforms-589
 Dependencies=leap/HEAD

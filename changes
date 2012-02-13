@@ -13596,3 +13596,32 @@ Directory admin/packages
  leap-platforms            Locally Modified          584 
 
 Mark package as a 'prerelease'
+
+----------
+wjun        Date: Mon Feb 13 00:19:34 EST 2012  CSN: CSN-leap-platforms-589
+                  Mon Feb 13 05:19:34 UTC 2012
+
+
+Directory drivers/linux/platforms/xupv5-pcie/src
+ main.c                    Locally Modified          588 
+
+fixed driver for new linux kernel
+
+----------
+wjun        Date: Mon Feb 13 16:33:31 EST 2012  CSN: CSN-leap-platforms-589
+                  Mon Feb 13 21:33:31 UTC 2012
+
+
+Directory admin
+ mytags                    Locally Modified          588 
+
+Directory admin/packages
+ leap-platforms            Locally Modified          588 
+
+Directory .
+ changes                   Locally Modified          588 
+
+Directory drivers/linux/platforms/xupv5-pcie/src
+ main.c                    Locally Modified          588 
+
+fixed driver to work in new linux kernel
