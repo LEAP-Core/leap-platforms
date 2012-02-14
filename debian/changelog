@@ -1,7 +1,10 @@
-leap-platforms (12.01+fixes~svn20120125r588+lucid) lucid; urgency=low
+leap-platforms (12.01+fixes~svn20120214r590+lucid) lucid; urgency=low
 
   [ Joel Emer ]
 
   * Release v12.01.
 
- -- Joel Emer <emer@csail.mit.edu>  Thu, 26 Jan 2012 21:22:49 -0500
+  [ Sangwoo Jun ]
+  * Backpatched xupv5 driver to work with new kernel
+
+ -- Sangwoo Jun <wjun@mit.edu>  Tue, 14 Feb 2012 15:01:20 -0500
