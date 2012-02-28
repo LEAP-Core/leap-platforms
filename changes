@@ -13625,3 +13625,18 @@ Directory drivers/linux/platforms/xupv5-pcie/src
  main.c                    Locally Modified          588 
 
 fixed driver to work in new linux kernel
+
+----------
+emer        Date: Tue Feb 28 17:52:08 EST 2012  CSN: CSN-leap-platforms-592
+                  Tue Feb 28 22:52:08 UTC 2012
+
+
+Directory debian
+ control                   Locally Modified          591 
+ changelog                 Locally Modified          591 
+ rules                     Locally Modified          591 
+
+Directory admin/packages
+ leap-platforms            Locally Modified          591 
+
+Move to version 12.02.
