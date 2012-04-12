@@ -13640,3 +13640,18 @@ Directory admin/packages
  leap-platforms            Locally Modified          591 
 
 Move to version 12.02.
+
+----------
+emer        Date: Thu Apr 12 13:41:28 EDT 2012  CSN: CSN-leap-platforms-593
+                  Thu Apr 12 17:41:28 UTC 2012
+
+
+Directory debian
+ control                   Locally Modified          592 
+ changelog                 Locally Modified          592 
+ rules                     Locally Modified          592 
+
+Directory admin/packages
+ leap-platforms            Locally Modified          592 
+
+Prepare for v12.04 release.

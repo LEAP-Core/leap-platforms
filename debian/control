@@ -7,13 +7,13 @@ Standards-Version: 3.7.2
 
 Package: leap-platforms
 Architecture: all
-Depends: leap-platforms-12.02
+Depends: leap-platforms-12.04
 Recommends: leap-platforms-12.01
 Description: Dependency package for Leap platforms environment
  Dependency package for the Leap platforms environment
 Section: devel
 
-Package: leap-platforms-12.02
+Package: leap-platforms-12.04
 Architecture: any
 Depends: leap-platforms-bin, ${misc:Depends}
 Description: Sharable package for the Leap platforms

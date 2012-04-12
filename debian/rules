@@ -12,7 +12,7 @@
 
 # Set the release name for the <package>-<release> .deb file
 #RELEASE = $(shell $(MAKE) print-release-name | sed 's/v//' )
-RELEASE = 12.02
+RELEASE = 12.04
 
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
