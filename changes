@@ -13655,3 +13655,21 @@ Directory admin/packages
  leap-platforms            Locally Modified          592 
 
 Prepare for v12.04 release.
+
+----------
+kfleming    Date: Mon Apr 16 16:59:38 EDT 2012  CSN: CSN-leap-platforms-596
+                  Mon Apr 16 20:59:38 UTC 2012
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ xilinx.sdc                Locally Removed           595 
+ xilinx.xcf                Locally Removed           595 
+ hardware-fpga-components-virtex2.awb Locally Modified          595 
+ xilinx-components.sdc     Locally Added               - 
+ hardware-fpga-components-virtex5.awb Locally Modified          595 
+ hardware-fpga-components-virtex6.awb Locally Modified          595 
+ xilinx-components.xcf     Locally Added               - 
+
+
+Renamed xilinx.sdc and xilinx.xcf to something slightly less generic
+and updated awb files to reflect this change.
