@@ -20,7 +20,8 @@
 %private lutram.v
 %private user-clock-xilinx-virtex2.v
 
-%sources -t SDC -v PRIVATE xilinx.sdc
+%sources -t SDC -v PRIVATE xilinx-components.sdc
+%sources -t XCF -v PRIVATE xilinx-components.xcf
 
 %param --global COST_TABLE 1 "Xilinx place and route cost table"
 
