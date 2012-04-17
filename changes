@@ -13673,3 +13673,28 @@ Directory modules/bluespec/common/fpgaenv/fpga-components
 
 Renamed xilinx.sdc and xilinx.xcf to something slightly less generic
 and updated awb files to reflect this change.
+
+----------
+kfleming    Date: Mon Apr 16 23:15:48 EDT 2012  CSN: CSN-leap-platforms-598
+                  Tue Apr 17 03:15:48 UTC 2012
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ hardware-fpga-components-virtex6-generic.awb Locally Added               0 
+ user-clock-pll.bsv        Locally Modified          597 
+ hardware-fpga-components-virtex5.awb Locally Modified          597 
+ hardware-fpga-components-virtex6.awb Locally Modified          597 
+ user-clock.bsv            Locally Modified          597 
+ user-clock-pll-common.bsv Locally Added               0 
+ user-clock-pll-common.v   Locally Added               0 
+ user-clock-xilinx-virtex6.v Locally Added               0 
+ user-clock-pll-virtex5.bsv Locally Modified          597 
+ user-clock-pll-virtex6.bsv Locally Added               0 
+ user-clock-pll-virtex5.v  Locally Modified          597 
+
+
+Refactored the Virtex 5 PLL code to support Virtex 6.  The existing V6
+clocking could only generate a 66 MHz clock for some reason. I added
+an extra awb file, but this is temporary while others adjust to the
+more robust clocking scheme.  I will switch to using the new style V6
+clock generation in a few weeks, once people have had time to switch over.

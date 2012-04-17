@@ -3,9 +3,7 @@
 //   Generate a user clock based on the incoming frequency that is multiplied
 //   by clockMultiplier and divided by clockDivider.
 //
-//   Uses a PLL instead of a DCM.
-//
-//   Picks the best source given a few standard ratios.
+//   Uses a magic number to generate a correctly ratioed bluespec clock.
 //
 module mkUserClock_PLL#(Integer inFreq,
                         Integer outFreq)

@@ -1,0 +1,33 @@
+%name Hardware FPGA Components for Virtex 6 (Generic)
+%desc Hardware FPGA Components for Virtex 6 (Generic)
+
+%provides fpga_components
+
+%public bram.bsv bram-multi-read.bsv
+%public lutram.bsv
+%public user-clock.bsv user-clock-pll-virtex6.bsv user-clock-pll-common.bsv
+%public user-clock-xilinx.bsv
+%public clock-buffers.bsv
+%public shiftreg.bsv
+
+%private Bram.v
+%private lutram.v
+%private user-clock-xilinx-virtex6.v
+%private user-clock-pll-common.v
+%private clock-buffers.v
+%private bscan-virtex5.v
+%private shiftreg.v
+
+%sources -t BSV -v PUBLIC  clock-import.bsv
+%sources -t VERILOG -v PRIVATE clock_import.v
+
+%sources -t XCF -v PRIVATE xilinx-components.xcf
+%sources -t SDC -v PRIVATE xilinx-components.sdc
+
+%param --global COST_TABLE 1 "Xilinx place and route cost table"
+
+%param SYNTH 1            "Synthesize it to FPGAs"
+%param BROKEN_REGFILE 1   "0 if RegFile synthesizes correctly.  Nonzero for Xilinx Xst < version 11."
+%param XILINX_FAMILY "virtex5"  "Xilinx parameter describing the fpga architecture"
+
+

@@ -23,16 +23,16 @@
 import Clocks::*;
 import Real::*;
 
-// ACP's Virtex-5 330-2 parameters...
-Real fINmin  = 19;
-Real fINmax  = 710;
-Real fVCOmin = 400;
+// Conservative Virtex 6 parameters...
+// If you have a better speed grade, you might try something different.
+Real fINmin  = 10;
+Real fINmax  = 700;
+Real fVCOmin = 600;
 Real fVCOmax = 1200;
-Real fPFDmin = 19;
-Real fPFDmax = 500;
-Real fOUTmin = 3.125;
-Real fOUTmax = 500;
-
-Integer dMax = 52;
+Real fPFDmin = 10;
+Real fPFDmax = 450;
+Real fOUTmin = 4.69;
+Real fOUTmax = 700;
+Integer dMax = 80;
 Integer mMax = 64;
 Integer outDivMax = 128;

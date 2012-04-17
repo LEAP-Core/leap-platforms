@@ -8,7 +8,7 @@
 %public bram.bsv bram-multi-read.bsv
 %public lutram.bsv
 %public alu-support.bsv
-%public user-clock.bsv user-clock-pll-virtex5.bsv
+%public user-clock.bsv user-clock-pll-virtex5.bsv user-clock-pll-common.bsv
 %public user-clock-xilinx.bsv
 %public clock-buffers.bsv
 %public floating-point-import.bsv
@@ -20,6 +20,7 @@
 %private lutram.v
 %private user-clock-xilinx-virtex5.v
 %private user-clock-pll-virtex5.v
+%private user-clock-pll-common.v
 %private clock-buffers.v
 %private bscan-virtex5.v
 

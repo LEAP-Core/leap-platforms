@@ -21,7 +21,7 @@
 //
 
 import Clocks::*;
-
+import Vector::*;
 
 function Integer gcd(Integer a, Integer b);
     // Sanity check args

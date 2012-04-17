@@ -1,5 +1,5 @@
-%name Hardware FPGA Components for Virtex 6
-%desc Hardware FPGA Components for Virtex 6
+%name Hardware FPGA Components for Virtex 6 (Russian)
+%desc Hardware FPGA Components for Virtex 6 (Russian)
 
 %provides fpga_components
 
