@@ -21,7 +21,5 @@
 %private shiftreg.v
 %private user-clock-altera-arriaII.v
 
-%param --global COST_TABLE 1 "Xilinx place and route cost table"
-
 %param SYNTH 1            "Synthesize it to FPGAs"
 %param BROKEN_REGFILE 1   "0 if RegFile synthesizes correctly.  Nonzero for Xilinx Xst < version 11."

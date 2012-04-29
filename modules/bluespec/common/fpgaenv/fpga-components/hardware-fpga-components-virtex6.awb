@@ -20,8 +20,6 @@
 %sources -t XCF -v PRIVATE xilinx-components.xcf
 %sources -t SDC -v PRIVATE xilinx-components.sdc
 
-%param --global COST_TABLE 1 "Xilinx place and route cost table"
-
 %param SYNTH 1            "Synthesize it to FPGAs"
 %param BROKEN_REGFILE 1   "0 if RegFile synthesizes correctly.  Nonzero for Xilinx Xst < version 11."
 %param XILINX_FAMILY "virtex6"  "Xilinx parameter describing the fpga architecture"

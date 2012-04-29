@@ -13698,3 +13698,19 @@ clocking could only generate a 66 MHz clock for some reason. I added
 an extra awb file, but this is temporary while others adjust to the
 more robust clocking scheme.  I will switch to using the new style V6
 clock generation in a few weeks, once people have had time to switch over.
+
+----------
+mcadler     Date: Sat Apr 28 21:41:38 EDT 2012  CSN: CSN-leap-platforms-599
+                  Sun Apr 29 01:41:38 UTC 2012
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ hardware-fpga-components-virtex6-generic.awb Locally Modified          598 
+ hardware-fpga-components-virtex2.awb Locally Modified          598 
+ hardware-fpga-components-virtex5.awb Locally Modified          598 
+ hardware-fpga-components-virtex6.awb Locally Modified          598 
+ hardware-fpga-components-arriaII.awb Locally Modified          598 
+
+Move COST_TABLE to the build manager so that changing it doesn't cause
+Bluespec recompilation.  (A consequence of build-time control over AWB
+parameters.)
