@@ -31,6 +31,7 @@
 //
 
 import RegFile::*;
+import Vector::*;
 
 interface LUTRAM#(type t_ADDR, type t_DATA);
     method Action upd(t_ADDR addr, t_DATA d);

@@ -13714,3 +13714,17 @@ Directory modules/bluespec/common/fpgaenv/fpga-components
 Move COST_TABLE to the build manager so that changing it doesn't cause
 Bluespec recompilation.  (A consequence of build-time control over AWB
 parameters.)
+
+----------
+mcadler     Date: Thu May 10 14:21:52 EDT 2012  CSN: CSN-leap-platforms-600
+                  Thu May 10 18:21:52 UTC 2012
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ lutram.bsv                Locally Modified          599 
+ bare-fpga-components.awb  Locally Added               0 
+
+Create a minimal FPGA components module for use by the bare (minimal)
+Bluesim-only environment.  Provide LUTRAM so designs can be ported easily
+to LEAP and avoid the Xst bug in which BRAM is inferred for storage that
+should be LUTs.

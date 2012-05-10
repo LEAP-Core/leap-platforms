@@ -1,0 +1,8 @@
+%name Bare FPGA Components
+%desc FPGA Components for minimal (bare) environment
+
+%provides fpga_components
+
+%attributes hasim
+
+%public lutram.bsv
