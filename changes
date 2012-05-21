@@ -13749,3 +13749,13 @@ Directory drivers/linux/platforms/htg-pcie-virtex5/src
 - Update HTG control script for new machine on SLES11.
 - Update leap control and driver build for SLES11.
 - pchnl_if.h was a link and should be a file.
+
+----------
+mcadler     Date: Mon May 21 10:40:58 EDT 2012  CSN: CSN-leap-platforms-602
+                  Mon May 21 14:40:58 UTC 2012
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express-driver-header
+ pchnl_if.h                Locally Added               0 
+
+Add pchnl_if.h as a file.
