@@ -1,7 +1,7 @@
 #
 # Makefile for PCIe Hardware Channel Driver
 #
-CFLAGS = -O2
+EXTRA_CFLAGS += -O2
 
 ifneq ($(KERNELRELEASE),)
 

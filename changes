@@ -13728,3 +13728,24 @@ Create a minimal FPGA components module for use by the bare (minimal)
 Bluesim-only environment.  Provide LUTRAM so designs can be ported easily
 to LEAP and avoid the Xst bug in which BRAM is inferred for storage that
 should be LUTs.
+
+----------
+mcadler     Date: Mon May 21 10:37:07 EDT 2012  CSN: CSN-leap-platforms-601
+                  Mon May 21 14:37:07 UTC 2012
+
+
+Directory tools/platforms/leap-fpga-ctrl
+ leap-fpga-ctrl.c          Locally Modified          600 
+
+Directory tools/platforms/leap-fpga-ctrl/scripts
+ HTG-V5-PCIe               Locally Modified          600 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express-driver-header
+ pchnl_if.h                Locally Removed           600 
+
+Directory drivers/linux/platforms/htg-pcie-virtex5/src
+ Makefile                  Locally Modified          600 
+
+- Update HTG control script for new machine on SLES11.
+- Update leap control and driver build for SLES11.
+- pchnl_if.h was a link and should be a file.

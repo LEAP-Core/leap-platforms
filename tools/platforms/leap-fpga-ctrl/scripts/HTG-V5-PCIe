@@ -23,10 +23,12 @@ arg_command="$1"
 arg_driver="$2"
 
 # Hot-plug controller for enabling/disabling while programming
-power_ctrl="/sys/bus/pci/slots/1/power"
+pci_enable="/sys/devices/pci0000:80/0000:80:01.0/rescan"
+pci_disable="/sys/devices/pci0000:80/0000:80:01.0/0000:81:00.0/remove"
+pci_devname="81:00.0 RAM memory: Xilinx Corporation Device"
 
 # Kernel module
-kernel_module_path="/usr/hasim/kernel/pchnl.ko"
+kernel_module_path="/usr/share/leap/drivers/pchnl.ko"
 kernel_module_name=`basename $kernel_module_path | sed -e 's/.[^.]*$//'`
 
 case "$arg_command" in
@@ -39,13 +41,13 @@ case "$arg_command" in
         rmmod $kernel_module_path  
     fi
 
-    if [ "`cat $power_ctrl`" != "0" ]; then
-        echo "Turn off PCIe bus power..."
-        echo 0 > $power_ctrl
+    if [ -f ${pci_disable} ]; then
+        echo "Disabling PCIe device..."
+        echo 1 > $pci_disable
     fi
 
     # Let the bus settle
-    sleep 2
+    sleep 1
 
     echo "Programming device: ${arg_driver}"
     ;;
@@ -55,13 +57,27 @@ case "$arg_command" in
     ## Activate the FPGA following programming.  Turn on the PCIe bus and load
     ## the kernel driver.
     ##
-    if [ "`cat $power_ctrl`" != "1" ]; then
-        echo "Turn on PCIe bus power..."
-        echo 1 > $power_ctrl
-    fi
 
     # Let the bus settle
     sleep 2
+
+    echo "Enabling PCIe device..."
+    echo 1 > $pci_enable
+
+    # Wait for PCIe physical device to appear
+    trips=0
+    while [ `lspci | grep -c "${pci_devname}"` -eq 0 ]; do
+        trips=`expr $trips + 1`
+        if [ $trips -eq 10 ]; then
+            echo "  Trying again..."
+            echo 1 > $pci_enable
+        fi
+        if [ $trips -eq 15 ]; then
+            echo "PCIe rescan failure"
+            exit 1
+        fi
+        sleep 1
+    done
 
     # Load the kernel driver
     if [ "`grep "^${kernel_module_name} " /proc/modules`" = "" ]; then

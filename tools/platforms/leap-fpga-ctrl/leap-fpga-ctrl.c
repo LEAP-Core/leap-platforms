@@ -18,10 +18,10 @@
 #define CONFIG_DIR SCRIPTSDIR "/"
 #define RES_DIR    LOCKDIR "/"
 
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <getopt.h>
-#include <errno.h>
 #include <error.h>
 #include <pwd.h>
 #include <unistd.h>
@@ -132,12 +132,12 @@ void invoke_helper_script(FPGA_STATE_T state)
     //
 
     if (! cfg_has_script) {
-      if (opt_debug)
-	{
-	  fprintf(stderr, "No device specific configuration script needed\n");
-	}
+        if (opt_debug)
+        {
+            fprintf(stderr, "No device specific configuration script needed\n");
+        }
 
-      return;
+        return;
     }
 
     if ((strlen(CONFIG_DIR) + strlen(cfg_class) + 1) >= sizeof(script))
@@ -157,7 +157,7 @@ void invoke_helper_script(FPGA_STATE_T state)
 
     if (opt_debug)
     {
-      fprintf(stderr, "Invoking device specific configuration script\n");
+        fprintf(stderr, "Invoking device specific configuration script\n");
     }
 
     pid = fork();
