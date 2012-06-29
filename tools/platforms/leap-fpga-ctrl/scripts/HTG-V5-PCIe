@@ -23,9 +23,9 @@ arg_command="$1"
 arg_driver="$2"
 
 # Hot-plug controller for enabling/disabling while programming
-pci_enable="/sys/devices/pci0000:80/0000:80:01.0/rescan"
-pci_disable="/sys/devices/pci0000:80/0000:80:01.0/0000:81:00.0/remove"
-pci_devname="81:00.0 RAM memory: Xilinx Corporation Device"
+pci_enable="/sys/devices/pci0000:80/0000:80:03.0/rescan"
+pci_disable="/sys/devices/pci0000:80/0000:80:03.0/0000:83:00.0/remove"
+pci_devname="83:00.0 RAM memory: Xilinx Corporation Device"
 
 # Kernel module
 kernel_module_path="/usr/share/leap/drivers/pchnl.ko"

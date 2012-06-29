@@ -17,6 +17,9 @@ has_control_script = yes
 # by the user after a successful reservation
 dev = /dev/pchnl
 
+# Optional programming cable ID (in case there are multiple programming cables)
+prog_cable_id = 00001097AA2F01
+
 [ACP.2]
 class = ACP
 has_control_script = no

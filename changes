@@ -13759,3 +13759,25 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci
  pchnl_if.h                Locally Added               0 
 
 Add pchnl_if.h as a file.
+
+----------
+mcadler     Date: Fri Jun 29 10:31:37 EDT 2012  CSN: CSN-leap-platforms-603
+                  Fri Jun 29 14:31:37 UTC 2012
+
+
+Directory tools/platforms/leap-fpga-ctrl
+ leap-fpga-ctrl.c          Locally Modified          602 
+ Makefile.in               Locally Modified          602 
+
+Directory tools/platforms/leap-fpga-ctrl/scripts
+ HTG-V5-PCIe               Locally Modified          602 
+
+Directory tools/platforms/leap-fpga-ctrl
+ Makefile.am               Locally Modified          602 
+
+Directory tools/platforms/leap-fpga-ctrl/etc
+ config-sample             Locally Modified          602 
+
+- Add programming cable id (prog_cable_id) to device configuration in order to
+  support multiple programming cables on a single machine.
+- Assume no control script if the parameter isn't specified.

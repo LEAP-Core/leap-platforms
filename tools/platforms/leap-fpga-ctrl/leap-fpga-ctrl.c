@@ -68,6 +68,7 @@ static char *cfg_name = NULL;
 static char *cfg_class = NULL;
 static int  cfg_has_script = 0;
 static char *cfg_fpga_dev = NULL;
+static char *cfg_prog_cable_id = NULL;
 static char cfg_res_file[1024];
 
 void state_print(FILE *f, FPGA_STATE_T state)
@@ -238,11 +239,12 @@ void cfg_load_dev(int id)
     has_script = cfg_get_str(sec,"has_control_script");
     if (! has_script)
     {
-        error(1, 0, "Error - required config file value \"has_control_script\" not found");
+        has_script = "no";
     }
     cfg_has_script = !strcmp(has_script,"yes");
 
     cfg_fpga_dev = cfg_get_str(sec, "dev");
+    cfg_prog_cable_id = cfg_get_str(sec, "prog_cable_id");
 
     // Device-specific reservation lock file
     if (strlen(RES_DIR) + strlen(sec) + 1 > sizeof(cfg_res_file))
@@ -705,7 +707,13 @@ void reset()
 void get_config(char *req)
 {
     if (! strcmp(req, "dev"))
-        printf("%s\n", cfg_fpga_dev);
+        printf("%s\n", cfg_fpga_dev ? cfg_fpga_dev : "");
+    else if (! strcmp(req, "name"))
+        printf("%s\n", cfg_name ? cfg_name : "");
+    else if (! strcmp(req, "class"))
+        printf("%s\n", cfg_class ? cfg_class : "");
+    else if (! strcmp(req, "prog_cable_id"))
+        printf("%s\n", cfg_prog_cable_id ? cfg_prog_cable_id : "");
     else if (! strcmp(req, "id"))
         printf("%d\n", cfg_id);
     else
