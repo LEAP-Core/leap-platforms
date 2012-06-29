@@ -13781,3 +13781,56 @@ Directory tools/platforms/leap-fpga-ctrl/etc
 - Add programming cable id (prog_cable_id) to device configuration in order to
   support multiple programming cables on a single machine.
 - Assume no control script if the parameter isn't specified.
+
+----------
+mcadler     Date: Fri Jun 29 15:59:24 EDT 2012  CSN: CSN-leap-platforms-604
+                  Fri Jun 29 19:59:24 UTC 2012
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/serial
+ xilinx.download           Locally Removed           603 
+ xilinx-xup-serial.awb     Locally Modified          603 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/pcie
+ xilinx.download           Locally Removed           603 
+ xilinx-xup-pcie.awb       Locally Modified          603 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/jtag
+ xilinx-xup-jtag.awb       Locally Modified          603 
+ xilinx.download           Locally Removed           603 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/pcie-sata
+ xilinx-xup-pcie-sata.awb  Locally Modified          603 
+ xilinx.download           Locally Removed           603 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/pcie-aurora
+ xilinx-xup-pcie-sata.awb  Locally Modified          603 
+ xilinx.download           Locally Removed           603 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/aurora
+ xilinx.download           Locally Removed           603 
+ xilinx-xup-sata.awb       Locally Modified          603 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/chipscope
+ xilinx.download           Locally Removed           603 
+ xilinx-xup-chipscope.awb  Locally Modified          603 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup/serial
+ xilinx.download           Locally Removed           603 
+ xilinx-xup-serial.awb     Locally Modified          603 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup/jtag
+ xilinx-xup-jtag.awb       Locally Modified          603 
+ xilinx.download           Locally Removed           603 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/jtag
+ xilinx.download           Locally Removed           603 
+ htg-v5-jtag.awb           Locally Modified          603 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled
+ xilinx.download           Locally Removed           603 
+ htg-v5-pcie-enabled-synplify.awb Locally Modified          603 
+ htg-v5-pcie-enabled.awb   Locally Modified          603 
+
+All bitfile download scripts were the same!  Generate the script in the build
+rules instead of replicating this file.

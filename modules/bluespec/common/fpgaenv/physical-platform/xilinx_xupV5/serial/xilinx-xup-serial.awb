@@ -14,7 +14,6 @@
 %sources -t XST -v PRIVATE xilinx.xst
 %sources -t SDF -v PUBLIC xilinx.sdf
 %sources -t SDC -v PUBLIC xilinx.sdc
-%sources -t DOWNLOAD -v PRIVATE xilinx.download
 
 %param --global MAKE_ALL_TARGET "bit"       "Target of 'make all'.  Most likely bit, exe or vexe."
 
