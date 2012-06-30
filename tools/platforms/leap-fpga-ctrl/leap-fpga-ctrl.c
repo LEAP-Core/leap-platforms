@@ -68,6 +68,7 @@ static char *cfg_name = NULL;
 static char *cfg_class = NULL;
 static int  cfg_has_script = 0;
 static char *cfg_fpga_dev = NULL;
+static char *cfg_bus_id = NULL;
 static char *cfg_prog_cable_id = NULL;
 static char cfg_res_file[1024];
 
@@ -177,13 +178,19 @@ void invoke_helper_script(FPGA_STATE_T state)
     else
     {
         // Child
+        char idbuf[16];
+        if (snprintf(idbuf, sizeof(idbuf), "%d", cfg_id) >= sizeof(idbuf))
+        {
+            error(1, errno, "Error - cfg_id too large (%d)", cfg_id);
+        }
+
         if (cfg_fpga_dev != NULL)
         {
-            execl(script, script, cmd, cfg_fpga_dev, NULL);
+            execl(script, script, cmd, idbuf, cfg_fpga_dev, NULL);
         }
         else 
         {
-            execl(script, script, cmd, NULL);
+            execl(script, script, cmd, idbuf, NULL);
         }
 
         error(1, errno, "Error - Failed to execute script %s", script);
@@ -244,6 +251,7 @@ void cfg_load_dev(int id)
     cfg_has_script = !strcmp(has_script,"yes");
 
     cfg_fpga_dev = cfg_get_str(sec, "dev");
+    cfg_bus_id = cfg_get_str(sec, "bus_id");
     cfg_prog_cable_id = cfg_get_str(sec, "prog_cable_id");
 
     // Device-specific reservation lock file
@@ -712,6 +720,8 @@ void get_config(char *req)
         printf("%s\n", cfg_name ? cfg_name : "");
     else if (! strcmp(req, "class"))
         printf("%s\n", cfg_class ? cfg_class : "");
+    else if (! strcmp(req, "bus_id"))
+        printf("%s\n", cfg_bus_id ? cfg_bus_id : "");
     else if (! strcmp(req, "prog_cable_id"))
         printf("%s\n", cfg_prog_cable_id ? cfg_prog_cable_id : "");
     else if (! strcmp(req, "id"))

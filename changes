@@ -13834,3 +13834,22 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-ena
 
 All bitfile download scripts were the same!  Generate the script in the build
 rules instead of replicating this file.
+
+----------
+mcadler     Date: Sat Jun 30 08:19:38 EDT 2012  CSN: CSN-leap-platforms-605
+                  Sat Jun 30 12:19:38 UTC 2012
+
+
+Directory tools/platforms/leap-fpga-ctrl
+ leap-fpga-ctrl.c          Locally Modified          604 
+
+Directory tools/platforms/leap-fpga-ctrl/scripts
+ HTG-V5-PCIe               Locally Modified          604 
+
+Directory tools/platforms/leap-fpga-ctrl/etc
+ config-sample             Locally Modified          604 
+
+- Add a bus_id to the configuration database
+- Pass device id to configuration scripts
+- Update HTG sample script to use the device id to query the database and find
+  the PCIe bus id.
