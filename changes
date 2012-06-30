@@ -13853,3 +13853,13 @@ Directory tools/platforms/leap-fpga-ctrl/etc
 - Pass device id to configuration scripts
 - Update HTG sample script to use the device id to query the database and find
   the PCIe bus id.
+
+----------
+mcadler     Date: Sat Jun 30 09:48:26 EDT 2012  CSN: CSN-leap-platforms-606
+                  Sat Jun 30 13:48:26 UTC 2012
+
+
+Directory tools/platforms/leap-fpga-ctrl/scripts
+ HTG-V5-PCIe               Locally Modified          605 
+
+Clean up.
