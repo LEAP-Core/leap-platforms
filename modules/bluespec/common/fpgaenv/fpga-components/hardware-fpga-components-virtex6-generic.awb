@@ -6,7 +6,6 @@
 %public bram.bsv bram-multi-read.bsv
 %public lutram.bsv
 %public user-clock.bsv user-clock-pll-virtex6.bsv user-clock-pll-common.bsv
-%public user-clock-xilinx.bsv
 %public clock-buffers.bsv
 %public shiftreg.bsv
 

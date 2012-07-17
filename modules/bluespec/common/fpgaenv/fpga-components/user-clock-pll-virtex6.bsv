@@ -36,3 +36,15 @@ Real fOUTmax = 700;
 Integer dMax = 80;
 Integer mMax = 64;
 Integer outDivMax = 128;
+
+// We also have to provide a user clock ratio so that 
+module mkUserClock_Ratio#(Integer inFreq,
+                          Integer clockMultiplier,
+                          Integer clockDivider)  
+    (UserClock);
+
+    let clk <- mkUserClock_PLL(inFreq,
+                               inFreq*clockMultiplier/clockDivider);
+
+    return clk;
+endmodule

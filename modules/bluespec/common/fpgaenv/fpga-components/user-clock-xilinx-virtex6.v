@@ -64,19 +64,29 @@
 
 `timescale 1ps/1ps
 
-(* CORE_GENERATION_INFO = "clock_gen,clk_wiz_v3_1,{component_name=clock_gen,use_phase_alignment=true,use_min_o_jitter=false,use_max_i_jitter=false,use_dyn_phase_shift=false,use_inclk_switchover=false,use_dyn_reconfig=false,feedback_source=FDBK_AUTO,primtype_sel=MMCM_ADV,num_out_clk=1,clkin1_period=15.151,clkin2_period=10.0,use_power_down=false,use_reset=true,use_locked=true,use_inclk_stopped=false,use_status=false,use_freeze=false,use_clk_valid=false,feedback_type=SINGLE,clock_mgr_type=MANUAL,manual_override=true}" *)
+
 
 module clk_pll(CLKIN1_IN, 
               RST_IN, 
               CLKOUT0_OUT, 
               CLKOUT1_OUT, 
               LOCKED_OUT);
-
-   parameter PLL_CLKIN_PERIOD = 20;
+   
+   parameter PLL_CLKIN1_PERIOD = 20.0;
    parameter PLL_DIVCLK_DIVIDE = 1;
-   parameter PLL_CLKFBOUT_MULT = 2;
+   parameter PLL_CLKFBOUT_MULT_F = 2;
    parameter PLL_CLKOUT0_DIVIDE = 1;
    parameter PLL_CLKOUT1_PHASE = 0.000;
+ 
+   input CLKIN1_IN;
+ 
+   input RST_IN;
+   
+   output CLKOUT0_OUT;
+ 
+   output CLKOUT1_OUT;
+ 
+   output LOCKED_OUT;
    
    
   // Input buffering
@@ -122,9 +132,9 @@ module clk_pll(CLKIN1_IN,
     .CLKOUT0_PHASE        (0.000),
     .CLKOUT0_DUTY_CYCLE   (0.500),
     .CLKOUT0_USE_FINE_PS  ("FALSE"),
-    .CLKOUT0_DIVIDE_F     (PLL_CLKOUT0_DIVIDE),
-    .CLKOUT0_PHASE        (PLL_CLKOUT1_PHASE),
-    .CLKOUT0_DUTY_CYCLE   (0.500),
+    .CLKOUT1_DIVIDE       (PLL_CLKOUT0_DIVIDE),
+    .CLKOUT1_PHASE        (PLL_CLKOUT1_PHASE),
+    .CLKOUT1_DUTY_CYCLE   (0.500),
     .CLKOUT1_USE_FINE_PS  ("FALSE"),
     .CLKIN1_PERIOD        (PLL_CLKIN1_PERIOD),
     .REF_JITTER1          (0.010))

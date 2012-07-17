@@ -146,11 +146,11 @@ endinterface
 import "BVI"
 module mkUserClock_Ratio_PLL#(Clock clockIn,
                               Reset resetIn,
-                              Integer inFreq,
+                              Real inFreq,
                               Integer clockInDivider,
-                              Integer clockMultiplier,
-                              Integer clockOutDivider,
-                              Integer clock1Phase)
+                              Real    clockMultiplier,
+                              Real clockOutDivider,
+                              Real    clock1Phase)
     // Interface:
     (PLL_CLOCK);
 
@@ -168,7 +168,7 @@ module mkUserClock_Ratio_PLL#(Clock clockIn,
     schedule locked CF locked;
 
     // Convert frequency (MHz) to period (ns)
-    parameter CR_CLKIN_PERIOD = 1000 / inFreq;
+    parameter CR_CLKIN_PERIOD = 1000.0 / inFreq;
     parameter CR_DIVCLK_DIVIDE = clockInDivider;
     parameter CR_CLKFBOUT_MULT = clockMultiplier;
     parameter CR_CLKOUT0_DIVIDE = clockOutDivider;
@@ -222,7 +222,7 @@ module mkUserClock_PLL#(Integer inFreq,
 
         let in_clk <- exposeCurrentClock();
         let in_rst <- exposeCurrentReset();
-        let clks <- mkUserClock_Ratio_PLL(in_clk, in_rst, inFreq, d_in, mul, d_out, 0);
+        let clks <- mkUserClock_Ratio_PLL(in_clk, in_rst, fromInteger(inFreq), d_in, fromInteger(mul), fromInteger(d_out), 0);
         clk = UserClock {clk: clks.clk0, rst: clks.rst};
     end
 
@@ -266,7 +266,7 @@ module mkUserClock_2PhasedPLL#(Integer inFreq,
 
     let in_clk <- exposeCurrentClock();
     let in_rst <- exposeCurrentReset();
-    let clks <- mkUserClock_Ratio_PLL(in_clk, in_rst, inFreq, d_in, mul, d_out, phase);
+    let clks <- mkUserClock_Ratio_PLL(in_clk, in_rst, fromInteger(inFreq), d_in, fromInteger(mul), fromInteger(d_out), fromInteger(phase));
 
     Vector#(2, Clock) clk_vec = newVector();
     clk_vec[0] = clks.clk0;
