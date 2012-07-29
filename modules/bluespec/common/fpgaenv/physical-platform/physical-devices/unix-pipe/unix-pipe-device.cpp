@@ -338,10 +338,9 @@ BLUESIM_SWITCH_CLASS::ProcessSwitchList(int switch_argc, char **switch_argv)
     bluesimArgv = switch_argv;
 }
 
-bool
-BLUESIM_SWITCH_CLASS::ShowSwitch(char *buff)
+void
+BLUESIM_SWITCH_CLASS::ShowSwitch(std::ostream& ostr, const string& prefix)
 {
-    strcpy(buff, "[--bluesim=\"<args>\"]    Arguments to Bluesim");
-    return true;
+    ostr << prefix << "[--bluesim=\"<args>\"]    Arguments to Bluesim" << endl;
 }
 

@@ -13881,3 +13881,14 @@ We can now generate generic clocks for the Virtex6 parts.
 More proof that Xilinx hates its customers: rather than converting
 Integer parameters to Reals, Xilinx randomly chokes with odd error
 messages about out of range VCO values.  
+
+----------
+mcadler     Date: Sun Jul 29 14:29:52 EDT 2012  CSN: CSN-leap-platforms-608
+                  Sun Jul 29 18:29:52 UTC 2012
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe
+ unix-pipe-device.h        Locally Modified          607 
+ unix-pipe-device.cpp      Locally Modified          607 
+
+Update for new --help argument interface.

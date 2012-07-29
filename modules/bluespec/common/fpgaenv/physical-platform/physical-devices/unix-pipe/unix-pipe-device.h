@@ -40,7 +40,8 @@ class BLUESIM_SWITCH_CLASS : public COMMAND_SWITCH_LIST_CLASS
         char** BluesimArgv() { return bluesimArgv; }
         
         void ProcessSwitchList(int argv, char** argc);
-        bool ShowSwitch(char* buff);
+        void ShowSwitch(std::ostream& ostr, const string& prefix);
+
     private:
         int bluesimArgc;
         char** bluesimArgv;
