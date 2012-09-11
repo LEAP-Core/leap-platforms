@@ -142,7 +142,8 @@ module clk_pll(CLKIN1_IN,
     // Output clocks
    (.CLKFBOUT            (clkfbout),
     .CLKFBOUTB           (clkfboutb_unused),
-    .CLKOUT0             (clkout0),
+//    .CLKOUT0             (clkout0),
+		.CLKOUT0						 (CLKOUT0_BUF),
     .CLKOUT0B            (clkout0b_unused),
     .CLKOUT1             (clkout1),
     .CLKOUT1B            (clkout1b_unused),
@@ -187,7 +188,8 @@ module clk_pll(CLKIN1_IN,
 
   BUFG clkout0_buf
    (.O   (CLKOUT0_OUT),
-    .I   (clkout0));
+    //.I   (clkout0));
+    .I   (CLKOUT0_BUF));
 
   BUFG clkout1_buf
    (.O   (CLKOUT1_OUT),

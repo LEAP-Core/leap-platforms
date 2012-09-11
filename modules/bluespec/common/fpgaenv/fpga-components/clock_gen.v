@@ -124,7 +124,8 @@ module clock_gen
     // Output clocks
    (.CLKFBOUT            (clkfbout),
     .CLKFBOUTB           (clkfboutb_unused),
-    .CLKOUT0             (clkout0),
+    .CLKOUT0             (CLKOUT0_BUF),
+    //.CLKOUT0             (clkout0),
     .CLKOUT0B            (clkout0b_unused),
     .CLKOUT1             (clkout1_unused),
     .CLKOUT1B            (clkout1b_unused),
@@ -169,7 +170,8 @@ module clock_gen
 
   BUFG clkout1_buf
    (.O   (CLK_OUT1),
-    .I   (clkout0));
+    .I   (CLKOUT0_BUF));
+    //.I   (clkout0));
 
 
 
