@@ -33,37 +33,37 @@ NET    "pcieWires_leds[2]"                                       LOC = AE22 | IO
 NET    "pcieWires_leds[1]"                                       LOC = AC24 | IOSTANDARD = LVCMOS25 ;
 NET    "pcieWires_leds[0]"                                       LOC = AC22 | IOSTANDARD = LVCMOS25 ;
 
-NET    "EN_pcieWires_refclk"                                               LOC = U23 ;
+#NET    "EN_pcieWires_refclk"                                               LOC = U23 ;
 #NET    "RST"                                               LOC = H10 | PULLUP | NODELAY | TIG ;
 
-#NET    "EN_pcieWires_pcie_clk_p"                                 LOC = P6;
-#NET    "EN_pcieWires_pcie_clk_n"                                 LOC = P5;
-NET    "EN_pcieWires_pcie_clk_p"                                 LOC = V6;
-NET    "EN_pcieWires_pcie_clk_n"                                 LOC = V5;
+NET    "EN_pcieWires_pcie_clk_p"                                 LOC = P6;
+NET    "EN_pcieWires_pcie_clk_n"                                 LOC = P5;
+#NET    "EN_pcieWires_pcie_clk_p"                                 LOC = V6;
+#NET    "EN_pcieWires_pcie_clk_n"                                 LOC = V5;
 
 ######################################################################################################
 # CLOCK CONSTRAINTS
 ######################################################################################################
-NET    "EN_pcieWires_refclk" TNM_NET = refclk_66;
-TIMESPEC TS_refclk_66 = PERIOD refclk_66 66 MHz HIGH 50 % INPUT_JITTER 500ps;
+#NET    "EN_pcieWires_refclk" TNM_NET = refclk_66;
+#TIMESPEC TS_refclk_66 = PERIOD refclk_66 66 MHz HIGH 50 % INPUT_JITTER 500ps;
 
 NET    "EN_pcieWires_pcie_clk_p" TNM_NET = pci_sys_clk_p;
-#TIMESPEC TS_pci_sys_clk_p = PERIOD pci_sys_clk_p 100 MHz HIGH 50%;
-TIMESPEC TS_pci_sys_clk_p = PERIOD pci_sys_clk_p 250 MHz HIGH 50%;
+TIMESPEC TS_pci_sys_clk_p = PERIOD pci_sys_clk_p 100 MHz HIGH 50%;
+#TIMESPEC TS_pci_sys_clk_p = PERIOD pci_sys_clk_p 250 MHz HIGH 50%;
 
-NET    "*ep/ep/pcie_clocking_i/clk_125" TNM_NET = "CLK_125" ;
-NET    "*ep/ep/pcie_clocking_i/clk_250" TNM_NET = "CLK_250" ;
-TIMESPEC "TS_CLK_125"  = PERIOD "CLK_125" TS_pci_sys_clk_p/2 HIGH 50 % PRIORITY 100 ;
-TIMESPEC "TS_CLK_250"  = PERIOD "CLK_250" TS_pci_sys_clk_p*1 HIGH 50 % PRIORITY 1;
+#NET    "*ep/ep/pcie_clocking_i/clk_125" TNM_NET = "CLK_125" ;
+#NET    "*ep/ep/pcie_clocking_i/clk_250" TNM_NET = "CLK_250" ;
+#TIMESPEC "TS_CLK_125"  = PERIOD "CLK_125" TS_pci_sys_clk_p/2 HIGH 50 % PRIORITY 100 ;
+#TIMESPEC "TS_CLK_250"  = PERIOD "CLK_250" TS_pci_sys_clk_p*1 HIGH 50 % PRIORITY 1;
 
 #JS
-#NET    "*ep_pcie_ep/trn_clk" TNM_NET = trn_clk_250;
-##NET    "m_llpi_phys_plat_pcie_device_bnoc_ep_pcie_ep/trn_clk" TNM_NET = trn_clk_250;
-#TIMESPEC TS_trn_clk_250 = PERIOD trn_clk_250 200 MHz HIGH 50%;
+NET    "*ep_pcie_ep/trn_clk" TNM_NET = trn_clk_250;
+#NET    "m_llpi_phys_plat_pcie_device_bnoc_ep_pcie_ep/trn_clk" TNM_NET = trn_clk_250;
+TIMESPEC TS_trn_clk_250 = PERIOD trn_clk_250 200 MHz HIGH 50%;
 
-#NET    "*ep_pcie_ep/trn2_clk" TNM_NET = trn_clk_125;
-##NET    "m_llpi_phys_plat_pcie_device_bnoc_ep_pcie_ep/trn2_clk" TNM_NET = trn_clk_125;
-#TIMESPEC TS_trn_clk_125 = PERIOD trn_clk_125 100 MHz HIGH 50%;
+NET    "*ep_pcie_ep/trn2_clk" TNM_NET = trn_clk_125;
+#NET    "m_llpi_phys_plat_pcie_device_bnoc_ep_pcie_ep/trn2_clk" TNM_NET = trn_clk_125;
+TIMESPEC TS_trn_clk_125 = PERIOD trn_clk_125 100 MHz HIGH 50%;
 
 ######################################################################################################
 # LOC ASSIGNMENTS
@@ -86,7 +86,7 @@ INST "*ep/ep/pcie_2_0_i/pcie_gt_i/gtx_v6_i/GTXD[7].GTX" LOC = GTXE1_X0Y8;
 ## New stuff added wjun
 #INST "*ep/ep/pcie_clocking_i/mmcm_adv_i" LOC = MMCM_ADV_X0Y7;
 #INST "*sys_clk_buf" LOC = IBUFDS_GTXE1_X0Y6;
-INST "*sys_clk_buf" LOC = IBUFDS_GTXE1_X0Y4;
+#INST "*sys_clk_buf" LOC = IBUFDS_GTXE1_X0Y4;
 #INST "*buffer_queue_memory/Mram_RAM2" TIG;
 #INST "*buffer_queue_memory/Mram_RAM1" TIG;
 #NET 	"*ep/pcie_clocking_i/clk_125" TNM_NET = "CLK_125" ;
@@ -103,6 +103,7 @@ PIN    "*ep/ep/pcie_clocking_i/mmcm_adv_i.RST"          TIG;
 # AREA ASSIGNMENTS
 ######################################################################################################
 INST       "*ep/ep/pcie_2_0_i/*"                      AREA_GROUP = "AG_pcie0";
+#INST "*ep/ep/*" AREA_GROUP = "AG_pcie0";
 INST       "*outFifo/*"                                AREA_GROUP = "AG_pcie0";
 AREA_GROUP "AG_pcie0"                                 RANGE = SLICE_X136Y147:SLICE_X155Y120;
 

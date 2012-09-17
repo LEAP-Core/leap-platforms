@@ -30,7 +30,7 @@ interface PCIE_WIRES;
 
   method Action pcie_clk_p();  
 
-	method Action refclk();
+//	method Action refclk();
 
   method Bit#(8) leds();
 
@@ -61,7 +61,7 @@ module mkPCIEDevice#(Clock rawClock, Reset rawReset) (PCIE_DEVICE);
 
     CLOCK_IMPORTER pcieClockN <- mkClockImporter();
     CLOCK_IMPORTER pcieClockP <- mkClockImporter();
-    CLOCK_IMPORTER refClock <- mkClockImporter();
+//    CLOCK_IMPORTER refClock <- mkClockImporter();
 
     // bridge expects its reset to be synchronized...
 
@@ -70,25 +70,26 @@ module mkPCIEDevice#(Clock rawClock, Reset rawReset) (PCIE_DEVICE);
     //Clock sys_clk_buf <- mkClockIBUFDS(pcieClockP.clock, pcieClockN.clock);
     // make a pretty ASync reset from the incoming rst...
     
-		MakeResetIfc refClk_reset <- mkReset(10,False,refClock.clock);
+//		MakeResetIfc refClk_reset <- mkReset(10,False,refClock.clock);
 
-    Reg#(Bit#(7)) count <- mkReg(~0);
+    Reg#(Bit#(8)) count <- mkReg(~0);
     MakeResetIfc localResetFast <- mkReset(0,False,clk);
     Reset combinedReset <- mkResetEither(rst, localResetFast.new_rst);
     Reset pcieReset <- mkAsyncReset(0,combinedReset,sys_clk_buf); 
     rule countDown(count > 0);
       count <= count - 1;
-      if(count > 64) 
+      if(count > 128) 
         begin
           localResetFast.assertReset();
         end
     endrule
 
+   Reset fpga_rstn <- mkResetInverter(pcieReset, clocked_by sys_clk_buf);
 //		Reset refrst = mkAsyncResetFromCR(4, refClock.clock);
-//    Reset refReset <- mkAsyncReset(0,combinedReset,refClk); 
-		BLUENOCIfc bnoc <- mkBlueNoCCore(sys_clk_buf, pcieReset,
-			clocked_by refClock.clock, reset_by refClk_reset.new_rst);
-
+//    Reset refReset <- mkAsyncReset(0,combinedReset,refClock.clock); 
+		BLUENOCIfc bnoc <- mkBlueNoCCore(sys_clk_buf, fpga_rstn);//, //pcieReset,
+//			clocked_by refClock.clock, reset_by refReset);
+			//clocked_by refClock.clock, reset_by refClk_reset.new_rst);
 
 		PCIE_BURY pcieBury <- mkPCIE_BURY(
 				clocked_by sys_clk_buf,
@@ -101,8 +102,8 @@ module mkPCIEDevice#(Clock rawClock, Reset rawReset) (PCIE_DEVICE);
 			bnoc.pcie.rxp(pcieBury.rxp_bsv);
 			bnoc.pcie.rxn(pcieBury.rxn_bsv);
 		endrule
-
-    interface PCIE_DRIVER driver;
+    
+		interface PCIE_DRIVER driver;
 
         method Action send(PCIEWord data) if(count == 0);
 					bnoc.send(data);
@@ -118,7 +119,7 @@ module mkPCIEDevice#(Clock rawClock, Reset rawReset) (PCIE_DEVICE);
     interface PCIE_WIRES  wires;
       method pcie_clk_n = pcieClockN.clock_wire;  
       method pcie_clk_p = pcieClockP.clock_wire;  
-      method refclk = refClock.clock_wire;  
+//      method refclk = refClock.clock_wire;  
 
 //      method leds = bridge.leds;
 			method Bit#(8) leds();
@@ -130,14 +131,16 @@ module mkPCIEDevice#(Clock rawClock, Reset rawReset) (PCIE_DEVICE);
       //interface reset = rst;
       interface clock = clk;
 
-			interface clockPCIE = pcieBury.clock;
 
+			interface clockPCIE = pcieBury.clock;
       interface PCIE_EXP pcie_exp;
         method rxp = pcieBury.rxp_wire;
         method rxn = pcieBury.rxn_wire;
         method txp = pcieBury.txp_wire;
         method txn = pcieBury.txn_wire;
       endinterface
+			
+      //interface clockPCIE = sys_clk_buf; 
 
 //			interface PCIE_EXP pcie_exp = bnoc.pcie;
 //      interface clockPCIE = sys_clk_buf; 

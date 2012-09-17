@@ -177,34 +177,63 @@ module mkBlueNoCCore#(Clock sys_clk_buf, Reset pci_sys_rstn)
    // Connect the bridge and targets to the switch and tie off unused ports
 	   FifoMsgSink#(4)   beats_in  <- mkFifoMsgSink(clocked_by epClock125, reset_by epReset125);
 	   FifoMsgSource#(4) beats_out <- mkFifoMsgSource(clocked_by epClock125, reset_by epReset125);
-	let nocport = as_port(beats_out.source, beats_in.sink);
-	mkConnection(bridge.noc, nocport);
+	//let nocport = as_port(beats_out.source, beats_in.sink);
+	//mkConnection(bridge.noc, nocport);
+	mkConnection(bridge.noc, as_port(beats_out.source, beats_in.sink));
 		
 	let syncToOut <- mkSyncFIFO(32, fpga_clk, fpga_rst, epClock125);
 	let syncFromIn <- mkSyncFIFO(32, epClock125, epReset125, fpga_clk);
 	
-	Reg#(Bit#(6)) epoch_send <- mkReg(0);
+	Reg#(Bit#(6)) epoch_send <- mkReg(0, clocked_by epClock125, reset_by epReset125);
 	Reg#(Bit#(6)) epoch_rcv <- mkReg(0, clocked_by epClock125, reset_by epReset125);
 	Reg#(Bit#(6)) epoch_peek <- mkReg(0, clocked_by epClock125, reset_by epReset125);
 //	Reg#(Bool) flushing <- mkReg(False, clocked_by epClock125, reset_by epReset125);
 //	Reg#(Bool) flushing_c <- mkReg(False);
+	
+	rule streamOut;
+		syncToOut.deq();
+		let data = syncToOut.first();
+		epoch_send <= epoch_send + 1;
+		beats_out.enq({epoch_send, 2'b1, 8'h0, data, 8'h97});
+	endrule
+
+	rule streamIm;
+		beats_in.deq();
+		let epoch = beats_in.first()[31:26];
+		let magic = beats_in.first()[7:0];
+		if ( magic == 8'hbb ) begin
+			epoch_rcv <= 0;
+			epoch_send <= 0;
+			//beats_out.enq({0, 2'b1, 8'h0, 8'h0, 8'hcc});
+		end else
+		if ( epoch != epoch_rcv ) begin
+			epoch_rcv <= epoch;
+			syncFromIn.enq({beats_in.first()[15:8]}); // FIXME
+		end
+	endrule
+
+/*
 	rule streamIn;//(!flushing);
 		beats_in.deq();
-		syncFromIn.enq({beats_in.first()[15:8]}); // FIXME
-		/*
+		//syncFromIn.enq({beats_in.first()[15:8]}); // FIXME
+		
 		let epoch = beats_in.first()[31:26];
 		let magic = beats_in.first()[7:0];
 		if ( epoch != epoch_rcv ) begin
-			epoch_rcv <= epoch;
 			if (magic == 8'hbe) begin // write
+				epoch_rcv <= epoch;
 				syncFromIn.enq({beats_in.first()[15:8]}); // FIXME
 			end
 			else if (magic == 8'hbd) begin // read
+				epoch_rcv <= epoch;
 				syncToOut.deq();
 				let data = syncToOut.first();
-				beats_out.enq(data);
+				beats_out.enq({epoch_send, 2'b1,8'h0,data,8'h97}); //FIXME
+				epoch_send <= epoch_send + 1;
+//				beats_out.enq(data);
 			end
 			else if (magic == 8'hbc) begin // peek
+				epoch_rcv <= epoch;
 				//epoch_send <= epoch_send + 1;
 				let peekres = 0;
 				if ( syncToOut.notEmpty ) begin
@@ -214,39 +243,18 @@ module mkBlueNoCCore#(Clock sys_clk_buf, Reset pci_sys_rstn)
 				epoch_peek <= epoch_peek + 1;
 			end
 			else if (magic == 8'hbb) begin //init
+				epoch_send <= 0;
+				epoch_rcv <= 0;
+				epoch_peek <= 0;
 				//flushing <= True;
 //				flushstart.enq(1);
 			end
 		end
-		*/
-	endrule
-/*
-	rule flush;
-		if ( flushstart.notEmpty ) begin
-			flushing_c <= True;
-			if ( syncFromIn.notEmpty )
-				syncFromIn.deq;
-			else 
-				flushstart.deq;
-		end else if (flushing_c) begin
-			flushend.enq(1);
-			flushing_c <= False;
-		end
-	endrule
-	rule endflush;
-		flushend.deq();
-		flushing <= False;
+		
 	endrule
 */
-//*
-	rule streamOut;
-		syncToOut.deq();
-		let data = syncToOut.first();
-		beats_out.enq(data);
-	endrule
-//*/
 
-//*
+/*
 	rule echo;
 		syncFromIn.deq();
 		let data = syncFromIn.first();
@@ -257,19 +265,19 @@ module mkBlueNoCCore#(Clock sys_clk_buf, Reset pci_sys_rstn)
 //		beats_out.enq({8'hab, 8'h0, data, 8'h98});
 
 	endrule
-//*/		 
+*/
    // FPGA pin interface
    interface PCIE_EXP pcie			= ep.pcie;
 	 interface Clock clock 				= clk;
 	method Action send(Bit#(8) data);
 //		epoch_send <= epoch_send + 1;
-//		syncToOut.enq({epoch_send, 2'b1,8'h0,data,8'h98}); //FIXME
+		//syncToOut.enq({epoch_send, 2'b1,8'h0,data,8'h97}); //FIXME
+		syncToOut.enq(data);
 	endmethod
 
 	method ActionValue#(Bit#(8)) receive();
-//		syncFromIn.deq();
-//		return syncFromIn.first();
-		return 0;
+		syncFromIn.deq();
+		return syncFromIn.first();
 	endmethod
       
 endmodule: mkBlueNoCCore
