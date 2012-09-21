@@ -42,11 +42,7 @@ module mkBridge_4#( Bit#(64)  board_content_id
                               );
    return _bridge;
 endmodule: mkBridge_4
-// This is the top-level FPGA block
-//(* synthesize, default_clock_osc="CLK", default_reset="RST", clock_prefix="", reset_prefix="" *)
-//(* default_clock_osc="CLK", default_reset="RST", clock_prefix="", reset_prefix="" *)
-//module mkBlueNoCCore#(Clock pci_sys_clk_p, Clock pci_sys_clk_n)
-//(* synthesize *)
+
 module mkBlueNoCCore#(Clock sys_clk_buf, Reset pci_sys_rstn)
                  (BLUENOCIfc);
    // access clock and reset
@@ -180,7 +176,7 @@ module mkBlueNoCCore#(Clock sys_clk_buf, Reset pci_sys_rstn)
 	//let nocport = as_port(beats_out.source, beats_in.sink);
 	//mkConnection(bridge.noc, nocport);
 	mkConnection(bridge.noc, as_port(beats_out.source, beats_in.sink));
-		
+	
 	let syncToOut <- mkSyncFIFO(32, fpga_clk, fpga_rst, epClock125);
 	let syncFromIn <- mkSyncFIFO(32, epClock125, epReset125, fpga_clk);
 	
@@ -189,7 +185,29 @@ module mkBlueNoCCore#(Clock sys_clk_buf, Reset pci_sys_rstn)
 	Reg#(Bit#(6)) epoch_peek <- mkReg(0, clocked_by epClock125, reset_by epReset125);
 //	Reg#(Bool) flushing <- mkReg(False, clocked_by epClock125, reset_by epReset125);
 //	Reg#(Bool) flushing_c <- mkReg(False);
-	
+
+/*
+	rule echo;
+		beats_in.deq();
+		beats_out.enq(beats_in.first());
+	endrule
+	*/
+	rule echo;
+		syncFromIn.deq();
+		let data = syncFromIn.first();
+		syncToOut.enq(data);
+	endrule
+	rule streamOut;
+		syncToOut.deq();
+		let data = syncToOut.first();
+		beats_out.enq({8'h01, 8'h0, data, 8'h97});
+	endrule
+
+	rule streamIm;
+		beats_in.deq();
+		syncFromIn.enq({beats_in.first()[15:8]});
+	endrule
+/*
 	rule streamOut;
 		syncToOut.deq();
 		let data = syncToOut.first();
@@ -204,14 +222,15 @@ module mkBlueNoCCore#(Clock sys_clk_buf, Reset pci_sys_rstn)
 		if ( magic == 8'hbb ) begin
 			epoch_rcv <= 0;
 			epoch_send <= 0;
-			//beats_out.enq({0, 2'b1, 8'h0, 8'h0, 8'hcc});
-		end else
+//			beats_out.enq({0, 2'b1, 8'h0, 8'h0, 8'hcc});
+		end 
+		else
 		if ( epoch != epoch_rcv ) begin
 			epoch_rcv <= epoch;
 			syncFromIn.enq({beats_in.first()[15:8]}); // FIXME
 		end
 	endrule
-
+*/
 /*
 	rule streamIn;//(!flushing);
 		beats_in.deq();
@@ -254,30 +273,18 @@ module mkBlueNoCCore#(Clock sys_clk_buf, Reset pci_sys_rstn)
 	endrule
 */
 
-/*
-	rule echo;
-		syncFromIn.deq();
-		let data = syncFromIn.first();
-		syncToOut.enq({6'b0,2'b1, 8'h0, data, 8'h98});
-		
-//		let data = beats_in.first()[7:0];
-//		beats_in.deq();
-//		beats_out.enq({8'hab, 8'h0, data, 8'h98});
 
-	endrule
-*/
    // FPGA pin interface
    interface PCIE_EXP pcie			= ep.pcie;
 	 interface Clock clock 				= clk;
 	method Action send(Bit#(8) data);
-//		epoch_send <= epoch_send + 1;
-		//syncToOut.enq({epoch_send, 2'b1,8'h0,data,8'h97}); //FIXME
-		syncToOut.enq(data);
+		//syncToOut.enq(data);
 	endmethod
 
 	method ActionValue#(Bit#(8)) receive();
-		syncFromIn.deq();
-		return syncFromIn.first();
+		return 0;
+		//syncFromIn.deq();
+		//return syncFromIn.first();
 	endmethod
       
 endmodule: mkBlueNoCCore

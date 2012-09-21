@@ -171,7 +171,7 @@ module clock_gen
   BUFG clkout1_buf
    (.O   (CLK_OUT1),
     .I   (CLKOUT0_BUF));
-    //.I   (clkout0));
+//    .I   (clkout0));
 
 
 

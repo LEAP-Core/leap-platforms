@@ -20,7 +20,7 @@ CONFIG PART = XC6VLX240T-FF1156-1;
 # PIN ASSIGNMENTS
 ######################################################################################################
 INST   "*sys_clk_buf"                                      DIFF_TERM = "TRUE";
-NET "*sys_clk_buf_O" PERIOD = 10ns;
+#NET "*sys_clk_buf_O" PERIOD = 10ns;
 
 
 
@@ -73,10 +73,10 @@ INST "*ep/ep/pcie_2_0_i/pcie_gt_i/gtx_v6_i/GTXD[0].GTX" LOC = GTXE1_X0Y15;
 INST "*ep/ep/pcie_2_0_i/pcie_gt_i/gtx_v6_i/GTXD[1].GTX" LOC = GTXE1_X0Y14;
 INST "*ep/ep/pcie_2_0_i/pcie_gt_i/gtx_v6_i/GTXD[2].GTX" LOC = GTXE1_X0Y13;
 INST "*ep/ep/pcie_2_0_i/pcie_gt_i/gtx_v6_i/GTXD[3].GTX" LOC = GTXE1_X0Y12;
-INST "*ep/ep/pcie_2_0_i/pcie_gt_i/gtx_v6_i/GTXD[4].GTX" LOC = GTXE1_X0Y11;
-INST "*ep/ep/pcie_2_0_i/pcie_gt_i/gtx_v6_i/GTXD[5].GTX" LOC = GTXE1_X0Y10;
-INST "*ep/ep/pcie_2_0_i/pcie_gt_i/gtx_v6_i/GTXD[6].GTX" LOC = GTXE1_X0Y9;
-INST "*ep/ep/pcie_2_0_i/pcie_gt_i/gtx_v6_i/GTXD[7].GTX" LOC = GTXE1_X0Y8;
+#INST "*ep/ep/pcie_2_0_i/pcie_gt_i/gtx_v6_i/GTXD[4].GTX" LOC = GTXE1_X0Y11;
+#INST "*ep/ep/pcie_2_0_i/pcie_gt_i/gtx_v6_i/GTXD[5].GTX" LOC = GTXE1_X0Y10;
+#INST "*ep/ep/pcie_2_0_i/pcie_gt_i/gtx_v6_i/GTXD[6].GTX" LOC = GTXE1_X0Y9;
+#INST "*ep/ep/pcie_2_0_i/pcie_gt_i/gtx_v6_i/GTXD[7].GTX" LOC = GTXE1_X0Y8;
 
 #INST   "*ep/ep/pcie_2_0_i/pcie_gt_i/gtx_v6_i/GTXD[0].GTX"  LOC = GTXE1_X0Y15;
 #INST   "*ep/ep/pcie_2_0_i/pcie_gt_i/gtx_v6_i/GTXD[1].GTX"  LOC = GTXE1_X0Y14;

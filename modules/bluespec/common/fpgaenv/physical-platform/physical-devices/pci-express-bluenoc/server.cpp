@@ -7,6 +7,8 @@
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 
+#include <poll.h>
+
 #include "asim/syntax.h"
 #include "asim/freelist.h"
 
@@ -40,7 +42,7 @@ bool initd = false;
 void serverStart()
 {
 	pthread_mutex_init(&dev_mutex, NULL);
-	pthread_mutex_lock(&dev_mutex);
+//	pthread_mutex_lock(&dev_mutex);
 
 	srand(time(0));
 	epoch_send = epoch_peek = epoch_recv = 32; // both are init'd to 0 at serverside. should be diffent
@@ -71,7 +73,7 @@ void serverStart()
 
 	printf( "** Server started!\n" );
 	initd = true;
-	pthread_mutex_unlock(&dev_mutex);
+//	pthread_mutex_unlock(&dev_mutex);
 }
 
 void serverFinish()
@@ -84,52 +86,78 @@ void serverSendSys(const char* byte)
 {
 	while (!initd);
 	printf( "** Sending %x\n", *byte);
-	pthread_mutex_lock(&dev_mutex);
-	printf( "** Sending Start%x\n", *byte);
+//	pthread_mutex_lock(&dev_mutex);
+	printf( "** Sending Start %x\n", *byte);
+	
+	struct pollfd p;
+	p.fd = pcie_dev;
+	p.events = POLLOUT;
+	int pres = poll(&p, 1, 0);
+	if ( !(p.revents & POLLOUT) )
+		printf ( "Write blocked!\n" );
+
 	int result = 0;
-  //   fprintf (stderr, "serverSendSys\n");
-    //fflush(stderr);
-		msg_buf[0] = 0xbe; // recv node
-		msg_buf[1] = *byte;
-		msg_buf[2] = 0; // msg length
-		msg_buf[3] = 1 + (epoch_send << 2); // don't wait
-		result = write(pcie_dev, msg_buf, 4);
-		if ( result != 4 ) {
-			fprintf(stderr, "Error: wrote %d bytes to bluenoc_1\n", result );
-		}
-		epoch_send += 1;
-		if ( epoch_send >= (1<<6) ) epoch_send = 0;
-	pthread_mutex_unlock(&dev_mutex);
-		printf( "** Msg Sent\n" );
+	msg_buf[0] = 0xbe; // recv node
+	msg_buf[1] = *byte;
+	msg_buf[2] = 0; // msg length
+	msg_buf[3] = 1 + (epoch_send << 2); // don't wait
+	result = write(pcie_dev, msg_buf, 4);
+	if ( result != 4 ) {
+		fprintf(stderr, "Error: wrote %d bytes to bluenoc_1\n", result );
+	}
+	epoch_send += 1;
+	if ( epoch_send >= (1<<6) ) epoch_send = 0;
+//	pthread_mutex_unlock(&dev_mutex);
+	printf( "** Msg Sent\n" );
 }
 
 unsigned char peekedVal = 0;
 unsigned char peeked = 0;
+unsigned int peekcount = 0;
 bool serverTestSys() {
 	while (!initd);
-	printf( "** Testing\n" );
-	pthread_mutex_lock(&dev_mutex);
+//	printf( "** Testing\n" );
+//	pthread_mutex_lock(&dev_mutex);
 	bool retVal = false;
-	/*
-	printf( "** Testing Start\n" );
 
-	unsigned char peekres = 0;
-	unsigned char epoch = epoch_recv;
-	unsigned char magic = 0xcc;
-	int result = read(pcie_dev, msg_buf, 4);
-	magic = msg_buf[0];
 
-	epoch = (msg_buf[3]>>2);
-	if ( epoch_recv == epoch || magic == 0xcc ) {
-		peeked = 0;
-	} else if (magic == 0x97){
-		peeked = 1;
-		peekedVal = msg_buf[1];
+	struct pollfd p;
+	p.fd = pcie_dev;
+	p.events = POLLIN;// | POLLPRI;
+	p.revents = 0;
+	int pres = poll(&p, 1, 0);
+	if ( pres > 0 && (p.revents & POLLIN))
 		retVal = true;
+
+	printf( "** Testing Start %d, %x\n", retVal, p.revents );
+
+	int result = 0;
+	if ( retVal ) {
+		unsigned char peekres = 0;
+		unsigned char epoch = epoch_recv;
+		unsigned char magic = 0xcc;
+		result = read(pcie_dev, msg_buf, 4);
+		magic = msg_buf[0];
+
+		epoch = (msg_buf[3]>>2);
+		if ( epoch_recv == epoch || magic == 0xcc || result != 4 ) {
+			peeked = 0;
+			retVal = false;
+		} else if (magic == 0x97){
+			peeked = 1;
+			peekedVal = msg_buf[1];
+			retVal = true;
+		}
 	}
-*/
-	pthread_mutex_unlock(&dev_mutex);
-	printf( "** Tested %d\n", peeked );
+//	pthread_mutex_unlock(&dev_mutex);
+	if (retVal == true ) {
+		printf( "** Tested true @ %d, %x\n", peekcount, p.revents);
+		peekcount = 0;
+	} else {
+		peekcount++;
+	}
+	printf( "** Tested Results %d\n", result );
+//	printf( "** Tested %d\n", peeked );
 	return retVal;
 }
 
@@ -137,24 +165,33 @@ void serverRecvSys(char* byte)
 {
 	while (!initd);
 	printf( "** Msg Receive requesting\n" );
-	pthread_mutex_lock(&dev_mutex);
+//	pthread_mutex_lock(&dev_mutex);
 	printf( "** Msg Receive Start\n" );
+	
+	struct pollfd p;
+	p.fd = pcie_dev;
+	p.events = POLLIN;
+	int pres = poll(&p, 1, 0);
+	if ( pres <= 0 || !(p.revents & (POLLIN|POLLRDNORM)) )
+		printf( "Read not ready?\n" );
 
 	unsigned char peekres = 0;
 	unsigned char epoch = epoch_recv;
 	unsigned char magic = 0xcc;
+	int result = 0;
 	if (peeked) {
 		*byte = peekedVal;
 	} else {
 		do {
-			int result = read(pcie_dev, msg_buf, 4);
+			printf( "** Msg Reading\n" );
+			result = read(pcie_dev, msg_buf, 4);
 			magic = msg_buf[0];
 			epoch = (msg_buf[3]>>2);
 			*byte = msg_buf[1];
-		} while ( epoch == epoch_recv || magic != 0x97 );
+		} while ( epoch == epoch_recv || magic != 0x97 || result != 4 );
 		epoch_recv = epoch;
 	}
-	pthread_mutex_unlock(&dev_mutex);
+//	pthread_mutex_unlock(&dev_mutex);
 	printf( "** Msg Received %x\n", poppedData );
 	testcount = 0;
 }

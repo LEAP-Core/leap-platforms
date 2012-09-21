@@ -58,11 +58,10 @@ module mkPCIEDevice#(Clock rawClock, Reset rawReset) (PCIE_DEVICE);
     // should this be a clock 100?
     Clock clk <- exposeCurrentClock();
     Reset rst <- exposeCurrentReset();
+//		Reset rst_n <- mkResetInverter(rst, clocked_by clk);
 
     CLOCK_IMPORTER pcieClockN <- mkClockImporter();
     CLOCK_IMPORTER pcieClockP <- mkClockImporter();
-//    CLOCK_IMPORTER refClock <- mkClockImporter();
-
     // bridge expects its reset to be synchronized...
 
     // Buffer clocks and reset before they are used
@@ -84,16 +83,14 @@ module mkPCIEDevice#(Clock rawClock, Reset rawReset) (PCIE_DEVICE);
         end
     endrule
 
-   Reset fpga_rstn <- mkResetInverter(pcieReset, clocked_by sys_clk_buf);
-//		Reset refrst = mkAsyncResetFromCR(4, refClock.clock);
-//    Reset refReset <- mkAsyncReset(0,combinedReset,refClock.clock); 
-		BLUENOCIfc bnoc <- mkBlueNoCCore(sys_clk_buf, fpga_rstn);//, //pcieReset,
-//			clocked_by refClock.clock, reset_by refReset);
-			//clocked_by refClock.clock, reset_by refClk_reset.new_rst);
+//   Reset fpga_rstn <- mkResetInverter(pcieReset, clocked_by sys_clk_buf);
+		BLUENOCIfc bnoc <- mkBlueNoCCore(sys_clk_buf, pcieReset);//, fpga_rstn);//,
+//			clocked_by clk, reset_by rst_n);
 
 		PCIE_BURY pcieBury <- mkPCIE_BURY(
 				clocked_by sys_clk_buf,
 				reset_by pcieReset);
+//				reset_by fpga_rstn);
 
 //		(* fire_when_enabled, no_implicit_conditions *)	
 		rule drivePCIE;
@@ -101,6 +98,11 @@ module mkPCIEDevice#(Clock rawClock, Reset rawReset) (PCIE_DEVICE);
 			pcieBury.txp_bsv(bnoc.pcie.txp);
 			bnoc.pcie.rxp(pcieBury.rxp_bsv);
 			bnoc.pcie.rxn(pcieBury.rxn_bsv);
+		endrule
+
+		Reg#(Bit#(16)) led_vals <- mkReg(16'b1010101010101010);
+		rule tickled;
+			led_vals <= led_vals + 1;
 		endrule
     
 		interface PCIE_DRIVER driver;
@@ -124,7 +126,8 @@ module mkPCIEDevice#(Clock rawClock, Reset rawReset) (PCIE_DEVICE);
 //      method leds = bridge.leds;
 			method Bit#(8) leds();
 				//return led_reg;
-				return 8'b11001010;
+				return led_vals[15:8];
+//				return 8'b11001010;
 //				return {7'b1101101, pcieBury.pin_wire};
 			endmethod
 
@@ -148,38 +151,3 @@ module mkPCIEDevice#(Clock rawClock, Reset rawReset) (PCIE_DEVICE);
     endinterface
 
 endmodule
-
-/*
-
-%sources -t BSV -v PUBLIC Bridge.bsv
-%sources -t BSV -v PUBLIC LLVirtex5PCIE.bsv
-%sources -t BSV -v PUBLIC PioFifo.bsv
-%sources -t BSV -v PUBLIC pcie_bury.bsv
-
-%sources -t NGC -v PRIVATE pcie_endpoint.ngc
-%sources -t XCF -v PRIVATE pcie-device.xcf
-%sources -t VERILOG -v PRIVATE pcie_endpoint_old.v
-%sources -t VERILOG -v PRIVATE endpoint_blk_plus_v1_14.v
-%sources -t VERILOG -v PRIVATE pcie_bury.v
-%sources -t UCF -v PRIVATE pcie-device.ucf
-
-
-	NET "m_llpi_phys_plat_pcie_device_pcieBury_rxp_in" keep = true;
-	NET "m_llpi_phys_plat_pcie_device_pcieBury_rxp_in" S = true;
-	NET "m_llpi_phys_plat_pcie_device_pcieBury_rxp_out" keep = true;
-	NET "m_llpi_phys_plat_pcie_device_pcieBury_rxp_out" S = true;
-	NET "m_llpi_phys_plat_pcie_device_pcieBury_rxn_in" keep = true;
-	NET "m_llpi_phys_plat_pcie_device_pcieBury_rxn_in" S = true;
-	NET "m_llpi_phys_plat_pcie_device_pcieBury_rxn_out" keep = true;
-	NET "m_llpi_phys_plat_pcie_device_pcieBury_rxn_out" S = true;
-
-	INST "*pcieBury" keep = true;
-	INST "*pcieBury" S = true;
-
-	NET "pcieWires_pcie_exp_rxp_i" keep = true;
-	NET "pcieWires_pcie_exp_rxp_i" S = true;
-	NET "pcieWires_pcie_exp_rxp_i" s = true;
-	NET "pcieWires_pcie_exp_rxn_i" keep = true;
-	NET "pcieWires_pcie_exp_rxn_i" S = true;
-	NET "pcieWires_pcie_exp_rxn_i" s = true;
-*/

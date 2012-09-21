@@ -188,7 +188,7 @@ module clk_pll(CLKIN1_IN,
 
   BUFG clkout0_buf
    (.O   (CLKOUT0_OUT),
-    //.I   (clkout0));
+//    .I   (clkout0));
     .I   (CLKOUT0_BUF));
 
   BUFG clkout1_buf
