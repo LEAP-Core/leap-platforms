@@ -1,0 +1,15 @@
+
+%name Fixed ML605 Clocks Device
+%desc Fixed ML605 Clocks Device
+
+%provides clocks_device
+
+%sources -t BSV -v PUBLIC  single-ended-clocks-import.bsv
+%sources -t BSV -v PUBLIC  single-ended-clocks-device.bsv
+%sources -t VERILOG -v PRIVATE single-ended-clocks-device.v
+
+%param --global MODEL_CLOCK_FREQ 75  "Desired model clock frequency (integer)."
+
+%param CRYSTAL_CLOCK_FREQ 66 "Input (Crystal) Clock Frequency"
+
+%param --global RESET_ACTIVE_HIGH      0   "Reset active level polarity: 0 - negative, 1 - positive."
