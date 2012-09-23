@@ -185,7 +185,8 @@ module mkBlueNoCCore#(Clock sys_clk_buf, Reset pci_sys_rstn)
 	Reg#(Bit#(6)) epoch_rcv <- mkReg(0, clocked_by epClock125, reset_by epReset125);
 	Reg#(Bit#(6)) epoch_peek <- mkReg(0, clocked_by epClock125, reset_by epReset125);
 	
-	Reg#(Bit#(8)) count_out <- mkReg(32);//, clocked_by epClock125, reset_by epReset125);
+	Reg#(Bit#(8)) count_out <- mkReg(32);
+	//, clocked_by epClock125, reset_by epReset125);
 //	Reg#(Bool) flushing <- mkReg(False, clocked_by epClock125, reset_by epReset125);
 //	Reg#(Bool) flushing_c <- mkReg(False);
 
@@ -198,14 +199,12 @@ module mkBlueNoCCore#(Clock sys_clk_buf, Reset pci_sys_rstn)
 
 	Reg#(Bit#(16)) led_count <- mkReg(0);
 	rule echo(count_out > 0);
-	/*
 		count_out <= count_out - 1;
 		syncToOut.enq(count_out);
-		*/
-		led_count <= led_count + 1;
-		syncFromIn.deq();
-		let data = syncFromIn.first();
-		syncToOut.enq(data);
+//		led_count <= led_count + 1;
+//		syncFromIn.deq();
+//		let data = syncFromIn.first();
+//		syncToOut.enq(data);
 	endrule
 
 	rule streamOut;

@@ -21,7 +21,7 @@ CONFIG PART = XC6VLX240T-FF1156-1;
 ######################################################################################################
 
 NET    "RST_N"                             LOC = H10   | IOSTANDARD = SSTL15  | PULLUP | NODELAY | TIG;
-NET    "CLK"                                    LOC = U23 | IOSTANDARD = LVCMOS25 ;
+NET    "CLK"                                    LOC = U23; # | IOSTANDARD = LVCMOS25 ;
 
 ######################################################################################################
 # CLOCK CONSTRAINTS

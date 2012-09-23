@@ -59,6 +59,7 @@ module mkPCIEDevice#(Clock rawClock, Reset rawReset) (PCIE_DEVICE);
     Clock clk <- exposeCurrentClock();
     Reset rst <- exposeCurrentReset();
 		Reset rst_n <- mkResetInverter(rst, clocked_by clk);
+//		Reset rawRst_n <- mkResetInverter(rawReset, clocked_by rawClock);
 
     CLOCK_IMPORTER pcieClockN <- mkClockImporter();
     CLOCK_IMPORTER pcieClockP <- mkClockImporter();
@@ -83,6 +84,7 @@ module mkPCIEDevice#(Clock rawClock, Reset rawReset) (PCIE_DEVICE);
 		Reset pcieReset_n <- mkResetInverter(pcieReset, clocked_by sys_clk_buf);
 		BLUENOCIfc bnoc <- mkBlueNoCCore(sys_clk_buf, pcieReset_n,
 			clocked_by clk, reset_by rst_n);
+//			clocked_by clk, reset_by rst);
 
 		PCIE_BURY pcieBury <- mkPCIE_BURY(
 				clocked_by sys_clk_buf,
