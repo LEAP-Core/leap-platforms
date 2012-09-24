@@ -13912,3 +13912,35 @@ Switched to driving user domain off of pcie-clock derivatives.  It is
 unclear to me why similar code using the 66Mhz crystal was
 non-functional.  In any case clocks are clocks, and we needed to make
 this work three months ago...
+
+----------
+kfleming    Date: Mon Sep 24 11:47:31 EDT 2012  CSN: CSN-leap-platforms-618
+                  Mon Sep 24 15:47:31 UTC 2012
+
+
+Directory tools/platforms/leap-fpga-ctrl/scripts
+ ML605                     Locally Added               0 
+
+Directory drivers/linux/platforms
+ ml605-pcie/               Locally Added               0 
+
+Directory drivers/linux/platforms/ml605-pcie
+ driver/                   Locally Added               0 
+
+Directory drivers/linux/platforms/ml605-pcie/driver
+ bluenoc                   Locally Added               0 
+ bluenoc.c                 Locally Added               0 
+ Makefile                  Locally Added               0 
+ bluenoc.h                 Locally Added               0 
+
+Directory drivers/linux/platforms/ml605-pcie
+ dkms/                     Locally Added               0 
+
+Directory drivers/linux/platforms/ml605-pcie/dkms
+ dkms.conf                 Locally Added               0 
+
+
+
+Added ML605 driver, its dkms hook, and a run script for
+leap-fpga-ctrl.  I have done some limited testing, but more will
+follow.

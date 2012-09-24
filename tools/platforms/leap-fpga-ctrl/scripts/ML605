@@ -1,0 +1,100 @@
+#!/usr/bin/perl
+
+#Untaint PATH
+$ENV{'PATH'} = '/sbin:/bin:/usr/bin';
+
+$magic = "1be7:b100";
+
+if($ARGV[0] =~ /activate/) {
+
+  print "Activating ML605\n";
+  # read in the config file
+  if(-e "/tmp/bluenoc_magic") {
+     `/usr/bin/setpci -d $magic COMMAND=7`;
+     `/usr/bin/setpci -d $magic CACHE_LINE_SIZE=10`;
+     open(CONFIG, "</tmp/bluenoc_magic");
+     while (<CONFIG>) {
+	 if(/Region0:(\w+)/) {
+	     #print "Region 0: $1";
+	     `/usr/bin/setpci -d $magic BASE_ADDRESS_0=$1`;
+	 }
+	 if(/Region1:(\w+)/) {
+	     #print "Region 1: $1";
+	     `/usr/bin/setpci -d $magic BASE_ADDRESS_1=$1`;
+	 }
+	 if(/Region2:(\w+)/) {
+	     #print "Region 2: $1";
+	     `/usr/bin/setpci -d $magic BASE_ADDRESS_2=$1`;
+	 }
+	 if(/ROM:(\w+)/) {
+	     #print "ROM: $1";
+	     `/usr/bin/setpci -d $magic ROM_ADDRESS=$1`;
+	 }
+     }
+  } else {
+      print "***You must now reboot your machine***\n";
+      exit(-1);
+  }
+  print "ML605 Activated\n";
+}
+
+if($ARGV[0] =~ /program/) {
+    print "Programming ML605\n";
+
+    # first let's see if our breadcrumbs exist
+    unless(-e "/tmp/bluenoc_magic") {
+	my @lines = `/usr/bin/lspci -vv`;   
+	my $in_pcie = 0;
+	my $region0;    
+	my $region1;    
+	my $region2;    
+	my $rom;    
+	
+	foreach my $line (@lines) {
+	    if($line =~ /Device $magic/) {
+		$in_pcie = 1;
+	    }
+	    
+	    if($in_pcie) {
+		#print "examining $line";
+		if($line =~ /Region 0: Memory at (\w+)/) {
+		    $region0 = $1;
+		}
+		
+		if($line =~ /Region 1: Memory at (\w+)/) {
+		    $region1 = $1;
+		}
+	      
+          
+		if($line =~ /Capabilities/) {
+		    $in_pcie = 0;
+		}
+	    }
+	}
+      
+	if((!defined $region0) || (!defined $region1)) {
+	    # we fail..
+	    print "Unable to locate Bluenoc PCIE device.  We will program the FGPA, but you must reboot you machine when this command completes.\n";   
+	} else {
+	    open(CONFIG, ">/tmp/bluenoc_magic");
+	    print CONFIG "Region0:$region0\n";
+	    print CONFIG "Region1:$region1\n";
+	}
+    }
+  
+    unless(-e "/dev/bluenoc_0") {
+	my $module="bluenoc";
+	my $device="bluenoc";
+	my $mode="666";
+	my $modprobe = `modprobe -v bluenoc`;
+	#print $modprobe;
+	my $major=`cat /proc/devices | grep $module`;
+	#print $major;
+	if($major =~ /(\d+) $module/) {
+	    #print "major number is $1";
+	    `mknod /dev/${device}0 c $1 0`;
+	    # give appropriate group/permissions          
+	    `chmod $mode  /dev/${device}*`;
+	}
+    }
+}

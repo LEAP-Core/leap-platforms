@@ -1,0 +1,23 @@
+#!/bin/sh
+
+usage() {
+   echo "Usage: bluenoc compile"
+   echo "       bluenoc load"
+   echo "       bluenoc unload"
+   echo "       bluenoc clean"
+}
+
+if [ $# -ne 1 ]; then
+   usage
+   exit 1
+fi
+
+case $1 in
+ compile) make clean && make ;;
+ load)    sudo insmod ./bluenoc.ko ;;
+ unload)  sudo rmmod bluenoc ;;
+ clean)   make clean ;;
+ *)       usage && exit 1 ;;
+esac
+
+exit $?
