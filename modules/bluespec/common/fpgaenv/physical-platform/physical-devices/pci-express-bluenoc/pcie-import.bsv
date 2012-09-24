@@ -18,6 +18,8 @@ typedef Bit#(8) PCIEWord;
 interface PCIE_DRIVER;
     method Action send(PCIEWord word);
     method ActionValue#(PCIEWord) receive();
+		interface Clock clock;
+		interface Reset reset;
 endinterface
 
 // PCIE_WIRES
@@ -106,15 +108,17 @@ module mkPCIEDevice#(Clock rawClock, Reset rawReset) (PCIE_DEVICE);
     
 		interface PCIE_DRIVER driver;
 
-        method Action send(PCIEWord data) if(count == 0);
+        method Action send(PCIEWord data);// if(count == 0);
 					bnoc.send(data);
         endmethod
 
-        method ActionValue#(PCIEWord) receive() if(count == 0);
+        method ActionValue#(PCIEWord) receive();// if(count == 0);
 					let data <- bnoc.receive();
 					return data;
         endmethod
 
+      interface clock = bnoc.clock;
+			interface reset = bnoc.reset;
     endinterface
 
     interface PCIE_WIRES  wires;

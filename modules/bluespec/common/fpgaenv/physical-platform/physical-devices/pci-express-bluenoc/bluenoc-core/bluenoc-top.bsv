@@ -22,6 +22,7 @@ interface BLUENOCIfc;
 		method Bit#(8) leds;
    interface PCIE_EXP#(8) pcie;
 	 interface Clock clock;
+	 interface Reset reset;
 endinterface
 //(* synthesize *)
 module mkBridge_4#( Bit#(64)  board_content_id
@@ -185,8 +186,8 @@ module mkBlueNoCCore#(Clock sys_clk_buf, Reset pci_sys_rstn)
         // invert reset to active low
         fpga_rst <- mkResetInverter(fpga_rstn, clocked_by fpga_clk);
 
-	let syncToOut <- mkSyncFIFO(32, fpga_clk, fpga_rstn, epClock125);
-	let syncFromIn <- mkSyncFIFO(32, epClock125, epReset125, fpga_clk);
+	//let syncToOut <- mkSyncFIFO(32, fpga_clk, fpga_rstn, epClock125);
+	//let syncFromIn <- mkSyncFIFO(32, epClock125, epReset125, fpga_clk, clocked_by fpga_clk, reset_by fpga_rstn);
 	
 	
 	FIFO#(Bit#(6)) beat <- mkFIFO(clocked_by epClock125, reset_by epReset125);
@@ -200,16 +201,10 @@ module mkBlueNoCCore#(Clock sys_clk_buf, Reset pci_sys_rstn)
 	//, clocked_by epClock125, reset_by epReset125);
 
 	rule fromFPGAClk;
-	    syncToOut.deq;
+	    //syncToOut.deq;
 	    rxFromFPGAClk <= rxFromFPGAClk + 1;
 	endrule
 
-
-	rule echo;
-		syncFromIn.deq();
-		let data = syncFromIn.first();
-		syncToOut.enq(data);
-	endrule
 
         rule foo2; 
             count_out <= count_out + 3;
@@ -226,33 +221,55 @@ module mkBlueNoCCore#(Clock sys_clk_buf, Reset pci_sys_rstn)
         let valFPGACross <- mkNullCrossingWire(epClock125,count_out, clocked_by fpga_clk, reset_by fpga_rstn);	
         let valNFPGACross <- mkNullCrossingWire(epClock125,count_out_n, clocked_by fpga_clk, reset_by fpga_rstn);	
 
+	FIFO#(Bit#(8)) inQ <- mkFIFO(clocked_by epClock125, reset_by epReset125);
+	FIFO#(Bit#(8)) outQ <- mkFIFO(clocked_by epClock125, reset_by epReset125);
 
-	rule streamOut;
-		beat.deq();
-		let data = zeroExtend({pack(rstnFPGACross),pack(rstFPGACross),rxFromFPGAClk});
-		beats_out.enq({8'h01, 8'h0,data, valNFPGACross});
+/*
+	rule echo;
+		//syncFromIn.deq();
+		//let data = syncFromIn.first();
+		//syncToOut.enq(8'h99);
+		inQ.deq();
+		let data = inQ.first();
+		outQ.enq(data);
 	endrule
-
-	rule streamIm;
- 	        beat.enq(0);
+	*/
+	rule streamOut;
+		//syncToOut.deq();
+		//let data = syncToOut.first();
+		outQ.deq();
+		let data = outQ.first();
+		beats_out.enq({8'h01, 8'h0,data,8'h98});
+	endrule
+	
+	Reg#(Bit#(8)) inQcount <- mkReg(0,clocked_by epClock125, reset_by epReset125);
+	rule streamIn(inQcount < 128);
+ 	 //       beat.enq(0);
 		beats_in.deq();
-		syncFromIn.enq({beats_in.first()[15:8]});
+		//syncFromIn.enq({beats_in.first()[15:8]});
+		inQ.enq({beats_in.first()[15:8]});
+		inQcount <= inQcount + 1;
 	endrule
 
    // FPGA pin interface
    interface PCIE_EXP pcie			= ep.pcie;
 	 interface Clock clock 				= fpga_clk;
+	 interface Reset reset 				= fpga_rst;
 	method Action send(Bit#(8) data);
+		outQ.enq(data);
 		//syncToOut.enq(data);
 	endmethod
 	method Bit#(8) leds();
 		return ?;
 	endmethod
 
-	method ActionValue#(Bit#(8)) receive();
-		return 0;
+	method ActionValue#(Bit#(8)) receive() if ( inQcount > 0 );
+		//return 0;
 		//syncFromIn.deq();
 		//return syncFromIn.first();
+		inQcount <= inQcount - 1;
+		inQ.deq();
+		return inQ.first();
 	endmethod
       
 endmodule: mkBlueNoCCore
