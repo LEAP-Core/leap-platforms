@@ -13892,3 +13892,23 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/uni
  unix-pipe-device.cpp      Locally Modified          607 
 
 Update for new --help argument interface.
+
+----------
+kfleming    Date: Mon Sep 24 00:42:58 EDT 2012  CSN: CSN-leap-platforms-616
+                  Mon Sep 24 04:42:58 UTC 2012
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/ml605/pcie-bluenoc
+ xilinx-xup-pcie.bsv       Locally Modified          615 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express-bluenoc
+ pcie-import.bsv           Locally Modified          615 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express-bluenoc/bluenoc-core
+ bluenoc-top.bsv           Locally Modified          615 
+
+
+Switched to driving user domain off of pcie-clock derivatives.  It is
+unclear to me why similar code using the 66Mhz crystal was
+non-functional.  In any case clocks are clocks, and we needed to make
+this work three months ago...

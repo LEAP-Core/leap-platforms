@@ -122,17 +122,11 @@ module mkPCIEDevice#(Clock rawClock, Reset rawReset) (PCIE_DEVICE);
       method pcie_clk_p = pcieClockP.clock_wire;  
 //      method refclk = refClock.clock_wire;  
 
-//      method leds = bridge.leds;
-			method Bit#(8) leds();
-				//return led_reg;
-				return  bnoc.leds();
-//				return led_vals[19:12];
-//				return 8'b11001010;
-//				return {7'b1101101, pcieBury.pin_wire};
-			endmethod
+      method leds = ?;
+
 
       //interface reset = rst;
-      interface clock = clk;
+      interface clock = clk;//bnoc.clock;
 
 
 			interface clockPCIE = pcieBury.clock;

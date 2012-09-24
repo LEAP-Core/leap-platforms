@@ -89,8 +89,8 @@ module mkPhysicalPlatform
 
     PCIE_DEVICE pcie_device <- mkPCIEDevice(clocks_device.driver.rawClock,
                                             clocks_device.driver.rawReset,
-                                            clocked_by clk,
-                                            reset_by rst);
+                                            clocked_by clocks_device.driver.rawClock,
+                                            reset_by clocks_device.driver.rawReset);
 
     // Aggregate the drivers
     

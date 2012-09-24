@@ -178,120 +178,75 @@ module mkBlueNoCCore#(Clock sys_clk_buf, Reset pci_sys_rstn)
 	//mkConnection(bridge.noc, nocport);
 	mkConnection(bridge.noc, as_port(beats_out.source, beats_in.sink));
 	
-	let syncToOut <- mkSyncFIFO(32, fpga_clk, fpga_rst, epClock125);
+
+        fpga_clk  = epClock125;
+        fpga_rstn  = epReset125;
+
+        // invert reset to active low
+        fpga_rst <- mkResetInverter(fpga_rstn, clocked_by fpga_clk);
+
+	let syncToOut <- mkSyncFIFO(32, fpga_clk, fpga_rstn, epClock125);
 	let syncFromIn <- mkSyncFIFO(32, epClock125, epReset125, fpga_clk);
 	
+	
+	FIFO#(Bit#(6)) beat <- mkFIFO(clocked_by epClock125, reset_by epReset125);
+	Reg#(Bit#(6)) rxFromFPGAClk <- mkReg(0, clocked_by epClock125, reset_by epReset125);
 	Reg#(Bit#(6)) epoch_send <- mkReg(0, clocked_by epClock125, reset_by epReset125);
 	Reg#(Bit#(6)) epoch_rcv <- mkReg(0, clocked_by epClock125, reset_by epReset125);
 	Reg#(Bit#(6)) epoch_peek <- mkReg(0, clocked_by epClock125, reset_by epReset125);
 	
-	Reg#(Bit#(8)) count_out <- mkReg(32);
+	Reg#(Bit#(8)) count_out <- mkReg(32, clocked_by fpga_clk, reset_by fpga_rstn);
+	Reg#(Bit#(8)) count_out_n <- mkReg(32, clocked_by fpga_clk, reset_by fpga_rstn);
 	//, clocked_by epClock125, reset_by epReset125);
-//	Reg#(Bool) flushing <- mkReg(False, clocked_by epClock125, reset_by epReset125);
-//	Reg#(Bool) flushing_c <- mkReg(False);
 
-/*
+	rule fromFPGAClk;
+	    syncToOut.deq;
+	    rxFromFPGAClk <= rxFromFPGAClk + 1;
+	endrule
+
+
 	rule echo;
-		beats_in.deq();
-		beats_out.enq(beats_in.first());
+		syncFromIn.deq();
+		let data = syncFromIn.first();
+		syncToOut.enq(data);
 	endrule
-	*/
 
-	Reg#(Bit#(16)) led_count <- mkReg(0);
-	rule echo(count_out > 0);
-		count_out <= count_out - 1;
-		syncToOut.enq(count_out);
-//		led_count <= led_count + 1;
-//		syncFromIn.deq();
-//		let data = syncFromIn.first();
-//		syncToOut.enq(data);
-	endrule
+        rule foo2; 
+            count_out <= count_out + 3;
+        endrule
+
+        rule foo; 
+            count_out_n <= count_out_n - 1;
+        endrule
+
+	let rstFPGA <- isResetAsserted(clocked_by fpga_clk, reset_by fpga_rst);
+	let rstFPGAN <- isResetAsserted(clocked_by fpga_clk, reset_by fpga_rstn);
+	let rstFPGACross <- mkNullCrossingWire(epClock125,rstFPGA, clocked_by fpga_clk, reset_by fpga_rstn);
+	let rstnFPGACross <- mkNullCrossingWire(epClock125,rstFPGAN, clocked_by fpga_clk, reset_by fpga_rstn);
+        let valFPGACross <- mkNullCrossingWire(epClock125,count_out, clocked_by fpga_clk, reset_by fpga_rstn);	
+        let valNFPGACross <- mkNullCrossingWire(epClock125,count_out_n, clocked_by fpga_clk, reset_by fpga_rstn);	
+
 
 	rule streamOut;
-		syncToOut.deq();
-		let data = syncToOut.first();
-		beats_out.enq({8'h01, 8'h0, data, 8'h97});
+		beat.deq();
+		let data = zeroExtend({pack(rstnFPGACross),pack(rstFPGACross),rxFromFPGAClk});
+		beats_out.enq({8'h01, 8'h0,data, valNFPGACross});
 	endrule
 
 	rule streamIm;
+ 	        beat.enq(0);
 		beats_in.deq();
 		syncFromIn.enq({beats_in.first()[15:8]});
 	endrule
-/*
-	rule streamOut;
-		syncToOut.deq();
-		let data = syncToOut.first();
-		epoch_send <= epoch_send + 1;
-		beats_out.enq({epoch_send, 2'b1, 8'h0, data, 8'h97});
-	endrule
-
-	rule streamIm;
-		beats_in.deq();
-		let epoch = beats_in.first()[31:26];
-		let magic = beats_in.first()[7:0];
-		if ( magic == 8'hbb ) begin
-			epoch_rcv <= 0;
-			epoch_send <= 0;
-//			beats_out.enq({0, 2'b1, 8'h0, 8'h0, 8'hcc});
-		end 
-		else
-		if ( epoch != epoch_rcv ) begin
-			epoch_rcv <= epoch;
-			syncFromIn.enq({beats_in.first()[15:8]}); // FIXME
-		end
-	endrule
-*/
-/*
-	rule streamIn;//(!flushing);
-		beats_in.deq();
-		//syncFromIn.enq({beats_in.first()[15:8]}); // FIXME
-		
-		let epoch = beats_in.first()[31:26];
-		let magic = beats_in.first()[7:0];
-		if ( epoch != epoch_rcv ) begin
-			if (magic == 8'hbe) begin // write
-				epoch_rcv <= epoch;
-				syncFromIn.enq({beats_in.first()[15:8]}); // FIXME
-			end
-			else if (magic == 8'hbd) begin // read
-				epoch_rcv <= epoch;
-				syncToOut.deq();
-				let data = syncToOut.first();
-				beats_out.enq({epoch_send, 2'b1,8'h0,data,8'h97}); //FIXME
-				epoch_send <= epoch_send + 1;
-//				beats_out.enq(data);
-			end
-			else if (magic == 8'hbc) begin // peek
-				epoch_rcv <= epoch;
-				//epoch_send <= epoch_send + 1;
-				let peekres = 0;
-				if ( syncToOut.notEmpty ) begin
-					peekres = 1;
-				end
-				beats_out.enq({epoch_peek, 2'b1, 8'h0, peekres,8'h98});
-				epoch_peek <= epoch_peek + 1;
-			end
-			else if (magic == 8'hbb) begin //init
-				epoch_send <= 0;
-				epoch_rcv <= 0;
-				epoch_peek <= 0;
-				//flushing <= True;
-//				flushstart.enq(1);
-			end
-		end
-		
-	endrule
-*/
-
 
    // FPGA pin interface
    interface PCIE_EXP pcie			= ep.pcie;
-	 interface Clock clock 				= clk;
+	 interface Clock clock 				= fpga_clk;
 	method Action send(Bit#(8) data);
 		//syncToOut.enq(data);
 	endmethod
 	method Bit#(8) leds();
-		return led_count[7:0];
+		return ?;
 	endmethod
 
 	method ActionValue#(Bit#(8)) receive();
