@@ -70,14 +70,14 @@ module mkPCIEDevice#(Clock rawClock, Reset rawReset) (PCIE_DEVICE);
     // Buffer clocks and reset before they are used
     Clock sys_clk_buf <- mkClockIBUFDS_GTXE1(True,pcieClockP.clock, pcieClockN.clock);
     
-    Reg#(Bit#(8)) count <- mkReg(~0);
+    Reg#(Bit#(6)) count <- mkReg(~0);
     MakeResetIfc localResetFast <- mkReset(0,False,clk);
     MakeResetIfc rst_null <- mkReset(0,False,clk);
     Reset combinedReset <- mkResetEither(rst, localResetFast.new_rst);
     Reset pcieReset <- mkAsyncReset(0,combinedReset,sys_clk_buf); 
     rule countDown(count > 0);
       count <= count - 1;
-      if(count > 128) 
+      if(count > 32) 
         begin
           localResetFast.assertReset();
         end
@@ -126,7 +126,7 @@ module mkPCIEDevice#(Clock rawClock, Reset rawReset) (PCIE_DEVICE);
       method pcie_clk_p = pcieClockP.clock_wire;  
 //      method refclk = refClock.clock_wire;  
 
-      method leds = ?;
+      method leds = ?;// bnoc.leds();
 
 
       //interface reset = rst;
