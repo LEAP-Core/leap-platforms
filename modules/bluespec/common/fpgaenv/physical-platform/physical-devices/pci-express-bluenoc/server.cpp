@@ -40,17 +40,34 @@ unsigned char poppedData;
 unsigned int send_idx = 0;
 
 void *readThread(void *param) {
+        char sequenceNumber = 0; 
+
 	while (readthread_do) {
 		while (dataPopped) sleep(0);
 		printf( "** Attempting Read %x!\n", poppedData );
 
 		int result = read(pcie_dev, read_buf, 4);
 		printf( "** Read len %d!\n", result );
-		if ( result != 4 ) continue;
+		if ( result != 4 ) {
+		  printf("Result was %d", result);
+		  continue;
+		}
+
+		if((read_buf[0] & 0xff) != (sequenceNumber&0xff)) {
+ 		    printf( "** Bad sequence %x Read %x %x %x %x!\n", sequenceNumber, read_buf[0], read_buf[1], read_buf[2], read_buf[3]);	 
+		    continue;
+		}
+		
+		sequenceNumber = (sequenceNumber + 1) & 0xff;
+
+	        printf( "** Read %x %x %x %x!\n", read_buf[0], read_buf[1], read_buf[2], read_buf[3]);
+
+		if(read_buf[3] != 1) {continue;} // flush out debug...
+
 		pthread_mutex_lock(&dev_mutex);
 		dataPopped = true;
 		poppedData = read_buf[1];
-		printf( "** Read %x %x %x %x!\n", read_buf[0], read_buf[1], read_buf[2], read_buf[3] );
+		
 		pthread_mutex_unlock(&dev_mutex);
 	}
 }
@@ -135,6 +152,6 @@ void serverRecvSys(char* byte)
 	pthread_mutex_lock(&dev_mutex);
 	dataPopped = false;
 	*byte = poppedData;
-	printf( "Rd %x\n", *byte );
+	//	printf( "Rd %x\n", *byte );
 	pthread_mutex_unlock(&dev_mutex);
 }
