@@ -13944,3 +13944,18 @@ Directory drivers/linux/platforms/ml605-pcie/dkms
 Added ML605 driver, its dkms hook, and a run script for
 leap-fpga-ctrl.  I have done some limited testing, but more will
 follow.
+
+----------
+kfleming    Date: Wed Sep 26 14:56:40 EDT 2012  CSN: CSN-leap-platforms-620
+                  Wed Sep 26 18:56:40 UTC 2012
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express-bluenoc
+ server.cpp                Locally Modified          619 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express-bluenoc/bluenoc-core
+ bluenoc-top.bsv           Locally Modified          619 
+
+
+
+Hello seems to work reliably, though I am not sure of how this came to pass.

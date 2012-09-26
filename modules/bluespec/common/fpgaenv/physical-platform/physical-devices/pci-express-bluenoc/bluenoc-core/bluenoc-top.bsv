@@ -220,12 +220,19 @@ module mkBlueNoCCore#(Clock sys_clk_buf, Reset pci_sys_rstn)
         let valFPGACross <- mkNullCrossingWire(epClock125,count_out, clocked_by fpga_clk, reset_by fpga_rstn);	
         let valNFPGACross <- mkNullCrossingWire(epClock125,count_out_n, clocked_by fpga_clk, reset_by fpga_rstn);	
 
-	FIFO#(Bit#(8)) inQ <- mkSizedFIFO(32, clocked_by epClock125, reset_by epReset125);
-	FIFO#(Bit#(8)) outQ <- mkSizedFIFO(32, clocked_by epClock125, reset_by epReset125);
+	FIFOF#(Bit#(8)) inQ <- mkSizedFIFOF(32, clocked_by epClock125, reset_by epReset125);
+	FIFOF#(Bit#(8)) outQ <- mkSizedFIFOF(32, clocked_by epClock125, reset_by epReset125);
 //	FIFO#(Bit#(8)) tempdat <- mkFIFO(clocked_by epClock125, reset_by epReset125);
 
 //	Reg#(Bit#(8)) inQcount <- mkReg(0,clocked_by epClock125, reset_by epReset125);
 	Reg#(Bit#(8)) inQtotal <- mkReg(0,clocked_by epClock125, reset_by epReset125);
+	Reg#(Bit#(8)) outQtotal <- mkReg(0,clocked_by epClock125, reset_by epReset125);
+	Reg#(Bit#(16)) timeout <- mkReg(0,clocked_by epClock125, reset_by epReset125);
+
+	rule tickTO(timeout != 0);
+	   timeout <= timeout + 1;
+        endrule
+
 	/*
 	rule echo;
 		//syncFromIn.deq();
@@ -237,13 +244,22 @@ module mkBlueNoCCore#(Clock sys_clk_buf, Reset pci_sys_rstn)
 		inQcount <= inQcount - 1;
 	endrule
 	*/
-	rule streamOut;
+
+	rule streamOutDebug (timeout == 0);
+	        timeout <= 1;
+		outQtotal <= outQtotal + 1;
+		Bit#(8) debug = zeroExtend({pack(outQ.notFull),pack(outQ.notEmpty), pack(inQ.notFull), pack(inQ.notEmpty)}); 
+		beats_out.enq({8'b101,8'h0,debug,outQtotal});
+	endrule
+
+	rule streamOut (timeout != 0);
 		//syncToOut.deq();
 		//let data = syncToOut.first();
 		outQ.deq();
 		//tempdat.deq();
 		let data = outQ.first();
-		beats_out.enq({8'h01, 8'h0,data,8'hab});
+		outQtotal <= outQtotal + 1;
+		beats_out.enq({8'b01,8'h0,data,outQtotal});
 	endrule
 	
 	Reg#(Bit#(6)) idx_rcv <- mkReg(0, clocked_by epClock125, reset_by epReset125);
@@ -260,16 +276,15 @@ module mkBlueNoCCore#(Clock sys_clk_buf, Reset pci_sys_rstn)
 		else if ( idx != idx_rcv ) begin
 			idx_rcv <= idx;
 			inQ.enq(data);
-//			tempdat.enq(inQcount);
-//			inQcount <= inQcount + 1;
-			inQtotal <= inQtotal + 1;
+       	                inQtotal <= inQtotal + 1;				
 		end
+
 	endrule
 
    // FPGA pin interface
    interface PCIE_EXP pcie			= ep.pcie;
-	 interface Clock clock 				= fpga_clk;
-	 interface Reset reset 				= fpga_rst;
+	 interface Clock clock 				= epClock125;
+	 interface Reset reset 				= epReset125;
 	method Action send(Bit#(8) data);
 		outQ.enq(data);
 	endmethod

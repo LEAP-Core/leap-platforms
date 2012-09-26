@@ -50,7 +50,7 @@ void *readThread(void *param) {
 		pthread_mutex_lock(&dev_mutex);
 		dataPopped = true;
 		poppedData = read_buf[1];
-		printf( "** Read %x!\n", poppedData );
+		printf( "** Read %x %x %x %x!\n", read_buf[0], read_buf[1], read_buf[2], read_buf[3] );
 		pthread_mutex_unlock(&dev_mutex);
 	}
 }
