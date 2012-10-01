@@ -13971,3 +13971,18 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci
 
 
 Driver code for working hello world. 
+
+----------
+mcadler     Date: Mon Oct  1 18:37:34 EDT 2012  CSN: CSN-leap-platforms-622
+                  Mon Oct  1 22:37:34 UTC 2012
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ bram.bsv                  Locally Modified          621 
+ bram-multi-read.bsv       Locally Modified          621 
+
+- Clean up BRAM interfaces and internal FIFO usage.
+- Break mkBRAMBUfferedPseudoMultiRead into two flavors:  one with the old
+  behavior with writes strictly ordered with reads.  The new flavor allows
+  writes to update their values immediately, independent of outstanding
+  reads.

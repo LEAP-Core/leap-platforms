@@ -136,11 +136,11 @@ module mkBRAMUnguarded
     // interface:
         (BRAM#(t_ADDR, t_DATA))
     provisos
-        (Bits#(t_ADDR, addr_SZ),
-         Bits#(t_DATA, data_SZ));
+        (Bits#(t_ADDR, t_ADDR_SZ),
+         Bits#(t_DATA, t_DATA_SZ));
 
     `ifdef SYNTH
-    let mem <- (valueOf(addr_SZ) == 0 || valueOf(data_SZ) == 0)? mkBRAMUnguardedZero(): mkBRAMUnguardedNonZero();
+    let mem <- (valueOf(t_ADDR_SZ) == 0 || valueOf(t_DATA_SZ) == 0)? mkBRAMUnguardedZero(): mkBRAMUnguardedNonZero();
     `else
     let mem <- mkBRAMUnguardedSim();
     `endif
@@ -171,19 +171,14 @@ module mkBRAM
     // interface:
         (BRAM#(t_ADDR, t_DATA))
     provisos
-        (Bits#(t_ADDR, addr_SZ),
-         Bits#(t_DATA, data_SZ));
+        (Bits#(t_ADDR, t_ADDR_SZ),
+         Bits#(t_DATA, t_DATA_SZ));
 
     // The primitive RAM.
-    BRAM#(Bit#(addr_SZ), Bit#(data_SZ)) ram <- mkBRAMUnguarded();
+    BRAM#(t_ADDR, t_DATA) ram <- mkBRAMUnguarded();
 
-    // Buffer the responses so nothing is dropped.  Bypass FIFO has 0 cycle
-    // latency for enq -> deq.  A bypass FIFO has only a single buffer slot,
-    // so we chain two together in order to get two slots.  This gives us
-    // single cycle read latency on BRAMs and the same buffering as a normal
-    // FIFO.
-    FIFO#(Bit#(data_SZ)) buffer0 <- mkBypassFIFO();
-    FIFOF#(Bit#(data_SZ)) buffer1 <- mkBypassFIFOF();
+    // Buffer the responses so nothing is dropped.
+    FIFOF#(t_DATA) buffer <- mkSizedBypassFIFOF(2);
 
     // Is there a response coming from the unguarded RAM?
     COUNTER#(1) readReqMade <- mkLCounter(0);
@@ -198,15 +193,8 @@ module mkBRAM
 
     rule enqIntoFIFO(readReqMade.value() == 1);
         readReqMade.down();
-        Bit#(data_SZ) data <- ram.readRsp();
-        buffer0.enq(data);
-    endrule
-    
-    // Forward data between the two outgoing read buffers
-    rule forwardReadData (True);
-        let data = buffer0.first();
-        buffer0.deq();
-        buffer1.enq(data);
+        let data <- ram.readRsp();
+        buffer.enq(data);
     endrule
 
     // readReq
@@ -215,7 +203,7 @@ module mkBRAM
     // Effect: Make the request and reserve the buffering spot.
 
     method Action readReq(t_ADDR a) if (bufferingAvailable.value() > 0);
-        ram.readReq(pack(a));
+        ram.readReq(a);
         readReqMade.up();
         bufferingAvailable.down();
     endmethod
@@ -227,13 +215,13 @@ module mkBRAM
 
     method ActionValue#(t_DATA) readRsp();
         bufferingAvailable.up();
-        let v = buffer1.first();
-        buffer1.deq();
-        return unpack(v);
+        let v = buffer.first();
+        buffer.deq();
+        return v;
     endmethod
    
-    method t_DATA peek() = unpack(buffer1.first());
-    method Bool notEmpty() = buffer1.notEmpty();
+    method t_DATA peek() = buffer.first();
+    method Bool notEmpty() = buffer.notEmpty();
     method Bool notFull() = (bufferingAvailable.value() > 0);
 
     // write
@@ -250,7 +238,7 @@ module mkBRAM
     // ***
 
     method Action write(t_ADDR a, t_DATA d);
-        ram.write(pack(a), pack(d));
+        ram.write(a, d);
     endmethod
 
     method Bool writeNotFull() = True;
