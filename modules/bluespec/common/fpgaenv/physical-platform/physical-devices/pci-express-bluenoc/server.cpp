@@ -6,7 +6,7 @@
 #include <stropts.h>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
-
+#include <bluenoc.h>
 #include <poll.h>
 #include <pthread.h>
 
@@ -44,12 +44,12 @@ void *readThread(void *param) {
 
 	while (readthread_do) {
 		while (dataPopped) sleep(0);
-		printf( "** Attempting Read %x!\n", poppedData );
+		//printf( "** Attempting Read %x!\n", poppedData );
 
 		int result = read(pcie_dev, read_buf, 4);
-		printf( "** Read len %d!\n", result );
+		//printf( "** Read len %d!\n", result );
 		if ( result != 4 ) {
-		  printf("Result was %d", result);
+		  printf("Read result was %d", result);
 		  continue;
 		}
 
@@ -60,7 +60,7 @@ void *readThread(void *param) {
 		
 		sequenceNumber = (sequenceNumber + 1) & 0xff;
 
-	        printf( "** Read %x %x %x %x!\n", read_buf[0], read_buf[1], read_buf[2], read_buf[3]);
+	        //printf( "** Read %x %x %x %x!\n", read_buf[0], read_buf[1], read_buf[2], read_buf[3]);
 
 		if(read_buf[3] != 1) {continue;} // flush out debug...
 
@@ -72,8 +72,25 @@ void *readThread(void *param) {
 	}
 }
 
+void printBoardInfo() {
+    tBoardInfo board_info;
+    ioctl(pcie_dev,BNOC_IDENTIFY,&board_info);
+
+        printf("  Board number:     %d\n", board_info.board_number);
+        if (board_info.is_active) {
+	  time_t t = board_info.timestamp;
+	  printf("  BlueNoC revision: %d.%d\n", board_info.major_rev, board_info.minor_rev);
+	  printf("  Build number:     %d\n", board_info.build);
+	  printf("  Timestamp:        %s", ctime(&t));
+	  printf("  Network width:    %d bytes per beat\n", board_info.bytes_per_beat);
+	  printf("  Content ID:       %llx\n", board_info.content_id);
+	}
+}
+
 void serverStart()
 {
+
+        int res;
 	pthread_mutex_init(&dev_mutex, NULL);
 
 	dataPopped = false;
@@ -83,7 +100,21 @@ void serverStart()
 		fprintf (stderr, "Error: Failed to open %s: %s\n", dev_file, strerror(errno));
 		exit(EXIT_FAILURE);
 	}
-	if (posix_memalign((void**)&msg_buf, 128, 4096) != 0
+	
+	res = ioctl(pcie_dev,BNOC_DEACTIVATE);
+	if(res < 0) {
+	    	fprintf (stderr, "Error: Failed to deactivate %s: %s\n", dev_file, strerror(errno));
+		exit(EXIT_FAILURE);
+	}
+
+	res = ioctl(pcie_dev,BNOC_REACTIVATE);
+	if(res < 0) {
+	    	fprintf (stderr, "Error: Failed to reactivate %s: %s\n", dev_file, strerror(errno));
+		exit(EXIT_FAILURE);
+	}
+
+
+      	if (posix_memalign((void**)&msg_buf, 128, 4096) != 0
 		||posix_memalign((void**)&read_buf, 128, 4096) != 0) {
 		fprintf (stderr, "Error: Failed to memalign msg_buf : %s\n", strerror(errno));
 		exit(EXIT_FAILURE);
@@ -125,7 +156,7 @@ void serverSendSys(const char* byte)
 	msg_buf[2] = 0; // msg length
 	msg_buf[3] = 1 + (send_idx << 2); // don't wait
 	result = write(pcie_dev, msg_buf, 4);
-	printf( "Send %x %x\n", *byte, send_idx );
+	//printf( "Send %x %x\n", *byte, send_idx );
 
 	if ( result != 4 ) {
 		fprintf(stderr, "Error: wrote %d bytes to bluenoc_1\n", result );
@@ -145,7 +176,7 @@ void serverRecvSys(char* byte)
 {
 	while (!initd);
 
-	printf( "Attempting Rd %x\n", *byte );
+	//printf( "Attempting Rd %x\n", *byte );
 	while (!dataPopped) sleep(0);
 
 	unsigned char ret = 0;

@@ -13986,3 +13986,26 @@ Directory modules/bluespec/common/fpgaenv/fpga-components
   behavior with writes strictly ordered with reads.  The new flavor allows
   writes to update their values immediately, independent of outstanding
   reads.
+
+----------
+kfleming    Date: Tue Oct  2 01:07:50 EDT 2012  CSN: CSN-leap-platforms-623
+                  Tue Oct  2 05:07:50 UTC 2012
+
+
+Directory tools/platforms/leap-fpga-ctrl/scripts
+ ML605                     Locally Modified          622 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express-bluenoc
+ server.cpp                Locally Modified          622 
+
+Directory drivers/linux/platforms/ml605-pcie/driver
+ bluenoc.c                 Locally Modified          622 
+ Makefile                  Locally Modified          622 
+ bluenoc.h                 Locally Modified          622 
+
+
+Upgraded driver so that ioctls are avialable for resetting driver
+state..  Ioctls in host-side code enable it to reinitialize the
+bluenoc driver after re-programming, whereas previously we needed
+rmmod/insmod.  In short, we can now run things on the ML605 from the
+bm directory.
