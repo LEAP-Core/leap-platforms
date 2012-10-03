@@ -72,19 +72,25 @@ void *readThread(void *param) {
 	}
 }
 
-void printBoardInfo() {
-    tBoardInfo board_info;
-    ioctl(pcie_dev,BNOC_IDENTIFY,&board_info);
+bool getBoardInfo(bool verbose) {
+	tBoardInfo board_info;
+	ioctl(pcie_dev,BNOC_IDENTIFY,&board_info);
 
-        printf("  Board number:     %d\n", board_info.board_number);
-        if (board_info.is_active) {
-	  time_t t = board_info.timestamp;
-	  printf("  BlueNoC revision: %d.%d\n", board_info.major_rev, board_info.minor_rev);
-	  printf("  Build number:     %d\n", board_info.build);
-	  printf("  Timestamp:        %s", ctime(&t));
-	  printf("  Network width:    %d bytes per beat\n", board_info.bytes_per_beat);
-	  printf("  Content ID:       %llx\n", board_info.content_id);
+	if ( verbose ) {
+		printf("  Board number:     %d\n", board_info.board_number);
 	}
+	if (board_info.is_active) {
+		if ( verbose ) {
+			time_t t = board_info.timestamp;
+			printf("  BlueNoC revision: %d.%d\n", board_info.major_rev, board_info.minor_rev);
+			printf("  Build number:     %d\n", board_info.build);
+			printf("  Timestamp:        %s", ctime(&t));
+			printf("  Network width:    %d bytes per beat\n", board_info.bytes_per_beat);
+			printf("  Content ID:       %llx\n", board_info.content_id);
+		}
+		return true;
+	}
+	return false;
 }
 
 void serverStart()
@@ -101,16 +107,18 @@ void serverStart()
 		exit(EXIT_FAILURE);
 	}
 	
-	res = ioctl(pcie_dev,BNOC_DEACTIVATE);
-	if(res < 0) {
-	    	fprintf (stderr, "Error: Failed to deactivate %s: %s\n", dev_file, strerror(errno));
-		exit(EXIT_FAILURE);
-	}
+	if ( getBoardInfo(false) ) {
+		res = ioctl(pcie_dev,BNOC_DEACTIVATE);
+		if(res < 0) {
+			fprintf (stderr, "Error: Failed to deactivate %s: %s\n", dev_file, strerror(errno));
+			exit(EXIT_FAILURE);
+		}
 
-	res = ioctl(pcie_dev,BNOC_REACTIVATE);
-	if(res < 0) {
-	    	fprintf (stderr, "Error: Failed to reactivate %s: %s\n", dev_file, strerror(errno));
-		exit(EXIT_FAILURE);
+		res = ioctl(pcie_dev,BNOC_REACTIVATE);
+		if(res < 0) {
+			fprintf (stderr, "Error: Failed to reactivate %s: %s\n", dev_file, strerror(errno));
+			exit(EXIT_FAILURE);
+		}
 	}
 
 
