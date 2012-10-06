@@ -14053,3 +14053,25 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci
 
 
 Added support for model clock to ml605.
+
+----------
+kfleming    Date: Sat Oct  6 19:15:11 EDT 2012  CSN: CSN-leap-platforms-627
+                  Sat Oct  6 23:15:11 UTC 2012
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ hardware-fpga-components-virtex6-generic.awb Locally Modified          626 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/ml605/pcie-bluenoc
+ xilinx-xup-pcie.ucf       Locally Modified          626 
+ xilinx-xup-pcie.bsv       Locally Modified          626 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express-bluenoc
+ pcie-import.bsv           Locally Modified          626 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express-bluenoc/bluenoc-core
+ bluenoc-top.bsv           Locally Modified          626 
+
+
+Tied system reset to derivative of PCIE reset.  Fixed bug in ucf that
+caused tools to ignore the existence of the user-domain clock.

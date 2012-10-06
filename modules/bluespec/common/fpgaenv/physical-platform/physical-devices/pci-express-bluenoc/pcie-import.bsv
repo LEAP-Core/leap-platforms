@@ -67,6 +67,7 @@ module mkPCIEDevice#(Clock rawClock, Reset rawReset) (PCIE_DEVICE);
     Clock sys_clk_buf <- mkClockIBUFDS_GTXE1(True,pcieClockP.clock, pcieClockN.clock);
     RESET_IMPORTER pcieReset <- mkResetImporter(clocked_by sys_clk_buf);  
 
+
 		BLUENOCIfc bnoc <- mkBlueNoCCore(sys_clk_buf, pcieReset.reset,
 			clocked_by rawClock, reset_by rawReset);
 
@@ -84,7 +85,7 @@ module mkPCIEDevice#(Clock rawClock, Reset rawReset) (PCIE_DEVICE);
 			bnoc.pcie.rxn(pcieBury.rxn_bsv);
 		endrule
     
-		interface PCIE_DRIVER driver;
+	interface PCIE_DRIVER driver;
 
         method Action send(PCIEWord data);// if(count == 0);
 					bnoc.send(data);
@@ -96,7 +97,7 @@ module mkPCIEDevice#(Clock rawClock, Reset rawReset) (PCIE_DEVICE);
         endmethod
 
       interface clock = bnoc.clock;
-			interface reset = bnoc.reset;
+      interface reset = bnoc.reset;
     endinterface
 
     interface PCIE_WIRES  wires;
@@ -107,8 +108,6 @@ module mkPCIEDevice#(Clock rawClock, Reset rawReset) (PCIE_DEVICE);
 
       method leds = ?;// bnoc.leds();
 
-
-      //interface reset = rst;
 
 
 			interface clockPCIE = pcieBury.clock;

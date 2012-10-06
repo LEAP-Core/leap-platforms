@@ -51,18 +51,6 @@ module mkBlueNoCCore#(Clock sys_clk_buf, Reset pci_sys_rstn)
    Clock fpga_clk  <- exposeCurrentClock();
    Reset fpga_rst  <- exposeCurrentReset();
 
-   // invert reset to active low
-   Reset fpga_rstn <- mkResetInverter(fpga_rst);
-
-   // put the clock through a PLL and synchronize the reset
-   ClockGeneratorParams clk_params = defaultValue();
-   clk_params.feedback_mul = 12;
-   clk_params.clk0_div = 12;
-   clk_params.clkin_buffer = False;
-   ClockGenerator clk_gen <- mkClockGenerator(clk_params, reset_by fpga_rstn);
-   Clock clk = clk_gen.clkout0;
-   Reset rstn <- mkAsyncReset(4,fpga_rstn,clk);
-
 
    // instantiate a PCIE endpoint
    PCIEParams pcie_params = defaultValue();
@@ -178,55 +166,22 @@ module mkBlueNoCCore#(Clock sys_clk_buf, Reset pci_sys_rstn)
 	mkConnection(bridge.noc, as_port(beats_out.source, beats_in.sink));
 	
 
-        fpga_clk  = epClock125;
-        fpga_rstn  = epReset125;
 
-        // invert reset to active low
-        fpga_rst <- mkResetInverter(fpga_rstn, clocked_by fpga_clk);
-
-	//let syncToOut <- mkSyncFIFO(32, fpga_clk, fpga_rstn, epClock125);
-	//let syncFromIn <- mkSyncFIFO(32, epClock125, epReset125, fpga_clk, clocked_by fpga_clk, reset_by fpga_rstn);
-	
-	
 	FIFO#(Bit#(6)) beat <- mkFIFO(clocked_by epClock125, reset_by epReset125);
 	Reg#(Bit#(6)) rxFromFPGAClk <- mkReg(0, clocked_by epClock125, reset_by epReset125);
 	Reg#(Bit#(6)) epoch_send <- mkReg(0, clocked_by epClock125, reset_by epReset125);
 	Reg#(Bit#(6)) epoch_peek <- mkReg(0, clocked_by epClock125, reset_by epReset125);
 	
-	Reg#(Bit#(8)) count_out <- mkReg(32, clocked_by fpga_clk, reset_by fpga_rstn);
-	Reg#(Bit#(8)) count_out_n <- mkReg(32, clocked_by fpga_clk, reset_by fpga_rstn);
-	//, clocked_by epClock125, reset_by epReset125);
 
-	rule fromFPGAClk;
-	    //syncToOut.deq;
-	    rxFromFPGAClk <= rxFromFPGAClk + 1;
-	endrule
+        let rstPCIE <- mkAsyncReset(2,epReset125,fpga_clk);
+        let rstEither <- mkResetEither(fpga_rst,rstPCIE);
 
-
-        rule foo2; 
-            count_out <= count_out + 3;
-        endrule
-
-        rule foo; 
-            count_out_n <= count_out_n - 1;
-        endrule
-
-	let rstFPGA <- isResetAsserted(clocked_by fpga_clk, reset_by fpga_rst);
-	let rstFPGAN <- isResetAsserted(clocked_by fpga_clk, reset_by fpga_rstn);
-	let rstFPGACross <- mkNullCrossingWire(epClock125,rstFPGA, clocked_by fpga_clk, reset_by fpga_rstn);
-	let rstnFPGACross <- mkNullCrossingWire(epClock125,rstFPGAN, clocked_by fpga_clk, reset_by fpga_rstn);
-        let valFPGACross <- mkNullCrossingWire(epClock125,count_out, clocked_by fpga_clk, reset_by fpga_rstn);	
-        let valNFPGACross <- mkNullCrossingWire(epClock125,count_out_n, clocked_by fpga_clk, reset_by fpga_rstn);	
-
-        SyncFIFOIfc#(Bit#(8)) inQ              <- mkSyncFIFOToCC(32, epClock125, epReset125);
-        SyncFIFOIfc#(Bit#(8)) outQ             <- mkSyncFIFOFromCC(32, epClock125);
+        SyncFIFOIfc#(Bit#(8)) inQ              <- mkSyncFIFO(32, epClock125, epReset125,fpga_clk);
+        SyncFIFOIfc#(Bit#(8)) outQ             <- mkSyncFIFO(32, fpga_clk, rstEither, epClock125);
     
 
-//	FIFOF#(Bit#(8)) inQ <- mkSizedFIFOF(32, clocked_by epClock125, reset_by epReset125);
-//	FIFOF#(Bit#(8)) outQ <- mkSizedFIFOF(32, clocked_by epClock125, reset_by epReset125);
-//	FIFO#(Bit#(8)) tempdat <- mkFIFO(clocked_by epClock125, reset_by epReset125);
 
-//	Reg#(Bit#(8)) inQcount <- mkReg(0,clocked_by epClock125, reset_by epReset125);
+
 	Reg#(Bit#(8)) inQtotal <- mkReg(0,clocked_by epClock125, reset_by epReset125);
 	Reg#(Bit#(8)) outQtotal <- mkReg(0,clocked_by epClock125, reset_by epReset125);
 	Reg#(Bit#(16)) timeout <- mkReg(0,clocked_by epClock125, reset_by epReset125);
@@ -285,8 +240,8 @@ module mkBlueNoCCore#(Clock sys_clk_buf, Reset pci_sys_rstn)
 
    // FPGA pin interface
    interface PCIE_EXP pcie			= ep.pcie;
-	 interface Clock clock 				= epClock125;
-	 interface Reset reset 				= epReset125;
+	 interface Clock clock 				= fpga_clk;
+	 interface Reset reset 				= rstEither;
 	method Action send(Bit#(8) data);
 		outQ.enq(data);
 	endmethod
