@@ -21,19 +21,18 @@ CONFIG PART = XC6VLX240T-FF1156-1;
 ######################################################################################################
 
 NET    "RST_N"                             LOC = H10   | IOSTANDARD = SSTL15  | PULLUP | NODELAY | TIG;
-NET    "CLK"                                    LOC = U23; # | IOSTANDARD = LVCMOS25 ;
 
-######################################################################################################
-# CLOCK CONSTRAINTS
-######################################################################################################
+#INST   "*sys_clk_buf_O"    DIFF_TERM = "TRUE";
+#INST   "m_llpi_phys_plat_clocks_device_crystalClocks_sys_clk_buf"    DIFF_TERM = "TRUE";
+#m_llpi_phys_plat_clocks_device_crystalClocks_sys_clk_buf
+#m_llpi_phys_plat_clocks_device_crystalClocks_sys_clk_buf_O
+#NET "*sys_clk_buf_O" PERIOD = 10ns;
 
-#NET "CLK" = period 10ns; 
+NET    "CLK_P" TNM_NET = clk;
+TIMESPEC TS_clk = PERIOD clkp 200 MHz HIGH 50%;
+#TIMESPEC TS_pci_sys_clk_p = PERIOD pci_sys_clk_p 250 MHz HIGH 50%;
 
-NET "CLK" TNM_NET = refclk_66;
-TIMESPEC TS_refclk_66 = PERIOD refclk_66 66 MHz HIGH 50 % INPUT_JITTER 500 ps;
+NET    "CLK_P"                                 LOC = J9;
+NET    "CLK_N"                                 LOC = H9;
 
-######################################################################################################
-# MISC CONSTRAINTS
-######################################################################################################
 
-#TEMPERATURE=55 C;

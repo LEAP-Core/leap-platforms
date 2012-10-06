@@ -19,6 +19,7 @@
 // Differential Clocks Device
 
 import Clocks::*;
+import XilinxCells::*;
 
 `include "physical_platform_utils.bsh"
 `include "fpga_components.bsh"
@@ -82,11 +83,16 @@ module mkClocksDevice
     // STAGE 1: get the crystal clock by instantiating the primitive clocks device
     //
     
-    PRIMITIVE_CLOCKS_DEVICE crystalClocks <- mkPrimitiveClocksDevice();
+    PRIMITIVE_DIFFERENTIAL_CLOCKS_DEVICE crystalClocks <- mkPrimitiveDifferentialClock();
     
     Clock rawClock = crystalClocks.clock;
     Reset rawReset = crystalClocks.reset;
     
+    if(`RESET_ACTIVE_HIGH > 0)
+    begin     
+        rawReset <- mkResetInverter(rawReset, clocked_by rawClock);
+    end
+
     //
     // STAGE 2: transform the clock using a DCM or PLL as requested by the user
     //
@@ -139,9 +145,10 @@ module mkClocksDevice
     // bind the wires
     
     interface CLOCKS_WIRES wires;
-        
-        method clock_wire   = crystalClocks.clock_wire;
-        method reset_n_wire = crystalClocks.reset_n_wire;
+       
+        method clock_n_wire   = crystalClocks.clock_n_wire;
+        method clock_p_wire   = crystalClocks.clock_p_wire;
+        method reset_n_wire   = crystalClocks.reset_n_wire;
             
     endinterface
     

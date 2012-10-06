@@ -36,10 +36,11 @@ NET    "pcieWires_leds[0]"                                       LOC = AC22 | IO
 #NET    "EN_pcieWires_refclk"                                               LOC = U23 ;
 #NET    "RST"                                               LOC = H10 | PULLUP | NODELAY | TIG ;
 
+NET    "EN_pcieWires_pcie_reset_wire"                           LOC = AE13 | PULLUP | NODELAY | TIG ;
 NET    "EN_pcieWires_pcie_clk_p"                                 LOC = P6;
 NET    "EN_pcieWires_pcie_clk_n"                                 LOC = P5;
-#NET    "EN_pcieWires_pcie_clk_p"                                 LOC = V6;
-#NET    "EN_pcieWires_pcie_clk_n"                                 LOC = V5;
+#NET    "EN_pcieWires_pcie_clk_p"                                LOC = V6;
+#NET    "EN_pcieWires_pcie_clk_n"                                LOC = V5;
 
 ######################################################################################################
 # CLOCK CONSTRAINTS

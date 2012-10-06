@@ -20,6 +20,11 @@
 %sources -t BSV -v PUBLIC  clock-import.bsv
 %sources -t VERILOG -v PRIVATE clock_import.v
 
+%sources -t BSV -v PUBLIC  differential-import-virtex6.bsv
+
+%sources -t BSV -v PUBLIC  reset-import.bsv
+%sources -t VERILOG -v PRIVATE reset_import.v
+
 %sources -t XCF -v PRIVATE xilinx-components.xcf
 %sources -t SDC -v PRIVATE xilinx-components.sdc
 

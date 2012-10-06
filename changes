@@ -14009,3 +14009,33 @@ state..  Ioctls in host-side code enable it to reinitialize the
 bluenoc driver after re-programming, whereas previously we needed
 rmmod/insmod.  In short, we can now run things on the ML605 from the
 bm directory.
+
+----------
+kfleming    Date: Fri Oct  5 23:30:54 EDT 2012  CSN: CSN-leap-platforms-625
+                  Sat Oct  6 03:30:54 UTC 2012
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ reset_import.v            Locally Added               0 
+ hardware-fpga-components-virtex6-generic.awb Locally Modified          624 
+ differential-import-virtex6.bsv Locally Added               0 
+ reset-import.bsv          Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/ml605/pcie-bluenoc
+ xilinx-xup-pcie.ucf       Locally Modified          624 
+ xilinx-xup-pcie.bsv       Locally Modified          624 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express-bluenoc
+ pcie-import.bsv           Locally Modified          624 
+ pcie-device.ucf           Locally Modified          624 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/differential
+ differential-clocks-device.awb Locally Modified          624 
+ differential-clocks-device.bsv Locally Modified          624 
+
+
+Several bug fixes and augmentations now that the defense slides are under control.
+
+1) Added reset import (we had clock import already)
+2) Fixed the differential clock to actually do a differential clock (i.e. more than one clock wire)
+3) ML605 pcie core was using the wrong pcie reset. Changed it to use the correct reset. 

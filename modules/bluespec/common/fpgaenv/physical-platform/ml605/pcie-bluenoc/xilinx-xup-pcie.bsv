@@ -88,9 +88,9 @@ module mkPhysicalPlatform
     // interface to the trigger module that the clocks device has given us.
 
     PCIE_DEVICE pcie_device <- mkPCIEDevice(clocks_device.driver.rawClock,
-                                            clocks_device.driver.rawReset,
-                                            clocked_by clocks_device.driver.rawClock,
-                                            reset_by clocks_device.driver.rawReset);
+                                            clocks_device.driver.rawReset);
+//                                            clocked_by clocks_device.driver.rawClock,
+//                                            reset_by clocks_device.driver.rawReset);
 
     // Aggregate the drivers
     
