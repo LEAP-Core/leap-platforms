@@ -63,8 +63,6 @@ module mkBlueNoCCore#(Clock sys_clk_buf, Reset pci_sys_rstn)
    Clock clk = clk_gen.clkout0;
    Reset rstn <- mkAsyncReset(4,fpga_rstn,clk);
 
-   // combine LVDS clocks from FPGA boundary
-//   Clock sys_clk_buf <- mkClockIBUFDS_GTXE1(True, pci_sys_clk_p, pci_sys_clk_n);
 
    // instantiate a PCIE endpoint
    PCIEParams pcie_params = defaultValue();
@@ -220,8 +218,12 @@ module mkBlueNoCCore#(Clock sys_clk_buf, Reset pci_sys_rstn)
         let valFPGACross <- mkNullCrossingWire(epClock125,count_out, clocked_by fpga_clk, reset_by fpga_rstn);	
         let valNFPGACross <- mkNullCrossingWire(epClock125,count_out_n, clocked_by fpga_clk, reset_by fpga_rstn);	
 
-	FIFOF#(Bit#(8)) inQ <- mkSizedFIFOF(32, clocked_by epClock125, reset_by epReset125);
-	FIFOF#(Bit#(8)) outQ <- mkSizedFIFOF(32, clocked_by epClock125, reset_by epReset125);
+        SyncFIFOIfc#(Bit#(8)) inQ              <- mkSyncFIFOToCC(32, epClock125, epReset125);
+        SyncFIFOIfc#(Bit#(8)) outQ             <- mkSyncFIFOFromCC(32, epClock125);
+    
+
+//	FIFOF#(Bit#(8)) inQ <- mkSizedFIFOF(32, clocked_by epClock125, reset_by epReset125);
+//	FIFOF#(Bit#(8)) outQ <- mkSizedFIFOF(32, clocked_by epClock125, reset_by epReset125);
 //	FIFO#(Bit#(8)) tempdat <- mkFIFO(clocked_by epClock125, reset_by epReset125);
 
 //	Reg#(Bit#(8)) inQcount <- mkReg(0,clocked_by epClock125, reset_by epReset125);
@@ -229,11 +231,11 @@ module mkBlueNoCCore#(Clock sys_clk_buf, Reset pci_sys_rstn)
 	Reg#(Bit#(8)) outQtotal <- mkReg(0,clocked_by epClock125, reset_by epReset125);
 	Reg#(Bit#(16)) timeout <- mkReg(0,clocked_by epClock125, reset_by epReset125);
 
+
 	rule tickTO(timeout != 0);
 	   timeout <= timeout + 1;
         endrule
-
-	/*
+/*
 	rule echo;
 		//syncFromIn.deq();
 		//let data = syncFromIn.first();
@@ -248,7 +250,7 @@ module mkBlueNoCCore#(Clock sys_clk_buf, Reset pci_sys_rstn)
 	rule streamOutDebug (timeout == 0);
 	        timeout <= 1;
 		outQtotal <= outQtotal + 1;
-		Bit#(8) debug = zeroExtend({pack(outQ.notFull),pack(outQ.notEmpty), pack(inQ.notFull), pack(inQ.notEmpty)}); 
+		Bit#(8) debug = zeroExtend({pack(outQ.notEmpty), pack(inQ.notFull)}); 
 		beats_out.enq({8'b101,8'h0,debug,outQtotal});
 	endrule
 

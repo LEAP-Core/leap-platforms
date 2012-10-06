@@ -14039,3 +14039,17 @@ Several bug fixes and augmentations now that the defense slides are under contro
 1) Added reset import (we had clock import already)
 2) Fixed the differential clock to actually do a differential clock (i.e. more than one clock wire)
 3) ML605 pcie core was using the wrong pcie reset. Changed it to use the correct reset. 
+
+----------
+kfleming    Date: Sat Oct  6 10:18:40 EDT 2012  CSN: CSN-leap-platforms-626
+                  Sat Oct  6 14:18:40 UTC 2012
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/ml605/pcie-bluenoc
+ xilinx-xup-pcie.bsv       Locally Modified          625 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express-bluenoc/bluenoc-core
+ bluenoc-top.bsv           Locally Modified          625 
+
+
+Added support for model clock to ml605.

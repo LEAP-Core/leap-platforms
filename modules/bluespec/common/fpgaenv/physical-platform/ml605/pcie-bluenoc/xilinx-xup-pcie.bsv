@@ -87,8 +87,8 @@ module mkPhysicalPlatform
     // Next, create the physical device that can trigger a soft reset. Pass along the
     // interface to the trigger module that the clocks device has given us.
 
-    PCIE_DEVICE pcie_device <- mkPCIEDevice(clocks_device.driver.rawClock,
-                                            clocks_device.driver.rawReset);
+    PCIE_DEVICE pcie_device <- mkPCIEDevice(clocks_device.driver.clock,
+                                            clocks_device.driver.reset);
 //                                            clocked_by clocks_device.driver.rawClock,
 //                                            reset_by clocks_device.driver.rawReset);
 
@@ -97,8 +97,8 @@ module mkPhysicalPlatform
     interface PHYSICAL_DRIVERS physicalDrivers;
     
         interface CLOCKS_DRIVER clocksDriver;
-					interface Clock clock = pcie_device.driver.clock;
-					interface Reset reset = pcie_device.driver.reset;
+					interface Clock clock = clocks_device.driver.clock;
+					interface Reset reset = clocks_device.driver.reset;
 
 					interface Clock rawClock = clocks_device.driver.rawClock;
 					interface Reset rawReset = clocks_device.driver.rawReset;
