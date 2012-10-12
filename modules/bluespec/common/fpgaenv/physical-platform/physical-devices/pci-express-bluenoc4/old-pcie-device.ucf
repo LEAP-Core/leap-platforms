@@ -1,0 +1,95 @@
+######################################################################################################
+# PIN ASSIGNMENTS
+######################################################################################################
+INST   "*sys_clk_buf"                                      DIFF_TERM = "TRUE";
+
+#
+# Transceiver instance placement.  This constraint selects the
+# transceivers to be used, which also dictates the pinout for the
+# transmit and receive differential pairs.  Please refer to the
+# Virtex-5 GTP Transceiver User Guide (UG196) for more
+# information.
+#
+
+# PCIe Lanes 0, 1
+INST "*/BU2/U0/pcie_ep0/pcie_blk/SIO/.pcie_gt_wrapper_i/GTD[0].GT_i" LOC = GTP_DUAL_X0Y2;
+
+
+######################################################################################################
+# Physical Constraints
+######################################################################################################
+
+#
+# BlockRAM placement
+#
+
+INST "*/BU2/U0/pcie_ep0/pcie_blk/pcie_mim_wrapper_i/bram_retry/generate_sdp.ram_sdp_inst"      LOC = RAMB36_X3Y12 ;
+INST "*/BU2/U0/pcie_ep0/pcie_blk/pcie_mim_wrapper_i/bram_tl_tx/generate_tdp2[1].ram_tdp2_inst" LOC = RAMB36_X3Y11 ;
+INST "*/BU2/U0/pcie_ep0/pcie_blk/pcie_mim_wrapper_i/bram_tl_rx/generate_tdp2[1].ram_tdp2_inst" LOC = RAMB36_X3Y10 ;
+INST "*/BU2/U0/pcie_ep0/pcie_blk/pcie_mim_wrapper_i/bram_tl_tx/generate_tdp2[0].ram_tdp2_inst" LOC = RAMB36_X3Y9 ;
+INST "*/BU2/U0/pcie_ep0/pcie_blk/pcie_mim_wrapper_i/bram_tl_rx/generate_tdp2[0].ram_tdp2_inst" LOC = RAMB36_X3Y8 ;
+
+######################################################################################################
+# Timing Constraints
+######################################################################################################
+
+#
+# Ignore timing on asynchronous signals.
+#
+
+#
+# Timing requirements and related constraints.
+#
+         
+
+NET "*sys_clk_buf_O" PERIOD = 10ns;
+
+
+
+NET "*/BU2/U0/pcie_ep0/pcie_blk/SIO/.pcie_gt_wrapper_i/gt_refclk_out" TNM_NET = "MGTCLK" ;
+
+
+TIMESPEC "TS_MGTCLK"  = PERIOD "MGTCLK" 100.00 MHz HIGH 50 % ;
+
+######################################################################################################
+# End
+######################################################################################################
+
+NET    "pcieWires_leds[7]"                                           LOC = AD25 | IOSTANDARD = LVCMOS18;
+NET    "pcieWires_leds[6]"                                           LOC = G16  | IOSTANDARD = LVCMOS25;
+NET    "pcieWires_leds[5]"                                           LOC = AD26 | IOSTANDARD = LVCMOS18;
+NET    "pcieWires_leds[4]"                                           LOC = G15  | IOSTANDARD = LVCMOS25;
+NET    "pcieWires_leds[3]"                                           LOC = L18  | IOSTANDARD = LVCMOS25;
+NET    "pcieWires_leds[2]"                                           LOC = H18  | IOSTANDARD = LVCMOS25;
+NET    "pcieWires_leds[1]"                                           LOC = F6   | IOSTANDARD = LVCMOS33;
+NET    "pcieWires_leds[0]"                                           LOC = T10  | IOSTANDARD = LVCMOS33;
+
+NET    "EN_pcieWires_pcie_clk_p"                                 LOC = AF4;
+NET    "EN_pcieWires_pcie_clk_n"                                 LOC = AF3;
+
+######################################################################################################
+# CLOCK CONSTRAINTS
+######################################################################################################
+
+#NET    "CLK_refclk_100" TNM_NET = refclk_100;
+#TIMESPEC TS_refclk_100 = PERIOD refclk_100 100 MHz HIGH 50 % INPUT_JITTER 500 ps;
+
+#NET    "clk_gen_pll_CLKOUT0" TNM_NET = scemi_clock;
+#TIMESPEC TS_scemi_clock = PERIOD scemi_clock TS_refclk_100 HIGH 50 % INPUT_JITTER 300 ps;
+
+#NET    "*scemi_uclkgen/current_clk*" TNM_NET = uclock;
+#TIMESPEC TS_uclock = PERIOD uclock TS_scemi_clock / 2;
+
+#NET    "*scemi_clk_port_clkgen/current_clk" TNM_NET = cclock;
+#TIMESPEC TS_cclock = PERIOD cclock TS_scemi_clock / 2;
+
+# Ignore clock crossings between scemi_clock and uclock
+#NET "clk_gen_pll_CLKOUT0" TNM_NET = FFS scemi_clock_flops;
+#NET "*scemi_uclkgen/current_clk*" TNM_NET = FFS uclock_flops;
+#NET "*scemi_uclkgen/current_clk*" TNM_NET = LATCHES uclock_latches;
+
+#TIMESPEC TS_sync_sf_to_uf = FROM scemi_clock_flops TO uclock_flops      TIG;
+#TIMESPEC TS_sync_sf_to_ul = FROM scemi_clock_flops TO uclock_latches    TIG;
+#TIMESPEC TS_sync_uf_to_sf = FROM uclock_flops      TO scemi_clock_flops TIG;
+
+
