@@ -42,6 +42,8 @@ module clock_buffer#(Clock inputClock)
     // interface:
         (CLOCK_WRAPPER_IFC);
 
+    default_reset rst (RST_N);
+
     input_clock (CLK_IN) = inputClock;
     
     output_clock clock (CLK_OUT);
@@ -68,6 +70,8 @@ import "BVI"
 module clock_input_buffer#(Clock inputClock)
     // interface:
         (CLOCK_WRAPPER_IFC);
+
+    default_reset rst (RST_N);
 
     input_clock (CLK_IN) = inputClock;
     

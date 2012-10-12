@@ -1,10 +1,9 @@
 // This module infers a parameteric Xilinx shift register.
 
-module shiftreg (CLK, CLK_GATE, RST_N, writeData, writeEnable, readData);
+module shiftreg (CLK, RST_N, writeData, writeEnable, readData);
    parameter LENGTH = 32;
    parameter WIDTH = 32;
    input CLK;
-   input CLK_GATE;   
    input RST_N;
    input writeData;   
 //   input [WIDTH - 1] writeData;

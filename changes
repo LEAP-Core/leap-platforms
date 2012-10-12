@@ -14075,3 +14075,21 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci
 
 Tied system reset to derivative of PCIE reset.  Fixed bug in ucf that
 caused tools to ignore the existence of the user-domain clock.
+
+----------
+mcadler     Date: Fri Oct 12 15:42:44 EDT 2012  CSN: CSN-leap-platforms-629
+                  Fri Oct 12 19:42:44 UTC 2012
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ bram.bsv                  Locally Modified          628 
+ clock-buffers.bsv         Locally Modified          628 
+ shiftreg.v                Locally Modified          628 
+ Bram.v                    Locally Modified          628 
+ lutram.bsv                Locally Modified          628 
+ shiftreg.bsv              Locally Modified          628 
+ lutram.v                  Locally Modified          628 
+
+Bluespec beta compiler changes the name of RST_N to RST in BVI when no reset
+is specified.  Specify default reset and clock explicitly so the code
+works with both old and new compilers.

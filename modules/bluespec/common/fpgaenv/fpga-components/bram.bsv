@@ -64,6 +64,9 @@ import "BVI" Bram = module mkBRAMUnguardedNonZero
     parameter dataSize = valueOf(data_SZ);
     parameter numRows = valueOf(TExp#(addr_SZ));
 
+    default_reset rst (RST_N);
+    default_clock clk (CLK);
+
     method readReq(readAddr) enable(readEnable);
     method readData readRsp() enable(readDataEnable);
     method write(writeAddr, writeData) enable(writeEnable);

@@ -13,6 +13,9 @@ import "BVI" shiftreg = module mkUnguardedShiftRegOne#(NumTypeParam#(length) len
 
     parameter LENGTH = valueOf(length);
 
+    default_reset rst (RST_N);
+    default_clock clk (CLK);
+
     method readData read();
     method write(writeData) enable(writeEnable);
 

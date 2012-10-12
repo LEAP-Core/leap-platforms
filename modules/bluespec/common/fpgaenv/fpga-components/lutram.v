@@ -14,7 +14,6 @@
 // Dual-ported LUT-based storage
 module LUTRAMUDualPort(CLK,
                        RST_N,
-                       CLK_GATE,
                        ADDR_IN, D_IN, WE,
                        ADDR_1, D_OUT_1
                        );
@@ -25,7 +24,7 @@ module LUTRAMUDualPort(CLK,
    parameter                   hi = 1;
 
    input                       CLK;
-   input                       RST_N, CLK_GATE;
+   input                       RST_N;
    input [addr_width - 1 : 0]  ADDR_IN;
    input [data_width - 1 : 0]  D_IN;
    input                       WE;

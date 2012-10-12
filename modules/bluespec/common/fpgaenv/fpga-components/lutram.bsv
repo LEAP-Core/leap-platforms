@@ -246,6 +246,9 @@ import "BVI" LUTRAMUDualPort = module mkLUTRAMUDualPort
     parameter lo = 0;
     parameter hi = valueOf(TSub#(TExp#(t_ADDR_SZ), 1));
 
+    default_reset rst (RST_N);
+    default_clock clk (CLK);
+
     method D_OUT_1 sub(ADDR_1);
     method upd(ADDR_IN, D_IN) enable(WE);
 

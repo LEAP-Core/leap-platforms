@@ -12,7 +12,6 @@ module Bram
 (
     CLK,
     RST_N,
-    CLK_GATE,
     readEnable,
     readAddr,
     readData,
@@ -25,7 +24,7 @@ module Bram
     parameter addrSize = 9;
     parameter numRows = 512;
 
-    input CLK, RST_N, CLK_GATE;
+    input CLK, RST_N;
     input  readEnable;
     input  [addrSize-1:0] readAddr;
     output [dataSize-1:0] readData;
