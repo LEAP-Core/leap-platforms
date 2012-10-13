@@ -97,8 +97,8 @@ module mkPhysicalPlatform
     interface PHYSICAL_DRIVERS physicalDrivers;
     
         interface CLOCKS_DRIVER clocksDriver;
-					interface Clock clock = pcie_device.driver.clock;
-					interface Reset reset = pcie_device.driver.reset;
+					interface Clock clock = clocks_device.driver.clock;
+					interface Reset reset = clocks_device.driver.reset;
 
 					interface Clock rawClock = clocks_device.driver.rawClock;
 					interface Reset rawReset = clocks_device.driver.rawReset;

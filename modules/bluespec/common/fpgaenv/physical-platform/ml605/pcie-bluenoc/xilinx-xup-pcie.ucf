@@ -28,8 +28,9 @@ NET    "RST_N"                             LOC = H10   | IOSTANDARD = SSTL15  | 
 #m_llpi_phys_plat_clocks_device_crystalClocks_sys_clk_buf_O
 #NET "*sys_clk_buf_O" PERIOD = 10ns;
 
-NET    "CLK_P" TNM_NET = clk;
-TIMESPEC TS_clk = PERIOD clk 100 MHz HIGH 50%;
+NET    "CLK_P" TNM_NET = TNM_clk_in;
+TIMESPEC "TS_clk_in" = PERIOD "TNM_clk_in" 5 ns;
+
 #TIMESPEC TS_pci_sys_clk_p = PERIOD pci_sys_clk_p 250 MHz HIGH 50%;
 
 NET    "CLK_P"                                 LOC = J9;

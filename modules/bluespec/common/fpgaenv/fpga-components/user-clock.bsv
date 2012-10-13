@@ -146,8 +146,6 @@ module mkUserClock#(Integer inFreq, Integer clockMultiplier, Integer clockDivide
     
 	if (mult ==  div)
     	    clk <- mkUserClock_Same;
-        else if (mult == 1) // We can use a divider here....
-	    clk <- mkUserClock_Divider(div);
         else
 	    clk <- mkUserClock_Ratio(inFreq, mult, div);
     `endif

@@ -14093,3 +14093,25 @@ Directory modules/bluespec/common/fpgaenv/fpga-components
 Bluespec beta compiler changes the name of RST_N to RST in BVI when no reset
 is specified.  Specify default reset and clock explicitly so the code
 works with both old and new compilers.
+
+----------
+kfleming    Date: Sat Oct 13 15:39:58 EDT 2012  CSN: CSN-leap-platforms-630
+                  Sat Oct 13 19:39:58 UTC 2012
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ user-clock.bsv            Locally Modified          629 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/ml605/pcie-bluenoc
+ xilinx-xup-pcie.ucf       Locally Modified          629 
+ xilinx-xup-pcie.bsv       Locally Modified          629 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express-bluenoc
+ pcie_bury.v               Locally Modified          629 
+
+
+1) Updated ML605 modules to compile with new version of bluespec
+2) fixed bug in ucf.  differential clock is 200MHz, not 100 Mhz
+
+hello and rrrtest work on the ml605, but the driver may still not be
+correct.

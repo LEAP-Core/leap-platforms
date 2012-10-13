@@ -1,5 +1,6 @@
 module pcie_bury(CLK, 
                  RST_N,
+                 RST,
 		 CLK_OUT,
 		 CLK_GATE,
                  rxp_in,
@@ -14,6 +15,7 @@ module pcie_bury(CLK,
 );
    input CLK;
    input RST_N;
+   input RST;
    output CLK_OUT;
    input CLK_GATE;
 	 (* S = "TRUE" *)
@@ -63,7 +65,7 @@ module pcie_bury(CLK,
 	 end
    
 	 
-	 assign CLK_OUT = RST_N;  // Do something to make xst happy
+	 assign CLK_OUT = RST_N|RST;  // Do something to make xst happy
    assign rxp_out = rxp_in;  // Do something to make xst happy
    assign rxn_out = rxn_in;
    assign txp_out = txp_in;
