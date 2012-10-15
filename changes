@@ -14115,3 +14115,14 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci
 
 hello and rrrtest work on the ml605, but the driver may still not be
 correct.
+
+----------
+mcadler     Date: Mon Oct 15 15:38:24 EDT 2012  CSN: CSN-leap-platforms-631
+                  Mon Oct 15 19:38:24 UTC 2012
+
+
+Directory drivers/linux/platforms/ml605-pcie/driver
+ bluenoc.c                 Locally Modified          630 
+ bluenoc.h                 Locally Modified          630 
+
+Update to latest BlueNoC drivers.
