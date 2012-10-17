@@ -36,7 +36,11 @@ interface ByteCompactor#( numeric type width_in
    // Retire up to width_out bytes from the buffer
    (* always_ready *)
    method Action deq(UInt#(TLog#(TAdd#(width_out,1))) count);
-
+   
+   // Clear the buffer
+   (* always_ready *)
+   method Action clear();
+      
 endinterface: ByteCompactor
 
 module mkByteCompactor(ByteCompactor#(width_in,width_out,buf_sz))
@@ -61,9 +65,10 @@ module mkByteCompactor(ByteCompactor#(width_in,width_out,buf_sz))
    Vector#(width_out,Maybe#(Bit#(8))) output_area = take(vec);
 
    // the user can add and remove bytes
-   RWire#(Vector#(width_in,Maybe#(Bit#(8)))) new_data <- mkRWire();
-   Wire#(UInt#(count_out))                   removed  <- mkDWire(0);
-
+   RWire#(Vector#(width_in,Maybe#(Bit#(8)))) new_data  <- mkRWire();
+   Wire#(UInt#(count_out))                   removed   <- mkDWire(0);
+   PulseWire                                 clear_vec <- mkPulseWire();
+   
    // bubble data down using a stage of neighbor transpositions
    function Vector#(n,Maybe#(t)) bubble(Vector#(n,Maybe#(t)) vin, Integer start);
       Vector#(n,Maybe#(t)) vout = ?;
@@ -91,49 +96,43 @@ module mkByteCompactor(ByteCompactor#(width_in,width_out,buf_sz))
    //   3. add any user data in the input area
    (* fire_when_enabled, no_implicit_conditions *)
    rule update_vec;
-      Vector#(buf_sz,Maybe#(Bit#(8))) vec0 = vec;
+      if (clear_vec)
+	 vec <= replicate(tagged Invalid);
+      else begin
+	 Vector#(buf_sz,Maybe#(Bit#(8))) vec0 = vec;
 
-      // shift bytes down into empty spaces
-      Vector#(buf_sz,Maybe#(Bit#(8))) vec1a = bubble(vec0,0);
-      Vector#(buf_sz,Maybe#(Bit#(8))) vec1b = bubble(vec1a,1);
-      Vector#(buf_sz,Maybe#(Bit#(8))) vec1c = bubble(vec1b,0);
-      Vector#(buf_sz,Maybe#(Bit#(8))) vec1d = bubble(vec1c,1);
-      Vector#(buf_sz,Maybe#(Bit#(8))) vec1e = bubble(vec1d,0);
-      Vector#(buf_sz,Maybe#(Bit#(8))) vec1f = bubble(vec1e,1);
+	 // shift bytes down into empty spaces
+	 Vector#(buf_sz,Maybe#(Bit#(8))) vec1a = bubble(vec0,0);
+	 Vector#(buf_sz,Maybe#(Bit#(8))) vec1b = bubble(vec1a,1);
+	 Vector#(buf_sz,Maybe#(Bit#(8))) vec1c = bubble(vec1b,0);
+	 Vector#(buf_sz,Maybe#(Bit#(8))) vec1d = bubble(vec1c,1);
+	 Vector#(buf_sz,Maybe#(Bit#(8))) vec1e = bubble(vec1d,0);
+	 Vector#(buf_sz,Maybe#(Bit#(8))) vec1f = bubble(vec1e,1);
+	 
+	 Vector#(buf_sz,Maybe#(Bit#(8))) vec2a = vec1f;
+	 
+	 // invalidate bytes taken by the user
+	 for (Integer i = 0; i < valueOf(width_out); i = i + 1) begin
+            if (fromInteger(i) < removed)
+               vec2a[i] = tagged Invalid;
+	 end
+	 
+	 // add new bytes from the user
+	 for (Integer i = 0; i < valueOf(width_in); i = i + 1) begin
+            Integer idx = valueOf(buf_sz) - valueOf(width_in) + i;
+            if (new_data.wget() matches tagged Valid .vin)
+               vec2a[idx] = vin[i];
+	 end
+	 
+	 // do another round of shifting
+	 Vector#(buf_sz,Maybe#(Bit#(8))) vec2b = bubble(vec2a,0);
+	 Vector#(buf_sz,Maybe#(Bit#(8))) vec2c = bubble(vec2b,1);
+	 
+	 Vector#(buf_sz,Maybe#(Bit#(8))) vec3 = vec2c;
 
-      Vector#(buf_sz,Maybe#(Bit#(8))) vec2a = vec1f;
-
-      // invalidate bytes taken by the user
-      for (Integer i = 0; i < valueOf(width_out); i = i + 1) begin
-         if (fromInteger(i) < removed)
-            vec2a[i] = tagged Invalid;
+	 // write the modified contents back into the buffer
+	 vec <= vec3;
       end
-
-      // add new bytes from the user
-      for (Integer i = 0; i < valueOf(width_in); i = i + 1) begin
-         Integer idx = valueOf(buf_sz) - valueOf(width_in) + i;
-         if (new_data.wget() matches tagged Valid .vin)
-            vec2a[idx] = vin[i];
-      end
-
-      // do another round of shifting
-      Vector#(buf_sz,Maybe#(Bit#(8))) vec2b = bubble(vec2a,0);
-      Vector#(buf_sz,Maybe#(Bit#(8))) vec2c = bubble(vec2b,1);
-
-      Vector#(buf_sz,Maybe#(Bit#(8))) vec3 = vec2c;
-
-/*
-      $write("%0t: vec =", $time());
-      for (Integer i = 0; i < valueOf(buf_sz); i = i + 1) begin
-         if (isValid(vec3[i])) $write(" %x", validValue(vec3[i]));
-         else                  $write(" ??");
-      end
-      $display();
-*/
-
-      // write the modified contents back into the buffer
-      vec <= vec3;
-
    endrule
 
    Bool input_area_is_clear = !any(isValid,input_area);
@@ -151,5 +150,9 @@ module mkByteCompactor(ByteCompactor#(width_in,width_out,buf_sz))
    method Action deq(UInt#(count_out) count);
       removed <= count;
    endmethod
-
+   
+   method Action clear();
+      clear_vec.send();
+   endmethod
+      
 endmodule: mkByteCompactor

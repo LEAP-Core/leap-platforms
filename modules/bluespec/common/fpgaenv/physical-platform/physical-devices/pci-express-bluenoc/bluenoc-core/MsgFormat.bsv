@@ -190,6 +190,7 @@ endinstance
 interface FifoMsgSource#(numeric type bpb);
    method Bool   full();
    method Action enq(MsgBeat#(bpb) v);
+   method Action clear();
    interface MsgSource#(bpb) source;
 endinterface: FifoMsgSource
 
@@ -197,6 +198,7 @@ interface FifoMsgSink#(numeric type bpb);
    method Bool          empty();
    method MsgBeat#(bpb) first();
    method Action        deq();
+   method Action        clear();
    interface MsgSink#(bpb) sink;
 endinterface: FifoMsgSink
 
@@ -225,6 +227,11 @@ module mkFifoMsgSource(FifoMsgSource#(bpb));
    // Allow beats to be added to the FIFO
    method Action enq(MsgBeat#(bpb) v) if (f.notFull());
       f.enq(v);
+   endmethod
+
+   // Clear the FIFO
+   method Action clear();
+      f.clear();
    endmethod
 
    // The MsgSource view of the FIFO destination side
@@ -268,6 +275,11 @@ module mkFifoMsgSink(FifoMsgSink#(bpb));
    // Allow data to be removed from the FIFO (unguarded)
    method Action deq();
       f.deq();
+   endmethod
+
+   // Clear the FIFO
+   method Action clear();
+      f.clear();
    endmethod
 
    // The MsgSink view of the FIFO source side
@@ -352,22 +364,34 @@ endmodule
  */
 
 interface MsgRoute#(numeric type bpb);
+
    // provide the next beat
    (* always_ready *)
    method Action beat(MsgBeat#(bpb) v);
+
    // commit the state updates for this beat
    (* always_ready *)
    method Action advance();
+
    // read the routing information from the beat
    method NodeID   dst();
    method NodeID   src();
    method UInt#(8) length();
    method Bool     dont_wait();
+   method Bit#(6)  opcode();
+
    // beat framing signals
    (* always_ready *)
    method Bool first_beat();
    (* always_ready *)
    method Bool last_beat();
+   (* always_ready *)
+   method UInt#(9) remaining_bytes();
+
+   // discard current message status
+   (* always_ready *)
+   method Action clear();
+
 endinterface: MsgRoute
 
 module mkMsgRoute(MsgRoute#(bpb));
@@ -384,6 +408,7 @@ module mkMsgRoute(MsgRoute#(bpb));
    Wire#(NodeID)    src_w         <- mkWire();
    Wire#(UInt#(8))  len_w         <- mkWire();
    Wire#(Bool)      dont_wait_w   <- mkWire();
+   Wire#(Bit#(6))   opcode_w      <- mkWire();
    RWire#(UInt#(9)) new_remaining <- mkRWire();
    PulseWire        first_beat_pw <- mkPulseWire();
    PulseWire        last_beat_pw  <- mkPulseWire();
@@ -433,18 +458,23 @@ module mkMsgRoute(MsgRoute#(bpb));
          new_remaining.wset(bytes_after);
       end
 
-      // extract the dont_wait bit
+      // extract the dont_wait bit and opcode
       if (bytes_per_beat == 1) begin
          if (header_pos == 3) begin
             dont_wait_w <= unpack(the_beat[0][0]);
+            opcode_w    <= unpack(the_beat[0][7:2]);
             new_remaining.wset(remaining - 1);
          end
       end
       else if (bytes_per_beat == 2) begin
-         if (header_pos == 2) dont_wait_w <= unpack(the_beat[1][0]);
+         if (header_pos == 2) begin
+            dont_wait_w <= unpack(the_beat[1][0]);
+            opcode_w    <= unpack(the_beat[1][7:2]);
+         end
       end
       else if (header_pos == 0) begin
          dont_wait_w <= unpack(the_beat[3][0]);
+         opcode_w    <= unpack(the_beat[3][7:2]);
       end
 
       // beyond the header, we just need to count down the number
@@ -494,10 +524,19 @@ module mkMsgRoute(MsgRoute#(bpb));
    method NodeID   src       = src_w;
    method UInt#(8) length    = len_w;
    method Bool     dont_wait = dont_wait_w;
+   method Bit#(6)  opcode    = opcode_w;
 
    // message framing signals
    method Bool first_beat = first_beat_pw;
    method Bool last_beat  = last_beat_pw;
+
+   method UInt#(9) remaining_bytes = remaining;
+
+   // discard current message status
+   method Action clear();
+      header_pos <= 0;
+      remaining  <= 0;
+   endmethod
 
 endmodule: mkMsgRoute
 
@@ -520,6 +559,13 @@ interface MsgBuild#(numeric type bpb);
    // message framing signals for convenience
    method Bool start_of_message();
    method Bool end_of_message();
+
+   // convenience signal for the builder
+   method UInt#(8) remaining_bytes();
+
+   // discard current message status
+   (* always_ready *)
+   method Action clear();
 
 endinterface
 
@@ -775,6 +821,26 @@ module mkMsgBuild(MsgBuild#(bpb))
 
    method Bool end_of_message();
       return eom && beat_fifo.source.src_rdy();
+   endmethod
+
+   method UInt#(8) remaining_bytes();
+      return bytes_left;
+   endmethod
+
+   // discard current message status
+   method Action clear();
+      beat_fifo.clear();
+      new_dst.clear();
+      new_src.clear();
+      new_len.clear();
+      new_dw.clear();
+      new_op.clear();
+      bytes_used   <= 0;
+      bytes_left   <= 0;
+      padding      <= 0;
+      bytes_taken  <= 0;
+      total_bytes  <= 0;
+      beat_data.clear();
    endmethod
 
 endmodule

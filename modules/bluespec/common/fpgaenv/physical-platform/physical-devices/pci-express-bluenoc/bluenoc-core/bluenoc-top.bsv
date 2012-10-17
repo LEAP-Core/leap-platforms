@@ -41,6 +41,7 @@ module mkBridge_4#( Bit#(64)  board_content_id
                               , rcb_mask
                               , msix_enabled
                               , msix_mask_all_intr
+															, False
                               );
    return _bridge;
 endmodule: mkBridge_4
