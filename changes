@@ -14126,3 +14126,86 @@ Directory drivers/linux/platforms/ml605-pcie/driver
  bluenoc.h                 Locally Modified          630 
 
 Update to latest BlueNoC drivers.
+
+----------
+kfleming    Date: Fri Oct 19 15:56:29 EDT 2012  CSN: CSN-leap-platforms-633
+                  Fri Oct 19 19:56:29 UTC 2012
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ differential-import-virtex6.bsv Locally Modified          632 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/ml605/pcie-bluenoc
+ xilinx-xup-pcie.awb       Locally Modified          632 
+ xilinx-xup-pcie.bsv       Locally Modified          632 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices
+ ddr3-sdram/               Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr3-sdram
+ ddr3-sdram.xcf            Locally Added               0 
+ ui_wr_data.v              Locally Added               0 
+ infrastructure.v          Locally Added               0 
+ bank_compare.v            Locally Added               0 
+ ecc_gen.v                 Locally Added               0 
+ bank_common.v             Locally Added               0 
+ phy_pd.v                  Locally Added               0 
+ rank_mach.v               Locally Added               0 
+ ecc_buf.v                 Locally Added               0 
+ rd_bitslip.v              Locally Added               0 
+ phy_dly_ctrl.v            Locally Added               0 
+ arb_mux.v                 Locally Added               0 
+ mc.v                      Locally Added               0 
+ ui_top.v                  Locally Added               0 
+ memc_ui_top.v             Locally Added               0 
+ ddr3-sdram-device.awb     Locally Added               0 
+ mem_intfc.v               Locally Added               0 
+ ddr3-sdram-verilog-import.bsv Locally Added               0 
+ rank_common.v             Locally Added               0 
+ arb_select.v              Locally Added               0 
+ phy_rdlvl.v               Locally Added               0 
+ phy_rdclk_gen.v           Locally Added               0 
+ phy_dm_iob.v              Locally Added               0 
+ phy_write.v               Locally Added               0 
+ phy_rddata_sync.v         Locally Added               0 
+ ecc_dec_fix.v             Locally Added               0 
+ bank_state.v              Locally Added               0 
+ bank_cntrl.v              Locally Added               0 
+ example_top.v             Locally Added               0 
+ phy_dq_iob.v              Locally Added               0 
+ clk_ibuf.v                Locally Added               0 
+ phy_ocb_mon_top.v         Locally Added               0 
+ bank_queue.v              Locally Added               0 
+ phy_data_io.v             Locally Added               0 
+ phy_top.v                 Locally Added               0 
+ ddr3-sdram-device.bsv     Locally Added               0 
+ phy_init.v                Locally Added               0 
+ phy_wrlvl.v               Locally Added               0 
+ phy_control_io.v          Locally Added               0 
+ arb_row_col.v             Locally Added               0 
+ ddr3_v3_5.v               Locally Added               0 
+ phy_read.v                Locally Added               0 
+ ui_rd_data.v              Locally Added               0 
+ dbg_display_driver.v      Locally Added               0 
+ phy_ocb_mon.v             Locally Added               0 
+ ddr3_wrapper.v            Locally Added               0 
+ rank_cntrl.v              Locally Added               0 
+ ecc_merge_enc.v           Locally Added               0 
+ xilinx_ddr3_sodimm.v      Locally Added               0 
+ phy_dqs_iob.v             Locally Added               0 
+ ui_cmd.v                  Locally Added               0 
+ phy_clock_io.v            Locally Added               0 
+ bank_mach.v               Locally Added               0 
+ ddr2_ddr3_chipscope.v     Locally Added               0 
+ round_robin_arb.v         Locally Added               0 
+ col_mach.v                Locally Added               0 
+ phy_pd_top.v              Locally Added               0 
+ phy_ck_iob.v              Locally Added               0 
+ phy_rdctrl_sync.v         Locally Added               0 
+ ddr3-sdram.ucf            Locally Added               0 
+ circ_buffer.v             Locally Added               0 
+ iodelay_ctrl.v            Locally Added               0 
+
+
+Added memory controller for ml605.  Still has memory corruption in the
+debug mode, but the behavior is at least partially correct.

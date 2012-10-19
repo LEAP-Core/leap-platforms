@@ -29,13 +29,16 @@ module mkPrimitiveDifferentialClock (PRIMITIVE_DIFFERENTIAL_CLOCKS_DEVICE);
     // Buffer clocks and reset before they are used
     Clock sys_clk_buf <- mkClockIBUFDS(pcieClockP.clock, pcieClockN.clock);
 
+    // And now a bufg 
+    Clock sys_clk_bufg <- mkClockBUFG(clocked_by sys_clk_buf);
+
     RESET_IMPORTER resetIn <- mkResetImporter(clocked_by sys_clk_buf);  
 
     method clock_n_wire = pcieClockN.clock_wire;
     method clock_p_wire = pcieClockP.clock_wire;
     method reset_n_wire = resetIn.reset_wire;
 
-    interface clock = sys_clk_buf;
+    interface clock = sys_clk_bufg;
     interface reset = resetIn.reset;
 
 endmodule

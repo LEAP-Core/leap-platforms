@@ -1,0 +1,64 @@
+%name DDR3 SDRAM Physical Device
+%desc DDR3 SDRAM Physical Device
+
+%provides ddr2_device
+
+%sources -t BSV -v PUBLIC ddr3-sdram-device.bsv
+%sources -t BSV -v PUBLIC ddr3-sdram-verilog-import.bsv
+
+%sources -t UCF -v PRIVATE ddr3-sdram.ucf
+
+%sources -t XCF -v PRIVATE ddr3-sdram.xcf
+
+%sources -t VERILOG -v PRIVATE memc_ui_top.v 
+%sources -t VERILOG -v PRIVATE ddr3_wrapper.v
+%sources -t VERILOG -v PRIVATE ddr3_v3_5.v 
+%sources -t VERILOG -v PRIVATE infrastructure.v 
+%sources -t VERILOG -v PRIVATE iodelay_ctrl.v 
+%sources -t VERILOG -v PRIVATE mem_intfc.v 
+%sources -t VERILOG -v PRIVATE mc.v 
+%sources -t VERILOG -v PRIVATE ui_top.v
+%sources -t VERILOG -v PRIVATE col_mach.v
+%sources -t VERILOG -v PRIVATE circ_buffer.v  
+%sources -t VERILOG -v PRIVATE bank_mach.v
+%sources -t VERILOG -v PRIVATE bank_cntrl.v
+%sources -t VERILOG -v PRIVATE bank_common.v
+%sources -t VERILOG -v PRIVATE bank_compare.v 
+%sources -t VERILOG -v PRIVATE bank_queue.v 
+%sources -t VERILOG -v PRIVATE bank_state.v      
+%sources -t VERILOG -v PRIVATE rank_mach.v  
+%sources -t VERILOG -v PRIVATE rank_cntrl.v  
+%sources -t VERILOG -v PRIVATE rank_common.v  
+%sources -t VERILOG -v PRIVATE phy_clock_io.v
+%sources -t VERILOG -v PRIVATE phy_control_io.v  
+%sources -t VERILOG -v PRIVATE phy_ck_iob.v 
+%sources -t VERILOG -v PRIVATE phy_dm_iob.v
+%sources -t VERILOG -v PRIVATE phy_dq_iob.v 
+%sources -t VERILOG -v PRIVATE phy_dqs_iob.v 
+%sources -t VERILOG -v PRIVATE phy_data_io.v   
+%sources -t VERILOG -v PRIVATE phy_top.v
+%sources -t VERILOG -v PRIVATE phy_ocb_mon.v
+%sources -t VERILOG -v PRIVATE phy_ocb_mon_top.v
+%sources -t VERILOG -v PRIVATE phy_pd.v
+%sources -t VERILOG -v PRIVATE phy_pd_top.v
+%sources -t VERILOG -v PRIVATE phy_read.v
+%sources -t VERILOG -v PRIVATE phy_dly_ctrl.v
+%sources -t VERILOG -v PRIVATE phy_rdlvl.v
+%sources -t VERILOG -v PRIVATE phy_rdclk_gen.v
+%sources -t VERILOG -v PRIVATE phy_rdctrl_sync.v    
+%sources -t VERILOG -v PRIVATE phy_rddata_sync.v    
+%sources -t VERILOG -v PRIVATE phy_write.v
+%sources -t VERILOG -v PRIVATE phy_wrlvl.v 
+%sources -t VERILOG -v PRIVATE phy_init.v  
+%sources -t VERILOG -v PRIVATE ui_cmd.v 
+%sources -t VERILOG -v PRIVATE ui_wr_data.v
+%sources -t VERILOG -v PRIVATE ui_rd_data.v 
+%sources -t VERILOG -v PRIVATE round_robin_arb.v
+%sources -t VERILOG -v PRIVATE arb_mux.v 
+%sources -t VERILOG -v PRIVATE arb_row_col.v 
+%sources -t VERILOG -v PRIVATE arb_select.v 
+%sources -t VERILOG -v PRIVATE rd_bitslip.v
+
+
+%param DRAM_MAX_OUTSTANDING_READS  8 "Maximum in-flight read requests"
+%param DRAM_DEBUG                  0 "Non-zero enables debugging methods"

@@ -24,6 +24,7 @@ import Clocks::*;
 
 `include "pcie_device.bsh"
 `include "clocks_device.bsh"
+`include "ddr2_device.bsh"
 `include "physical_platform_utils.bsh"
 
 // PHYSICAL_DRIVERS
@@ -36,6 +37,7 @@ interface PHYSICAL_DRIVERS;
     
     interface CLOCKS_DRIVER                        clocksDriver;
     interface PCIE_DRIVER                          pcieDriver;
+    interface Vector#(FPGA_DDR_BANKS, DDR2_DRIVER) ddr2Driver;
         
 endinterface
 
@@ -52,6 +54,7 @@ interface TOP_LEVEL_WIRES;
     (* prefix = "" *)
     interface CLOCKS_WIRES                        clocksWires;
     interface PCIE_WIRES                          pcieWires;
+    interface DDR2_WIRES                          ddr2Wires;
 
 endinterface
 
@@ -84,6 +87,11 @@ module mkPhysicalPlatform
     Clock clk = clocks_device.driver.clock;
     Reset rst = clocks_device.driver.reset;
 
+    // There is a strong assumption that the clock for this module is the 200MHz differential clock
+
+    DDR2_DEVICE ddr3_device <- mkDDR3Device(clocks_device.driver.rawClock, clocks_device.driver.rawReset, 
+                                            clocked_by clocks_device.driver.clock, reset_by clocks_device.driver.reset);
+
     // Next, create the physical device that can trigger a soft reset. Pass along the
     // interface to the trigger module that the clocks device has given us.
 
@@ -105,6 +113,7 @@ module mkPhysicalPlatform
 
 				endinterface //= clocks_device.driver;
         interface pcieDriver       = pcie_device.driver;
+        interface ddr2Driver       = ddr3_device.driver;
 
     endinterface
     
@@ -114,6 +123,7 @@ module mkPhysicalPlatform
 
         interface clocksWires      = clocks_device.wires;
         interface pcieWires        = pcie_device.wires;
+        interface ddr2Wires        = ddr3_device.wires;
 
     endinterface
                

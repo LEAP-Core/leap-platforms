@@ -3,7 +3,7 @@
 %desc ML605 V6 Platform with BlueNoC
 
 %provides physical_platform	
-%requires clocks_device pcie_device physical_platform_utils
+%requires clocks_device pcie_device physical_platform_utils ddr2_device
 
 %sources -t BSV -v PUBLIC  xilinx-xup-pcie.bsv
 %sources -t H   -v PUBLIC  xilinx-xup-pcie.h
