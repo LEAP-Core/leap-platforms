@@ -49,10 +49,10 @@
 //   ____  ____
 //  /   /\/   /
 // /___/  \  /    Vendor             : Xilinx
-// \   \   \/     Version            : 3.5
+// \   \   \/     Version            : 3.9
 //  \   \         Application        : MIG
 //  /   /         Filename           : memc_ui_top.v
-// /___/   /\     Date Last Modified : $Date: 2010/06/10 09:22:22 $
+// /___/   /\     Date Last Modified : $Date: 2011/06/02 07:18:01 $
 // \   \  /  \    Date Created       : Mon Jun 23 2008
 //  \___\/\___\
 //
@@ -67,22 +67,19 @@
 //*****************************************************************************
 
 `timescale 1 ps / 1 ps
-(* X_CORE_INFO = "mig_v3_5_ddr3_V6, Coregen 12.2" , CORE_GENERATION_INFO = "ddr3_V6,mig_v3_5,{LANGUAGE=Verilog, SYNTHESIS_TOOL=ISE, LEVEL=CONTROLLER, AXI_ENABLE=0, NO_OF_CONTROLLERS=1, INTERFACE_TYPE=DDR3, CLK_PERIOD=2500, MEMORY_TYPE=SODIMM, MEMORY_PART=mt4jsf6464hy-1g1, DQ_WIDTH=64, ECC=OFF, DATA_MASK=1, BURST_MODE=8, BURST_TYPE=SEQ, OUTPUT_DRV=HIGH, RTT_NOM=60, REFCLK_FREQ=200, CLKFBOUT_MULT_F=6, CLKOUT_DIVIDE=3, DEBUG_PORT=ON, IODELAY_HP_MODE=ON, INTERNAL_VREF=1, DCI_INOUTS=1, CLASS_ADDR=II, INPUT_CLK_TYPE=DIFFERENTIAL}" *)
+(* X_CORE_INFO = "mig_v3_9_ddr3_V6, Coregen 13.3" , CORE_GENERATION_INFO = "ddr3_V6,mig_v3_9,{LANGUAGE=Verilog, SYNTHESIS_TOOL=ISE, LEVEL=CONTROLLER, AXI_ENABLE=0, NO_OF_CONTROLLERS=1, INTERFACE_TYPE=DDR3, CLK_PERIOD=2500, MEMORY_TYPE=SODIMM, MEMORY_PART=mt4jsf6464hy-1g1, DQ_WIDTH=64, ECC=OFF, DATA_MASK=1, BURST_MODE=8, BURST_TYPE=SEQ, OUTPUT_DRV=HIGH, RTT_NOM=60, REFCLK_FREQ=200, MMCM_ADV_BANDWIDTH=MMCM_ADV_BANDWIDTH, CLKFBOUT_MULT_F=6, CLKOUT_DIVIDE=3, DEBUG_PORT=ON, IODELAY_HP_MODE=ON, INTERNAL_VREF=0, DCI_INOUTS=1, CLASS_ADDR=II, INPUT_CLK_TYPE=DIFFERENTIAL}" *)
 module memc_ui_top #
   (
    parameter REFCLK_FREQ             = 200,
                                        // # = 200 when design frequency <= 533 MHz,
                                        //   = 300 when design frequency > 533 MHz.
-   parameter SIM_INIT_OPTION         = "NONE",
-                                       // # = "SKIP_PU_DLY" - Skip the memory
-                                       //                     initilization sequence,
-                                       //   = "NONE" - Complete the memory
-                                       //              initilization sequence.
-   parameter SIM_CAL_OPTION          = "NONE",
-                                       // # = "FAST_CAL" - Skip the delay
-                                       //                  Calibration process,
-                                       //   = "NONE" - Complete the delay
-                                       //              Calibration process.
+   parameter SIM_BYPASS_INIT_CAL     = "OFF",
+                                       // # = "OFF" -  Complete memory init &
+                                       //              calibration sequence
+                                       // # = "SKIP" - Skip memory init &
+                                       //              calibration sequence
+                                       // # = "FAST" - Skip memory init & use
+                                       //              abbreviated calib sequence
    parameter IODELAY_GRP             = "IODELAY_MIG",
                                        //to phy_top
    parameter nCK_PER_CLK             = 2,
@@ -157,20 +154,19 @@ module memc_ui_top #
    parameter CWL                     = 5,
                                        // DDR3 SDRAM: CAS Write Latency (Mode Register 2).
                                        // DDR2 SDRAM: Can be ignored
-   parameter DATA_BUF_ADDR_WIDTH     = 8,
-                                       // # = 8,9,10,11,12.
+   parameter DATA_BUF_ADDR_WIDTH     = 4,
    parameter DATA_BUF_OFFSET_WIDTH   = 1,
                                        // # = 0,1.
    //parameter DELAY_WR_DATA_CNTRL     = 0, //This parameter is made as MC local parameter
                                        // # = 0,1.
    parameter BM_CNT_WIDTH            = 2,
                                        // # = ceil(log2(nBANK_MACHS)).
-   parameter ADDR_CMD_MODE           = "UNBUF",
-                                       // # = "UNBUF", "REG".
+   parameter ADDR_CMD_MODE           = "1T" ,
+                                       // # = "2T", "1T".
    parameter nBANK_MACHS             = 4,
                                        // # = 2,3,4,5,6,7,8.
-   parameter ORDERING                = "NORM",
-                                       // # = "NORM", "STRICT", "RELAXED".
+   parameter ORDERING                = "STRICT",
+                                       // # = "NORM", "STRICT".
    parameter RANKS                   = 1,
                                        // # of Ranks.
    parameter WRLVL                   = "ON",
@@ -266,6 +262,7 @@ module memc_ui_top #
    parameter ADDR_WIDTH              = 27,
                                        // # = RANK_WIDTH + BANK_WIDTH
                                        //     + ROW_WIDTH + COL_WIDTH;
+   parameter  MEM_ADDR_ORDER         = "ROW_BANK_COLUMN",
    parameter STARVE_LIMIT            = 2,
                                        // # = 2,3,4.
    parameter TCQ                     = 100,
@@ -303,7 +300,7 @@ module memc_ui_top #
    output                             pd_PSEN,
    output                             pd_PSINCDEC,
    input                              pd_PSDONE,
-   output                             dfi_init_complete,
+   output                             phy_init_done,
    output [BM_CNT_WIDTH-1:0]          bank_mach_next,
    output [3:0]                       app_ecc_multiple_err,
    output [APP_DATA_WIDTH-1:0]        app_rd_data,
@@ -320,6 +317,7 @@ module memc_ui_top #
    input                              app_wdf_end,
    input [APP_MASK_WIDTH-1:0]         app_wdf_mask,
    input                              app_wdf_wren,
+   input                              app_correct_en,
    input [5*DQS_WIDTH-1:0]            dbg_wr_dqs_tap_set,
    input [5*DQS_WIDTH-1:0]            dbg_wr_dq_tap_set,
    input                              dbg_wr_tap_set_en,
@@ -368,7 +366,10 @@ module memc_ui_top #
                                 8 : (DATA_WIDTH <= 247)?
                                  9 : 10;
 
+  localparam P_FAMILY = "virtex6";
+
 //  localparam PAYLOAD_WIDTH = (ECC_TEST == "OFF") ? DATA_WIDTH : DQ_WIDTH;
+  localparam P_ECC_TEST_FI_XOR = ECC_TEST;
 
   wire                             correct_en;
   wire [3:0]                       raw_not_ecc;
@@ -376,8 +377,8 @@ module memc_ui_top #
   wire [3:0]                       ecc_multiple;
   wire [MC_ERR_ADDR_WIDTH-1:0]     ecc_err_addr;
   wire [3:0]                       app_raw_not_ecc;
-  wire                             app_correct_en;
-
+  wire [DQ_WIDTH/8-1:0]            fi_xor_we;
+  wire [DQ_WIDTH-1:0]              fi_xor_wrdata;
 
   wire [DATA_BUF_OFFSET_WIDTH-1:0] wr_data_offset;
   wire                             wr_data_en;
@@ -399,7 +400,7 @@ module memc_ui_top #
   wire [2:0]                       cmd;
   wire [BANK_WIDTH-1:0]            bank;
   wire [(4*PAYLOAD_WIDTH)-1:0]     wr_data;
-  wire [(4*(DATA_WIDTH/8))-1:0]    wr_data_mask;
+  wire [(4*(DATA_WIDTH/8))-1:0] wr_data_mask;
 
   mem_intfc #
     (
@@ -429,6 +430,7 @@ module memc_ui_top #
      .DRAM_TYPE             (DRAM_TYPE),
      .DRAM_WIDTH            (DRAM_WIDTH),
      .ECC                   (ECC),
+     .ECC_TEST_FI_XOR       (P_ECC_TEST_FI_XOR),
      .PAYLOAD_WIDTH         (PAYLOAD_WIDTH),
      .ECC_WIDTH             (ECC_WIDTH),
      .MC_ERR_ADDR_WIDTH     (MC_ERR_ADDR_WIDTH),
@@ -467,8 +469,7 @@ module memc_ui_top #
      .ROW_WIDTH             (ROW_WIDTH),
      .SLOT_0_CONFIG         (SLOT_0_CONFIG),
      .SLOT_1_CONFIG         (SLOT_1_CONFIG),
-     .SIM_INIT_OPTION       (SIM_INIT_OPTION),
-     .SIM_CAL_OPTION        (SIM_CAL_OPTION),
+     .SIM_BYPASS_INIT_CAL   (SIM_BYPASS_INIT_CAL),
      .REFCLK_FREQ           (REFCLK_FREQ),
      .nDQS_COL0             (nDQS_COL0),
      .nDQS_COL1             (nDQS_COL1),
@@ -502,7 +503,7 @@ module memc_ui_top #
      .ddr_addr                  (ddr_addr),
      .dbg_wr_dqs_tap_set        (dbg_wr_dqs_tap_set),
      .dbg_wr_dq_tap_set         (dbg_wr_dq_tap_set),
-     .dbg_wr_tap_set_en         (dbg_wr_tap_set_en),  
+     .dbg_wr_tap_set_en         (dbg_wr_tap_set_en),
      .dbg_wrlvl_start           (dbg_wrlvl_start),
      .dbg_wrlvl_done            (dbg_wrlvl_done),
      .dbg_wrlvl_err             (dbg_wrlvl_err),
@@ -524,10 +525,10 @@ module memc_ui_top #
      .dbg_rddata                (dbg_rddata),
      // Currently CPT clock IODELAY taps must be moved on per-DQS group
      // basis-only - i.e. all CPT clocks cannot be moved simultaneously
-     // If desired to change this, rewire dbg_idel_*_all, and 
-     // dbg_sel_idel_*_* accordingly. Also no support for changing DQS 
-     // and CPT taps via phase detector. Note: can change CPT taps via 
-     // dbg_idel_*_cpt, but PD must off when this happens     
+     // If desired to change this, rewire dbg_idel_*_all, and
+     // dbg_sel_idel_*_* accordingly. Also no support for changing DQS
+     // and CPT taps via phase detector. Note: can change CPT taps via
+     // dbg_idel_*_cpt, but PD must off when this happens
      .dbg_idel_up_all           (1'b0),
      .dbg_idel_down_all         (1'b0),
      .dbg_idel_up_cpt           (dbg_inc_cpt),
@@ -548,16 +549,16 @@ module memc_ui_top #
      .dbg_pd_inc_cpt            (1'b0),
      .dbg_pd_dec_cpt            (1'b0),
      .dbg_pd_inc_dqs            (dbg_inc_rd_dqs),
-     .dbg_pd_dec_dqs            (dbg_inc_rd_dqs),
+     .dbg_pd_dec_dqs            (dbg_dec_rd_dqs),
      .dbg_pd_disab_hyst         (1'b0),
      .dbg_pd_disab_hyst_0       (1'b0),
      .dbg_pd_msb_sel            (4'b0000),
      .dbg_pd_byte_sel           (dbg_inc_dec_sel),
      .dbg_inc_rd_fps            (dbg_inc_rd_fps),
      .dbg_dec_rd_fps            (dbg_dec_rd_fps),
-     .dbg_phy_pd                (),    
-     .dbg_phy_read              (),  
-     .dbg_phy_rdlvl             (), 
+     .dbg_phy_pd                (),
+     .dbg_phy_read              (),
+     .dbg_phy_rdlvl             (),
      .dbg_phy_top               (),
      .bank_mach_next            (bank_mach_next),
      .accept                    (accept),
@@ -566,7 +567,7 @@ module memc_ui_top #
      .rd_data_end               (rd_data_end),
      .pd_PSEN                   (pd_PSEN),
      .pd_PSINCDEC               (pd_PSINCDEC),
-     .dfi_init_complete         (dfi_init_complete),
+     .dfi_init_complete         (phy_init_done),
      .ecc_single                (ecc_single),
      .ecc_multiple              (ecc_multiple),
      .ecc_err_addr              (ecc_err_addr),
@@ -592,7 +593,9 @@ module memc_ui_top #
      .slot_0_present            (SLOT_0_CONFIG),
      .slot_1_present            (SLOT_1_CONFIG),
      .correct_en                (correct_en),
-     .raw_not_ecc               (raw_not_ecc)
+     .raw_not_ecc               (raw_not_ecc),
+     .fi_xor_we                 (fi_xor_we),
+     .fi_xor_wrdata             (fi_xor_wrdata)
     );
 
   ui_top #
@@ -608,7 +611,8 @@ module memc_ui_top #
      .ORDERING       (ORDERING),
      .RANKS          (RANKS),
      .RANK_WIDTH     (RANK_WIDTH),
-     .ROW_WIDTH      (ROW_WIDTH)
+     .ROW_WIDTH      (ROW_WIDTH),
+     .MEM_ADDR_ORDER (MEM_ADDR_ORDER)
     )
    u_ui_top
      (

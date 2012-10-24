@@ -49,10 +49,10 @@
 //   ____  ____
 //  /   /\/   /
 // /___/  \  /    Vendor: Xilinx
-// \   \   \/     Version: 3.5
+// \   \   \/     Version: 3.9
 //  \   \         Application: MIG
 //  /   /         Filename: phy_control_io.v
-// /___/   /\     Date Last Modified: $Date: 2010/05/05 00:43:33 $
+// /___/   /\     Date Last Modified: $Date: 2011/06/02 07:18:02 $
 // \   \  /  \    Date Created: Mon Jun 23 2008
 //  \___\/\___\
 //
@@ -65,11 +65,11 @@
 //*****************************************************************************
 
 /******************************************************************************
-**$Id: phy_control_io.v,v 1.1.2.4 2010/05/05 00:43:33 richc Exp $
-**$Date: 2010/05/05 00:43:33 $
-**$Author: richc $
-**$Revision: 1.1.2.4 $
-**$Source: /devl/xcs/repo/env/Databases/ip/src2/M/mig_v3_5/data/dlib/virtex6/ddr3_sdram/verilog/rtl/phy/Attic/phy_control_io.v,v $
+**$Id: phy_control_io.v,v 1.1 2011/06/02 07:18:02 mishra Exp $
+**$Date: 2011/06/02 07:18:02 $
+**$Author: mishra $
+**$Revision: 1.1 $
+**$Source: /devl/xcs/repo/env/Databases/ip/src2/O/mig_v3_9/data/dlib/virtex6/ddr3_sdram/verilog/rtl/phy/phy_control_io.v,v $
 ******************************************************************************/
 
 `timescale 1ps/1ps
@@ -90,8 +90,10 @@ module phy_control_io #
    parameter REG_CTRL     = "ON",    // "ON" for registered DIMM
    parameter REFCLK_FREQ  = 300.0,   // IODELAY Reference Clock freq (MHz)
    parameter IODELAY_HP_MODE = "ON",   // IODELAY High Performance Mode
-   parameter IODELAY_GRP     = "IODELAY_MIG"  // May be assigned unique name
+   parameter IODELAY_GRP     = "IODELAY_MIG",  // May be assigned unique name
                                               // when mult IP cores in design
+   parameter DDR2_EARLY_CS   = 0     // set = 1 for >200 MHz DDR2 UDIMM designs
+			             // for early launch of CS
    )
   (
    input                   clk_mem,        // full rate core clock
@@ -170,6 +172,10 @@ module phy_control_io #
   wire [CKE_WIDTH-1:0]             mux_cke1;
   reg  [CS_WIDTH*nCS_PER_RANK-1:0] mux_cs_n0;
   reg  [CS_WIDTH*nCS_PER_RANK-1:0] mux_cs_n1;
+  reg  [CS_WIDTH*nCS_PER_RANK-1:0] mux_cs_d1;
+  reg  [CS_WIDTH*nCS_PER_RANK-1:0] mux_cs_d2;
+  reg  [CS_WIDTH*nCS_PER_RANK-1:0] mux_cs_d3;
+  reg  [CS_WIDTH*nCS_PER_RANK-1:0] mux_cs_d4;
   reg [0:0]                        mux_ioconfig;
   reg                              mux_ioconfig_en;
   wire [CS_WIDTH*nCS_PER_RANK-1:0] mux_odt0;
@@ -343,6 +349,37 @@ module phy_control_io #
       end
     end
   endgenerate
+
+  // for DDR2 UDIMM designs the CS has to be launched early.
+  // Setting the OSERDES input based on the DDR2_EARLY_CS parameter.
+  // when this paramter is CS will be launched half a cycle early.
+  // Launching half a cycle early will cause simulation issues.
+  // Using synthesis options to control the assignment
+
+  always @(mux_cs_n0 or mux_cs_n1) begin
+    if(DDR2_EARLY_CS == 1) begin
+      mux_cs_d1 = mux_cs_n0;
+      mux_cs_d2 = mux_cs_n1;
+      mux_cs_d3 = mux_cs_n1;
+      mux_cs_d4 = mux_cs_n0;
+    end else begin 
+      mux_cs_d1 = mux_cs_n0;
+      mux_cs_d2 = mux_cs_n0;
+      mux_cs_d3 = mux_cs_n1;
+      mux_cs_d4 = mux_cs_n1;
+    end // else: !if(DDR2_EARLY_CS == 1)
+
+    // For simulation override the assignment for
+    // synthesis do not override
+    // synthesis translate_off
+    mux_cs_d1 = mux_cs_n0;
+    mux_cs_d2 = mux_cs_n0;
+    mux_cs_d3 = mux_cs_n1;
+    mux_cs_d4 = mux_cs_n1;  
+    // synthesis translate_on
+  end 
+
+
 
   // parity for reg dimm. Have to check the timing impact.
   // Generate only for DDR3 RDIMM.
@@ -866,10 +903,10 @@ module phy_control_io #
            .CLKDIV       (clk),
            .CLKPERF      (),       
            .CLKPERFDELAY (),
-           .D1           (mux_cs_n0[cs_i]),
-           .D2           (mux_cs_n0[cs_i]),
-           .D3           (mux_cs_n1[cs_i]),
-           .D4           (mux_cs_n1[cs_i]),
+           .D1           (mux_cs_d1[cs_i]),
+           .D2           (mux_cs_d2[cs_i]),
+           .D3           (mux_cs_d3[cs_i]),
+           .D4           (mux_cs_d4[cs_i]),
            .D5           (),
            .D6           (),
            .ODV          (1'b0),

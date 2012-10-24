@@ -49,7 +49,7 @@
 //   ____  ____
 //  /   /\/   /
 // /___/  \  /    Vendor                : Xilinx
-// \   \   \/     Version               : 3.5
+// \   \   \/     Version               : 3.9
 //  \   \         Application           : MIG
 //  /   /         Filename              : mc.v
 // /___/   /\     Date Last Modified    : $date$
@@ -71,7 +71,7 @@
 module mc #
   (
    parameter TCQ = 100,
-   parameter ADDR_CMD_MODE            = "UNBUF",
+   parameter ADDR_CMD_MODE            = "1T",
    parameter BANK_WIDTH               = 3,
    parameter BM_CNT_WIDTH             = 2,
    parameter BURST_MODE               = "8",
@@ -89,6 +89,7 @@ module mc #
    parameter DQS_WIDTH                = 8,
    parameter DQ_WIDTH                 = 64,
    parameter ECC                      = "OFF",
+   parameter ECC_TEST_FI_XOR          = "OFF",
    parameter ECC_WIDTH                = 8,
    parameter MC_ERR_ADDR_WIDTH        = 31,
    parameter nBANK_MACHS              = 4,
@@ -134,7 +135,8 @@ module mc #
   use_addr, slot_1_present, slot_0_present, size, rst, row,
   raw_not_ecc, rank, hi_priority, dfi_rddata_valid, dfi_init_complete,
   data_buf_addr, correct_en, col, cmd, clk, bank, app_zq_req,
-  app_ref_req, app_periodic_rd_req, dfi_rddata, wr_data, wr_data_mask
+  app_ref_req, app_periodic_rd_req, dfi_rddata, wr_data, wr_data_mask,
+  fi_xor_we, fi_xor_wrdata
   );
 
 
@@ -221,6 +223,17 @@ module mc #
 // are less than LOW_IDLE_CNT.  At which point parked bank machines
 // is selected to exit until the number of idle bank machines exceeds
 // the LOW_IDLE_CNT.
+// Note: Setting this value to a value greater than zero may result in 
+// better efficiency for specific traffic patterns as the controller will
+// attempt to keep the page open for this time value.  However, this should
+// only be used in situations where the number of bank machines (nBANK_MACH)
+// is equal to or greater than the number of pages that will be open.
+// If the user attempts to open more pages than bank machines, the controller
+// will stall for a time period up to the value set which will likely result
+// in a serious efficiency degradation.  Increasing the number of bank
+// machines may result in difficulty meeting timing closure.
+// Check timing closure in the ISE tools before increasing the
+// number of bank machines.
   localparam nOP_WAIT                 = 0;
   localparam LOW_IDLE_CNT             = 0;
 
@@ -242,6 +255,8 @@ module mc #
   input                 hi_priority;            // To bank_mach0 of bank_mach.v
   input [RANK_WIDTH-1:0] rank;                  // To bank_mach0 of bank_mach.v
   input [3:0]           raw_not_ecc;            // To ecc_merge_enc0 of ecc_merge_enc.v
+  input [DQS_WIDTH-1:0] fi_xor_we;              // To fi_xor0 of fi_xor.v
+  input [DQ_WIDTH-1:0]  fi_xor_wrdata;          // To fi_xor0 of fi_xor.v
   input [ROW_WIDTH-1:0] row;                    // To bank_mach0 of bank_mach.v
   input                 rst;                    // To rank_mach0 of rank_mach.v, ...
   input                 size;                   // To bank_mach0 of bank_mach.v
@@ -669,6 +684,7 @@ module mc #
     else begin : ecc_on
       wire [CODE_WIDTH*ECC_WIDTH-1:0] h_rows;
       wire [4*DATA_WIDTH-1:0] rd_merge_data;
+      wire [4*DQ_WIDTH-1:0] dfi_wrdata_i;
       ecc_merge_enc #
         (/*AUTOINSTPARAM*/
          // Parameters
@@ -683,7 +699,7 @@ module mc #
         ecc_merge_enc0
           (/*AUTOINST*/
            // Outputs
-           .dfi_wrdata                  (dfi_wrdata[4*DQ_WIDTH-1:0]),
+           .dfi_wrdata                  (dfi_wrdata_i[4*DQ_WIDTH-1:0]),
            .dfi_wrdata_mask             (dfi_wrdata_mask[4*DQ_WIDTH/8-1:0]),
            // Inputs
            .clk                         (clk),
@@ -749,6 +765,35 @@ module mc #
          (/*AUTOINST*/
           // Outputs
           .h_rows                       (h_rows[CODE_WIDTH*ECC_WIDTH-1:0]));
+
+      if (ECC_TEST_FI_XOR == "ON") begin : gen_fi_xor_inst
+        reg dfi_wrdata_en_r; 
+        wire dfi_wrdata_en_i;
+
+        always @(posedge clk) begin
+          dfi_wrdata_en_r <= dfi_wrdata_en[0];
+        end
+
+        assign dfi_wrdata_en_i = dfi_wrdata_en_r;
+
+        fi_xor #(
+          .DQ_WIDTH (DQ_WIDTH),
+          .DQS_WIDTH (DQS_WIDTH),
+          .nCK_PER_CLK (nCK_PER_CLK)
+        )
+        fi_xor0
+        (
+          .clk (clk),
+          .wrdata_in (dfi_wrdata_i),
+          .wrdata_out (dfi_wrdata),
+          .wrdata_en (dfi_wrdata_en_i),
+          .fi_xor_we (fi_xor_we),
+          .fi_xor_wrdata (fi_xor_wrdata)
+        );
+     end
+     else begin : gen_wrdata_passthru
+       assign dfi_wrdata = dfi_wrdata_i;
+     end
 
 `ifdef DISPLAY_H_MATRIX
       integer i;

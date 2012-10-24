@@ -49,7 +49,7 @@
 //   ____  ____
 //  /   /\/   /
 // /___/  \  /    Vendor                : Xilinx
-// \   \   \/     Version               : 3.5
+// \   \   \/     Version               : 3.9
 //  \   \         Application           : MIG
 //  /   /         Filename              : chipscope.v
 // /___/   /\     Date Last Modified    : $date$

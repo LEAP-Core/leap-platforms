@@ -60,11 +60,11 @@ TIMESPEC TS_pci_sys_clk_p = PERIOD pci_sys_clk_p 100 MHz HIGH 50%;
 #JS
 NET    "*ep_pcie_ep/trn_clk" TNM_NET = trn_clk_250;
 #NET    "m_llpi_phys_plat_pcie_device_bnoc_ep_pcie_ep/trn_clk" TNM_NET = trn_clk_250;
-TIMESPEC TS_trn_clk_250 = PERIOD trn_clk_250 200 MHz HIGH 50%;
+TIMESPEC TS_trn_clk_250 = PERIOD trn_clk_250 250 MHz HIGH 50%;
 
 NET    "*ep_pcie_ep/trn2_clk" TNM_NET = trn_clk_125;
 #NET    "m_llpi_phys_plat_pcie_device_bnoc_ep_pcie_ep/trn2_clk" TNM_NET = trn_clk_125;
-TIMESPEC TS_trn_clk_125 = PERIOD trn_clk_125 100 MHz HIGH 50%;
+TIMESPEC TS_trn_clk_125 = PERIOD trn_clk_125 125 MHz HIGH 50%;
 
 ######################################################################################################
 # LOC ASSIGNMENTS

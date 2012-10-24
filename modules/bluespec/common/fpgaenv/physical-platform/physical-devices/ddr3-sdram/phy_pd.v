@@ -49,10 +49,10 @@
 //   ____  ____
 //  /   /\/   /
 // /___/  \  /    Vendor: Xilinx
-// \   \   \/     Version: 3.5
+// \   \   \/     Version: 3.9
 //  \   \         Application: MIG
 //  /   /         Filename: phy_pd.v
-// /___/   /\     Date Last Modified: $Date: 2010/03/21 17:21:47 $
+// /___/   /\     Date Last Modified: $Date: 2011/06/02 07:18:03 $
 // \   \  /  \    Date Created: Aug 03 2009
 //  \___\/\___\
 //
@@ -69,11 +69,11 @@
 //*****************************************************************************
 
 /******************************************************************************
-**$Id: phy_pd.v,v 1.1.2.1 2010/03/21 17:21:47 jschmitz Exp $
-**$Date: 2010/03/21 17:21:47 $
-**$Author: jschmitz $
-**$Revision: 1.1.2.1 $
-**$Source: /devl/xcs/repo/env/Databases/ip/src2/M/mig_v3_5/data/dlib/virtex6/ddr3_sdram/verilog/rtl/phy/Attic/phy_pd.v,v $
+**$Id: phy_pd.v,v 1.1 2011/06/02 07:18:03 mishra Exp $
+**$Date: 2011/06/02 07:18:03 $
+**$Author: mishra $
+**$Revision: 1.1 $
+**$Source: /devl/xcs/repo/env/Databases/ip/src2/O/mig_v3_9/data/dlib/virtex6/ddr3_sdram/verilog/rtl/phy/phy_pd.v,v $
 ******************************************************************************/
 
 `timescale 1ps/1ps

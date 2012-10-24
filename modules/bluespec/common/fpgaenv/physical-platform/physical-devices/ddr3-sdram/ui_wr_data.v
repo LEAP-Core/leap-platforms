@@ -49,7 +49,7 @@
 //   ____  ____
 //  /   /\/   /
 // /___/  \  /    Vendor                : Xilinx
-// \   \   \/     Version               : 3.5
+// \   \   \/     Version               : 3.9
 //  \   \         Application           : MIG
 //  /   /         Filename              : ui_wr_data.v
 // /___/   /\     Date Last Modified    : $date$
@@ -264,7 +264,7 @@ module ui_wr_data #
   	app_wdf_rdy_r_copy3 <= #TCQ wdf_rdy_ns;
   	app_wdf_rdy_r_copy4 <= #TCQ wdf_rdy_ns;
   end
-  wire wr_data_end = app_wdf_end_r1 && app_wdf_rdy_r_copy1;
+  wire wr_data_end = app_wdf_end_r1 && app_wdf_rdy_r_copy1 && app_wdf_wren_r1;
   wire [3:0] wr_data_pntr;
   wire [4:0] wb_wr_data_addr;
   reg [3:0] wr_data_indx_r;

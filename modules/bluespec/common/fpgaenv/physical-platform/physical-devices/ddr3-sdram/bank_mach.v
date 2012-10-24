@@ -49,7 +49,7 @@
 //   ____  ____
 //  /   /\/   /
 // /___/  \  /    Vendor                : Xilinx
-// \   \   \/     Version               : 3.5
+// \   \   \/     Version               : 3.9
 //  \   \         Application           : MIG
 //  /   /         Filename              : bank_mach.v
 // /___/   /\     Date Last Modified    : $date$
@@ -72,7 +72,7 @@
 module bank_mach #
   (
    parameter TCQ = 100,
-   parameter ADDR_CMD_MODE            = "UNBUF",
+   parameter ADDR_CMD_MODE            = "1T",
    parameter BANK_WIDTH               = 3,
    parameter BM_CNT_WIDTH             = 2,
    parameter BURST_MODE               = "8",

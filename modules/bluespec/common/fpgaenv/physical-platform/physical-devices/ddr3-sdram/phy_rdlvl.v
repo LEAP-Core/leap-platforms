@@ -52,7 +52,7 @@
 // \   \   \/     Version:
 //  \   \         Application: MIG
 //  /   /         Filename: phy_rdlvl.v
-// /___/   /\     Date Last Modified: $Date: 2010/06/03 17:04:33 $
+// /___/   /\     Date Last Modified: $Date: 2011/06/02 07:18:04 $
 // \   \  /  \    Date Created:
 //  \___\/\___\
 //
@@ -67,11 +67,11 @@
 //*****************************************************************************
 
 /******************************************************************************
-**$Id: phy_rdlvl.v,v 1.1.2.2 2010/06/03 17:04:33 richc Exp $
-**$Date: 2010/06/03 17:04:33 $
-**$Author: richc $
-**$Revision: 1.1.2.2 $
-**$Source: /devl/xcs/repo/env/Databases/ip/src2/M/mig_v3_5/data/dlib/virtex6/ddr3_sdram/verilog/rtl/phy/Attic/phy_rdlvl.v,v $
+**$Id: phy_rdlvl.v,v 1.1 2011/06/02 07:18:04 mishra Exp $
+**$Date: 2011/06/02 07:18:04 $
+**$Author: mishra $
+**$Revision: 1.1 $
+**$Source: /devl/xcs/repo/env/Databases/ip/src2/O/mig_v3_9/data/dlib/virtex6/ddr3_sdram/verilog/rtl/phy/phy_rdlvl.v,v $
 ******************************************************************************/
 
 `timescale 1ps/1ps
@@ -86,6 +86,7 @@ module phy_rdlvl #
    parameter DQS_CNT_WIDTH   = 3,      // = ceil(log2(DQS_WIDTH))
    parameter DQS_WIDTH       = 8,      // # of DQS (strobe)
    parameter DRAM_WIDTH      = 8,      // # of DQ per DQS
+   parameter DRAM_TYPE       = "DDR3",  // Memory I/F type: "DDR3", "DDR2"
    parameter PD_TAP_REQ      = 10,     // # of IODELAY taps reserved for PD
    parameter nCL             = 5,      // Read CAS latency (in clk cyc)
    parameter SIM_CAL_OPTION  = "NONE", // Skip various calibration steps
@@ -96,8 +97,10 @@ module phy_rdlvl #
    input                        rst,
    // Calibration status, control signals
    input [1:0]                  rdlvl_start,
+   input                        rdlvl_clkdiv_start,
    input                        rdlvl_rd_active,
    output reg [1:0]             rdlvl_done,
+   output reg                   rdlvl_clkdiv_done,
    output reg [1:0]             rdlvl_err,
    output reg                   rdlvl_prech_req,
    input                        prech_done,
@@ -120,10 +123,13 @@ module phy_rdlvl #
    input                        rdlvl_pat_resume,   // resume pattern calib
    output reg                   rdlvl_pat_err,      // error during pattern cal
    output [DQS_CNT_WIDTH-1:0]   rdlvl_pat_err_cnt,  // erroring DQS group
+   // Resynchronization clock (clkinv_inv) calibration outputs
+   output [DQS_WIDTH-1:0]       rd_clkdiv_inv,
    // Debug Port
    output [5*DQS_WIDTH-1:0]     dbg_cpt_first_edge_cnt,
    output [5*DQS_WIDTH-1:0]     dbg_cpt_second_edge_cnt,
    output reg [3*DQS_WIDTH-1:0] dbg_rd_bitslip_cnt,
+   output [DQS_WIDTH-1:0]       dbg_rd_clkdiv_inv,
    output reg [2*DQS_WIDTH-1:0] dbg_rd_clkdly_cnt, 
    output reg [4:0]             dbg_rd_active_dly,
    input                        dbg_idel_up_all,
@@ -150,7 +156,7 @@ module phy_rdlvl #
   // data window, although with multi-sampling during read leveling, this is
   // not as much a concern) - the larger the value, the more protection 
   // against "false" windows  
-  localparam MIN_EYE_SIZE = 3;
+  localparam MIN_EYE_SIZE = (DRAM_TYPE == "DDR3") ? 3 : 6;
   // # of clock cycles to wait after changing IDELAY value or read data MUX
   // to allow both IDELAY chain to settle, and for delayed input to
   // propagate thru ISERDES
@@ -215,11 +221,30 @@ module phy_rdlvl #
   localparam CAL2_DONE         = 3'h5;
   localparam CAL2_ERROR_TO     = 3'h6;
 
+  localparam [3:0] CAL_CLKDIV_IDLE                   = 4'h0;
+  localparam [3:0] CAL_CLKDIV_NEW_DQS_WAIT           = 4'h1;
+  localparam [3:0] CAL_CLKDIV_IDEL_STORE_REF         = 4'h2;
+  localparam [3:0] CAL_CLKDIV_DETECT_EDGE            = 4'h3;
+  localparam [3:0] CAL_CLKDIV_IDEL_INCDEC_RSYNC      = 4'h4;
+  localparam [3:0] CAL_CLKDIV_IDEL_INCDEC_RSYNC_WAIT = 4'h5;
+  localparam [3:0] CAL_CLKDIV_IDEL_SET_MIDPT_RSYNC   = 4'h6;
+  localparam [3:0] CAL_CLKDIV_NEXT_CHECK             = 4'h7;
+  localparam [3:0] CAL_CLKDIV_NEXT_DQS               = 4'h8;
+  localparam [3:0] CAL_CLKDIV_DONE                   = 4'h9;
+  
   integer    i;
   integer    j;
   integer    x;
   genvar     z;
   
+  reg                     cal_clkdiv_clkdiv_inv_r;
+  reg [DQS_CNT_WIDTH-1:0] cal_clkdiv_cnt_clkdiv_r;      
+  reg                     cal_clkdiv_dlyce_rsync_r;
+  reg                     cal_clkdiv_dlyinc_rsync_r;
+  reg                     cal_clkdiv_idel_rsync_inc_r;
+  reg                     cal_clkdiv_prech_req_r;
+  reg                     cal_clkdiv_store_sr_req_r;
+  reg [3:0]               cal_clkdiv_state_r;
   reg [DQS_CNT_WIDTH-1:0] cal1_cnt_cpt_r;
   reg                     cal1_dlyce_cpt_r;
   reg                     cal1_dlyinc_cpt_r;
@@ -228,6 +253,7 @@ module phy_rdlvl #
   wire                    cal1_found_edge;
   reg                     cal1_prech_req_r;
   reg [4:0]               cal1_state_r;
+  reg                     cal1_store_sr_req_r;
   reg [2*DQS_WIDTH-1:0]   cal2_clkdly_cnt_r;
   reg [1:0]               cal2_cnt_bitslip_r;
   reg [4:0]               cal2_cnt_rd_dly_r;
@@ -245,6 +271,7 @@ module phy_rdlvl #
   reg [4:0]               cal2_rd_active_dly_r;
   reg [2*DQS_WIDTH-1:0]   cal2_rd_bitslip_cnt_r;     
   reg [2:0]               cal2_state_r;
+  reg [DQS_WIDTH-1:0]     clkdiv_inv_r;
   reg [2:0]               cnt_eye_size_r;
   reg [5:0]               cnt_idel_dec_cpt_r;
   reg [4:0]               cnt_idel_inc_cpt_r;
@@ -270,13 +297,16 @@ module phy_rdlvl #
   reg                     found_stable_eye_r;
   reg                     found_two_edge_r;
   reg [4:0]               idel_tap_cnt_cpt_r;
+  reg [4:0]               idel_tap_delta_rsync_r;
   reg                     idel_tap_limit_cpt_r;
   reg                     idel_tap_limit_dq_r;
   reg                     last_tap_jitter_r;
+  reg [4:0]               min_rsync_marg_r; 
   reg [DRAM_WIDTH-1:0]    mux_rd_fall0_r;
   reg [DRAM_WIDTH-1:0]    mux_rd_fall1_r;
   reg [DRAM_WIDTH-1:0]    mux_rd_rise0_r;
   reg [DRAM_WIDTH-1:0]    mux_rd_rise1_r;
+  reg                     new_cnt_clkdiv_r;
   reg                     new_cnt_cpt_r;
   reg [RD_SHIFT_LEN-1:0]  old_sr_fall0_r [DRAM_WIDTH-1:0];
   reg [RD_SHIFT_LEN-1:0]  old_sr_fall1_r [DRAM_WIDTH-1:0];
@@ -297,6 +327,7 @@ module phy_rdlvl #
   wire [RD_SHIFT_LEN-1:0] pat_rise0 [3:0];
   wire [RD_SHIFT_LEN-1:0] pat_rise1 [3:0];
   wire                    pipe_wait;
+  reg                     pol_min_rsync_marg_r;
   reg                     prev_found_edge_r;
   reg                     prev_found_edge_valid_r;  
   reg                     prev_match_fall0_and_r;
@@ -336,7 +367,6 @@ module phy_rdlvl #
   reg [DRAM_WIDTH-1:0]    sr_match_rise1_r;
   reg                     store_sr_done_r;
   reg                     store_sr_r;
-  reg                     store_sr_req_r;
   reg                     sr_valid_r;
   reg [5:0]               tby4_r;
 
@@ -385,8 +415,20 @@ module phy_rdlvl #
   assign dbg_phy_rdlvl[91:87]   = right_edge_taps_r;
   assign dbg_phy_rdlvl[96:92]   = second_edge_dq_taps_r;
   assign dbg_phy_rdlvl[102:97]  = tby4_r;
-  assign dbg_phy_rdlvl[255:103] = 'b0;
-  
+  assign dbg_phy_rdlvl[103]     = cal_clkdiv_clkdiv_inv_r;
+  assign dbg_phy_rdlvl[104]     = cal_clkdiv_dlyce_rsync_r;
+  assign dbg_phy_rdlvl[105]     = cal_clkdiv_dlyinc_rsync_r;
+  assign dbg_phy_rdlvl[106]     = cal_clkdiv_idel_rsync_inc_r;
+  assign dbg_phy_rdlvl[107]     = pol_min_rsync_marg_r;
+  assign dbg_phy_rdlvl[111:108] = cal_clkdiv_state_r;
+  assign dbg_phy_rdlvl[115:112] = cal_clkdiv_cnt_clkdiv_r;
+  assign dbg_phy_rdlvl[120:116] = idel_tap_delta_rsync_r;
+  assign dbg_phy_rdlvl[125:121] = min_rsync_marg_r;
+  assign dbg_phy_rdlvl[134:126] = clkdiv_inv_r;
+  assign dbg_phy_rdlvl[135]     = rdlvl_clkdiv_start;
+  assign dbg_phy_rdlvl[136]     = rdlvl_clkdiv_done;
+  assign dbg_phy_rdlvl[255:137] = 'b0;
+
   //***************************************************************************
   // Debug output
   //***************************************************************************
@@ -445,9 +487,11 @@ module phy_rdlvl #
   //***************************************************************************
 
   always @(posedge clk) begin
-    (* full_case, parallel_case *) case (rdlvl_done[0])
-      1'b0: rd_mux_sel_r <= #TCQ cal1_cnt_cpt_r;
-      1'b1: rd_mux_sel_r <= #TCQ cal2_cnt_rden_r;
+    (* full_case, parallel_case *) case ({rdlvl_clkdiv_done, rdlvl_done[0]})
+      2'b00: rd_mux_sel_r <= #TCQ cal1_cnt_cpt_r;
+      2'b01: rd_mux_sel_r <= #TCQ cal_clkdiv_cnt_clkdiv_r;
+      2'b10: rd_mux_sel_r <= #TCQ cal2_cnt_rden_r;   // don't care
+      2'b11: rd_mux_sel_r <= #TCQ cal2_cnt_rden_r;
     endcase
   end
 
@@ -513,7 +557,15 @@ module phy_rdlvl #
   always @(posedge clk) begin
     dlyce_rsync  <= #TCQ 'b0;
     dlyinc_rsync <= #TCQ 'b0;
-    if (DEBUG_PORT == "ON") begin
+
+    if (cal_clkdiv_dlyce_rsync_r) begin
+      // When shifting RSYNC, shift all BUFR IODELAYs. This is allowed
+      // because only one DQS-group's data is being checked at any one
+      // time, and at the end of calibration, all of the BUFR IODELAYs
+      // will be reset to the starting tap value          
+      dlyce_rsync  <= #TCQ {DQS_WIDTH{1'b1}};
+      dlyinc_rsync <= #TCQ cal_clkdiv_dlyinc_rsync_r; 
+    end else if (DEBUG_PORT == "ON") begin
       // simultaneously inc/dec all RSYNC idelays
       if (dbg_idel_up_all || dbg_idel_down_all || dbg_sel_all_idel_rsync) begin
         dlyce_rsync  <= #TCQ {4{dbg_idel_up_all | 
@@ -578,14 +630,10 @@ module phy_rdlvl #
   // combine requests to modify any of the IDELAYs into one
   assign dlyce_or = cal1_dlyce_cpt_r |
                     new_cnt_cpt_r |
-                    (cal1_state_r == CAL1_IDEL_INC_DQ);
+                    (cal1_state_r == CAL1_IDEL_INC_DQ) |
+                    cal_clkdiv_dlyce_rsync_r | 
+                    new_cnt_clkdiv_r;
   
-  // RESTORE, RC, 060409
-//  assign dlyce_or = cal1_dlyce_cpt_r |
-//                    cal1_dlyce_rsync_r |
-//                    new_cnt_cpt_r |
-//                    (cal1_state_r == CAL1_INC_DQ) ;
-
   // NOTE: Can later recode to avoid combinational path, but be careful about
   //   timing effect on main state logic
   assign pipe_wait = dlyce_or || (cnt_pipe_wait_r != PIPE_WAIT_CNT-1);
@@ -612,7 +660,8 @@ module phy_rdlvl #
       rdlvl_prech_req <= #TCQ 1'b0;
     else
       // Combine requests from all stages here
-      rdlvl_prech_req <= #TCQ cal1_prech_req_r | cal2_prech_req_r;
+      rdlvl_prech_req <= #TCQ cal1_prech_req_r | cal2_prech_req_r |
+                         cal_clkdiv_prech_req_r;
 
   //***************************************************************************
   // Shift register to store last RDDATA_SHIFT_LEN cycles of data from ISERDES
@@ -668,7 +717,9 @@ module phy_rdlvl #
   // future enhancement)
   //*****************************************************************
 
-  // Simple handshaking - when CAL1 state machine wants the OLD SR
+  assign store_sr_req = cal1_store_sr_req_r || cal_clkdiv_store_sr_req_r;
+  
+  // Simple handshaking - when calib state machines want the OLD SR  
   // value to get loaded, it requests for it to be loaded. One the
   // next sr_valid_r pulse, it does get loaded, and store_sr_done_r
   // is then pulsed asserted to indicate this, and we all go on our
@@ -679,7 +730,7 @@ module phy_rdlvl #
       store_sr_r      <= #TCQ 1'b0;
     end else begin
       store_sr_done_r <= sr_valid_r & store_sr_r;
-      if (store_sr_req_r)
+      if (store_sr_req)
         store_sr_r <= #TCQ 1'b1;
       else if (sr_valid_r && store_sr_r)
         store_sr_r <= #TCQ 1'b0;
@@ -697,13 +748,13 @@ module phy_rdlvl #
       old_sr_valid_r      <= #TCQ 1'b0;
      end else begin
       // Flag to indicate whether data in OLD_SR register is valid
-      if (store_sr_req_r)
+      if (store_sr_req)
         old_sr_valid_r <= #TCQ 1'b0;         
       else if (store_sr_done_r)
         old_sr_valid_r <= #TCQ 1'b1;
       // Immediately flush valid pipe to prevent any logic from
       // acting on compare results using previous OLD_SR data
-      if (store_sr_req_r) begin
+      if (store_sr_req) begin
         sr_match_valid_r  <= #TCQ 1'b0; 
         sr_match_valid_r1 <= #TCQ 1'b0;
       end else begin
@@ -1027,6 +1078,7 @@ module phy_rdlvl #
       cal1_dq_tap_cnt_r     <= #TCQ 5'b00000;
       cal1_dq_taps_inc_r    <= #TCQ 1'b0;
       cal1_prech_req_r      <= #TCQ 1'b0;
+      cal1_store_sr_req_r   <= #TCQ 1'b0;
       cal1_state_r          <= #TCQ CAL1_IDLE;
       cnt_idel_dec_cpt_r    <= #TCQ 6'bxxxxxx;
       cnt_idel_inc_cpt_r    <= #TCQ 5'bxxxxx;
@@ -1043,15 +1095,14 @@ module phy_rdlvl #
       right_edge_taps_r     <= #TCQ 5'bxxxxx;
       second_edge_taps_r    <= #TCQ 5'bxxxxx;
       second_edge_dq_taps_r <= #TCQ 5'bxxxxx; 
-      store_sr_req_r        <= #TCQ 1'b0; 
     end else begin
       // default (inactive) states for all "pulse" outputs
       cal1_prech_req_r    <= #TCQ 1'b0;
       cal1_dlyce_cpt_r    <= #TCQ 1'b0;
       cal1_dlyinc_cpt_r   <= #TCQ 1'b0;
+      cal1_store_sr_req_r <= #TCQ 1'b0;
       detect_edge_start_r <= #TCQ 1'b0;
       new_cnt_cpt_r       <= #TCQ 1'b0;
-      store_sr_req_r      <= #TCQ 1'b0;
       
       case (cal1_state_r)
         
@@ -1083,7 +1134,7 @@ module phy_rdlvl #
         // An edge can only be found at IODELAY taps = 0 if the read data
         // is changing during this time (possible due to jitter)
         CAL1_IDEL_STORE_FIRST: begin 
-          store_sr_req_r <= #TCQ 1'b1;
+          cal1_store_sr_req_r <= #TCQ 1'b1;
           detect_edge_start_r <= #TCQ 1'b1;
           if (store_sr_done_r)begin
             if(cal1_dq_taps_inc_r) // if using dq taps 
@@ -1166,7 +1217,7 @@ module phy_rdlvl #
         // Store the current read data into the read data shift register
         // before incrementing the tap count and doing this again 
         CAL1_IDEL_STORE_OLD: begin
-          store_sr_req_r <= #TCQ 1'b1;
+          cal1_store_sr_req_r <= #TCQ 1'b1;
           if (store_sr_done_r)begin
             if(cal1_dq_taps_inc_r) // if using dq taps
               cal1_state_r <= #TCQ CAL1_IDEL_INC_DQ;
@@ -1608,6 +1659,236 @@ module phy_rdlvl #
     rd_active_dly  <= #TCQ cal2_rd_active_dly_r;
   end
 
+  //*****************************************************************
+  // Calibration state machine for determining polarity of ISERDES
+  // CLKDIV invert control on a per-DQS group basis
+  // This stage is used to choose the best phase of the resync clock 
+  // (on a per-DQS group basis) - "best phase" meaning the phase that
+  // results in the largest possible margin in the CLK-to-RSYNC clock
+  // domain transfer within the ISERDES. 
+  // NOTE: This stage actually takes place after stage 1 calibration.
+  // For the time being, the signal naming convention associated with
+  // this stage will be known as "cal_clkdiv". However, it really is 
+  // another stage of calibration - should be stage 2, and what is
+  // currently stage 2 (rd_active_dly calibration) should be changed
+  // to stage 3. 
+  //*****************************************************************
+
+  assign rd_clkdiv_inv     = clkdiv_inv_r;
+  assign dbg_rd_clkdiv_inv = clkdiv_inv_r;
+
+  always @(posedge clk)
+    if (rst) begin
+      cal_clkdiv_clkdiv_inv_r     <= #TCQ 1'b0;
+      cal_clkdiv_cnt_clkdiv_r     <= #TCQ 'b0;      
+      cal_clkdiv_dlyce_rsync_r    <= #TCQ 1'b0;
+      cal_clkdiv_dlyinc_rsync_r   <= #TCQ 1'b0;
+      cal_clkdiv_idel_rsync_inc_r <= #TCQ 1'b0;
+      cal_clkdiv_prech_req_r      <= #TCQ 1'b0;
+      cal_clkdiv_state_r          <= #TCQ CAL_CLKDIV_IDLE;
+      cal_clkdiv_store_sr_req_r   <= #TCQ 1'b0;
+      clkdiv_inv_r                <= #TCQ 'b0;
+      idel_tap_delta_rsync_r      <= #TCQ 5'b00000;
+      min_rsync_marg_r            <= #TCQ 5'bxxxxx;      
+      new_cnt_clkdiv_r            <= #TCQ 1'b0;
+      pol_min_rsync_marg_r        <= #TCQ 1'b0;    
+      rdlvl_clkdiv_done           <= #TCQ 1'b0;
+    end else begin
+      // default (inactive) states for all "pulse" outputs
+      cal_clkdiv_dlyce_rsync_r  <= #TCQ 1'b0;
+      cal_clkdiv_prech_req_r    <= #TCQ 1'b0;
+      cal_clkdiv_store_sr_req_r <= #TCQ 1'b0;
+      new_cnt_clkdiv_r          <= #TCQ 1'b0;
+      
+      case (cal_clkdiv_state_r)        
+        
+        CAL_CLKDIV_IDLE:      
+          if (rdlvl_clkdiv_start) begin
+            if (SIM_CAL_OPTION == "SKIP_CAL") begin
+              // "Hardcoded" calibration option - for all DQS groups
+              // do not invert rsync clock  
+              clkdiv_inv_r       <= #TCQ 'b0;
+              cal_clkdiv_state_r <= #TCQ CAL_CLKDIV_DONE;
+            end else begin
+              new_cnt_clkdiv_r   <= #TCQ 1'b1;
+              cal_clkdiv_state_r <= #TCQ CAL_CLKDIV_NEW_DQS_WAIT;
+            end
+          end          
+
+        // Wait for various MUXes associated with a new DQS group to
+        // change - also gives time for the read data shift register
+        // to load with the updated data for the new DQS group
+        CAL_CLKDIV_NEW_DQS_WAIT: begin
+          // Reset smallest recorded margin
+          min_rsync_marg_r     <= #TCQ 5'b10000;
+          pol_min_rsync_marg_r <= 1'b0;
+          if (!pipe_wait)
+            cal_clkdiv_state_r <= #TCQ CAL_CLKDIV_IDEL_STORE_REF;
+        end
+
+        // For a given polarity of the rsync clock, save the initial data
+        // value and use this as a reference to decide when an "edge" has 
+        // been encountered as the rsync clock is shifted
+        CAL_CLKDIV_IDEL_STORE_REF: begin 
+          cal_clkdiv_store_sr_req_r <= #TCQ 1'b1;
+          if (store_sr_done_r)
+            cal_clkdiv_state_r <= #TCQ CAL_CLKDIV_DETECT_EDGE;
+        end
+
+        // Check for presence of cpt-rsync clock synchronization "edge"
+        // This occurs when the captured data sequence changes as the RSYNC
+        // clock is shifted
+        CAL_CLKDIV_DETECT_EDGE:
+          if (found_edge_valid_r) begin
+            // If an edge found, or we've run out of taps looking for an 
+            // edge, then:
+            //  (1) If the current margin found is the smallest, then
+            //      record it, as well as whether the CLKDIV was inverted
+            //      or not when this margin was measured
+            //  (2) Reverse the direction of IDEL_RSYNC_INC and/or invert
+            //      CLKDIV. We only invert CLKDIV if we just finished
+            //      incrementing the RSYNC IODELAY with CLKDIV not inverted
+            //  (3) Restore the original RSYNC clock delay in preparation
+            //      for either further measurements with the current DQS
+            //      group, or with the next DQS group       
+            if ((idel_tap_delta_rsync_r == 5'b01111) || found_edge_r) begin 
+              // record the margin if it's the smallest found so far
+              if (idel_tap_delta_rsync_r < min_rsync_marg_r) begin 
+                min_rsync_marg_r     <= #TCQ idel_tap_delta_rsync_r;
+                pol_min_rsync_marg_r <= #TCQ cal_clkdiv_clkdiv_inv_r;
+              end
+              // Reverse direction of RSYNC inc/dec
+              cal_clkdiv_idel_rsync_inc_r <= #TCQ ~cal_clkdiv_idel_rsync_inc_r;
+              // Check whether to also invert CLKDIV (see above comments)
+              if (cal_clkdiv_idel_rsync_inc_r) begin
+                cal_clkdiv_clkdiv_inv_r               
+                  <= #TCQ ~cal_clkdiv_clkdiv_inv_r;
+                clkdiv_inv_r[cal_clkdiv_cnt_clkdiv_r] 
+                  <= #TCQ ~cal_clkdiv_clkdiv_inv_r;
+              end
+              // Proceed to restoring original RSYNC clock delay
+              cal_clkdiv_state_r <= #TCQ CAL_CLKDIV_IDEL_SET_MIDPT_RSYNC;
+            end else begin
+              // Otherwise, increment or decrement RSYNC phase, keep 
+              // looking for an edge
+              cal_clkdiv_state_r <= #TCQ CAL_CLKDIV_IDEL_INCDEC_RSYNC;
+            end
+          end
+            
+        // Increment or decrement RSYNC IODELAY by 1
+        CAL_CLKDIV_IDEL_INCDEC_RSYNC: begin
+          cal_clkdiv_dlyce_rsync_r     <= #TCQ 1'b1;
+          cal_clkdiv_dlyinc_rsync_r    <= #TCQ cal_clkdiv_idel_rsync_inc_r;
+          cal_clkdiv_state_r           
+            <= #TCQ CAL_CLKDIV_IDEL_INCDEC_RSYNC_WAIT;
+          idel_tap_delta_rsync_r <= #TCQ idel_tap_delta_rsync_r + 1;
+        end
+        
+        // Wait for RSYNC IODELAY, internal nodes within ISERDES, and 
+        // comparison logic shift register to settle, before checking again 
+        // for an edge
+        CAL_CLKDIV_IDEL_INCDEC_RSYNC_WAIT: begin
+          if (!pipe_wait)
+            cal_clkdiv_state_r <= #TCQ CAL_CLKDIV_DETECT_EDGE;
+        end
+        
+        // Restore RSYNC IODELAY to starting value
+        CAL_CLKDIV_IDEL_SET_MIDPT_RSYNC:
+          // Check case if we found an edge at starting tap (possible if 
+          // we start at or near (near enough for jitter to affect us) 
+          // the transfer point between the CLK and RSYNC clock domains
+          if (idel_tap_delta_rsync_r == 5'b00000)
+            cal_clkdiv_state_r <= #TCQ CAL_CLKDIV_NEXT_CHECK;
+          else begin
+            cal_clkdiv_dlyce_rsync_r  <= #TCQ 1'b1;
+            // inc/dec the RSYNC IODELAY in the opposite directionas
+            // the just-finished search. This is a bit confusing, but note
+            // that after finishing the search, we always invert 
+            // IDEL_RSYNC_INC prior to arriving at this state  
+            cal_clkdiv_dlyinc_rsync_r <= #TCQ cal_clkdiv_idel_rsync_inc_r;
+            idel_tap_delta_rsync_r <= #TCQ idel_tap_delta_rsync_r - 1;
+            if (idel_tap_delta_rsync_r == 5'b00001)
+              cal_clkdiv_state_r <= #TCQ CAL_CLKDIV_NEXT_CHECK;
+          end     
+          
+        // Determine where to go next:
+        //  (1) start looking for an edge in the other direction (CLKDIV
+        //      polarity unchanged)
+        //  (2) change CLKDIV polarity, resample and record a reference
+        //      data value, and start looking for an edge
+        //  (3) if we've searched all 4 possibilities (CLKDIV inverted, 
+        //      not inverted, RSYNC shifted in left and right directions) 
+        //      then decide which clock polarity is best to use for CLKDIV
+        //      and proceed to next DQS
+        // NOTE: When we're comparing the current "state" (using both
+        //       IDEL_RSYNC_INC and CLKDIV_INV) we are comparing what the
+        //       next value of these signals will be, not what they were
+        //       for the phase of edge detection just finished. Therefore
+        //       IDEL_RSYNC_INC=0 and CLKDIV_INV=1 means we are about to
+        //       decrement RSYNC with CLKDIV inverted (or in other words,
+        //       we just searched with incrementing RSYNC, and CLKDIV not
+        //       inverted)
+        CAL_CLKDIV_NEXT_CHECK:
+          // Wait for any residual change effects (CLKDIV inversion, RSYNC
+          // IODELAY inc/dec) from previous state to finish
+          if (!pipe_wait) begin   
+            if (!cal_clkdiv_idel_rsync_inc_r && !cal_clkdiv_clkdiv_inv_r) begin
+              // If we've searched all 4 possibilities, then decide which
+              // is the "best" clock polarity (which is to say, whichever 
+              // polarity which DID NOT result in the minimum margin found) 
+              // to use and proceed to next DQS
+              if (SIM_CAL_OPTION == "FAST_CAL")
+                // if simulating, and "shortcuts" for calibration enabled, 
+                // apply results to all other elements (i.e. assume delay 
+                // on all bits/bytes is same)
+                clkdiv_inv_r <= #TCQ {DQS_WIDTH{~pol_min_rsync_marg_r}};
+              else
+                // Otherwise, apply result only to current DQS group
+                clkdiv_inv_r[cal_clkdiv_cnt_clkdiv_r] 
+                  <= #TCQ ~pol_min_rsync_marg_r;
+
+              cal_clkdiv_state_r <= #TCQ CAL_CLKDIV_NEXT_DQS;
+            end else if (!cal_clkdiv_idel_rsync_inc_r && 
+                         cal_clkdiv_clkdiv_inv_r)
+              // If we've finished searching with CLKDIV not inverted
+              // Now store a new reference value for edge-detection
+              // comparison purposes and begin looking for an edge
+              cal_clkdiv_state_r <= #TCQ CAL_CLKDIV_IDEL_STORE_REF;
+            else
+              // Otherwise, we've just finished checking by decrementing
+              // RSYNC. Now look for an edge by incrementing RSYNC 
+              // (keep the CLKDIV polarity unchanged)  
+              cal_clkdiv_state_r <= #TCQ CAL_CLKDIV_DETECT_EDGE;          
+          end
+
+        // Determine whether we're done, or have more DQS's to calibrate
+        // Also request precharge after every byte
+        CAL_CLKDIV_NEXT_DQS: begin
+          cal_clkdiv_prech_req_r <= #TCQ 1'b1;
+
+          // Wait until precharge that occurs in between calibration of
+          // DQS groups is finished
+          if (prech_done) begin   
+            if ((cal_clkdiv_cnt_clkdiv_r >= DQS_WIDTH-1) ||
+                (SIM_CAL_OPTION == "FAST_CAL"))
+              // If FAST_CAL enabled, only cal first DQS group - the results
+              // (aka CLKDIV invert) have been applied to all DQS groups
+              cal_clkdiv_state_r      <= #TCQ CAL_CLKDIV_DONE;         
+            else begin
+              // Otherwise increment DQS group counter and keep going
+              new_cnt_clkdiv_r  <= #TCQ 1'b1;
+              cal_clkdiv_cnt_clkdiv_r <= #TCQ cal_clkdiv_cnt_clkdiv_r + 1;
+              cal_clkdiv_state_r      <= #TCQ CAL_CLKDIV_NEW_DQS_WAIT;
+            end
+          end
+        end
+            
+        // Done with this stage of calibration
+        CAL_CLKDIV_DONE:
+          rdlvl_clkdiv_done <= #TCQ 1'b1;
+        
+      endcase
+    end
    
   //*****************************************************************
   // Stage 2 state machine
@@ -1659,13 +1940,13 @@ module phy_rdlvl #
               // values based on CAS latency
               cal2_state_r <= #TCQ CAL2_DONE;
               case (nCL)
-                5:  cal2_rd_bitslip_cnt_r <= #TCQ {DQS_WIDTH{2'b00}};
-                6:  cal2_rd_bitslip_cnt_r <= #TCQ {DQS_WIDTH{2'b10}};
-                7:  cal2_rd_bitslip_cnt_r <= #TCQ {DQS_WIDTH{2'b00}};
-                8:  cal2_rd_bitslip_cnt_r <= #TCQ {DQS_WIDTH{2'b10}};
-                9:  cal2_rd_bitslip_cnt_r <= #TCQ {DQS_WIDTH{2'b00}};
-                10: cal2_rd_bitslip_cnt_r <= #TCQ {DQS_WIDTH{2'b10}};
-                11: cal2_rd_bitslip_cnt_r <= #TCQ {DQS_WIDTH{2'b00}};
+                5:  cal2_rd_bitslip_cnt_r <= #TCQ {DQS_WIDTH{2'b11}};
+                6:  cal2_rd_bitslip_cnt_r <= #TCQ {DQS_WIDTH{2'b01}};
+                7:  cal2_rd_bitslip_cnt_r <= #TCQ {DQS_WIDTH{2'b11}};
+                8:  cal2_rd_bitslip_cnt_r <= #TCQ {DQS_WIDTH{2'b01}};
+                9:  cal2_rd_bitslip_cnt_r <= #TCQ {DQS_WIDTH{2'b11}};
+                10: cal2_rd_bitslip_cnt_r <= #TCQ {DQS_WIDTH{2'b01}};
+                11: cal2_rd_bitslip_cnt_r <= #TCQ {DQS_WIDTH{2'b11}};
               endcase
             end else
               cal2_state_r <= #TCQ CAL2_READ_WAIT;
@@ -1794,13 +2075,13 @@ module phy_rdlvl #
       // specific for a testbench w/o additional net delays using a Micron
       // memory model. Any other configuration may not work.
       case (nCL)
-        5:  cal2_rd_active_dly_r <= #TCQ 11;
-        6:  cal2_rd_active_dly_r <= #TCQ 11;
-        7:  cal2_rd_active_dly_r <= #TCQ 12;
-        8:  cal2_rd_active_dly_r <= #TCQ 12;
-        9:  cal2_rd_active_dly_r <= #TCQ 13;
-        10: cal2_rd_active_dly_r <= #TCQ 13;
-        11: cal2_rd_active_dly_r <= #TCQ 14;
+        5:  cal2_rd_active_dly_r <= #TCQ 10;
+        6:  cal2_rd_active_dly_r <= #TCQ 10;
+        7:  cal2_rd_active_dly_r <= #TCQ 11;
+        8:  cal2_rd_active_dly_r <= #TCQ 11;
+        9:  cal2_rd_active_dly_r <= #TCQ 12;
+        10: cal2_rd_active_dly_r <= #TCQ 12;
+        11: cal2_rd_active_dly_r <= #TCQ 13;
       endcase
     else if (!rdlvl_done[1])
       // Before calibration is complete, set RD_ACTIVE to minimum delay

@@ -49,10 +49,10 @@
 //   ____  ____
 //  /   /\/   /
 // /___/  \  /    Vendor: Xilinx
-// \   \   \/     Version: 3.5
+// \   \   \/     Version: 3.9
 //  \   \         Application: MIG
 //  /   /         Filename: phy_dqs_iob.v
-// /___/   /\     Date Last Modified: $Date: 2010/03/21 17:21:47 $
+// /___/   /\     Date Last Modified: $Date: 2011/06/02 07:18:03 $
 // \   \  /  \    Date Created:Aug 03 2009
 //  \___\/\___\
 //
@@ -66,11 +66,11 @@
 //*****************************************************************************
 
 /******************************************************************************
-**$Id: phy_dqs_iob.v,v 1.1.2.1 2010/03/21 17:21:47 jschmitz Exp $
-**$Date: 2010/03/21 17:21:47 $
-**$Author: jschmitz $
-**$Revision: 1.1.2.1 $
-**$Source: /devl/xcs/repo/env/Databases/ip/src2/M/mig_v3_5/data/dlib/virtex6/ddr3_sdram/verilog/rtl/phy/Attic/phy_dqs_iob.v,v $
+**$Id: phy_dqs_iob.v,v 1.1 2011/06/02 07:18:03 mishra Exp $
+**$Date: 2011/06/02 07:18:03 $
+**$Author: mishra $
+**$Revision: 1.1 $
+**$Source: /devl/xcs/repo/env/Databases/ip/src2/O/mig_v3_9/data/dlib/virtex6/ddr3_sdram/verilog/rtl/phy/phy_dqs_iob.v,v $
 ******************************************************************************/
 
 `timescale 1ps/1ps
@@ -100,6 +100,7 @@ module phy_dqs_iob #
    // Read datapath I/F
    input [1:0]  rd_bitslip_cnt,
    input [1:0]  rd_clkdly_cnt,
+   input        rd_clkdiv_inv,   
    output       rd_dqs_rise0, // DQS captured in clk_cpt domain
    output       rd_dqs_fall0, // used by Phase Detector. Monitor DQS
    output       rd_dqs_rise1,
@@ -132,6 +133,9 @@ module phy_dqs_iob #
   wire          iserdes_clk;
   wire          iserdes_clkb;
   wire [5:0]    iserdes_q;
+  wire [5:0]    iserdes_q_mux;  
+  reg [5:0]     iserdes_q_neg_r;
+  reg [5:0]     iserdes_q_r;    
   wire [3:0]    rddata;
 
   //***************************************************************************
@@ -176,7 +180,7 @@ module phy_dqs_iob #
        .DATAOUT     (dqs_p_iodelay),
        .C           (clk_rsync),
        .CE          (1'b0),
-       .DATAIN      (),
+       .DATAIN      (1'b0),
        .IDATAIN     (dqs_ibuf_p),
        .INC         (1'b0),
        .ODATAIN     (dqs_p_oq),
@@ -298,7 +302,7 @@ module phy_dqs_iob #
     (
      .DATA_RATE         ("DDR"),
      .DATA_WIDTH        (4),
-     .DYN_CLKDIV_INV_EN ("FALSE"),
+     .DYN_CLKDIV_INV_EN ("TRUE"),
      .DYN_CLK_INV_EN    ("FALSE"),
      .INIT_Q1           (1'b0),
      .INIT_Q2           (1'b0),
@@ -333,7 +337,7 @@ module phy_dqs_iob #
        .CLKDIV       (clk_rsync),
        .D            (),
        .DDLY         (dqs_p_iodelay),
-       .DYNCLKDIVSEL (1'b0),
+       .DYNCLKDIVSEL (rd_clkdiv_inv),
        .DYNCLKSEL    (1'b0),
        .OCLK         (clk_mem),    // Not used, but connect to avoid DRC
        .OFB          (1'b0),
@@ -342,6 +346,23 @@ module phy_dqs_iob #
        .SHIFTIN2     (1'b0)
        );
 
+  //*****************************************************************
+  // Selectable registers on ISERDES data outputs depending on
+  // whether DYNCLKDIVSEL is enabled or not
+  //*****************************************************************
+  
+  // Capture first using CLK_RSYNC falling edge domain, then transfer 
+  // to rising edge CLK_RSYNC. We could also attempt to transfer
+  // directly from falling edge CLK_RSYNC domain (in ISERDES) to
+  // rising edge CLK_RSYNC domain in fabric. This is allowed as long
+  // as the half-cycle timing on these paths can be met. 
+  always @(negedge clk_rsync)
+    iserdes_q_neg_r <= #TCQ iserdes_q;
+  always @(posedge clk_rsync)
+    iserdes_q_r     <= #TCQ iserdes_q_neg_r;
+  
+  assign iserdes_q_mux = (rd_clkdiv_inv) ? iserdes_q_r : iserdes_q;
+  
   //*****************************************************************
   // Read bitslip logic
   //*****************************************************************
@@ -355,7 +376,7 @@ module phy_dqs_iob #
        .clk         (clk_rsync),
        .bitslip_cnt (rd_bitslip_cnt),
        .clkdly_cnt  (rd_clkdly_cnt),
-       .din         (iserdes_q),
+       .din         (iserdes_q_mux),
        .qout        (rddata)
        );
 

@@ -49,7 +49,7 @@
 //   ____  ____
 //  /   /\/   /
 // /___/  \  /    Vendor                : Xilinx
-// \   \   \/     Version               : 3.5
+// \   \   \/     Version               : 3.9
 //  \   \         Application           : MIG
 //  /   /         Filename              : col_mach.v
 // /___/   /\     Date Last Modified    : $date$
@@ -320,7 +320,18 @@ endfunction // clogb2
   input [BANK_WIDTH-1:0] col_ba;
   input [ROW_WIDTH-1:0] col_row;
   input [ROW_WIDTH-1:0] col_a;
-  wire [11:0] col_a_full = {col_a[12], col_a[11], col_a[9:0]};
+  
+  // Real column address (skip A10/AP and A12/BC#). The maximum width is 12;
+  // the width will be tailored for the target DRAM downstream.
+  wire [11:0] col_a_full;
+  
+  // Minimum row width is 12; take remaining 11 bits after omitting A10/AP
+  assign col_a_full[10:0] = {col_a[11], col_a[9:0]};
+  
+  // Get the 12th bit when row address width accommodates it; omit A12/BC#
+  assign col_a_full[11] = ROW_WIDTH >= 14 ? col_a[13] : 0;
+
+  // Extract only the width of the target DRAM
   wire [COL_WIDTH-1:0] col_a_extracted = col_a_full[COL_WIDTH-1:0];
 
   localparam MC_ERR_LINE_WIDTH = MC_ERR_ADDR_WIDTH-DATA_BUF_OFFSET_WIDTH;

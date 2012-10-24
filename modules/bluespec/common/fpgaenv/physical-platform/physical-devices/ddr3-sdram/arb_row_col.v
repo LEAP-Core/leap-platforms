@@ -49,7 +49,7 @@
 //   ____  ____
 //  /   /\/   /
 // /___/  \  /    Vendor                : Xilinx
-// \   \   \/     Version               : 3.5
+// \   \   \/     Version               : 3.9
 //  \   \         Application           : MIG
 //  /   /         Filename              : arb_row_col.v
 // /___/   /\     Date Last Modified    : $date$
@@ -84,7 +84,7 @@
 module arb_row_col #
   (
    parameter TCQ = 100,
-   parameter ADDR_CMD_MODE            = "UNBUF",
+   parameter ADDR_CMD_MODE            = "1T",
    parameter EARLY_WR_DATA_ADDR       = "OFF",
    parameter nBANK_MACHS              = 4,
    parameter nCK_PER_CLK              = 2,

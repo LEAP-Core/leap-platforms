@@ -49,10 +49,10 @@
 //   ____  ____
 //  /   /\/   /
 // /___/  \  /    Vendor: Xilinx
-// \   \   \/     Version: 3.5
+// \   \   \/     Version: 3.9
 //  \   \         Application: MIG
 //  /   /         Filename: phy_dq_iob.v
-// /___/   /\     Date Last Modified: $Date: 2010/03/21 17:21:47 $
+// /___/   /\     Date Last Modified: $Date: 2011/06/02 07:18:03 $
 // \   \  /  \    Date Created: Aug 03 2009
 //  \___\/\___\
 //
@@ -66,11 +66,11 @@
 //*****************************************************************************
 
 /******************************************************************************
-**$Id: phy_dq_iob.v,v 1.1.2.1 2010/03/21 17:21:47 jschmitz Exp $
-**$Date: 2010/03/21 17:21:47 $
-**$Author: jschmitz $
-**$Revision: 1.1.2.1 $
-**$Source: /devl/xcs/repo/env/Databases/ip/src2/M/mig_v3_5/data/dlib/virtex6/ddr3_sdram/verilog/rtl/phy/Attic/phy_dq_iob.v,v $
+**$Id: phy_dq_iob.v,v 1.1 2011/06/02 07:18:03 mishra Exp $
+**$Date: 2011/06/02 07:18:03 $
+**$Author: mishra $
+**$Revision: 1.1 $
+**$Source: /devl/xcs/repo/env/Databases/ip/src2/O/mig_v3_9/data/dlib/virtex6/ddr3_sdram/verilog/rtl/phy/phy_dq_iob.v,v $
 ******************************************************************************/
 
 `timescale 1ps/1ps
@@ -108,6 +108,7 @@ module phy_dq_iob #
    // Read datapath I/F
    input [1:0]  rd_bitslip_cnt,
    input [1:0]  rd_clkdly_cnt,
+   input        rd_clkdiv_inv,
    output       rd_data_rise0,
    output       rd_data_fall0,
    output       rd_data_rise1,
@@ -135,6 +136,9 @@ module phy_dq_iob #
   wire       iserdes_clk;
   wire       iserdes_clkb;
   wire [5:0] iserdes_q;
+  wire [5:0] iserdes_q_mux;  
+  reg [5:0]  iserdes_q_neg_r;
+  reg [5:0]  iserdes_q_r; 
   reg        ocb_d1;
   reg        ocb_d2;
   reg        ocb_d3;
@@ -201,7 +205,7 @@ module phy_dq_iob #
        .DATAOUT     (dq_iodelay),
        .C           (clk_rsync),
        .CE          (1'b0),
-       .DATAIN      (),
+       .DATAIN      (1'b0),
        .IDATAIN     (dq_in),
        .INC         (1'b0),
        .ODATAIN     (dq_oq),
@@ -440,10 +444,10 @@ module phy_dq_iob #
         end
       end else if (nCWL == 4) begin: gen_ddr2_ncwl4
         always @(posedge clk) begin
-          ocb_d1 =  wr_data_rise1_r1;
-          ocb_d2 =  wr_data_fall1_r1;
-          ocb_d3 =  wr_data_rise0;
-          ocb_d4 =  wr_data_fall0;
+          ocb_d1 <=  wr_data_rise1_r1;
+          ocb_d2 <=  wr_data_fall1_r1;
+          ocb_d3 <=  wr_data_rise0;
+          ocb_d4 <=  wr_data_fall0;
         end
       end else if (nCWL == 5) begin: gen_ddr2_ncwl5
         always @(posedge clk) begin
@@ -454,10 +458,10 @@ module phy_dq_iob #
         end
       end else if (nCWL == 6) begin: gen_ddr2_ncwl6
         always @(posedge clk) begin
-          ocb_d1 =  wr_data_rise1_r2;
-          ocb_d2 =  wr_data_fall1_r2;
-          ocb_d3 =  wr_data_rise0_r1;
-          ocb_d4 =  wr_data_fall0_r1;
+          ocb_d1 <=  wr_data_rise1_r2;
+          ocb_d2 <=  wr_data_fall1_r2;
+          ocb_d3 <=  wr_data_rise0_r1;
+          ocb_d4 <=  wr_data_fall0_r1;
         end
       end       
     end
@@ -531,7 +535,7 @@ module phy_dq_iob #
     (
      .DATA_RATE         ("DDR"),
      .DATA_WIDTH        (4),
-     .DYN_CLKDIV_INV_EN ("FALSE"),
+     .DYN_CLKDIV_INV_EN ("TRUE"),
      .DYN_CLK_INV_EN    ("FALSE"),
      .INIT_Q1           (1'b0),
      .INIT_Q2           (1'b0),
@@ -566,7 +570,7 @@ module phy_dq_iob #
        .CLKDIV       (clk_rsync),
        .D            (),
        .DDLY         (dq_iodelay),
-       .DYNCLKDIVSEL (1'b0),
+       .DYNCLKDIVSEL (rd_clkdiv_inv),
        .DYNCLKSEL    (1'b0),
        .OCLK         (clk_mem),    // Not used, but connect to avoid DRC
        .OFB          (1'b0),
@@ -576,6 +580,23 @@ module phy_dq_iob #
        );
 
   //*****************************************************************
+  // Selectable registers on ISERDES data outputs depending on
+  // whether DYNCLKDIVSEL is enabled or not
+  //*****************************************************************
+  
+  // Capture first using CLK_RSYNC falling edge domain, then transfer 
+  // to rising edge CLK_RSYNC. We could also attempt to transfer
+  // directly from falling edge CLK_RSYNC domain (in ISERDES) to
+  // rising edge CLK_RSYNC domain in fabric. This is allowed as long
+  // as the half-cycle timing on these paths can be met. 
+  always @(negedge clk_rsync)
+    iserdes_q_neg_r <= #TCQ iserdes_q;
+  always @(posedge clk_rsync)
+    iserdes_q_r     <= #TCQ iserdes_q_neg_r;
+  
+  assign iserdes_q_mux = (rd_clkdiv_inv) ? iserdes_q_r : iserdes_q;
+  
+  //*****************************************************************  
   // Read bitslip logic
   //*****************************************************************
 
@@ -588,7 +609,7 @@ module phy_dq_iob #
      .clk         (clk_rsync),
      .bitslip_cnt (rd_bitslip_cnt),
      .clkdly_cnt  (rd_clkdly_cnt),
-     .din         (iserdes_q),
+     .din         (iserdes_q_mux),
      .qout        (rddata)
      );
 

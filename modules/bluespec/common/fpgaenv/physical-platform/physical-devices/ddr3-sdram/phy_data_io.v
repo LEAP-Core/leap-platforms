@@ -49,10 +49,10 @@
 //   ____  ____
 //  /   /\/   /
 // /___/  \  /    Vendor: Xilinx
-// \   \   \/     Version: 3.5
+// \   \   \/     Version: 3.9
 //  \   \         Application: MIG
 //  /   /         Filename: phy_data_io.v
-// /___/   /\     Date Last Modified: $Date: 2010/03/21 17:21:47 $
+// /___/   /\     Date Last Modified: $Date: 2011/06/02 07:18:02 $
 // \   \  /  \    Date Created: Aug 03 2009
 //  \___\/\___\
 //
@@ -65,11 +65,11 @@
 //*****************************************************************************
 
 /******************************************************************************
-**$Id: phy_data_io.v,v 1.1.2.1 2010/03/21 17:21:47 jschmitz Exp $
-**$Date: 2010/03/21 17:21:47 $
-**$Author: jschmitz $
-**$Revision: 1.1.2.1 $
-**$Source: /devl/xcs/repo/env/Databases/ip/src2/M/mig_v3_5/data/dlib/virtex6/ddr3_sdram/verilog/rtl/phy/Attic/phy_data_io.v,v $
+**$Id: phy_data_io.v,v 1.1 2011/06/02 07:18:02 mishra Exp $
+**$Date: 2011/06/02 07:18:02 $
+**$Author: mishra $
+**$Revision: 1.1 $
+**$Source: /devl/xcs/repo/env/Databases/ip/src2/O/mig_v3_9/data/dlib/virtex6/ddr3_sdram/verilog/rtl/phy/phy_data_io.v,v $
 ******************************************************************************/
 
 `timescale 1ps/1ps
@@ -129,6 +129,7 @@ module phy_data_io #
    // Read datapath I/F
    input [2*DQS_WIDTH-1:0]   rd_bitslip_cnt,
    input [2*DQS_WIDTH-1:0]   rd_clkdly_cnt,
+   input [DQS_WIDTH-1:0]     rd_clkdiv_inv,
    output [DQ_WIDTH-1:0]     rd_data_rise0,
    output [DQ_WIDTH-1:0]     rd_data_fall0,
    output [DQ_WIDTH-1:0]     rd_data_rise1,
@@ -175,11 +176,13 @@ module phy_data_io #
 
   generate
     genvar c0_i;
+    if (nDQS_COL0 > 0) begin: gen_c0    
     for (c0_i = 0; c0_i < nDQS_COL0; c0_i = c0_i + 1) begin: gen_loop_c0
       always @(clk_rsync[0])
         clk_rsync_dqs[DQS_LOC_COL0[8*c0_i+7-:8]] = clk_rsync[0];
       always @(rst_rsync[0])
         rst_rsync_dqs[DQS_LOC_COL0[8*c0_i+7-:8]] = rst_rsync[0];
+    end
     end
   endgenerate
 
@@ -238,17 +241,19 @@ module phy_data_io #
 
   generate
     genvar dqs_i;
-    reg rst_dqs_r;
-    // synthesis attribute max_fanout of rst_dqs_r is 1
-    // synthesis attribute shreg_extract of rst_dqs_r is "no";  
-    // synthesis attribute equivalent_register_removal of rst_dqs_r is "no"
-    always @(posedge clk)
-      if (rst)
-        rst_dqs_r <= #TCQ 1'b1;
-      else
-        rst_dqs_r <= #TCQ 'b0;
-   
     for (dqs_i = 0; dqs_i < DQS_WIDTH; dqs_i = dqs_i+1) begin: gen_dqs
+      reg rst_dqs_r /* synthesis syn_maxfan = 1 */
+                    /* synthesis syn_preserve = 1 */
+                    /* synthesis syn_srlstyle="noextractff_srl" */;
+      // synthesis attribute max_fanout of rst_dqs_r is 1
+      // synthesis attribute shreg_extract of rst_dqs_r is "no";  
+      // synthesis attribute equivalent_register_removal of rst_dqs_r is "no"      
+      always @(posedge clk)
+        if (rst)
+          rst_dqs_r <= #TCQ 1'b1;
+        else
+          rst_dqs_r <= #TCQ 'b0;
+
       phy_dqs_iob #
         (
          .DRAM_TYPE       (DRAM_TYPE),
@@ -270,6 +275,7 @@ module phy_data_io #
            .dqs_rst         (dqs_rst[4*dqs_i+:4]),
            .rd_bitslip_cnt  (rd_bitslip_cnt[2*dqs_i+:2]),
            .rd_clkdly_cnt   (rd_clkdly_cnt[2*dqs_i+:2]),
+           .rd_clkdiv_inv   (rd_clkdiv_inv[dqs_i]),
            .rd_dqs_rise0    (rd_dqs_rise0[dqs_i]),
            .rd_dqs_fall0    (rd_dqs_fall0[dqs_i]),
            .rd_dqs_rise1    (rd_dqs_rise1[dqs_i]),
@@ -287,18 +293,20 @@ module phy_data_io #
 
   generate
     genvar dm_i;
-    reg rst_dm_r;
-    // synthesis attribute max_fanout of rst_dm_r is 1
-    // synthesis attribute shreg_extract of rst_dm_r is "no";  
-    // synthesis attribute equivalent_register_removal of rst_dm_r is "no"
-    always @(posedge clk)
-      if (rst)
-        rst_dm_r <= #TCQ 1'b1;
-      else
-        rst_dm_r <= #TCQ 'b0;
-   
     if (USE_DM_PORT) begin: gen_dm_inst
       for (dm_i = 0; dm_i < DM_WIDTH; dm_i = dm_i+1) begin: gen_dm
+        reg rst_dm_r /* synthesis syn_maxfan = 1 */
+                     /* synthesis syn_preserve = 1 */
+                     /* synthesis syn_srlstyle="noextractff_srl" */;
+        // synthesis attribute max_fanout of rst_dm_r is 1
+        // synthesis attribute shreg_extract of rst_dm_r is "no";  
+        // synthesis attribute equivalent_register_removal of rst_dm_r is "no"
+	always @(posedge clk)
+          if (rst)
+            rst_dm_r <= #TCQ 1'b1;
+          else
+            rst_dm_r <= #TCQ 'b0;
+
         phy_dm_iob #
           (
            .TCQ             (TCQ),
@@ -335,17 +343,19 @@ module phy_data_io #
 
   generate
     genvar dq_i;
-    reg rst_dq_r;
-    // synthesis attribute max_fanout of rst_dq_r is 1
-    // synthesis attribute shreg_extract of rst_dq_r is "no";  
-    // synthesis attribute equivalent_register_removal of rst_dq_r is "no"
-    always @(posedge clk)
-      if (rst)
-        rst_dq_r <= #TCQ 1'b1;
-      else
-        rst_dq_r <= #TCQ 'b0;
-   
     for (dq_i = 0; dq_i < DQ_WIDTH; dq_i = dq_i+1) begin: gen_dq
+      reg rst_dq_r /* synthesis syn_maxfan = 1 */
+                   /* synthesis syn_preserve = 1 */
+                   /* synthesis syn_srlstyle="noextractff_srl" */;
+      // synthesis attribute max_fanout of rst_dq_r is 1
+      // synthesis attribute shreg_extract of rst_dq_r is "no";  
+      // synthesis attribute equivalent_register_removal of rst_dq_r is "no"
+      always @(posedge clk)
+        if (rst)
+          rst_dq_r <= #TCQ 1'b1;
+        else
+          rst_dq_r <= #TCQ 'b0;
+   
       phy_dq_iob #
         (
          .TCQ             (TCQ),
@@ -375,6 +385,7 @@ module phy_data_io #
            .wr_data_fall1  (wr_data_fall1[dq_i]),
            .rd_bitslip_cnt (rd_bitslip_cnt[2*(dq_i/DRAM_WIDTH)+:2]),
            .rd_clkdly_cnt  (rd_clkdly_cnt[2*(dq_i/DRAM_WIDTH)+:2]),
+           .rd_clkdiv_inv  (rd_clkdiv_inv[dq_i/DRAM_WIDTH]),
            .rd_data_rise0  (rd_data_rise0[dq_i]),
            .rd_data_fall0  (rd_data_fall0[dq_i]),
            .rd_data_rise1  (rd_data_rise1[dq_i]),

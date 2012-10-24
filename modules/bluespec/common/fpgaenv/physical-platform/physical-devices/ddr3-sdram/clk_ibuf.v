@@ -49,10 +49,10 @@
 //   ____  ____
 //  /   /\/   /
 // /___/  \  /    Vendor: Xilinx
-// \   \   \/     Version:3.5
+// \   \   \/     Version:3.9
 //  \   \         Application: MIG
 //  /   /         Filename: clk_ibuf.v 
-// /___/   /\     Date Last Modified: $Date: 2010/03/21 17:21:47 $
+// /___/   /\     Date Last Modified: $Date: 2011/06/02 07:18:00 $
 // \   \  /  \    Date Created:Mon Aug 3 2009 
 //  \___\/\___\
 //

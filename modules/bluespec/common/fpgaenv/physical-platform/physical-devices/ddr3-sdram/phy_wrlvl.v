@@ -49,10 +49,10 @@
 //   ____  ____
 //  /   /\/   /
 // /___/  \  /    Vendor: Xilinx
-// \   \   \/     Version: 3.5 
+// \   \   \/     Version: 3.9 
 //  \   \         Application: MIG
 //  /   /         Filename: phy_wrlvl.v
-// /___/   /\     Date Last Modified: $Date: 2010/05/14 20:59:48 $
+// /___/   /\     Date Last Modified: $Date: 2011/06/02 07:18:04 $
 // \   \  /  \    Date Created: Mon Jun 23 2008
 //  \___\/\___\
 //
@@ -78,11 +78,11 @@
 //*****************************************************************************
 
 /******************************************************************************
-**$Id: phy_wrlvl.v,v 1.1.2.5 2010/05/14 20:59:48 mgeorge Exp $
-**$Date: 2010/05/14 20:59:48 $
-**$Author: mgeorge $
-**$Revision: 1.1.2.5 $
-**$Source: /devl/xcs/repo/env/Databases/ip/src2/M/mig_v3_5/data/dlib/virtex6/ddr3_sdram/verilog/rtl/phy/Attic/phy_wrlvl.v,v $
+**$Id: phy_wrlvl.v,v 1.1 2011/06/02 07:18:04 mishra Exp $
+**$Date: 2011/06/02 07:18:04 $
+**$Author: mishra $
+**$Revision: 1.1 $
+**$Source: /devl/xcs/repo/env/Databases/ip/src2/O/mig_v3_9/data/dlib/virtex6/ddr3_sdram/verilog/rtl/phy/phy_wrlvl.v,v $
 ******************************************************************************/
 
 `timescale 1ps/1ps
@@ -112,6 +112,7 @@ module phy_wrlvl #
    input                        rdlvl_error,
    // read level stage 2 failing byte
    input [DQS_CNT_WIDTH-1:0]    rdlvl_err_byte,
+   input [1:0]                  rdlvl_done,
                                 
    output                       wr_level_done,
    // to phy_init for cs logic
@@ -146,7 +147,7 @@ module phy_wrlvl #
    localparam WL_WAIT_DQ      = 4'h8;
 
 
-   integer     e, f, g, h, i, j, k, l, m, n, p, q, r, s;
+   integer     d, e, f, g, h, i, j, k, l, m, n, p, q, r, s;
    
    reg [DQS_CNT_WIDTH:0] dqs_count_r;
    reg [DQS_CNT_WIDTH:0] dqs_count_rep1;
@@ -170,6 +171,7 @@ module phy_wrlvl #
    reg                   rdlvl_resume_r;
    reg                   rdlvl_resume_r1;
    reg                   rdlvl_resume_r2;
+   reg                   rdlvl_done_r1;
    reg [2*DQS_WIDTH-1:0] wr_calib_dly_r;
    reg [DQS_WIDTH-1:0]   set_one_flag;
    reg [DQS_WIDTH-1:0]   set_two_flag;
@@ -179,6 +181,7 @@ module phy_wrlvl #
    reg [5*DQS_WIDTH-1:0] dlyval_wr_dq_r[0:CS_WIDTH-1];
    reg [DQS_WIDTH-1:0]   inv_dqs_wl_r[0:CS_WIDTH-1];
    reg [2*DQS_WIDTH-1:0] wr_calib_dly_r1[0:CS_WIDTH-1];
+   reg [1:0]             tmp_calib_dly_r;
    reg [4:0] dq_tap_wl[0:DQS_WIDTH-1];
    reg [4:0] dq_tap[0:CS_WIDTH-1][0:DQS_WIDTH-1];
    reg                   dq_cnt_inc;
@@ -616,6 +619,7 @@ endgenerate
          rdlvl_resume_r <= #TCQ 1'b0;
          rdlvl_resume_r1<= #TCQ 1'b0;
          rdlvl_resume_r2<= #TCQ 1'b0;
+         rdlvl_done_r1  <= #TCQ 1'b0;
       end else begin
          rdlvl_error_r  <= #TCQ rdlvl_error;
          rdlvl_error_r1 <= #TCQ rdlvl_error_r;
@@ -624,6 +628,7 @@ endgenerate
          rdlvl_resume_r2<= #TCQ rdlvl_resume_r1;
          rdlvl_resume   <= #TCQ (rdlvl_resume_r | rdlvl_resume_r1
                                  | rdlvl_resume_r2);
+         rdlvl_done_r1  <= #TCQ rdlvl_done[1];
          
       end
   end
@@ -640,11 +645,22 @@ endgenerate
       end
   end
 
+  always @(posedge clk) begin
+    if (rst)
+      tmp_calib_dly_r <= #TCQ 2'b00;
+    else if (rdlvl_done[1] && (SIM_CAL_OPTION == "FAST_CAL"))
+      tmp_calib_dly_r <= #TCQ wr_calib_dly_r[1:0];
+  end
+
 // wr_calib_dly only increments from 0 to a max value of 3
 // Write bitslip logic only supports upto 3 clk_mem cycles
   always @(posedge clk) begin
-      if (rst) begin
+      if (rst)
          wr_calib_dly_r  <= #TCQ {2*DQS_WIDTH{1'b0}};
+      else if (rdlvl_done_r1 && (SIM_CAL_OPTION == "FAST_CAL")) begin
+        for (d = 0; d < DQS_WIDTH; d = d + 1) begin
+           wr_calib_dly_r[2*d+:2] <= #TCQ tmp_calib_dly_r;
+        end
       end else if (rdlvl_error && !rdlvl_error_r) begin
          if (set_two_flag[rdlvl_err_byte_r]) begin
            wr_calib_dly_r[2*rdlvl_err_byte_r+0] <= #TCQ 1'b1;

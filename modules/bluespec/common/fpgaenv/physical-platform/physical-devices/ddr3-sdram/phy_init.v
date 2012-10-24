@@ -49,10 +49,10 @@
 //   ____  ____
 //  /   /\/   /
 // /___/  \  /    Vendor: Xilinx
-// \   \   \/     Version: 3.5
+// \   \   \/     Version: 3.8
 //  \   \         Application: MIG
 //  /   /         Filename: phy_init.v
-// /___/   /\     Date Last Modified: $Date: 2010/05/14 06:26:04 $
+// /___/   /\     Date Last Modified: $Date: 2011/06/02 07:18:03 $
 // \   \  /  \    Date Created: Mon Jun 23 2008
 //  \___\/\___\
 //
@@ -80,11 +80,11 @@
 //*****************************************************************************
 
 /******************************************************************************
-**$Id: phy_init.v,v 1.1.2.4 2010/05/14 06:26:04 karthip Exp $
-**$Date: 2010/05/14 06:26:04 $
-**$Author: karthip $
-**$Revision: 1.1.2.4 $
-**$Source: /devl/xcs/repo/env/Databases/ip/src2/M/mig_v3_5/data/dlib/virtex6/ddr3_sdram/verilog/rtl/phy/Attic/phy_init.v,v $
+**$Id: phy_init.v,v 1.1 2011/06/02 07:18:03 mishra Exp $
+**$Date: 2011/06/02 07:18:03 $
+**$Author: mishra $
+**$Revision: 1.1 $
+**$Source: /devl/xcs/repo/env/Databases/ip/src2/O/mig_v3_9/data/dlib/virtex6/ddr3_sdram/verilog/rtl/phy/phy_init.v,v $
 ******************************************************************************/
 
 `timescale 1ps/1ps
@@ -143,6 +143,8 @@ module phy_init #
    output reg                  wrlvl_active,
    input [1:0]                 rdlvl_done,  
    output reg [1:0]            rdlvl_start,
+   input                       rdlvl_clkdiv_done,
+   output reg                  rdlvl_clkdiv_start,
    input                       rdlvl_prech_req,
    input                       rdlvl_resume,
    // To phy_write for write bitslip during read leveling
@@ -184,13 +186,10 @@ module phy_init #
    output reg                  phy_ioconfig_en
    );
    
-   
- 
   // In a 2 slot dual rank per system RTT_NOM values 
   // for Rank2 and Rank3 default to 40 ohms
   localparam RTT_NOM2 = "40";
   localparam RTT_NOM3 = "40";
-
 
   // Specifically for use with half-frequency controller (nCK_PER_CLK=2)
   // = 1 if burst length = 4, = 0 if burst length = 8. Determines how
@@ -200,7 +199,6 @@ module phy_init #
              (BURST_MODE == "8") ? 1'b0 : 
              ((BURST_MODE == "4") ? 1'b1 : 1'b0);
              
-
   //***************************************************************************
   // Counter values used to determine bus timing
   // NOTE on all counter terminal counts - these can/should be one less than 
@@ -221,9 +219,9 @@ module phy_init #
   localparam DDR3_CKE_DELAY_NS     = 500000 + DDR3_RESET_DELAY_NS;
   localparam DDR2_CKE_DELAY_NS     = 200000;
   localparam PWRON_RESET_DELAY_CNT = 
-             ((DDR3_RESET_DELAY_NS+CLK_PERIOD-1)/CLK_PERIOD)-1;
+             ((DDR3_RESET_DELAY_NS+CLK_PERIOD-1)/CLK_PERIOD);
   localparam PWRON_CKE_DELAY_CNT   = (DRAM_TYPE == "DDR3") ?
-             (((DDR3_CKE_DELAY_NS+CLK_PERIOD-1)/CLK_PERIOD)-1) :
+             (((DDR3_CKE_DELAY_NS+CLK_PERIOD-1)/CLK_PERIOD)) :
              (((DDR2_CKE_DELAY_NS+CLK_PERIOD-1)/CLK_PERIOD));
               // FOR DDR2 -1 taken out. With -1 not getting 200us. The equation
               // needs to be reworked. 
@@ -288,64 +286,65 @@ module phy_init #
   // Address = 010. Data = 0000
   localparam REG_RC2 = 8'b00000010;
    
- // RC3 timing control word. Setting the data to 0000
+  // RC3 timing control word. Setting the data to 0000
    localparam REG_RC3 = 8'b00000011;
 
- // RC4 timing control work. Setting the data to 0000 
+  // RC4 timing control work. Setting the data to 0000 
    localparam REG_RC4 = 8'b00000100;
     
- // RC5 timing control work. Setting the data to 0000 
+  // RC5 timing control work. Setting the data to 0000 
    localparam REG_RC5 = 8'b00000101;   
 
-// Adding the register dimm latency to write latency
+  // Adding the register dimm latency to write latency
    localparam CWL_M = (REG_CTRL == "ON") ? nCWL + 1 : nCWL;
 
-
-
   // Master state machine encoding
-  localparam  INIT_IDLE                  = 6'b000000; //0
-  localparam  INIT_WAIT_CKE_EXIT         = 6'b000001; //1
-  localparam  INIT_LOAD_MR               = 6'b000010; //2
-  localparam  INIT_LOAD_MR_WAIT          = 6'b000011; //3
-  localparam  INIT_ZQCL                  = 6'b000100; //4
-  localparam  INIT_WAIT_DLLK_ZQINIT      = 6'b000101; //5
-  localparam  INIT_WRLVL_START           = 6'b000110; //6
-  localparam  INIT_WRLVL_WAIT            = 6'b000111; //7
-  localparam  INIT_WRLVL_LOAD_MR         = 6'b001000; //8
-  localparam  INIT_WRLVL_LOAD_MR_WAIT    = 6'b001001; //9
-  localparam  INIT_WRLVL_LOAD_MR2        = 6'b001010; //A  
-  localparam  INIT_WRLVL_LOAD_MR2_WAIT   = 6'b001011; //B  
-  localparam  INIT_RDLVL_ACT             = 6'b001100; //C  
-  localparam  INIT_RDLVL_ACT_WAIT        = 6'b001101; //D  
-  localparam  INIT_RDLVL_STG1_WRITE      = 6'b001110; //E  
-  localparam  INIT_RDLVL_STG1_WRITE_READ = 6'b001111; //F  
-  localparam  INIT_RDLVL_STG1_READ       = 6'b010000; //10 
-  localparam  INIT_RDLVL_STG2_WRITE      = 6'b010001; //11 
-  localparam  INIT_RDLVL_STG2_WRITE_READ = 6'b010010; //12 
-  localparam  INIT_RDLVL_STG2_READ       = 6'b010011; //13 
-  localparam  INIT_RDLVL_STG2_READ_WAIT  = 6'b010100; //14 
-  localparam  INIT_PRECHARGE_PREWAIT     = 6'b010101; //15 
-  localparam  INIT_PRECHARGE             = 6'b010110; //16 
-  localparam  INIT_PRECHARGE_WAIT        = 6'b010111; //17 
-  localparam  INIT_DONE                  = 6'b011000; //18 
-  localparam  INIT_IOCONFIG_WR           = 6'b011001; //19 
-  localparam  INIT_IOCONFIG_RD           = 6'b011010; //1A 
-  localparam  INIT_IOCONFIG_WR_WAIT      = 6'b011011; //1B 
-  localparam  INIT_IOCONFIG_RD_WAIT      = 6'b011100; //1C 
-  localparam  INIT_DDR2_PRECHARGE        = 6'b011101; //1D 
-  localparam  INIT_DDR2_PRECHARGE_WAIT   = 6'b011110; //1E 
-  localparam  INIT_REFRESH               = 6'b011111; //1F 
-  localparam  INIT_REFRESH_WAIT          = 6'b100000; //20
-  localparam  INIT_PD_ACT                = 6'b100001; //21
-  localparam  INIT_PD_ACT_WAIT           = 6'b100010; //22
-  localparam  INIT_PD_READ               = 6'b100011; //23
-  localparam  INIT_REG_WRITE             = 6'b100100; //24
-  localparam  INIT_REG_WRITE_WAIT        = 6'b100101; //25
-  localparam  INIT_DDR2_MULTI_RANK       = 6'b100110; //26
-  localparam  INIT_DDR2_MULTI_RANK_WAIT  = 6'b100111; //27 
+  localparam  INIT_IDLE                    = 6'b000000; //0
+  localparam  INIT_WAIT_CKE_EXIT           = 6'b000001; //1
+  localparam  INIT_LOAD_MR                 = 6'b000010; //2
+  localparam  INIT_LOAD_MR_WAIT            = 6'b000011; //3
+  localparam  INIT_ZQCL                    = 6'b000100; //4
+  localparam  INIT_WAIT_DLLK_ZQINIT        = 6'b000101; //5
+  localparam  INIT_WRLVL_START             = 6'b000110; //6
+  localparam  INIT_WRLVL_WAIT              = 6'b000111; //7
+  localparam  INIT_WRLVL_LOAD_MR           = 6'b001000; //8
+  localparam  INIT_WRLVL_LOAD_MR_WAIT      = 6'b001001; //9
+  localparam  INIT_WRLVL_LOAD_MR2          = 6'b001010; //A  
+  localparam  INIT_WRLVL_LOAD_MR2_WAIT     = 6'b001011; //B  
+  localparam  INIT_RDLVL_ACT               = 6'b001100; //C
+  localparam  INIT_RDLVL_ACT_WAIT          = 6'b001101; //D
+  localparam  INIT_RDLVL_STG1_WRITE        = 6'b001110; //E
+  localparam  INIT_RDLVL_STG1_WRITE_READ   = 6'b001111; //F 
+  localparam  INIT_RDLVL_STG1_READ         = 6'b010000; //10 
+  localparam  INIT_RDLVL_STG2_WRITE        = 6'b010001; //11 
+  localparam  INIT_RDLVL_STG2_WRITE_READ   = 6'b010010; //12 
+  localparam  INIT_RDLVL_STG2_READ         = 6'b010011; //13 
+  localparam  INIT_RDLVL_STG2_READ_WAIT    = 6'b010100; //14 
+  localparam  INIT_PRECHARGE_PREWAIT       = 6'b010101; //15 
+  localparam  INIT_PRECHARGE               = 6'b010110; //16 
+  localparam  INIT_PRECHARGE_WAIT          = 6'b010111; //17 
+  localparam  INIT_DONE                    = 6'b011000; //18 
+  localparam  INIT_IOCONFIG_WR             = 6'b011001; //19 
+  localparam  INIT_IOCONFIG_RD             = 6'b011010; //1A 
+  localparam  INIT_IOCONFIG_WR_WAIT        = 6'b011011; //1B 
+  localparam  INIT_IOCONFIG_RD_WAIT        = 6'b011100; //1C 
+  localparam  INIT_DDR2_PRECHARGE          = 6'b011101; //1D 
+  localparam  INIT_DDR2_PRECHARGE_WAIT     = 6'b011110; //1E 
+  localparam  INIT_REFRESH                 = 6'b011111; //1F 
+  localparam  INIT_REFRESH_WAIT            = 6'b100000; //20
+  localparam  INIT_PD_ACT                  = 6'b100001; //21
+  localparam  INIT_PD_ACT_WAIT             = 6'b100010; //22
+  localparam  INIT_PD_READ                 = 6'b100011; //23
+  localparam  INIT_REG_WRITE               = 6'b100100; //24
+  localparam  INIT_REG_WRITE_WAIT          = 6'b100101; //25
+  localparam  INIT_DDR2_MULTI_RANK         = 6'b100110; //26
+  localparam  INIT_DDR2_MULTI_RANK_WAIT    = 6'b100111; //27
+  localparam  INIT_RDLVL_CLKDIV_WRITE      = 6'b101000; //28  
+  localparam  INIT_RDLVL_CLKDIV_WRITE_READ = 6'b101001; //29  
+  localparam  INIT_RDLVL_CLKDIV_READ       = 6'b101010; //2A
 
-  reg [1:0] auto_cnt_r;
-  reg         burst_addr_r;  
+  reg [1:0]   auto_cnt_r;
+  reg [1:0]   burst_addr_r;  
   reg [1:0]   chip_cnt_r;
   reg [6:0]   cnt_cmd_r;
   reg         cnt_cmd_done_r;  
@@ -353,7 +352,7 @@ module phy_init #
   reg         cnt_dllk_zqinit_done_r;
   reg         cnt_init_af_done_r;  
   reg [1:0]   cnt_init_af_r;
-  reg [1:0]   cnt_init_data_r;  
+  reg [3:0]   cnt_init_data_r;  
   reg [1:0]   cnt_init_mr_r;
   reg         cnt_init_mr_done_r;
   reg         cnt_init_pre_wait_done_r;
@@ -379,7 +378,7 @@ module phy_init #
   wire [15:0] load_mr2;
   wire [15:0] load_mr3;
   reg         mem_init_done_r;
-  reg 	      mem_init_done_r1;
+  reg         mem_init_done_r1;
   reg [1:0]   mr2_r [0:3];
   reg [2:0]   mr1_r [0:3];
   reg         new_burst_r;
@@ -400,7 +399,9 @@ module phy_init #
   reg [BANK_WIDTH-1:0] bank_w;
   reg [15:0]  rdlvl_start_dly0_r;
   reg [15:0]  rdlvl_start_dly1_r;  
+  reg [15:0]  rdlvl_start_dly_clkdiv_r;  
   wire [1:0]  rdlvl_start_pre;
+  wire        rdlvl_start_pre_clkdiv;  
   wire        rdlvl_rd;
   wire        rdlvl_wr;
   reg         rdlvl_wr_r;
@@ -436,11 +437,16 @@ module phy_init #
     if (!rst) 
       $display ("PHY_INIT: Read Leveling Stage 1 completed at %t", $time);
   end
-    
+
   always @(posedge rdlvl_done[1]) begin
     if (!rst) 
       $display ("PHY_INIT: Read Leveling Stage 2 completed at %t", $time);
   end
+    
+  always @(posedge rdlvl_clkdiv_done) begin
+    if (!rst) 
+      $display ("PHY_INIT: Read Leveling CLKDIV cal completed at %t", $time);
+  end  
     
   always @(posedge pd_cal_done) begin
     if (!rst && (PHASE_DETECT == "ON"))
@@ -485,7 +491,6 @@ module phy_init #
      .S   (1'b0)
      ) /* synthesis syn_preserve=1 */
        /* synthesis syn_replicate = 0 */;
-
   
   //***************************************************************************
   // Mode register programming
@@ -677,12 +682,10 @@ module phy_init #
   assign load_mr3[2]    = 1'b0;
   assign load_mr3[15:3] = 13'b0000000000000;
   
-
   // For multi-rank systems the rank being accessed during writes in 
   // Read Leveling must be sent to phy_write for the bitslip logic
   // Due to timing issues this signal is registered in phy_top.v
   assign chip_cnt = chip_cnt_r;
-
 
   //***************************************************************************
   // Logic to begin initial calibration, and to handle precharge requests
@@ -695,8 +698,9 @@ module phy_init #
   // indicate when the read data is present on the bus (when this happens 
   // after the read command is issued depends on CAS LATENCY) - there will 
   // need to be some delay before valid data is present on the bus. 
-  assign rdlvl_start_pre[0] = (init_state_r == INIT_RDLVL_STG1_READ);
-  assign rdlvl_start_pre[1] = (init_state_r == INIT_RDLVL_STG2_READ);
+  assign rdlvl_start_pre[0]     = (init_state_r == INIT_RDLVL_STG1_READ);
+  assign rdlvl_start_pre[1]     = (init_state_r == INIT_RDLVL_STG2_READ);
+  assign rdlvl_start_pre_clkdiv = (init_state_r == INIT_RDLVL_CLKDIV_READ);  
 
   // Similar comment applies to start of PHASE DETECTOR
   assign pd_cal_start_pre = (init_state_r == INIT_PD_READ);
@@ -706,25 +710,26 @@ module phy_init #
   // PRECH_DONE signal is used for all blocks
   assign prech_done_pre = (((init_state_r == INIT_RDLVL_STG1_READ) ||
                             (init_state_r == INIT_RDLVL_STG2_READ) ||
+                            (init_state_r == INIT_RDLVL_CLKDIV_READ) || 
                             (init_state_r == INIT_PD_READ)) &&
                            prech_pending_r && 
                            !prech_req_posedge_r);
   
-
-
   // Delay start of each calibration by 16 clock cycles to ensure that when 
   // calibration logic begins, read data is already appearing on the bus.   
   // Each circuit should synthesize using an SRL16. Assume that reset is
   // long enough to clear contents of SRL16. 
   always @(posedge clk) begin   
-    rdlvl_start_dly0_r     <= #TCQ {rdlvl_start_dly0_r[14:0], 
-                                     rdlvl_start_pre[0]};
-    rdlvl_start_dly1_r     <= #TCQ {rdlvl_start_dly1_r[14:0], 
-                                     rdlvl_start_pre[1]};
-    pd_cal_start_dly_r     <= #TCQ {pd_cal_start_dly_r[14:0],
-                                     pd_cal_start_pre};
-    prech_done_dly_r       <= #TCQ {prech_done_dly_r[14:0], 
-                                     prech_done_pre};
+    rdlvl_start_dly0_r       <= #TCQ {rdlvl_start_dly0_r[14:0], 
+                                      rdlvl_start_pre[0]};
+    rdlvl_start_dly1_r       <= #TCQ {rdlvl_start_dly1_r[14:0], 
+                                      rdlvl_start_pre[1]};
+    rdlvl_start_dly_clkdiv_r <= #TCQ {rdlvl_start_dly_clkdiv_r[14:0], 
+                                      rdlvl_start_pre_clkdiv};
+    pd_cal_start_dly_r       <= #TCQ {pd_cal_start_dly_r[14:0],
+                                      pd_cal_start_pre};
+    prech_done_dly_r         <= #TCQ {prech_done_dly_r[14:0], 
+                                      prech_done_pre};
   end
 
   always @(posedge clk)    
@@ -733,13 +738,16 @@ module phy_init #
   // Generate latched signals for start of write and read leveling
   always @(posedge clk)
     if (rst) begin
-      rdlvl_start  <= #TCQ 2'b00;
-      pd_cal_start <= #TCQ 1'b0;      
+      rdlvl_start        <= #TCQ 2'b00;
+      rdlvl_clkdiv_start <= #TCQ 1'b0;
+      pd_cal_start       <= #TCQ 1'b0;      
     end else begin      
       if (rdlvl_start_dly0_r[15])
         rdlvl_start[0] <= #TCQ 1'b1;
       if (rdlvl_start_dly1_r[15])
         rdlvl_start[1] <= #TCQ 1'b1;
+      if (rdlvl_start_dly_clkdiv_r[15])
+        rdlvl_clkdiv_start <= #TCQ 1'b1;
       if (pd_cal_start_dly_r[15])
         pd_cal_start <= #TCQ 1'b1;        
     end
@@ -835,6 +843,7 @@ module phy_init #
       INIT_RDLVL_ACT_WAIT,
       INIT_RDLVL_STG1_WRITE_READ,
       INIT_RDLVL_STG2_WRITE_READ,
+      INIT_RDLVL_CLKDIV_WRITE_READ,
       INIT_RDLVL_STG2_READ_WAIT,
       INIT_PD_ACT_WAIT,
       INIT_PRECHARGE_PREWAIT,
@@ -948,15 +957,29 @@ module phy_init #
   // Wait for both DLL to lock (tDLLK) and ZQ calibration to finish
   // (tZQINIT). Both take the same amount of time (512*tCK)
   //*****************************************************************
+  // Reset condition added to cnt_dll_zqinit_r, cnt_dll_zqinit_done_r 
+  // and stopped cnt_dllk_zqinit_r from free running to avoid corner 
+  // case where downstream signal mem_init_done_r can be asserted early in H/W (i.e. 
+  // without a reset if cnt_dll_zqinit_r is free running mem_init_done_r could be high earlier)
+
 
   always @(posedge clk)
-    if (init_state_r == INIT_ZQCL) begin
+    if (rst) begin
+      cnt_dllk_zqinit_r <= 'b0;
+    end else if (init_state_r == INIT_ZQCL) begin
       cnt_dllk_zqinit_r      <= #TCQ 'b0;
+    end else if ((init_state_r == INIT_WAIT_DLLK_ZQINIT)
+                && (cnt_dllk_zqinit_r != TDLLK_TZQINIT_DELAY_CNT)) begin
+      cnt_dllk_zqinit_r <= #TCQ cnt_dllk_zqinit_r + 1;
+    end
+    
+  always @(posedge clk)
+    if (rst) begin
+      cnt_dllk_zqinit_done_r <= #TCQ 1'b0;
+    end else if (init_state_r == INIT_ZQCL) begin
       cnt_dllk_zqinit_done_r <= #TCQ 1'b0;
     end else begin
-      cnt_dllk_zqinit_r <= #TCQ cnt_dllk_zqinit_r + 1;
-      if (!cnt_dllk_zqinit_done_r) 
-        cnt_dllk_zqinit_done_r 
+      cnt_dllk_zqinit_done_r 
           <= #TCQ (cnt_dllk_zqinit_r == TDLLK_TZQINIT_DELAY_CNT);
     end
 
@@ -1025,7 +1048,7 @@ module phy_init #
     if (init_state_r == INIT_IDLE) begin
       cnt_init_af_r      <= #TCQ 'b0;
       cnt_init_af_done_r <= #TCQ 1'b0;
-    end else if ((init_state_r == INIT_REFRESH) && (~mem_init_done_r1))begin
+    end else if ((init_state_r == INIT_REFRESH) && (~mem_init_done_r1)) begin
       cnt_init_af_r      <= #TCQ cnt_init_af_r + 1;
       cnt_init_af_done_r <= #TCQ (cnt_init_af_r == 2'b11);
     end   
@@ -1067,7 +1090,8 @@ module phy_init #
            or ddr2_refresh_flag_r or ddr3_lm_done_r
            or init_state_r or mem_init_done_r1
            or pd_cal_done or prech_req_posedge_r
-           or rdlvl_done or rdlvl_resume or rdlvl_start or rdpath_rdy
+           or rdlvl_done or rdlvl_clkdiv_done or rdlvl_resume 
+           or rdlvl_start or rdlvl_clkdiv_start or rdpath_rdy
            or reg_ctrl_cnt_r or wrlvl_done_r1 or wrlvl_rank_done_r3) begin     
     init_next_state = init_state_r;
     (* full_case, parallel_case *) case (init_state_r)
@@ -1166,7 +1190,7 @@ module phy_init #
       INIT_WAIT_DLLK_ZQINIT:
         if (cnt_dllk_zqinit_done_r)
           // memory initialization per rank for multi-rank case
-          if (!mem_init_done_r1 && (chip_cnt_r <= CS_WIDTH-1))
+          if (!mem_init_done_r && (chip_cnt_r <= CS_WIDTH-1))
             init_next_state = INIT_LOAD_MR;
           else if (WRLVL == "ON")
             init_next_state = INIT_WRLVL_START;
@@ -1194,13 +1218,12 @@ module phy_init #
           if(cnt_init_af_done_r && (~mem_init_done_r1))
             // go to lm state as part of DDR2 init sequence 
             init_next_state = INIT_LOAD_MR;
-          else if (((&rdlvl_done) && (PHASE_DETECT == "ON"))
-                    && mem_init_done_r1)
-            init_next_state = INIT_PD_ACT;
           else if (mem_init_done_r1)begin
             if(auto_cnt_r < (CS_WIDTH))
               init_next_state = INIT_REFRESH;
-            else 
+            else if ((&rdlvl_done) && (PHASE_DETECT == "ON"))
+              init_next_state = INIT_PD_ACT;
+            else
               init_next_state = INIT_RDLVL_ACT; 
           end else // to DDR2 init state as part of DDR2 init sequence  
             init_next_state = INIT_REFRESH;
@@ -1264,19 +1287,27 @@ module phy_init #
           // Just finished an activate. Now either write, read, or precharge 
           // depending on where we are in the training sequence
           if (!rdlvl_done[0] && !rdlvl_start[0])
-            // Case 1: If in stage 1, and entering for first then, then
+            // Case 1: If in stage 1, and entering for first time, then
             //   write training pattern to memory
             init_next_state = INIT_IOCONFIG_WR;
           else if (!rdlvl_done[0] && rdlvl_start[0])
             // Case 2: If in stage 1, and just precharged after training
             //   previous byte, then continue reading
             init_next_state = INIT_IOCONFIG_RD;
+          else if (!rdlvl_clkdiv_done && !rdlvl_clkdiv_start)
+            // Case 3: If in CLKDIV cal, and entering for first time, then
+            //   write training pattern to memory
+            init_next_state = INIT_IOCONFIG_WR;
+          else if (!rdlvl_clkdiv_done && rdlvl_clkdiv_start)
+            // Case 4: If in CLKDIV cal, and just precharged after training
+            //   previous byte, then continue reading              
+            init_next_state = INIT_IOCONFIG_RD;
           else if (!rdlvl_done[1] && !rdlvl_start[1])
-            // Case 3: If in stage 2, and entering for first then, then
+            // Case 5: If in stage 2, and entering for first time, then
             //   write training pattern to memory
             init_next_state = INIT_IOCONFIG_WR;
           else if (!rdlvl_done[1] && rdlvl_start[1])
-            // Case 4: If in stage 2, and just precharged after training
+            // Case 6: If in stage 2, and just precharged after training
             //   previous byte, then continue reading              
             init_next_state = INIT_IOCONFIG_RD;
           else
@@ -1293,8 +1324,13 @@ module phy_init #
 
       // Write training pattern for stage 1
       INIT_RDLVL_STG1_WRITE:
-        // Once we've issued enough commands for 8 words - proceed to reads
-        if (burst_addr_r == 1'b1)
+        // Once we've issued enough commands for 16 words - proceed to reads
+        // Note that 16 words are written even though the training pattern
+        // is only 8 words (training pattern is written twice) because at
+        // this point in the calibration process we may be generating the
+        // DQS and DQ a few cycles early (that part of the write timing
+        // adjustment doesn't happen until stage 2)
+        if (burst_addr_r == 2'b11)
           init_next_state = INIT_RDLVL_STG1_WRITE_READ;
 
       // Write-read turnaround
@@ -1307,6 +1343,28 @@ module phy_init #
       INIT_RDLVL_STG1_READ:
         if (rdlvl_done[0] || prech_req_posedge_r)
           init_next_state = INIT_PRECHARGE_PREWAIT;
+
+      //*********************************************      
+      // CLKDIV calibration read-leveling (write and continuous read)
+      //*********************************************      
+
+      // Write training pattern for stage 1
+      INIT_RDLVL_CLKDIV_WRITE:
+        // Once we've issued enough commands for 16 words - proceed to reads
+        // See comment for state RDLVL_STG1_WRITE
+        if (burst_addr_r == 2'b11)
+          init_next_state = INIT_RDLVL_CLKDIV_WRITE_READ;
+
+      // Write-read turnaround
+      INIT_RDLVL_CLKDIV_WRITE_READ: 
+        if (cnt_cmd_done_r)
+          init_next_state = INIT_IOCONFIG_RD;
+
+      // Continuous read, where interruptible by precharge request from
+      // calibration logic. Also precharges when stage 1 is complete
+      INIT_RDLVL_CLKDIV_READ:
+        if (rdlvl_clkdiv_done || prech_req_posedge_r)
+          init_next_state = INIT_PRECHARGE_PREWAIT;
       
       //*********************************************      
       // Stage 2 read-leveling (write and continuous read)
@@ -1314,8 +1372,11 @@ module phy_init #
 
       // Write training pattern for stage 1
       INIT_RDLVL_STG2_WRITE:
-        // Once we've issued enough commands for 8 words - proceed to reads
-        if (burst_addr_r == 1'b1)
+        // Once we've issued enough commands for 16 words - proceed to reads
+        // Write 8 extra words in order to prevent any previous data in
+        // memory from skewing calibration results (write 8 words for
+        // training pattern followed by 8 zeros)
+        if (burst_addr_r == 2'b11)
           init_next_state = INIT_RDLVL_STG2_WRITE_READ;
 
       // Write-read turnaround
@@ -1327,7 +1388,7 @@ module phy_init #
       // instead there is a large gap between each read
       INIT_RDLVL_STG2_READ:
         // Keep reading for 8 words
-        if (burst_addr_r == 1'b1)
+        if (burst_addr_r == 2'b01)
           init_next_state = INIT_RDLVL_STG2_READ_WAIT;
 
       // Wait before issuing the next read. If a precharge request comes in
@@ -1335,8 +1396,8 @@ module phy_init #
       INIT_RDLVL_STG2_READ_WAIT:
         if (rdlvl_resume)
           init_next_state = INIT_IOCONFIG_WR;
-	else if (rdlvl_done[1] || prech_req_posedge_r)
-	  init_next_state = INIT_PRECHARGE_PREWAIT;
+        else if (rdlvl_done[1] || prech_req_posedge_r)
+          init_next_state = INIT_PRECHARGE_PREWAIT;
         else if (cnt_cmd_done_r)
             init_next_state = INIT_RDLVL_STG2_READ;
        
@@ -1387,9 +1448,6 @@ module phy_init #
           else if ((pd_cal_done || (PHASE_DETECT != "ON")) && (&rdlvl_done)) 
            // after all calibration program the correct burst length
             init_next_state = INIT_LOAD_MR; 
-          else if ((&rdlvl_done) && (PHASE_DETECT == "ON"))
-            // If read leveling finished, proceed to PD calibration
-            init_next_state = INIT_REFRESH; 
           else
             // Otherwise, open row for read-leveling purposes
             init_next_state = INIT_REFRESH;
@@ -1410,6 +1468,9 @@ module phy_init #
         if (!rdlvl_done[0])
           // Write Stage 1 training pattern to memory
           init_next_state = INIT_RDLVL_STG1_WRITE;
+        else if (!rdlvl_clkdiv_done)
+           // Write CLKDIV cal training pattern to memory
+          init_next_state = INIT_RDLVL_CLKDIV_WRITE;
         else
           // Write Stage 2 training pattern to memory
           init_next_state = INIT_RDLVL_STG2_WRITE;
@@ -1421,6 +1482,9 @@ module phy_init #
         if (!rdlvl_done[0])
           // Read Stage 1 training pattern from memory
           init_next_state = INIT_RDLVL_STG1_READ;
+        else if (!rdlvl_clkdiv_done)
+          // Read CLKDIV cal training pattern from memory
+          init_next_state = INIT_RDLVL_CLKDIV_READ;
         else if (!rdlvl_done[1])
           // Read Stage 2 training pattern from memory
           init_next_state = INIT_RDLVL_STG2_READ;
@@ -1482,36 +1546,37 @@ module phy_init #
   // For DDR3 asserted when  
   always @(posedge clk)
     if (rst || (wrlvl_done_r &&
-       (init_state_r==INIT_WRLVL_LOAD_MR2_WAIT))
-       || ((mem_init_done_r & (~mem_init_done_r1))
-        && (DRAM_TYPE == "DDR2")))begin 
+                (init_state_r==INIT_WRLVL_LOAD_MR2_WAIT))
+        || ((mem_init_done_r & (~mem_init_done_r1))
+            && (DRAM_TYPE == "DDR2"))) begin 
       chip_cnt_r <= #TCQ 2'b00;
     end else if (((init_state_r1 == INIT_REFRESH) &&
-      mem_init_done_r1))begin
-      if(chip_cnt_r < CS_WIDTH-1)
+                  mem_init_done_r1) )begin
+      if (chip_cnt_r < CS_WIDTH-1)
         chip_cnt_r <= #TCQ chip_cnt_r + 1;
       else
         chip_cnt_r <= #TCQ 2'b00;
     end else if ((((init_state_r == INIT_WAIT_DLLK_ZQINIT) &&
-             (cnt_dllk_zqinit_r == TDLLK_TZQINIT_DELAY_CNT)) ||
-             ((init_state_r!=INIT_WRLVL_LOAD_MR2_WAIT) && 
-             (init_next_state==INIT_WRLVL_LOAD_MR2_WAIT)) && 
-             (DRAM_TYPE == "DDR3")) || 
-             ((init_state_r == INIT_DDR2_MULTI_RANK)
-                && (DRAM_TYPE == "DDR2")) ||
-               // condition to increment chip_cnt during
-               // final burst length programming for DDR3 
-              ((init_state_r == INIT_LOAD_MR_WAIT) && 
-               (cnt_cmd_done_r)&& (&rdlvl_done))) 
-                begin
-      if (((~mem_init_done_r1 || (&rdlvl_done)) && 
-         (chip_cnt_r != CS_WIDTH-1)) || 
-         (mem_init_done_r1 && ~(&rdlvl_done) && 
-         (chip_cnt_r != calib_width -1)))
-        chip_cnt_r <= #TCQ chip_cnt_r + 1;
-      else
-        chip_cnt_r <= #TCQ 2'b00;
-    end // if ((((init_state_r == INIT_WAIT_DLLK_ZQINIT) &&...
+                   (cnt_dllk_zqinit_r == TDLLK_TZQINIT_DELAY_CNT) &&
+	            (!cnt_dllk_zqinit_done_r)) ||
+                  ((init_state_r!=INIT_WRLVL_LOAD_MR2_WAIT) && 
+                   (init_next_state==INIT_WRLVL_LOAD_MR2_WAIT)) && 
+                  (DRAM_TYPE == "DDR3")) || 
+                 ((init_state_r == INIT_DDR2_MULTI_RANK)
+                  && (DRAM_TYPE == "DDR2")) ||
+                 // condition to increment chip_cnt during
+                 // final burst length programming for DDR3 
+                 ((init_state_r == INIT_LOAD_MR_WAIT) && 
+                  (cnt_cmd_done_r)&& (&rdlvl_done))) 
+      begin
+        if (((~mem_init_done_r1 || (&rdlvl_done)) && 
+             (chip_cnt_r != CS_WIDTH-1)) || 
+            (mem_init_done_r1 && ~(&rdlvl_done) && 
+             (chip_cnt_r != calib_width -1)))
+          chip_cnt_r <= #TCQ chip_cnt_r + 1;
+        else
+          chip_cnt_r <= #TCQ 2'b00;
+      end
 
   // keep track of which chip selects got auto-refreshed (avoid auto-refreshing
   // all CS's at once to avoid current spike)
@@ -1558,6 +1623,8 @@ module phy_init #
           (init_state_r == INIT_PRECHARGE) ||
           (init_state_r == INIT_RDLVL_STG2_READ) ||
           (init_state_r == INIT_RDLVL_STG2_WRITE) ||
+          (init_state_r == INIT_RDLVL_CLKDIV_READ) ||
+          (init_state_r == INIT_RDLVL_CLKDIV_WRITE) ||
           (init_state_r == INIT_PD_ACT) ||
           (init_state_r == INIT_PD_READ) || 
           (init_state_r == INIT_DDR2_PRECHARGE) ||
@@ -1573,27 +1640,40 @@ module phy_init #
   //***************************************************************************
 
   assign rdlvl_wr = (init_state_r == INIT_RDLVL_STG1_WRITE) ||
-                    (init_state_r == INIT_RDLVL_STG2_WRITE);
+                    (init_state_r == INIT_RDLVL_STG2_WRITE) ||
+                    (init_state_r == INIT_RDLVL_CLKDIV_WRITE);
   assign rdlvl_rd = (init_state_r == INIT_RDLVL_STG1_READ) ||
                     (init_state_r == INIT_RDLVL_STG2_READ) ||
+                    (init_state_r == INIT_RDLVL_CLKDIV_READ) ||             
                     (init_state_r == INIT_PD_READ);
   assign rdlvl_wr_rd = rdlvl_wr | rdlvl_rd;
 
-  // keep track of current address - need this if burst length < 8 for
-  // calibration reads and writes. Make sure value always gets initialized 
-  // to 0 before we enter write/read state. Used to keep track of when 
-  // another burst must be issued on command/address bus
-  // Least significant two bits of address bus are always 2'b00 when
-  // command issued. Only bit[3] will vary depending on the burst length
-  // LS 3-bits of address to DRAM = {burst_addr, 2'b00}. This can be expanded
-  // for more bits if the training sequence is longer than 8 words
+  // Determine current DRAM address (lower bits of address) when writing or
+  // reading from memory during calibration (to access training patterns):
+  //  (1) address must be initialized to 0 before entering all write/read
+  //      states
+  //  (2) for writes, the maximum address is = {2 * length of calibration
+  //      training pattern}
+  //  (3) for reads, the maximum address is = {length of calibration
+  //      training pattern}, therefore it will need to be reinitialized
+  //      while we remain in a read state since reads can occur continuously
+  // NOTE: For a training pattern length of 8, burst_addr is used to 
+  // such that the lower order bits of the address are given by = 
+  // {burst_addr, 2'b00}. This can be expanded for more bits if the training 
+  // sequence is longer than 8 words  
   always @(posedge clk)
-    // Address increments by 
-    if (rdlvl_wr_rd)
-      burst_addr_r <= #TCQ ~burst_addr_r;
+    if (rdlvl_rd)
+      // Reads only access first 8 words of memory, and the access can
+      // occur continously (i.e. w/o leaving the read state)
+      burst_addr_r <= #TCQ {1'b0, ~burst_addr_r[0]};
+    else if (rdlvl_wr)
+      // Writes will access first 16 words fo memory, and the access is
+      // only one-time (before leaving the write state)
+      burst_addr_r <= #TCQ burst_addr_r + 1;
     else
-      burst_addr_r <= #TCQ 1'b0;
-
+      // Otherwise, during any other states, reset address to 0
+      burst_addr_r <= #TCQ 2'b00;
+  
   // determine how often to issue row command during read leveling writes
   // and reads
   always @(posedge clk)
@@ -1657,33 +1737,49 @@ module phy_init #
   // Generate training data written at start of each read-leveling stage
   // For every stage of read leveling, 8 words are written into memory
   // The format is as follows (shown as {rise,fall}):
-  //   Stage 1: 0xF, 0x0, 0xF, 0x0, 0xF, 0x0, 0xF, 0x0
-  //   Stage 2: 0xF, 0x0, 0xA, 0x5, 0x5, 0xA, 0x9, 0x6
+  //   Stage 1:    0xF, 0x0, 0xF, 0x0, 0xF, 0x0, 0xF, 0x0
+  //   CLKDIV cal: 0xF, 0xF, 0xF. 0xF, 0x0, 0x0, 0x0, 0x0 
+  //   Stage 2:    0xF, 0x0, 0xA, 0x5, 0x5, 0xA, 0x9, 0x6
   //***************************************************************************
 
   always @(posedge clk)
-    if ((init_state_r == INIT_IDLE) ||
-        (init_state_r == INIT_RDLVL_STG1_WRITE))
-      cnt_init_data_r <= #TCQ 2'b00;
-    else if (phy_wrdata_en)
+    // NOTE: No need to initialize cnt_init_data_r except possibly for
+    //  simulation purposes (to prevent excessive warnings) since first
+    //  state encountered before its use is RDLVL_STG1_WRITE 
+    if (phy_wrdata_en)      
       cnt_init_data_r <= #TCQ cnt_init_data_r + 1;
+    else if ((init_state_r == INIT_IDLE) || 
+             (init_state_r == INIT_RDLVL_STG1_WRITE))
+      cnt_init_data_r <= #TCQ 4'b0000;
+    else if (init_state_r == INIT_RDLVL_CLKDIV_WRITE)
+      cnt_init_data_r <= #TCQ 4'b0100;
     else if (init_state_r == INIT_RDLVL_STG2_WRITE)
-      cnt_init_data_r <= #TCQ 2'b10;      
+      cnt_init_data_r <= #TCQ 4'b1000;
 
   always @(posedge clk)
     (* full_case, parallel_case *) case (cnt_init_data_r)
-      2'b00:
+      // Stage 1 calibration pattern (all 4 writes have same data)
+      4'b0000, 4'b0001, 4'b0010, 4'b0011:
         phy_wrdata <= #TCQ {{DQ_WIDTH{1'b0}},{DQ_WIDTH{1'b1}},
-                             {DQ_WIDTH{1'b0}},{DQ_WIDTH{1'b1}}};
-      2'b01:
-        phy_wrdata <= #TCQ {{DQ_WIDTH{1'b0}},{DQ_WIDTH{1'b1}},
-                             {DQ_WIDTH{1'b0}},{DQ_WIDTH{1'b1}}};
-      2'b10:
+                            {DQ_WIDTH{1'b0}},{DQ_WIDTH{1'b1}}};
+      // Stage 3 calibration pattern (repeat twice)
+      4'b0100, 4'b0110:
+        phy_wrdata <= #TCQ {{DQ_WIDTH{1'b1}},{DQ_WIDTH{1'b1}},
+                            {DQ_WIDTH{1'b1}},{DQ_WIDTH{1'b1}}};
+      4'b0101, 4'b0111:
+        phy_wrdata <= #TCQ {{DQ_WIDTH{1'b0}},{DQ_WIDTH{1'b0}},
+                            {DQ_WIDTH{1'b0}},{DQ_WIDTH{1'b0}}};
+      // Stage 2 calibration pattern (2 different sets of writes, each 8
+      // 2 different sets of writes, each 8words long
+      4'b1000:
         phy_wrdata <= #TCQ {{DQ_WIDTH/4{4'h5}},{DQ_WIDTH/4{4'hA}},
-                             {DQ_WIDTH/4{4'h0}},{DQ_WIDTH/4{4'hF}}};
-      2'b11: 
+                            {DQ_WIDTH/4{4'h0}},{DQ_WIDTH/4{4'hF}}};
+      4'b1001: 
         phy_wrdata <= #TCQ {{DQ_WIDTH/4{4'h6}},{DQ_WIDTH/4{4'h9}},
-                             {DQ_WIDTH/4{4'hA}},{DQ_WIDTH/4{4'h5}}};
+                            {DQ_WIDTH/4{4'hA}},{DQ_WIDTH/4{4'h5}}};
+      4'b1010, 4'b1011:
+        phy_wrdata <= #TCQ {{DQ_WIDTH/4{4'h0}},{DQ_WIDTH/4{4'h0}},
+                            {DQ_WIDTH/4{4'h0}},{DQ_WIDTH/4{4'h0}}};
     endcase
           
   //***************************************************************************
@@ -1771,707 +1867,705 @@ module phy_init #
   // Assuming CS_WIDTH equals number of ranks configured
   // For single slot systems slot_1_present input will be ignored
   // Assuming component interfaces to be single slot systems
-generate
-  if (nSLOTS == 1) begin: gen_single_slot_odt
-    always @(posedge clk) begin
-      tmp_mr2_r[1]   <= #TCQ 2'b00;
-      tmp_mr2_r[2]   <= #TCQ 2'b00;
-      tmp_mr2_r[3]   <= #TCQ 2'b00;
-      tmp_mr1_r[1]   <= #TCQ 3'b000;
-      tmp_mr1_r[2]   <= #TCQ 3'b000;
-      tmp_mr1_r[3]   <= #TCQ 3'b000;
-      phy_tmp_cs1_r <= #TCQ {CS_WIDTH*nCS_PER_RANK{1'b1}};
-      phy_tmp_odt0_r <= #TCQ {CS_WIDTH*nCS_PER_RANK{1'b0}};
-      phy_tmp_odt1_r <= #TCQ {CS_WIDTH*nCS_PER_RANK{1'b0}};
-      phy_tmp_odt0_r1 <= #TCQ phy_tmp_odt0_r;
-      phy_tmp_odt1_r1 <= #TCQ phy_tmp_odt1_r;
-       
-      case ({slot_0_present[0],slot_0_present[1],
-             slot_0_present[2],slot_0_present[3]})
-      // Single slot configuration with quad rank
-      // Assuming same behavior as single slot dual rank for now
-      // DDR2 does not have quad rank parts 
-      4'b1111: begin    
-                 if ((RTT_WR == "OFF") || 
-                    ((WRLVL=="ON") && ~wrlvl_done &&
-                     (wrlvl_rank_cntr==3'd0))) begin
-                   //Rank0 Dynamic ODT disabled
-                   tmp_mr2_r[0] <= #TCQ 2'b00;
-                   //Rank0 Rtt_NOM defaults to 120 ohms
-                   tmp_mr1_r[0] <= #TCQ (RTT_NOM == "40") ? 3'b011 :
-                                       (RTT_NOM == "60") ? 3'b001 :
-                                       3'b010;
-                 end else begin
-                   //Rank0 Dynamic ODT defaults to 120 ohms
-                   tmp_mr2_r[0] <= #TCQ (RTT_WR == "60") ? 2'b01 :
-                                       2'b10;
-                   //Rank0 Rtt_NOM
-                   tmp_mr1_r[0] <= #TCQ 3'b000;
-                 end
-                 phy_tmp_odt0_r[nCS_PER_RANK-1:0] <= #TCQ {nCS_PER_RANK{1'b1}};
-                 phy_tmp_odt1_r[nCS_PER_RANK-1:0] <= #TCQ {nCS_PER_RANK{1'b1}};
-                 // Chip Select assignments
-                 phy_tmp_cs1_r[((chip_cnt_r*nCS_PER_RANK)
-                   ) +: nCS_PER_RANK] <= #TCQ 'b0;
-      end 
+  generate
+    if (nSLOTS == 1) begin: gen_single_slot_odt
+      always @(posedge clk) begin
+        tmp_mr2_r[1]   <= #TCQ 2'b00;
+        tmp_mr2_r[2]   <= #TCQ 2'b00;
+        tmp_mr2_r[3]   <= #TCQ 2'b00;
+        tmp_mr1_r[1]   <= #TCQ 3'b000;
+        tmp_mr1_r[2]   <= #TCQ 3'b000;
+        tmp_mr1_r[3]   <= #TCQ 3'b000;
+        phy_tmp_cs1_r <= #TCQ {CS_WIDTH*nCS_PER_RANK{1'b1}};
+        phy_tmp_odt0_r <= #TCQ {CS_WIDTH*nCS_PER_RANK{1'b0}};
+        phy_tmp_odt1_r <= #TCQ {CS_WIDTH*nCS_PER_RANK{1'b0}};
+        phy_tmp_odt0_r1 <= #TCQ phy_tmp_odt0_r;
+        phy_tmp_odt1_r1 <= #TCQ phy_tmp_odt1_r;
         
-      // Single slot configuration with single rank
-      4'b1000: begin    
-                 phy_tmp_odt0_r <= #TCQ {CS_WIDTH*nCS_PER_RANK{1'b1}};
-                 phy_tmp_odt1_r <= #TCQ {CS_WIDTH*nCS_PER_RANK{1'b1}};
-                 if ((REG_CTRL == "ON") && (nCS_PER_RANK > 1)) begin
-                   phy_tmp_cs1_r[chip_cnt_r] <= #TCQ 1'b0;
-                 end else begin
-                   phy_tmp_cs1_r <= #TCQ {CS_WIDTH*nCS_PER_RANK{1'b0}};
-                 end
-                 if ((RTT_WR == "OFF") || 
-                    ((WRLVL=="ON") && ~wrlvl_done)) begin
-                   //Rank0 Dynamic ODT disabled
-                   tmp_mr2_r[0] <= #TCQ 2'b00;
-                   //Rank0 Rtt_NOM defaults to 120 ohms
-                   tmp_mr1_r[0] <= #TCQ (RTT_NOM == "40") ? 3'b011 :
-                                       (RTT_NOM == "60") ? 3'b001 :
-                                       3'b010;
-                 end else begin
-                   //Rank0 Dynamic ODT defaults to 120 ohms
-                   tmp_mr2_r[0] <= #TCQ (RTT_WR == "60") ? 2'b01 :
-                                       2'b10;
-                   //Rank0 Rtt_NOM
-                   tmp_mr1_r[0] <= #TCQ 3'b000;
-                 end
-      end 
+        case ({slot_0_present[0],slot_0_present[1],
+               slot_0_present[2],slot_0_present[3]})
+          // Single slot configuration with quad rank
+          // Assuming same behavior as single slot dual rank for now
+          // DDR2 does not have quad rank parts 
+          4'b1111: begin    
+            if ((RTT_WR == "OFF") || 
+                ((WRLVL=="ON") && ~wrlvl_done &&
+                 (wrlvl_rank_cntr==3'd0))) begin
+              //Rank0 Dynamic ODT disabled
+              tmp_mr2_r[0] <= #TCQ 2'b00;
+              //Rank0 Rtt_NOM defaults to 120 ohms
+              tmp_mr1_r[0] <= #TCQ (RTT_NOM == "40") ? 3'b011 :
+                              (RTT_NOM == "60") ? 3'b001 :
+                              3'b010;
+            end else begin
+              //Rank0 Dynamic ODT defaults to 120 ohms
+              tmp_mr2_r[0] <= #TCQ (RTT_WR == "60") ? 2'b01 :
+                              2'b10;
+              //Rank0 Rtt_NOM
+              tmp_mr1_r[0] <= #TCQ 3'b000;
+            end
+            phy_tmp_odt0_r[nCS_PER_RANK-1:0] <= #TCQ {nCS_PER_RANK{1'b1}};
+            phy_tmp_odt1_r[nCS_PER_RANK-1:0] <= #TCQ {nCS_PER_RANK{1'b1}};
+            // Chip Select assignments
+            phy_tmp_cs1_r[((chip_cnt_r*nCS_PER_RANK)
+                           ) +: nCS_PER_RANK] <= #TCQ 'b0;
+          end 
         
-      // Single slot configuration with dual rank
-      4'b1100: begin
-                 phy_tmp_odt0_r[nCS_PER_RANK-1:0] <= #TCQ {nCS_PER_RANK{1'b1}};
-                 phy_tmp_odt1_r[nCS_PER_RANK-1:0] <= #TCQ {nCS_PER_RANK{1'b1}};
-                 // Chip Select assignments
-                 
-                 phy_tmp_cs1_r[((chip_cnt_r*nCS_PER_RANK)
-                 ) +: nCS_PER_RANK] <= #TCQ 'b0;
-                 if ((RTT_WR == "OFF") || 
-                    ((WRLVL=="ON") && ~wrlvl_done &&
-                     (wrlvl_rank_cntr==3'd0))) begin
-                   //Rank0 Dynamic ODT disabled
-                   tmp_mr2_r[0] <= #TCQ 2'b00;
-                   //Rank0 Rtt_NOM defaults to 120 ohms
-                   tmp_mr1_r[0] <= #TCQ (RTT_NOM == "40") ? 3'b011 :
-                                       (RTT_NOM == "60") ? 3'b001 :
-                                       3'b010;
-                 end else begin
-                   //Rank0 Dynamic ODT defaults to 120 ohms
-                   tmp_mr2_r[0] <= #TCQ (RTT_WR == "60") ? 2'b01 :
-                                       2'b10;
-                   //Rank0 Rtt_NOM
-                   tmp_mr1_r[0] <= #TCQ 3'b000;
-                 end
-      end 
-        
-      default: begin    
-                 phy_tmp_odt0_r <= #TCQ {CS_WIDTH*nCS_PER_RANK{1'b1}};
-                 phy_tmp_odt1_r <= #TCQ {CS_WIDTH*nCS_PER_RANK{1'b1}};
-                 phy_tmp_cs1_r <= #TCQ {CS_WIDTH*nCS_PER_RANK{1'b0}};
-                 if ((RTT_WR == "OFF") || 
-                    ((WRLVL=="ON") && ~wrlvl_done)) begin
-                   //Rank0 Dynamic ODT disabled
-                   tmp_mr2_r[0] <= #TCQ 2'b00;
-                   //Rank0 Rtt_NOM defaults to 120 ohms
-                   tmp_mr1_r[0] <= #TCQ (RTT_NOM == "40") ? 3'b011 :
-                                       (RTT_NOM == "60") ? 3'b001 :
-                                       3'b010;
-                 end else begin
-                   //Rank0 Dynamic ODT defaults to 120 ohms
-                   tmp_mr2_r[0] <= #TCQ (RTT_WR == "60") ? 2'b01 :
-                                       2'b10;
-                   //Rank0 Rtt_NOM
-                   tmp_mr1_r[0] <= #TCQ 3'b000;
-                 end
-      end       
-      endcase // case({slot_0_present[0],slot_0_present[1],...
-    end
-  end else if (nSLOTS == 2) begin: gen_dual_slot_odt
-    always @ (posedge clk) begin
-      tmp_mr2_r[1]   <= #TCQ 2'b00;
-      tmp_mr2_r[2]   <= #TCQ 2'b00;
-      tmp_mr2_r[3]   <= #TCQ 2'b00;
-      tmp_mr1_r[1]   <= #TCQ 3'b000;
-      tmp_mr1_r[2]   <= #TCQ 3'b000;
-      tmp_mr1_r[3]   <= #TCQ 3'b000;
-      phy_tmp_odt0_r <= #TCQ {CS_WIDTH*nCS_PER_RANK{1'b0}};
-      phy_tmp_odt1_r <= #TCQ {CS_WIDTH*nCS_PER_RANK{1'b0}};
-      phy_tmp_cs1_r <= #TCQ {CS_WIDTH*nCS_PER_RANK{1'b1}};
-      phy_tmp_odt0_r1 <= #TCQ phy_tmp_odt0_r;
-      phy_tmp_odt1_r1 <= #TCQ phy_tmp_odt1_r;
-       
-      case ({slot_0_present[0],slot_0_present[1],
-             slot_1_present[0],slot_1_present[1]})       
-      // Two slot configuration, one slot present, single rank
-      4'b10_00: begin
-                 if (wrlvl_odt || (init_state_r == INIT_IOCONFIG_WR_WAIT)
-                    || (init_state_r == INIT_RDLVL_STG1_WRITE) 
-                    || (init_state_r == INIT_RDLVL_STG2_WRITE)) begin
-                   // odt turned on only during write 
-                   phy_tmp_odt0_r <= #TCQ {nCS_PER_RANK{1'b1}};
-                   phy_tmp_odt1_r <= #TCQ {nCS_PER_RANK{1'b1}};                   
-                 end
-                 phy_tmp_cs1_r <= #TCQ {nCS_PER_RANK{1'b0}};
-                 if ((RTT_WR == "OFF") || 
-                    ((WRLVL=="ON") && ~wrlvl_done)) begin
-                   //Rank0 Dynamic ODT disabled
-                   tmp_mr2_r[0] <= #TCQ 2'b00;
-                   //Rank0 Rtt_NOM defaults to 120 ohms
-                   tmp_mr1_r[0] <= #TCQ (RTT_NOM == "40") ? 3'b011 :
-                                       (RTT_NOM == "60") ? 3'b001 :
-                                       3'b010;
-                 end else begin
-                   //Rank0 Dynamic ODT defaults to 120 ohms
-                   tmp_mr2_r[0] <= #TCQ (RTT_WR == "60") ? 2'b01 :
-                                       2'b10;
-                   //Rank0 Rtt_NOM
-                   tmp_mr1_r[0] <= #TCQ 3'b000;
-                 end
-               end
-      4'b00_10: begin
-                 
-                 //Rank1 ODT enabled
-                 if (wrlvl_odt || (init_state_r == INIT_IOCONFIG_WR_WAIT)
-                    || (init_state_r == INIT_RDLVL_STG1_WRITE) 
-                    || (init_state_r == INIT_RDLVL_STG2_WRITE)) begin
-                   // odt turned on only during write
-                   phy_tmp_odt0_r <= #TCQ {nCS_PER_RANK{1'b1}};
-                   phy_tmp_odt1_r <= #TCQ {nCS_PER_RANK{1'b1}};                   
-                 end
-                 phy_tmp_cs1_r <= #TCQ {nCS_PER_RANK{1'b0}};
-                 if ((RTT_WR == "OFF") || 
-                    ((WRLVL=="ON") && ~wrlvl_done)) begin
-                   //Rank1 Dynamic ODT disabled
-                   tmp_mr2_r[0] <= #TCQ 2'b00;
-                   //Rank1 Rtt_NOM defaults to 120 ohms
-                   tmp_mr1_r[0] <= #TCQ (RTT_NOM == "40") ? 3'b011 :
-                                       (RTT_NOM == "60") ? 3'b001 :
-                                       3'b010;
-                 end else begin
-                   //Rank1 Dynamic ODT defaults to 120 ohms
-                   tmp_mr2_r[0] <= #TCQ (RTT_WR == "60") ? 2'b01 :
-                                       2'b10;
-                   //Rank1 Rtt_NOM
-                   tmp_mr1_r[0] <= #TCQ 3'b000;
-                 end
-               end
-      // Two slot configuration, one slot present, dual rank
-      4'b00_11: begin
-                 if (wrlvl_odt || (init_state_r == INIT_IOCONFIG_WR_WAIT)
-                    || (init_state_r == INIT_RDLVL_STG1_WRITE) 
-                    || (init_state_r == INIT_RDLVL_STG2_WRITE)) begin
-                   // odt turned on only during write
-                   phy_tmp_odt0_r[nCS_PER_RANK-1:0]  
-                   <= #TCQ {nCS_PER_RANK{1'b1}};
-                   phy_tmp_odt1_r[nCS_PER_RANK-1:0]  
-                   <= #TCQ {nCS_PER_RANK{1'b1}};
-                 end
-         
-                 // Chip Select assignments
-                 phy_tmp_cs1_r[(chip_cnt_r*nCS_PER_RANK) +: nCS_PER_RANK] 
-                 <= #TCQ {nCS_PER_RANK{1'b0}};
-         
-                
-                 if ((RTT_WR == "OFF") ||
-                    ((WRLVL=="ON") && ~wrlvl_done &&
-                     (wrlvl_rank_cntr==3'd0))) begin
-                   //Rank0 Dynamic ODT disabled
-                   tmp_mr2_r[0] <= #TCQ 2'b00;
-                   //Rank0 Rtt_NOM defaults to 120 ohms
-                   tmp_mr1_r[0] <= #TCQ (RTT_NOM == "40") ? 3'b011 :
-                                       (RTT_NOM == "60") ? 3'b001 :
-                                       3'b010;
-                 end else begin
-                   //Rank0 Dynamic ODT defaults to 120 ohms
-                   tmp_mr2_r[0] <= #TCQ (RTT_WR == "60") ? 2'b01 :
-                                       2'b10;
-                   //Rank0 Rtt_NOM
-                   tmp_mr1_r[0] <= #TCQ 3'b000;
-                 end
-               end
-      4'b11_00: begin
-                 if (wrlvl_odt || (init_state_r == INIT_IOCONFIG_WR_WAIT)
-                    || (init_state_r == INIT_RDLVL_STG1_WRITE) 
-                    || (init_state_r == INIT_RDLVL_STG2_WRITE)) begin
-                   // odt turned on only during write
-                   phy_tmp_odt0_r[nCS_PER_RANK-1] <= #TCQ {nCS_PER_RANK{1'b1}};
-                   phy_tmp_odt1_r[nCS_PER_RANK-1] <= #TCQ {nCS_PER_RANK{1'b1}};
-                 end
-         
-                 // Chip Select assignments
-                 phy_tmp_cs1_r[(chip_cnt_r*nCS_PER_RANK) +: nCS_PER_RANK] 
-                 <= #TCQ {nCS_PER_RANK{1'b0}};
+          // Single slot configuration with single rank
+          4'b1000: begin    
+            phy_tmp_odt0_r <= #TCQ {CS_WIDTH*nCS_PER_RANK{1'b1}};
+            phy_tmp_odt1_r <= #TCQ {CS_WIDTH*nCS_PER_RANK{1'b1}};
+            if ((REG_CTRL == "ON") && (nCS_PER_RANK > 1)) begin
+              phy_tmp_cs1_r[chip_cnt_r] <= #TCQ 1'b0;
+            end else begin
+              phy_tmp_cs1_r <= #TCQ {CS_WIDTH*nCS_PER_RANK{1'b0}};
+            end
+            if ((RTT_WR == "OFF") || 
+                ((WRLVL=="ON") && ~wrlvl_done)) begin
+              //Rank0 Dynamic ODT disabled
+              tmp_mr2_r[0] <= #TCQ 2'b00;
+              //Rank0 Rtt_NOM defaults to 120 ohms
+              tmp_mr1_r[0] <= #TCQ (RTT_NOM == "40") ? 3'b011 :
+                              (RTT_NOM == "60") ? 3'b001 :
+                              3'b010;
+            end else begin
+              //Rank0 Dynamic ODT defaults to 120 ohms
+              tmp_mr2_r[0] <= #TCQ (RTT_WR == "60") ? 2'b01 :
+                              2'b10;
+              //Rank0 Rtt_NOM
+              tmp_mr1_r[0] <= #TCQ 3'b000;
+            end
+          end 
           
-                 if ((RTT_WR == "OFF") ||
-                    ((WRLVL=="ON") && ~wrlvl_done &&
-                     (wrlvl_rank_cntr==3'd0))) begin
-                   //Rank1 Dynamic ODT disabled
-                   tmp_mr2_r[0] <= #TCQ 2'b00;
-                   //Rank1 Rtt_NOM defaults to 120 ohms
-                   tmp_mr1_r[0] <= #TCQ (RTT_NOM == "40") ? 3'b011 :
-                                       (RTT_NOM == "60") ? 3'b001 :
-                                       3'b010;
-                 end else begin
-                   //Rank1 Dynamic ODT defaults to 120 ohms
-                   tmp_mr2_r[0] <= #TCQ (RTT_WR == "60") ? 2'b01 :
-                                       2'b10;
-                   //Rank1 Rtt_NOM
-                   tmp_mr1_r[0] <= #TCQ 3'b000;
-                 end
-               end
-      // Two slot configuration, one rank per slot
-      4'b10_10: begin
-                 if(DRAM_TYPE == "DDR2")begin
-                   if(chip_cnt_r == 2'b00)begin
-                     phy_tmp_odt0_r[(0*nCS_PER_RANK) +: nCS_PER_RANK]
-                     <= #TCQ {nCS_PER_RANK{1'b0}};
-                     phy_tmp_odt0_r[(1*nCS_PER_RANK) +: nCS_PER_RANK]
-                     <= #TCQ {nCS_PER_RANK{1'b1}};
-                     phy_tmp_odt1_r[(0*nCS_PER_RANK) +: nCS_PER_RANK]
-                     <= #TCQ {nCS_PER_RANK{1'b0}};
-                     phy_tmp_odt1_r[(1*nCS_PER_RANK) +: nCS_PER_RANK]
-                     <= #TCQ {nCS_PER_RANK{1'b1}};
-                   end else begin
-                     phy_tmp_odt0_r[(0*nCS_PER_RANK) +: nCS_PER_RANK]
-                     <= #TCQ {nCS_PER_RANK{1'b1}};
-                     phy_tmp_odt0_r[(1*nCS_PER_RANK) +: nCS_PER_RANK]
-                     <= #TCQ {nCS_PER_RANK{1'b0}};
-                     phy_tmp_odt1_r[(0*nCS_PER_RANK) +: nCS_PER_RANK]
-                     <= #TCQ {nCS_PER_RANK{1'b1}};
-                     phy_tmp_odt1_r[(1*nCS_PER_RANK) +: nCS_PER_RANK]
-                     <= #TCQ {nCS_PER_RANK{1'b0}};
-                   end
-                 end else begin                       
-                   if (wrlvl_odt || (init_state_r == INIT_IOCONFIG_WR_WAIT)
-                       || (init_state_r == INIT_RDLVL_STG1_WRITE) 
-                    || (init_state_r == INIT_RDLVL_STG2_WRITE)) begin
-                     phy_tmp_odt0_r[(0*nCS_PER_RANK) +: nCS_PER_RANK]
-                     <= #TCQ {nCS_PER_RANK{1'b1}};
-                     phy_tmp_odt0_r[(1*nCS_PER_RANK) +: nCS_PER_RANK]
-                     <= #TCQ {nCS_PER_RANK{1'b1}};
-                     phy_tmp_odt1_r[(0*nCS_PER_RANK) +: nCS_PER_RANK]
-                     <= #TCQ {nCS_PER_RANK{1'b1}};
-                     phy_tmp_odt1_r[(1*nCS_PER_RANK) +: nCS_PER_RANK]
-                     <= #TCQ {nCS_PER_RANK{1'b1}};
-                   end else if ((init_state_r == INIT_IOCONFIG_RD_WAIT)
-                    || (init_state_r == INIT_RDLVL_STG1_READ) 
-                    || (init_state_r == INIT_RDLVL_STG2_READ)) begin
-                     if (chip_cnt_r == 2'b00) begin
-                       phy_tmp_odt0_r[(0*nCS_PER_RANK) +: nCS_PER_RANK]
-                       <= #TCQ {nCS_PER_RANK{1'b0}};
-                       phy_tmp_odt0_r[(1*nCS_PER_RANK) +: nCS_PER_RANK]
-                       <= #TCQ {nCS_PER_RANK{1'b1}};
-                       phy_tmp_odt1_r[(0*nCS_PER_RANK) +: nCS_PER_RANK]
-                       <= #TCQ {nCS_PER_RANK{1'b0}};
-                       phy_tmp_odt1_r[(1*nCS_PER_RANK) +: nCS_PER_RANK]
-                       <= #TCQ {nCS_PER_RANK{1'b1}};
-                     end else if (chip_cnt_r == 2'b01) begin 
-                       phy_tmp_odt0_r[(0*nCS_PER_RANK) +: nCS_PER_RANK]
-                       <= #TCQ {nCS_PER_RANK{1'b1}};
-                       phy_tmp_odt0_r[(1*nCS_PER_RANK) +: nCS_PER_RANK]
-                       <= #TCQ {nCS_PER_RANK{1'b0}};
-                       phy_tmp_odt1_r[(0*nCS_PER_RANK) +: nCS_PER_RANK]
-                       <= #TCQ {nCS_PER_RANK{1'b1}};
-                       phy_tmp_odt1_r[(1*nCS_PER_RANK) +: nCS_PER_RANK]
-                       <= #TCQ {nCS_PER_RANK{1'b0}};
-                     end
-                   end
-                 end // else: !if(DRAM_TYPE == "DDR2")
-  
-                 // Chip Select assignments
-                 phy_tmp_cs1_r[(chip_cnt_r*nCS_PER_RANK) +: nCS_PER_RANK] 
+          // Single slot configuration with dual rank
+          4'b1100: begin
+            phy_tmp_odt0_r[nCS_PER_RANK-1:0] <= #TCQ {nCS_PER_RANK{1'b1}};
+            phy_tmp_odt1_r[nCS_PER_RANK-1:0] <= #TCQ {nCS_PER_RANK{1'b1}};
+            // Chip Select assignments            
+            phy_tmp_cs1_r[((chip_cnt_r*nCS_PER_RANK)
+                           ) +: nCS_PER_RANK] <= #TCQ 'b0;
+            if ((RTT_WR == "OFF") || 
+                ((WRLVL=="ON") && ~wrlvl_done &&
+                 (wrlvl_rank_cntr==3'd0))) begin
+              //Rank0 Dynamic ODT disabled
+              tmp_mr2_r[0] <= #TCQ 2'b00;
+              //Rank0 Rtt_NOM defaults to 120 ohms
+              tmp_mr1_r[0] <= #TCQ (RTT_NOM == "40") ? 3'b011 :
+                              (RTT_NOM == "60") ? 3'b001 :
+                              3'b010;
+            end else begin
+              //Rank0 Dynamic ODT defaults to 120 ohms
+              tmp_mr2_r[0] <= #TCQ (RTT_WR == "60") ? 2'b01 :
+                              2'b10;
+              //Rank0 Rtt_NOM
+              tmp_mr1_r[0] <= #TCQ 3'b000;
+            end
+          end 
+          
+          default: begin    
+            phy_tmp_odt0_r <= #TCQ {CS_WIDTH*nCS_PER_RANK{1'b1}};
+            phy_tmp_odt1_r <= #TCQ {CS_WIDTH*nCS_PER_RANK{1'b1}};
+            phy_tmp_cs1_r <= #TCQ {CS_WIDTH*nCS_PER_RANK{1'b0}};
+            if ((RTT_WR == "OFF") || 
+                ((WRLVL=="ON") && ~wrlvl_done)) begin
+              //Rank0 Dynamic ODT disabled
+              tmp_mr2_r[0] <= #TCQ 2'b00;
+              //Rank0 Rtt_NOM defaults to 120 ohms
+              tmp_mr1_r[0] <= #TCQ (RTT_NOM == "40") ? 3'b011 :
+                              (RTT_NOM == "60") ? 3'b001 :
+                              3'b010;
+            end else begin
+              //Rank0 Dynamic ODT defaults to 120 ohms
+              tmp_mr2_r[0] <= #TCQ (RTT_WR == "60") ? 2'b01 :
+                              2'b10;
+              //Rank0 Rtt_NOM
+              tmp_mr1_r[0] <= #TCQ 3'b000;
+            end
+          end       
+        endcase
+      end
+    end else if (nSLOTS == 2) begin: gen_dual_slot_odt
+      always @ (posedge clk) begin
+        tmp_mr2_r[1]   <= #TCQ 2'b00;
+        tmp_mr2_r[2]   <= #TCQ 2'b00;
+        tmp_mr2_r[3]   <= #TCQ 2'b00;
+        tmp_mr1_r[1]   <= #TCQ 3'b000;
+        tmp_mr1_r[2]   <= #TCQ 3'b000;
+        tmp_mr1_r[3]   <= #TCQ 3'b000;
+        phy_tmp_odt0_r <= #TCQ {CS_WIDTH*nCS_PER_RANK{1'b0}};
+        phy_tmp_odt1_r <= #TCQ {CS_WIDTH*nCS_PER_RANK{1'b0}};
+        phy_tmp_cs1_r <= #TCQ {CS_WIDTH*nCS_PER_RANK{1'b1}};
+        phy_tmp_odt0_r1 <= #TCQ phy_tmp_odt0_r;
+        phy_tmp_odt1_r1 <= #TCQ phy_tmp_odt1_r;
+        
+        case ({slot_0_present[0],slot_0_present[1],
+               slot_1_present[0],slot_1_present[1]})       
+          // Two slot configuration, one slot present, single rank
+          4'b10_00: begin
+            if (wrlvl_odt || (init_state_r == INIT_IOCONFIG_WR_WAIT) ||
+                (init_state_r == INIT_RDLVL_STG1_WRITE) ||
+                (init_state_r == INIT_RDLVL_STG2_WRITE) ||
+                (init_state_r == INIT_RDLVL_CLKDIV_WRITE)) begin
+              // odt turned on only during write 
+              phy_tmp_odt0_r <= #TCQ {nCS_PER_RANK{1'b1}};
+              phy_tmp_odt1_r <= #TCQ {nCS_PER_RANK{1'b1}};
+            end
+            phy_tmp_cs1_r <= #TCQ {nCS_PER_RANK{1'b0}};
+            if ((RTT_WR == "OFF") || 
+                ((WRLVL=="ON") && ~wrlvl_done)) begin
+              //Rank0 Dynamic ODT disabled
+              tmp_mr2_r[0] <= #TCQ 2'b00;
+              //Rank0 Rtt_NOM defaults to 120 ohms
+              tmp_mr1_r[0] <= #TCQ (RTT_NOM == "40") ? 3'b011 :
+                              (RTT_NOM == "60") ? 3'b001 :
+                              3'b010;
+            end else begin
+              //Rank0 Dynamic ODT defaults to 120 ohms
+              tmp_mr2_r[0] <= #TCQ (RTT_WR == "60") ? 2'b01 :
+                              2'b10;
+              //Rank0 Rtt_NOM
+              tmp_mr1_r[0] <= #TCQ 3'b000;
+            end
+          end
+          4'b00_10: begin          
+            //Rank1 ODT enabled
+            if (wrlvl_odt || (init_state_r == INIT_IOCONFIG_WR_WAIT) ||
+                (init_state_r == INIT_RDLVL_STG1_WRITE) ||
+                (init_state_r == INIT_RDLVL_STG2_WRITE) ||
+                (init_state_r == INIT_RDLVL_CLKDIV_WRITE)) begin
+              // odt turned on only during write
+              phy_tmp_odt0_r <= #TCQ {nCS_PER_RANK{1'b1}};
+              phy_tmp_odt1_r <= #TCQ {nCS_PER_RANK{1'b1}};                   
+            end
+            phy_tmp_cs1_r <= #TCQ {nCS_PER_RANK{1'b0}};
+            if ((RTT_WR == "OFF") || 
+                ((WRLVL=="ON") && ~wrlvl_done)) begin
+              //Rank1 Dynamic ODT disabled
+              tmp_mr2_r[0] <= #TCQ 2'b00;
+              //Rank1 Rtt_NOM defaults to 120 ohms
+              tmp_mr1_r[0] <= #TCQ (RTT_NOM == "40") ? 3'b011 :
+                              (RTT_NOM == "60") ? 3'b001 :
+                              3'b010;
+            end else begin
+              //Rank1 Dynamic ODT defaults to 120 ohms
+              tmp_mr2_r[0] <= #TCQ (RTT_WR == "60") ? 2'b01 :
+                              2'b10;
+              //Rank1 Rtt_NOM
+              tmp_mr1_r[0] <= #TCQ 3'b000;
+            end
+          end
+          // Two slot configuration, one slot present, dual rank
+          4'b00_11: begin
+            if (wrlvl_odt || (init_state_r == INIT_IOCONFIG_WR_WAIT) ||
+                (init_state_r == INIT_RDLVL_STG1_WRITE) ||
+                (init_state_r == INIT_RDLVL_STG2_WRITE) ||
+                (init_state_r == INIT_RDLVL_CLKDIV_WRITE)) begin
+              // odt turned on only during write
+              phy_tmp_odt0_r[nCS_PER_RANK-1:0]  
+                <= #TCQ {nCS_PER_RANK{1'b1}};
+              phy_tmp_odt1_r[nCS_PER_RANK-1:0]  
+                <= #TCQ {nCS_PER_RANK{1'b1}};
+            end         
+            // Chip Select assignments
+            phy_tmp_cs1_r[(chip_cnt_r*nCS_PER_RANK) +: nCS_PER_RANK] 
+              <= #TCQ {nCS_PER_RANK{1'b0}};
+            if ((RTT_WR == "OFF") ||
+                ((WRLVL=="ON") && ~wrlvl_done &&
+                 (wrlvl_rank_cntr==3'd0))) begin
+              //Rank0 Dynamic ODT disabled
+              tmp_mr2_r[0] <= #TCQ 2'b00;
+              //Rank0 Rtt_NOM defaults to 120 ohms
+              tmp_mr1_r[0] <= #TCQ (RTT_NOM == "40") ? 3'b011 :
+                              (RTT_NOM == "60") ? 3'b001 :
+                              3'b010;
+            end else begin
+              //Rank0 Dynamic ODT defaults to 120 ohms
+              tmp_mr2_r[0] <= #TCQ (RTT_WR == "60") ? 2'b01 :
+                              2'b10;
+              //Rank0 Rtt_NOM
+              tmp_mr1_r[0] <= #TCQ 3'b000;
+            end
+          end
+          4'b11_00: begin
+            if (wrlvl_odt || (init_state_r == INIT_IOCONFIG_WR_WAIT) ||
+                (init_state_r == INIT_RDLVL_STG1_WRITE) || 
+                (init_state_r == INIT_RDLVL_STG2_WRITE) ||
+                (init_state_r == INIT_RDLVL_CLKDIV_WRITE)) begin    
+              // odt turned on only during write
+              phy_tmp_odt0_r[nCS_PER_RANK-1] <= #TCQ {nCS_PER_RANK{1'b1}};
+              phy_tmp_odt1_r[nCS_PER_RANK-1] <= #TCQ {nCS_PER_RANK{1'b1}};
+            end          
+            // Chip Select assignments
+            phy_tmp_cs1_r[(chip_cnt_r*nCS_PER_RANK) +: nCS_PER_RANK] 
+              <= #TCQ {nCS_PER_RANK{1'b0}};
+            if ((RTT_WR == "OFF") ||
+                ((WRLVL=="ON") && ~wrlvl_done &&
+                 (wrlvl_rank_cntr==3'd0))) begin
+              //Rank1 Dynamic ODT disabled
+              tmp_mr2_r[0] <= #TCQ 2'b00;
+              //Rank1 Rtt_NOM defaults to 120 ohms
+              tmp_mr1_r[0] <= #TCQ (RTT_NOM == "40") ? 3'b011 :
+                              (RTT_NOM == "60") ? 3'b001 :
+                              3'b010;
+            end else begin
+              //Rank1 Dynamic ODT defaults to 120 ohms
+              tmp_mr2_r[0] <= #TCQ (RTT_WR == "60") ? 2'b01 :
+                              2'b10;
+              //Rank1 Rtt_NOM
+              tmp_mr1_r[0] <= #TCQ 3'b000;
+            end
+          end
+          // Two slot configuration, one rank per slot
+          4'b10_10: begin
+            if (DRAM_TYPE == "DDR2")begin
+              if (chip_cnt_r == 2'b00)begin
+                phy_tmp_odt0_r[(0*nCS_PER_RANK) +: nCS_PER_RANK]
                   <= #TCQ {nCS_PER_RANK{1'b0}};
-
-                 if ((RTT_WR == "OFF") ||
-                    ((WRLVL=="ON") && ~wrlvl_done &&
-                     (wrlvl_rank_cntr==3'd0))) begin
-                   //Rank0 Dynamic ODT disabled
-                   tmp_mr2_r[0] <= #TCQ 2'b00;
-                   //Rank0 Rtt_NOM defaults to 120 ohms
-                   tmp_mr1_r[0] <= #TCQ (RTT_NOM == "40") ? 3'b011 :
-                                       (RTT_NOM == "60") ? 3'b001 :
-                                       3'b010;
-                   //Rank1 Dynamic ODT disabled
-                   tmp_mr2_r[1] <= #TCQ 2'b00;
-                   //Rank1 Rtt_NOM defaults to 120 ohms
-                   tmp_mr1_r[1] <= #TCQ (RTT_NOM == "40") ? 3'b011 :
-                                       (RTT_NOM == "60") ? 3'b001 :
-                                       3'b010;
-                 end else begin
-                   //Rank0 Dynamic ODT defaults to 120 ohms
-                   tmp_mr2_r[0] <= #TCQ (RTT_WR == "60") ? 2'b01 :
-                                       2'b10;
-                   //Rank0 Rtt_NOM defaults to 40 ohms
-                   tmp_mr1_r[0] <= #TCQ (RTT_NOM == "60") ? 3'b001 :
-                                       (RTT_NOM == "120") ? 3'b010 :
-                                       (RTT_NOM == "20") ? 3'b100 :
-                                       (RTT_NOM == "30") ? 3'b101 :
-                                       3'b011;
-                   //Rank1 Dynamic ODT defaults to 120 ohms
-                   tmp_mr2_r[1] <= #TCQ (RTT_WR == "60") ? 2'b01 :
-                                       2'b10;
-                   //Rank1 Rtt_NOM defaults to 40 ohms
-                   tmp_mr1_r[1] <= #TCQ (RTT_NOM == "60") ? 3'b001 :
-                                       (RTT_NOM == "120") ? 3'b010 :
-                                       (RTT_NOM == "20") ? 3'b100 :
-                                       (RTT_NOM == "30") ? 3'b101 :
-                                       3'b011;
-                 end
-               end
-      // Two Slots - One slot with dual rank and the other with single rank
-      4'b10_11: begin
-
-                 //Rank3 Rtt_NOM defaults to 40 ohms
-                 tmp_mr1_r[2] <= #TCQ (RTT_NOM3 == "60") ? 3'b001 :
-                                     (RTT_NOM3 == "120") ? 3'b010 :
-                                     (RTT_NOM3 == "20") ? 3'b100 :
-                                     (RTT_NOM3 == "30") ? 3'b101 :
-                                     3'b011;
-                 tmp_mr2_r[2] <= #TCQ 2'b00;
-                 if ((RTT_WR == "OFF") ||
-                    ((WRLVL=="ON") && ~wrlvl_done &&
-                     (wrlvl_rank_cntr==3'd0))) begin
-                   //Rank0 Dynamic ODT disabled
-                   tmp_mr2_r[0] <= #TCQ 2'b00;
-                   //Rank0 Rtt_NOM defaults to 120 ohms
-                   tmp_mr1_r[0] <= #TCQ (RTT_NOM == "40") ? 3'b011 :
-                                       (RTT_NOM == "60") ? 3'b001 :
-                                       3'b010;
-                   //Rank1 Dynamic ODT disabled
-                   tmp_mr2_r[1] <= #TCQ 2'b00;
-                   //Rank1 Rtt_NOM defaults to 120 ohms
-                   tmp_mr1_r[1] <= #TCQ (RTT_NOM == "40") ? 3'b011 :
-                                       (RTT_NOM == "60") ? 3'b001 :
-                                       3'b010;
-                 end else begin
-                   //Rank0 Dynamic ODT defaults to 120 ohms
-                   tmp_mr2_r[0] <= #TCQ (RTT_WR == "60") ? 2'b01 :
-                                       2'b10;
-                   //Rank0 Rtt_NOM defaults to 40 ohms
-                   tmp_mr1_r[0] <= #TCQ (RTT_NOM == "60") ? 3'b001 :
-                                       (RTT_NOM == "120") ? 3'b010 :
-                                       (RTT_NOM == "20") ? 3'b100 :
-                                       (RTT_NOM == "30") ? 3'b101 :
-                                       3'b011;
-                   //Rank1 Dynamic ODT defaults to 120 ohms
-                   tmp_mr2_r[1] <= #TCQ (RTT_WR == "60") ? 2'b01 :
-                                       2'b10;
-                   //Rank1 Rtt_NOM
-                   tmp_mr1_r[1] <= #TCQ 3'b000;
-                 end
-                 //Slot1 Rank1 or Rank3 is being written
-                 if(DRAM_TYPE == "DDR2")begin
-                   if(chip_cnt_r == 2'b00)begin
-                     phy_tmp_odt0_r[(1*nCS_PER_RANK) +: nCS_PER_RANK] 
-                     <= #TCQ {nCS_PER_RANK{1'b1}};
-                     phy_tmp_odt1_r[(1*nCS_PER_RANK) +: nCS_PER_RANK] 
-                     <= #TCQ {nCS_PER_RANK{1'b1}};
-                   end else begin
-                     phy_tmp_odt0_r[(0*nCS_PER_RANK) +: nCS_PER_RANK] 
-                     <= #TCQ {nCS_PER_RANK{1'b1}};
-                     phy_tmp_odt1_r[(0*nCS_PER_RANK) +: nCS_PER_RANK] 
-                     <= #TCQ {nCS_PER_RANK{1'b1}};
-                   end
-                 end else begin               
-                   if (wrlvl_odt || (init_state_r == INIT_IOCONFIG_WR_WAIT)
-                      || (init_state_r == INIT_RDLVL_STG1_WRITE) 
-                      || (init_state_r == INIT_RDLVL_STG2_WRITE)) begin
-                     if (chip_cnt_r[0] == 1'b1) begin
-                       phy_tmp_odt0_r[(0*nCS_PER_RANK) +: nCS_PER_RANK] 
-                       <= #TCQ {nCS_PER_RANK{1'b1}};
-                       phy_tmp_odt1_r[(0*nCS_PER_RANK) +: nCS_PER_RANK] 
-                       <= #TCQ {nCS_PER_RANK{1'b1}};
-                       phy_tmp_odt0_r[(1*nCS_PER_RANK) +: nCS_PER_RANK] 
-                       <= #TCQ {nCS_PER_RANK{1'b1}};
-                       phy_tmp_odt1_r[(1*nCS_PER_RANK) +: nCS_PER_RANK] 
-                       <= #TCQ {nCS_PER_RANK{1'b1}};
-                     //Slot0 Rank0 is being written
-                     end else begin
-                       phy_tmp_odt0_r[(0*nCS_PER_RANK) +: nCS_PER_RANK] 
-                       <= #TCQ {nCS_PER_RANK{1'b1}};
-                       phy_tmp_odt1_r[(0*nCS_PER_RANK) +: nCS_PER_RANK] 
-                       <= #TCQ {nCS_PER_RANK{1'b1}};
-                       phy_tmp_odt0_r[(2*nCS_PER_RANK) +: nCS_PER_RANK] 
-                       <= #TCQ {nCS_PER_RANK{1'b1}};
-                       phy_tmp_odt1_r[(2*nCS_PER_RANK) +: nCS_PER_RANK] 
-                       <= #TCQ {nCS_PER_RANK{1'b1}};
-                     end
-                   end else if ((init_state_r == INIT_IOCONFIG_RD_WAIT) 
-                     || (init_state_r == INIT_RDLVL_STG1_READ) 
-                     || (init_state_r == INIT_RDLVL_STG2_READ))begin
-                     if (chip_cnt_r == 2'b00) begin
-                       phy_tmp_odt0_r[(2*nCS_PER_RANK) +: nCS_PER_RANK] 
-                       <= #TCQ {nCS_PER_RANK{1'b1}};
-                       phy_tmp_odt1_r[(2*nCS_PER_RANK) +: nCS_PER_RANK] 
-                       <= #TCQ {nCS_PER_RANK{1'b1}};
-                     end else begin
-                       phy_tmp_odt0_r[(0*nCS_PER_RANK) +: nCS_PER_RANK] 
-                       <= #TCQ {nCS_PER_RANK{1'b1}};
-                       phy_tmp_odt1_r[(0*nCS_PER_RANK) +: nCS_PER_RANK] 
-                       <= #TCQ {nCS_PER_RANK{1'b1}};
-                     end
-                   end
-                 end // else: !if(DRAM_TYPE == "DDR2")
-
-                 // Chip Select assignments
-                 phy_tmp_cs1_r[(chip_cnt_r*nCS_PER_RANK) +: nCS_PER_RANK] 
-                 <= #TCQ {nCS_PER_RANK{1'b0}};   
-                 
-               end
-      // Two Slots - One slot with dual rank and the other with single rank
-      4'b11_10: begin
-
-                 //Rank2 Rtt_NOM defaults to 40 ohms
-                 tmp_mr1_r[2] <= #TCQ (RTT_NOM2 == "60") ? 3'b001 :
-                                     (RTT_NOM2 == "120") ? 3'b010 :
-                                     (RTT_NOM2 == "20") ? 3'b100 :
-                                     (RTT_NOM2 == "30") ? 3'b101 :
-                                     3'b011;
-                 tmp_mr2_r[2] <= #TCQ 2'b00;
-                 if ((RTT_WR == "OFF") ||
-                    ((WRLVL=="ON") && ~wrlvl_done &&
-                     (wrlvl_rank_cntr==3'd0))) begin
-                   //Rank0 Dynamic ODT disabled
-                   tmp_mr2_r[0] <= #TCQ 2'b00;
-                   //Rank0 Rtt_NOM defaults to 120 ohms
-                   tmp_mr1_r[0] <= #TCQ (RTT_NOM == "40") ? 3'b011 :
-                                       (RTT_NOM == "60") ? 3'b001 :
-                                       3'b010;
-                   //Rank1 Dynamic ODT disabled
-                   tmp_mr2_r[1] <= #TCQ 2'b00;
-                   //Rank1 Rtt_NOM defaults to 120 ohms
-                   tmp_mr1_r[1] <= #TCQ (RTT_NOM == "40") ? 3'b011 :
-                                       (RTT_NOM == "60") ? 3'b001 :
-                                       3'b010;
-                 end else begin
-                   //Rank1 Dynamic ODT defaults to 120 ohms
-                   tmp_mr2_r[1] <= #TCQ (RTT_WR == "60") ? 2'b01 :
-                                       2'b10;
-                   //Rank1 Rtt_NOM defaults to 40 ohms
-                   tmp_mr1_r[1] <= #TCQ (RTT_NOM == "60") ? 3'b001 :
-                                       (RTT_NOM == "120") ? 3'b010 :
-                                       (RTT_NOM == "20") ? 3'b100 :
-                                       (RTT_NOM == "30") ? 3'b101 :
-                                       3'b011;
-                   //Rank0 Dynamic ODT defaults to 120 ohms
-                   tmp_mr2_r[0] <= #TCQ (RTT_WR == "60") ? 2'b01 :
-                                       2'b10;
-                   //Rank0 Rtt_NOM
-                   tmp_mr1_r[0] <= #TCQ 3'b000;
-                 end // else: !if((RTT_WR == "OFF") ||...
-
-                 if(DRAM_TYPE == "DDR2")begin
-                   if(chip_cnt_r[1] == 1'b1)begin
-                     phy_tmp_odt0_r[nCS_PER_RANK-1:0] <= 
-                     #TCQ {nCS_PER_RANK{1'b1}};
-                     phy_tmp_odt1_r[nCS_PER_RANK-1:0] <= 
-                     #TCQ {nCS_PER_RANK{1'b1}};
-                   end else begin
-                     phy_tmp_odt0_r[(2*nCS_PER_RANK) +: nCS_PER_RANK] 
-                     <= #TCQ {nCS_PER_RANK{1'b1}};
-                     phy_tmp_odt1_r[(2*nCS_PER_RANK) +: nCS_PER_RANK] 
-                     <= #TCQ {nCS_PER_RANK{1'b1}};
-                   end
-                 end else begin 
-                   if (wrlvl_odt || (init_state_r == INIT_IOCONFIG_WR_WAIT)
-                       || (init_state_r == INIT_RDLVL_STG1_WRITE) 
-                       || (init_state_r == INIT_RDLVL_STG2_WRITE)) begin
-                     
-                     if (chip_cnt_r[1] == 1'b1) begin
-                       phy_tmp_odt0_r[(1*nCS_PER_RANK) +: nCS_PER_RANK] 
-                       <= #TCQ {nCS_PER_RANK{1'b1}};
-                       phy_tmp_odt1_r[(1*nCS_PER_RANK) +: nCS_PER_RANK] 
-                       <= #TCQ {nCS_PER_RANK{1'b1}};
-                       phy_tmp_odt0_r[(2*nCS_PER_RANK) +: nCS_PER_RANK] 
-                       <= #TCQ {nCS_PER_RANK{1'b1}};
-                       phy_tmp_odt1_r[(2*nCS_PER_RANK) +: nCS_PER_RANK] 
-                       <= #TCQ {nCS_PER_RANK{1'b1}};
-                     
-                     end else begin
-                       phy_tmp_odt0_r[nCS_PER_RANK-1:0] <= 
-                       #TCQ {nCS_PER_RANK{1'b1}};
-                       phy_tmp_odt1_r[nCS_PER_RANK-1:0] <= 
-                       #TCQ {nCS_PER_RANK{1'b1}};
-                       phy_tmp_odt0_r[(2*nCS_PER_RANK) +: nCS_PER_RANK] 
-                       <= #TCQ {nCS_PER_RANK{1'b1}};
-                       phy_tmp_odt1_r[(2*nCS_PER_RANK) +: nCS_PER_RANK] 
-                       <= #TCQ {nCS_PER_RANK{1'b1}};
-                     end
-                   end else if ((init_state_r == INIT_IOCONFIG_RD_WAIT)
-                     || (init_state_r == INIT_RDLVL_STG1_READ) 
-                     || (init_state_r == INIT_RDLVL_STG2_READ)) begin
-                     
-                     if (chip_cnt_r[1] == 1'b1) begin
-                       phy_tmp_odt0_r[(1*nCS_PER_RANK) +: nCS_PER_RANK] 
-                       <= #TCQ {nCS_PER_RANK{1'b1}};
-                       phy_tmp_odt1_r[(1*nCS_PER_RANK) +: nCS_PER_RANK] 
-                       <= #TCQ {nCS_PER_RANK{1'b1}};
-                     
-                     end else begin
-                       phy_tmp_odt0_r[(2*nCS_PER_RANK) +: nCS_PER_RANK] 
-                       <= #TCQ {nCS_PER_RANK{1'b1}};
-                       phy_tmp_odt1_r[(2*nCS_PER_RANK) +: nCS_PER_RANK] 
-                       <= #TCQ {nCS_PER_RANK{1'b1}};
-                     end
-                   end // if (init_state_r == INIT_IOCONFIG_RD)
-                 end // else: !if(DRAM_TYPE == "DDR2")
+                phy_tmp_odt0_r[(1*nCS_PER_RANK) +: nCS_PER_RANK]
+                  <= #TCQ {nCS_PER_RANK{1'b1}};
+                phy_tmp_odt1_r[(0*nCS_PER_RANK) +: nCS_PER_RANK]
+                  <= #TCQ {nCS_PER_RANK{1'b0}};
+                phy_tmp_odt1_r[(1*nCS_PER_RANK) +: nCS_PER_RANK]
+                  <= #TCQ {nCS_PER_RANK{1'b1}};
+              end else begin
+                phy_tmp_odt0_r[(0*nCS_PER_RANK) +: nCS_PER_RANK]
+                  <= #TCQ {nCS_PER_RANK{1'b1}};
+                phy_tmp_odt0_r[(1*nCS_PER_RANK) +: nCS_PER_RANK]
+                  <= #TCQ {nCS_PER_RANK{1'b0}};
+                phy_tmp_odt1_r[(0*nCS_PER_RANK) +: nCS_PER_RANK]
+                  <= #TCQ {nCS_PER_RANK{1'b1}};
+                phy_tmp_odt1_r[(1*nCS_PER_RANK) +: nCS_PER_RANK]
+                  <= #TCQ {nCS_PER_RANK{1'b0}};
+              end
+            end else begin                       
+              if (wrlvl_odt || (init_state_r == INIT_IOCONFIG_WR_WAIT) ||
+                  (init_state_r == INIT_RDLVL_STG1_WRITE) || 
+                  (init_state_r == INIT_RDLVL_STG2_WRITE) ||
+                  (init_state_r == INIT_RDLVL_CLKDIV_WRITE)) begin
+                phy_tmp_odt0_r[(0*nCS_PER_RANK) +: nCS_PER_RANK]
+                  <= #TCQ {nCS_PER_RANK{1'b1}};
+                phy_tmp_odt0_r[(1*nCS_PER_RANK) +: nCS_PER_RANK]
+                  <= #TCQ {nCS_PER_RANK{1'b1}};
+                phy_tmp_odt1_r[(0*nCS_PER_RANK) +: nCS_PER_RANK]
+                  <= #TCQ {nCS_PER_RANK{1'b1}};
+                phy_tmp_odt1_r[(1*nCS_PER_RANK) +: nCS_PER_RANK]
+                  <= #TCQ {nCS_PER_RANK{1'b1}};
+              end else if ((init_state_r == INIT_IOCONFIG_RD_WAIT) ||
+                           (init_state_r == INIT_RDLVL_STG1_READ) || 
+                           (init_state_r == INIT_RDLVL_STG2_READ) ||
+                           (init_state_r == INIT_RDLVL_CLKDIV_READ)) begin
+                if (chip_cnt_r == 2'b00) begin
+                  phy_tmp_odt0_r[(0*nCS_PER_RANK) +: nCS_PER_RANK]
+                    <= #TCQ {nCS_PER_RANK{1'b0}};
+                  phy_tmp_odt0_r[(1*nCS_PER_RANK) +: nCS_PER_RANK]
+                    <= #TCQ {nCS_PER_RANK{1'b1}};
+                  phy_tmp_odt1_r[(0*nCS_PER_RANK) +: nCS_PER_RANK]
+                    <= #TCQ {nCS_PER_RANK{1'b0}};
+                  phy_tmp_odt1_r[(1*nCS_PER_RANK) +: nCS_PER_RANK]
+                    <= #TCQ {nCS_PER_RANK{1'b1}};
+                end else if (chip_cnt_r == 2'b01) begin 
+                  phy_tmp_odt0_r[(0*nCS_PER_RANK) +: nCS_PER_RANK]
+                    <= #TCQ {nCS_PER_RANK{1'b1}};
+                  phy_tmp_odt0_r[(1*nCS_PER_RANK) +: nCS_PER_RANK]
+                    <= #TCQ {nCS_PER_RANK{1'b0}};
+                  phy_tmp_odt1_r[(0*nCS_PER_RANK) +: nCS_PER_RANK]
+                    <= #TCQ {nCS_PER_RANK{1'b1}};
+                  phy_tmp_odt1_r[(1*nCS_PER_RANK) +: nCS_PER_RANK]
+                    <= #TCQ {nCS_PER_RANK{1'b0}};
+                end
+              end
+            end          
+            // Chip Select assignments
+            phy_tmp_cs1_r[(chip_cnt_r*nCS_PER_RANK) +: nCS_PER_RANK] 
+              <= #TCQ {nCS_PER_RANK{1'b0}};
+            
+            if ((RTT_WR == "OFF") ||
+                ((WRLVL=="ON") && ~wrlvl_done &&
+                 (wrlvl_rank_cntr==3'd0))) begin
+              //Rank0 Dynamic ODT disabled
+              tmp_mr2_r[0] <= #TCQ 2'b00;
+              //Rank0 Rtt_NOM defaults to 120 ohms
+              tmp_mr1_r[0] <= #TCQ (RTT_NOM == "40") ? 3'b011 :
+                              (RTT_NOM == "60") ? 3'b001 :
+                              3'b010;
+              //Rank1 Dynamic ODT disabled
+              tmp_mr2_r[1] <= #TCQ 2'b00;
+              //Rank1 Rtt_NOM defaults to 120 ohms
+              tmp_mr1_r[1] <= #TCQ (RTT_NOM == "40") ? 3'b011 :
+                              (RTT_NOM == "60") ? 3'b001 :
+                              3'b010;
+            end else begin
+              //Rank0 Dynamic ODT defaults to 120 ohms
+              tmp_mr2_r[0] <= #TCQ (RTT_WR == "60") ? 2'b01 :
+                              2'b10;
+              //Rank0 Rtt_NOM defaults to 40 ohms
+              tmp_mr1_r[0] <= #TCQ (RTT_NOM == "60") ? 3'b001 :
+                              (RTT_NOM == "120") ? 3'b010 :
+                              (RTT_NOM == "20") ? 3'b100 :
+                              (RTT_NOM == "30") ? 3'b101 :
+                              3'b011;
+              //Rank1 Dynamic ODT defaults to 120 ohms
+              tmp_mr2_r[1] <= #TCQ (RTT_WR == "60") ? 2'b01 :
+                              2'b10;
+              //Rank1 Rtt_NOM defaults to 40 ohms
+              tmp_mr1_r[1] <= #TCQ (RTT_NOM == "60") ? 3'b001 :
+                              (RTT_NOM == "120") ? 3'b010 :
+                              (RTT_NOM == "20") ? 3'b100 :
+                              (RTT_NOM == "30") ? 3'b101 :
+                              3'b011;
+            end
+          end
+          // Two Slots - One slot with dual rank and the other with single rank
+          4'b10_11: begin         
+            //Rank3 Rtt_NOM defaults to 40 ohms
+            tmp_mr1_r[2] <= #TCQ (RTT_NOM3 == "60") ? 3'b001 :
+                            (RTT_NOM3 == "120") ? 3'b010 :
+                            (RTT_NOM3 == "20") ? 3'b100 :
+                            (RTT_NOM3 == "30") ? 3'b101 :
+                            3'b011;
+            tmp_mr2_r[2] <= #TCQ 2'b00;
+            if ((RTT_WR == "OFF") ||
+                ((WRLVL=="ON") && ~wrlvl_done &&
+                 (wrlvl_rank_cntr==3'd0))) begin
+              //Rank0 Dynamic ODT disabled
+              tmp_mr2_r[0] <= #TCQ 2'b00;
+              //Rank0 Rtt_NOM defaults to 120 ohms
+              tmp_mr1_r[0] <= #TCQ (RTT_NOM == "40") ? 3'b011 :
+                              (RTT_NOM == "60") ? 3'b001 :
+                              3'b010;
+              //Rank1 Dynamic ODT disabled
+              tmp_mr2_r[1] <= #TCQ 2'b00;
+              //Rank1 Rtt_NOM defaults to 120 ohms
+              tmp_mr1_r[1] <= #TCQ (RTT_NOM == "40") ? 3'b011 :
+                              (RTT_NOM == "60") ? 3'b001 :
+                              3'b010;
+            end else begin
+              //Rank0 Dynamic ODT defaults to 120 ohms
+              tmp_mr2_r[0] <= #TCQ (RTT_WR == "60") ? 2'b01 :
+                              2'b10;
+              //Rank0 Rtt_NOM defaults to 40 ohms
+              tmp_mr1_r[0] <= #TCQ (RTT_NOM == "60") ? 3'b001 :
+                              (RTT_NOM == "120") ? 3'b010 :
+                              (RTT_NOM == "20") ? 3'b100 :
+                              (RTT_NOM == "30") ? 3'b101 :
+                              3'b011;
+              //Rank1 Dynamic ODT defaults to 120 ohms
+              tmp_mr2_r[1] <= #TCQ (RTT_WR == "60") ? 2'b01 :
+                              2'b10;
+              //Rank1 Rtt_NOM
+              tmp_mr1_r[1] <= #TCQ 3'b000;
+            end
+            //Slot1 Rank1 or Rank3 is being written
+            if (DRAM_TYPE == "DDR2")begin
+              if (chip_cnt_r == 2'b00)begin
+                phy_tmp_odt0_r[(1*nCS_PER_RANK) +: nCS_PER_RANK] 
+                  <= #TCQ {nCS_PER_RANK{1'b1}};
+                phy_tmp_odt1_r[(1*nCS_PER_RANK) +: nCS_PER_RANK] 
+                  <= #TCQ {nCS_PER_RANK{1'b1}};
+              end else begin
+                phy_tmp_odt0_r[(0*nCS_PER_RANK) +: nCS_PER_RANK] 
+                  <= #TCQ {nCS_PER_RANK{1'b1}};
+                phy_tmp_odt1_r[(0*nCS_PER_RANK) +: nCS_PER_RANK] 
+                  <= #TCQ {nCS_PER_RANK{1'b1}};
+              end
+            end else begin               
+              if (wrlvl_odt || (init_state_r == INIT_IOCONFIG_WR_WAIT) ||
+                  (init_state_r == INIT_RDLVL_STG1_WRITE) || 
+                  (init_state_r == INIT_RDLVL_STG2_WRITE) ||
+                  (init_state_r == INIT_RDLVL_CLKDIV_WRITE)) begin
+                if (chip_cnt_r[0] == 1'b1) begin
+                  phy_tmp_odt0_r[(0*nCS_PER_RANK) +: nCS_PER_RANK] 
+                    <= #TCQ {nCS_PER_RANK{1'b1}};
+                  phy_tmp_odt1_r[(0*nCS_PER_RANK) +: nCS_PER_RANK] 
+                    <= #TCQ {nCS_PER_RANK{1'b1}};
+                  phy_tmp_odt0_r[(1*nCS_PER_RANK) +: nCS_PER_RANK] 
+                    <= #TCQ {nCS_PER_RANK{1'b1}};
+                  phy_tmp_odt1_r[(1*nCS_PER_RANK) +: nCS_PER_RANK] 
+                    <= #TCQ {nCS_PER_RANK{1'b1}};
+                  //Slot0 Rank0 is being written
+                end else begin
+                  phy_tmp_odt0_r[(0*nCS_PER_RANK) +: nCS_PER_RANK] 
+                    <= #TCQ {nCS_PER_RANK{1'b1}};
+                  phy_tmp_odt1_r[(0*nCS_PER_RANK) +: nCS_PER_RANK] 
+                    <= #TCQ {nCS_PER_RANK{1'b1}};
+                  phy_tmp_odt0_r[(2*nCS_PER_RANK) +: nCS_PER_RANK] 
+                    <= #TCQ {nCS_PER_RANK{1'b1}};
+                  phy_tmp_odt1_r[(2*nCS_PER_RANK) +: nCS_PER_RANK] 
+                    <= #TCQ {nCS_PER_RANK{1'b1}};
+                end
+              end else if ((init_state_r == INIT_IOCONFIG_RD_WAIT) ||
+                           (init_state_r == INIT_RDLVL_STG1_READ) || 
+                           (init_state_r == INIT_RDLVL_STG2_READ) ||
+                           (init_state_r == INIT_RDLVL_CLKDIV_READ)) begin
+                if (chip_cnt_r == 2'b00) begin
+                  phy_tmp_odt0_r[(2*nCS_PER_RANK) +: nCS_PER_RANK] 
+                    <= #TCQ {nCS_PER_RANK{1'b1}};
+                  phy_tmp_odt1_r[(2*nCS_PER_RANK) +: nCS_PER_RANK] 
+                    <= #TCQ {nCS_PER_RANK{1'b1}};
+                end else begin
+                  phy_tmp_odt0_r[(0*nCS_PER_RANK) +: nCS_PER_RANK] 
+                    <= #TCQ {nCS_PER_RANK{1'b1}};
+                  phy_tmp_odt1_r[(0*nCS_PER_RANK) +: nCS_PER_RANK] 
+                    <= #TCQ {nCS_PER_RANK{1'b1}};
+                end
+              end
+            end 
+            
+            // Chip Select assignments
+            phy_tmp_cs1_r[(chip_cnt_r*nCS_PER_RANK) +: nCS_PER_RANK] 
+              <= #TCQ {nCS_PER_RANK{1'b0}};             
+          end
+          // Two Slots - One slot with dual rank and the other with single rank
+          4'b11_10: begin   
+            //Rank2 Rtt_NOM defaults to 40 ohms
+            tmp_mr1_r[2] <= #TCQ (RTT_NOM2 == "60") ? 3'b001 :
+                            (RTT_NOM2 == "120") ? 3'b010 :
+                            (RTT_NOM2 == "20") ? 3'b100 :
+                            (RTT_NOM2 == "30") ? 3'b101 :
+                            3'b011;
+            tmp_mr2_r[2] <= #TCQ 2'b00;
+            if ((RTT_WR == "OFF") ||
+                ((WRLVL=="ON") && ~wrlvl_done &&
+                 (wrlvl_rank_cntr==3'd0))) begin
+              //Rank0 Dynamic ODT disabled
+              tmp_mr2_r[0] <= #TCQ 2'b00;
+              //Rank0 Rtt_NOM defaults to 120 ohms
+              tmp_mr1_r[0] <= #TCQ (RTT_NOM == "40") ? 3'b011 :
+                              (RTT_NOM == "60") ? 3'b001 :
+                              3'b010;
+              //Rank1 Dynamic ODT disabled
+              tmp_mr2_r[1] <= #TCQ 2'b00;
+              //Rank1 Rtt_NOM defaults to 120 ohms
+              tmp_mr1_r[1] <= #TCQ (RTT_NOM == "40") ? 3'b011 :
+                              (RTT_NOM == "60") ? 3'b001 :
+                              3'b010;
+            end else begin
+              //Rank1 Dynamic ODT defaults to 120 ohms
+              tmp_mr2_r[1] <= #TCQ (RTT_WR == "60") ? 2'b01 :
+                              2'b10;
+              //Rank1 Rtt_NOM defaults to 40 ohms
+              tmp_mr1_r[1] <= #TCQ (RTT_NOM == "60") ? 3'b001 :
+                              (RTT_NOM == "120") ? 3'b010 :
+                              (RTT_NOM == "20") ? 3'b100 :
+                              (RTT_NOM == "30") ? 3'b101 :
+                              3'b011;
+              //Rank0 Dynamic ODT defaults to 120 ohms
+              tmp_mr2_r[0] <= #TCQ (RTT_WR == "60") ? 2'b01 :
+                              2'b10;
+              //Rank0 Rtt_NOM
+              tmp_mr1_r[0] <= #TCQ 3'b000;
+            end
+            
+            if (DRAM_TYPE == "DDR2")begin
+              if (chip_cnt_r[1] == 1'b1)begin
+                phy_tmp_odt0_r[nCS_PER_RANK-1:0] 
+                  <= #TCQ {nCS_PER_RANK{1'b1}};
+                phy_tmp_odt1_r[nCS_PER_RANK-1:0] 
+                  <= #TCQ {nCS_PER_RANK{1'b1}};
+              end else begin
+                phy_tmp_odt0_r[(2*nCS_PER_RANK) +: nCS_PER_RANK] 
+                  <= #TCQ {nCS_PER_RANK{1'b1}};
+                phy_tmp_odt1_r[(2*nCS_PER_RANK) +: nCS_PER_RANK] 
+                  <= #TCQ {nCS_PER_RANK{1'b1}};
+              end
+            end else begin 
+              if (wrlvl_odt || (init_state_r == INIT_IOCONFIG_WR_WAIT) ||
+                  (init_state_r == INIT_RDLVL_STG1_WRITE) || 
+                  (init_state_r == INIT_RDLVL_STG2_WRITE) ||
+                  (init_state_r == INIT_RDLVL_CLKDIV_WRITE)) begin
+                if (chip_cnt_r[1] == 1'b1) begin
+                  phy_tmp_odt0_r[(1*nCS_PER_RANK) +: nCS_PER_RANK] 
+                    <= #TCQ {nCS_PER_RANK{1'b1}};
+                  phy_tmp_odt1_r[(1*nCS_PER_RANK) +: nCS_PER_RANK] 
+                    <= #TCQ {nCS_PER_RANK{1'b1}};
+                  phy_tmp_odt0_r[(2*nCS_PER_RANK) +: nCS_PER_RANK] 
+                    <= #TCQ {nCS_PER_RANK{1'b1}};
+                  phy_tmp_odt1_r[(2*nCS_PER_RANK) +: nCS_PER_RANK] 
+                    <= #TCQ {nCS_PER_RANK{1'b1}};
+                  
+                end else begin
+                  phy_tmp_odt0_r[nCS_PER_RANK-1:0] 
+                    <= #TCQ {nCS_PER_RANK{1'b1}};
+                  phy_tmp_odt1_r[nCS_PER_RANK-1:0] 
+                    <= #TCQ {nCS_PER_RANK{1'b1}};
+                  phy_tmp_odt0_r[(2*nCS_PER_RANK) +: nCS_PER_RANK] 
+                    <= #TCQ {nCS_PER_RANK{1'b1}};
+                  phy_tmp_odt1_r[(2*nCS_PER_RANK) +: nCS_PER_RANK] 
+                    <= #TCQ {nCS_PER_RANK{1'b1}};
+                end
+              end else if ((init_state_r == INIT_IOCONFIG_RD_WAIT) ||
+                           (init_state_r == INIT_RDLVL_STG1_READ) ||
+                           (init_state_r == INIT_RDLVL_STG2_READ) ||
+                           (init_state_r == INIT_RDLVL_CLKDIV_READ)) begin
+                if (chip_cnt_r[1] == 1'b1) begin
+                  phy_tmp_odt0_r[(1*nCS_PER_RANK) +: nCS_PER_RANK] 
+                    <= #TCQ {nCS_PER_RANK{1'b1}};
+                  phy_tmp_odt1_r[(1*nCS_PER_RANK) +: nCS_PER_RANK] 
+                    <= #TCQ {nCS_PER_RANK{1'b1}};                  
+                end else begin
+                  phy_tmp_odt0_r[(2*nCS_PER_RANK) +: nCS_PER_RANK] 
+                    <= #TCQ {nCS_PER_RANK{1'b1}};
+                  phy_tmp_odt1_r[(2*nCS_PER_RANK) +: nCS_PER_RANK] 
+                    <= #TCQ {nCS_PER_RANK{1'b1}};
+                end
+              end
+            end
     
-                 // Chip Select assignments
-                 phy_tmp_cs1_r[(chip_cnt_r*nCS_PER_RANK) +: nCS_PER_RANK] 
-                 <= #TCQ {nCS_PER_RANK{1'b0}};
-               end
-      // Two Slots - two ranks per slot
-      4'b11_11: begin
-                 //Rank2 Rtt_NOM defaults to 40 ohms
-                 tmp_mr1_r[2] <= #TCQ (RTT_NOM2 == "60") ? 3'b001 :
-                                     (RTT_NOM2 == "120") ? 3'b010 :
-                                     (RTT_NOM2 == "20") ? 3'b100 :
-                                     (RTT_NOM2 == "30") ? 3'b101 :
-                                     3'b011;
-                 //Rank3 Rtt_NOM defaults to 40 ohms
-                 tmp_mr1_r[3] <= #TCQ (RTT_NOM3 == "60") ? 3'b001 :
-                                     (RTT_NOM3 == "120") ? 3'b010 :
-                                     (RTT_NOM3 == "20") ? 3'b100 :
-                                     (RTT_NOM3 == "30") ? 3'b101 :
-                                     3'b011;
-                 tmp_mr2_r[2] <= #TCQ 2'b00;
-                 tmp_mr2_r[3] <= #TCQ 2'b00;
-                 if ((RTT_WR == "OFF") ||
-                    ((WRLVL=="ON") && ~wrlvl_done &&
-                     (wrlvl_rank_cntr==3'd0))) begin
-                   //Rank0 Dynamic ODT disabled
-                   tmp_mr2_r[0] <= #TCQ 2'b00;
-                   //Rank0 Rtt_NOM defaults to 120 ohms
-                   tmp_mr1_r[0] <= #TCQ (RTT_NOM == "40") ? 3'b011 :
-                                       (RTT_NOM == "60") ? 3'b001 :
-                                       3'b010;
-                   //Rank1 Dynamic ODT disabled
-                   tmp_mr2_r[1] <= #TCQ 2'b00;
-                   //Rank1 Rtt_NOM defaults to 120 ohms
-                   tmp_mr1_r[1] <= #TCQ (RTT_NOM == "40") ? 3'b011 :
-                                       (RTT_NOM == "60") ? 3'b001 :
-                                       3'b010;
-                 end else begin
-                   //Rank1 Dynamic ODT defaults to 120 ohms
-                   tmp_mr2_r[1] <= #TCQ (RTT_WR == "60") ? 2'b01 :
-                                       2'b10;
-                   //Rank1 Rtt_NOM
-                   tmp_mr1_r[1] <= #TCQ 3'b000;
-                   //Rank0 Dynamic ODT defaults to 120 ohms
-                   tmp_mr2_r[0] <= #TCQ (RTT_WR == "60") ? 2'b01 :
-                                       2'b10;
-                   //Rank0 Rtt_NOM
-                   tmp_mr1_r[0] <= #TCQ 3'b000;
-                 end // else: !if((RTT_WR == "OFF") ||...
-
-                 if(DRAM_TYPE == "DDR2")begin
-                   if(chip_cnt_r[1] == 1'b1)begin
-                     phy_tmp_odt0_r[(0*nCS_PER_RANK) +: nCS_PER_RANK] 
-                     <= #TCQ {nCS_PER_RANK{1'b1}};
-                     phy_tmp_odt1_r[(0*nCS_PER_RANK) +: nCS_PER_RANK] 
-                     <= #TCQ {nCS_PER_RANK{1'b1}};
-                   end else begin
-                     phy_tmp_odt0_r[(2*nCS_PER_RANK) +: nCS_PER_RANK] 
-                     <= #TCQ {nCS_PER_RANK{1'b1}};
-                     phy_tmp_odt1_r[(2*nCS_PER_RANK) +: nCS_PER_RANK] 
-                     <= #TCQ {nCS_PER_RANK{1'b1}};
-                   end
-                 end else begin
-                   if (wrlvl_odt || (init_state_r == INIT_IOCONFIG_WR_WAIT)
-                      || (init_state_r == INIT_RDLVL_STG1_WRITE) 
-                      || (init_state_r == INIT_RDLVL_STG2_WRITE)) begin
-                     //Slot1 Rank1 or Rank3 is being written
-                     if (chip_cnt_r[0] == 1'b1) begin
-                       phy_tmp_odt0_r[(1*nCS_PER_RANK) +: nCS_PER_RANK] 
-                       <= #TCQ {nCS_PER_RANK{1'b1}};
-                       phy_tmp_odt1_r[(1*nCS_PER_RANK) +: nCS_PER_RANK] 
-                       <= #TCQ {nCS_PER_RANK{1'b1}};
-                       phy_tmp_odt0_r[(2*nCS_PER_RANK) +: nCS_PER_RANK] 
-                       <= #TCQ {nCS_PER_RANK{1'b1}};
-                       phy_tmp_odt1_r[(2*nCS_PER_RANK) +: nCS_PER_RANK] 
-                       <= #TCQ {nCS_PER_RANK{1'b1}};
-                     //Slot0 Rank0 or Rank2 is being written
-                     end else begin
-                       phy_tmp_odt0_r[(0*nCS_PER_RANK) +: nCS_PER_RANK] 
-                       <= #TCQ {nCS_PER_RANK{1'b1}};
-                       phy_tmp_odt1_r[(0*nCS_PER_RANK) +: nCS_PER_RANK] 
-                       <= #TCQ {nCS_PER_RANK{1'b1}};
-                       phy_tmp_odt0_r[(3*nCS_PER_RANK) +: nCS_PER_RANK] 
-                       <= #TCQ {nCS_PER_RANK{1'b1}};
-                       phy_tmp_odt1_r[(3*nCS_PER_RANK) +: nCS_PER_RANK] 
-                       <= #TCQ {nCS_PER_RANK{1'b1}};
-                     end
-                   end else if ((init_state_r == INIT_IOCONFIG_RD_WAIT) 
-                     || (init_state_r == INIT_RDLVL_STG1_READ) 
-                     || (init_state_r == INIT_RDLVL_STG2_READ))begin
-                     //Slot1 Rank1 or Rank3 is being read
-                     if (chip_cnt_r[0] == 1'b1) begin
-                       phy_tmp_odt0_r[(2*nCS_PER_RANK) +: nCS_PER_RANK] 
-                       <= #TCQ {nCS_PER_RANK{1'b1}};
-                       phy_tmp_odt1_r[(2*nCS_PER_RANK) +: nCS_PER_RANK] 
-                       <= #TCQ {nCS_PER_RANK{1'b1}};
-                     //Slot0 Rank0 or Rank2 is being read
-                     end else begin
-                       phy_tmp_odt0_r[(3*nCS_PER_RANK) +: nCS_PER_RANK] 
-                       <= #TCQ {nCS_PER_RANK{1'b1}};
-                       phy_tmp_odt1_r[(3*nCS_PER_RANK) +: nCS_PER_RANK] 
-                       <= #TCQ {nCS_PER_RANK{1'b1}};
-                     end
-                   end // if (init_state_r == INIT_IOCONFIG_RD)
-                 end // else: !if(DRAM_TYPE == "DDR2")
-         
-                 // Chip Select assignments
-                 phy_tmp_cs1_r[(chip_cnt_r*nCS_PER_RANK) +: nCS_PER_RANK] 
-                 <= #TCQ {nCS_PER_RANK{1'b0}};
-               end
-      default: begin
-                 phy_tmp_odt0_r <= #TCQ {nCS_PER_RANK*CS_WIDTH{1'b1}};
-                 phy_tmp_odt1_r <= #TCQ {nCS_PER_RANK*CS_WIDTH{1'b1}};
-                 // Chip Select assignments
-                 phy_tmp_cs1_r[(chip_cnt_r*nCS_PER_RANK) +: nCS_PER_RANK] 
-                 <= #TCQ {nCS_PER_RANK{1'b0}};
-                 if ((RTT_WR == "OFF") ||
-                    ((WRLVL=="ON") && ~wrlvl_done)) begin
-                   //Rank0 Dynamic ODT disabled
-                   tmp_mr2_r[0] <= #TCQ 2'b00;
-                   //Rank0 Rtt_NOM defaults to 120 ohms
-                   tmp_mr1_r[0] <= #TCQ (RTT_NOM == "40") ? 3'b011 :
-                                       (RTT_NOM == "60") ? 3'b001 :
-                                       3'b010;
-                   //Rank1 Dynamic ODT disabled
-                   tmp_mr2_r[1] <= #TCQ 2'b00;
-                   //Rank1 Rtt_NOM defaults to 120 ohms
-                   tmp_mr1_r[1] <= #TCQ (RTT_NOM == "40") ? 3'b011 :
-                                       (RTT_NOM == "60") ? 3'b001 :
-                                       3'b010;
-                 end else begin
-                   //Rank0 Dynamic ODT defaults to 120 ohms
-                   tmp_mr2_r[0] <= #TCQ (RTT_WR == "60") ? 2'b01 :
-                                       2'b10;
-                   //Rank0 Rtt_NOM defaults to 40 ohms
-                   tmp_mr1_r[0] <= #TCQ (RTT_NOM == "60") ? 3'b001 :
-                                       (RTT_NOM == "120") ? 3'b010 :
-                                       (RTT_NOM == "20") ? 3'b100 :
-                                       (RTT_NOM == "30") ? 3'b101 :
-                                       3'b011;
-                   //Rank1 Dynamic ODT defaults to 120 ohms
-                   tmp_mr2_r[1] <= #TCQ (RTT_WR == "60") ? 2'b01 :
-                                       2'b10;
-                   //Rank1 Rtt_NOM defaults to 40 ohms
-                   tmp_mr1_r[1] <= #TCQ (RTT_NOM == "60") ? 3'b001 :
-                                       (RTT_NOM == "120") ? 3'b010 :
-                                       (RTT_NOM == "20") ? 3'b100 :
-                                       (RTT_NOM == "30") ? 3'b101 :
-                                       3'b011;
-                 end
-               end
-      endcase
+            // Chip Select assignments
+            phy_tmp_cs1_r[(chip_cnt_r*nCS_PER_RANK) +: nCS_PER_RANK] 
+              <= #TCQ {nCS_PER_RANK{1'b0}};
+          end
+          // Two Slots - two ranks per slot
+          4'b11_11: begin
+            //Rank2 Rtt_NOM defaults to 40 ohms
+            tmp_mr1_r[2] <= #TCQ (RTT_NOM2 == "60") ? 3'b001 :
+                            (RTT_NOM2 == "120") ? 3'b010 :
+                            (RTT_NOM2 == "20") ? 3'b100 :
+                            (RTT_NOM2 == "30") ? 3'b101 :
+                            3'b011;
+            //Rank3 Rtt_NOM defaults to 40 ohms
+            tmp_mr1_r[3] <= #TCQ (RTT_NOM3 == "60") ? 3'b001 :
+                            (RTT_NOM3 == "120") ? 3'b010 :
+                            (RTT_NOM3 == "20") ? 3'b100 :
+                            (RTT_NOM3 == "30") ? 3'b101 :
+                            3'b011;
+            tmp_mr2_r[2] <= #TCQ 2'b00;
+            tmp_mr2_r[3] <= #TCQ 2'b00;
+            if ((RTT_WR == "OFF") ||
+                ((WRLVL=="ON") && ~wrlvl_done &&
+                 (wrlvl_rank_cntr==3'd0))) begin
+              //Rank0 Dynamic ODT disabled
+              tmp_mr2_r[0] <= #TCQ 2'b00;
+              //Rank0 Rtt_NOM defaults to 120 ohms
+              tmp_mr1_r[0] <= #TCQ (RTT_NOM == "40") ? 3'b011 :
+                              (RTT_NOM == "60") ? 3'b001 :
+                              3'b010;
+              //Rank1 Dynamic ODT disabled
+              tmp_mr2_r[1] <= #TCQ 2'b00;
+              //Rank1 Rtt_NOM defaults to 120 ohms
+              tmp_mr1_r[1] <= #TCQ (RTT_NOM == "40") ? 3'b011 :
+                              (RTT_NOM == "60") ? 3'b001 :
+                              3'b010;
+            end else begin
+              //Rank1 Dynamic ODT defaults to 120 ohms
+              tmp_mr2_r[1] <= #TCQ (RTT_WR == "60") ? 2'b01 :
+                              2'b10;
+              //Rank1 Rtt_NOM
+              tmp_mr1_r[1] <= #TCQ 3'b000;
+              //Rank0 Dynamic ODT defaults to 120 ohms
+              tmp_mr2_r[0] <= #TCQ (RTT_WR == "60") ? 2'b01 :
+                              2'b10;
+              //Rank0 Rtt_NOM
+              tmp_mr1_r[0] <= #TCQ 3'b000;
+            end // else: !if((RTT_WR == "OFF") ||...
+            
+            if(DRAM_TYPE == "DDR2")begin
+              if(chip_cnt_r[1] == 1'b1)begin
+                phy_tmp_odt0_r[(0*nCS_PER_RANK) +: nCS_PER_RANK] 
+                  <= #TCQ {nCS_PER_RANK{1'b1}};
+                phy_tmp_odt1_r[(0*nCS_PER_RANK) +: nCS_PER_RANK] 
+                  <= #TCQ {nCS_PER_RANK{1'b1}};
+              end else begin
+                phy_tmp_odt0_r[(2*nCS_PER_RANK) +: nCS_PER_RANK] 
+                  <= #TCQ {nCS_PER_RANK{1'b1}};
+                phy_tmp_odt1_r[(2*nCS_PER_RANK) +: nCS_PER_RANK] 
+                  <= #TCQ {nCS_PER_RANK{1'b1}};
+              end
+            end else begin
+              if (wrlvl_odt || (init_state_r == INIT_IOCONFIG_WR_WAIT) ||
+                  (init_state_r == INIT_RDLVL_STG1_WRITE) ||
+                  (init_state_r == INIT_RDLVL_STG2_WRITE) ||
+                  (init_state_r == INIT_RDLVL_CLKDIV_WRITE)) begin
+                //Slot1 Rank1 or Rank3 is being written
+                if (chip_cnt_r[0] == 1'b1) begin
+                  phy_tmp_odt0_r[(1*nCS_PER_RANK) +: nCS_PER_RANK] 
+                    <= #TCQ {nCS_PER_RANK{1'b1}};
+                  phy_tmp_odt1_r[(1*nCS_PER_RANK) +: nCS_PER_RANK] 
+                    <= #TCQ {nCS_PER_RANK{1'b1}};
+                  phy_tmp_odt0_r[(2*nCS_PER_RANK) +: nCS_PER_RANK] 
+                    <= #TCQ {nCS_PER_RANK{1'b1}};
+                  phy_tmp_odt1_r[(2*nCS_PER_RANK) +: nCS_PER_RANK] 
+                    <= #TCQ {nCS_PER_RANK{1'b1}};
+                  //Slot0 Rank0 or Rank2 is being written
+                end else begin
+                  phy_tmp_odt0_r[(0*nCS_PER_RANK) +: nCS_PER_RANK] 
+                    <= #TCQ {nCS_PER_RANK{1'b1}};
+                  phy_tmp_odt1_r[(0*nCS_PER_RANK) +: nCS_PER_RANK] 
+                    <= #TCQ {nCS_PER_RANK{1'b1}};
+                  phy_tmp_odt0_r[(3*nCS_PER_RANK) +: nCS_PER_RANK] 
+                    <= #TCQ {nCS_PER_RANK{1'b1}};
+                  phy_tmp_odt1_r[(3*nCS_PER_RANK) +: nCS_PER_RANK] 
+                    <= #TCQ {nCS_PER_RANK{1'b1}};
+                end
+              end else if ((init_state_r == INIT_IOCONFIG_RD_WAIT) ||
+                           (init_state_r == INIT_RDLVL_STG1_READ) || 
+                           (init_state_r == INIT_RDLVL_STG2_READ) ||
+                           (init_state_r == INIT_RDLVL_CLKDIV_READ)) begin
+                //Slot1 Rank1 or Rank3 is being read
+                if (chip_cnt_r[0] == 1'b1) begin
+                  phy_tmp_odt0_r[(2*nCS_PER_RANK) +: nCS_PER_RANK] 
+                    <= #TCQ {nCS_PER_RANK{1'b1}};
+                  phy_tmp_odt1_r[(2*nCS_PER_RANK) +: nCS_PER_RANK] 
+                    <= #TCQ {nCS_PER_RANK{1'b1}};
+                  //Slot0 Rank0 or Rank2 is being read
+                end else begin
+                  phy_tmp_odt0_r[(3*nCS_PER_RANK) +: nCS_PER_RANK] 
+                    <= #TCQ {nCS_PER_RANK{1'b1}};
+                  phy_tmp_odt1_r[(3*nCS_PER_RANK) +: nCS_PER_RANK] 
+                    <= #TCQ {nCS_PER_RANK{1'b1}};
+                end
+              end // if (init_state_r == INIT_IOCONFIG_RD)
+            end // else: !if(DRAM_TYPE == "DDR2")
+            
+            // Chip Select assignments
+            phy_tmp_cs1_r[(chip_cnt_r*nCS_PER_RANK) +: nCS_PER_RANK] 
+              <= #TCQ {nCS_PER_RANK{1'b0}};
+          end
+          default: begin
+            phy_tmp_odt0_r <= #TCQ {nCS_PER_RANK*CS_WIDTH{1'b1}};
+            phy_tmp_odt1_r <= #TCQ {nCS_PER_RANK*CS_WIDTH{1'b1}};
+            // Chip Select assignments
+            phy_tmp_cs1_r[(chip_cnt_r*nCS_PER_RANK) +: nCS_PER_RANK] 
+              <= #TCQ {nCS_PER_RANK{1'b0}};
+            if ((RTT_WR == "OFF") ||
+                ((WRLVL=="ON") && ~wrlvl_done)) begin
+              //Rank0 Dynamic ODT disabled
+              tmp_mr2_r[0] <= #TCQ 2'b00;
+              //Rank0 Rtt_NOM defaults to 120 ohms
+              tmp_mr1_r[0] <= #TCQ (RTT_NOM == "40") ? 3'b011 :
+                              (RTT_NOM == "60") ? 3'b001 :
+                              3'b010;
+              //Rank1 Dynamic ODT disabled
+              tmp_mr2_r[1] <= #TCQ 2'b00;
+              //Rank1 Rtt_NOM defaults to 120 ohms
+              tmp_mr1_r[1] <= #TCQ (RTT_NOM == "40") ? 3'b011 :
+                              (RTT_NOM == "60") ? 3'b001 :
+                              3'b010;
+            end else begin
+              //Rank0 Dynamic ODT defaults to 120 ohms
+              tmp_mr2_r[0] <= #TCQ (RTT_WR == "60") ? 2'b01 :
+                              2'b10;
+              //Rank0 Rtt_NOM defaults to 40 ohms
+              tmp_mr1_r[0] <= #TCQ (RTT_NOM == "60") ? 3'b001 :
+                              (RTT_NOM == "120") ? 3'b010 :
+                              (RTT_NOM == "20") ? 3'b100 :
+                              (RTT_NOM == "30") ? 3'b101 :
+                              3'b011;
+              //Rank1 Dynamic ODT defaults to 120 ohms
+              tmp_mr2_r[1] <= #TCQ (RTT_WR == "60") ? 2'b01 :
+                              2'b10;
+              //Rank1 Rtt_NOM defaults to 40 ohms
+              tmp_mr1_r[1] <= #TCQ (RTT_NOM == "60") ? 3'b001 :
+                              (RTT_NOM == "120") ? 3'b010 :
+                              (RTT_NOM == "20") ? 3'b100 :
+                              (RTT_NOM == "30") ? 3'b101 :
+                              3'b011;
+            end
+          end
+        endcase
+      end
     end
-  end
-endgenerate
+  endgenerate
 
 
     
@@ -2479,59 +2573,63 @@ endgenerate
   // Timing of ODT is not particularly precise (i.e. does not turn
   // on right before write data, and turn off immediately after
   // write is finished), but it doesn't have to be
-generate
-  if (nSLOTS == 1) begin
-    always @(posedge clk)
-      if ((((RTT_NOM == "DISABLED") && (RTT_WR == "OFF")) ||
-        (wrlvl_done && !wrlvl_done_r)) && (DRAM_TYPE == "DDR3"))begin
-        phy_odt0 <= #TCQ {CS_WIDTH*nCS_PER_RANK{1'b0}};
-        phy_odt1 <= #TCQ {CS_WIDTH*nCS_PER_RANK{1'b0}};
-      end    
-      else if  (((DRAM_TYPE == "DDR3") 
-         ||((RTT_NOM != "DISABLED") && (DRAM_TYPE == "DDR2")))
-         && ((wrlvl_odt) ||
-        (init_state_r == INIT_RDLVL_STG1_WRITE) ||
-        (init_state_r == INIT_RDLVL_STG1_WRITE_READ) ||
-        (init_state_r == INIT_RDLVL_STG2_WRITE) ||
-        (init_state_r == INIT_RDLVL_STG2_WRITE_READ))) begin
-        phy_odt0 <= #TCQ phy_tmp_odt0_r;
-        phy_odt1 <= #TCQ phy_tmp_odt1_r;
-      end else begin
-        phy_odt0 <= #TCQ {CS_WIDTH*nCS_PER_RANK{1'b0}};
-        phy_odt1 <= #TCQ {CS_WIDTH*nCS_PER_RANK{1'b0}};
-      end
-  end else if (nSLOTS == 2) begin
-    always @(posedge clk)
-      if (((RTT_NOM == "DISABLED") && (RTT_WR == "OFF")) ||
-          wrlvl_rank_done || wrlvl_rank_done_r1 ||
-         (wrlvl_done && !wrlvl_done_r)) begin
-        phy_odt0 <= #TCQ {CS_WIDTH*nCS_PER_RANK{1'b0}};
-        phy_odt1 <= #TCQ {CS_WIDTH*nCS_PER_RANK{1'b0}};
-      end    
-      else if  (((DRAM_TYPE == "DDR3") 
-         ||((RTT_NOM != "DISABLED") && (DRAM_TYPE == "DDR2"))) 
-         && ((wrlvl_odt_r1) || 
-        (init_state_r == INIT_RDLVL_STG1_WRITE) ||
-        (init_state_r == INIT_RDLVL_STG1_WRITE_READ) ||
-        (init_state_r == INIT_RDLVL_STG2_WRITE) ||
-        (init_state_r == INIT_RDLVL_STG2_WRITE_READ) ||
-        (init_state_r == INIT_RDLVL_STG1_READ) ||
-        (init_state_r == INIT_RDLVL_STG2_READ) ||
-        (init_state_r == INIT_RDLVL_STG2_READ_WAIT) ||
-        (init_state_r == INIT_PRECHARGE_PREWAIT))) begin
-         phy_odt0 <= #TCQ phy_tmp_odt0_r | phy_tmp_odt0_r1;
-         phy_odt1 <= #TCQ phy_tmp_odt1_r | phy_tmp_odt1_r1 ;
-      end else begin
-        phy_odt0 <= #TCQ {CS_WIDTH*nCS_PER_RANK{1'b0}};
-        phy_odt1 <= #TCQ {CS_WIDTH*nCS_PER_RANK{1'b0}};
-      end
-  end
-endgenerate
+  generate
+    if (nSLOTS == 1) begin
+      always @(posedge clk)
+        if ((((RTT_NOM == "DISABLED") && (RTT_WR == "OFF")) ||
+             (wrlvl_done && !wrlvl_done_r)) && (DRAM_TYPE == "DDR3"))begin
+          phy_odt0 <= #TCQ {CS_WIDTH*nCS_PER_RANK{1'b0}};
+          phy_odt1 <= #TCQ {CS_WIDTH*nCS_PER_RANK{1'b0}};
+        end    
+        else if  (((DRAM_TYPE == "DDR3") 
+                   ||((RTT_NOM != "DISABLED") && (DRAM_TYPE == "DDR2")))
+                  && ((wrlvl_odt) ||
+                      (init_state_r == INIT_RDLVL_STG1_WRITE) ||
+                      (init_state_r == INIT_RDLVL_STG1_WRITE_READ) ||
+                      (init_state_r == INIT_RDLVL_STG2_WRITE) ||
+                      (init_state_r == INIT_RDLVL_STG2_WRITE_READ) ||
+                      (init_state_r == INIT_RDLVL_CLKDIV_WRITE) ||
+                      (init_state_r == INIT_RDLVL_CLKDIV_WRITE_READ))) begin
+          phy_odt0 <= #TCQ phy_tmp_odt0_r;
+          phy_odt1 <= #TCQ phy_tmp_odt1_r;
+        end else begin
+          phy_odt0 <= #TCQ {CS_WIDTH*nCS_PER_RANK{1'b0}};
+          phy_odt1 <= #TCQ {CS_WIDTH*nCS_PER_RANK{1'b0}};
+        end
+    end else if (nSLOTS == 2) begin
+      always @(posedge clk)
+        if (((RTT_NOM == "DISABLED") && (RTT_WR == "OFF")) ||
+            wrlvl_rank_done || wrlvl_rank_done_r1 ||
+            (wrlvl_done && !wrlvl_done_r)) begin
+          phy_odt0 <= #TCQ {CS_WIDTH*nCS_PER_RANK{1'b0}};
+          phy_odt1 <= #TCQ {CS_WIDTH*nCS_PER_RANK{1'b0}};
+        end    
+        else if  (((DRAM_TYPE == "DDR3") 
+                   ||((RTT_NOM != "DISABLED") && (DRAM_TYPE == "DDR2"))) 
+                  && ((wrlvl_odt_r1) || 
+                      (init_state_r == INIT_RDLVL_STG1_WRITE) ||
+                      (init_state_r == INIT_RDLVL_STG1_WRITE_READ) ||
+                      (init_state_r == INIT_RDLVL_STG1_READ) ||
+                      (init_state_r == INIT_RDLVL_CLKDIV_WRITE) ||
+                      (init_state_r == INIT_RDLVL_CLKDIV_WRITE_READ) ||
+                      (init_state_r == INIT_RDLVL_CLKDIV_READ) ||       
+                      (init_state_r == INIT_RDLVL_STG2_WRITE) ||
+                      (init_state_r == INIT_RDLVL_STG2_WRITE_READ) ||
+                      (init_state_r == INIT_RDLVL_STG2_READ) ||
+                      (init_state_r == INIT_RDLVL_STG2_READ_WAIT) ||
+                      (init_state_r == INIT_PRECHARGE_PREWAIT))) begin
+          phy_odt0 <= #TCQ phy_tmp_odt0_r | phy_tmp_odt0_r1;
+          phy_odt1 <= #TCQ phy_tmp_odt1_r | phy_tmp_odt1_r1 ;
+        end else begin
+          phy_odt0 <= #TCQ {CS_WIDTH*nCS_PER_RANK{1'b0}};
+          phy_odt1 <= #TCQ {CS_WIDTH*nCS_PER_RANK{1'b0}};
+        end
+    end
+  endgenerate
    
   //*****************************************************************
   // memory address during init
   //*****************************************************************
-
 
   always @(burst_addr_r or cnt_init_mr_r or chip_cnt_r
            or ddr2_refresh_flag_r or init_state_r or load_mr0
@@ -2692,8 +2790,9 @@ endgenerate
       bank_w    = CALIB_BA_ADD[BANK_WIDTH-1:0];
       address_w[ROW_WIDTH-1:COL_WIDTH] = {ROW_WIDTH-COL_WIDTH{1'b0}};
       address_w[COL_WIDTH-1:0] = 
-                {CALIB_COL_ADD[COL_WIDTH-1:3],burst_addr_r, 2'b00};
+                {CALIB_COL_ADD[COL_WIDTH-1:4],burst_addr_r, 2'b00};
       address_w[12]            =  1'b1;
+      address_w[10]            =  1'b0;
     end else if ((init_state_r == INIT_RDLVL_ACT) ||
                  (init_state_r == INIT_PD_ACT)) begin
 

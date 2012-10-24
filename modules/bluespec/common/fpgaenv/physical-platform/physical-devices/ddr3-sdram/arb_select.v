@@ -49,7 +49,7 @@
 //   ____  ____
 //  /   /\/   /
 // /___/  \  /    Vendor                : Xilinx
-// \   \   \/     Version               : 3.5
+// \   \   \/     Version               : 3.9
 //  \   \         Application           : MIG
 //  /   /         Filename              : arb_select.v
 // /___/   /\     Date Last Modified    : $date$
@@ -75,7 +75,7 @@
 module arb_select #
   (
    parameter TCQ = 100,
-   parameter ADDR_CMD_MODE            = "UNBUF",
+   parameter ADDR_CMD_MODE            = "1T",
    parameter BANK_VECT_INDX           = 11,
    parameter BANK_WIDTH               = 3,
    parameter BURST_MODE               = "8",

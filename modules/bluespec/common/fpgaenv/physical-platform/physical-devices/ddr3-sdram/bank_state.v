@@ -49,7 +49,7 @@
 //   ____  ____
 //  /   /\/   /
 // /___/  \  /    Vendor                : Xilinx
-// \   \   \/     Version               : 3.5
+// \   \   \/     Version               : 3.9
 //  \   \         Application           : MIG
 //  /   /         Filename              : bank_state.v
 // /___/   /\     Date Last Modified    : $date$
@@ -141,7 +141,7 @@
 module bank_state #
   (
    parameter TCQ = 100,
-   parameter ADDR_CMD_MODE            = "UNBUF",
+   parameter ADDR_CMD_MODE            = "1T",
    parameter BM_CNT_WIDTH             = 2,
    parameter BURST_MODE               = "8",
    parameter CWL                      = 5,
@@ -448,8 +448,8 @@ module bank_state #
                                             ? op_cnt_r - ONE[OP_WIDTH-1:0]
                                             : op_cnt_r;
         always @(posedge clk) op_cnt_r <= #TCQ op_cnt_ns;
-        assign op_exit_req = (low_idle_cnt_r && op_active) ||
-                             (op_wait_r && ~|op_cnt_r);
+        assign op_exit_req = //(low_idle_cnt_r && op_active) || //Changed by KK for improving the
+                             (op_wait_r && ~|op_cnt_r);         //effeciency in case of known patterns
       end
     end
   endgenerate

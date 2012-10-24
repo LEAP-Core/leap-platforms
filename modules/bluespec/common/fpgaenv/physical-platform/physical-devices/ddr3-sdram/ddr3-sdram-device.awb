@@ -60,5 +60,11 @@
 %sources -t VERILOG -v PRIVATE rd_bitslip.v
 
 
+%param DRAM_MIN_BURST     2   "Minimum Burst Size"
+%param DIMM_WIDTH         64  "Minimum Burst Size"
+%param DRAM_WORD_WIDTH    256 "Physical DRAM Width"
+%param MEM_BANKS          1   "DDR banks"
+
+
 %param DRAM_MAX_OUTSTANDING_READS  8 "Maximum in-flight read requests"
 %param DRAM_DEBUG                  0 "Non-zero enables debugging methods"

@@ -49,10 +49,10 @@
 //   ____  ____
 //  /   /\/   /
 // /___/  \  /    Vendor: Xilinx
-// \   \   \/     Version: 3.5
+// \   \   \/     Version: 3.9
 //  \   \         Application: MIG
 //  /   /         Filename: iodelay_ctrl.v
-// /___/   /\     Date Last Modified: $Date: 2010/03/21 17:21:47 $
+// /___/   /\     Date Last Modified: $Date: 2011/06/02 07:18:00 $
 // \   \  /  \    Date Created: Wed Aug 16 2006
 //  \___\/\___\
 //
@@ -68,11 +68,11 @@
 //*****************************************************************************
 
 /******************************************************************************
-**$Id: iodelay_ctrl.v,v 1.1.2.1 2010/03/21 17:21:47 jschmitz Exp $
-**$Date: 2010/03/21 17:21:47 $
-**$Author: jschmitz $
-**$Revision: 1.1.2.1 $
-**$Source: /devl/xcs/repo/env/Databases/ip/src2/M/mig_v3_5/data/dlib/virtex6/ddr3_sdram/verilog/rtl/ip_top/Attic/iodelay_ctrl.v,v $
+**$Id: iodelay_ctrl.v,v 1.1 2011/06/02 07:18:00 mishra Exp $
+**$Date: 2011/06/02 07:18:00 $
+**$Author: mishra $
+**$Revision: 1.1 $
+**$Source: /devl/xcs/repo/env/Databases/ip/src2/O/mig_v3_9/data/dlib/virtex6/ddr3_sdram/verilog/rtl/ip_top/iodelay_ctrl.v,v $
 ******************************************************************************/
 // Add clk_200 output port for ML605 single clock design
 
@@ -109,6 +109,7 @@ module iodelay_ctrl #
   //  localparam RST_SYNC_NUM = 25;
   
   wire                   clk_ref_bufg;  
+  wire                   clk_ref_ibufg;
   wire                   rst_ref;
   reg [RST_SYNC_NUM-1:0] rst_ref_sync_r /* synthesis syn_maxfan = 10 */;  
   wire                   rst_tmp_idelay;
@@ -125,15 +126,9 @@ module iodelay_ctrl #
   //***************************************************************************
   
   //***************************************************************************
-  // Global clock buffer for IDELAY reference clock
-  //***************************************************************************
-   
-/*  BUFG u_bufg_clk_ref
-    (
-     .O (clk_ref_bufg),
-     .I (clk_ref_diff)
-     );*/
-   assign clk_ref_bufg = clk_ref_diff;
+
+  
+ assign clk_ref_bufg = clk_ref_diff;
    
  assign clk_200 = clk_ref_bufg; // ML605 single 200MHz clock source
 

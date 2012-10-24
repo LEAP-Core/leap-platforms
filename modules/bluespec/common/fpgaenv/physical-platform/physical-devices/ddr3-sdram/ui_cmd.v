@@ -49,7 +49,7 @@
 //   ____  ____
 //  /   /\/   /
 // /___/  \  /    Vendor                : Xilinx
-// \   \   \/     Version               : 3.5
+// \   \   \/     Version               : 3.9
 //  \   \         Application           : MIG
 //  /   /         Filename              : ui_cmd.v
 // /___/   /\     Date Last Modified    : $date$
@@ -75,7 +75,8 @@ module ui_cmd #
    parameter COL_WIDTH          = 12,
    parameter RANK_WIDTH         = 2,
    parameter ROW_WIDTH          = 16,
-   parameter RANKS              = 4
+   parameter RANKS              = 4,
+   parameter MEM_ADDR_ORDER     = "BANK_ROW_COLUMN"
   )
   (/*AUTOARG*/
   // Outputs
@@ -93,7 +94,7 @@ module ui_cmd #
   input rd_buf_full;
   input wr_req_16;
   wire app_rdy_ns = accept_ns && ~rd_buf_full && ~wr_req_16;
-  reg app_rdy_r;
+  reg app_rdy_r = 1'b0;
   always @(posedge clk) app_rdy_r <= #TCQ app_rdy_ns;
   reg app_rdy_inv_r;
   always @(posedge clk) app_rdy_inv_r <= #TCQ ~app_rdy_ns;
@@ -106,8 +107,8 @@ module ui_cmd #
   input app_hi_pri;
   input app_en;
 
-  reg [ADDR_WIDTH-1:0] app_addr_r1;
-  reg [ADDR_WIDTH-1:0] app_addr_r2;
+  reg [ADDR_WIDTH-1:0] app_addr_r1 = {ADDR_WIDTH{1'b0}};
+  reg [ADDR_WIDTH-1:0] app_addr_r2 = {ADDR_WIDTH{1'b0}};
   reg [2:0] app_cmd_r1;
   reg [2:0] app_cmd_r2;
   reg app_sz_r1;
@@ -117,7 +118,7 @@ module ui_cmd #
   reg app_en_r1;
   reg app_en_r2;
 
-  wire [ADDR_WIDTH-1:0] app_addr_ns1 = ({ADDR_WIDTH{app_rdy_r}} & app_addr) | ({ADDR_WIDTH{app_rdy_inv_r}} & app_addr_r1);
+  wire [ADDR_WIDTH-1:0] app_addr_ns1 = ({ADDR_WIDTH{app_rdy_r}} & {ADDR_WIDTH{app_en}} & app_addr) | ({ADDR_WIDTH{app_rdy_inv_r}} & app_addr_r1);
   wire [ADDR_WIDTH-1:0] app_addr_ns2 = ({ADDR_WIDTH{app_rdy_r}} & app_addr_r1) | ({ADDR_WIDTH{app_rdy_inv_r}} & app_addr_r2);
   wire [2:0] app_cmd_ns1 = ({3{app_rdy_r}} & app_cmd) | ({3{app_rdy_inv_r}} & app_cmd_r1);
   wire [2:0] app_cmd_ns2 = ({3{app_rdy_r}} & app_cmd_r1) | ({3{app_rdy_inv_r}} & app_cmd_r2);
@@ -156,11 +157,26 @@ module ui_cmd #
   assign col = ({COL_WIDTH{app_rdy_r}}     & app_addr_r1[0+:COL_WIDTH]) |
                ({COL_WIDTH{app_rdy_inv_r}} & app_addr_r2[0+:COL_WIDTH]);
 
-  assign row = ({ROW_WIDTH{app_rdy_r}}     & app_addr_r1[COL_WIDTH+:ROW_WIDTH]) |
-               ({ROW_WIDTH{app_rdy_inv_r}} & app_addr_r2[COL_WIDTH+:ROW_WIDTH]);
+  generate
+    begin
+      if (MEM_ADDR_ORDER == "ROW_BANK_COLUMN")
+      begin
+        assign row = ({ROW_WIDTH{app_rdy_r}}     & app_addr_r1[COL_WIDTH+BANK_WIDTH+:ROW_WIDTH]) |
+                     ({ROW_WIDTH{app_rdy_inv_r}} & app_addr_r2[COL_WIDTH+BANK_WIDTH+:ROW_WIDTH]);
 
-  assign bank = ({BANK_WIDTH{app_rdy_r}}     & app_addr_r1[COL_WIDTH+ROW_WIDTH+:BANK_WIDTH]) |
-                ({BANK_WIDTH{app_rdy_inv_r}} & app_addr_r2[COL_WIDTH+ROW_WIDTH+:BANK_WIDTH]);
+        assign bank = ({BANK_WIDTH{app_rdy_r}}     & app_addr_r1[COL_WIDTH+:BANK_WIDTH]) |
+                    ({BANK_WIDTH{app_rdy_inv_r}} & app_addr_r2[COL_WIDTH+:BANK_WIDTH]);
+      end
+      else
+      begin
+        assign row = ({ROW_WIDTH{app_rdy_r}}     & app_addr_r1[COL_WIDTH+:ROW_WIDTH]) |
+                     ({ROW_WIDTH{app_rdy_inv_r}} & app_addr_r2[COL_WIDTH+:ROW_WIDTH]);
+
+        assign bank = ({BANK_WIDTH{app_rdy_r}}     & app_addr_r1[COL_WIDTH+ROW_WIDTH+:BANK_WIDTH]) |
+                    ({BANK_WIDTH{app_rdy_inv_r}} & app_addr_r2[COL_WIDTH+ROW_WIDTH+:BANK_WIDTH]);
+      end
+    end
+  endgenerate
 
   assign rank = (RANKS == 1)
                   ? 1'b0

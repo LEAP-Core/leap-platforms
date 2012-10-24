@@ -49,10 +49,10 @@
 //   ____  ____
 //  /   /\/   /
 // /___/  \  /    Vendor: Xilinx
-// \   \   \/     Version: 3.5
+// \   \   \/     Version: 3.9
 //  \   \         Application: MIG
 //  /   /         Filename: phy_top.v
-// /___/   /\     Date Last Modified: $Date: 2010/05/20 10:38:07 $
+// /___/   /\     Date Last Modified: $Date: 2011/06/02 07:18:04 $
 // \   \  /  \    Date Created: Aug 03 2009
 //  \___\/\___\
 //
@@ -70,15 +70,15 @@
 //*****************************************************************************
 
 /******************************************************************************
-**$Id: phy_top.v,v 1.1.2.7 2010/05/20 10:38:07 moushmi Exp $
-**$Date: 2010/05/20 10:38:07 $
-**$Author: moushmi $
-**$Revision: 1.1.2.7 $
-**$Source: /devl/xcs/repo/env/Databases/ip/src2/M/mig_v3_5/data/dlib/virtex6/ddr3_sdram/verilog/rtl/phy/Attic/phy_top.v,v $
+**$Id: phy_top.v,v 1.1 2011/06/02 07:18:04 mishra Exp $
+**$Date: 2011/06/02 07:18:04 $
+**$Author: mishra $
+**$Revision: 1.1 $
+**$Source: /devl/xcs/repo/env/Databases/ip/src2/O/mig_v3_9/data/dlib/virtex6/ddr3_sdram/verilog/rtl/phy/phy_top.v,v $
 ******************************************************************************/
 
 `timescale 1ps/1ps
-(* X_CORE_INFO = "mig_v3_5_ddr3_V6, Coregen 12.2" , CORE_GENERATION_INFO = "ddr3_V6,mig_v3_5,{LANGUAGE=Verilog, SYNTHESIS_TOOL=ISE, LEVEL=PHY, AXI_ENABLE=0, NO_OF_CONTROLLERS=1, INTERFACE_TYPE=DDR3, CLK_PERIOD=2500, MEMORY_TYPE=SODIMM, MEMORY_PART=mt4jsf6464hy-1g1, DQ_WIDTH=64, ECC=OFF, DATA_MASK=1, BURST_MODE=8, BURST_TYPE=SEQ, OUTPUT_DRV=HIGH, RTT_NOM=60, REFCLK_FREQ=200, CLKFBOUT_MULT_F=6, CLKOUT_DIVIDE=3, DEBUG_PORT=ON, IODELAY_HP_MODE=ON, INTERNAL_VREF=1, DCI_INOUTS=1, CLASS_ADDR=II, INPUT_CLK_TYPE=DIFFERENTIAL}" *)
+(* X_CORE_INFO = "mig_v3_9_ddr3_V6, Coregen 13.3" , CORE_GENERATION_INFO = "ddr3_V6_phy,mig_v3_9,{LANGUAGE=Verilog, SYNTHESIS_TOOL=ISE, LEVEL=PHY, AXI_ENABLE=0, NO_OF_CONTROLLERS=1, INTERFACE_TYPE=DDR3, CLK_PERIOD=2500, MEMORY_TYPE=SODIMM, MEMORY_PART=mt4jsf6464hy-1g1, DQ_WIDTH=64, ECC=OFF, DATA_MASK=1, BURST_MODE=8, BURST_TYPE=SEQ, OUTPUT_DRV=HIGH, RTT_NOM=60, REFCLK_FREQ=200, MMCM_ADV_BANDWIDTH=MMCM_ADV_BANDWIDTH, CLKFBOUT_MULT_F=6, CLKOUT_DIVIDE=3, DEBUG_PORT=ON, IODELAY_HP_MODE=ON, INTERNAL_VREF=0, DCI_INOUTS=1, CLASS_ADDR=II, INPUT_CLK_TYPE=DIFFERENTIAL}" *)
 module phy_top #
   (
    parameter TCQ             = 100,
@@ -150,6 +150,12 @@ module phy_top #
    parameter DQS_LOC_COL3    = 0,          // DQS grps in col #4
    parameter USE_DM_PORT     = 1,          // DM instantation enable
    // Simulation /debug options
+   parameter SIM_BYPASS_INIT_CAL = "OFF",   
+                                        // Parameter used to force skipping
+                                        // or abbreviation of initialization
+                                        // and calibration. Overrides
+                                        // SIM_INIT_OPTION, SIM_CAL_OPTION,
+                                        // and disables various other blocks
    parameter SIM_INIT_OPTION = "NONE",  // Skip various initialization steps
    parameter SIM_CAL_OPTION  = "NONE",  // Skip various calibration steps
    parameter DEBUG_PORT      = "OFF"    // Enable debug port
@@ -276,6 +282,33 @@ module phy_top #
    output [255:0]             dbg_phy_top    // General PHY debug
    );
 
+  // Parameter used to force skipping or abbreviation of initialization
+  // and calibration. Overrides SIM_INIT_OPTION, SIM_CAL_OPTION, and 
+  // disables various other blocks depending on the option selected
+  // This option should only be used during simulation. In the case of
+  // the "SKIP" option, the testbench used should also not be modeling
+  // propagation delays.
+  // Allowable options = {"NONE", "SKIP", "FAST"}
+  //  "NONE" = options determined by the individual parameter settings
+  //  "SKIP" = skip power-up delay, skip calibration for read leveling,
+  //           write leveling, and phase detector. In the case of write
+  //           leveling and the phase detector, this means not instantiating
+  //           those blocks at all.
+  //  "FAST" = skip power-up delay, and calibrate (read leveling, write
+  //           leveling, and phase detector) only using one DQS group, and
+  //           apply the results to all other DQS groups. 
+  localparam SIM_INIT_OPTION_W
+             = ((SIM_BYPASS_INIT_CAL == "SKIP") || 
+                (SIM_BYPASS_INIT_CAL == "FAST")) ?
+             "SKIP_PU_DLY" : SIM_INIT_OPTION;
+  localparam SIM_CAL_OPTION_W
+             = (SIM_BYPASS_INIT_CAL == "SKIP") ? "SKIP_CAL" :
+             ((SIM_BYPASS_INIT_CAL == "FAST") ? "FAST_CAL" : SIM_CAL_OPTION);
+  localparam WRLVL_W 
+             = (SIM_BYPASS_INIT_CAL == "SKIP") ? "OFF" : WRLVL;
+  localparam PHASE_DETECT_W 
+             = (SIM_BYPASS_INIT_CAL == "SKIP") ? "OFF" : PHASE_DETECT;
+  
   // Advance ODELAY of DQ by extra 0.25*tCK (quarter clock cycle) to center
   // align DQ and DQS on writes. Round (up or down) value to nearest integer
   localparam integer SHIFT_TBY4_TAP
@@ -289,7 +322,14 @@ module phy_top #
   // Calculate number of slots in the system
   localparam nSLOTS  = 1 + (|SLOT_1_CONFIG ? 1 : 0);
   // Disable Phase Detector Below 250MHz
-  localparam USE_PHASE_DETECT = (CLK_PERIOD > 8000) ? "OFF" : PHASE_DETECT;
+  localparam USE_PHASE_DETECT = (CLK_PERIOD > 8000) ? "OFF" : PHASE_DETECT_W;
+
+  // Param to determine if the configuration is an UDIMM configuration for DDR2
+  // this parameter is used for advancing the chip select for frequencies above
+  // 200 MHz. 
+  localparam DDR2_EARLY_CS = ((CLK_PERIOD < 10000) & ( DQ_WIDTH >= 64) &
+                             (CK_WIDTH < 5) & (DRAM_TYPE == "DDR2") &
+                             (REG_CTRL == "OFF")); 
 
   reg  [2:0]                       calib_width;
   wire [1:0]                       chip_cnt;
@@ -362,6 +402,7 @@ module phy_top #
   wire [1:0]                       rank_cnt;
   wire [4:0]                       rd_active_dly;
   wire [2*DQS_WIDTH-1:0]           rd_bitslip_cnt;
+  wire [DQS_WIDTH-1:0]             rd_clkdiv_inv;
   wire [2*DQS_WIDTH-1:0]           rd_clkdly_cnt;
   wire [DQ_WIDTH-1:0]              rd_data_fall0;
   wire [DQ_WIDTH-1:0]              rd_data_fall1;
@@ -371,6 +412,8 @@ module phy_top #
   wire [DQS_WIDTH-1:0]             rd_dqs_fall1;
   wire [DQS_WIDTH-1:0]             rd_dqs_rise0;
   wire [DQS_WIDTH-1:0]             rd_dqs_rise1;
+  wire                             rdlvl_clkdiv_done;  
+  wire                             rdlvl_clkdiv_start;  
   wire [1:0]                       rdlvl_done;
   wire [1:0]                       rdlvl_err;
   wire                             rdlvl_pat_resume;
@@ -424,9 +467,9 @@ module phy_top #
   // Write leveling dependent signals
   //***************************************************************************
 
-  assign rdlvl_pat_resume_w = (WRLVL == "ON") ? rdlvl_pat_resume : 1'b0;
-  assign dqs_inv      = (WRLVL == "ON") ? inv_dqs : {DQS_WIDTH{1'b0}};
-  assign wrcal_dly_w  = (WRLVL == "ON") ? wr_calib_dly : {2*DQS_WIDTH{1'b0}};
+  assign rdlvl_pat_resume_w = (WRLVL_W == "ON") ? rdlvl_pat_resume : 1'b0;
+  assign dqs_inv     = (WRLVL_W == "ON") ? inv_dqs : {DQS_WIDTH{1'b0}};
+  assign wrcal_dly_w = (WRLVL_W == "ON") ? wr_calib_dly : {2*DQS_WIDTH{1'b0}};
 
   // Rank count (chip_cnt) from phy_init for write bitslip during read leveling
   // Rank count (io_config) from MC during normal operation
@@ -435,7 +478,7 @@ module phy_top #
                     // io_config[1:0] causes warning with VCS
                     // io_config[RANK_WIDTH-1:0] causes error with VCS
                     (RANK_WIDTH == 2) ? io_config[1:0] :
-                    io_config[0];
+                    {1'b0, io_config[0]};
                     
   always @(posedge clk) begin
     chip_cnt_r  <= #TCQ chip_cnt;
@@ -461,7 +504,7 @@ module phy_top #
         // values of DQ and DQS. This can be used to measure DQ-DQS
         // (as well as tDQSS) timing margin on writes  
         assign dlyval_wrlvl_dq[5*offset_i+4:5*offset_i]
-                 = (WRLVL == "ON") ?
+                 = (WRLVL_W == "ON") ?
                    ((wrlvl_done && dbg_wr_tap_set_en) ?
                     dbg_wr_dq_tap_set[5*offset_i+4:5*offset_i] :
                     dlyval_wrlvl_dq_w[5*offset_i+4:5*offset_i]) :
@@ -469,7 +512,7 @@ module phy_top #
                     dbg_wr_dq_tap_set[5*offset_i+4:5*offset_i] :
                     SHIFT_TBY4_TAP);
         assign dlyval_wrlvl_dqs[5*offset_i+4:5*offset_i]
-                 = (WRLVL == "ON") ?
+                 = (WRLVL_W == "ON") ?
                    ((wrlvl_done && dbg_wr_tap_set_en) ?
                     dbg_wr_dqs_tap_set[5*offset_i+4:5*offset_i] :
                     dlyval_wrlvl_dqs_w[5*offset_i+4:5*offset_i]) :
@@ -478,11 +521,11 @@ module phy_top #
                     5'b0);
       end else begin: gen_offset_tap_nodbg 
         assign dlyval_wrlvl_dq[5*offset_i+4:5*offset_i]
-                 = (WRLVL == "ON") ?
+                 = (WRLVL_W == "ON") ?
                    dlyval_wrlvl_dq_w[5*offset_i+4:5*offset_i] :
                    SHIFT_TBY4_TAP;
         assign dlyval_wrlvl_dqs[5*offset_i+4:5*offset_i]
-                 = (WRLVL == "ON") ?
+                 = (WRLVL_W == "ON") ?
                    dlyval_wrlvl_dqs_w[5*offset_i+4:5*offset_i] :
                    5'b0;        
       end      
@@ -602,11 +645,11 @@ module phy_top #
      .REG_CTRL        (REG_CTRL),
      .RTT_NOM         (RTT_NOM),
      .RTT_WR          (RTT_WR),
-     .WRLVL           (WRLVL),
+     .WRLVL           (WRLVL_W),
      .PHASE_DETECT    (USE_PHASE_DETECT),
      .nSLOTS          (nSLOTS),
-     .SIM_INIT_OPTION (SIM_INIT_OPTION),
-     .SIM_CAL_OPTION  (SIM_CAL_OPTION)
+     .SIM_INIT_OPTION (SIM_INIT_OPTION_W),
+     .SIM_CAL_OPTION  (SIM_CAL_OPTION_W)
      )
     u_phy_init
       (
@@ -621,6 +664,8 @@ module phy_top #
        .slot_1_present    (slot_1_present),
        .rdlvl_done        (rdlvl_done),
        .rdlvl_start       (rdlvl_start),
+       .rdlvl_clkdiv_done (rdlvl_clkdiv_done),
+       .rdlvl_clkdiv_start(rdlvl_clkdiv_start),
        .rdlvl_prech_req   (rdlvl_prech_req),
        .rdlvl_resume      (rdlvl_pat_resume_w),
        .chip_cnt          (chip_cnt),
@@ -667,13 +712,14 @@ module phy_top #
      .CS_WIDTH         (CS_WIDTH),
      .CKE_WIDTH        (CKE_WIDTH),
      .ROW_WIDTH        (ROW_WIDTH),
-     .WRLVL            (WRLVL),
+     .WRLVL            (WRLVL_W),
      .nCWL             (CWL_M),
      .DRAM_TYPE        (DRAM_TYPE),
      .REG_CTRL         (REG_CTRL),
      .REFCLK_FREQ      (REFCLK_FREQ),
      .IODELAY_HP_MODE  (IODELAY_HP_MODE),
-     .IODELAY_GRP      (IODELAY_GRP)
+     .IODELAY_GRP      (IODELAY_GRP),
+     .DDR2_EARLY_CS    (DDR2_EARLY_CS)
      )
     u_phy_control_io
       (
@@ -735,7 +781,7 @@ module phy_top #
     (
      .TCQ              (TCQ),
      .CK_WIDTH         (CK_WIDTH),
-     .WRLVL            (WRLVL),
+     .WRLVL            (WRLVL_W),
      .DRAM_TYPE        (DRAM_TYPE),
      .REFCLK_FREQ      (REFCLK_FREQ),
      .IODELAY_GRP      (IODELAY_GRP)
@@ -765,7 +811,7 @@ module phy_top #
      .DQ_WIDTH        (DQ_WIDTH),
      .DQS_WIDTH       (DQS_WIDTH),
      .nCWL            (CWL_M),
-     .WRLVL           (WRLVL),
+     .WRLVL           (WRLVL_W),
      .REFCLK_FREQ     (REFCLK_FREQ),
      .IBUF_LPWR_MODE  (IBUF_LPWR_MODE),
      .IODELAY_HP_MODE (IODELAY_HP_MODE),
@@ -809,6 +855,7 @@ module phy_top #
        //Read datapath I/F
        .rd_bitslip_cnt  (rd_bitslip_cnt),
        .rd_clkdly_cnt   (rd_clkdly_cnt),
+       .rd_clkdiv_inv   (rd_clkdiv_inv),
        .rd_data_rise0   (rd_data_rise0),
        .rd_data_fall0   (rd_data_fall0),
        .rd_data_rise1   (rd_data_rise1),
@@ -839,7 +886,8 @@ module phy_top #
      .DQS_WIDTH      (DQS_WIDTH),
      .RANK_WIDTH     (RANK_WIDTH),
      .nCWL           (CWL_M),
-     .WRLVL          (WRLVL),
+     .REG_CTRL       (REG_CTRL),
+     .WRLVL          (WRLVL_W),
      .PHASE_DETECT   (USE_PHASE_DETECT),
      .DRAM_TYPE      (DRAM_TYPE),
      .nDQS_COL0      (nDQS_COL0),
@@ -896,7 +944,7 @@ module phy_top #
   phy_write #
     (
      .TCQ             (TCQ),
-     .WRLVL           (WRLVL),
+     .WRLVL           (WRLVL_W),
      .DQ_WIDTH        (DQ_WIDTH),
      .DQS_WIDTH       (DQS_WIDTH),
      .DRAM_TYPE       (DRAM_TYPE),
@@ -955,7 +1003,7 @@ module phy_top #
   //***************************************************************************
 
   generate
-    if (WRLVL == "ON") begin: mb_wrlvl_inst
+    if (WRLVL_W == "ON") begin: mb_wrlvl_inst
       phy_wrlvl #
         (
          .TCQ               (TCQ),
@@ -967,7 +1015,7 @@ module phy_top #
          .CAL_WIDTH         (CAL_WIDTH),
          .DQS_TAP_CNT_INDEX (5*DQS_WIDTH-1),
          .SHIFT_TBY4_TAP    (SHIFT_TBY4_TAP),
-         .SIM_CAL_OPTION    (SIM_CAL_OPTION)
+         .SIM_CAL_OPTION    (SIM_CAL_OPTION_W)
          )
         u_phy_wrlvl
           (
@@ -978,6 +1026,7 @@ module phy_top #
            .wr_level_start              (wrlvl_start),
            .wl_sm_start                 (wl_sm_start),
            .rd_data_rise0               (dfi_rddata[DQ_WIDTH-1:0]),
+           .rdlvl_done                  (rdlvl_done),
            .wr_level_done               (wrlvl_done),
            .wrlvl_rank_done             (wrlvl_rank_done),
            .dlyval_wr_dqs               (dlyval_wrlvl_dqs_w),
@@ -1073,9 +1122,10 @@ module phy_top #
      .DQS_CNT_WIDTH   (DQS_CNT_WIDTH),
      .DQS_WIDTH       (DQS_WIDTH),
      .DRAM_WIDTH      (DRAM_WIDTH),
+     .DRAM_TYPE       (DRAM_TYPE),
      .nCL             (nCL),
      .PD_TAP_REQ      (PD_TAP_REQ),
-     .SIM_CAL_OPTION  (SIM_CAL_OPTION),
+     .SIM_CAL_OPTION  (SIM_CAL_OPTION_W),
      .DEBUG_PORT      (DEBUG_PORT)
      )
     u_phy_rdlvl
@@ -1083,8 +1133,10 @@ module phy_top #
        .clk                     (clk),
        .rst                     (rst),
        .rdlvl_start             (rdlvl_start),
+       .rdlvl_clkdiv_start      (rdlvl_clkdiv_start),
        .rdlvl_rd_active         (dfi_rddata_valid_phy),
        .rdlvl_done              (rdlvl_done),
+       .rdlvl_clkdiv_done       (rdlvl_clkdiv_done),
        .rdlvl_err               (rdlvl_err),
        .rdlvl_prech_req         (rdlvl_prech_req),
        .prech_done              (prech_done),
@@ -1101,12 +1153,14 @@ module phy_top #
        .rd_bitslip_cnt          (rd_bitslip_cnt),
        .rd_clkdly_cnt           (rd_clkdly_cnt),
        .rd_active_dly           (rd_active_dly),
-       .rdlvl_pat_resume        (rdlvl_pat_resume),
+       .rdlvl_pat_resume        (rdlvl_pat_resume_w),
        .rdlvl_pat_err           (rdlvl_pat_err),
        .rdlvl_pat_err_cnt       (rdlvl_pat_err_cnt),
+       .rd_clkdiv_inv           (rd_clkdiv_inv),
        .dbg_cpt_first_edge_cnt  (dbg_cpt_first_edge_cnt),
        .dbg_cpt_second_edge_cnt (dbg_cpt_second_edge_cnt),
        .dbg_rd_bitslip_cnt      (dbg_rd_bitslip_cnt),
+       .dbg_rd_clkdiv_inv       (), // connect in future release
        .dbg_rd_clkdly_cnt       (dbg_rd_clkdly_cnt),
        .dbg_rd_active_dly       (dbg_rd_active_dly),
        .dbg_idel_up_all         (dbg_idel_up_all),
@@ -1137,7 +1191,7 @@ module phy_top #
          .PD_CALIB_MODE     (PD_CALIB_MODE),
          .PD_MSB_SEL        (PD_MSB_SEL),
          .PD_DQS0_ONLY      (PD_DQS0_ONLY),
-         .SIM_CAL_OPTION    (SIM_CAL_OPTION),
+         .SIM_CAL_OPTION    (SIM_CAL_OPTION_W),
          .DEBUG_PORT        (DEBUG_PORT)         
          )
         u_phy_pd_top

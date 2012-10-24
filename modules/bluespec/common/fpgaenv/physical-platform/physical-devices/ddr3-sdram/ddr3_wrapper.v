@@ -89,20 +89,14 @@ module ddr3_wrapper #
    assign 		 app_wdf_wren   = app_wdf_enable;
 
    wire 		 user_reset;
-   assign 		 user_reset_n   = ~user_reset;
+   assign 		 user_reset_n   = user_reset;
 
    wire                  sys_rst;
    assign                sys_rst        = ~sys_rst_n;
    
-   ddr3_v3_5 # (
-		.SIM_INIT_OPTION (SIM_INIT_OPTION),
-		.SIM_CAL_OPTION  (SIM_CAL_OPTION),
-		.REFCLK_FREQ     (200),
-		.nCK_PER_CLK     (2),
-		.tCK             (CLK_PERIOD / 2)
-		)
+   ddr3_v3_5 
    u_ddr3 (
-	   .clk_ref_diff             (clk_ref_diff),
+	   .clk_sys                  (clk_ref_diff),
 	   .ddr3_dq                  (ddr3_dq),
 	   .ddr3_addr                (ddr3_addr),
 	   .ddr3_ba                  (ddr3_ba),
@@ -122,14 +116,14 @@ module ddr3_wrapper #
 	   .app_wdf_data             (app_wdf_data),
 	   .app_wdf_mask             (app_wdf_mask),
 	   .app_wdf_end              (app_wdf_end),
-	   .tg_addr                  (app_addr),
+	   .app_addr                 (app_addr),
 	   .app_cmd                  (app_cmd),
 	   .app_en                   (app_en),
 	   .app_rdy                  (app_rdy),
 	   .app_wdf_rdy              (app_wdf_rdy),
 	   .app_rd_data              (app_rd_data),
 	   .app_rd_data_valid        (app_rd_data_valid),
-	   .tb_rst                   (user_reset),
+	   .tb_rst_n                 (user_reset),
 	   .tb_clk                   (user_clock),
 	   .phy_init_done            (phy_init_done),
 	   .sys_rst                  (sys_rst)

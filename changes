@@ -14209,3 +14209,76 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr
 
 Added memory controller for ml605.  Still has memory corruption in the
 debug mode, but the behavior is at least partially correct.
+
+----------
+kfleming    Date: Wed Oct 24 14:52:27 EDT 2012  CSN: CSN-leap-platforms-634
+                  Wed Oct 24 18:52:27 UTC 2012
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express-bluenoc
+ pcie-device.ucf           Locally Modified          633 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr3-sdram
+ ui_wr_data.v              Locally Modified          633 
+ infrastructure.v          Locally Modified          633 
+ bank_compare.v            Locally Modified          633 
+ ecc_gen.v                 Locally Modified          633 
+ bank_common.v             Locally Modified          633 
+ phy_pd.v                  Locally Modified          633 
+ rank_mach.v               Locally Modified          633 
+ ecc_buf.v                 Locally Modified          633 
+ rd_bitslip.v              Locally Modified          633 
+ phy_dly_ctrl.v            Locally Modified          633 
+ arb_mux.v                 Locally Modified          633 
+ mc.v                      Locally Modified          633 
+ ui_top.v                  Locally Modified          633 
+ memc_ui_top.v             Locally Modified          633 
+ ddr3-sdram-device.awb     Locally Modified          633 
+ mem_intfc.v               Locally Modified          633 
+ rank_common.v             Locally Modified          633 
+ arb_select.v              Locally Modified          633 
+ phy_rdlvl.v               Locally Modified          633 
+ phy_rdclk_gen.v           Locally Modified          633 
+ phy_dm_iob.v              Locally Modified          633 
+ phy_write.v               Locally Modified          633 
+ phy_rddata_sync.v         Locally Modified          633 
+ ecc_dec_fix.v             Locally Modified          633 
+ bank_state.v              Locally Modified          633 
+ bank_cntrl.v              Locally Modified          633 
+ phy_dq_iob.v              Locally Modified          633 
+ clk_ibuf.v                Locally Modified          633 
+ bank_queue.v              Locally Modified          633 
+ phy_data_io.v             Locally Modified          633 
+ phy_top.v                 Locally Modified          633 
+ phy_init.v                Locally Modified          633 
+ phy_wrlvl.v               Locally Modified          633 
+ phy_control_io.v          Locally Modified          633 
+ arb_row_col.v             Locally Modified          633 
+ ddr3_v3_5.v               Locally Modified          633 
+ phy_read.v                Locally Modified          633 
+ ui_rd_data.v              Locally Modified          633 
+ ddr3_wrapper.v            Locally Modified          633 
+ rank_cntrl.v              Locally Modified          633 
+ ecc_merge_enc.v           Locally Modified          633 
+ phy_dqs_iob.v             Locally Modified          633 
+ ui_cmd.v                  Locally Modified          633 
+ phy_clock_io.v            Locally Modified          633 
+ bank_mach.v               Locally Modified          633 
+ ddr2_ddr3_chipscope.v     Locally Modified          633 
+ round_robin_arb.v         Locally Modified          633 
+ col_mach.v                Locally Modified          633 
+ phy_pd_top.v              Locally Modified          633 
+ phy_ck_iob.v              Locally Modified          633 
+ phy_rdctrl_sync.v         Locally Modified          633 
+ ddr3-sdram.ucf            Locally Modified          633 
+ circ_buffer.v             Locally Modified          633 
+ iodelay_ctrl.v            Locally Modified          633 
+
+
+Some fixes to the ddr3 controller for the ml605.
+
+1) Fixed pcie ucf, which had wrong clock frequencies
+2) Upgraded to mig v39
+
+The memory controller now passes the debugger test. 
+

@@ -49,10 +49,10 @@
 //   ____  ____
 //  /   /\/   /
 // /___/  \  /    Vendor: Xilinx
-// \   \   \/     Version: 3.5
+// \   \   \/     Version: 3.9
 //  \   \         Application: MIG
 //  /   /         Filename: infrastructure.v
-// /___/   /\     Date Last Modified: $Date: 2010/03/21 17:21:47 $
+// /___/   /\     Date Last Modified: $Date: 2011/06/02 07:18:00 $
 // \   \  /  \    Date Created:Tue Jun 30 2009
 //  \___\/\___\
 //
@@ -62,14 +62,15 @@
 //   Clock generation/distribution and reset synchronization
 //Reference:
 //Revision History:
+//                   1. Add output port "pll_lock" for ML605 GPIO LED
 //*****************************************************************************
 
 /******************************************************************************
-**$Id: infrastructure.v,v 1.1.2.1 2010/03/21 17:21:47 jschmitz Exp $
-**$Date: 2010/03/21 17:21:47 $
-**$Author: jschmitz $
-**$Revision: 1.1.2.1 $
-**$Source: /devl/xcs/repo/env/Databases/ip/src2/M/mig_v3_5/data/dlib/virtex6/ddr3_sdram/verilog/rtl/ip_top/Attic/infrastructure.v,v $
+**$Id: infrastructure.v,v 1.1 2011/06/02 07:18:00 mishra Exp $
+**$Date: 2011/06/02 07:18:00 $
+**$Author: mishra $
+**$Revision: 1.1 $
+**$Source: /devl/xcs/repo/env/Databases/ip/src2/O/mig_v3_9/data/dlib/virtex6/ddr3_sdram/verilog/rtl/ip_top/infrastructure.v,v $
 ******************************************************************************/
 
 `timescale 1ps/1ps
@@ -77,17 +78,18 @@
 
 module infrastructure #
   (
-   parameter TCQ             = 100,      // clk->out delay (sim only)
-   parameter CLK_PERIOD      = 3000,     // Internal (fabric) clk period
-   parameter nCK_PER_CLK     = 2,        // External (memory) clock period = 
+   parameter TCQ                = 100,   // clk->out delay (sim only)
+   parameter CLK_PERIOD         = 3000,  // Internal (fabric) clk period
+   parameter nCK_PER_CLK        = 2,     // External (memory) clock period =
                                          // CLK_PERIOD/nCK_PER_CLK
-   parameter INPUT_CLK_TYPE  = "DIFFERENTIAL", // input clock type 
-                                               // "DIFFERENTIAL","SINGLE_ENDED"
-   parameter CLKFBOUT_MULT_F = 2,        // write PLL VCO multiplier
-   parameter DIVCLK_DIVIDE   = 1,        // write PLL VCO divisor
-   parameter CLKOUT_DIVIDE   = 2,        // VCO output divisor for fast 
+   parameter INPUT_CLK_TYPE     = "DIFFERENTIAL", // input clock type
+                                         // "DIFFERENTIAL","SINGLE_ENDED"
+   parameter MMCM_ADV_BANDWIDTH = "OPTIMIZED", // MMCM programming algorithm
+   parameter CLKFBOUT_MULT_F    = 2,     // write PLL VCO multiplier
+   parameter DIVCLK_DIVIDE      = 1,     // write PLL VCO divisor
+   parameter CLKOUT_DIVIDE      = 2,     // VCO output divisor for fast
                                          // (memory) clocks
-   parameter RST_ACT_LOW  = 1
+   parameter RST_ACT_LOW        = 1
    )
   (
    // Clock inputs
@@ -104,8 +106,9 @@ module infrastructure #
    output rstdiv0,            // Reset CLK and CLKDIV logic (incl I/O),
    // Phase Shift Interface
    input  PSEN,               // For enabling fine-phase shift
-   input  PSINCDEC,           // = 1 increment phase shift, = 0 
-   output PSDONE            
+   input  PSINCDEC,           // = 1 increment phase shift, = 0
+   output pll_lock,           // = 1 for PLL LOCKED condition (LED on ML605)
+   output PSDONE
    );
 
   // # of clock cycles to delay deassertion of reset. Needs to be a fairly
@@ -124,20 +127,20 @@ module infrastructure #
   // consider route delay - add one or two extra cycles to be sure!)
   localparam RST_DIV_SYNC_NUM = (RST_SYNC_NUM+1)/2;
 
-  localparam real CLKIN1_PERIOD 
+  localparam real CLKIN1_PERIOD
              = (CLKFBOUT_MULT_F * CLK_PERIOD)/
              (DIVCLK_DIVIDE * CLKOUT_DIVIDE * nCK_PER_CLK * 1000.0);  // in ns
 
-  localparam integer VCO_PERIOD 
+  localparam integer VCO_PERIOD
              = (DIVCLK_DIVIDE * CLK_PERIOD)/(CLKFBOUT_MULT_F * nCK_PER_CLK);
 
   localparam CLKOUT0_DIVIDE_F = CLKOUT_DIVIDE;
-  localparam CLKOUT1_DIVIDE   = CLKOUT_DIVIDE * nCK_PER_CLK; 
-  localparam CLKOUT2_DIVIDE   = CLKOUT_DIVIDE; 
+  localparam CLKOUT1_DIVIDE   = CLKOUT_DIVIDE * nCK_PER_CLK;
+  localparam CLKOUT2_DIVIDE   = CLKOUT_DIVIDE;
 
   localparam CLKOUT0_PERIOD = VCO_PERIOD * CLKOUT0_DIVIDE_F;
   localparam CLKOUT1_PERIOD = VCO_PERIOD * CLKOUT1_DIVIDE;
-  localparam CLKOUT2_PERIOD = VCO_PERIOD * CLKOUT2_DIVIDE;  
+  localparam CLKOUT2_PERIOD = VCO_PERIOD * CLKOUT2_DIVIDE;
 
   //synthesis translate_off
   initial begin
@@ -187,20 +190,20 @@ module infrastructure #
 
   //*****************************************************************
   // NOTES ON CALCULTING PROPER VCO FREQUENCY
-  //  1. VCO frequency = 
+  //  1. VCO frequency =
   //     1/((DIVCLK_DIVIDE * CLK_PERIOD)/(CLKFBOUT_MULT_F * nCK_PER_CLK))
-  //  2. VCO frequency must be in the range [800MHz, 1.2MHz] for -1 part. 
+  //  2. VCO frequency must be in the range [800MHz, 1.2MHz] for -1 part.
   //     The lower limit of 800MHz is greater than the lower supported
   //     frequency of 400MHz according to the datasheet because the MMCM
   //     jitter performance improves significantly when the VCO is operatin
   //     above 800MHz. For speed grades faster than -1, the max VCO frequency
   //     will be highe, and the multiply and divide factors can be adjusted
-  //     according (in general to run the VCO as fast as possible). 
+  //     according (in general to run the VCO as fast as possible).
   //*****************************************************************
 
   MMCM_ADV #
     (
-     .BANDWIDTH             ("OPTIMIZED"),
+     .BANDWIDTH             (MMCM_ADV_BANDWIDTH),
      .CLOCK_HOLD            ("FALSE"),
      .COMPENSATION          ("INTERNAL"),
      .REF_JITTER1           (0.005),

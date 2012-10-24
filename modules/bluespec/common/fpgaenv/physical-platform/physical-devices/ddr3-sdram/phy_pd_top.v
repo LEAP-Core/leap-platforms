@@ -49,10 +49,10 @@
 //   ____  ____
 //  /   /\/   /
 // /___/  \  /    Vendor: Xilinx
-// \   \   \/     Version: 3.5
+// \   \   \/     Version: 3.9
 //  \   \         Application: MIG
 //  /   /         Filename: phy_pd_top.v
-// /___/   /\     Date Last Modified: $Date: 2010/03/21 17:21:47 $
+// /___/   /\     Date Last Modified: $Date: 2011/06/02 07:18:03 $
 // \   \  /  \    Date Created: Aug 03 2009
 //  \___\/\___\
 //
@@ -66,11 +66,11 @@
 //*****************************************************************************
 
 /******************************************************************************
-**$Id: phy_pd_top.v,v 1.1.2.1 2010/03/21 17:21:47 jschmitz Exp $
-**$Date: 2010/03/21 17:21:47 $
-**$Author: jschmitz $
-**$Revision: 1.1.2.1 $
-**$Source: /devl/xcs/repo/env/Databases/ip/src2/M/mig_v3_5/data/dlib/virtex6/ddr3_sdram/verilog/rtl/phy/Attic/phy_pd_top.v,v $
+**$Id: phy_pd_top.v,v 1.1 2011/06/02 07:18:03 mishra Exp $
+**$Date: 2011/06/02 07:18:03 $
+**$Author: mishra $
+**$Revision: 1.1 $
+**$Source: /devl/xcs/repo/env/Databases/ip/src2/O/mig_v3_9/data/dlib/virtex6/ddr3_sdram/verilog/rtl/phy/phy_pd_top.v,v $
 *****************************************************************************/
 
 `timescale 1ps/1ps
@@ -142,6 +142,7 @@ module phy_pd_top #
   wire [DQS_WIDTH-1:0] inc_cpt;
   wire [DQS_WIDTH-1:0] inc_dqs;
   wire [DQS_WIDTH-1:0] disable_hysteresis;
+  wire [DQS_WIDTH-1:0] disab_hyst_debug_on;
   wire [3:0]           early_dqs_data[DQS_WIDTH-1:0];
   wire [DQS_WIDTH-1:0] maintain_off;
   wire [3:0]           msb_sel[DQS_WIDTH-1:0];
@@ -188,10 +189,9 @@ module phy_pd_top #
   // DQS group.
   //***************************************************************************
 
-  assign disable_hysteresis 
-    = (DEBUG_PORT == "ON") ? 
-      {{DQS_WIDTH-1{dbg_pd_disab_hyst}},dbg_pd_disab_hyst_0} :
-      {DQS_WIDTH{1'b0}};
+  assign disab_hyst_debug_on = (DQS_WIDTH == 1'b1) ? dbg_pd_disab_hyst_0 : {{DQS_WIDTH-1{dbg_pd_disab_hyst}},dbg_pd_disab_hyst_0};
+  assign disable_hysteresis = (DEBUG_PORT == "ON") ? disab_hyst_debug_on : {DQS_WIDTH{1'b0}};
+  
   
   assign pd_off = (DEBUG_PORT == "ON") ? dbg_pd_off : 1'b0;
 

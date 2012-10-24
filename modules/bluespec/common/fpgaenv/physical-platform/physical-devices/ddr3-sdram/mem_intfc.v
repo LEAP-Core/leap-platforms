@@ -49,7 +49,7 @@
 //   ____  ____
 //  /   /\/   /
 // /___/  \  /    Vendor                : Xilinx
-// \   \   \/     Version               : 3.5
+// \   \   \/     Version               : 3.9
 //  \   \         Application           : MIG
 //  /   /         Filename              : mem_intfc.v
 // /___/   /\     Date Last Modified    : $date$
@@ -71,7 +71,7 @@ module mem_intfc #
   (
    parameter TCQ = 100,
    parameter PAYLOAD_WIDTH   = 64,
-   parameter ADDR_CMD_MODE   = "UNBUF",
+   parameter ADDR_CMD_MODE   = "1T",
    parameter AL              = "0",     // Additive Latency option
    parameter BANK_WIDTH      = 3,       // # of bank bits
    parameter BM_CNT_WIDTH    = 2,       // Bank machine counter width
@@ -96,6 +96,7 @@ module mem_intfc #
    parameter DRAM_TYPE       = "DDR3",
    parameter DRAM_WIDTH      = 8,       // # of DQ per DQS
    parameter ECC             = "OFF",
+   parameter ECC_TEST_FI_XOR = "OFF",
    parameter ECC_WIDTH       = 8,
    parameter MC_ERR_ADDR_WIDTH = 31,
    parameter nAL             = 0,       // Additive latency (in clk cyc)
@@ -128,13 +129,17 @@ module mem_intfc #
    parameter WRLVL           = "OFF"  ,  // to phy_top
    parameter DEBUG_PORT      = "OFF"  ,  // to phy_top
    parameter CAL_WIDTH       = "HALF" ,  // to phy_top
+   // calibration Address. The address given below will be used for calibration
+   // read and write operations. 
+   parameter CALIB_ROW_ADD   = 16'h0000,// Calibration row address
+   parameter CALIB_COL_ADD   = 12'h000, // Calibration column address
+   parameter CALIB_BA_ADD    = 3'h0,    // Calibration bank address 
    parameter RANK_WIDTH      = 1,
    parameter RANKS           = 4,
    parameter ROW_WIDTH       = 16,       // DRAM address bus width
    parameter [7:0] SLOT_0_CONFIG = 8'b0000_0001,
    parameter [7:0] SLOT_1_CONFIG = 8'b0000_0000,
-   parameter SIM_INIT_OPTION = "SKIP_PU_DLY",
-   parameter SIM_CAL_OPTION  = "FAST_CAL",
+   parameter SIM_BYPASS_INIT_CAL = "OFF",
    parameter REFCLK_FREQ     = 300.0,
    parameter nDQS_COL0       = DQS_WIDTH,
    parameter nDQS_COL1       = 0,
@@ -169,6 +174,7 @@ module mem_intfc #
    use_addr, size, rst, row, rank, hi_priority, data_buf_addr, 
    col, cmd, clk_mem, clk, clk_rd_base, bank, wr_data, wr_data_mask, 
    pd_PSDONE, slot_0_present, slot_1_present, correct_en, raw_not_ecc,
+   fi_xor_we, fi_xor_wrdata,
    dbg_wr_dqs_tap_set, dbg_wr_dq_tap_set, dbg_wr_tap_set_en, 
    dbg_idel_up_all, dbg_idel_down_all, dbg_idel_up_cpt, dbg_idel_down_cpt, 
    dbg_idel_up_rsync, dbg_idel_down_rsync, 
@@ -221,6 +227,8 @@ module mem_intfc #
   input                  pd_PSDONE;              // To phy_top0 of phy_top.v
   input [RANK_WIDTH-1:0] rank;                   // To mc0 of mc.v
   input [3:0]            raw_not_ecc;
+  input [DQ_WIDTH/8-1:0] fi_xor_we;              // to mc0 of mc.v
+  input [DQ_WIDTH-1:0]   fi_xor_wrdata;          // to mc0 of mc.v
   input [ROW_WIDTH-1:0]  row;                    // To mc0 of mc.v
   input                  rst;                    // To mc0 of mc.v, ...
   input                  size;                   // To mc0 of mc.v
@@ -533,6 +541,7 @@ module mem_intfc #
     .DQS_WIDTH                          (DQS_WIDTH),
     .DQ_WIDTH                           (DQ_WIDTH),
     .ECC                                (ECC),
+    .ECC_TEST_FI_XOR                    (ECC_TEST_FI_XOR),
     .ECC_WIDTH                          (ECC_WIDTH),
     .nBANK_MACHS                        (nBANK_MACHS),
     .nCK_PER_CLK                        (nCK_PER_CLK),
@@ -622,6 +631,8 @@ module mem_intfc #
       .hi_priority          (hi_priority),
       .rank                 (rank[RANK_WIDTH-1:0]),
       .raw_not_ecc          (raw_not_ecc[3:0]),
+      .fi_xor_we            (fi_xor_we),
+      .fi_xor_wrdata        (fi_xor_wrdata),
       .row                  (row[ROW_WIDTH-1:0]),
       .rst                  (rst),
       .size                 (size),
@@ -648,6 +659,9 @@ module mem_intfc #
      .REFCLK_FREQ                       (REFCLK_FREQ),
      .nCS_PER_RANK                      (nCS_PER_RANK),
      .CAL_WIDTH                         (CAL_WIDTH),
+     .CALIB_ROW_ADD                     (CALIB_ROW_ADD),
+     .CALIB_COL_ADD                     (CALIB_COL_ADD),
+     .CALIB_BA_ADD                      (CALIB_BA_ADD),
      .CS_WIDTH                          (CS_WIDTH),
      .nCK_PER_CLK                       (nCK_PER_CLK),
      .CKE_WIDTH                         (CKE_WIDTH),
@@ -681,8 +695,12 @@ module mem_intfc #
      .PHASE_DETECT                      (PHASE_DETECT),
      .IODELAY_HP_MODE                   (IODELAY_HP_MODE),
      .IODELAY_GRP                       (IODELAY_GRP),
-     .SIM_INIT_OPTION                   (SIM_INIT_OPTION),
-     .SIM_CAL_OPTION                    (SIM_CAL_OPTION),
+     // Prevent the following simulation-related parameters from
+     // being overridden for synthesis - for synthesis only the
+     // default values of these parameters should be used
+     // synthesis translate_off
+     .SIM_BYPASS_INIT_CAL               (SIM_BYPASS_INIT_CAL),
+     // synthesis translate_on
      .nDQS_COL0                         (nDQS_COL0),
      .nDQS_COL1                         (nDQS_COL1),
      .nDQS_COL2                         (nDQS_COL2),

@@ -49,10 +49,10 @@
 //   ____  ____
 //  /   /\/   /
 // /___/  \  /    Vendor: Xilinx
-// \   \   \/     Version: 3.5
+// \   \   \/     Version: 3.9
 //  \   \         Application: MIG
 //  /   /         Filename: phy_dly_ctrl.v
-// /___/   /\     Date Last Modified: $Date: 2010/03/21 17:21:47 $
+// /___/   /\     Date Last Modified: $Date: 2011/06/02 07:18:02 $
 // \   \  /  \    Date Created: Mon Jun 30 2008
 //  \___\/\___\
 //
@@ -78,11 +78,11 @@
 //*****************************************************************************
 
 /******************************************************************************
-**$Id: phy_dly_ctrl.v,v 1.1.2.1 2010/03/21 17:21:47 jschmitz Exp $
-**$Date: 2010/03/21 17:21:47 $
-**$Author: jschmitz $
-**$Revision: 1.1.2.1 $
-**$Source: /devl/xcs/repo/env/Databases/ip/src2/M/mig_v3_5/data/dlib/virtex6/ddr3_sdram/verilog/rtl/phy/Attic/phy_dly_ctrl.v,v $
+**$Id: phy_dly_ctrl.v,v 1.1 2011/06/02 07:18:02 mishra Exp $
+**$Date: 2011/06/02 07:18:02 $
+**$Author: mishra $
+**$Revision: 1.1 $
+**$Source: /devl/xcs/repo/env/Databases/ip/src2/O/mig_v3_9/data/dlib/virtex6/ddr3_sdram/verilog/rtl/phy/phy_dly_ctrl.v,v $
 ******************************************************************************/
 
 `timescale 1ps/1ps
@@ -95,9 +95,10 @@ module phy_dly_ctrl #
    parameter DQS_WIDTH      = 8,      // # of DQS (strobe)
    parameter RANK_WIDTH     = 1,      // # of ranks of DRAM
    parameter nCWL           = 5,      // Write CAS latency (in clk cyc)
+   parameter REG_CTRL       = "OFF",  // "ON" for registered DIMM
    parameter WRLVL          = "ON",   // Enable write leveling
    parameter PHASE_DETECT   = "ON",   // Enable read phase detector
-   parameter DRAM_TYPE      = "DDR3",  // Memory I/F type: "DDR3", "DDR2"
+   parameter DRAM_TYPE      = "DDR3", // Memory I/F type: "DDR3", "DDR2"
    parameter nDQS_COL0      = 4,      // # DQS groups in I/O column #1
    parameter nDQS_COL1      = 4,      // # DQS groups in I/O column #2
    parameter nDQS_COL2      = 0,      // # DQS groups in I/O column #3
@@ -149,14 +150,6 @@ module phy_dly_ctrl #
    // Debug Port
    input                        dbg_pd_off
    );
-
-  // Ensure nonzero width for certain buses to prevent syntax errors
-  // during compile in the event they are not used (e.g. buses that have to
-  // do with column #2 in a single column design never get used, although
-  // those buses still will get declared)
-  localparam COL1_VECT_WIDTH = (nDQS_COL1 > 0) ? nDQS_COL1 : 1;
-  localparam COL2_VECT_WIDTH = (nDQS_COL2 > 0) ? nDQS_COL2 : 1;
-  localparam COL3_VECT_WIDTH = (nDQS_COL3 > 0) ? nDQS_COL3 : 1;
 
   reg [DQS_WIDTH-1:0]        dlyce_cpt_mux;
   reg [3:0]                  dlyce_rsync_mux;
@@ -243,25 +236,35 @@ module phy_dly_ctrl #
   generate
     for (r_i = 0; r_i < 4; r_i = r_i + 1) begin: gen_sync_rd_wr
       if (DRAM_TYPE == "DDR2") begin :  gen_cwl_ddr2
-         if(nCWL <= 3) begin: gen_cwl_ddr2_ls_4
-           // one less pipeline stage for cwl<= 3 
-           always @(posedge clk_rsync[r_i]) begin
-             rd_wr_rsync_tmp_r[r_i] <= #TCQ rd_wr_r;
-             rd_wr_rsync_r[r_i]     <= #TCQ rd_wr_rsync_tmp_r[r_i];      
-           end
-         end else begin  
-           always @(posedge clk_rsync[r_i]) begin:gen_cwl_ddr2_gt_3
-             rd_wr_rsync_tmp_r[r_i] <= #TCQ rd_wr_r;
-             rd_wr_rsync_tmp_r1[r_i] <= #TCQ rd_wr_rsync_tmp_r[r_i];
-             rd_wr_rsync_r[r_i]     <= #TCQ rd_wr_rsync_tmp_r1[r_i];     
-           end
-         end 
-      end else if (nCWL == 5) begin: gen_cwl_5_ddr3
+        if (nCWL <= 3) begin: gen_cwl_ddr2_ls_4
+          // one less pipeline stage for cwl<= 3 
+          always @(posedge clk_rsync[r_i]) begin
+            rd_wr_rsync_tmp_r[r_i] <= #TCQ rd_wr_r;
+            rd_wr_rsync_r[r_i]     <= #TCQ rd_wr_rsync_tmp_r[r_i];      
+          end
+        end else begin  
+          always @(posedge clk_rsync[r_i]) begin:gen_cwl_ddr2_gt_3
+            rd_wr_rsync_tmp_r[r_i] <= #TCQ rd_wr_r;
+            rd_wr_rsync_tmp_r1[r_i] <= #TCQ rd_wr_rsync_tmp_r[r_i];
+            rd_wr_rsync_r[r_i]     <= #TCQ rd_wr_rsync_tmp_r1[r_i];     
+          end
+        end 
+      end else if ((nCWL == 5) || 
+                   ((nCWL == 6) && (REG_CTRL == "ON"))) begin: gen_cwl_5_ddr3
         // For CWL = 5, bypass one of the pipeline registers for speed
         // purposes (need to load IODELAY value as soon as possible on write,
         // time between IOCONFIG_EN and OSERDES.WC assertion is shorter than
         // for all other CWL values. Rely on built in registers in IODELAY to
-        // reduce metastability? 
+        // reduce metastability?
+        // NOTE: 2nd case added where we consider the case of registered
+        //   DIMM and an nCWL value (as passed to this module) of 6 to be
+        //   the same case, because the actual CWL value = 5 (as programmed
+        //   in the DRAM - see module phy_top for CWL_M adjustment) and more
+        //   importantly, the controller (MC) treats the CWL as 5 for bus
+        //   turnaround purposes, and on a WRITE->READ, it the extra clock
+        //   cycle is needed to program the new value of the IODELAY before
+        //   the read data is captured. Note that we may want to apply this
+        //   case as well for DDR2 registered DIMMs as well
         always @(posedge clk_rsync[r_i])
           rd_wr_rsync_r[r_i] <= #TCQ rd_wr_r;
       end else begin: gen_cwl_gt_5_ddr3
@@ -346,6 +349,7 @@ module phy_dly_ctrl #
 
   generate
     genvar c0_i;
+    if (nDQS_COL0 > 0) begin: gen_c0    
     for (c0_i = 0; c0_i < nDQS_COL0; c0_i = c0_i + 1) begin: gen_loop_c0
 
       //*****************************************************************
@@ -395,6 +399,7 @@ module phy_dly_ctrl #
              
           dlyval_dq[5*(DQS_LOC_COL0[8*c0_i+:8])+:5]
             <= #TCQ dlyval_rdlvl_dq[5*(DQS_LOC_COL0[8*c0_i+:8])+:5];
+          end
         end
       end
     end

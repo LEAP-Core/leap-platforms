@@ -49,10 +49,10 @@
 //   ____  ____
 //  /   /\/   /
 // /___/  \  /    Vendor: Xilinx
-// \   \   \/     Version: 3.5
+// \   \   \/     Version: 3.9
 //  \   \         Application: MIG
 //  /   /         Filename: phy_rddata_sync.v
-// /___/   /\     Date Last Modified: $Date: 2010/03/21 17:21:47 $
+// /___/   /\     Date Last Modified: $Date: 2011/06/02 07:18:04 $
 // \   \  /  \    Date Created: Aug 03 2009
 //  \___\/\___\
 //
@@ -66,11 +66,11 @@
 //*****************************************************************************
 
 /******************************************************************************
-**$Id: phy_rddata_sync.v,v 1.1.2.1 2010/03/21 17:21:47 jschmitz Exp $
-**$Date: 2010/03/21 17:21:47 $
-**$Author: jschmitz $
-**$Revision: 1.1.2.1 $
-**$Source: /devl/xcs/repo/env/Databases/ip/src2/M/mig_v3_5/data/dlib/virtex6/ddr3_sdram/verilog/rtl/phy/Attic/phy_rddata_sync.v,v $
+**$Id: phy_rddata_sync.v,v 1.1 2011/06/02 07:18:04 mishra Exp $
+**$Date: 2011/06/02 07:18:04 $
+**$Author: mishra $
+**$Revision: 1.1 $
+**$Source: /devl/xcs/repo/env/Databases/ip/src2/O/mig_v3_9/data/dlib/virtex6/ddr3_sdram/verilog/rtl/phy/phy_rddata_sync.v,v $
 ******************************************************************************/
 
 `timescale 1ps/1ps
@@ -113,11 +113,12 @@ module phy_rddata_sync #
   // during compile in the event they are not used (e.g. buses that have to
   // do with column #2 in a single column design never get used, although
   // those buses still will get declared)
+  localparam COL0_VECT_WIDTH = (nDQS_COL0 > 0) ? nDQS_COL0 : 1;
   localparam COL1_VECT_WIDTH = (nDQS_COL1 > 0) ? nDQS_COL1 : 1;
   localparam COL2_VECT_WIDTH = (nDQS_COL2 > 0) ? nDQS_COL2 : 1;
   localparam COL3_VECT_WIDTH = (nDQS_COL3 > 0) ? nDQS_COL3 : 1;
 
-  reg [4*DRAM_WIDTH*nDQS_COL0-1:0]        data_c0;
+  reg [4*DRAM_WIDTH*COL0_VECT_WIDTH-1:0]  data_c0;
   reg [4*DRAM_WIDTH*COL1_VECT_WIDTH-1:0]  data_c1;
   reg [4*DRAM_WIDTH*COL2_VECT_WIDTH-1:0]  data_c2;
   reg [4*DRAM_WIDTH*COL3_VECT_WIDTH-1:0]  data_c3;
@@ -125,11 +126,11 @@ module phy_rddata_sync #
   reg [DQ_WIDTH-1:0]                      data_fall1_sync;
   reg [DQ_WIDTH-1:0]                      data_rise0_sync;
   reg [DQ_WIDTH-1:0]                      data_rise1_sync;
-  wire [4*DRAM_WIDTH*nDQS_COL0-1:0]       data_sync_c0;
+  wire [4*DRAM_WIDTH*COL0_VECT_WIDTH-1:0] data_sync_c0;
   wire [4*DRAM_WIDTH*COL1_VECT_WIDTH-1:0] data_sync_c1;
   wire [4*DRAM_WIDTH*COL2_VECT_WIDTH-1:0] data_sync_c2;
   wire [4*DRAM_WIDTH*COL3_VECT_WIDTH-1:0] data_sync_c3;
-  reg [4*nDQS_COL0-1:0]                   dqs_c0;
+  reg [4*COL0_VECT_WIDTH-1:0]             dqs_c0;
   reg [4*COL1_VECT_WIDTH-1:0]             dqs_c1;
   reg [4*COL2_VECT_WIDTH-1:0]             dqs_c2;
   reg [4*COL3_VECT_WIDTH-1:0]             dqs_c3;
@@ -137,7 +138,7 @@ module phy_rddata_sync #
   reg [DQS_WIDTH-1:0]                     dqs_fall1_sync;
   reg [DQS_WIDTH-1:0]                     dqs_rise0_sync;
   reg [DQS_WIDTH-1:0]                     dqs_rise1_sync;
-  wire [4*nDQS_COL0-1:0]                  dqs_sync_c0;
+  wire [4*COL0_VECT_WIDTH-1:0]            dqs_sync_c0;
   wire [4*COL1_VECT_WIDTH-1:0]            dqs_sync_c1;
   wire [4*COL2_VECT_WIDTH-1:0]            dqs_sync_c2;
   wire [4*COL3_VECT_WIDTH-1:0]            dqs_sync_c3;
@@ -163,6 +164,7 @@ module phy_rddata_sync #
 
   generate
     genvar c0_i;
+    if (nDQS_COL0 > 0) begin: gen_c0
     for (c0_i = 0; c0_i < nDQS_COL0; c0_i = c0_i + 1) begin: gen_loop_c0
       // Steer data to circular buffer - merge FALL/RISE data into single bus
       always @(rd_dqs_fall0 or rd_dqs_fall1 or
@@ -218,7 +220,6 @@ module phy_rddata_sync #
           = data_sync_c0[4*DRAM_WIDTH*c0_i+DRAM_WIDTH-1:4*DRAM_WIDTH*c0_i];
       end
     end
-  endgenerate
 
   circ_buffer #
     (
@@ -234,6 +235,8 @@ module phy_rddata_sync #
       .wdata ({dqs_c0,data_c0}),
       .rdata ({dqs_sync_c0,data_sync_c0})
     );
+    end
+  endgenerate
 
   generate
     genvar c1_i;

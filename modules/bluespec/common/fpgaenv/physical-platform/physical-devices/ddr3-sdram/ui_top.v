@@ -49,7 +49,7 @@
 //   ____  ____
 //  /   /\/   /
 // /___/  \  /    Vendor                : Xilinx
-// \   \   \/     Version               : 3.5
+// \   \   \/     Version               : 3.9
 //  \   \         Application           : MIG
 //  /   /         Filename              : ui_top.v
 // /___/   /\     Date Last Modified    : $date$
@@ -81,7 +81,8 @@ module ui_top #
    parameter ORDERING        = "NORM",
    parameter RANKS           = 4,
    parameter RANK_WIDTH      = 2,
-   parameter ROW_WIDTH       = 16
+   parameter ROW_WIDTH       = 16,
+   parameter MEM_ADDR_ORDER  = "BANK_ROW_COLUMN"
   )
   (/*AUTOARG*/
   // Outputs
@@ -193,7 +194,8 @@ module ui_top #
      .COL_WIDTH                         (COL_WIDTH),
      .RANK_WIDTH                        (RANK_WIDTH),
      .ROW_WIDTH                         (ROW_WIDTH),
-     .RANKS                             (RANKS))
+     .RANKS                             (RANKS),
+     .MEM_ADDR_ORDER                    (MEM_ADDR_ORDER))
     ui_cmd0
       (/*AUTOINST*/
        // Outputs
