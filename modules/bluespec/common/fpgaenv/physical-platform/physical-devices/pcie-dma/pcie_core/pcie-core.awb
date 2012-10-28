@@ -1,9 +1,0 @@
-%name Xilinx PCIe Core for ML605
-%desc Xilinx PCIe Core for ML605
-
-%provides pcie_core
-
-%sources -t VERILOG -v PRIVATE pcie_core.v
-%sources -t NGC     -v PRIVATE pcie_core.ngc
-
-

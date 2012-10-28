@@ -1,6 +1,6 @@
 
-%name PCI Express Physical Device (mmap-based)
-%desc PCI Express Physical Device (mmap-based)
+%name CSR/mmap-based PCIe Physical Device
+%desc CSR/mmap-based PCIe Physical Device
 
 %provides pci_express_device
 

@@ -14416,3 +14416,198 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci
 - Remove a few signals from debug info. in DDR3 driver.  Reading the wires
   every cycle caused DDR3 value errors or hangs.  This makes no sense since
   they are all output wires.  Strange.
+
+----------
+mcadler     Date: Sun Oct 28 11:24:06 EDT 2012  CSN: CSN-leap-platforms-636
+                  Sun Oct 28 15:24:06 UTC 2012
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices
+ pcie-dma/                 Locally Removed           635 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pcie-dma
+ BRAM64x512.v              Locally Removed           635 
+ Xilinx_SyncFIFOLevel_512x64.v Locally Removed           635 
+ dma_sgl_loader.v          Locally Removed           635 
+ BRAM64x512.ngc            Locally Removed           635 
+ Xilinx_SyncFIFOLevel_512x64.ngc Locally Removed           635 
+ pcie_dma_device.v         Locally Removed           635 
+ pcie_dma_app.v            Locally Removed           635 
+ pcie_core/                Locally Removed           635 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pcie-dma/pcie_core
+ pcie_core.v               Locally Removed           635 
+ pcie-core.awb             Locally Removed           635 
+ pcie_core.ngc             Locally Removed           635 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pcie-dma
+ pci-express-dma.awb       Locally Removed           635 
+ pcie_wrapper.bsv          Locally Removed           635 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices
+ pci-express-driver-header/ Locally Removed           635 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express-driver-header
+ pchnl_if.h                Locally Removed           635 
+ pchnl_if.awb              Locally Removed           635 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices
+ pci-express-bluenoc/      Locally Removed           635 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express-bluenoc
+ pcie-import.bsv           Locally Removed           635 
+ pcie_endpoint_old.v       Locally Removed           635 
+ PioFifo.bsv               Locally Removed           635 
+ pcie_bury.v               Locally Removed           635 
+ Bridge.bsv                Locally Removed           635 
+ pcie_endpoint.ngc         Locally Removed           635 
+ pcie-wrapper.bsv          Locally Removed           635 
+ server.cpp                Locally Removed           635 
+ LLVirtex5PCIE.bsv         Locally Removed           635 
+ pcie-device.ucf           Locally Removed           635 
+ endpoint_blk_plus_v1_14.v Locally Removed           635 
+ pcie-device.xcf           Locally Removed           635 
+ server.h                  Locally Removed           635 
+ pcie-device.cpp           Locally Removed           635 
+ pcie-device.h             Locally Removed           635 
+ old-pcie-device.ucf       Locally Removed           635 
+ pcie_endpoint.xco         Locally Removed           635 
+ pcie_bury.bsv             Locally Removed           635 
+ bluenoc-core/             Locally Removed           635 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express-bluenoc/bluenoc-core
+ pcie_reset_delay_v6.v     Locally Removed           635 
+ gtx_drp_chanalign_fix_3752_v6.v Locally Removed           635 
+ bluenoc-top.bsv           Locally Removed           635 
+ gtx_wrapper_v6.v          Locally Removed           635 
+ pcie_gtx_v6.v             Locally Removed           635 
+ pcie_bram_top_v6.v        Locally Removed           635 
+ pcie_brams_v6.v           Locally Removed           635 
+ pcie_endpoint.v           Locally Removed           635 
+ pcie_bury.v               Locally Removed           635 
+ bluenoc-core.awb          Locally Removed           635 
+ ByteBuffer.bsv            Locally Removed           635 
+ pcie_pipe_misc_v6.v       Locally Removed           635 
+ MsgFormat.bsv             Locally Removed           635 
+ v6_pcie_v1_6.v            Locally Removed           635 
+ xilinx_v6_pcie_wrapper.v  Locally Removed           635 
+ PCIEtoBNoCBridge.bsv      Locally Removed           635 
+ pcie_2_0_v6.v             Locally Removed           635 
+ pcie_bram_v6.v            Locally Removed           635 
+ gtx_tx_sync_rate_v6.v     Locally Removed           635 
+ ByteCompactor.bsv         Locally Removed           635 
+ pcie_clocking_v6.v        Locally Removed           635 
+ pcie_bury.bsv             Locally Removed           635 
+ pcie_pipe_lane_v6.v       Locally Removed           635 
+ pcie_upconfig_fix_3451_v6.v Locally Removed           635 
+ pcie_pipe_v6.v            Locally Removed           635 
+ gtx_rx_valid_filter_v6.v  Locally Removed           635 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express-bluenoc
+ pcie-bluenoc.awb          Locally Removed           635 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices
+ pci-express-new/          Locally Removed           635 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express-new
+ h2f_data_fifo.ngc         Locally Removed           635 
+ f2h_data_fifo.ngc         Locally Removed           635 
+ pcieblkplus.ngc           Locally Removed           635 
+ pci-express-device.bsv    Locally Removed           635 
+ csr_host_ctrl.vhd         Locally Removed           635 
+ csr_fpga_ctrl.vhd         Locally Removed           635 
+ csr_ctrl.vhd              Locally Removed           635 
+ rst_controller.vhd        Locally Removed           635 
+ pci-express-vhdl-import.bsv Locally Removed           635 
+ CSR_BRAM.ngc              Locally Removed           635 
+ pci-express-device-mmap.awb Locally Removed           635 
+ intr_controller.vhd       Locally Removed           635 
+ pci-express-c-import-mmap.cpp Locally Removed           635 
+ pcie_bar0.vhd             Locally Removed           635 
+ dma_ctrl.vhd              Locally Removed           635 
+ pci-express-c-import-mmap.h Locally Removed           635 
+ pcie_rx_wrapper.vhd       Locally Removed           635 
+ channel_top.vhd           Locally Removed           635 
+ pcie_tx_wrapper.vhd       Locally Removed           635 
+ channel_ctrl.vhd          Locally Removed           635 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices
+ pci-express-bluespec/     Locally Removed           635 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express-bluespec
+ pcie-import.bsv           Locally Removed           635 
+ pcie_endpoint.v           Locally Removed           635 
+ PioFifo.bsv               Locally Removed           635 
+ pcie_bury.v               Locally Removed           635 
+ Bridge.bsv                Locally Removed           635 
+ pcie_endpoint.ngc         Locally Removed           635 
+ pcie-wrapper.bsv          Locally Removed           635 
+ server.cpp                Locally Removed           635 
+ pcie-bluespec.awb         Locally Removed           635 
+ LLVirtex5PCIE.bsv         Locally Removed           635 
+ pcie-device.ucf           Locally Removed           635 
+ endpoint_blk_plus_v1_14.v Locally Removed           635 
+ pcie-device.xcf           Locally Removed           635 
+ server.h                  Locally Removed           635 
+ pcie-device.cpp           Locally Removed           635 
+ pcie-device.h             Locally Removed           635 
+ pcie_endpoint.xco         Locally Removed           635 
+ pcie_bury.bsv             Locally Removed           635 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices
+ pci-express-bluenoc4/     Locally Removed           635 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express-bluenoc4
+ pcie-import.bsv           Locally Removed           635 
+ pcie_endpoint_old.v       Locally Removed           635 
+ PioFifo.bsv               Locally Removed           635 
+ pcie_bury.v               Locally Removed           635 
+ Bridge.bsv                Locally Removed           635 
+ pcie_endpoint.ngc         Locally Removed           635 
+ pcie-wrapper.bsv          Locally Removed           635 
+ server.cpp                Locally Removed           635 
+ LLVirtex5PCIE.bsv         Locally Removed           635 
+ pcie-device.ucf           Locally Removed           635 
+ endpoint_blk_plus_v1_14.v Locally Removed           635 
+ pcie-device.xcf           Locally Removed           635 
+ server.h                  Locally Removed           635 
+ pcie-device.cpp           Locally Removed           635 
+ pcie-device.h             Locally Removed           635 
+ old-pcie-device.ucf       Locally Removed           635 
+ pcie_endpoint.xco         Locally Removed           635 
+ pcie_bury.bsv             Locally Removed           635 
+ bluenoc-core/             Locally Removed           635 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express-bluenoc4/bluenoc-core
+ pcie_reset_delay_v6.v     Locally Removed           635 
+ gtx_drp_chanalign_fix_3752_v6.v Locally Removed           635 
+ bluenoc-top.bsv           Locally Removed           635 
+ gtx_wrapper_v6.v          Locally Removed           635 
+ pcie_gtx_v6.v             Locally Removed           635 
+ pcie_bram_top_v6.v        Locally Removed           635 
+ pcie_brams_v6.v           Locally Removed           635 
+ pcie_endpoint.v           Locally Removed           635 
+ pcie_bury.v               Locally Removed           635 
+ bluenoc-core.awb          Locally Removed           635 
+ ByteBuffer.bsv            Locally Removed           635 
+ pcie_pipe_misc_v6.v       Locally Removed           635 
+ MsgFormat.bsv             Locally Removed           635 
+ v6_pcie_v1_6.v            Locally Removed           635 
+ xilinx_v6_pcie_wrapper.v  Locally Removed           635 
+ PCIEtoBNoCBridge.bsv      Locally Removed           635 
+ pcie_2_0_v6.v             Locally Removed           635 
+ pcie_bram_v6.v            Locally Removed           635 
+ gtx_tx_sync_rate_v6.v     Locally Removed           635 
+ ByteCompactor.bsv         Locally Removed           635 
+ pcie_clocking_v6.v        Locally Removed           635 
+ pcie_bury.bsv             Locally Removed           635 
+ pcie_pipe_lane_v6.v       Locally Removed           635 
+ pcie_upconfig_fix_3451_v6.v Locally Removed           635 
+ pcie_pipe_v6.v            Locally Removed           635 
+ gtx_rx_valid_filter_v6.v  Locally Removed           635 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express-bluenoc4
+ pcie-bluenoc.awb          Locally Removed           635 
+
+- Remove old code
+- Move all PCIe drivers into one tree.
