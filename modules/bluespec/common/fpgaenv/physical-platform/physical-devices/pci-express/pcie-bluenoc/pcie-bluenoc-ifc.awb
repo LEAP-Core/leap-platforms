@@ -1,0 +1,9 @@
+%name BlueNoC PCIe Bridge Interfaces
+%desc BlueNoC PCIe Bridge Interfaces
+
+%provides pcie_bluenoc_ifc
+
+%public pcie-bluenoc-ifc.bsv
+
+%param PCIE_BYTES_PER_BEAT   8     "BlueNoC bytes per beat"
+%param PCIE_LANES            8     "PCIe lanes"

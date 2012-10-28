@@ -1,26 +1,26 @@
-
-%name ML605 V6 platform with PCIe DMA only
-%desc ML605 V6 platform with PCIe DMA only
+%name ML605 Virtex-6 Platform with PCIe
+%desc ML605 Virtex-6 Platform with PCIe
 
 %provides physical_platform
 
 %requires clocks_device
-%requires physical_platform_utils
 %requires pcie_device
+%requires ddr2_device
+%requires physical_platform_utils
 
 %sources -t BSV -v PUBLIC  ml605-v6-pcie-dma.bsv
-%sources -t H   -v PUBLIC  ml605-v6-pcie-dma.h
 %sources -t CPP -v PRIVATE ml605-v6-pcie-dma.cpp
+%sources -t H   -v PUBLIC  ml605-v6-pcie-dma.h
 %sources -t UCF -v PRIVATE ml605-v6-pcie-dma.ucf
-%sources -t XCF -v PRIVATE ml605-v6-pcie-dma.xcf
 
 %sources -t UT  -v PRIVATE xilinx.ut
-%sources -t XST -v PRIVATE ml605-v6-pcie-dma.xst
-%sources -t SDC -v PRIVATE ml605-v6-pcie-dma.sdc
+%sources -t XST -v PRIVATE xilinx.xst
+%sources -t SDC -v PRIVATE xilinx.sdc
 %sources -t SDF -v PRIVATE xilinx.sdf
 
 %param --global MAKE_ALL_TARGET      "bit"       "Target of 'make all'.  Most likely bit, exe or vexe."
 
+%param FPGA_PLATFORM      "ML605"              "FPGA Platform"
 %param FPGA_PART_XILINX   "xc6vlx240tff1156-1" "FPGA Part ID"
 %param FPGA_POSITION      2                    "FPGA Position (in Xilinx iMPACT)"
 %param MAP_OPTIONS        "-global_opt speed"  "Extra Xilinx Map Options"

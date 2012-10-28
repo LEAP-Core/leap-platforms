@@ -67,4 +67,4 @@
 
 
 %param DRAM_MAX_OUTSTANDING_READS  8 "Maximum in-flight read requests"
-%param DRAM_DEBUG                  0 "Non-zero enables debugging methods"
+%param --global DRAM_DEBUG         0 "Non-zero enables debugging methods"

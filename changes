@@ -14282,3 +14282,137 @@ Some fixes to the ddr3 controller for the ml605.
 
 The memory controller now passes the debugger test. 
 
+
+----------
+mcadler     Date: Sun Oct 28 09:49:30 EDT 2012  CSN: CSN-leap-platforms-635
+                  Sun Oct 28 13:49:30 UTC 2012
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ differential-import-virtex6.bsv Locally Modified          634 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/ml605/pcie-dma
+ ml605-v6-pcie-dma.h       Locally Modified          634 
+ ml605-v6-pcie-dma.awb     Locally Modified          634 
+ ml605-v6-pcie-dma.sdc     Locally Removed           634 
+ ml605-v6-pcie-dma.bsv     Locally Modified          634 
+ xilinx.sdc                Locally Added               - 
+ ml605-v6-pcie-dma.ucf     Locally Modified          634 
+ ml605-v6-pcie-dma.xst     Locally Removed           634 
+ ml605-v6-pcie-dma.xcf     Locally Removed           634 
+ xilinx.xst                Locally Added               - 
+ ml605-v6-pcie-dma.cpp     Locally Modified          634 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/ml605
+ pcie-bluenoc/             Locally Removed           634 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/ml605/pcie-bluenoc
+ xilinx-xup-pcie.ucf       Locally Removed           634 
+ xilinx.ut                 Locally Removed           634 
+ xilinx.sdc                Locally Removed           634 
+ xilinx-xup-pcie.cpp       Locally Removed           634 
+ xilinx.sdf                Locally Removed           634 
+ xilinx.xst                Locally Removed           634 
+ xilinx-xup-pcie.h         Locally Removed           634 
+ old.ucf                   Locally Removed           634 
+ xilinx-xup-pcie.awb       Locally Removed           634 
+ xilinx-xup-pcie.bsv       Locally Removed           634 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr3-sdram
+ ddr3-sdram-device.awb     Locally Modified          634 
+ ddr3-sdram-verilog-import.bsv Locally Modified          634 
+ ddr3-sdram-device.bsv     Locally Modified          634 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express
+ pci-express-device-ioctl.awb Locally Removed           634 
+ f2h_data_fifo.ngc         Locally Removed           634 
+ h2f_data_fifo.ngc         Locally Removed           634 
+ libpchnl.h                Locally Removed           634 
+ pcieblkplus.ngc           Locally Removed           634 
+ pci-express-c-import-ioctl.cpp Locally Removed           634 
+ DMA_CONTROLLER.vhd        Locally Removed           634 
+ pci-express-device.bsv    Locally Removed           634 
+ channel.vhd               Locally Removed           634 
+ pci-express-c-import-ioctl.h Locally Removed           634 
+ RST_CONTROLLER.vhd        Locally Removed           634 
+ pci-express-vhdl-import.bsv Locally Removed           634 
+ CSR_BRAM.ngc              Locally Removed           634 
+ PCIE_RX_ENGINE.vhd        Locally Removed           634 
+ pci-express-device-mmap.awb Locally Removed           634 
+ INTR_CONTROLLER.vhd       Locally Removed           634 
+ PCIE_TX_ENGINE.vhd        Locally Removed           634 
+ pci-express-c-import-mmap.cpp Locally Removed           634 
+ PCIE_BAR0.vhd             Locally Removed           634 
+ pcie-bluenoc/             Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc
+ pcie-bluenoc.bsh          Locally Added               0 
+ pcie-bury.v               Locally Added               0 
+ pcie-bluenoc-tests.cpp    Locally Added               0 
+ pcie-bluenoc.cpp          Locally Added               0 
+ bluenoc-simple-switch.bsv Locally Added               0 
+ pcie-bury.bsv             Locally Added               0 
+ pcie-bluenoc.h            Locally Added               0 
+ pcie-bluenoc-tests.h      Locally Added               0 
+ pcie-bluenoc-ifc.awb      Locally Added               0 
+ pcie-bluenoc.awb          Locally Added               0 
+ pcie-bluenoc-ifc.bsv      Locally Added               0 
+ bluenoc.h                 Locally Added               0 
+ pcie-bluenoc.bsv          Locally Added               0 
+ pcie-bluenoc-tests.bsv    Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express
+ pci-express-c-import-mmap.h Locally Removed           634 
+ Channel_top.vhd           Locally Removed           634 
+ CSR_CONTROLLER.vhd        Locally Removed           634 
+ pcie-bluenoc-virtex6/     Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc-virtex6
+ pcie_reset_delay_v6.v     Locally Added               0 
+ bluenoc-top.bsv           Locally Added               0 
+ gtx_drp_chanalign_fix_3752_v6.v Locally Added               0 
+ pcie_gtx_v6.v             Locally Added               0 
+ gtx_wrapper_v6.v          Locally Added               0 
+ pcie_bram_top_v6.v        Locally Added               0 
+ pcie_brams_v6.v           Locally Added               0 
+ pcie_pipe_misc_v6.v       Locally Added               0 
+ xilinx_v6_pcie_wrapper.v  Locally Added               0 
+ pcie-virtex6.awb          Locally Added               0 
+ pcie_2_0_v6.v             Locally Added               0 
+ pcie_bram_v6.v            Locally Added               0 
+ pcie-virtex6.ucf          Locally Added               0 
+ pcie-endpoint.v           Locally Added               0 
+ gtx_tx_sync_rate_v6.v     Locally Added               0 
+ pcie-virtex6.xcf          Locally Added               0 
+ pcie_clocking_v6.v        Locally Added               0 
+ pcie_pipe_lane_v6.v       Locally Added               0 
+ pcie_upconfig_fix_3451_v6.v Locally Added               0 
+ pcie_pipe_v6.v            Locally Added               0 
+ gtx_rx_valid_filter_v6.v  Locally Added               0 
+ pcie-virtex6.bsv          Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express
+ libpchnl.c                Locally Removed           634 
+
+- New BlueNoC implementation hierarchy:
+
+  - PCIe driver is a generic BlueNoC wrapper layer.  It requires a PCIe
+    device layer (e.g. Xilinx Virtex-6).  This should make it possible to
+    share almost all code with a Virtex-7 version.  The driver exposes
+    a network port to the rest of the design along with the port's clock
+    and a reset signal that can be triggered from software.
+
+  - The generic PCIe driver instantiates a simple switch at the base of the
+    hierarchy.  Network destinations 1-3 are debugging ports.  Destination
+    1 is passed to the PCIe driver and currently tied off.  Destination 2
+    is a sink and 3 is a flooder.  These are used by integrity / bandwidth
+    test code when --pcie-tests is set on the run-time command line.
+    Destinations 4 and above are passed out of the driver.
+
+- Remove obsolete BlueNoC code.
+
+- Fix scheduler warnings in DDR3 driver (missing BVI CF declarations).
+
+- Remove a few signals from debug info. in DDR3 driver.  Reading the wires
+  every cycle caused DDR3 value errors or hangs.  This makes no sense since
+  they are all output wires.  Strange.

@@ -1,0 +1,21 @@
+%name BlueNoC PCIe Bridge
+%desc BlueNoC PCIe Bridge
+
+%provides pcie_device
+
+%requires pcie_bluenoc_ifc
+%requires pcie_bluenoc_device
+
+%public pcie-bluenoc.bsv
+%public pcie-bluenoc.bsh
+%public pcie-bluenoc.cpp
+%public pcie-bluenoc.h
+
+%public bluenoc-simple-switch.bsv
+%public pcie-bluenoc-tests.bsv
+%public pcie-bluenoc-tests.cpp
+%public pcie-bluenoc-tests.h
+%public bluenoc.h
+
+%public pcie-bury.bsv
+%private pcie-bury.v

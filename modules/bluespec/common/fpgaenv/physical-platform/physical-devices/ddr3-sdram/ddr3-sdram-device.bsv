@@ -235,8 +235,7 @@ module mkDDR3Device#(Clock rawClock200, Reset rawReset200)
     
     ReadOnly#(Bit#(1)) initDone  <- mkNullCrossingWire(modelClock, pack(dramController.init_done()), clocked_by controllerClock, reset_by controllerReset);
     ReadOnly#(Bit#(1)) cmdRdy  <- mkNullCrossingWire(modelClock, pack(dramController.cmd_rdy()), clocked_by controllerClock, reset_by controllerReset);
-    ReadOnly#(Bit#(1)) enqRdy  <- mkNullCrossingWire(modelClock, pack(dramController.enq_rdy()), clocked_by controllerClock, reset_by controllerReset)
-; 
+    ReadOnly#(Bit#(1)) enqRdy  <- mkNullCrossingWire(modelClock, pack(dramController.enq_rdy()), clocked_by controllerClock, reset_by controllerReset); 
     ReadOnly#(Bit#(1)) deqRdy  <- mkNullCrossingWire(modelClock, pack(dramController.deq_rdy()), clocked_by controllerClock, reset_by controllerReset);
     ReadOnly#(Bool) resetAssertedCast <- isResetAsserted(clocked_by controllerClock, reset_by controllerReset);
     ReadOnly#(Bit#(1)) resetAsserted  <- mkNullCrossingWire(modelClock, pack(resetAssertedCast._read()), clocked_by controllerClock, reset_by controllerReset);
@@ -480,8 +479,14 @@ module mkDDR3Device#(Clock rawClock200, Reset rawReset200)
 
     Reg#(Bit#(64)) statusReg <- mkRegU;
 
+    (* fire_when_enabled, no_implicit_conditions *)
     rule assignStatus;
-        statusReg <= zeroExtend({pack(syncWriteDataQ.notFull()),1'b0,1'b0,resetAsserted,1'b0,pack(syncReadDataQ.notEmpty()),1'b0,1'b0,pack(mergeReqQ.notEmpty()),deqRdy,enqRdy,cmdRdy,initDone});
+        // Attempting to read deqRdy, enqRdy, or cmdRdy appears to cause hangs or incorrect values in the memory.
+        // This doesn't make much sense, given that they are output signals.  Something else may be wrong.  For
+        // now we simply won't read them.
+        statusReg <= zeroExtend({pack(syncWriteDataQ.notFull()),1'b0,1'b0,resetAsserted,1'b0,pack(syncReadDataQ.notEmpty()),1'b0,1'b0,pack(mergeReqQ.notEmpty()),
+                                 3'b0, // Replaces "deqRdy,enqRdy,cmdRdy" that were causing hangs
+                                 initDone});
     endrule
 
 

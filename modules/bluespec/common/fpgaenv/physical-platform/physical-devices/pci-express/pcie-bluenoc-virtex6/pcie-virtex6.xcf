@@ -1,0 +1,20 @@
+BEGIN MODEL "mk_model_Wrapper"
+    NET "m_llpi_phys_plat_pcie_sysClkBuf_O" keep = true;
+    NET "m_llpi_phys_plat_pcie_sysClkBuf_O" S = true;
+    NET "m_llpi_phys_plat_pcie_dev_ep_pcie_ep_pci_exp_txp" keep = true;
+    NET "m_llpi_phys_plat_pcie_dev_ep_pcie_ep_pci_exp_txp" S = true;
+    NET "m_llpi_phys_plat_pcie_dev_ep_pcie_ep_pci_exp_txp" s = true;
+    NET "m_llpi_phys_plat_pcie_dev_ep_pcie_ep_pci_exp_txn" keep = true;
+    NET "m_llpi_phys_plat_pcie_dev_ep_pcie_ep_pci_exp_txn" S = true;
+    NET "m_llpi_phys_plat_pcie_dev_ep_pcie_ep_pci_exp_txn" s = true;
+    NET "m_llpi_phys_plat_pcie_dev_ep_pcie_ep_pci_exp_rxp" keep = true;
+    NET "m_llpi_phys_plat_pcie_dev_ep_pcie_ep_pci_exp_rxp" S = true;
+    NET "m_llpi_phys_plat_pcie_dev_ep_pcie_ep_pci_exp_rxp" s = true;
+    NET "m_llpi_phys_plat_pcie_dev_ep_pcie_ep_pci_exp_rxn" keep = true;
+    NET "m_llpi_phys_plat_pcie_dev_ep_pcie_ep_pci_exp_rxn" S = true;
+    NET "m_llpi_phys_plat_pcie_dev_ep_pcie_ep_pci_exp_rxn" s = true;
+
+    NET "CLK_pcieWires_clockPCIE" keep = true;
+    NET "CLK_pcieWires_clockPCIE" S = true;
+    NET "CLK_pcieWires_clockPCIE" s = true;
+END;

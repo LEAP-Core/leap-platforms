@@ -87,10 +87,12 @@ module mkXilinxDRAMController#(Clock bsv_clk200,
     ifc_inout                   ddr3_dqs_p(ddr3_dqs_p);
     ifc_inout                   ddr3_dqs_n(ddr3_dqs_n);
    
-    schedule (ddr3_ck_p, ddr3_ck_n, ddr3_addr, ddr3_ba, ddr3_ras_n, ddr3_cas_n, ddr3_we_n, ddr3_cs_n, ddr3_odt, ddr3_cke, ddr3_dm) CF
-             (ddr3_ck_p, ddr3_ck_n, ddr3_addr, ddr3_ba, ddr3_ras_n, ddr3_cas_n, ddr3_we_n, ddr3_cs_n, ddr3_odt, ddr3_cke, ddr3_dm);
+    schedule (ddr3_ck_p, ddr3_ck_n, ddr3_addr, ddr3_ba, ddr3_ras_n, ddr3_cas_n, ddr3_we_n, ddr3_cs_n, ddr3_odt, ddr3_cke, ddr3_dm, ddr3_reset_n) CF
+             (ddr3_ck_p, ddr3_ck_n, ddr3_addr, ddr3_ba, ddr3_ras_n, ddr3_cas_n, ddr3_we_n, ddr3_cs_n, ddr3_odt, ddr3_cke, ddr3_dm, ddr3_reset_n);
    
-    schedule (init_done, enqueue_address, enqueue_data, dequeue_data) CF (init_done);
+    schedule (init_done, enqueue_address, enqueue_data, dequeue_data, cmd_rdy, enq_rdy, deq_rdy) CF (init_done);
+    schedule (cmd_rdy, enq_rdy, deq_rdy) CF (dequeue_data);
+    schedule (cmd_rdy, enq_rdy, deq_rdy) CF (cmd_rdy, enq_rdy, deq_rdy, enqueue_address, enqueue_data);
    
     schedule (enqueue_address) SB (enqueue_data);
     schedule (enqueue_address) SBR  (enqueue_address);

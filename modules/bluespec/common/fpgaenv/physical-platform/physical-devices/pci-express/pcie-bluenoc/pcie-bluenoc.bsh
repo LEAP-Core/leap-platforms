@@ -1,0 +1,4 @@
+//
+// Include interfaces with main package.
+//
+`include "awb/provides/pcie_bluenoc_ifc.bsh"

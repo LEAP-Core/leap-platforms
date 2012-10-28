@@ -1,38 +1,30 @@
-/*****************************************************************************
- *
- * @file ml605-v6-pcie-dma.bsv
- * @brief physical platform with pcie dma device only
- *
- * @author rfadeev
- * @mailto roman.fadeev@intel.com
- *
- * Copyright (C) 2011 Intel Corporation
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- *
- *****************************************************************************/
+//
+// Copyright (C) 2012 Intel Corporation
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
 
-
-// ****** Bluespec imports ******
-
+import FIFO::*;
+import Vector::*;
 import Clocks::*;
 
-// ****** Project imports ******
+// The Physical Platform for the ML605 Virtex 6 with PCIE
 
-`include "clocks_device.bsh"
 `include "pcie_device.bsh"
+`include "clocks_device.bsh"
+`include "ddr2_device.bsh"
 `include "physical_platform_utils.bsh"
 
 // PHYSICAL_DRIVERS
@@ -42,11 +34,9 @@ import Clocks::*;
 // We use other modules to actually do the work.
 
 interface PHYSICAL_DRIVERS;
-
-    interface CLOCKS_DRIVER                     clocksDriver;
-    interface PCIE_DRIVER                       pcieDriver;
-    interface PCIE_CLK_DEV			pcieClkDriver;
-
+    interface CLOCKS_DRIVER                        clocksDriver;
+    interface PCIE_DRIVER                          pcieDriver;
+    interface Vector#(FPGA_DDR_BANKS, DDR2_DRIVER) ddr2Driver;
 endinterface
 
 // TOP_LEVEL_WIRES
@@ -57,12 +47,11 @@ endinterface
 // These wires are defined in the individual devices.
 
 interface TOP_LEVEL_WIRES;
-
+    // wires from devices
     (* prefix = "" *)
-    interface CLOCKS_WIRES                      clocksWires;
-    (* prefix = "" *)
-    interface PCIE_EXP#(8)                      pcieWires;
-
+    interface CLOCKS_WIRES                        clocksWires;
+    interface PCIE_WIRES                          pcieWires;
+    interface DDR2_WIRES                          ddr2Wires;
 endinterface
 
 // PHYSICAL_PLATFORM
@@ -70,10 +59,8 @@ endinterface
 // The platform is the aggregation of wires and drivers.
 
 interface PHYSICAL_PLATFORM;
-
-    interface PHYSICAL_DRIVERS                  physicalDrivers;
-    interface TOP_LEVEL_WIRES                   topLevelWires;
-
+    interface PHYSICAL_DRIVERS physicalDrivers;
+    interface TOP_LEVEL_WIRES  topLevelWires;
 endinterface
 
 // mkPhysicalPlatform
@@ -82,39 +69,54 @@ endinterface
 // and an aggregation of all the wires.
 
 module mkPhysicalPlatform
-       //interface:
-                    (PHYSICAL_PLATFORM);
-
+    //interface: 
+    (PHYSICAL_PLATFORM);
+    
     // The Platform is instantiated inside a NULL clock domain. Our first course of
     // action should be to instantiate the Clocks Physical Device and obtain interfaces
     // to clock and reset the other devices with.
-
+    
     CLOCKS_DEVICE clocks_device <- mkClocksDevice();
-
+    
     Clock clk = clocks_device.driver.clock;
     Reset rst = clocks_device.driver.reset;
 
-    // Finally, instantiate all other physical devices
+    // There is a strong assumption that the clock for this module is the 200MHz
+    // differential clock.
+    DDR2_DEVICE ddr3_device <- mkDDR3Device(clocks_device.driver.rawClock,
+                                            clocks_device.driver.rawReset, 
+                                            clocked_by clocks_device.driver.clock,
+                                            reset_by clocks_device.driver.reset);
 
-    PCIE_Controller pcie_device <- mkPCIEWrapper(clocks_device.softResetTrigger, clk, rst);
+    // Next, create the physical device that can trigger a soft reset. Pass along the
+    // interface to the trigger module that the clocks device has given us.
 
+    PCIE_DEVICE pcie <- mkPCIEDevice(clocks_device.driver.clock,
+                                     clocks_device.driver.reset);
+
+    //
     // Aggregate the drivers
-
+    //
     interface PHYSICAL_DRIVERS physicalDrivers;
+        interface CLOCKS_DRIVER clocksDriver;
+            interface Clock clock = clocks_device.driver.clock;
+            interface Reset reset = clocks_device.driver.reset;
 
-        interface clocksDriver    = clocks_device.driver;
-        interface pcieDriver      = pcie_device.pcie_driver;
-	interface pcieClkDriver	  = pcie_device.pcie_clk_device;
+            interface Clock rawClock = clocks_device.driver.rawClock;
+            interface Reset rawReset = clocks_device.driver.rawReset;
+        endinterface //= clocks_device.driver;
 
+        interface pcieDriver = pcie.driver;
+        interface ddr2Driver = ddr3_device.driver;
     endinterface
-
+    
+    //
     // Aggregate the wires
-
+    //
     interface TOP_LEVEL_WIRES topLevelWires;
-
-        interface clocksWires     = clocks_device.wires;
-        interface pcieWires       = pcie_device.pcie_pins;
-
+        interface clocksWires = clocks_device.wires;
+        interface pcieWires   = pcie.wires;
+        interface ddr2Wires   = ddr3_device.wires;
     endinterface
-
+               
 endmodule
