@@ -479,6 +479,7 @@ module mkDDR3Device#(Clock rawClock200, Reset rawReset200)
 
     Reg#(Bit#(64)) statusReg <- mkRegU;
 
+`ifndef DRAM_DEBUG_Z
     (* fire_when_enabled, no_implicit_conditions *)
     rule assignStatus;
         // Attempting to read deqRdy, enqRdy, or cmdRdy appears to cause hangs or incorrect values in the memory.
@@ -488,6 +489,7 @@ module mkDDR3Device#(Clock rawClock200, Reset rawReset200)
                                  3'b0, // Replaces "deqRdy,enqRdy,cmdRdy" that were causing hangs
                                  initDone});
     endrule
+`endif
 
 
 `ifndef DRAM_DEBUG_Z

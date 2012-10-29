@@ -35,19 +35,20 @@ import XilinxPCIE::*;
 `include "awb/provides/pcie_bluenoc_device.bsh"
 
 
-module mkPCIEBlueNoCDevice#(Clock sysClkBuf, Reset pciSysRstN)
+//
+// mkPCIEBlueNoCDevice --
+//   Instantiate the PCIe device-specific driver.  The incoming pcieSysClkBuf
+//   is the PCIe source clock.
+//
+module mkPCIEBlueNoCDevice#(Clock pcieSysClkBuf, Reset pcieSysRstN)
     // Interface:
     (BNOC_PCIE_DEV#(n_BPB));
-
-    // access clock and reset
-    Clock fpga_clk  <- exposeCurrentClock();
-    Reset fpga_rst  <- exposeCurrentReset();
 
     // Instantiate a PCIE endpoint
     PCIEParams pcie_params = defaultValue();
     PCIExpressV6#(8) ep <- mkPCIExpressEndpointV6(pcie_params,
-                                                  clocked_by sysClkBuf,
-                                                  reset_by pciSysRstN);
+                                                  clocked_by pcieSysClkBuf,
+                                                  reset_by pcieSysRstN);
 
     // Extract the clocks and resets from the endpoint.
     Clock epClock250  = ep.trn.clk;

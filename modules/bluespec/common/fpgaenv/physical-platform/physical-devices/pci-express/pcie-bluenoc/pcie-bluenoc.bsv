@@ -67,21 +67,22 @@ module mkPCIEDevice#(Clock rawClock, Reset rawReset)
     // Interface:
     (PCIE_DEVICE);
 
+    // PCIe is driven by a different clock than the raw clock.
     CLOCK_IMPORTER pcieClockN <- mkClockImporter();
     CLOCK_IMPORTER pcieClockP <- mkClockImporter();
     
     // Buffer clocks and reset before they are used
-    Clock sysClkBuf <- mkClockIBUFDS_GTXE1(True, pcieClockP.clock, pcieClockN.clock);
-    RESET_IMPORTER pcieReset <- mkResetImporter(clocked_by sysClkBuf);  
+    Clock pcieSysClkBuf <- mkClockIBUFDS_GTXE1(True, pcieClockP.clock, pcieClockN.clock);
+    RESET_IMPORTER pcieReset <- mkResetImporter(clocked_by pcieSysClkBuf);  
 
     // Instantiate a PCIe endpoint
     BNOC_PCIE_DEV#(PCIE_BYTES_PER_BEAT) dev <-
-        mkPCIEBlueNoCDevice(sysClkBuf, pcieReset.reset,
+        mkPCIEBlueNoCDevice(pcieSysClkBuf, pcieReset.reset,
                             clocked_by rawClock,
                             reset_by rawReset);
 
     // Connect PCIe transmit and receive wires, not handled in Bluespec
-    PCIE_BURY pcieBury <- mkPCIE_BURY(clocked_by sysClkBuf,
+    PCIE_BURY pcieBury <- mkPCIE_BURY(clocked_by pcieSysClkBuf,
                                       reset_by pcieReset.reset);
 
     (* fire_when_enabled, no_implicit_conditions *) 

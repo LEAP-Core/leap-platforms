@@ -5,9 +5,7 @@
 ######################################################################################################
 # PIN ASSIGNMENTS
 ######################################################################################################
-INST   "*sysClkBuf"                                      DIFF_TERM = "TRUE";
-#NET "*sysClkBuf_O" PERIOD = 10ns;
-
+INST   "*pcieSysClkBuf"                                      DIFF_TERM = "TRUE";
 
 NET    "pcieWires_leds[7]"                                       LOC = AD24 | IOSTANDARD = LVCMOS25 ;
 NET    "pcieWires_leds[6]"                                       LOC = AE24 | IOSTANDARD = LVCMOS25 ;
@@ -29,22 +27,32 @@ NET    "EN_pcieWires_pcie_clk_n"                                 LOC = P5;
 ######################################################################################################
 # CLOCK CONSTRAINTS
 ######################################################################################################
-NET    "EN_pcieWires_pcie_clk_p" TNM_NET = pci_sys_clk_p;
-TIMESPEC TS_pci_sys_clk_p = PERIOD pci_sys_clk_p 100 MHz HIGH 50%;
+NET    "EN_pcieWires_pcie_clk_p" TNM_NET = TG_pci_sys_clk_p;
+TIMESPEC TS_pci_sys_clk_p = PERIOD TG_pci_sys_clk_p 100 MHz HIGH 50%;
 
-NET    "*ep/ep/pcie_clocking_i/clk_250" TNM_NET = trn_clk_250;
-#NET "*ep_pcie_ep/trn_clk" TNM_NET = trn_clk_250;
-TIMESPEC TS_trn_clk_250 = PERIOD trn_clk_250 TS_pci_sys_clk_p*2.5 HIGH 50 % PRIORITY 1;
+NET    "*ep/ep/pcie_clocking_i/clk_250" TNM_NET = TG_trn_clk_250;
+TIMESPEC TS_trn_clk_250 = PERIOD TG_trn_clk_250 TS_pci_sys_clk_p*2.5 HIGH 50 % PRIORITY 1;
 
-NET    "*ep/ep/pcie_clocking_i/clk_125" TNM_NET = trn_clk_125;
-#NET "*ep_pcie_ep/trn2_clk" TNM_NET = trn_clk_125;
-TIMESPEC TS_trn_clk_125 = PERIOD trn_clk_125 TS_pci_sys_clk_p*1.25 HIGH 50 % PRIORITY 100;
+NET    "*ep/ep/pcie_clocking_i/clk_125" TNM_NET = TG_trn_clk_125;
+TIMESPEC TS_trn_clk_125 = PERIOD TG_trn_clk_125 TS_pci_sys_clk_p*1.25 HIGH 50 % PRIORITY 100;
 
 PIN    "*ep/ep/trn_reset_n_int_i.CLR"                   TIG;
 PIN    "*ep/ep/trn_reset_n_i.CLR"                       TIG;
 PIN    "*ep/ep/pcie_clocking_i/mmcm_adv_i.RST"          TIG;
+#TIMESPEC "TS_RESETN" = FROM FFS(*) TO FFS(trn_reset_n_i) 8 ns;
 
-TIMESPEC "TS_RESETN" = FROM FFS(*) TO FFS(trn_reset_n_i) 8 ns;
+
+INST   "*pcie_dev_fifoRxData_elem*"                     TNM=TG_trn_clk_125;
+INST   "*pcie_dev_fifoRxData_block*"                    TNM=TG_trn_clk_250;
+
+INST   "*pcie_dev_fifoTxData_elem*"                     TNM=TG_trn_clk_250;
+INST   "*pcie_dev_fifoTxData_block*"                    TNM=TG_trn_clk_125;
+
+# These are set conservatively at 250 MHz.  Could probably be 125 MHz but
+# timing is easy to meet.  Without them, the null crossing registers in
+# the gearbox appear to have a 0 time requirement.
+TIMESPEC TS_trn_clk_125_to_250=FROM TG_trn_clk_125 TO TG_trn_clk_250 4ns DATAPATHONLY;
+TIMESPEC TS_trn_clk_250_to_125=FROM TG_trn_clk_250 TO TG_trn_clk_125 4ns DATAPATHONLY;
 
 
 ######################################################################################################

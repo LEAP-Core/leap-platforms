@@ -20,7 +20,7 @@
 %sources -t BSV -v PUBLIC  clock-import.bsv
 %sources -t VERILOG -v PRIVATE clock_import.v
 
-%sources -t BSV -v PUBLIC  differential-import-virtex6.bsv
+%sources -t BSV -v PUBLIC  differential-clock-import.bsv
 
 %sources -t BSV -v PUBLIC  reset-import.bsv
 %sources -t VERILOG -v PRIVATE reset_import.v
@@ -59,6 +59,4 @@
 
 %param SYNTH 1            "Synthesize it to FPGAs"
 %param BROKEN_REGFILE 1   "0 if RegFile synthesizes correctly.  Nonzero for Xilinx Xst < version 11."
-%param XILINX_FAMILY "virtex5"  "Xilinx parameter describing the fpga architecture"
-
-
+%param XILINX_FAMILY "virtex6"  "Xilinx parameter describing the fpga architecture"

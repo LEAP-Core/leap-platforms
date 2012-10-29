@@ -16,13 +16,21 @@
 
 CONFIG PART = XC6VLX240T-FF1156-1;
 
+disable = reg_sr_o;
+disable = reg_sr_r;
+
 ######################################################################################################
 # PIN ASSIGNMENTS
 ######################################################################################################
 
-NET    "RST_N"                             LOC = H10   | IOSTANDARD = SSTL15  | PULLUP | NODELAY | TIG;
+NET    "RST_N"                        LOC = H10 | IOSTANDARD = SSTL15 | PULLUP | NODELAY | TIG;
 
-NET    "CLK_P" TNM_NET = TNM_clk_in;
-NET    "CLK_P"                             LOC = J9;
-NET    "CLK_N"                             LOC = H9;
+NET    "CLK_P" TNM_NET = TNM_clk_in;  # 200 MHz sys0 XO
+NET    "CLK_P"                        LOC = J9 | IOSTANDARD = LVDS_25;
+NET    "CLK_N"                        LOC = H9 | IOSTANDARD = LVDS_25;
 
+TIMESPEC TS_clk_in = PERIOD TNM_clk_in 200 MHz HIGH 50 % ;
+
+# This is the buffered output of TS_clk_in.  Do we need it, too?
+#NET    "m_llpi_phys_plat_clocks_device_crystalClocks_sysClkBuf_O" TNM_NET = TNM_clk_ref200;
+#TIMESPEC TS_clk_ref200 = PERIOD TNM_clk_ref200 200 MHz HIGH 50 % ;

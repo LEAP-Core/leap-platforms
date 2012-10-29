@@ -1,6 +1,6 @@
 BEGIN MODEL "mk_model_Wrapper"
-    NET "m_llpi_phys_plat_pcie_sysClkBuf_O" keep = true;
-    NET "m_llpi_phys_plat_pcie_sysClkBuf_O" S = true;
+    NET "m_llpi_phys_plat_pcie_pciSysClkBuf_O" keep = true;
+    NET "m_llpi_phys_plat_pcie_pciSysClkBuf_O" S = true;
     NET "m_llpi_phys_plat_pcie_dev_ep_pcie_ep_pci_exp_txp" keep = true;
     NET "m_llpi_phys_plat_pcie_dev_ep_pcie_ep_pci_exp_txp" S = true;
     NET "m_llpi_phys_plat_pcie_dev_ep_pcie_ep_pci_exp_txp" s = true;
