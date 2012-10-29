@@ -1,0 +1,4 @@
+This SDRAM device driver is a generic Bluespec interface between the model
+and a Xilinx device-specific driver.  It presents a standard interface to the
+model and assumes the device-specific driver is wrapped such that it provides
+a parameterized, consistent, interface.

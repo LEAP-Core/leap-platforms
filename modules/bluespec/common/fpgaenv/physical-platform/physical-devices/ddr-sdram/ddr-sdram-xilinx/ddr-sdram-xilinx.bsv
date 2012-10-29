@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2009 Intel Corporation
+// Copyright (C) 2012 Intel Corporation
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -23,7 +23,9 @@ import Vector::*;
 import RWire::*;
 
 
-`include "asim/provides/librl_bsv_base.bsh"
+`include "awb/provides/librl_bsv_base.bsh"
+`include "awb/provides/ddr_sdram_device.bsh"
+`include "awb/provides/ddr_sdram_xilinx_driver.bsh"
 
 
 //
@@ -31,7 +33,7 @@ import RWire::*;
 // not flexible.
 //
 
-typedef 1 FPGA_DDR_BANKS;
+typedef `DRAM_NUM_BANKS FPGA_DDR_BANKS;
 typedef `DRAM_MAX_OUTSTANDING_READS FPGA_DDR_MAX_OUTSTANDING_READS;
 
 // The smallest addressable word:
@@ -41,12 +43,12 @@ typedef Bit#(FPGA_DDR_WORD_SZ) FPGA_DDR_WORD;
 // The DRAM controller uses both clock edges to pass data, which appears to
 // be 2 words per cycle.  Addresses are little endian, so the low address
 // goes in the low bits.  Most of the interfaces in this module pass:
-typedef 256 FPGA_DDR_DUALEDGE_DATA_SZ;
+typedef `DRAM_WORD_WIDTH FPGA_DDR_DUALEDGE_DATA_SZ;
 typedef Bit#(FPGA_DDR_DUALEDGE_DATA_SZ) FPGA_DDR_DUALEDGE_DATA;
 
 // The DRAM controller reads and writes multiple dual-edge data values for
 // a single request.  The number of dual-edge data values per request is:
-typedef 2 FPGA_DDR_BURST_LENGTH;
+typedef `DRAM_MIN_BURST FPGA_DDR_BURST_LENGTH;
 
 // Each byte in a write may be disabled for writes using a bit mask.
 // !!! NOTE: to conform to the controller, a mask bit is 0 to request a write !!!
@@ -54,20 +56,20 @@ typedef Bit#(TDiv#(FPGA_DDR_WORD_SZ, 8)) FPGA_DDR_WORD_MASK;
 typedef Bit#(TDiv#(FPGA_DDR_DUALEDGE_DATA_SZ, 8)) FPGA_DDR_DUALEDGE_DATA_MASK;
 
 // Capacity of the memory (addressing FPGA_DDR_WORDs):
-typedef 27 FPGA_DDR_ADDRESS_SZ;
+typedef `DRAM_ADDR_BITS FPGA_DDR_ADDRESS_SZ;
 typedef Bit#(FPGA_DDR_ADDRESS_SZ) FPGA_DDR_ADDRESS;
 
 
 //
-// DDR3_DRIVER
+// DDR_DRIVER
 //
 // The driver interface could be expressed as a simple BRAM style interface
 // with write, readReq and readResp.  It is not.  Instead, the driver interface
-// corresponds to the DDR3 controller interface, passing dual-edge data
+// corresponds to the DDR controller interface, passing dual-edge data
 // sized objects.  For some designs this will make the logic smaller without
 // a performance penalty.
 //
-interface DDR2_DRIVER;
+interface DDR_DRIVER;
     // Read request/response pair.  NOTE: every read request generates
     // FPGA_DDR_BURST_LENGTH responses.  If the address is not aligned to
     // the full response the DRAM controller rotates the response so the
@@ -76,7 +78,7 @@ interface DDR2_DRIVER;
     method ActionValue#(FPGA_DDR_DUALEDGE_DATA) readRsp();
 
     // Write requests and data are separate since the data will ultimately
-    // be streamed to the DDR3 controller.
+    // be streamed to the DDR controller.
     method Action writeReq(FPGA_DDR_ADDRESS addr);
 
     // Write data corresponding to a write request.  Call writeData
@@ -96,71 +98,15 @@ interface DDR2_DRIVER;
 endinterface
 
 
-//        
-// DDR3_WIRES --
-//     These are wires which are simply passed up to the toplevel,
-//     where the UCF file ties them to pins.
-//
-interface DDR2_WIRES;
-    //
-    // wires from the mem controller to the DRAM device
-    //
-    
-    (* always_ready *)
-    method    Bit#(1)           ddr3_ck_p;
-
-    (* always_ready *)
-    method    Bit#(1)           ddr3_ck_n;
-        
-    (* always_ready *)
-    method    Bit#(13)          ddr3_addr;
-        
-    (* always_ready *)
-    method    Bit#(3)           ddr3_ba;
-
-    (* always_ready *)
-    method    Bit#(1)           ddr3_ras_n;
-
-    (* always_ready *)
-    method    Bit#(1)           ddr3_cas_n;
-
-    (* always_ready *)
-    method    Bit#(1)           ddr3_we_n;
-        
-    (* always_ready *)        
-    method    Bit#(1)           ddr3_cs_n;
-        
-    (* always_ready *)
-    method    Bit#(1)           ddr3_odt;
-
-    (* always_ready *)
-    method    Bit#(1)           ddr3_cke;
-
-    (* always_ready *)
-    method    Bit#(8)           ddr3_dm;
-
-    (* always_ready *)
-    method    Bit#(1)           ddr3_reset_n;
-
-    (* always_ready, always_enabled *)
-    interface Inout#(Bit#(64))  ddr3_dq;
-
-    (* always_ready, always_enabled *)
-    interface Inout#(Bit#(8))   ddr3_dqs_p;
-
-    (* always_ready, always_enabled *)
-    interface Inout#(Bit#(8))   ddr3_dqs_n;
-endinterface
-
 
 
 //
-// DDR3_DEVICE --
+// DDR_DEVICE --
 //     By convention a device is both a driver and a wires interface.
 //
-interface DDR2_DEVICE;
-    interface Vector#(FPGA_DDR_BANKS, DDR2_DRIVER) driver;
-    interface DDR2_WIRES  wires;
+interface DDR_DEVICE;
+    interface Vector#(FPGA_DDR_BANKS, DDR_DRIVER) driver;
+    interface DDR_WIRES  wires;
 endinterface
 
 
@@ -187,11 +133,11 @@ FPGA_DDR_STATE
 
 
 //
-// mkDDR3Device
+// mkDDRDevice
 //
-module mkDDR3Device#(Clock rawClock200, Reset rawReset200)
+module mkDDRDevice#(Clock rawClock, Reset rawReset)
     // interface:
-    (DDR2_DEVICE);
+    (DDR_DEVICE);
     
     Clock modelClock <- exposeCurrentClock();
     Reset modelReset <- exposeCurrentReset();
@@ -199,7 +145,7 @@ module mkDDR3Device#(Clock rawClock200, Reset rawReset200)
     //
     // Instantiate the Xilinx Memory Controller
     //
-    XILINX_DRAM_CONTROLLER dramController <- mkXilinxDRAMController(rawClock200, rawReset200);
+    XILINX_DRAM_CONTROLLER dramController <- mkXilinxDRAMController(rawClock, rawReset);
     
     // Clock the glue logic with the Controller's clock
     Clock controllerClock = dramController.controller_clock;
@@ -234,9 +180,11 @@ module mkDDR3Device#(Clock rawClock200, Reset rawReset200)
     Reg#(Bool) writePending <- mkReg(False, clocked_by controllerClock, reset_by controllerReset);
     
     ReadOnly#(Bit#(1)) initDone  <- mkNullCrossingWire(modelClock, pack(dramController.init_done()), clocked_by controllerClock, reset_by controllerReset);
+`ifdef DEBUG_DDR3
     ReadOnly#(Bit#(1)) cmdRdy  <- mkNullCrossingWire(modelClock, pack(dramController.cmd_rdy()), clocked_by controllerClock, reset_by controllerReset);
     ReadOnly#(Bit#(1)) enqRdy  <- mkNullCrossingWire(modelClock, pack(dramController.enq_rdy()), clocked_by controllerClock, reset_by controllerReset); 
     ReadOnly#(Bit#(1)) deqRdy  <- mkNullCrossingWire(modelClock, pack(dramController.deq_rdy()), clocked_by controllerClock, reset_by controllerReset);
+`endif
     ReadOnly#(Bool) resetAssertedCast <- isResetAsserted(clocked_by controllerClock, reset_by controllerReset);
     ReadOnly#(Bit#(1)) resetAsserted  <- mkNullCrossingWire(modelClock, pack(resetAssertedCast._read()), clocked_by controllerClock, reset_by controllerReset);
 
@@ -364,7 +312,7 @@ module mkDDR3Device#(Clock rawClock200, Reset rawReset200)
 
     //
     // initPhase0 --
-    //     A delay loop to make sure reset settles.  Also, the DDR3 low level
+    //     A delay loop to make sure reset settles.  Also, the DDR low level
     //     driver is not reset by a soft reset.  There may be some reads left
     //     over from the last run.  Sync them.
     //
@@ -500,7 +448,7 @@ module mkDDR3Device#(Clock rawClock200, Reset rawReset200)
 
     let banks = newVector();
 
-    banks[0] = interface DDR2_DRIVER;
+    banks[0] = interface DDR_DRIVER;
     
 /*
 RAM status:0
@@ -590,25 +538,7 @@ RAM status:0
     // ====================================================================
 
     // The wires are not domain-crossed because no one should ever look at them.
-    interface DDR2_WIRES wires;
-        method ddr3_ck_p    = dramController.ddr3_ck_p;
-        method ddr3_ck_n    = dramController.ddr3_ck_n;
-        method ddr3_addr    = dramController.ddr3_addr;
-        method ddr3_ba      = dramController.ddr3_ba;
-        method ddr3_ras_n   = dramController.ddr3_ras_n;
-        method ddr3_cas_n   = dramController.ddr3_cas_n;
-        method ddr3_we_n    = dramController.ddr3_we_n;        
-        method ddr3_cs_n    = dramController.ddr3_cs_n;
-        method ddr3_odt     = dramController.ddr3_odt;
-        method ddr3_cke     = dramController.ddr3_cke;
-        method ddr3_dm      = dramController.ddr3_dm;
-        method ddr3_reset_n = dramController.ddr3_reset_n;
-            
-        interface ddr3_dq    = dramController.ddr3_dq;
-        interface ddr3_dqs_p = dramController.ddr3_dqs_p;
-        interface ddr3_dqs_n = dramController.ddr3_dqs_n;
-    endinterface
-    
+    interface wires = dramController.wires;
 
     // Drivers visible to upper layers
     interface driver = banks;

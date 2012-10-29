@@ -1,5 +1,5 @@
-%name DDR SDRAM Physical Device
-%desc DDR SDRAM Physical Device
+%name XUPv2 DDR SDRAM Physical Device
+%desc XUPv2 DDR SDRAM Physical Device
 
 %provides ddr_sdram_device
 

@@ -1,5 +1,5 @@
-%name DDR SDRAM Physical Device for Synplify
-%desc DDR SDRAM Physical Device for Synplify
+%name XUPv2 DDR SDRAM Physical Device for Synplify
+%desc XUPv2 DDR SDRAM Physical Device for Synplify
 
 %provides ddr_sdram_device
 

@@ -203,7 +203,8 @@ entity ddr2_sdram is
    app_af_cmd            : in    std_logic_vector(2 downto 0);
    rd_data_fifo_out      : out   std_logic_vector((APPDATA_WIDTH-1) downto 0);
    app_wdf_data          : in    std_logic_vector((APPDATA_WIDTH-1) downto 0);
-   app_wdf_mask_data     : in    std_logic_vector((APPDATA_WIDTH/8-1) downto 0)
+   app_wdf_mask_data     : in    std_logic_vector((APPDATA_WIDTH/8-1) downto 0);
+   app_wdf_end_burst     : in    std_logic
    );
 
 end entity ddr2_sdram;

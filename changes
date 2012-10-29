@@ -14682,3 +14682,153 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices
 
 Begin reorganization of DDR SDRAM drivers into a rational tree.  First move
 the old XUPv2 code out of the way.
+
+----------
+mcadler     Date: Mon Oct 29 18:43:05 EDT 2012  CSN: CSN-leap-platforms-639
+                  Mon Oct 29 22:43:05 UTC 2012
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/ml605/pcie-dma
+ ml605-v6-pcie-dma.awb     Locally Modified          638 
+ ml605-v6-pcie-dma.bsv     Locally Modified          638 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled
+ htg-v5-pcie-enabled.awb   Locally Modified          638 
+ htg-v5-pcie-enabled.bsv   Locally Modified          638 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices
+ ddr2-sdram/               Locally Removed           638 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr2-sdram
+ ddr2_phy_io.vhd           Locally Removed           638 
+ ddr2_phy_ctl_io.vhd       Locally Removed           638 
+ ddr2-sdram-device.bsv     Locally Removed           638 
+ ddr2_usr_top.vhd          Locally Removed           638 
+ ddr2_sdram.sdc            Locally Removed           638 
+ ddr2_top.vhd              Locally Removed           638 
+ ddr2_ctrl.vhd             Locally Removed           638 
+ ddr2_sdram.vhd            Locally Removed           638 
+ ddr2_phy_write.vhd        Locally Removed           638 
+ ddr2-pll.bsv              Locally Removed           638 
+ ddr2_infrastructure.vhd   Locally Removed           638 
+ ddr2_usr_wr.vhd           Locally Removed           638 
+ ddr2_phy_top.vhd          Locally Removed           638 
+ ddr2-sdram-device-synplify.awb Locally Removed           638 
+ ddr2-sdram-sync-tig-synplify.ucf Locally Removed           638 
+ ddr2-pll.v                Locally Removed           638 
+ ddr2_phy_calib.vhd        Locally Removed           638 
+ ddr2_idelay_ctrl.vhd      Locally Removed           638 
+ ddr2_usr_rd.vhd           Locally Removed           638 
+ ddr2-sdram-vhdl-import.bsv Locally Removed           638 
+ ddr2_phy_dqs_iob.vhd      Locally Removed           638 
+ ddr2_sdram.ucf            Locally Removed           638 
+ ddr2_usr_addr_fifo.vhd    Locally Removed           638 
+ ddr2_phy_dm_iob.vhd       Locally Removed           638 
+ ddr2-sdram-device.awb     Locally Removed           638 
+ ddr2-sdram-sync-tig.ucf   Locally Removed           638 
+ ddr2_chipscope.vhd        Locally Removed           638 
+ ddr2_phy_dq_iob.vhd       Locally Removed           638 
+ ddr2_sdram-synplify.ucf   Locally Removed           638 
+ ddr2_mem_if_top.vhd       Locally Removed           638 
+ ddr2_phy_init.vhd         Locally Removed           638 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices
+ ddr3-sdram/               Locally Removed           638 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr3-sdram
+ ddr3-sdram.xcf            Locally Removed           638 
+ ui_wr_data.v              Locally Removed           638 
+ infrastructure.v          Locally Removed           638 
+ bank_compare.v            Locally Removed           638 
+ ecc_gen.v                 Locally Removed           638 
+ bank_common.v             Locally Removed           638 
+ phy_pd.v                  Locally Removed           638 
+ rank_mach.v               Locally Removed           638 
+ ecc_buf.v                 Locally Removed           638 
+ rd_bitslip.v              Locally Removed           638 
+ phy_dly_ctrl.v            Locally Removed           638 
+ arb_mux.v                 Locally Removed           638 
+ mc.v                      Locally Removed           638 
+ ui_top.v                  Locally Removed           638 
+ memc_ui_top.v             Locally Removed           638 
+ mem_intfc.v               Locally Removed           638 
+ ddr3-sdram-device.awb     Locally Removed           638 
+ ddr3-sdram-verilog-import.bsv Locally Removed           638 
+ arb_select.v              Locally Removed           638 
+ phy_rdlvl.v               Locally Removed           638 
+ rank_common.v             Locally Removed           638 
+ phy_rdclk_gen.v           Locally Removed           638 
+ phy_dm_iob.v              Locally Removed           638 
+ phy_write.v               Locally Removed           638 
+ ecc_dec_fix.v             Locally Removed           638 
+ bank_state.v              Locally Removed           638 
+ phy_rddata_sync.v         Locally Removed           638 
+ example_top.v             Locally Removed           638 
+ bank_cntrl.v              Locally Removed           638 
+ phy_dq_iob.v              Locally Removed           638 
+ phy_ocb_mon_top.v         Locally Removed           638 
+ clk_ibuf.v                Locally Removed           638 
+ bank_queue.v              Locally Removed           638 
+ phy_data_io.v             Locally Removed           638 
+ ddr3-sdram-device.bsv     Locally Removed           638 
+ phy_top.v                 Locally Removed           638 
+ phy_init.v                Locally Removed           638 
+ phy_wrlvl.v               Locally Removed           638 
+ phy_control_io.v          Locally Removed           638 
+ ddr3_v3_5.v               Locally Removed           638 
+ arb_row_col.v             Locally Removed           638 
+ phy_read.v                Locally Removed           638 
+ ui_rd_data.v              Locally Removed           638 
+ ddr3_wrapper.v            Locally Removed           638 
+ dbg_display_driver.v      Locally Removed           638 
+ phy_ocb_mon.v             Locally Removed           638 
+ rank_cntrl.v              Locally Removed           638 
+ ecc_merge_enc.v           Locally Removed           638 
+ xilinx_ddr3_sodimm.v      Locally Removed           638 
+ phy_dqs_iob.v             Locally Removed           638 
+ ui_cmd.v                  Locally Removed           638 
+ phy_clock_io.v            Locally Removed           638 
+ bank_mach.v               Locally Removed           638 
+ ddr2_ddr3_chipscope.v     Locally Removed           638 
+ round_robin_arb.v         Locally Removed           638 
+ col_mach.v                Locally Removed           638 
+ phy_pd_top.v              Locally Removed           638 
+ phy_ck_iob.v              Locally Removed           638 
+ phy_rdctrl_sync.v         Locally Removed           638 
+ ddr3-sdram.ucf            Locally Removed           638 
+ circ_buffer.v             Locally Removed           638 
+ iodelay_ctrl.v            Locally Removed           638 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram
+ ddr-sdram-xilinx/         Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-xilinx
+ ddr-sdram-xilinx.bsv      Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-xilinx/ddr3-sdram-ml605
+ ddr3-sdram-device.bsv     Locally Removed           638 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-xilinx
+ ddr-sdram-xilinx.bsh      Locally Added               0 
+ ddr-sdram-xilinx.ucf      Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-xilinx/ddr2-sdram-v5-htg
+ ddr2_sdram.ucf            Locally Removed           638 
+ ddr2-sdram.ucf            Locally Added               - 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-xilinx
+ ddr-sdram-xilinx.h        Locally Added               0 
+ README                    Locally Added               0 
+ ddr-sdram-xilinx.awb      Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/sdram-xupv2
+ ddr-sdram-device.awb      Locally Modified          638 
+ ddr-sdram-device-synplify.awb Locally Modified          638 
+
+Reorganize the DDR SDRAM drivers into a shared component and device-specific
+components.  DDR2 and DDR3 driver interfaces are nearly identical, making
+it possible to share a controller.
+
+Wires and parameters flow from the device-specific code through the device-
+independent wrapper.  The wrapper mainly manages clock domain crossing and
+DDR request timing requirements.

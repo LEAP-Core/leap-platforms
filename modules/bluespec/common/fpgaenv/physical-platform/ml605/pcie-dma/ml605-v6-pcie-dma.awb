@@ -5,7 +5,7 @@
 
 %requires clocks_device
 %requires pcie_device
-%requires ddr2_device
+%requires ddr_sdram_device
 %requires physical_platform_utils
 
 %sources -t BSV -v PUBLIC  ml605-v6-pcie-dma.bsv

@@ -1,0 +1,16 @@
+%name Xilinx DDR SDRAM Physical Device
+%desc Xilinx DDR SDRAM Physical Device
+
+%provides ddr_sdram_device
+%requires ddr_sdram_xilinx_driver
+
+%notes README
+
+%public ddr-sdram-xilinx.bsv
+%public ddr-sdram-xilinx.bsh
+%public ddr-sdram-xilinx.h
+
+%private ddr-sdram-xilinx.ucf
+
+%param DRAM_MAX_OUTSTANDING_READS  8 "Maximum in-flight read requests"
+%param --global DRAM_DEBUG         0 "Non-zero enables debugging methods"

@@ -4,24 +4,66 @@ typedef enum {
 	      VOID  = 7  // unused
 	      } DDR3Command deriving(Bits, Eq);
 
+//        
+// DDR_WIRES --
+//     These are wires which are simply passed up to the toplevel,
+//     where the UCF file ties them to pins.
+//
+interface DDR_WIRES;
+    //
+    // wires from the mem controller to the DRAM device
+    //
+    
+    (* always_ready *)
+    method    Bit#(1)           ddr_ck_p;
+
+    (* always_ready *)
+    method    Bit#(1)           ddr_ck_n;
+        
+    (* always_ready *)
+    method    Bit#(13)          ddr_addr;
+        
+    (* always_ready *)
+    method    Bit#(3)           ddr_ba;
+
+    (* always_ready *)
+    method    Bit#(1)           ddr_ras_n;
+
+    (* always_ready *)
+    method    Bit#(1)           ddr_cas_n;
+
+    (* always_ready *)
+    method    Bit#(1)           ddr_we_n;
+        
+    (* always_ready *)        
+    method    Bit#(1)           ddr_cs_n;
+        
+    (* always_ready *)
+    method    Bit#(1)           ddr_odt;
+
+    (* always_ready *)
+    method    Bit#(1)           ddr_cke;
+
+    (* always_ready *)
+    method    Bit#(8)           ddr_dm;
+
+    (* always_ready *)
+    method    Bit#(1)           ddr_reset_n;
+
+    (* always_ready, always_enabled *)
+    interface Inout#(Bit#(64))  ddr_dq;
+
+    (* always_ready, always_enabled *)
+    interface Inout#(Bit#(8))   ddr_dqs_p;
+
+    (* always_ready, always_enabled *)
+    interface Inout#(Bit#(8))   ddr_dqs_n;
+endinterface
+
+
 interface XILINX_DRAM_CONTROLLER;
     
-    // wires
-    method    Bit#(1)           ddr3_ck_p;
-    method    Bit#(1)           ddr3_ck_n;
-    method    Bit#(13)          ddr3_addr;
-    method    Bit#(3)           ddr3_ba;
-    method    Bit#(1)           ddr3_ras_n;
-    method    Bit#(1)           ddr3_cas_n;
-    method    Bit#(1)           ddr3_we_n;
-    method    Bit#(1)           ddr3_cs_n;
-    method    Bit#(1)           ddr3_odt;
-    method    Bit#(1)           ddr3_cke;
-    method    Bit#(1)           ddr3_reset_n;
-    method    Bit#(8)           ddr3_dm;
-    interface Inout#(Bit#(64))  ddr3_dq;
-    interface Inout#(Bit#(8))   ddr3_dqs_p;
-    interface Inout#(Bit#(8))   ddr3_dqs_n;
+    interface DDR_WIRES wires;
         
     interface Clock controller_clock;
     interface Reset controller_reset;
@@ -35,9 +77,9 @@ interface XILINX_DRAM_CONTROLLER;
     method    Bit#(1)           cmd_rdy;
     method    Bit#(1)           enq_rdy;
     method    Bit#(1)           deq_rdy;
-
        
 endinterface
+
 
 import "BVI" ddr3_wrapper =
 module mkXilinxDRAMController#(Clock bsv_clk200,
@@ -59,18 +101,24 @@ module mkXilinxDRAMController#(Clock bsv_clk200,
     output_clock controller_clock(user_clock);
     output_reset controller_reset(user_reset_n) clocked_by(controller_clock);
 
-    method ddr3_ck_p            ddr3_ck_p;
-    method ddr3_ck_n            ddr3_ck_n;
-    method ddr3_addr            ddr3_addr;
-    method ddr3_ba              ddr3_ba;
-    method ddr3_ras_n           ddr3_ras_n;
-    method ddr3_cas_n           ddr3_cas_n;
-    method ddr3_we_n            ddr3_we_n;
-    method ddr3_cs_n            ddr3_cs_n;
-    method ddr3_odt             ddr3_odt;
-    method ddr3_cke             ddr3_cke;
-    method ddr3_dm              ddr3_dm;
-    method ddr3_reset_n         ddr3_reset_n;
+    interface DDR_WIRES wires;
+        method ddr3_ck_p            ddr_ck_p;
+        method ddr3_ck_n            ddr_ck_n;
+        method ddr3_addr            ddr_addr;
+        method ddr3_ba              ddr_ba;
+        method ddr3_ras_n           ddr_ras_n;
+        method ddr3_cas_n           ddr_cas_n;
+        method ddr3_we_n            ddr_we_n;
+        method ddr3_cs_n            ddr_cs_n;
+        method ddr3_odt             ddr_odt;
+        method ddr3_cke             ddr_cke;
+        method ddr3_dm              ddr_dm;
+        method ddr3_reset_n         ddr_reset_n;
+
+        ifc_inout                   ddr_dq(ddr3_dq);
+        ifc_inout                   ddr_dqs_p(ddr3_dqs_p);
+        ifc_inout                   ddr_dqs_n(ddr3_dqs_n);
+    endinterface
       
     method init_done            init_done clocked_by (controller_clock) reset_by (controller_reset);
         
@@ -83,12 +131,9 @@ module mkXilinxDRAMController#(Clock bsv_clk200,
     method app_rd_ready         deq_rdy clocked_by (controller_clock) reset_by (controller_reset);
 
 
-    ifc_inout                   ddr3_dq(ddr3_dq);
-    ifc_inout                   ddr3_dqs_p(ddr3_dqs_p);
-    ifc_inout                   ddr3_dqs_n(ddr3_dqs_n);
    
-    schedule (ddr3_ck_p, ddr3_ck_n, ddr3_addr, ddr3_ba, ddr3_ras_n, ddr3_cas_n, ddr3_we_n, ddr3_cs_n, ddr3_odt, ddr3_cke, ddr3_dm, ddr3_reset_n) CF
-             (ddr3_ck_p, ddr3_ck_n, ddr3_addr, ddr3_ba, ddr3_ras_n, ddr3_cas_n, ddr3_we_n, ddr3_cs_n, ddr3_odt, ddr3_cke, ddr3_dm, ddr3_reset_n);
+    schedule (wires.ddr_ck_p, wires.ddr_ck_n, wires.ddr_addr, wires.ddr_ba, wires.ddr_ras_n, wires.ddr_cas_n, wires.ddr_we_n, wires.ddr_cs_n, wires.ddr_odt, wires.ddr_cke, wires.ddr_dm, wires.ddr_reset_n) CF
+             (wires.ddr_ck_p, wires.ddr_ck_n, wires.ddr_addr, wires.ddr_ba, wires.ddr_ras_n, wires.ddr_cas_n, wires.ddr_we_n, wires.ddr_cs_n, wires.ddr_odt, wires.ddr_cke, wires.ddr_dm, wires.ddr_reset_n);
    
     schedule (init_done, enqueue_address, enqueue_data, dequeue_data, cmd_rdy, enq_rdy, deq_rdy) CF (init_done);
     schedule (cmd_rdy, enq_rdy, deq_rdy) CF (dequeue_data);

@@ -24,12 +24,12 @@ import Clocks::*;
 
 // The Physical Platform for the HTG Virtex 5 with PCI Express.
 
-`include "led_device.bsh"
-`include "switch_device.bsh"
-`include "pci_express_device.bsh"
-`include "ddr2_device.bsh"
-`include "clocks_device.bsh"
-`include "physical_platform_utils.bsh"
+`include "awb/provides/led_device.bsh"
+`include "awb/provides/switch_device.bsh"
+`include "awb/provides/pci_express_device.bsh"
+`include "awb/provides/ddr_sdram_device.bsh"
+`include "awb/provides/clocks_device.bsh"
+`include "awb/provides/physical_platform_utils.bsh"
 
 // 8 switches and leds
 
@@ -44,11 +44,11 @@ import Clocks::*;
 
 interface PHYSICAL_DRIVERS;
     
-    interface CLOCKS_DRIVER                      clocksDriver;
-    interface LEDS_DRIVER#(`NUMBER_LEDS)         ledsDriver;
-    interface SWITCHES_DRIVER#(`NUMBER_SWITCHES) switchesDriver;
-    interface PCI_EXPRESS_DRIVER                 pciExpressDriver;
-    interface Vector#(FPGA_DDR_BANKS, DDR2_DRIVER) ddr2Driver;
+    interface CLOCKS_DRIVER                        clocksDriver;
+    interface LEDS_DRIVER#(`NUMBER_LEDS)           ledsDriver;
+    interface SWITCHES_DRIVER#(`NUMBER_SWITCHES)   switchesDriver;
+    interface PCI_EXPRESS_DRIVER                   pciExpressDriver;
+    interface Vector#(FPGA_DDR_BANKS, DDR_DRIVER)  ddrDriver;
         
 endinterface
 
@@ -67,7 +67,7 @@ interface TOP_LEVEL_WIRES;
     interface LEDS_WIRES#(`NUMBER_LEDS)          ledsWires;
     interface SWITCHES_WIRES#(`NUMBER_SWITCHES)  switchesWires;
     interface PCI_EXPRESS_WIRES                  pciExpressWires;
-    interface Vector#(FPGA_DDR_BANKS, DDR2_WIRES) ddr2Wires;
+    interface DDR_WIRES                          ddrWires;
     
 endinterface
 
@@ -112,19 +112,10 @@ module mkPhysicalPlatform
     LEDS_DEVICE#(`NUMBER_LEDS)         leds_device       <- mkLEDsDevice(clocked_by clk, reset_by rst);
     SWITCHES_DEVICE#(`NUMBER_SWITCHES) switches_device   <- mkSwitchesDevice(clocked_by clk, reset_by rst);
 
-    Vector#(FPGA_DDR_BANKS, DDR2_DEVICE) ddr2_sdram_device = newVector();
-    Vector#(FPGA_DDR_BANKS, DDR2_DRIVER) ddr2_driver = newVector();
-    Vector#(FPGA_DDR_BANKS, DDR2_WIRES) ddr2_wires = newVector();
-    for (Integer b = 0; b < valueOf(FPGA_DDR_BANKS); b = b + 1)
-    begin
-        ddr2_sdram_device[b] <- mkDDR2Device(clocks_device.driver.rawClock,
-                                             clocks_device.driver.rawReset,
-                                             clocked_by clk,
-                                             reset_by rst);
-        ddr2_driver[b] = ddr2_sdram_device[b].driver;
-        ddr2_wires[b] = ddr2_sdram_device[b].wires;
-    end
-    
+    DDR_DEVICE sdram <- mkDDRDevice(clocks_device.driver.rawClock,
+                                    clocks_device.driver.rawReset,
+                                    clocked_by clk,
+                                    reset_by rst);
 
     /*
     // Bugfix for Xilinx tools: if the LEDs and Switches are not used at all in the
@@ -151,7 +142,7 @@ module mkPhysicalPlatform
         interface ledsDriver       = leds_device.driver;
         interface switchesDriver   = switches_device.driver;
         interface pciExpressDriver = pci_express_device.driver;
-        interface ddr2Driver       = ddr2_driver;
+        interface ddrDriver        = sdram.driver;
     
     endinterface
     
@@ -163,7 +154,7 @@ module mkPhysicalPlatform
         interface ledsWires        = leds_device.wires;
         interface switchesWires    = switches_device.wires;
         interface pciExpressWires  = pci_express_device.wires;
-        interface ddr2Wires        = ddr2_wires;
+        interface ddrWires         = sdram.wires;
 
     endinterface
                
