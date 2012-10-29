@@ -14649,3 +14649,36 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci
   - Clean up UCF file (move non-DDR constraints elsewhere).
   - Update sync FIFO constraints to more recent versions.
   - Enable area group, which seems to work now.
+
+----------
+mcadler     Date: Mon Oct 29 10:25:11 EDT 2012  CSN: CSN-leap-platforms-638
+                  Mon Oct 29 14:25:11 UTC 2012
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices
+ ddr/                      Locally Removed           637 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr
+ ddr-sdram-device.awb      Locally Removed           637 
+ ddr-sdram-verilog-import.bsv Locally Removed           637 
+ NPICommon.bsv             Locally Removed           637 
+ NPIMaster.bsv             Locally Removed           637 
+ ddr-sdram-device-synplify.awb Locally Removed           637 
+ ddr_sdram_xilinx.v        Locally Removed           637 
+ clock_generator_ddr_wrapper.ngc Locally Removed           637 
+ proc_sys_reset_ddr_wrapper.ngc Locally Removed           637 
+ ddr_sdram_wrapper.v       Locally Removed           637 
+ ddr_sdram.v               Locally Removed           637 
+ ddr-sdram-device.bsv      Locally Removed           637 
+ ddr_sdram_wrapper.ngc     Locally Removed           637 
+ ddr_sdram.sdc             Locally Removed           637 
+ ddr_sdram_synplify.ucf    Locally Removed           637 
+ ddr_sdram.ucf             Locally Removed           637 
+ ddr_sdram_tig_synplify.ucf Locally Removed           637 
+ ddr_sdram_tig.ucf         Locally Removed           637 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices
+ ddr-sdram/                Locally Added               0 
+
+Begin reorganization of DDR SDRAM drivers into a rational tree.  First move
+the old XUPv2 code out of the way.
