@@ -14832,3 +14832,38 @@ it possible to share a controller.
 Wires and parameters flow from the device-specific code through the device-
 independent wrapper.  The wrapper mainly manages clock domain crossing and
 DDR request timing requirements.
+
+----------
+mcadler     Date: Mon Oct 29 20:25:57 EDT 2012  CSN: CSN-leap-platforms-640
+                  Tue Oct 30 00:25:57 UTC 2012
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/jtag
+ htg-v5-jtag.awb           Locally Modified          639 
+ htg-v5-jtag.bsv           Locally Modified          639 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express
+ pcie-xupv5/               Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-xupv5
+ pcie-import.bsv           Locally Added               0 
+ pcie_endpoint.v           Locally Added               0 
+ PioFifo.bsv               Locally Added               0 
+ pcie_bury.v               Locally Added               0 
+ Bridge.bsv                Locally Added               0 
+ pcie_endpoint.ngc         Locally Added               0 
+ pcie-wrapper.bsv          Locally Added               0 
+ server.cpp                Locally Added               0 
+ pcie-bluespec.awb         Locally Added               0 
+ LLVirtex5PCIE.bsv         Locally Added               0 
+ pcie-device.ucf           Locally Added               0 
+ endpoint_blk_plus_v1_14.v Locally Added               0 
+ pcie-device.xcf           Locally Added               0 
+ server.h                  Locally Added               0 
+ README                    Locally Added               0 
+ pcie-device.cpp           Locally Added               0 
+ pcie-device.h             Locally Added               0 
+ pcie_endpoint.xco         Locally Added               0 
+ pcie_bury.bsv             Locally Added               0 
+
+Restore the XUPv5 PCIe driver I overzealously deleted.

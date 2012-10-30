@@ -1,0 +1,2 @@
+This is a relatively old driver.  It wraps the Bluespec-provided PCIe driver.
+More recent code uses BlueNoC to wrap the PCIe driver and manage DMA.

@@ -4,7 +4,7 @@
 
 %provides physical_platform
 
-%requires clocks_device led_device switch_device jtag_device pci_express_device ddr2_device physical_platform_utils
+%requires clocks_device led_device switch_device jtag_device pci_express_device ddr_sdram_device physical_platform_utils
 
 %sources -t BSV -v PUBLIC  htg-v5-jtag.bsv
 %sources -t H   -v PUBLIC  htg-v5-jtag.h
