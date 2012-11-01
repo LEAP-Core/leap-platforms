@@ -19,9 +19,11 @@
 // Simulation Physical Platform
 
 import Clocks::*;
+import Vector::*;
 
 `include "clocks_device.bsh"
 `include "unix_pipe_device.bsh"
+`include "awb/provides/ddr_sdram_device.bsh"
 `include "physical_platform_utils.bsh"
 
 // PHYSICAL_DRIVERS
@@ -34,6 +36,7 @@ interface PHYSICAL_DRIVERS;
 
     interface CLOCKS_DRIVER    clocksDriver;
     interface UNIX_PIPE_DRIVER unixPipeDriver;
+    interface Vector#(FPGA_DDR_BANKS, DDR_DRIVER) ddrDriver;
 
 endinterface
 
@@ -48,6 +51,7 @@ interface TOP_LEVEL_WIRES;
     
     interface CLOCKS_WIRES    clocksWires;
     interface UNIX_PIPE_WIRES unixPipeWires;
+    interface DDR_WIRES       ddrWires;
     
 endinterface
 
@@ -79,7 +83,12 @@ module mkPhysicalPlatform
     
     Clock clk = clocks_device.driver.clock;
     Reset rst = clocks_device.driver.reset;
-    
+
+    // The simulation platform emulates DDR using BRAM.  Having a DRAM-like
+    // interface makes it easier to test clients of memory in simulation
+    // instead of debugging on hardware.
+    DDR_DEVICE ram <- mkDDRDevice(clocked_by clk, reset_by rst);
+
     // Next, create the physical device that can trigger a soft reset. Pass along the
     // interface to the trigger module that the clocks device has given us.
 
@@ -95,6 +104,7 @@ module mkPhysicalPlatform
     
         interface clocksDriver   = clocks_device.driver;
         interface unixPipeDriver = unix_pipe_device.driver;
+        interface ddrDriver      = ram.driver;
 
     endinterface
     
@@ -104,6 +114,7 @@ module mkPhysicalPlatform
     
         interface clocksWires    = clocks_device.wires;
         interface unixPipeWires  = unix_pipe_device.wires;
+        interface ddrWires       = ram.wires;
 
     endinterface
                

@@ -1,0 +1,2 @@
+This module emulates SDRAM using BRAM.  It is useful for configurations without
+on-board memory and for emulating DDR in Bluesim.

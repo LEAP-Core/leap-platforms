@@ -10,41 +10,41 @@
 ## 
 ##                            * * * * * * * * * *
 ##
-INST "*_sdram_syncResetQ/dGDeqPtr*"         TNM=TG_ram_clk;
-INST "*_sdram_syncResetQ/sGEnqPtr*"         TNM=TG_model_clk;
-INST "*_sdram_syncResetQ/dSyncReg1*"        TNM=TG_ram_clk;
-INST "*_sdram_syncResetQ/sSyncReg1*"        TNM=TG_model_clk;
+INST "*_sdram_*_syncResetQ/dGDeqPtr*"         TNM=TG_ram_clk;
+INST "*_sdram_*_syncResetQ/sGEnqPtr*"         TNM=TG_model_clk;
+INST "*_sdram_*_syncResetQ/dSyncReg1*"        TNM=TG_ram_clk;
+INST "*_sdram_*_syncResetQ/sSyncReg1*"        TNM=TG_model_clk;
 
-INST "*_sdram_syncRequestQ/Mram_fifoMem*"   TNM=TG_model_clk;
-INST "*_sdram_syncRequestQ/dDoutReg*"       TNM=TG_ram_clk;
-INST "*_sdram_syncRequestQ/dGDeqPtr*"       TNM=TG_ram_clk;
-INST "*_sdram_syncRequestQ/sGEnqPtr*"       TNM=TG_model_clk;
-INST "*_sdram_syncRequestQ/dSyncReg1*"      TNM=TG_ram_clk;
-INST "*_sdram_syncRequestQ/sSyncReg1*"      TNM=TG_model_clk;
-INST "*_sdram_syncRequestQ/sNotFullReg*"    TNM=TG_model_clk;
+INST "*_sdram_*_syncRequestQ/Mram_fifoMem*"   TNM=TG_model_clk;
+INST "*_sdram_*_syncRequestQ/dDoutReg*"       TNM=TG_ram_clk;
+INST "*_sdram_*_syncRequestQ/dGDeqPtr*"       TNM=TG_ram_clk;
+INST "*_sdram_*_syncRequestQ/sGEnqPtr*"       TNM=TG_model_clk;
+INST "*_sdram_*_syncRequestQ/dSyncReg1*"      TNM=TG_ram_clk;
+INST "*_sdram_*_syncRequestQ/sSyncReg1*"      TNM=TG_model_clk;
+INST "*_sdram_*_syncRequestQ/sNotFullReg*"    TNM=TG_model_clk;
 
-INST "*_sdram_syncWriteDataQ/Mram_fifoMem*" TNM=TG_model_clk;
-INST "*_sdram_syncWriteDataQ/dDoutReg*"     TNM=TG_ram_clk;
-INST "*_sdram_syncWriteDataQ/dGDeqPtr*"     TNM=TG_ram_clk;
-INST "*_sdram_syncWriteDataQ/sGEnqPtr*"     TNM=TG_model_clk;
-INST "*_sdram_syncWriteDataQ/dSyncReg1*"    TNM=TG_ram_clk;
-INST "*_sdram_syncWriteDataQ/sSyncReg1*"    TNM=TG_model_clk;
-INST "*_sdram_syncWriteDataQ/sNotFullReg*"  TNM=TG_model_clk;
+INST "*_sdram_*_syncWriteDataQ/Mram_fifoMem*" TNM=TG_model_clk;
+INST "*_sdram_*_syncWriteDataQ/dDoutReg*"     TNM=TG_ram_clk;
+INST "*_sdram_*_syncWriteDataQ/dGDeqPtr*"     TNM=TG_ram_clk;
+INST "*_sdram_*_syncWriteDataQ/sGEnqPtr*"     TNM=TG_model_clk;
+INST "*_sdram_*_syncWriteDataQ/dSyncReg1*"    TNM=TG_ram_clk;
+INST "*_sdram_*_syncWriteDataQ/sSyncReg1*"    TNM=TG_model_clk;
+INST "*_sdram_*_syncWriteDataQ/sNotFullReg*"  TNM=TG_model_clk;
 
-INST "*_sdram_syncReadDataQ/Mram_fifoMem*"  TNM=TG_ram_clk;
-INST "*_sdram_syncReadDataQ/dDoutReg*"      TNM=TG_model_clk;
-INST "*_sdram_syncReadDataQ/dGDeqPtr*"      TNM=TG_model_clk;
-INST "*_sdram_syncReadDataQ/sGEnqPtr*"      TNM=TG_ram_clk;
-INST "*_sdram_syncReadDataQ/dSyncReg1*"     TNM=TG_model_clk;
-INST "*_sdram_syncReadDataQ/sSyncReg1*"     TNM=TG_ram_clk;
-INST "*_sdram_syncReadDataQ/sNotFullReg*"   TNM=TG_ram_clk;
+INST "*_sdram_*_syncReadDataQ/Mram_fifoMem*"  TNM=TG_ram_clk;
+INST "*_sdram_*_syncReadDataQ/dDoutReg*"      TNM=TG_model_clk;
+INST "*_sdram_*_syncReadDataQ/dGDeqPtr*"      TNM=TG_model_clk;
+INST "*_sdram_*_syncReadDataQ/sGEnqPtr*"      TNM=TG_ram_clk;
+INST "*_sdram_*_syncReadDataQ/dSyncReg1*"     TNM=TG_model_clk;
+INST "*_sdram_*_syncReadDataQ/sSyncReg1*"     TNM=TG_ram_clk;
+INST "*_sdram_*_syncReadDataQ/sNotFullReg*"   TNM=TG_ram_clk;
 
 ## Add these when DRAM_DEBUG awb option is enabled
-#INST "*_sdram_syncStatus/sDataSyncIn*"      TNM=TG_ram_clk;
-#INST "*_sdram_syncStatus/dD_OUT*"           TNM=TG_model_clk;
-#INST "*_sdram_syncStatus/sync/sToggleReg*"  TNM=TG_ram_clk;
-#INST "*_sdram_syncStatus/sync/dSyncReg1*"   TNM=TG_model_clk;
+#INST "*_sdram_*_syncStatus/sDataSyncIn*"      TNM=TG_ram_clk;
+#INST "*_sdram_*_syncStatus/dD_OUT*"           TNM=TG_model_clk;
+#INST "*_sdram_*_syncStatus/sync/sToggleReg*"  TNM=TG_ram_clk;
+#INST "*_sdram_*_syncStatus/sync/dSyncReg1*"   TNM=TG_model_clk;
 
 # Ignoring timing on statusReg is a bit drastic, but the value matters only
 # when DRAM_DEBUG is enabled.
-#INST "*_sdram_statusReg*"                   TIG;
+#INST "*_sdram_*_statusReg*"                   TIG;

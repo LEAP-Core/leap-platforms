@@ -32,8 +32,8 @@
 %sources -t UCF -v PRIVATE ddr2-sdram.ucf
 
 
-%param DRAM_MIN_BURST     2   "Minimum Burst Size"
-%param DRAM_DIMM_WIDTH    64  "Minimum Burst Size"
-%param DRAM_WORD_WIDTH    128 "Physical DRAM Width"
+%param DRAM_MIN_BURST     2   "Minimum burst size"
+%param DRAM_BEAT_WIDTH    128 "Bit width of one beat in a burst"
+%param DRAM_WORD_WIDTH    64  "Addressable object size"
 %param DRAM_ADDR_BITS     26  "Address bits per bank"
 %param DRAM_NUM_BANKS     1   "DDR banks"

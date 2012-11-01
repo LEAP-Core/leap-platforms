@@ -14867,3 +14867,48 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci
  pcie_bury.bsv             Locally Added               0 
 
 Restore the XUPv5 PCIe driver I overzealously deleted.
+
+----------
+mcadler     Date: Thu Nov  1 08:05:09 EDT 2012  CSN: CSN-leap-platforms-641
+                  Thu Nov  1 12:05:09 UTC 2012
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/simulation
+ sim-physical-platform.awb Locally Modified          640 
+ sim-physical-platform.bsv Locally Modified          640 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-xilinx
+ ddr-sdram-xilinx.bsv      Locally Modified          640 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-xilinx/ddr3-sdram-ml605
+ ddr3-sdram-device.awb     Locally Modified          640 
+ ddr3-sdram-verilog-import.bsv Locally Modified          640 
+ ddr3-sdram.ucf            Locally Modified          640 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-xilinx
+ ddr-sdram-xilinx.ucf      Locally Modified          640 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-xilinx/ddr2-sdram-v5-htg
+ ddr2-sdram-device.bsv     Locally Modified          640 
+ ddr2-sdram-vhdl-import.bsv Locally Modified          640 
+ ddr2-sdram-device.awb     Locally Modified          640 
+ ddr2-sdram.ucf            Locally Modified          640 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram
+ ddr-sdram-bram/           Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-bram
+ ddr-sdram-bram.awb        Locally Added               0 
+ ddr-sdram-bram.bsv        Locally Added               0 
+ README                    Locally Added               0 
+
+- Clean up naming of DRAM AWB configuration parameters so I actually know what
+  they mean without rereading the source.
+
+- Add a DDR RAM emulator using BRAM for use in Bluesim or on platforms lacking
+  external memory.  This makes it possible to debug the local memory code
+  in Bluesim.  It also provides a consistent physical platform, making parts
+  of the virtual platform easier to write.  Now used by default in Bluesim
+  platforms.
+
+- Add support for multiple memory banks to generic Xilinx DRAM wrapper.

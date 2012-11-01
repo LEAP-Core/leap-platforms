@@ -41,8 +41,8 @@ typedef Bit#(FPGA_DDR_WORD_SZ) FPGA_DDR_WORD;
 // The DRAM controller uses both clock edges to pass data, which appears to
 // be 2 words per cycle.  Addresses are little endian, so the low address
 // goes in the low bits.  Most of the interfaces in this module pass:
-typedef 128 FPGA_DDR_DUALEDGE_DATA_SZ;
-typedef Bit#(FPGA_DDR_DUALEDGE_DATA_SZ) FPGA_DDR_DUALEDGE_DATA;
+typedef 128 FPGA_DDR_DUALEDGE_BEAT_SZ;
+typedef Bit#(FPGA_DDR_DUALEDGE_BEAT_SZ) FPGA_DDR_DUALEDGE_BEAT;
 
 // The DRAM controller reads and writes multiple dual-edge data values for
 // a single request.  The number of dual-edge data values per request is:
@@ -51,7 +51,7 @@ typedef 2 FPGA_DDR_BURST_LENGTH;
 // Each byte in a write may be disabled for writes using a bit mask.
 // !!! NOTE: to conform to the controller, a mask bit is 0 to request a write !!!
 typedef Bit#(TDiv#(FPGA_DDR_WORD_SZ, 8)) FPGA_DDR_WORD_MASK;
-typedef Bit#(TDiv#(FPGA_DDR_DUALEDGE_DATA_SZ, 8)) FPGA_DDR_DUALEDGE_DATA_MASK;
+typedef Bit#(TDiv#(FPGA_DDR_DUALEDGE_BEAT_SZ, 8)) FPGA_DDR_DUALEDGE_BEAT_MASK;
 
 // Capacity of the memory (addressing FPGA_DDR_WORDs):
 typedef 26 FPGA_DDR_ADDRESS_SZ;
@@ -73,7 +73,7 @@ interface DDR2_DRIVER;
     // the full response the DRAM controller rotates the response so the
     // requested address is returned in the low bits of the first response.
     method Action readReq(FPGA_DDR_ADDRESS addr);
-    method ActionValue#(FPGA_DDR_DUALEDGE_DATA) readRsp();
+    method ActionValue#(FPGA_DDR_DUALEDGE_BEAT) readRsp();
 
     // Write requests and data are separate since the data will ultimately
     // be streamed to the DDR2 controller.
@@ -82,7 +82,7 @@ interface DDR2_DRIVER;
     // Write data corresponding to a write request.  Call writeData
     // FPGA_DDR_BURST_LENGTH times for every write request.  The order of
     // writeReq() and writeData() calls are not important.
-    method Action writeData(FPGA_DDR_DUALEDGE_DATA data, FPGA_DDR_DUALEDGE_DATA_MASK mask);
+    method Action writeData(FPGA_DDR_DUALEDGE_BEAT data, FPGA_DDR_DUALEDGE_BEAT_MASK mask);
 
 `ifndef DRAM_DEBUG_Z
     // Methods enabled only for debugging the controller:
@@ -217,7 +217,7 @@ module mkDDR2Device#(Clock topLevelClock, Reset topLevelReset)
     //
 
     // Read buffer (size this buffer to sustain as many DRAM bursts as needed)
-    SyncFIFOIfc#(FPGA_DDR_DUALEDGE_DATA) syncReadDataQ <-
+    SyncFIFOIfc#(FPGA_DDR_DUALEDGE_BEAT) syncReadDataQ <-
         mkSyncFIFO(`DRAM_MAX_OUTSTANDING_READS * valueOf(FPGA_DDR_BURST_LENGTH),
                    controllerClock, controllerReset, modelClock);
 
@@ -232,7 +232,7 @@ module mkDDR2Device#(Clock topLevelClock, Reset topLevelReset)
     SyncFIFOIfc#(FPGA_DDR_REQUEST) syncRequestQ <- mkSyncFIFO(2, modelClock, modelReset, controllerClock);
 
     // Write data queue
-    SyncFIFOIfc#(Tuple2#(FPGA_DDR_DUALEDGE_DATA, FPGA_DDR_DUALEDGE_DATA_MASK))
+    SyncFIFOIfc#(Tuple2#(FPGA_DDR_DUALEDGE_BEAT, FPGA_DDR_DUALEDGE_BEAT_MASK))
         syncWriteDataQ <- mkSyncFIFO(2, modelClock, modelReset, controllerClock);
     
     Reg#(Bool) writePending <- mkReg(False, clocked_by controllerClock, reset_by controllerReset);
@@ -275,8 +275,8 @@ module mkDDR2Device#(Clock topLevelClock, Reset topLevelReset)
     // registers within the DRAM clock domain before forwarding a request.
     //
 
-    Reg#(Vector#(FPGA_DDR_BURST_LENGTH, FPGA_DDR_DUALEDGE_DATA)) writeValue <- mkRegU(clocked_by controllerClock, reset_by controllerReset);
-    Reg#(Vector#(FPGA_DDR_BURST_LENGTH, FPGA_DDR_DUALEDGE_DATA_MASK)) writeValueMask <- mkRegU(clocked_by controllerClock, reset_by controllerReset);
+    Reg#(Vector#(FPGA_DDR_BURST_LENGTH, FPGA_DDR_DUALEDGE_BEAT)) writeValue <- mkRegU(clocked_by controllerClock, reset_by controllerReset);
+    Reg#(Vector#(FPGA_DDR_BURST_LENGTH, FPGA_DDR_DUALEDGE_BEAT_MASK)) writeValueMask <- mkRegU(clocked_by controllerClock, reset_by controllerReset);
     Reg#(Bit#(TLog#(TAdd#(1, FPGA_DDR_BURST_LENGTH)))) writeBurstIdx <- mkReg(0, clocked_by controllerClock, reset_by controllerReset);
 
     //
@@ -423,7 +423,7 @@ module mkDDR2Device#(Clock topLevelClock, Reset topLevelReset)
     
     rule initPhase2 ((state == STATE_init) && (initPhase == 2));
         // Data to write
-        Vector#(TDiv#(FPGA_DDR_DUALEDGE_DATA_SZ, 8), Bit#(8)) init_data = replicate('haa);
+        Vector#(TDiv#(FPGA_DDR_DUALEDGE_BEAT_SZ, 8), Bit#(8)) init_data = replicate('haa);
 
         if (initPart == 0)
         begin
@@ -439,7 +439,7 @@ module mkDDR2Device#(Clock topLevelClock, Reset topLevelReset)
             syncWriteDataQ.enq(tuple2(pack(init_data), 0));
 
             // Point to next dual-edge data address
-            let next_addr = initAddr + fromInteger(valueOf(TMul#(FPGA_DDR_BURST_LENGTH, TDiv#(FPGA_DDR_DUALEDGE_DATA_SZ, FPGA_DDR_WORD_SZ))));
+            let next_addr = initAddr + fromInteger(valueOf(TMul#(FPGA_DDR_BURST_LENGTH, TDiv#(FPGA_DDR_DUALEDGE_BEAT_SZ, FPGA_DDR_WORD_SZ))));
             initAddr <= next_addr;
 
             if (next_addr == 0)
@@ -536,7 +536,7 @@ module mkDDR2Device#(Clock topLevelClock, Reset topLevelReset)
             nInflightReads.up();
         endmethod
 
-        method ActionValue#(FPGA_DDR_DUALEDGE_DATA) readRsp() if (state == STATE_ready);
+        method ActionValue#(FPGA_DDR_DUALEDGE_BEAT) readRsp() if (state == STATE_ready);
             let d = syncReadDataQ.first();
             syncReadDataQ.deq();
 
@@ -558,7 +558,7 @@ module mkDDR2Device#(Clock topLevelClock, Reset topLevelReset)
             mergeReqQ.ports[1].enq(tagged DRAM_WRITE addr);
         endmethod
         
-        method Action writeData(FPGA_DDR_DUALEDGE_DATA data, FPGA_DDR_DUALEDGE_DATA_MASK mask) if (state == STATE_ready);
+        method Action writeData(FPGA_DDR_DUALEDGE_BEAT data, FPGA_DDR_DUALEDGE_BEAT_MASK mask) if (state == STATE_ready);
             syncWriteDataQ.enq(tuple2(data, mask));
         endmethod
 

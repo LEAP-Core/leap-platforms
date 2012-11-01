@@ -1,0 +1,17 @@
+%name DDR SDRAM Emulator in BRAM
+%desc DDR SDRAM Emulator in BRAM
+
+%provides ddr_sdram_device
+
+%notes README
+
+%public ddr-sdram-bram.bsv
+
+%param DRAM_MAX_OUTSTANDING_READS  8 "Maximum in-flight read requests"
+%param --global DRAM_DEBUG         1 "Non-zero enables debugging methods"
+
+%param DRAM_MIN_BURST     2   "Minimum burst size"
+%param DRAM_BEAT_WIDTH    128 "Bit width of one beat in a burst"
+%param DRAM_WORD_WIDTH    64  "Addressable object size"
+%param DRAM_ADDR_BITS     10  "Address bits per bank"
+%param DRAM_NUM_BANKS     1   "DDR banks"

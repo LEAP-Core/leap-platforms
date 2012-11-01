@@ -5,11 +5,11 @@ typedef enum {
 	      } DDR3Command deriving(Bits, Eq);
 
 //        
-// DDR_WIRES --
+// DDR_BANK_WIRES --
 //     These are wires which are simply passed up to the toplevel,
 //     where the UCF file ties them to pins.
 //
-interface DDR_WIRES;
+interface DDR_BANK_WIRES;
     //
     // wires from the mem controller to the DRAM device
     //
@@ -63,7 +63,7 @@ endinterface
 
 interface XILINX_DRAM_CONTROLLER;
     
-    interface DDR_WIRES wires;
+    interface DDR_BANK_WIRES wires;
         
     interface Clock controller_clock;
     interface Reset controller_reset;
@@ -101,7 +101,7 @@ module mkXilinxDRAMController#(Clock bsv_clk200,
     output_clock controller_clock(user_clock);
     output_reset controller_reset(user_reset_n) clocked_by(controller_clock);
 
-    interface DDR_WIRES wires;
+    interface DDR_BANK_WIRES wires;
         method ddr3_ck_p            ddr_ck_p;
         method ddr3_ck_n            ddr_ck_n;
         method ddr3_addr            ddr_addr;

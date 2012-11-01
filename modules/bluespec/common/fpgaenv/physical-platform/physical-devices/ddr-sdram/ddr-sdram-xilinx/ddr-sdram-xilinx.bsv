@@ -16,6 +16,12 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+//
+// A general wrapper for Xilinx DDR memories, providing clock transition
+// and request timing managagement.  The wrapper instantiates device-specific
+// drivers.
+//
+
 import Clocks::*;
 import FIFO::*;
 import FIFOF::*;
@@ -37,14 +43,14 @@ typedef `DRAM_NUM_BANKS FPGA_DDR_BANKS;
 typedef `DRAM_MAX_OUTSTANDING_READS FPGA_DDR_MAX_OUTSTANDING_READS;
 
 // The smallest addressable word:
-typedef 64 FPGA_DDR_WORD_SZ;
+typedef `DRAM_WORD_WIDTH FPGA_DDR_WORD_SZ;
 typedef Bit#(FPGA_DDR_WORD_SZ) FPGA_DDR_WORD;
 
 // The DRAM controller uses both clock edges to pass data, which appears to
 // be 2 words per cycle.  Addresses are little endian, so the low address
 // goes in the low bits.  Most of the interfaces in this module pass:
-typedef `DRAM_WORD_WIDTH FPGA_DDR_DUALEDGE_DATA_SZ;
-typedef Bit#(FPGA_DDR_DUALEDGE_DATA_SZ) FPGA_DDR_DUALEDGE_DATA;
+typedef `DRAM_BEAT_WIDTH FPGA_DDR_DUALEDGE_BEAT_SZ;
+typedef Bit#(FPGA_DDR_DUALEDGE_BEAT_SZ) FPGA_DDR_DUALEDGE_BEAT;
 
 // The DRAM controller reads and writes multiple dual-edge data values for
 // a single request.  The number of dual-edge data values per request is:
@@ -53,7 +59,7 @@ typedef `DRAM_MIN_BURST FPGA_DDR_BURST_LENGTH;
 // Each byte in a write may be disabled for writes using a bit mask.
 // !!! NOTE: to conform to the controller, a mask bit is 0 to request a write !!!
 typedef Bit#(TDiv#(FPGA_DDR_WORD_SZ, 8)) FPGA_DDR_WORD_MASK;
-typedef Bit#(TDiv#(FPGA_DDR_DUALEDGE_DATA_SZ, 8)) FPGA_DDR_DUALEDGE_DATA_MASK;
+typedef Bit#(TDiv#(FPGA_DDR_DUALEDGE_BEAT_SZ, 8)) FPGA_DDR_DUALEDGE_BEAT_MASK;
 
 // Capacity of the memory (addressing FPGA_DDR_WORDs):
 typedef `DRAM_ADDR_BITS FPGA_DDR_ADDRESS_SZ;
@@ -75,7 +81,7 @@ interface DDR_DRIVER;
     // the full response the DRAM controller rotates the response so the
     // requested address is returned in the low bits of the first response.
     method Action readReq(FPGA_DDR_ADDRESS addr);
-    method ActionValue#(FPGA_DDR_DUALEDGE_DATA) readRsp();
+    method ActionValue#(FPGA_DDR_DUALEDGE_BEAT) readRsp();
 
     // Write requests and data are separate since the data will ultimately
     // be streamed to the DDR controller.
@@ -84,7 +90,7 @@ interface DDR_DRIVER;
     // Write data corresponding to a write request.  Call writeData
     // FPGA_DDR_BURST_LENGTH times for every write request.  The order of
     // writeReq() and writeData() calls are not important.
-    method Action writeData(FPGA_DDR_DUALEDGE_DATA data, FPGA_DDR_DUALEDGE_DATA_MASK mask);
+    method Action writeData(FPGA_DDR_DUALEDGE_BEAT data, FPGA_DDR_DUALEDGE_BEAT_MASK mask);
 
 `ifndef DRAM_DEBUG_Z
     // Methods enabled only for debugging the controller:
@@ -98,16 +104,50 @@ interface DDR_DRIVER;
 endinterface
 
 
+typedef Vector#(FPGA_DDR_BANKS, DDR_BANK_WIRES) DDR_WIRES;
 
 
 //
 // DDR_DEVICE --
 //     By convention a device is both a driver and a wires interface.
+//     Drivers are exposed as a vector of devices since they may be accessed
+//     independently by clients.  The wires are exposed as a monolithic
+//     type since they will typically be tied down to pins and not used
+//     elsewhere in the design.
 //
 interface DDR_DEVICE;
     interface Vector#(FPGA_DDR_BANKS, DDR_DRIVER) driver;
-    interface DDR_WIRES  wires;
+    interface DDR_WIRES wires;
 endinterface
+
+
+//
+// DDR_BANK --
+//     A bank is one driver and corresponding wires.
+//
+interface DDR_BANK;
+    interface DDR_DRIVER driver;
+    interface DDR_BANK_WIRES wires;
+endinterface
+
+
+//
+// mkDDRDevice
+//
+module mkDDRDevice#(Clock rawClock, Reset rawReset)
+    // interface:
+    (DDR_DEVICE);
+
+    Vector#(FPGA_DDR_BANKS, DDR_BANK) b <-
+        replicateM(mkDDRBank(rawClock, rawReset));
+
+    function DDR_DRIVER getDriver(DDR_BANK bank) = bank.driver;
+    function DDR_BANK_WIRES getWires(DDR_BANK bank) = bank.wires;
+
+    interface driver = map(getDriver, b);
+    interface wires = map(getWires, b);
+endmodule
+    
 
 
 //
@@ -135,9 +175,9 @@ FPGA_DDR_STATE
 //
 // mkDDRDevice
 //
-module mkDDRDevice#(Clock rawClock, Reset rawReset)
+module mkDDRBank#(Clock rawClock, Reset rawReset)
     // interface:
-    (DDR_DEVICE);
+    (DDR_BANK);
     
     Clock modelClock <- exposeCurrentClock();
     Reset modelReset <- exposeCurrentReset();
@@ -145,11 +185,11 @@ module mkDDRDevice#(Clock rawClock, Reset rawReset)
     //
     // Instantiate the Xilinx Memory Controller
     //
-    XILINX_DRAM_CONTROLLER dramController <- mkXilinxDRAMController(rawClock, rawReset);
+    XILINX_DRAM_CONTROLLER dramCtrl <- mkXilinxDRAMController(rawClock, rawReset);
     
     // Clock the glue logic with the Controller's clock
-    Clock controllerClock = dramController.controller_clock;
-    Reset controllerReset = dramController.controller_reset;
+    Clock controllerClock = dramCtrl.controller_clock;
+    Reset controllerReset = dramCtrl.controller_reset;
 
     // State
     Reg#(FPGA_DDR_STATE) state <- mkReg(STATE_init);
@@ -159,7 +199,7 @@ module mkDDRDevice#(Clock rawClock, Reset rawReset)
     //
 
     // Read buffer (size this buffer to sustain as many DRAM bursts as needed)
-    SyncFIFOIfc#(FPGA_DDR_DUALEDGE_DATA) syncReadDataQ <-
+    SyncFIFOIfc#(FPGA_DDR_DUALEDGE_BEAT) syncReadDataQ <-
         mkSyncFIFO(`DRAM_MAX_OUTSTANDING_READS * valueOf(FPGA_DDR_BURST_LENGTH),
                    controllerClock, controllerReset, modelClock);
 
@@ -174,16 +214,16 @@ module mkDDRDevice#(Clock rawClock, Reset rawReset)
     SyncFIFOIfc#(FPGA_DDR_REQUEST) syncRequestQ <- mkSyncFIFO(2, modelClock, modelReset, controllerClock);
 
     // Write data queue
-    SyncFIFOIfc#(Tuple2#(FPGA_DDR_DUALEDGE_DATA, FPGA_DDR_DUALEDGE_DATA_MASK))
+    SyncFIFOIfc#(Tuple2#(FPGA_DDR_DUALEDGE_BEAT, FPGA_DDR_DUALEDGE_BEAT_MASK))
         syncWriteDataQ <- mkSyncFIFO(2, modelClock, modelReset, controllerClock);
     
     Reg#(Bool) writePending <- mkReg(False, clocked_by controllerClock, reset_by controllerReset);
     
-    ReadOnly#(Bit#(1)) initDone  <- mkNullCrossingWire(modelClock, pack(dramController.init_done()), clocked_by controllerClock, reset_by controllerReset);
+    ReadOnly#(Bit#(1)) initDone  <- mkNullCrossingWire(modelClock, pack(dramCtrl.init_done()), clocked_by controllerClock, reset_by controllerReset);
 `ifdef DEBUG_DDR3
-    ReadOnly#(Bit#(1)) cmdRdy  <- mkNullCrossingWire(modelClock, pack(dramController.cmd_rdy()), clocked_by controllerClock, reset_by controllerReset);
-    ReadOnly#(Bit#(1)) enqRdy  <- mkNullCrossingWire(modelClock, pack(dramController.enq_rdy()), clocked_by controllerClock, reset_by controllerReset); 
-    ReadOnly#(Bit#(1)) deqRdy  <- mkNullCrossingWire(modelClock, pack(dramController.deq_rdy()), clocked_by controllerClock, reset_by controllerReset);
+    ReadOnly#(Bit#(1)) cmdRdy  <- mkNullCrossingWire(modelClock, pack(dramCtrl.cmd_rdy()), clocked_by controllerClock, reset_by controllerReset);
+    ReadOnly#(Bit#(1)) enqRdy  <- mkNullCrossingWire(modelClock, pack(dramCtrl.enq_rdy()), clocked_by controllerClock, reset_by controllerReset); 
+    ReadOnly#(Bit#(1)) deqRdy  <- mkNullCrossingWire(modelClock, pack(dramCtrl.deq_rdy()), clocked_by controllerClock, reset_by controllerReset);
 `endif
     ReadOnly#(Bool) resetAssertedCast <- isResetAsserted(clocked_by controllerClock, reset_by controllerReset);
     ReadOnly#(Bit#(1)) resetAsserted  <- mkNullCrossingWire(modelClock, pack(resetAssertedCast._read()), clocked_by controllerClock, reset_by controllerReset);
@@ -201,8 +241,8 @@ module mkDDRDevice#(Clock rawClock, Reset rawReset)
     // Push incoming data into read buffer. This rule *MUST* fire if the explicit
     // conditions are true, else we will lose data.
     (* fire_when_enabled *)
-    rule readDataToBuffer (dramController.init_done());
-        syncReadDataQ.enq(dramController.dequeue_data());
+    rule readDataToBuffer (dramCtrl.init_done());
+        syncReadDataQ.enq(dramCtrl.dequeue_data());
     endrule
 
     
@@ -210,11 +250,11 @@ module mkDDRDevice#(Clock rawClock, Reset rawReset)
     // Rules for synchronizing from Model to Controller
     //
     
-    rule processReadRequest (dramController.init_done() &&&
+    rule processReadRequest (dramCtrl.init_done() &&&
                              ! syncResetQ.notEmpty() &&&
                              syncRequestQ.first() matches tagged DRAM_READ .address);
         syncRequestQ.deq();
-        dramController.enqueue_address(READ, zeroExtend(address));
+        dramCtrl.enqueue_address(READ, zeroExtend(address));
     endrule
 
     
@@ -226,8 +266,8 @@ module mkDDRDevice#(Clock rawClock, Reset rawReset)
     // registers within the DRAM clock domain before forwarding a request.
     //
 
-    Reg#(Vector#(FPGA_DDR_BURST_LENGTH, FPGA_DDR_DUALEDGE_DATA)) writeValue <- mkRegU(clocked_by controllerClock, reset_by controllerReset);
-    Reg#(Vector#(FPGA_DDR_BURST_LENGTH, FPGA_DDR_DUALEDGE_DATA_MASK)) writeValueMask <- mkRegU(clocked_by controllerClock, reset_by controllerReset);
+    Reg#(Vector#(FPGA_DDR_BURST_LENGTH, FPGA_DDR_DUALEDGE_BEAT)) writeValue <- mkRegU(clocked_by controllerClock, reset_by controllerReset);
+    Reg#(Vector#(FPGA_DDR_BURST_LENGTH, FPGA_DDR_DUALEDGE_BEAT_MASK)) writeValueMask <- mkRegU(clocked_by controllerClock, reset_by controllerReset);
     Reg#(Bit#(TLog#(TAdd#(1, FPGA_DDR_BURST_LENGTH)))) writeBurstIdx <- mkReg(0, clocked_by controllerClock, reset_by controllerReset);
 
     //
@@ -250,7 +290,7 @@ module mkDDRDevice#(Clock rawClock, Reset rawReset)
     //     Stage 0 of write request.  Send control message and first half of data
     //     to the memory controller.
     //
-    rule processWriteRequest0 (dramController.init_done() &&&
+    rule processWriteRequest0 (dramCtrl.init_done() &&&
                                ! syncResetQ.notEmpty() &&&
                                ! writePending &&&
                                (writeBurstIdx == fromInteger(valueOf(FPGA_DDR_BURST_LENGTH))) &&&
@@ -259,10 +299,10 @@ module mkDDRDevice#(Clock rawClock, Reset rawReset)
         syncRequestQ.deq();
 
         // address + command
-        dramController.enqueue_address(WRITE, zeroExtend(address));
+        dramCtrl.enqueue_address(WRITE, zeroExtend(address));
         
         // Data + mask
-        dramController.enqueue_data(writeValue[0], writeValueMask[0], False);
+        dramCtrl.enqueue_data(writeValue[0], writeValueMask[0], False);
                     
         writeBurstIdx <= 0;
         writePending <= True;
@@ -274,10 +314,10 @@ module mkDDRDevice#(Clock rawClock, Reset rawReset)
     //   This rule *MUST* fire in the cycle immediately after the previous rule.
     //
     (* fire_when_enabled *)
-    rule processWriteRequest1 (dramController.init_done() &&
+    rule processWriteRequest1 (dramCtrl.init_done() &&
                                writePending);
         // data + mask
-        dramController.enqueue_data(writeValue[1], writeValueMask[1], True);
+        dramCtrl.enqueue_data(writeValue[1], writeValueMask[1], True);
         
         writePending <= False;
     endrule    
@@ -287,7 +327,7 @@ module mkDDRDevice#(Clock rawClock, Reset rawReset)
     // processModelReset --
     //     Model reset needs to clear out partial writes.
     //
-    rule processModelReset (dramController.init_done());
+    rule processModelReset (dramCtrl.init_done());
         syncResetQ.deq();
 
         writeBurstIdx <= 0;
@@ -374,7 +414,7 @@ module mkDDRDevice#(Clock rawClock, Reset rawReset)
     
     rule initPhase2 ((state == STATE_init) && (initPhase == 2));
         // Data to write
-        Vector#(TDiv#(FPGA_DDR_DUALEDGE_DATA_SZ, 8), Bit#(8)) init_data = replicate('haa);
+        Vector#(TDiv#(FPGA_DDR_DUALEDGE_BEAT_SZ, 8), Bit#(8)) init_data = replicate('haa);
 
         if (initPart == 0)
         begin
@@ -390,7 +430,7 @@ module mkDDRDevice#(Clock rawClock, Reset rawReset)
             syncWriteDataQ.enq(tuple2(pack(init_data), 0));
 
             // Point to next dual-edge data address
-            let next_addr = initAddr + fromInteger(valueOf(TMul#(FPGA_DDR_BURST_LENGTH, TDiv#(FPGA_DDR_DUALEDGE_DATA_SZ, FPGA_DDR_WORD_SZ))));
+            let next_addr = initAddr + fromInteger(valueOf(TMul#(FPGA_DDR_BURST_LENGTH, TDiv#(FPGA_DDR_DUALEDGE_BEAT_SZ, FPGA_DDR_WORD_SZ))));
             initAddr <= next_addr;
 
             if (next_addr == 0)
@@ -446,9 +486,7 @@ module mkDDRDevice#(Clock rawClock, Reset rawReset)
         mkReg(`DRAM_MAX_OUTSTANDING_READS);
 `endif
 
-    let banks = newVector();
-
-    banks[0] = interface DDR_DRIVER;
+    interface DDR_DRIVER driver;
     
 /*
 RAM status:0
@@ -500,7 +538,7 @@ RAM status:0
             nInflightReads.up();
         endmethod
 
-        method ActionValue#(FPGA_DDR_DUALEDGE_DATA) readRsp() if (state == STATE_ready);
+        method ActionValue#(FPGA_DDR_DUALEDGE_BEAT) readRsp() if (state == STATE_ready);
             let d = syncReadDataQ.first();
             syncReadDataQ.deq();
 
@@ -522,25 +560,14 @@ RAM status:0
             mergeReqQ.ports[1].enq(tagged DRAM_WRITE addr);
         endmethod
         
-        method Action writeData(FPGA_DDR_DUALEDGE_DATA data, FPGA_DDR_DUALEDGE_DATA_MASK mask) if (state == STATE_ready);
+        method Action writeData(FPGA_DDR_DUALEDGE_BEAT data, FPGA_DDR_DUALEDGE_BEAT_MASK mask) if (state == STATE_ready);
             syncWriteDataQ.enq(tuple2(data, mask));
         endmethod
 
-    endinterface;
+    endinterface
 
-
-
-
-    // ====================================================================
-    //
-    // Methods
-    //
-    // ====================================================================
 
     // The wires are not domain-crossed because no one should ever look at them.
-    interface wires = dramController.wires;
-
-    // Drivers visible to upper layers
-    interface driver = banks;
+    interface wires = dramCtrl.wires;
 
 endmodule
