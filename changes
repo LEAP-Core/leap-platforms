@@ -14912,3 +14912,15 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr
   platforms.
 
 - Add support for multiple memory banks to generic Xilinx DRAM wrapper.
+
+----------
+mcadler     Date: Thu Nov  1 16:46:37 EDT 2012  CSN: CSN-leap-platforms-642
+                  Thu Nov  1 20:46:37 UTC 2012
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-bram
+ ddr-sdram-bram.awb        Locally Modified          641 
+ ddr-sdram-bram.bsv        Locally Modified          641 
+
+Add optional latency to read responses in simulated DRAM.  This may be useful
+for emulating DDR SDRAM latencies in Bluesim.  The latency is 0 by default.

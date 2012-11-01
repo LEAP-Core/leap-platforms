@@ -250,8 +250,23 @@ module mkDDRBank
     Reg#(t_BURST_IDX) readBurstCnt <- mkReg(0);
     FIFO#(Tuple2#(t_WORD_IDX, Bool)) inflightReadQ <- mkFIFO();
 
-    FIFO#(Tuple2#(FPGA_DDR_DUALEDGE_BEAT, Bool)) readRespQ <-
-        mkSizedFIFO(valueOf(TMul#(FPGA_DDR_BURST_LENGTH, FPGA_DDR_MAX_OUTSTANDING_READS)));
+
+    //
+    // readRespQ is the FIFO between BRAM reads and the response.  Under normal
+    // circumstances it is a standard FIFO with one cycle latency and enough
+    // buffering to hold all responses allowed to be in flight.  When
+    // DRAM_READ_LATENCY is non-zero it is a delay FIFO, forcing clients to
+    // wait longer for responses.  This may be useful for simulating true
+    // DDR SDRAM behavior in Bluesim.
+    //
+
+    NumTypeParam#(`DRAM_READ_LATENCY) extraLatency = ?;
+
+    FIFOF#(Tuple2#(FPGA_DDR_DUALEDGE_BEAT, Bool)) readRespQ <-
+        ((`DRAM_READ_LATENCY == 0) ?
+         mkSizedFIFOF(valueOf(TMul#(FPGA_DDR_BURST_LENGTH, FPGA_DDR_MAX_OUTSTANDING_READS))) :
+         mkDelayFIFOF(extraLatency));
+
 
     rule doReadReq (mergeReqQ.first() matches tagged DRAM_READ .addr);
         let beat_addr = beatAddr(addr) + zeroExtend(readBurstCnt);
