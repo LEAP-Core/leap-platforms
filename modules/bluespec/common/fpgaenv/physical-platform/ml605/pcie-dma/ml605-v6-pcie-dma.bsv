@@ -95,6 +95,30 @@ module mkPhysicalPlatform
                                      clocks_device.driver.rawReset);
 
     //
+    // Pass reset from PCIe to the model.  The host holds reset long enough that
+    // a crossing wire to the model clock domain is sufficient.
+    //
+    Reg#(Bool) pcieInReset <- mkReg(True,
+                                    clocked_by pcie.driver.clock,
+                                    reset_by pcie.driver.reset);
+    ReadOnly#(Bool) assertModelReset <-
+        mkNullCrossingWire(clocks_device.driver.clock,
+                           pcieInReset,
+                           clocked_by pcie.driver.clock,
+                           reset_by pcie.driver.reset);
+    
+    (* fire_when_enabled, no_implicit_conditions *)
+    rule exitResetPCIe (pcieInReset);
+        pcieInReset <= False;
+    endrule
+
+    (* fire_when_enabled *)
+    rule triggerModelReset (assertModelReset);
+        clocks_device.softResetTrigger.reset();
+    endrule
+
+
+    //
     // Aggregate the drivers
     //
     interface PHYSICAL_DRIVERS physicalDrivers;

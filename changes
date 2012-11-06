@@ -14924,3 +14924,24 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr
 
 Add optional latency to read responses in simulated DRAM.  This may be useful
 for emulating DDR SDRAM latencies in Bluesim.  The latency is 0 by default.
+
+----------
+mcadler     Date: Mon Nov  5 19:50:38 EST 2012  CSN: CSN-leap-platforms-643
+                  Tue Nov  6 00:50:38 UTC 2012
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/ml605/pcie-dma
+ ml605-v6-pcie-dma.bsv     Locally Modified          642 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-xilinx
+ ddr-sdram-xilinx.bsv      Locally Modified          642 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-bram
+ ddr-sdram-bram.bsv        Locally Modified          642 
+
+- Reset the model on ML605 when PCIe reset is asserted on the host driver's
+  ioctl interface.
+
+- Add some DDR definitions used by local memory.
+
+- BRAM DDR emulator now handles DDR word size the same as the beat size.

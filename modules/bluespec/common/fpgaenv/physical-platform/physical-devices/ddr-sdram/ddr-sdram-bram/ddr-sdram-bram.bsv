@@ -219,10 +219,14 @@ module mkDDRBank
 
         // Rotate write into position based on word index as I think
         // DDR controllers do.  Word indexing is not well tested!
-        data_b = rotateBy(data_b, zeroExtend(unpack(word_idx)) *
-                                  fromInteger(valueOf(FPGA_DDR_BYTES_PER_WORD)));
-        mask = rotateBitsBy(mask, zeroExtend(unpack(word_idx)) *
-                                  fromInteger(valueOf(FPGA_DDR_BYTES_PER_WORD)));
+        // Hack to avoid overflow:
+        Integer bytes_per_word =
+            (valueOf(FPGA_DDR_BYTES_PER_BEAT) == valueOf(FPGA_DDR_BYTES_PER_WORD)) ?
+                 0 : valueOf(FPGA_DDR_BYTES_PER_WORD);
+        UInt#(TLog#(FPGA_DDR_BYTES_PER_BEAT)) rot_amt =
+           zeroExtend(unpack(word_idx)) * fromInteger(bytes_per_word);
+        data_b = rotateBy(data_b, rot_amt);
+        mask = rotateBitsBy(mask, rot_amt);
 
         // Track write burst count
         if (writeBurstCnt == burst_idx_last)
@@ -309,9 +313,12 @@ module mkDDRBank
         // Rotate read into position based on word index as I think
         // DDR controllers do.  Word indexing is not well tested!
         // Rotate is the oposite directino of write rotation.
-        data_b = reverse(rotateBy(reverse(data_b),
-                                  zeroExtend(unpack(word_idx)) *
-                                  fromInteger(valueOf(FPGA_DDR_BYTES_PER_WORD))));
+        Integer bytes_per_word =
+            (valueOf(FPGA_DDR_BYTES_PER_BEAT) == valueOf(FPGA_DDR_BYTES_PER_WORD)) ?
+                 0 : valueOf(FPGA_DDR_BYTES_PER_WORD);
+        UInt#(TLog#(FPGA_DDR_BYTES_PER_BEAT)) rot_amt =
+           zeroExtend(unpack(word_idx)) * fromInteger(bytes_per_word);
+        data_b = reverse(rotateBy(reverse(data_b), rot_amt));
 
         readRespQ.enq(tuple2(unpack(pack(data_b)), is_last_in_burst));
     endrule

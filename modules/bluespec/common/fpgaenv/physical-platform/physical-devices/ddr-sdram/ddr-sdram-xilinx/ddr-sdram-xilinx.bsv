@@ -52,14 +52,18 @@ typedef Bit#(FPGA_DDR_WORD_SZ) FPGA_DDR_WORD;
 typedef `DRAM_BEAT_WIDTH FPGA_DDR_DUALEDGE_BEAT_SZ;
 typedef Bit#(FPGA_DDR_DUALEDGE_BEAT_SZ) FPGA_DDR_DUALEDGE_BEAT;
 
+typedef TDiv#(FPGA_DDR_DUALEDGE_BEAT_SZ, FPGA_DDR_WORD_SZ) FPGA_DDR_WORDS_PER_BEAT;
+typedef TDiv#(FPGA_DDR_DUALEDGE_BEAT_SZ, 8) FPGA_DDR_BYTES_PER_BEAT;
+typedef TDiv#(FPGA_DDR_WORD_SZ, 8) FPGA_DDR_BYTES_PER_WORD;
+
 // The DRAM controller reads and writes multiple dual-edge data values for
 // a single request.  The number of dual-edge data values per request is:
 typedef `DRAM_MIN_BURST FPGA_DDR_BURST_LENGTH;
 
 // Each byte in a write may be disabled for writes using a bit mask.
 // !!! NOTE: to conform to the controller, a mask bit is 0 to request a write !!!
-typedef Bit#(TDiv#(FPGA_DDR_WORD_SZ, 8)) FPGA_DDR_WORD_MASK;
-typedef Bit#(TDiv#(FPGA_DDR_DUALEDGE_BEAT_SZ, 8)) FPGA_DDR_DUALEDGE_BEAT_MASK;
+typedef Bit#(FPGA_DDR_BYTES_PER_WORD) FPGA_DDR_WORD_MASK;
+typedef Bit#(FPGA_DDR_BYTES_PER_BEAT) FPGA_DDR_DUALEDGE_BEAT_MASK;
 
 // Capacity of the memory (addressing FPGA_DDR_WORDs):
 typedef `DRAM_ADDR_BITS FPGA_DDR_ADDRESS_SZ;
@@ -414,7 +418,7 @@ module mkDDRBank#(Clock rawClock, Reset rawReset)
     
     rule initPhase2 ((state == STATE_init) && (initPhase == 2));
         // Data to write
-        Vector#(TDiv#(FPGA_DDR_DUALEDGE_BEAT_SZ, 8), Bit#(8)) init_data = replicate('haa);
+        Vector#(FPGA_DDR_BYTES_PER_BEAT, Bit#(8)) init_data = replicate('haa);
 
         if (initPart == 0)
         begin
@@ -430,7 +434,7 @@ module mkDDRBank#(Clock rawClock, Reset rawReset)
             syncWriteDataQ.enq(tuple2(pack(init_data), 0));
 
             // Point to next dual-edge data address
-            let next_addr = initAddr + fromInteger(valueOf(TMul#(FPGA_DDR_BURST_LENGTH, TDiv#(FPGA_DDR_DUALEDGE_BEAT_SZ, FPGA_DDR_WORD_SZ))));
+            let next_addr = initAddr + fromInteger(valueOf(TMul#(FPGA_DDR_BURST_LENGTH, FPGA_DDR_WORDS_PER_BEAT)));
             initAddr <= next_addr;
 
             if (next_addr == 0)
