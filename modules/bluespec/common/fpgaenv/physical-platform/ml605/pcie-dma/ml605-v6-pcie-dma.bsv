@@ -76,23 +76,23 @@ module mkPhysicalPlatform
     // action should be to instantiate the Clocks Physical Device and obtain interfaces
     // to clock and reset the other devices with.
     
-    CLOCKS_DEVICE clocks_device <- mkClocksDevice();
+    CLOCKS_DEVICE clocks <- mkClocksDevice();
     
-    Clock clk = clocks_device.driver.clock;
-    Reset rst = clocks_device.driver.reset;
+    Clock clk = clocks.driver.clock;
+    Reset rst = clocks.driver.reset;
 
     // There is a strong assumption that the clock for this module is the 200MHz
     // differential clock.
-    DDR_DEVICE sdram <- mkDDRDevice(clocks_device.driver.rawClock,
-                                    clocks_device.driver.rawReset, 
-                                    clocked_by clocks_device.driver.clock,
-                                    reset_by clocks_device.driver.reset);
+    DDR_DEVICE sdram <- mkDDRDevice(clocks.driver.rawClock,
+                                    clocks.driver.rawReset, 
+                                    clocked_by clocks.driver.clock,
+                                    reset_by clocks.driver.reset);
 
     // Next, create the physical device that can trigger a soft reset. Pass along the
     // interface to the trigger module that the clocks device has given us.
 
-    PCIE_DEVICE pcie <- mkPCIEDevice(clocks_device.driver.rawClock,
-                                     clocks_device.driver.rawReset);
+    PCIE_DEVICE pcie <- mkPCIEDevice(clocks.driver.rawClock,
+                                     clocks.driver.rawReset);
 
     //
     // Pass reset from PCIe to the model.  The host holds reset long enough that
@@ -102,7 +102,7 @@ module mkPhysicalPlatform
                                     clocked_by pcie.driver.clock,
                                     reset_by pcie.driver.reset);
     ReadOnly#(Bool) assertModelReset <-
-        mkNullCrossingWire(clocks_device.driver.clock,
+        mkNullCrossingWire(clocks.driver.clock,
                            pcieInReset,
                            clocked_by pcie.driver.clock,
                            reset_by pcie.driver.reset);
@@ -114,7 +114,7 @@ module mkPhysicalPlatform
 
     (* fire_when_enabled *)
     rule triggerModelReset (assertModelReset);
-        clocks_device.softResetTrigger.reset();
+        clocks.softResetTrigger.reset();
     endrule
 
 
@@ -123,12 +123,12 @@ module mkPhysicalPlatform
     //
     interface PHYSICAL_DRIVERS physicalDrivers;
         interface CLOCKS_DRIVER clocksDriver;
-            interface Clock clock = clocks_device.driver.clock;
-            interface Reset reset = clocks_device.driver.reset;
+            interface Clock clock = clocks.driver.clock;
+            interface Reset reset = clocks.driver.reset;
 
-            interface Clock rawClock = clocks_device.driver.rawClock;
-            interface Reset rawReset = clocks_device.driver.rawReset;
-        endinterface //= clocks_device.driver;
+            interface Clock rawClock = clocks.driver.rawClock;
+            interface Reset rawReset = clocks.driver.rawReset;
+        endinterface //= clocks.driver;
 
         interface pcieDriver = pcie.driver;
         interface ddrDriver  = sdram.driver;
@@ -138,7 +138,7 @@ module mkPhysicalPlatform
     // Aggregate the wires
     //
     interface TOP_LEVEL_WIRES topLevelWires;
-        interface clocksWires = clocks_device.wires;
+        interface clocksWires = clocks.wires;
         interface pcieWires   = pcie.wires;
         interface ddrWires    = sdram.wires;
     endinterface

@@ -5,7 +5,6 @@
 
 %sources -t BSV -v PUBLIC pcie-virtex6.bsv
 %sources -t UCF -v PRIVATE pcie-virtex6.ucf
-%sources -t XCF -v PRIVATE pcie-virtex6.xcf
 
 %sources -t VERILOG -v PRIVATE gtx_drp_chanalign_fix_3752_v6.v
 %sources -t VERILOG -v PRIVATE gtx_rx_valid_filter_v6.v

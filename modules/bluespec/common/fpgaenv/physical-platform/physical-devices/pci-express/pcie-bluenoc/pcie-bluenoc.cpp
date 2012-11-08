@@ -70,13 +70,6 @@ PCIE_DEVICE_CLASS::Init()
         exit(EXIT_FAILURE);
     }
 
-    if (posix_memalign((void**)&outBuf, 128, 65536) != 0 ||
-		posix_memalign((void**)&inBuf, 128, 65536) != 0)
-    {
-		fprintf (stderr, "PCIe Device: Failed to memalign I/O buffers: %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
-	}
-
     //
     // Get board info
     //
@@ -140,8 +133,8 @@ PCIE_DEVICE_CLASS::Probe()
 
 
 // blocking read
-UMF_CHUNK
-PCIE_DEVICE_CLASS::Read()
+ssize_t
+PCIE_DEVICE_CLASS::Read(void *buf, size_t count)
 {
     struct pollfd pcie_poll;
     pcie_poll.fd = pcieDev;
@@ -149,26 +142,18 @@ PCIE_DEVICE_CLASS::Read()
 
     while (true)
     {
+        // Using poll to protect reads seem to prevent hangs
         int result = poll(&pcie_poll, 1, -1);
         if (result <= 0) continue;
 
-        read(pcieDev, inBuf, bpb);
-        UMF_CHUNK* chunk = (UMF_CHUNK*)&inBuf[4];
-        return *chunk;
+        return read(pcieDev, buf, count);
     }
 }
 
 
 // write
 void
-PCIE_DEVICE_CLASS::Write(
-    UMF_CHUNK chunk)
+PCIE_DEVICE_CLASS::Write(const void *buf, size_t count)
 {
-    outBuf[0] = 4;          // Destination address
-    outBuf[1] = 0;          // Source address
-    outBuf[2] = 4;          // Data size
-    outBuf[3] = 1;          // Send immediately (don't wait)
-    UMF_CHUNK* oc = (UMF_CHUNK*)&outBuf[4];
-    *oc = chunk;
-    assert(write(pcieDev, outBuf, max(8, bpb)) == max(8, bpb));
+    VERIFY(write(pcieDev, buf, count) == count);
 }

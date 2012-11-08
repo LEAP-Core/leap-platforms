@@ -335,6 +335,7 @@ INST    "*/u_ddr3/*"                                    AREA_GROUP = "AG_ddr3";
 AREA_GROUP "AG_ddr3"                                    RANGE = SLICE_X58Y132:SLICE_X97Y196;
 
 INST "*_dramCtrl/u_ddr3/u_memc_ui_top/*/rst_delayed_*"  TIG;
+INST "*_dramCtrl/u_ddr3/u_memc_ui_top/*/dfi_init_complete" TIG;
 
 INST "*_dramCtrl/u_ddr3/u_infrastructure/rstdiv0_sync_r*" TNM=TG_ram_clk;
 INST "*_dramCtrl/u_ddr3/u_memc_ui_top/u_ui_top/ui_cmd0/app_rdy_r" TNM=TG_ram_clk;

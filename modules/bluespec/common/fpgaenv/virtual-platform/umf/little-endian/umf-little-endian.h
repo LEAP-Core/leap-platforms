@@ -145,6 +145,7 @@ class UMF_MESSAGE_CLASS: public PLATFORMS_MODULE_CLASS,
     void               StartReverseExtract();
     bool               CanReverseExtract() const;
     UMF_CHUNK          ReverseExtractChunk();
+    void               ReverseExtractChunks(int nchunks, UMF_CHUNK dst[]);
     // Manage full extraction, calling routings above and returning the number
     // of chunks extracted.
     int                ReverseExtractAllChunks(UMF_CHUNK dst[]);
@@ -516,6 +517,24 @@ UMF_MESSAGE_CLASS::ReverseExtractChunk()
     // copy the data behind the pointer and rewind the pointer
     readIndex -= sizeof(UMF_CHUNK);
     return *(UMF_CHUNK *)(&message[readIndex]);
+}
+
+//
+// ReverseExtractChunks --
+//     Copy multiple chunks in reverse order.
+//
+inline void
+UMF_MESSAGE_CLASS::ReverseExtractChunks(int nchunks, UMF_CHUNK dst[])
+{
+    ASSERTX(nchunks * sizeof(UMF_CHUNK) <= readIndex);
+    const UMF_CHUNK* src = (UMF_CHUNK *)(&message[readIndex]);
+
+    readIndex -= nchunks * sizeof(UMF_CHUNK);
+
+    while (nchunks--)
+    {
+        *dst++ = *--src;
+    }
 }
 
 //

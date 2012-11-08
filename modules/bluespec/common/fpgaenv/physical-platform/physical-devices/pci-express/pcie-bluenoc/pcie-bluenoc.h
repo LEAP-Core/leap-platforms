@@ -19,6 +19,8 @@
 #ifndef __PCIE__
 #define __PCIE__
 
+#include <unistd.h>
+
 #include "platforms-module.h"
 #include "awb/provides/umf.h"
 #include "awb/provides/command_switches.h"
@@ -58,9 +60,6 @@ class PCIE_DEVICE_CLASS: public PLATFORMS_MODULE_CLASS
     int pcieDev;                      // Device file descriptor
     int bpb;                          // Bytes per beat
 
-    unsigned char* outBuf;
-    unsigned char* inBuf;
-
   public:
     PCIE_DEVICE_CLASS(PLATFORMS_MODULE);
     ~PCIE_DEVICE_CLASS();
@@ -69,8 +68,18 @@ class PCIE_DEVICE_CLASS: public PLATFORMS_MODULE_CLASS
     void Init();                       // uninit
     void Uninit();                     // uninit
     bool Probe();                      // probe for data
-    UMF_CHUNK Read();                  // nonblocking read
-    void Write(UMF_CHUNK chunk);       // write
+
+    // Read up to count bytes into buffer.  The buffer must be 128-byte aligned
+    // for use with the PCIe driver.  The actual number of bytes read is
+    // returned.
+    ssize_t Read(void *buf, size_t count);
+
+    // Write count bytes to the PCIe device.  Like Read(), buf must be
+    // 128-byte aligned.
+    void Write(const void *buf, size_t count);
+
+    // Number of bytes per beat in the FPGA-side BlueNoC driver.
+    UINT32 BytesPerBeat() const { return bpb; }
 };
 
 #endif
