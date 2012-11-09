@@ -26,11 +26,11 @@ import Vector::*;
 `define POLL_INTERVAL   0
 
 // BDPI imports
-import "BDPI" function Action                 pipe_init();
-import "BDPI" function ActionValue#(Bit#(8))  pipe_open(Bit#(8) programID);
-import "BDPI" function ActionValue#(Bit#(65)) pipe_read(Bit#(8) handle);
-import "BDPI" function ActionValue#(Bit#(1))  pipe_can_write(Bit#(8) handle);
-import "BDPI" function Action   pipe_write(Bit#(8) handle, Bit#(64) data);
+import "BDPI" function Action                  pipe_init();
+import "BDPI" function ActionValue#(Bit#(8))   pipe_open(Bit#(8) programID);
+import "BDPI" function ActionValue#(Bit#(129)) pipe_read(Bit#(8) handle);
+import "BDPI" function ActionValue#(Bit#(1))   pipe_can_write(Bit#(8) handle);
+import "BDPI" function Action   pipe_write(Bit#(8) handle, Bit#(128) data);
                   
 import "BDPI" function Bool                   pipe_receive_reset();
 import "BDPI" function Action                 pipe_clear_reset();
@@ -106,12 +106,11 @@ module mkUNIXPipeDevice#(SOFT_RESET_TRIGGER softResetTrigger)
     // probe C code for incoming chunk
     rule read_bdpi (state == STATE_ready && pollCounter == 0);
         let msg <- pipe_read(handle);
-        Bit#(1) flag = msg[64];
-        Bit#(64) data = msg[63:0];
+        Bit#(1) flag = msg[128];
 
         if (flag != `PIPE_NULL)
         begin
-            UMF_CHUNK chunk = truncate(data);
+            UMF_CHUNK chunk = truncate(msg);
             readBuffer.enq(chunk);
         end
         pollCounter <= `POLL_INTERVAL;

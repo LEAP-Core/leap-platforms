@@ -5,5 +5,5 @@
 
 %public pcie-bluenoc-ifc.bsv
 
-%param PCIE_BYTES_PER_BEAT   8     "BlueNoC bytes per beat"
+%param PCIE_BYTES_PER_BEAT   16    "BlueNoC bytes per beat"
 %param PCIE_LANES            8     "PCIe lanes"

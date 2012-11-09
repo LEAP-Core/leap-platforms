@@ -48,6 +48,8 @@ using namespace std;
 typedef UINT32 UMF_CHUNK;
 #elif (UMF_CHUNK_BYTES == 8)
 typedef UINT64 UMF_CHUNK;
+#elif (UMF_CHUNK_BYTES == 16)
+typedef UINT128 UMF_CHUNK;
 #else
 #error Unsupported UMF_CHUNK_BYTES
 #endif

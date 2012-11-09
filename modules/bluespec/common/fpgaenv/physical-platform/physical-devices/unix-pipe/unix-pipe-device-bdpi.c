@@ -203,7 +203,7 @@ void pipe_read(unsigned int* resultptr, unsigned char handle)
 
     if (! initialized)
     {
-        resultptr[2] = PIPE_NULL;
+        resultptr[4] = PIPE_NULL;
         return;
     }
 
@@ -294,20 +294,8 @@ void pipe_read(unsigned int* resultptr, unsigned char handle)
     /* see if we have sufficient data to complete a chunk */
     if ((channel->ibTail - channel->ibHead) >= BDPI_CHUNK_BYTES)
     {
-        /* pack chunk into a UINT32 */
-        int i;
-        unsigned long long retval = 0;
-
-        /* the following code is endian-agnostic */
-        for (i = 0; i < BDPI_CHUNK_BYTES; i++)
-        {
-            unsigned long long byte = (unsigned long long)channel->inputBuffer[channel->ibHead];
-            retval |= (byte << (i * 8));
-            channel->ibHead = channel->ibHead + 1;
-        }
-
-        /* sanity checks */
-        assert(channel->ibHead <= channel->ibTail);
+        memcpy(resultptr, &channel->inputBuffer[channel->ibHead], BDPI_CHUNK_BYTES);
+        channel->ibHead = channel->ibHead + BDPI_CHUNK_BYTES;
 
         /* now that we have a full chunk, see if head and tail are
          * aligned, and if so, reset both pointers */
@@ -317,15 +305,12 @@ void pipe_read(unsigned int* resultptr, unsigned char handle)
             channel->ibTail = 0;
         }
 
-        /* chunk ready, return */
-        resultptr[0] = (unsigned int)retval;
-        resultptr[1] = (unsigned int)(retval >> 32);
-        resultptr[2] = 0;
+        resultptr[4] = 0;
         return;
     }
 
     /* if we're here, then there's no data on the incoming channel */
-    resultptr[2] = PIPE_NULL;
+    resultptr[4] = PIPE_NULL;
     return;
 }
 
@@ -376,12 +361,9 @@ unsigned char pipe_can_write(unsigned char handle)
 
 
 /* write one chunk of data */
-void pipe_write(unsigned char handle, unsigned long long data)
+void pipe_write(unsigned char handle, unsigned int* data)
 {   
     int bytes_written;
-    unsigned char databuf[BDPI_CHUNK_BYTES];
-    unsigned long long mask;
-    int i;
     Channel *channel;
 
     if (! initialized)
@@ -394,17 +376,8 @@ void pipe_write(unsigned char handle, unsigned long long data)
     channel = &OCHT[handle];
     assert(channel->open);
 
-    /* unpack UINT32 into byte sequence */
-    mask = 0xFF;
-    for (i = 0; i < BDPI_CHUNK_BYTES; i++)
-    {
-        unsigned char byte = (mask & data) >> (i * 8);
-        databuf[i] = (unsigned char)byte;
-        mask = mask << 8;
-    }
-
     /* send message on pipe */
-    bytes_written = write(DESC_FPGA_2_HOST, databuf, BDPI_CHUNK_BYTES);
+    bytes_written = write(DESC_FPGA_2_HOST, data, BDPI_CHUNK_BYTES);
     if (bytes_written == -1)
     {
         fprintf(stderr, "         HW side exiting (pipe closed)\n");

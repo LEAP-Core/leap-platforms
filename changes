@@ -14974,3 +14974,23 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr
 - Updates for ML605 timing:
   - Add a DDR TIG
   - Remove unnecessary xcf constraints for PCIe
+
+----------
+mcadler     Date: Thu Nov  8 20:14:16 EST 2012  CSN: CSN-leap-platforms-645
+                  Fri Nov  9 01:14:16 UTC 2012
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian
+ umf-little-endian.h       Locally Modified          644 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc
+ pcie-bluenoc-ifc.awb      Locally Modified          644 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe
+ unix-pipe-device.bsv      Locally Modified          644 
+ unix-pipe-device-bdpi.c   Locally Modified          644 
+ unix-pipe-device-bdpi.h   Locally Modified          644 
+
+Support UMF_CHUNK sizes up to 16 bytes.  Make the default ML605 BlueNoC 16
+byes per beat.
+

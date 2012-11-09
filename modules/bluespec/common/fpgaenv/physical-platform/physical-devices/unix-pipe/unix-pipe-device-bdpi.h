@@ -62,12 +62,12 @@ typedef struct _Channel
 /* interface methods */
 unsigned char pipe_open(unsigned char programID);
 
-// Returns 65 useful bits.  The first unsigned long long is data.  The next
+// Returns 129 useful bits.  The first 128 bits are data.  The next
 // bit is set for PIPE_NULL (no new data).
 void pipe_read(unsigned int* resultptr, unsigned char handle);
 
 // Return 1 if can write, 0 if can not.
 unsigned char pipe_can_write(unsigned char handle);
-void pipe_write(unsigned char handle, unsigned long long data);
+void pipe_write(unsigned char handle, unsigned int* data);
 
 #endif
