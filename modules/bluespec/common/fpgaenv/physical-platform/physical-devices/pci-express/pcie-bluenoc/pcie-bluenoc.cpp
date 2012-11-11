@@ -27,11 +27,9 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <sys/ioctl.h>
-#include <sys/mman.h>
 #include <poll.h>
 #include <pthread.h>
 #include <error.h>
-#include <sys/time.h>
 #include <assert.h>
 
 #include "asim/syntax.h"
@@ -63,7 +61,9 @@ PCIE_DEVICE_CLASS::Init()
     //
     // Reset the FPGA -- allows running without reprogramming
     //
-    int res = ioctl(pcieDev, BNOC_SOFT_RESET);
+    int res = ioctl(pcieDev, BNOC_DEACTIVATE);
+    res = ioctl(pcieDev, BNOC_REACTIVATE);
+    res = ioctl(pcieDev, BNOC_SOFT_RESET);
     if (res < 0)
     {
         fprintf (stderr, "Error: Failed to reset %s: %s\n", dev_file, strerror(errno));
@@ -77,6 +77,11 @@ PCIE_DEVICE_CLASS::Init()
 	ioctl(pcieDev, BNOC_IDENTIFY, &board_info);
     assert(board_info.is_active);
     bpb = board_info.bytes_per_beat;
+
+    if (Probe())
+    {
+        cerr << "*** Warning:  PCIe BlueNoC channel isn't empty on startup ***" << endl;
+    }
 
     if (switches.RunTests())
     {
@@ -136,18 +141,7 @@ PCIE_DEVICE_CLASS::Probe()
 ssize_t
 PCIE_DEVICE_CLASS::Read(void *buf, size_t count)
 {
-    struct pollfd pcie_poll;
-    pcie_poll.fd = pcieDev;
-    pcie_poll.events = POLLIN | POLLPRI;
-
-    while (true)
-    {
-        // Using poll to protect reads seem to prevent hangs
-        int result = poll(&pcie_poll, 1, -1);
-        if (result <= 0) continue;
-
-        return read(pcieDev, buf, count);
-    }
+    return read(pcieDev, buf, count);
 }
 
 

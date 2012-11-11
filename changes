@@ -14994,3 +14994,25 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/uni
 Support UMF_CHUNK sizes up to 16 bytes.  Make the default ML605 BlueNoC 16
 byes per beat.
 
+
+----------
+mcadler     Date: Sun Nov 11 13:21:20 EST 2012  CSN: CSN-leap-platforms-646
+                  Sun Nov 11 18:21:20 UTC 2012
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc
+ pcie-bluenoc.cpp          Locally Modified          645 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc-virtex6
+ pcie-virtex6.bsv          Locally Modified          645 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/differential
+ differential-clocks-device.bsv Locally Modified          645 
+
+- Put back deactivate/reactivate in addition to soft reset.  Deactivating seems to do a
+  better job of clearing old I/O state.
+
+- No longer need to protect read() with poll() because the FPGA-side channel code
+  is now better about sending only complete packets.
+
+- Tweak reset timing.

@@ -52,10 +52,10 @@ module mkPCIEBlueNoCDevice#(Clock pcieSysClkBuf, Reset pcieSysRstN)
 
     // Extract the clocks and resets from the endpoint.
     Clock epClock250  = ep.trn.clk;
-    Reset epReset250 <- mkAsyncReset(4, ep.trn.reset_n, epClock250);
+    Reset epReset250 <- mkAsyncReset(8, ep.trn.reset_n, epClock250);
 
     Clock epClock125  = ep.trn.clk2;
-    Reset epReset125 <- mkAsyncReset(4, ep.trn.reset_n, epClock125);
+    Reset epReset125 <- mkAsyncReset(8, ep.trn.reset_n, epClock125);
 
     // Tie off some portions of the endpoint interface.
     mkTieOff(ep.cfg);
@@ -149,7 +149,7 @@ module mkPCIEBlueNoCDevice#(Clock pcieSysClkBuf, Reset pcieSysRstN)
 
     // Create a reset for the NoC design which incorporates soft reset through
     // the bridge.
-    MakeResetIfc soft_reset <- mkReset(4, True,
+    MakeResetIfc soft_reset <- mkReset(16, True,
                                        epClock125, clocked_by epClock125,
                                        reset_by epReset125);
 
