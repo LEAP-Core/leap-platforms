@@ -15016,3 +15016,30 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clo
   is now better about sending only complete packets.
 
 - Tweak reset timing.
+
+----------
+mcadler     Date: Mon Nov 12 15:32:31 EST 2012  CSN: CSN-leap-platforms-647
+                  Mon Nov 12 20:32:31 UTC 2012
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-xilinx
+ ddr-sdram-xilinx.bsv      Locally Modified          646 
+ ddr-sdram-xilinx.ucf      Locally Modified          646 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-xilinx/ddr2-sdram-v5-htg
+ ddr2-sdram-device.bsv     Locally Modified          646 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-bram
+ ddr-sdram-bram.bsv        Locally Modified          646 
+
+- Reset was not synchronized between DRAM and model domains, allowing the
+  model to make requests when the DRAM was in reset.  In addition, the DRAM
+  domain was reset only after programming and not by a soft reset.  Fixed
+  both these problems.
+
+- Correct the driver's assumption that DRAM bursts are always 2 beats.
+
+- Add debug scan support for the DRAM driver.  Platform drivers can't use
+  soft connections.  Instead, scan state is exported as a list that is
+  ultimately connected to a debug scan node by the local memory virtual
+  device.

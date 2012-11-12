@@ -19,6 +19,7 @@
 import FIFO::*;
 import FIFOF::*;
 import Vector::*;
+import List::*;
 
 
 `include "awb/provides/librl_bsv_base.bsh"
@@ -87,6 +88,8 @@ interface DDR_DRIVER;
     // FPGA_DDR_BURST_LENGTH times for every write request.  The order of
     // writeReq() and writeData() calls are not important.
     method Action writeData(FPGA_DDR_DUALEDGE_BEAT data, FPGA_DDR_DUALEDGE_BEAT_MASK mask);
+
+    method List#(Tuple2#(String, Bool)) debugScanState();
 
 `ifndef DRAM_DEBUG_Z
     // Methods enabled only for debugging the controller:
@@ -378,4 +381,7 @@ module mkDDRBank
         writeDataQ.enq(tuple2(data, mask));
     endmethod
 
+    method List#(Tuple2#(String, Bool)) debugScanState();
+        return List::nil;
+    endmethod
 endmodule

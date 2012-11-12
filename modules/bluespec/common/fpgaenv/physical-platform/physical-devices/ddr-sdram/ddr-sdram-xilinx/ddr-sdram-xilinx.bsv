@@ -26,6 +26,7 @@ import Clocks::*;
 import FIFO::*;
 import FIFOF::*;
 import Vector::*;
+import List::*;
 import RWire::*;
 
 
@@ -95,6 +96,8 @@ interface DDR_DRIVER;
     // FPGA_DDR_BURST_LENGTH times for every write request.  The order of
     // writeReq() and writeData() calls are not important.
     method Action writeData(FPGA_DDR_DUALEDGE_BEAT data, FPGA_DDR_DUALEDGE_BEAT_MASK mask);
+
+    method List#(Tuple2#(String, Bool)) debugScanState();
 
 `ifndef DRAM_DEBUG_Z
     // Methods enabled only for debugging the controller:
@@ -185,11 +188,16 @@ module mkDDRBank#(Clock rawClock, Reset rawReset)
     
     Clock modelClock <- exposeCurrentClock();
     Reset modelReset <- exposeCurrentReset();
-    
+
+    Reset modelResetInRaw <- mkAsyncReset(4, modelReset, rawClock);
+    Reset modelOrRawReset <- mkResetEither(modelResetInRaw, rawReset,
+                                           clocked_by rawClock);
+
     //
     // Instantiate the Xilinx Memory Controller
     //
-    XILINX_DRAM_CONTROLLER dramCtrl <- mkXilinxDRAMController(rawClock, rawReset);
+    XILINX_DRAM_CONTROLLER dramCtrl <-
+        mkXilinxDRAMController(rawClock, modelOrRawReset);
     
     // Clock the glue logic with the Controller's clock
     Clock controllerClock = dramCtrl.controller_clock;
@@ -197,6 +205,11 @@ module mkDDRBank#(Clock rawClock, Reset rawReset)
 
     // State
     Reg#(FPGA_DDR_STATE) state <- mkReg(STATE_init);
+
+    CrossingReg#(Bool) dramReady <-
+        mkNullCrossingReg(modelClock, False,
+                          clocked_by controllerClock, reset_by controllerReset);
+    Reg#(Bool) dramReady_Model <- mkReg(False);
 
     //
     // Synchronizers from Controller to Model
@@ -211,9 +224,6 @@ module mkDDRBank#(Clock rawClock, Reset rawReset)
     // Synchronizers from Model to Controller
     //
 
-    // Model requests a reset
-    SyncFIFOIfc#(Bool) syncResetQ <- mkSyncFIFO(2, modelClock, modelReset, controllerClock);
-
     // Request queue
     SyncFIFOIfc#(FPGA_DDR_REQUEST) syncRequestQ <- mkSyncFIFO(2, modelClock, modelReset, controllerClock);
 
@@ -221,9 +231,6 @@ module mkDDRBank#(Clock rawClock, Reset rawReset)
     SyncFIFOIfc#(Tuple2#(FPGA_DDR_DUALEDGE_BEAT, FPGA_DDR_DUALEDGE_BEAT_MASK))
         syncWriteDataQ <- mkSyncFIFO(2, modelClock, modelReset, controllerClock);
     
-    Reg#(Bool) writePending <- mkReg(False, clocked_by controllerClock, reset_by controllerReset);
-    
-    ReadOnly#(Bit#(1)) initDone  <- mkNullCrossingWire(modelClock, pack(dramCtrl.init_done()), clocked_by controllerClock, reset_by controllerReset);
 `ifdef DEBUG_DDR3
     ReadOnly#(Bit#(1)) cmdRdy  <- mkNullCrossingWire(modelClock, pack(dramCtrl.cmd_rdy()), clocked_by controllerClock, reset_by controllerReset);
     ReadOnly#(Bit#(1)) enqRdy  <- mkNullCrossingWire(modelClock, pack(dramCtrl.enq_rdy()), clocked_by controllerClock, reset_by controllerReset); 
@@ -245,7 +252,7 @@ module mkDDRBank#(Clock rawClock, Reset rawReset)
     // Push incoming data into read buffer. This rule *MUST* fire if the explicit
     // conditions are true, else we will lose data.
     (* fire_when_enabled *)
-    rule readDataToBuffer (dramCtrl.init_done());
+    rule readDataToBuffer (dramReady);
         syncReadDataQ.enq(dramCtrl.dequeue_data());
     endrule
 
@@ -254,8 +261,7 @@ module mkDDRBank#(Clock rawClock, Reset rawReset)
     // Rules for synchronizing from Model to Controller
     //
     
-    rule processReadRequest (dramCtrl.init_done() &&&
-                             ! syncResetQ.notEmpty() &&&
+    rule processReadRequest (dramReady &&&
                              syncRequestQ.first() matches tagged DRAM_READ .address);
         syncRequestQ.deq();
         dramCtrl.enqueue_address(READ, zeroExtend(address));
@@ -270,16 +276,23 @@ module mkDDRBank#(Clock rawClock, Reset rawReset)
     // registers within the DRAM clock domain before forwarding a request.
     //
 
-    Reg#(Vector#(FPGA_DDR_BURST_LENGTH, FPGA_DDR_DUALEDGE_BEAT)) writeValue <- mkRegU(clocked_by controllerClock, reset_by controllerReset);
-    Reg#(Vector#(FPGA_DDR_BURST_LENGTH, FPGA_DDR_DUALEDGE_BEAT_MASK)) writeValueMask <- mkRegU(clocked_by controllerClock, reset_by controllerReset);
-    Reg#(Bit#(TLog#(TAdd#(1, FPGA_DDR_BURST_LENGTH)))) writeBurstIdx <- mkReg(0, clocked_by controllerClock, reset_by controllerReset);
+    Vector#(FPGA_DDR_BURST_LENGTH, Reg#(FPGA_DDR_DUALEDGE_BEAT)) writeValue <-
+        replicateM(mkRegU(clocked_by controllerClock, reset_by controllerReset));
+
+    Vector#(FPGA_DDR_BURST_LENGTH, Reg#(FPGA_DDR_DUALEDGE_BEAT_MASK)) writeValueMask <-
+        replicateM(mkRegU(clocked_by controllerClock, reset_by controllerReset));
+
+    Reg#(Bit#(TLog#(TAdd#(1, FPGA_DDR_BURST_LENGTH)))) writeBurstIdx <-
+        mkReg(0, clocked_by controllerClock, reset_by controllerReset);
+
+    Reg#(Bit#(TLog#(TAdd#(1, FPGA_DDR_BURST_LENGTH)))) writeEmitIdx <-
+        mkReg(0, clocked_by controllerClock, reset_by controllerReset);
 
     //
     // copyWriteData --
     //     Copy incoming write data from the sync FIFO to local registers.
     //
-    rule copyWriteData (writeBurstIdx != fromInteger(valueOf(FPGA_DDR_BURST_LENGTH)) &&
-                        ! syncResetQ.notEmpty());
+    rule copyWriteData (writeBurstIdx != fromInteger(valueOf(FPGA_DDR_BURST_LENGTH)));
         match {.data, .mask} = syncWriteDataQ.first();
         syncWriteDataQ.deq();        
 
@@ -294,10 +307,9 @@ module mkDDRBank#(Clock rawClock, Reset rawReset)
     //     Stage 0 of write request.  Send control message and first half of data
     //     to the memory controller.
     //
-    rule processWriteRequest0 (dramCtrl.init_done() &&&
-                               ! syncResetQ.notEmpty() &&&
-                               ! writePending &&&
+    rule processWriteRequest0 (dramReady &&&
                                (writeBurstIdx == fromInteger(valueOf(FPGA_DDR_BURST_LENGTH))) &&&
+                               (writeEmitIdx == 0) &&&
                                syncRequestQ.first() matches tagged DRAM_WRITE .address);
 
         syncRequestQ.deq();
@@ -308,40 +320,40 @@ module mkDDRBank#(Clock rawClock, Reset rawReset)
         // Data + mask
         dramCtrl.enqueue_data(writeValue[0], writeValueMask[0], False);
                     
+        // Write the rest of the beats
+        if (valueOf(FPGA_DDR_BURST_LENGTH) != 1)
+        begin
+            writeEmitIdx <= 1;
+        end
+
+        // Allow new incoming data.  It is safe to allow incoming data at the
+        // same time as the current write is emitted since write beats must
+        // go out in consecutive cycles.
         writeBurstIdx <= 0;
-        writePending <= True;
     endrule
     
     //
     // processWriteRequest 1--
     //   Stage two of write request.  Forward remainder of data to the memory.
-    //   This rule *MUST* fire in the cycle immediately after the previous rule.
+    //   This rule *MUST* fire in the cycles immediately after the previous rule.
     //
     (* fire_when_enabled *)
-    rule processWriteRequest1 (dramCtrl.init_done() &&
-                               writePending);
+    rule processWriteRequest1 (writeEmitIdx != 0);
         // data + mask
-        dramCtrl.enqueue_data(writeValue[1], writeValueMask[1], True);
+        dramCtrl.enqueue_data(writeValue[writeEmitIdx],
+                              writeValueMask[writeEmitIdx],
+                              True);
         
-        writePending <= False;
+        if (writeEmitIdx == fromInteger(valueOf(TSub#(FPGA_DDR_BURST_LENGTH, 1))))
+        begin
+            // Done
+            writeEmitIdx <= 0;
+        end
+        else
+        begin
+            writeEmitIdx <= writeEmitIdx + 1;
+        end
     endrule    
-
-
-    //
-    // processModelReset --
-    //     Model reset needs to clear out partial writes.
-    //
-    rule processModelReset (dramCtrl.init_done());
-        syncResetQ.deq();
-
-        writeBurstIdx <= 0;
-
-        if (syncRequestQ.notEmpty())
-            syncRequestQ.deq();
-
-        if (syncWriteDataQ.notEmpty())
-            syncWriteDataQ.deq();
-    endrule
 
 
     // ====================================================================
@@ -350,91 +362,88 @@ module mkDDRBank#(Clock rawClock, Reset rawReset)
     //
     // ====================================================================
 
-    Reg#(Bit#(2)) initPhase <- mkReg(0);
-
-    Reg#(Bit#(10)) init0Loop <- mkReg(0);
-
-    //
-    // initPhase0 --
-    //     A delay loop to make sure reset settles.  Also, the DDR low level
-    //     driver is not reset by a soft reset.  There may be some reads left
-    //     over from the last run.  Sync them.
-    //
-    rule initPhase0 ((state == STATE_init) && (initPhase == 0));
-        if (syncReadDataQ.notEmpty())
-        begin
-            syncReadDataQ.deq();
-        end
-
-        // Reset partial store state in the DDR clock domain.  Send a few times
-        // so the incoming request queue is guaranteed empty.
-        if (init0Loop < 8)
-            syncResetQ.enq(?);
-
-        if (init0Loop == maxBound)
-            initPhase <= 1;
-        
-        init0Loop <= init0Loop + 1;
+    (* fire_when_enabled, no_implicit_conditions *)
+    rule dramReadyInit (True);
+        dramReady <= dramCtrl.init_done();
     endrule
 
+    (* fire_when_enabled, no_implicit_conditions *)
+    rule dramReadyToModel (True);
+        dramReady_Model <= dramReady.crossed();
+    endrule
 
-    Reg#(Bit#(2)) init1Loop <- mkReg(0);
-    Reg#(Bit#(1)) datasink  <- mkReg(0);
+    Reg#(Bit#(1)) initPhase <- mkReg(0);
+    Reg#(Bit#(TLog#(TAdd#(FPGA_DDR_BURST_LENGTH, 1)))) initBurstIdx <- mkReg(0);
 
     // UGLY HACK
     // Initialization rules: write and read some junk into the DRAM so that
     // the Sync FIFOs don't get optimized away by the synthesis tools. If the
     // Sync FIFOs get optimized away, then the TIG constraints in the UCF
     // file become invalid and ngdbuild complains.
-    rule initPhase1 ((state == STATE_init) && (initPhase == 1));
-        case (init1Loop) matches
-            0: syncRequestQ.enq(tagged DRAM_READ 0);
-            1: begin
-                   datasink <= syncReadDataQ.first()[0];
-                   syncReadDataQ.deq();
-               end
-            2: begin
-                   syncRequestQ.enq(tagged DRAM_WRITE 0);
-                   syncWriteDataQ.enq(tuple2(zeroExtend(datasink), 0));
+    rule initPhase0 ((state == STATE_init) && (initPhase == 0) && dramReady_Model);
+        if (initBurstIdx == 0)
+        begin
+            // First: read from address 0
+            syncRequestQ.enq(tagged DRAM_READ 0);
+        end
+        else
+        begin
+            // Copy read to a write back to the memory
+            let data = syncReadDataQ.first();
+            syncReadDataQ.deq();
 
-                   datasink <= syncReadDataQ.first()[0];
-                   syncReadDataQ.deq();
-               end
-            3: begin
-                   syncWriteDataQ.enq(tuple2(zeroExtend(datasink), 0));
-                   initPhase <= 2;
-               end
-        endcase
+            syncWriteDataQ.enq(tuple2(data, 0));
 
-        init1Loop <= init1Loop + 1;
+            // Request a write (once)
+            if (initBurstIdx == 1)
+            begin
+                syncRequestQ.enq(tagged DRAM_WRITE 0);
+            end
+        end
+
+        if (initBurstIdx != fromInteger(valueOf(FPGA_DDR_BURST_LENGTH)))
+        begin
+            initBurstIdx <= initBurstIdx + 1;
+        end
+        else
+        begin
+            initBurstIdx <= 0;
+            initPhase <= 1;
+        end
     endrule
 
     //
-    // initPhase2 --
+    // initPhase1 --
     //     Write a constant pattern to initialize memory.
     //
     Reg#(FPGA_DDR_ADDRESS) initAddr <- mkReg(0);
-    Reg#(Bit#(1)) initPart <- mkReg(0);
-    
-    rule initPhase2 ((state == STATE_init) && (initPhase == 2));
+
+    rule initPhase1 ((state == STATE_init) && (initPhase == 1));
         // Data to write
         Vector#(FPGA_DDR_BYTES_PER_BEAT, Bit#(8)) init_data = replicate('haa);
 
-        if (initPart == 0)
+        if (initBurstIdx == 0)
         begin
             // First stage write.  Write the control message and the first
             // half of the data.
+            syncRequestQ.enq(tagged DRAM_WRITE initAddr);
             syncWriteDataQ.enq(tuple2(pack(init_data), 0));
         end
         else
         begin
-            // Second stage write.  Write the rest of the data and check whether
-            // initialization is done.
-            syncRequestQ.enq(tagged DRAM_WRITE initAddr);
+            // Write the rest of the data.
             syncWriteDataQ.enq(tuple2(pack(init_data), 0));
+        end
+
+        // Done with this burst?
+        if (initBurstIdx == fromInteger(valueOf(TSub#(FPGA_DDR_BURST_LENGTH, 1))))
+        begin
+            initBurstIdx <= 0;
 
             // Point to next dual-edge data address
-            let next_addr = initAddr + fromInteger(valueOf(TMul#(FPGA_DDR_BURST_LENGTH, FPGA_DDR_WORDS_PER_BEAT)));
+            let next_addr = initAddr +
+                            fromInteger(valueOf(TMul#(FPGA_DDR_BURST_LENGTH,
+                                                      FPGA_DDR_WORDS_PER_BEAT)));
             initAddr <= next_addr;
 
             if (next_addr == 0)
@@ -442,8 +451,10 @@ module mkDDRBank#(Clock rawClock, Reset rawReset)
                 state <= STATE_ready;
             end
         end
-
-        initPart <= initPart + 1;
+        else
+        begin
+            initBurstIdx <= initBurstIdx + 1;
+        end
     endrule
 
 
@@ -479,7 +490,7 @@ module mkDDRBank#(Clock rawClock, Reset rawReset)
         // now we simply won't read them.
         statusReg <= zeroExtend({pack(syncWriteDataQ.notFull()),1'b0,1'b0,resetAsserted,1'b0,pack(syncReadDataQ.notEmpty()),1'b0,1'b0,pack(mergeReqQ.notEmpty()),
                                  3'b0, // Replaces "deqRdy,enqRdy,cmdRdy" that were causing hangs
-                                 initDone});
+                                 pack(dramReady_Model)});
     endrule
 `endif
 
@@ -490,8 +501,23 @@ module mkDDRBank#(Clock rawClock, Reset rawReset)
         mkReg(`DRAM_MAX_OUTSTANDING_READS);
 `endif
 
+    //
+    // Debug scan state
+    //
+    List#(Tuple2#(String, Bool)) ds_data = List::nil;
+    ds_data = List::cons(tuple2("Xilinx DDR SDRAM ready", (state == STATE_ready)), ds_data);
+    ds_data = List::cons(tuple2("Xilinx DDR SDRAM initPhase", unpack(initPhase)), ds_data);
+    ds_data = List::cons(tuple2("Xilinx DDR SDRAM mergeReqQ not empty", mergeReqQ.notEmpty), ds_data);
+    ds_data = List::cons(tuple2("Xilinx DDR SDRAM mergeReqQ not full", mergeReqQ.ports[0].notFull), ds_data);
+    ds_data = List::cons(tuple2("Xilinx DDR SDRAM syncRequestQ not full", syncRequestQ.notFull), ds_data);
+    ds_data = List::cons(tuple2("Xilinx DDR SDRAM syncWriteDataQ not full", syncWriteDataQ.notFull), ds_data);
+    ds_data = List::cons(tuple2("Xilinx DDR SDRAM syncReadDataQ not empty", syncReadDataQ.notEmpty), ds_data);
+
+    let debugScanData = ds_data;
+
+
     interface DDR_DRIVER driver;
-    
+
 /*
 RAM status:0
     [prim_device.ram1.enqueue_address_RDY()]: 0
@@ -568,6 +594,9 @@ RAM status:0
             syncWriteDataQ.enq(tuple2(data, mask));
         endmethod
 
+        method List#(Tuple2#(String, Bool)) debugScanState();
+            return debugScanData;
+        endmethod
     endinterface
 
 
