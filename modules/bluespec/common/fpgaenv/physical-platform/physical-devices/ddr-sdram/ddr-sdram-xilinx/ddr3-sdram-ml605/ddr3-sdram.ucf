@@ -333,6 +333,7 @@ INST "*/u_memc_ui_top/u_mem_intfc/phy_top0/u_phy_read/u_phy_rdclk_gen/u_mmcm_clk
 
 INST    "*/u_ddr3/*"                                    AREA_GROUP = "AG_ddr3";
 AREA_GROUP "AG_ddr3"                                    RANGE = SLICE_X58Y132:SLICE_X97Y196;
+AREA_GROUP "AG_ddr3"                                    GROUP = CLOSED;
 
 INST "*_dramCtrl/u_ddr3/u_memc_ui_top/*/rst_delayed_*"  TIG;
 INST "*_dramCtrl/u_ddr3/u_memc_ui_top/*/dfi_init_complete" TIG;

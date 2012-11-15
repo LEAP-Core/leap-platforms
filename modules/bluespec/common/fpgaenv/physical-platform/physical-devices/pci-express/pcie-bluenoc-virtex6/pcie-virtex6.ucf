@@ -80,17 +80,17 @@ INST "*ep/ep/pcie_2_0_i/pcie_gt_i/gtx_v6_i/GTXD[7].GTX" LOC = GTXE1_X0Y8;
 # AREA ASSIGNMENTS
 ######################################################################################################
 
-INST       "*pcie_dev_inFifo/*"                AREA_GROUP = "AG_pcie_in_fifo";
-AREA_GROUP "AG_pcie_in_fifo"                   RANGE = SLICE_X136Y120:SLICE_X155Y129;
-AREA_GROUP "AG_pcie_in_fifo"                   GROUP = CLOSED;
+INST "*pcie_dev_ep_pcie_ep/ep*"          AREA_GROUP = "AG_pcie_ep";
+INST "*pcie_dev_inFifo/*"                AREA_GROUP = "AG_pcie_ep";
+INST "*pcie_dev_fifoRxData*"             AREA_GROUP = "AG_pcie_ep";
+INST "*pcie_dev_outFifo/*"               AREA_GROUP = "AG_pcie_ep";
+INST "*pcie_dev_fifoTxData*"             AREA_GROUP = "AG_pcie_ep";
+AREA_GROUP "AG_pcie_ep"                  RANGE = SLICE_X132Y105:SLICE_X159Y144;
+AREA_GROUP "AG_pcie_ep"                  GROUP = CLOSED;
 
-INST       "*pcie_dev_outFifo/*"               AREA_GROUP = "AG_pcie_out_fifo";
-AREA_GROUP "AG_pcie_out_fifo"                  RANGE = SLICE_X136Y130:SLICE_X155Y139;
-AREA_GROUP "AG_pcie_out_fifo"                  GROUP = CLOSED;
-
-INST       "*pcie_dev_bri*"                    AREA_GROUP = "AG_pcie_bridge";
-AREA_GROUP "AG_pcie_bridge"                    RANGE = SLICE_X84Y40:SLICE_X135Y179;
-AREA_GROUP "AG_pcie_bridge"                    GROUP = CLOSED;
+INST       "*pcie_dev_bri*"              AREA_GROUP = "AG_pcie_bridge";
+AREA_GROUP "AG_pcie_bridge"              RANGE = SLICE_X116Y34:SLICE_X159Y103;
+AREA_GROUP "AG_pcie_bridge"              GROUP = CLOSED;
 
 
 ######################################################################################################
