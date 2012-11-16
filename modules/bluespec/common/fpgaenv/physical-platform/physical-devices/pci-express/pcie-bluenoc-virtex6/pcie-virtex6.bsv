@@ -35,14 +35,27 @@ import XilinxPCIE::*;
 `include "awb/provides/pcie_bluenoc_device.bsh"
 
 
+// ========================================================================
+//
+//   Synthesized wrappers generate clean boundaries in the Bluespec-
+//   generated Verilog, allowing regions to be placed in area groups.
+//   Without the synthesis boundary some Bluespec compiler temporary
+//   names are difficult to match with a pattern.
+//
+//   Synthesis boundary interfaces can't be polymorphic.  Hence the
+//   specificity of PCIE_BYTES_PER_BEAT in interfaces.
+//
+// ========================================================================
+
 //
 // mkPCIEBlueNoCDevice --
 //   Instantiate the PCIe device-specific driver.  The incoming pcieSysClkBuf
 //   is the PCIe source clock.
 //
+(* synthesize *)
 module mkPCIEBlueNoCDevice#(Clock pcieSysClkBuf, Reset pcieSysRstN)
     // Interface:
-    (BNOC_PCIE_DEV#(n_BPB));
+    (BNOC_PCIE_DEV#(PCIE_BYTES_PER_BEAT));
 
     // Instantiate a PCIE endpoint
     PCIEParams pcie_params = defaultValue();
@@ -130,15 +143,15 @@ module mkPCIEBlueNoCDevice#(Clock pcieSysClkBuf, Reset pcieSysRstN)
 
     // Instantiate the TLP-to-BNoC bridge and connect the PCIe endpoint to it.
     PCIEtoBNoC#(PCIE_BYTES_PER_BEAT) bridge <-
-        mkPCIEtoBNoC(64'hc001_1eaf_c0de_d00d,
-                     myID,
-                     max_read_req_bytes,
-                     max_payload_bytes,
-                     rcb_mask,
-                     msix_enable,
-                     msix_masked,
-                     False, // use MSI-X, not MSI on the ML605
-                     clocked_by epClock125, reset_by epReset125);
+        mkBNoCBridgeSynth(64'hc001_1eaf_c0de_d00d,
+                          myID,
+                          max_read_req_bytes,
+                          max_payload_bytes,
+                          rcb_mask,
+                          msix_enable,
+                          msix_masked,
+                          False, // use MSI-X, not MSI on the ML605
+                          clocked_by epClock125, reset_by epReset125);
 
     // Connect the BlueNoC bridge to the PCIe device.
     mkConnectionWithClocks(ep.trn_rx, tpl_2(bridge.tlps),
@@ -169,4 +182,28 @@ module mkPCIEBlueNoCDevice#(Clock pcieSysClkBuf, Reset pcieSysRstN)
     // FPGA pin interface
     interface PCIE_EXP pcie_exp = ep.pcie;
       
+endmodule
+
+
+(* synthesize *)
+module mkBNoCBridgeSynth#(Bit#(64)  board_content_id,
+                          PciId     my_id,
+                          UInt#(13) max_read_req_bytes,
+                          UInt#(13) max_payload_bytes,
+                          Bit#(7)   rcb_mask,
+                          Bool      msix_enabled,
+                          Bool      msix_mask_all_intr,
+                          Bool      msi_enabled)
+    // Interface:
+    (PCIEtoBNoC#(PCIE_BYTES_PER_BEAT));
+
+    let bridge <- mkPCIEtoBNoC(board_content_id,
+                               my_id,
+                               max_read_req_bytes,
+                               max_payload_bytes,
+                               rcb_mask,
+                               msix_enabled,
+                               msix_mask_all_intr,
+                               msi_enabled);
+    return bridge;
 endmodule

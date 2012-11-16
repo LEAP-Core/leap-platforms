@@ -15059,3 +15059,25 @@ Improved area groups.  I don't know who picked the previous ones, but they were
 strange.  DDR3 now sits directly over the memory pins.  The PCIe driver and
 FIFOs now sit next to the PCIe hard block.  BlueNoC's bridge is next to the PCIe
 driver.
+
+----------
+mcadler     Date: Fri Nov 16 13:46:47 EST 2012  CSN: CSN-leap-platforms-649
+                  Fri Nov 16 18:46:47 UTC 2012
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc-virtex6
+ bluenoc-top.bsv           Locally Removed           648 
+ pcie-virtex6.awb          Locally Modified          648 
+ pcie-virtex6.ucf          Locally Modified          648 
+ pcie-virtex6-include.v    Locally Added               0 
+ pcie-virtex6.bsv          Locally Modified          648 
+
+Force synthesis of the PCIe driver and BlueNoC bridge as separate boundaries
+using (* synthesize *).  This guarantees that the entire module is part of
+the designated area group.  Without the boundary some compiler-generated
+temporary names wound up not matching the INST pattern and were forced outside
+the area group, leading to timing problems.
+
+The unfortunate hack here is that pcie-virtex6-include.v is needed to include
+the generated Verilog.  Ideally, we would have syntax in AWB or automatic
+detection of generated Verilog files as part of the build process.
