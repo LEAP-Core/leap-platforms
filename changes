@@ -15081,3 +15081,14 @@ the area group, leading to timing problems.
 The unfortunate hack here is that pcie-virtex6-include.v is needed to include
 the generated Verilog.  Ideally, we would have syntax in AWB or automatic
 detection of generated Verilog files as part of the build process.
+
+----------
+mcadler     Date: Sat Nov 17 09:25:06 EST 2012  CSN: CSN-leap-platforms-650
+                  Sat Nov 17 14:25:06 UTC 2012
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-xilinx/ddr3-sdram-ml605
+ ddr3-sdram-device.awb     Locally Modified          649 
+
+Doh!  ML605 memory was configured for 1GB but the board only has 512MB.  The
+high part aliased the low half.
