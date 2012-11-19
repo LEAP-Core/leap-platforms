@@ -20,7 +20,11 @@ NET  "ddrWires_0_ddr_ba[*]"                            IOSTANDARD = SSTL15;
 NET  "ddrWires_0_ddr_ras_n"                            IOSTANDARD = SSTL15;
 NET  "ddrWires_0_ddr_cas_n"                            IOSTANDARD = SSTL15;
 NET  "ddrWires_0_ddr_we_n"                             IOSTANDARD = SSTL15;
-NET  "ddrWires_0_ddr_reset_n"                          IOSTANDARD = SSTL15;
+
+# Changed to LVCMOS15 I/O standard, as suggested by answer 36078:
+#   http://www.xilinx.com/support/answers/36078.htm
+NET  "ddrWires_0_ddr_reset_n"                          IOSTANDARD = LVCMOS15;
+
 NET  "ddrWires_0_ddr_cs_n"                             IOSTANDARD = SSTL15;
 NET  "ddrWires_0_ddr_odt"                              IOSTANDARD = SSTL15;
 NET  "ddrWires_0_ddr_cke"                              IOSTANDARD = SSTL15;
@@ -323,8 +327,8 @@ NET      "m_llpi_phys_plat_sdram_b_dramCtrl/u_ddr3/u_memc_ui_top/u_mem_intfc/phy
 ######################################################################################
 
 INST "*_dramCtrl/u_ddr3/u_infrastructure/u_mmcm_adv"      LOC = "MMCM_ADV_X0Y8"; #Banks 16, 26, 36
-INST "*/gen_enable_ocb_mon.u_phy_ocb_mon_top/u_oserdes_ocb_mon" LOC = "OLOGIC_X2Y130";
-INST "*/u_memc_ui_top/u_mem_intfc/phy_top0/u_phy_read/u_phy_rdclk_gen/u_mmcm_clk_base" LOC = "MMCM_ADV_X0Y8"; #Banks 16, 26, 36
+#INST "*/gen_enable_ocb_mon.u_phy_ocb_mon_top/u_oserdes_ocb_mon" LOC = "OLOGIC_X2Y130";
+#INST "*/u_memc_ui_top/u_mem_intfc/phy_top0/u_phy_read/u_phy_rdclk_gen/u_mmcm_clk_base" LOC = "MMCM_ADV_X0Y8"; #Banks 16, 26, 36
 
 
 ###########################################################################

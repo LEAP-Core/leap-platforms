@@ -27,8 +27,6 @@
 
 module ddr3_wrapper #
   (
-   parameter SIM_INIT_OPTION    = "SKIP_PU_DLY",
-   parameter SIM_CAL_OPTION     = "FAST_CAL",
    parameter CLK_PERIOD         = 5000
    )
   (
@@ -56,7 +54,7 @@ module ddr3_wrapper #
    output                user_clock,
    output                user_reset_n,
 
-   // DDR2 User Interface
+   // DDR3 User Interface
    input [2:0]           app_cmd,
    input                 app_enable,
    input [26:0]          app_addr,
@@ -69,14 +67,22 @@ module ddr3_wrapper #
    output                app_wdf_ready,
 
    output                app_rd_ready,
-   output [255:0]        app_rd_data
+   output [255:0]        app_rd_data,
+
+   // Debug info
+   output                dbg_wrlvl_start,
+   output                dbg_wrlvl_done,
+   output                dbg_wrlvl_err,
+   output [1:0]          dbg_rdlvl_start,
+   output [1:0]          dbg_rdlvl_done,
+   output [1:0]          dbg_rdlvl_err
    );
 
    wire                  app_rdy;
    wire 		 app_wdf_rdy;
    wire 		 app_rd_data_valid;
    wire 		 phy_init_done;
-     
+
    assign                app_ready      = app_rdy && phy_init_done;
    assign                app_wdf_ready  = app_wdf_rdy && phy_init_done;
    assign                app_rd_ready   = app_rd_data_valid && phy_init_done;
@@ -126,7 +132,13 @@ module ddr3_wrapper #
 	   .tb_rst_n                 (user_reset),
 	   .tb_clk                   (user_clock),
 	   .phy_init_done            (phy_init_done),
-	   .sys_rst                  (sys_rst)
+	   .sys_rst                  (sys_rst),
+           .dbg_wrlvl_start          (dbg_wrlvl_start),
+           .dbg_wrlvl_done           (dbg_wrlvl_done),
+           .dbg_wrlvl_err            (dbg_wrlvl_err),
+           .dbg_rdlvl_start          (dbg_rdlvl_start),
+           .dbg_rdlvl_done           (dbg_rdlvl_done),
+           .dbg_rdlvl_err            (dbg_rdlvl_err)
 	   );
 
 endmodule // ddr3_wrapper

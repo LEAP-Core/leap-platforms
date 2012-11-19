@@ -231,11 +231,17 @@ module mkDDRBank#(Clock rawClock, Reset rawReset)
     SyncFIFOIfc#(Tuple2#(FPGA_DDR_DUALEDGE_BEAT, FPGA_DDR_DUALEDGE_BEAT_MASK))
         syncWriteDataQ <- mkSyncFIFO(2, modelClock, modelReset, controllerClock);
     
-`ifdef DEBUG_DDR3
-    ReadOnly#(Bit#(1)) cmdRdy  <- mkNullCrossingWire(modelClock, pack(dramCtrl.cmd_rdy()), clocked_by controllerClock, reset_by controllerReset);
-    ReadOnly#(Bit#(1)) enqRdy  <- mkNullCrossingWire(modelClock, pack(dramCtrl.enq_rdy()), clocked_by controllerClock, reset_by controllerReset); 
-    ReadOnly#(Bit#(1)) deqRdy  <- mkNullCrossingWire(modelClock, pack(dramCtrl.deq_rdy()), clocked_by controllerClock, reset_by controllerReset);
+    // Debug signals
+`ifndef DEBUG_DDR3_Z
+    ReadOnly#(Bool) dbg_wrlvl_start <- mkNullCrossingWire(modelClock, dramCtrl.dbg_wrlvl_start(), clocked_by controllerClock, reset_by controllerReset);
+    ReadOnly#(Bool) dbg_wrlvl_done  <- mkNullCrossingWire(modelClock, dramCtrl.dbg_wrlvl_done(), clocked_by controllerClock, reset_by controllerReset);
+    ReadOnly#(Bool) dbg_wrlvl_err   <- mkNullCrossingWire(modelClock, dramCtrl.dbg_wrlvl_err(), clocked_by controllerClock, reset_by controllerReset);
+
+    ReadOnly#(Bit#(2)) dbg_rdlvl_start <- mkNullCrossingWire(modelClock, dramCtrl.dbg_rdlvl_start(), clocked_by controllerClock, reset_by controllerReset);
+    ReadOnly#(Bit#(2)) dbg_rdlvl_done  <- mkNullCrossingWire(modelClock, dramCtrl.dbg_rdlvl_done(), clocked_by controllerClock, reset_by controllerReset);
+    ReadOnly#(Bit#(2)) dbg_rdlvl_err   <- mkNullCrossingWire(modelClock, dramCtrl.dbg_rdlvl_err(), clocked_by controllerClock, reset_by controllerReset);
 `endif
+
     ReadOnly#(Bool) resetAssertedCast <- isResetAsserted(clocked_by controllerClock, reset_by controllerReset);
     ReadOnly#(Bit#(1)) resetAsserted  <- mkNullCrossingWire(modelClock, pack(resetAssertedCast._read()), clocked_by controllerClock, reset_by controllerReset);
 
@@ -512,6 +518,19 @@ module mkDDRBank#(Clock rawClock, Reset rawReset)
     ds_data = List::cons(tuple2("Xilinx DDR SDRAM syncRequestQ not full", syncRequestQ.notFull), ds_data);
     ds_data = List::cons(tuple2("Xilinx DDR SDRAM syncWriteDataQ not full", syncWriteDataQ.notFull), ds_data);
     ds_data = List::cons(tuple2("Xilinx DDR SDRAM syncReadDataQ not empty", syncReadDataQ.notEmpty), ds_data);
+
+`ifndef DEBUG_DDR3_Z
+    ds_data = List::cons(tuple2("Xilinx DDR SDRAM dbg_wrlvl_start", dbg_wrlvl_start), ds_data);
+    ds_data = List::cons(tuple2("Xilinx DDR SDRAM dbg_wrlvl_done", dbg_wrlvl_done), ds_data);
+    ds_data = List::cons(tuple2("Xilinx DDR SDRAM dbg_wrlvl_err", dbg_wrlvl_err), ds_data);
+
+    ds_data = List::cons(tuple2("Xilinx DDR SDRAM dbg_rdlvl_start[0]", unpack(dbg_rdlvl_start[0])), ds_data);
+    ds_data = List::cons(tuple2("Xilinx DDR SDRAM dbg_rdlvl_start[1]", unpack(dbg_rdlvl_start[1])), ds_data);
+    ds_data = List::cons(tuple2("Xilinx DDR SDRAM dbg_rdlvl_done[0]", unpack(dbg_rdlvl_done[0])), ds_data);
+    ds_data = List::cons(tuple2("Xilinx DDR SDRAM dbg_rdlvl_done[1]", unpack(dbg_rdlvl_done[1])), ds_data);
+    ds_data = List::cons(tuple2("Xilinx DDR SDRAM dbg_rdlvl_err[0]", unpack(dbg_rdlvl_err[0])), ds_data);
+    ds_data = List::cons(tuple2("Xilinx DDR SDRAM dbg_rdlvl_err[1]", unpack(dbg_rdlvl_err[1])), ds_data);
+`endif
 
     let debugScanData = ds_data;
 

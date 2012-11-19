@@ -74,6 +74,14 @@ interface XILINX_DRAM_CONTROLLER;
     method    Action            enqueue_data(Bit#(256) data, Bit#(32) mask, Bool endBurst);
     method    Bit#(256)         dequeue_data;
 
+    // Debug info
+    method    Bool              dbg_wrlvl_start;
+    method    Bool              dbg_wrlvl_done;
+    method    Bool              dbg_wrlvl_err;
+    method    Bit#(2)           dbg_rdlvl_start;
+    method    Bit#(2)           dbg_rdlvl_done;
+    method    Bit#(2)           dbg_rdlvl_err;
+
     method    Bit#(1)           cmd_rdy;
     method    Bit#(1)           enq_rdy;
     method    Bit#(1)           deq_rdy;
@@ -121,6 +129,13 @@ module mkXilinxDRAMController#(Clock bsv_clk200,
     endinterface
       
     method init_done            init_done clocked_by (controller_clock) reset_by (controller_reset);
+
+    method dbg_wrlvl_start      dbg_wrlvl_start clocked_by (controller_clock) reset_by (controller_reset);
+    method dbg_wrlvl_done       dbg_wrlvl_done clocked_by (controller_clock) reset_by (controller_reset);
+    method dbg_wrlvl_err        dbg_wrlvl_err clocked_by (controller_clock) reset_by (controller_reset);
+    method dbg_rdlvl_start      dbg_rdlvl_start clocked_by (controller_clock) reset_by (controller_reset);
+    method dbg_rdlvl_done       dbg_rdlvl_done clocked_by (controller_clock) reset_by (controller_reset);
+    method dbg_rdlvl_err        dbg_rdlvl_err clocked_by (controller_clock) reset_by (controller_reset);
         
     method                      enqueue_address(app_cmd, app_addr) enable(app_enable) ready(app_ready) clocked_by (controller_clock) reset_by (controller_reset);
     method                      enqueue_data(app_wdf_data, app_wdf_mask, app_wdf_end) enable(app_wdf_enable) ready(app_wdf_ready) clocked_by (controller_clock) reset_by (controller_reset);
@@ -135,9 +150,20 @@ module mkXilinxDRAMController#(Clock bsv_clk200,
     schedule (wires.ddr_ck_p, wires.ddr_ck_n, wires.ddr_addr, wires.ddr_ba, wires.ddr_ras_n, wires.ddr_cas_n, wires.ddr_we_n, wires.ddr_cs_n, wires.ddr_odt, wires.ddr_cke, wires.ddr_dm, wires.ddr_reset_n) CF
              (wires.ddr_ck_p, wires.ddr_ck_n, wires.ddr_addr, wires.ddr_ba, wires.ddr_ras_n, wires.ddr_cas_n, wires.ddr_we_n, wires.ddr_cs_n, wires.ddr_odt, wires.ddr_cke, wires.ddr_dm, wires.ddr_reset_n);
    
-    schedule (init_done, enqueue_address, enqueue_data, dequeue_data, cmd_rdy, enq_rdy, deq_rdy) CF (init_done);
-    schedule (cmd_rdy, enq_rdy, deq_rdy) CF (dequeue_data);
-    schedule (cmd_rdy, enq_rdy, deq_rdy) CF (cmd_rdy, enq_rdy, deq_rdy, enqueue_address, enqueue_data);
+    schedule (init_done,
+              dbg_wrlvl_done, dbg_wrlvl_err, dbg_wrlvl_start, 
+              dbg_rdlvl_done, dbg_rdlvl_err, dbg_rdlvl_start,
+              enqueue_address, enqueue_data, dequeue_data, cmd_rdy, enq_rdy, deq_rdy) CF (init_done);
+    schedule (cmd_rdy, enq_rdy, deq_rdy,
+              dbg_wrlvl_done, dbg_wrlvl_err, dbg_wrlvl_start, 
+              dbg_rdlvl_done, dbg_rdlvl_err, dbg_rdlvl_start) CF (dequeue_data);
+    schedule (cmd_rdy, enq_rdy, deq_rdy,
+              dbg_wrlvl_done, dbg_wrlvl_err, dbg_wrlvl_start, 
+              dbg_rdlvl_done, dbg_rdlvl_err, dbg_rdlvl_start)
+                 CF (cmd_rdy, enq_rdy, deq_rdy,
+                     dbg_wrlvl_done, dbg_wrlvl_err, dbg_wrlvl_start, 
+                     dbg_rdlvl_done, dbg_rdlvl_err, dbg_rdlvl_start,
+                     enqueue_address, enqueue_data);
    
     schedule (enqueue_address) SB (enqueue_data);
     schedule (enqueue_address) SBR  (enqueue_address);

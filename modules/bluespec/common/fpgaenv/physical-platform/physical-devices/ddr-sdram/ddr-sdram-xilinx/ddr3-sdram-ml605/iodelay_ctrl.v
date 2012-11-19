@@ -49,7 +49,7 @@
 //   ____  ____
 //  /   /\/   /
 // /___/  \  /    Vendor: Xilinx
-// \   \   \/     Version: 3.9
+// \   \   \/     Version: 3.92
 //  \   \         Application: MIG
 //  /   /         Filename: iodelay_ctrl.v
 // /___/   /\     Date Last Modified: $Date: 2011/06/02 07:18:00 $
@@ -126,11 +126,16 @@ module iodelay_ctrl #
   //***************************************************************************
   
   //***************************************************************************
+  // Global clock buffer for IDELAY reference clock
+  //***************************************************************************
 
-  
- assign clk_ref_bufg = clk_ref_diff;
-   
- assign clk_200 = clk_ref_bufg; // ML605 single 200MHz clock source
+  BUFG u_bufg_clk_ref
+    (
+     .O (clk_ref_bufg),
+     .I (clk_ref_diff)
+     );
+
+  assign clk_200 = clk_ref_bufg; // ML605 single 200MHz clock source
 
   //*****************************************************************
   // IDELAYCTRL reset

@@ -49,7 +49,7 @@
 //   ____  ____
 //  /   /\/   /
 // /___/  \  /    Vendor                : Xilinx
-// \   \   \/     Version               : 3.9
+// \   \   \/     Version               : 3.92
 //  \   \         Application           : MIG
 //  /   /         Filename              : bank_state.v
 // /___/   /\     Date Last Modified    : $date$
@@ -553,16 +553,35 @@ module bank_state #
   reg [BM_CNT_WIDTH-1:0] act_starve_limit_cntr_ns;
   reg [BM_CNT_WIDTH-1:0] act_starve_limit_cntr_r;
 
-  always @(/*AS*/act_req or act_starve_limit_cntr_r or rts_act_denied)
-    begin
-      act_starve_limit_cntr_ns = act_starve_limit_cntr_r;
-      if (~act_req)
-        act_starve_limit_cntr_ns = {BM_CNT_WIDTH{1'b0}};
-      else
-        if (rts_act_denied && &act_starve_limit_cntr_r)
-          act_starve_limit_cntr_ns = act_starve_limit_cntr_r +
-                                     {{BM_CNT_WIDTH-1{1'b0}}, 1'b1};
-    end
+  generate
+    if (BM_CNT_WIDTH > 1) // Number of Bank Machs > 2
+    begin :BM_MORE_THAN_2 
+      always @(/*AS*/act_req or act_starve_limit_cntr_r or rts_act_denied)
+        begin
+          act_starve_limit_cntr_ns = act_starve_limit_cntr_r;
+          if (~act_req)
+            act_starve_limit_cntr_ns = {BM_CNT_WIDTH{1'b0}};
+          else
+            if (rts_act_denied && &act_starve_limit_cntr_r)
+              act_starve_limit_cntr_ns = act_starve_limit_cntr_r +
+                                         {{BM_CNT_WIDTH-1{1'b0}}, 1'b1};
+        end
+    end 
+    else // Number of Bank Machs == 2
+    begin :BM_EQUAL_2 
+       always @(/*AS*/act_req or act_starve_limit_cntr_r or rts_act_denied)
+         begin
+           act_starve_limit_cntr_ns = act_starve_limit_cntr_r;
+           if (~act_req)
+             act_starve_limit_cntr_ns = {BM_CNT_WIDTH{1'b0}};
+           else
+             if (rts_act_denied && &act_starve_limit_cntr_r)
+               act_starve_limit_cntr_ns = act_starve_limit_cntr_r +
+                                          {1'b1};
+         end
+    end 
+  endgenerate
+
   always @(posedge clk) act_starve_limit_cntr_r <=
                         #TCQ act_starve_limit_cntr_ns;
 

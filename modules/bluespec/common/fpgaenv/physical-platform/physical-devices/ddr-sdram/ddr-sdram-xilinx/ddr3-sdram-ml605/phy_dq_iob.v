@@ -49,7 +49,7 @@
 //   ____  ____
 //  /   /\/   /
 // /___/  \  /    Vendor: Xilinx
-// \   \   \/     Version: 3.9
+// \   \   \/     Version: 3.92
 //  \   \         Application: MIG
 //  /   /         Filename: phy_dq_iob.v
 // /___/   /\     Date Last Modified: $Date: 2011/06/02 07:18:03 $
@@ -434,7 +434,7 @@ module phy_dq_iob #
           ocb_d2 =  wr_data_fall1_r1;
           ocb_d3 =  wr_data_rise0;
           ocb_d4 =  wr_data_fall0;
-        end // always @ (posedge clk)
+        end
       end else if (nCWL == 3) begin: gen_ddr2_ncwl3
         always @(posedge clk) begin
           ocb_d1 <= #TCQ wr_data_rise0;

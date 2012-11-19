@@ -36,8 +36,6 @@
 %sources -t VERILOG -v PRIVATE phy_dqs_iob.v 
 %sources -t VERILOG -v PRIVATE phy_data_io.v   
 %sources -t VERILOG -v PRIVATE phy_top.v
-%sources -t VERILOG -v PRIVATE phy_ocb_mon.v
-%sources -t VERILOG -v PRIVATE phy_ocb_mon_top.v
 %sources -t VERILOG -v PRIVATE phy_pd.v
 %sources -t VERILOG -v PRIVATE phy_pd_top.v
 %sources -t VERILOG -v PRIVATE phy_read.v

@@ -49,7 +49,7 @@
 //   ____  ____
 //  /   /\/   /
 // /___/  \  /    Vendor                : Xilinx
-// \   \   \/     Version               : 3.9
+// \   \   \/     Version               : 3.92
 //  \   \         Application           : MIG
 //  /   /         Filename              : bank_compare.v
 // /___/   /\     Date Last Modified    : $date$

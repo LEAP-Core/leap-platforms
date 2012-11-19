@@ -49,7 +49,7 @@
 //   ____  ____
 //  /   /\/   /
 // /___/  \  /    Vendor             : Xilinx
-// \   \   \/     Version            : 3.9
+// \   \   \/     Version            : 3.92
 //  \   \         Application        : MIG
 //  /   /         Filename           : memc_ui_top.v
 // /___/   /\     Date Last Modified : $Date: 2011/06/02 07:18:01 $
@@ -67,12 +67,19 @@
 //*****************************************************************************
 
 `timescale 1 ps / 1 ps
-(* X_CORE_INFO = "mig_v3_9_ddr3_V6, Coregen 13.3" , CORE_GENERATION_INFO = "ddr3_V6,mig_v3_9,{LANGUAGE=Verilog, SYNTHESIS_TOOL=ISE, LEVEL=CONTROLLER, AXI_ENABLE=0, NO_OF_CONTROLLERS=1, INTERFACE_TYPE=DDR3, CLK_PERIOD=2500, MEMORY_TYPE=SODIMM, MEMORY_PART=mt4jsf6464hy-1g1, DQ_WIDTH=64, ECC=OFF, DATA_MASK=1, BURST_MODE=8, BURST_TYPE=SEQ, OUTPUT_DRV=HIGH, RTT_NOM=60, REFCLK_FREQ=200, MMCM_ADV_BANDWIDTH=MMCM_ADV_BANDWIDTH, CLKFBOUT_MULT_F=6, CLKOUT_DIVIDE=3, DEBUG_PORT=ON, IODELAY_HP_MODE=ON, INTERNAL_VREF=0, DCI_INOUTS=1, CLASS_ADDR=II, INPUT_CLK_TYPE=DIFFERENTIAL}" *)
+(* X_CORE_INFO = "mig_v3_92_ddr3_V6, Coregen 14.2" , CORE_GENERATION_INFO = "ddr3_V6,mig_v3_92,{LANGUAGE=Verilog, SYNTHESIS_TOOL=ISE, LEVEL=CONTROLLER, AXI_ENABLE=0, NO_OF_CONTROLLERS=1, INTERFACE_TYPE=DDR3, CLK_PERIOD=2500, MEMORY_TYPE=SODIMM, MEMORY_PART=mt4jsf6464hy-1g1, DQ_WIDTH=64, ECC=OFF, DATA_MASK=1, BURST_MODE=8, BURST_TYPE=SEQ, OUTPUT_DRV=HIGH, RTT_NOM=60, REFCLK_FREQ=200, MMCM_ADV_BANDWIDTH=MMCM_ADV_BANDWIDTH, CLKFBOUT_MULT_F=6, CLKOUT_DIVIDE=3, DEBUG_PORT=OFF, IODELAY_HP_MODE=ON, INTERNAL_VREF=0, DCI_INOUTS=1, CLASS_ADDR=I, INPUT_CLK_TYPE=SINGLE_ENDED}" *)
 module memc_ui_top #
   (
    parameter REFCLK_FREQ             = 200,
-                                       // # = 200 when design frequency <= 533 MHz,
-                                       //   = 300 when design frequency > 533 MHz.
+                                       // DDR2 SDRAM:
+				       // = 200 for all design frequencies
+                                       // DDR3 SDRAM:
+				       // = 200 for all design frequencies of
+                                       //       -1 speed grade devices
+                                       // = 200 when design frequency < 480 MHz
+                                       //       for -2 and -3 speed grade devices
+                                       // = 300 when design frequency >= 480 MHz
+                                       //       for -2 and -3 speed grade devices
    parameter SIM_BYPASS_INIT_CAL     = "OFF",
                                        // # = "OFF" -  Complete memory init &
                                        //              calibration sequence

@@ -49,7 +49,7 @@
 //   ____  ____
 //  /   /\/   /
 // /___/  \  /    Vendor: Xilinx
-// \   \   \/     Version: 3.9
+// \   \   \/     Version: 3.92
 //  \   \         Application: MIG
 //  /   /         Filename: phy_write.v
 // /___/   /\     Date Last Modified: $Date: 2011/06/02 07:18:04 $

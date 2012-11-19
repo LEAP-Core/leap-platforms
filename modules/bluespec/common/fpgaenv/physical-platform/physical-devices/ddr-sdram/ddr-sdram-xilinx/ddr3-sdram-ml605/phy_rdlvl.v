@@ -90,6 +90,7 @@ module phy_rdlvl #
    parameter PD_TAP_REQ      = 10,     // # of IODELAY taps reserved for PD
    parameter nCL             = 5,      // Read CAS latency (in clk cyc)
    parameter SIM_CAL_OPTION  = "NONE", // Skip various calibration steps
+   parameter REG_CTRL        = "ON",    // "ON" for registered DIMM
    parameter DEBUG_PORT      = "OFF"   // Enable debug port
    )
   (
@@ -1935,11 +1936,28 @@ module phy_rdlvl #
       case (cal2_state_r)
         CAL2_IDLE:
           if (rdlvl_start[1]) begin
-            if (SIM_CAL_OPTION == "SKIP_CAL") begin
+            if (SIM_CAL_OPTION == "SKIP_CAL" && REG_CTRL == "ON") begin
+              // If skip rdlvl, then proceed to end. Also hardcode bitslip
+              // values based on CAS latency. This is for RDIMM case
+              cal2_state_r <= #TCQ CAL2_DONE;
+              case (nCL)
+                3:  cal2_rd_bitslip_cnt_r <= #TCQ {DQS_WIDTH{2'b01}};
+                4:  cal2_rd_bitslip_cnt_r <= #TCQ {DQS_WIDTH{2'b11}};
+                5:  cal2_rd_bitslip_cnt_r <= #TCQ {DQS_WIDTH{2'b01}};
+                6:  cal2_rd_bitslip_cnt_r <= #TCQ {DQS_WIDTH{2'b11}};
+                7:  cal2_rd_bitslip_cnt_r <= #TCQ {DQS_WIDTH{2'b01}};
+                8:  cal2_rd_bitslip_cnt_r <= #TCQ {DQS_WIDTH{2'b11}};
+                9:  cal2_rd_bitslip_cnt_r <= #TCQ {DQS_WIDTH{2'b01}};
+                10: cal2_rd_bitslip_cnt_r <= #TCQ {DQS_WIDTH{2'b11}};
+                11: cal2_rd_bitslip_cnt_r <= #TCQ {DQS_WIDTH{2'b01}};
+              endcase
+            end else if (SIM_CAL_OPTION == "SKIP_CAL") begin
               // If skip rdlvl, then proceed to end. Also hardcode bitslip
               // values based on CAS latency
               cal2_state_r <= #TCQ CAL2_DONE;
               case (nCL)
+                3:  cal2_rd_bitslip_cnt_r <= #TCQ {DQS_WIDTH{2'b11}};
+                4:  cal2_rd_bitslip_cnt_r <= #TCQ {DQS_WIDTH{2'b01}};
                 5:  cal2_rd_bitslip_cnt_r <= #TCQ {DQS_WIDTH{2'b11}};
                 6:  cal2_rd_bitslip_cnt_r <= #TCQ {DQS_WIDTH{2'b01}};
                 7:  cal2_rd_bitslip_cnt_r <= #TCQ {DQS_WIDTH{2'b11}};

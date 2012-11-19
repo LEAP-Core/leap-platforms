@@ -49,10 +49,10 @@
 //   ____  ____
 //  /   /\/   /
 // /___/  \  /    Vendor             : Xilinx
-// \   \   \/     Version            : 3.6.1
+// \   \   \/     Version            : 3.92
 //  \   \         Application        : MIG
 //  /   /         Filename           : example_top.v
-// /___/   /\     Date Last Modified : $Date: 2010/10/27 17:40:42 $
+// /___/   /\     Date Last Modified : $Date: 2011/06/02 07:18:00 $
 // \   \  /  \    Date Created       : Mon Jun 23 2008
 //  \___\/\___\
 //
@@ -69,15 +69,7 @@
 //                     3. Synthesizable testbench - used to model user's backend
 //                        logic
 // Reference        :
-// Revision History :  Target ML605 
-//    1. Add output ports for "pll_lock" and "heartbeat" LEDS
-//    2. Comment out "sda" and "scl" ports and logic.
-//    3. Add "pll_lock" port on module "infrastructure.v" connect to wire "locked"
-//    4. Define active high system reset switch "RST_ACTIVE_LOW = 0"
-//    5. Modify MMCM parameters to generate 400MHz clock using 200MHz input clock (versus default 400MHz)
-//    6. Modify "iodelay_ctrl" module to provide clk_200 output to "infrastructure" MMCM CLKIN
-//    7. Add counter and output assignment for "heartbeat" 
-//    8. Add VIO control inputs to permit traffic generator update from VIO console
+// Revision History :
 //*****************************************************************************
 
 `timescale 1ps/1ps
@@ -85,19 +77,23 @@
 module example_top #
   (
    parameter REFCLK_FREQ             = 200,
-                                       // # = 200 when design frequency <= 533 MHz,
-                                       //   = 300 when design frequency > 533 MHz.
+                                       // # = 200 for all design frequencies of
+                                       //         -1 speed grade devices
+                                       //   = 200 when design frequency < 480 MHz
+                                       //         for -2 and -3 speed grade devices.
+                                       //   = 300 when design frequency >= 480 MHz
+                                       //         for -2 and -3 speed grade devices.
    parameter IODELAY_GRP             = "IODELAY_MIG",
                                        // It is associated to a set of IODELAYs with
                                        // an IDELAYCTRL that have same IODELAY CONTROLLER
                                        // clock frequency.
    parameter MMCM_ADV_BANDWIDTH      = "OPTIMIZED",
-                                       // MMCM programming algorithm 
+                                       // MMCM programming algorithm
    parameter CLKFBOUT_MULT_F         = 6,
                                        // write PLL VCO multiplier.
-   parameter DIVCLK_DIVIDE           = 1,  // ML605 200MHz input clock (VCO = 1200MHz)use "2" for 400MHz SMA,
+   parameter DIVCLK_DIVIDE           = 2,
                                        // write PLL VCO divisor.
-   parameter CLKOUT_DIVIDE           = 3,  //400MHz clock
+   parameter CLKOUT_DIVIDE           = 3,
                                        // VCO output divisor for fast (memory) clocks.
    parameter nCK_PER_CLK             = 2,
                                        // # of memory CKs per fabric clock.
@@ -115,16 +111,6 @@ module example_top #
                                        //              calibration sequence
                                        // # = "FAST" - Skip memory init & use
                                        //              abbreviated calib sequence
-   parameter SIM_INIT_OPTION         = "NONE",
-                                       // # = "SKIP_PU_DLY" - Skip the memory
-                                       //                     initilization sequence,
-                                       //   = "NONE" - Complete the memory
-                                       //              initilization sequence.
-   parameter SIM_CAL_OPTION          = "NONE",
-                                       // # = "FAST_CAL" - Skip the delay
-                                       //                  Calibration process,
-                                       //   = "NONE" - Complete the delay
-                                       //              Calibration process.
    parameter nCS_PER_RANK            = 1,
                                        // # of unique CS outputs per Rank for
                                        // phy.
@@ -158,7 +144,7 @@ module example_top #
    parameter ADDR_CMD_MODE           = "1T" ,
                                        // # = "2T", "1T".
    parameter ORDERING                = "STRICT",
-                                       // # = "NORM", "STRICT", "RELAXED".
+                                       // # = "NORM", "STRICT".
    parameter WRLVL                   = "ON",
                                        // # = "ON" - DDR3 SDRAM
                                        //   = "OFF" - DDR2 SDRAM.
@@ -207,6 +193,7 @@ module example_top #
    parameter ADDR_WIDTH              = 27,
                                        // # = RANK_WIDTH + BANK_WIDTH
                                        //     + ROW_WIDTH + COL_WIDTH;
+   parameter ECC                     = "OFF",
    parameter ECC_TEST                = "OFF",
    parameter TCQ                     = 100,
    // Traffic Gen related parameters
@@ -215,11 +202,20 @@ module example_top #
                                        // signals. Traffic Generator will only
                                        // write to one single location and no
                                        // read transactions will be generated.
+
+   parameter SIMULATION              = "FALSE",
+   parameter DATA_MODE               = 2,
+   parameter ADDR_MODE               = 3,
+   parameter TST_MEM_INSTR_MODE      = "R_W_INSTR_MODE",
    parameter DATA_PATTERN            = "DGEN_ALL",
+                                        // DATA_PATTERN shoule be set to "DGEN_ALL"
+                                        // unless it is targeted for S6 small device.
                                         // "DGEN_HAMMER", "DGEN_WALKING1",
                                         // "DGEN_WALKING0","DGEN_ADDR","
                                         // "DGEN_NEIGHBOR","DGEN_PRBS","DGEN_ALL"
    parameter CMD_PATTERN             = "CGEN_ALL",
+                                        // CMD_PATTERN shoule be set to "CGEN_ALL"
+                                        // unless it is targeted for S6 small device.
                                         // "CGEN_PRBS","CGEN_FIXED","CGEN_BRAM",
                                         // "CGEN_SEQUENTIAL", "CGEN_ALL"
 
@@ -228,20 +224,18 @@ module example_top #
    parameter END_ADDRESS             = 32'h00ffffff,
    parameter PRBS_EADDR_MASK_POS     = 32'hff000000,
    parameter SEL_VICTIM_LINE         = 11,
-   parameter RST_ACT_LOW             = 1,              // ML605 reset active high
+   parameter RST_ACT_LOW             = 1,
                                        // =1 for active low reset,
                                        // =0 for active high.
-   parameter INPUT_CLK_TYPE          = "DIFFERENTIAL",
+   parameter INPUT_CLK_TYPE          = "SINGLE_ENDED",
                                        // input clock type DIFFERENTIAL or SINGLE_ENDED
    parameter STARVE_LIMIT            = 2
                                        // # = 2,3,4.
    )
   (
 
-//  input                             sys_clk_p,    //differential system clocks
-//  input                             sys_clk_n,
-  input                             sys_clk_diff,     //differential iodelayctrl clk
-
+  input                             sys_clk,    //single ended system clocks
+  input                             clk_ref,     //single ended iodelayctrl clk
    inout  [DQ_WIDTH-1:0]                ddr3_dq,
    output [ROW_WIDTH-1:0]               ddr3_addr,
    output [BANK_WIDTH-1:0]              ddr3_ba,
@@ -257,37 +251,13 @@ module example_top #
    inout  [DQS_WIDTH-1:0]               ddr3_dqs_n,
    output [CK_WIDTH-1:0]                ddr3_ck_p,
    output [CK_WIDTH-1:0]                ddr3_ck_n,
- //  inout                                sda,      // ML605
- //  output                               scl,      // ML605 
+   inout                                sda,
+   output                               scl,
    output                               error,
    output                               phy_init_done,
-   output                               pll_lock,   // ML605 GPIO LED
-   output                               heartbeat,  // ML605 GPIO LED
 
-
-   input                                sys_rst,   // System reset
-
-   output [APP_DATA_WIDTH-1:0]        app_rd_data,
-   output                             app_rd_data_end,
-   output                             app_rd_data_valid,
-   output                             app_rdy,
-   output                             app_wdf_rdy,
-   input [ADDR_WIDTH-1:0]             app_addr,
-   input [2:0]                        app_cmd,
-   input                              app_en,
-   input [APP_DATA_WIDTH-1:0]         app_wdf_data,
-   input                              app_wdf_end,
-   input [APP_MASK_WIDTH-1:0]         app_wdf_mask,
-   input                              app_wdf_wren,
-
-   output                                 ram_clk,
-   output                                 ram_rst
- 
+   input                                sys_rst   // System reset
    );
-
-   assign ram_clk = clk;
-   assign ram_rst = ~rst; // still a high reset x_X
-   
 
   function integer STR_TO_INT;
     input [7:0] in;
@@ -309,13 +279,15 @@ module example_top #
   localparam APP_DATA_WIDTH      = PAYLOAD_WIDTH * 4;
   localparam APP_MASK_WIDTH      = APP_DATA_WIDTH / 8;
 
-  wire                                clk_ref;
-  wire                                sys_clk;
+  wire                                clk_ref_p;
+  wire                                clk_ref_n;
+  wire                                sys_clk_p;
+  wire                                sys_clk_n;
   wire                                mmcm_clk;
   wire                                iodelay_ctrl_rdy;
       
-//  (* KEEP = "TRUE" *) wire            sda_i;
-//  (* KEEP = "TRUE" *) wire            scl_i;
+  (* KEEP = "TRUE" *) wire            sda_i;
+  (* KEEP = "TRUE" *) wire            scl_i;
   wire                                rst;
   wire                                clk;
   wire                                clk_mem;
@@ -326,13 +298,21 @@ module example_top #
   wire  [(BM_CNT_WIDTH)-1:0]          bank_mach_next;
   wire                                ddr3_parity;
   wire                                app_hi_pri;
-  wire                                dfi_init_complete;
+  wire [APP_MASK_WIDTH-1:0]           app_wdf_mask;
   wire [3:0]                          app_ecc_multiple_err_i;
   wire [47:0]                         traffic_wr_data_counts;
   wire [47:0]                         traffic_rd_data_counts;
-  wire                                modify_enable_sel;
-  wire [2:0]                          data_mode_manual_sel;
-  wire [2:0]                          addr_mode_manual_sel;
+  wire [ADDR_WIDTH-1:0]               app_addr;
+  wire [2:0]                          app_cmd;
+  wire                                app_en;
+  wire                                app_sz;
+  wire                                app_rdy;
+  wire [APP_DATA_WIDTH-1:0]           app_rd_data;
+  wire                                app_rd_data_valid;
+  wire [APP_DATA_WIDTH-1:0]           app_wdf_data;
+  wire                                app_wdf_end;
+  wire                                app_wdf_rdy;
+  wire                                app_wdf_wren;
   wire                                t_gen_run_traffic;
   wire  [3:0]                         t_gen_instr_mode;
   wire [31:0]                         t_gen_start_addr;
@@ -382,25 +362,25 @@ module example_top #
   wire [5*DQS_WIDTH-1:0]              dbg_wr_dq_tap_set;
   wire [5*DQS_WIDTH-1:0]              dbg_wr_dqs_tap_set;
   wire                                dbg_wr_tap_set_en;
-  wire 			                      dbg_idel_up_all; 
-  wire 			                      dbg_idel_down_all; 
-  wire 			                      dbg_idel_up_cpt; 
-  wire 			                      dbg_idel_down_cpt; 
-  wire 			                      dbg_idel_up_rsync; 
-  wire 			                      dbg_idel_down_rsync; 
-  wire 			                      dbg_sel_all_idel_cpt; 
-  wire 			                      dbg_sel_all_idel_rsync; 
-  wire 			                      dbg_pd_inc_cpt; 
-  wire 			                      dbg_pd_dec_cpt; 
-  wire 			                      dbg_pd_inc_dqs; 
-  wire 			                      dbg_pd_dec_dqs; 
-  wire 			                      dbg_pd_disab_hyst; 
-  wire 			                      dbg_pd_disab_hyst_0; 
+  wire                                dbg_idel_up_all;
+  wire                                dbg_idel_down_all;
+  wire                                dbg_idel_up_cpt;
+  wire                                dbg_idel_down_cpt;
+  wire                                dbg_idel_up_rsync;
+  wire                                dbg_idel_down_rsync;
+  wire                                dbg_sel_all_idel_cpt;
+  wire                                dbg_sel_all_idel_rsync;
+  wire                                dbg_pd_inc_cpt;
+  wire                                dbg_pd_dec_cpt;
+  wire                                dbg_pd_inc_dqs;
+  wire                                dbg_pd_dec_dqs;
+  wire                                dbg_pd_disab_hyst;
+  wire                                dbg_pd_disab_hyst_0;
   wire                                dbg_wrlvl_done;
   wire                                dbg_wrlvl_err;
   wire                                dbg_wrlvl_start;
-  wire [4:0]                          dbg_tap_cnt_during_wrlvl;  
-  wire [19:0]                         dbg_rsync_tap_cnt;  
+  wire [4:0]                          dbg_tap_cnt_during_wrlvl;
+  wire [19:0]                         dbg_rsync_tap_cnt;
   wire [255:0]                        dbg_phy_pd;
   wire [255:0]                        dbg_phy_read;
   wire [255:0]                        dbg_phy_rdlvl;
@@ -410,6 +390,9 @@ module example_top #
   wire [DQS_CNT_WIDTH-1:0]            dbg_sel_idel_cpt;
   wire [DQS_CNT_WIDTH-1:0]            dbg_sel_idel_rsync;
   wire [DQS_CNT_WIDTH-1:0]            dbg_pd_byte_sel;
+  wire                                modify_enable_sel;
+  wire [2:0]                          vio_data_mode;
+  wire [2:0]                          vio_addr_mode;
 
   wire                                ddr3_cs0_clk;
   wire [35:0]                         ddr3_cs0_control;
@@ -425,21 +408,15 @@ module example_top #
   wire [35:0]                         ddr3_cs4_control;
   wire [31:0]                         ddr3_cs4_sync_out;
 
+  //***************************************************************************
 
-  assign phy_init_done = dfi_init_complete;
+
   assign app_hi_pri = 1'b0;
-//  assign app_wdf_mask = {APP_MASK_WIDTH{1'b0}};
+  assign app_wdf_mask = {APP_MASK_WIDTH{1'b0}};
 
-// ML605 comment out the following signals to enable traffic generator control from VIO console:
-// assign manual_clear_error     = 1'b0;
-// assign modify_enable_sel      = 1'b1;
-// assign data_mode_manual_sel   = 3'b010; // ADDR_DATA
-// assign addr_mode_manual_sel   = 3'b011; //SEQUENTIAL_ADDR
-
-  wire  locked; // ML605
-  assign pll_lock = locked;  // ML605 
-
-/*  MUXCY scl_inst
+  assign manual_clear_error     = 1'b0;
+      
+  MUXCY scl_inst
     (
      .O  (scl),
      .CI (scl_i),
@@ -454,12 +431,10 @@ module example_top #
      .DI (1'b0),
      .S  (1'b1)
      );
-*/
-  assign clk_ref = 1'b0;
-//  assign sys_clk = 1'b0; 
-// ML605 200MHz clock sourced from BUFG within "idelay_ctrl" module.
-  wire clk_200;    
-  //***************************************************************************
+  assign clk_ref_p = 1'b0;
+  assign clk_ref_n = 1'b0;
+  assign sys_clk_p = 1'b0;
+  assign sys_clk_n = 1'b0;
 
 
   iodelay_ctrl #
@@ -471,14 +446,12 @@ module example_top #
      )
     u_iodelay_ctrl
       (
-       .sys_clk_diff     (sys_clk_diff),  // ML605 200MHz EPSON oscillator
+       .clk_ref_p        (clk_ref_p),
+       .clk_ref_n        (clk_ref_n),
        .clk_ref          (clk_ref),
        .sys_rst          (sys_rst),
-       .clk_200          (clk_200),    // ML605 200MHz clock from BUFG to MMCM CLKIN1
        .iodelay_ctrl_rdy (iodelay_ctrl_rdy)
        );
-/* ML605 comment out "clk_ibuf" module. MIG default requires 2 inputs clocks.
-
   clk_ibuf #
     (
      .INPUT_CLK_TYPE (INPUT_CLK_TYPE)
@@ -490,8 +463,6 @@ module example_top #
        .sys_clk           (sys_clk),
        .mmcm_clk          (mmcm_clk)
        );
-*/
- 
   infrastructure #
     (
      .TCQ                (TCQ),
@@ -508,9 +479,8 @@ module example_top #
        .clk_mem          (clk_mem),
        .clk              (clk),
        .clk_rd_base      (clk_rd_base),
-       .pll_lock         (locked),     // ML605 GPIO LED output port
        .rstdiv0          (rst),
-       .mmcm_clk         (clk_200),    // ML605 single input clock 200MHz from "iodelay_ctrl"
+       .mmcm_clk         (mmcm_clk),
        .sys_rst          (sys_rst),
        .iodelay_ctrl_rdy (iodelay_ctrl_rdy),
        .PSDONE           (pd_PSDONE),
@@ -544,8 +514,6 @@ module example_top #
    .ROW_WIDTH            (ROW_WIDTH),
    .RTT_NOM              (RTT_NOM),
    .RTT_WR               (RTT_WR),
-   .SIM_CAL_OPTION       (SIM_CAL_OPTION),
-   .SIM_INIT_OPTION      (SIM_INIT_OPTION),
    .SIM_BYPASS_INIT_CAL  (SIM_BYPASS_INIT_CAL),
    .WRLVL                (WRLVL),
    .nDQS_COL0            (nDQS_COL0),
@@ -564,8 +532,11 @@ module example_top #
    .tCK                  (tCK),
    .ADDR_WIDTH           (ADDR_WIDTH),
    .TCQ                  (TCQ),
+   .ECC                  (ECC),
    .ECC_TEST             (ECC_TEST),
-   .PAYLOAD_WIDTH        (PAYLOAD_WIDTH)
+   .PAYLOAD_WIDTH        (PAYLOAD_WIDTH),
+   .APP_DATA_WIDTH       (APP_DATA_WIDTH),
+   .APP_MASK_WIDTH       (APP_MASK_WIDTH)
    )
   u_memc_ui_top
   (
@@ -592,7 +563,7 @@ module example_top #
    .pd_PSEN                          (pd_PSEN),
    .pd_PSINCDEC                      (pd_PSINCDEC),
    .pd_PSDONE                        (pd_PSDONE),
-   .dfi_init_complete                (dfi_init_complete),
+   .phy_init_done                    (phy_init_done),
    .bank_mach_next                   (bank_mach_next),
    .app_ecc_multiple_err             (app_ecc_multiple_err_i),
    .app_rd_data                      (app_rd_data),
@@ -609,6 +580,7 @@ module example_top #
    .app_wdf_end                      (app_wdf_end),
    .app_wdf_mask                     (app_wdf_mask),
    .app_wdf_wren                     (app_wdf_wren),
+   .app_correct_en                   (1'b1),
    .dbg_wr_dqs_tap_set               (dbg_wr_dqs_tap_set),
    .dbg_wr_dq_tap_set                (dbg_wr_dq_tap_set),
    .dbg_wr_tap_set_en                (dbg_wr_tap_set_en),
@@ -644,6 +616,123 @@ module example_top #
    );
 
 
+  // Traffic Gen Modules
+  init_mem_pattern_ctr #
+    (
+     .FAMILY             ("VIRTEX6"),
+     .MEM_BURST_LEN      (BURST_LENGTH),
+     .BEGIN_ADDRESS      (BEGIN_ADDRESS),
+     .END_ADDRESS        (END_ADDRESS),
+     .DWIDTH             (APP_DATA_WIDTH),
+     .TST_MEM_INSTR_MODE (TST_MEM_INSTR_MODE),
+     .DATA_MODE          (DATA_MODE),
+     .ADDR_WIDTH         (ADDR_WIDTH),
+     .EYE_TEST           (EYE_TEST)
+     )
+    init_mem0
+      (
+       .clk_i                (clk),
+       .rst_i                (rst),
+       .mcb_cmd_en_i         (app_en),
+       .mcb_cmd_instr_i      (app_cmd[2:0]),
+       .mcb_cmd_addr_i       (app_addr),
+       .mcb_cmd_bl_i         (6'b001000),
+       .mcb_init_done_i      (phy_init_done),
+       .cmp_error            (error),
+       .run_traffic_o        (t_gen_run_traffic),
+       .start_addr_o         (t_gen_start_addr),
+       .end_addr_o           (t_gen_end_addr),
+       .cmd_seed_o           (t_gen_cmd_seed),
+       .data_seed_o          (t_gen_data_seed),
+       .load_seed_o          (t_gen_load_seed),
+       .addr_mode_o          (t_gen_addr_mode),
+       .instr_mode_o         (t_gen_instr_mode),
+       .bl_mode_o            (t_gen_bl_mode),
+       .data_mode_o          (t_gen_data_mode),
+       .mode_load_o          (t_gen_mode_load),
+       .fixed_bl_o           (t_gen_fixed_bl),
+       .fixed_instr_o        (t_gen_fixed_instr),
+       .fixed_addr_o         (t_gen_fixed_addr),
+       .mcb_wr_en_i          (app_wdf_wren),
+       .vio_modify_enable    (modify_enable_sel),
+       .vio_data_mode_value  (vio_data_mode),
+       .vio_addr_mode_value  (vio_addr_mode),
+       .vio_bl_mode_value    (2'b01),
+       .vio_fixed_bl_value   (6'b001000)
+       );
+
+  mcb_traffic_gen #
+    (
+     .FAMILY              ("VIRTEX6"),
+     .MEM_BURST_LEN       (BURST_LENGTH),
+     .PORT_MODE           ("BI_MODE"),
+     .DATA_PATTERN        (DATA_PATTERN),
+     .CMD_PATTERN         (CMD_PATTERN),
+     .ADDR_WIDTH          (ADDR_WIDTH),
+     .MEM_COL_WIDTH       (COL_WIDTH),
+     .NUM_DQ_PINS         (PAYLOAD_WIDTH),
+     .SEL_VICTIM_LINE     (SEL_VICTIM_LINE),
+     .DWIDTH              (APP_DATA_WIDTH),
+     .DQ_ERROR_WIDTH      (PAYLOAD_WIDTH/8),
+     .PRBS_SADDR_MASK_POS (PRBS_SADDR_MASK_POS),
+     .PRBS_EADDR_MASK_POS (PRBS_EADDR_MASK_POS),
+     .PRBS_SADDR          (BEGIN_ADDRESS),
+     .PRBS_EADDR          (END_ADDRESS),
+     .EYE_TEST            (EYE_TEST)
+     )
+    m_traffic_gen
+      (
+       .clk_i              (clk),
+       .rst_i              (rst),
+       .run_traffic_i      (t_gen_run_traffic),
+       .manual_clear_error (manual_clear_error),
+       .start_addr_i       (t_gen_start_addr),
+       .end_addr_i         (t_gen_end_addr),
+       .cmd_seed_i         (t_gen_cmd_seed),
+       .data_seed_i        (t_gen_data_seed),
+       .load_seed_i        (t_gen_load_seed),
+       .addr_mode_i        (t_gen_addr_mode),
+       .instr_mode_i       (t_gen_instr_mode),
+       .bl_mode_i          (t_gen_bl_mode),
+       .data_mode_i        (t_gen_data_mode),
+       .mode_load_i        (t_gen_mode_load),
+       .fixed_bl_i         (t_gen_fixed_bl),
+       .fixed_instr_i      (t_gen_fixed_instr),
+       .fixed_addr_i       (t_gen_fixed_addr),
+       .bram_cmd_i         (39'b0),
+       .bram_valid_i       (1'b0),
+       .bram_rdy_o         (),
+       .mcb_cmd_en_o       (app_en),
+       .mcb_cmd_instr_o    (app_cmd[2:0]),
+       .mcb_cmd_addr_o     (app_addr),
+       .mcb_cmd_bl_o       (),
+       .mcb_cmd_full_i     (~app_rdy),
+       .mcb_wr_en_o        (app_wdf_wren),
+       .mcb_wr_data_o      (app_wdf_data[APP_DATA_WIDTH-1:0]),
+       .mcb_wr_full_i      (~app_wdf_rdy),
+       .mcb_wr_data_end_o  (app_wdf_end),
+       .mcb_wr_fifo_counts (tg_wr_fifo_counts),
+       .mcb_wr_mask_o      (),
+       .mcb_rd_en_o        (tg_rd_en),
+       .mcb_rd_data_i      (app_rd_data[APP_DATA_WIDTH-1:0]),
+       .mcb_rd_empty_i     (~app_rd_data_valid),
+       .mcb_rd_fifo_counts (tg_rd_fifo_counts),
+       .counts_rst         (rst),
+       .wr_data_counts     (),
+       .rd_data_counts     (),
+       .cmp_data           (),
+       .cmp_error          (),
+       .cmp_data_valid     (),
+       .error              (error),
+       .error_status       (),
+       .mem_rd_data        (),
+       .fixed_data_i       ({APP_DATA_WIDTH{1'b0}}),
+       .dq_error_bytelane_cmp(),
+       .cumlative_dq_lane_error()
+       );
+
+
+
   // If debug port is not enabled, then make certain control input
   // to Debug Port are disabled
   generate
@@ -662,11 +751,183 @@ module example_top #
       assign dbg_inc_dec_sel        = 'b0;
       assign dbg_inc_rd_fps         = 1'b0;
       assign dbg_pd_msb_sel         = 'b0 ;
-      assign dbg_sel_idel_cpt       = 'b0 ;	 
+      assign dbg_sel_idel_cpt       = 'b0 ;
       assign dbg_sel_idel_rsync     = 'b0 ;
-      assign dbg_pd_byte_sel        = 'b0 ;	
+      assign dbg_pd_byte_sel        = 'b0 ;
       assign dbg_dec_rd_fps         = 1'b0;
+      assign modify_enable_sel      = 1'b0;
     end
   endgenerate
+  generate
+    if (DEBUG_PORT == "ON") begin: gen_dbg_enable
+
+      // Connect these to VIO if changing output (write) 
+      // IODELAY taps desired 
+      assign dbg_wr_dqs_tap_set     = 'b0;
+      assign dbg_wr_dq_tap_set      = 'b0;
+      assign dbg_wr_tap_set_en      = 1'b0;
+
+      // Connect these to VIO if changing read base clock
+      // phase required
+      assign dbg_inc_rd_fps         = 1'b0;
+      assign dbg_dec_rd_fps         = 1'b0;
+      
+      //*******************************************************
+      // CS0 - ILA for monitoring PHY status, testbench error,
+      //       and synchronized read data
+      //*******************************************************
+
+      // Assignments for ILA monitoring general PHY
+      // status and synchronized read data
+      assign ddr3_cs0_clk             = clk;
+      assign ddr3_cs0_trig[1:0]       = dbg_rdlvl_done;
+      assign ddr3_cs0_trig[3:2]       = dbg_rdlvl_err;
+      assign ddr3_cs0_trig[4]         = phy_init_done;
+      assign ddr3_cs0_trig[5]         = 1'b0;  // Reserve for ERROR from TrafficGen
+      assign ddr3_cs0_trig[7:5]       = 'b0;
+
+      // Support for only up to 72-bits of data
+      if (DQ_WIDTH <= 72) begin: gen_dq_le_72
+        assign ddr3_cs0_data[4*DQ_WIDTH-1:0] = dbg_rddata;
+      end else begin: gen_dq_gt_72
+        assign ddr3_cs0_data[287:0] = dbg_rddata[287:0];
+      end
+
+      assign ddr3_cs0_data[289:288]   = dbg_rdlvl_done;
+      assign ddr3_cs0_data[291:290]   = dbg_rdlvl_err;
+      assign ddr3_cs0_data[292]       = phy_init_done;
+      assign ddr3_cs0_data[293]       = 1'b0; // Reserve for ERROR from TrafficGen
+      assign ddr3_cs0_data[383:294]   = 'b0;
+
+      //*******************************************************
+      // CS1 - Input VIO for monitoring PHY status and
+      //       write leveling/calibration delays
+      //*******************************************************
+
+      // Support for only up to 18 DQS groups
+      if (DQS_WIDTH <= 18) begin: gen_dqs_le_18_cs1
+        assign ddr3_cs1_async_in[5*DQS_WIDTH-1:0]     = dbg_wl_odelay_dq_tap_cnt;
+        assign ddr3_cs1_async_in[5*DQS_WIDTH+89:90]   = dbg_wl_odelay_dqs_tap_cnt;
+        assign ddr3_cs1_async_in[DQS_WIDTH+179:180]   = dbg_wl_dqs_inverted;
+        assign ddr3_cs1_async_in[2*DQS_WIDTH+197:198] = dbg_wr_calib_clk_delay;
+      end else begin: gen_dqs_gt_18_cs1
+        assign ddr3_cs1_async_in[89:0]    = dbg_wl_odelay_dq_tap_cnt[89:0];
+        assign ddr3_cs1_async_in[179:90]  = dbg_wl_odelay_dqs_tap_cnt[89:0];
+        assign ddr3_cs1_async_in[197:180] = dbg_wl_dqs_inverted[17:0];
+        assign ddr3_cs1_async_in[233:198] = dbg_wr_calib_clk_delay[35:0];
+      end
+
+      assign ddr3_cs1_async_in[235:234] = dbg_rdlvl_done[1:0];
+      assign ddr3_cs1_async_in[237:236] = dbg_rdlvl_err[1:0];
+      assign ddr3_cs1_async_in[238]     = phy_init_done;
+      assign ddr3_cs1_async_in[239]     = 1'b0; // Pre-MIG 3.4: Used for rst_pll_ck_fb
+      assign ddr3_cs1_async_in[240]     = 1'b0; // Reserve for ERROR from TrafficGen
+      assign ddr3_cs1_async_in[255:241] = 'b0;
+
+      //*******************************************************
+      // CS2 - Input VIO for monitoring Read Calibration
+      //       results.
+      //*******************************************************
+
+      // Support for only up to 18 DQS groups
+      if (DQS_WIDTH <= 18) begin: gen_dqs_le_18_cs2
+        assign ddr3_cs2_async_in[5*DQS_WIDTH-1:0]     = dbg_cpt_tap_cnt;
+        // Reserved for future monitoring of DQ tap counts from read leveling
+        assign ddr3_cs2_async_in[5*DQS_WIDTH+89:90]   = 'b0;
+        assign ddr3_cs2_async_in[3*DQS_WIDTH+179:180] = dbg_rd_bitslip_cnt;
+      end else begin: gen_dqs_gt_18_cs2
+        assign ddr3_cs2_async_in[89:0]    = dbg_cpt_tap_cnt[89:0];
+        // Reserved for future monitoring of DQ tap counts from read leveling
+        assign ddr3_cs2_async_in[179:90]  = 'b0;
+        assign ddr3_cs2_async_in[233:180] = dbg_rd_bitslip_cnt[53:0];
+      end
+
+      assign ddr3_cs2_async_in[238:234] = dbg_rd_active_dly;
+      assign ddr3_cs2_async_in[255:239] = 'b0;
+
+      //*******************************************************
+      // CS3 - Input VIO for monitoring more Read Calibration
+      //       results.
+      //*******************************************************
+
+      // Support for only up to 18 DQS groups
+      if (DQS_WIDTH <= 18) begin: gen_dqs_le_18_cs3
+        assign ddr3_cs3_async_in[5*DQS_WIDTH-1:0]     = dbg_cpt_first_edge_cnt;
+        assign ddr3_cs3_async_in[5*DQS_WIDTH+89:90]   = dbg_cpt_second_edge_cnt;
+        assign ddr3_cs3_async_in[2*DQS_WIDTH+179:180] = dbg_rd_clkdly_cnt;
+      end else begin: gen_dqs_gt_18_cs3
+        assign ddr3_cs3_async_in[89:0]    = dbg_cpt_first_edge_cnt[89:0];
+        assign ddr3_cs3_async_in[179:90]  = dbg_cpt_second_edge_cnt[89:0];
+        assign ddr3_cs3_async_in[215:180] = dbg_rd_clkdly_cnt[35:0];
+      end
+
+      assign ddr3_cs3_async_in[255:216] = 'b0;
+
+      //*******************************************************
+      // CS4 - Output VIO for disabling OCB monitor, Read Phase
+      //       Detector, and dynamically changing various
+      //       IODELAY values used for adjust read data capture
+      //       timing
+      //*******************************************************
+
+      assign ddr3_cs4_clk                = clk;
+      assign dbg_pd_off             = ddr3_cs4_sync_out[0];
+      assign dbg_pd_maintain_off    = ddr3_cs4_sync_out[1];
+      assign dbg_pd_maintain_0_only = ddr3_cs4_sync_out[2];
+      assign dbg_ocb_mon_off        = ddr3_cs4_sync_out[3];
+      assign dbg_inc_cpt            = ddr3_cs4_sync_out[4];
+      assign dbg_dec_cpt            = ddr3_cs4_sync_out[5];
+      assign dbg_inc_rd_dqs         = ddr3_cs4_sync_out[6];
+      assign dbg_dec_rd_dqs         = ddr3_cs4_sync_out[7];
+      assign dbg_inc_dec_sel        = ddr3_cs4_sync_out[DQS_CNT_WIDTH+7:8];
+      assign modify_enable_sel      = (SIMULATION == "TRUE") ? 1'b0 : ddr3_cs4_sync_out[16];
+      assign vio_addr_mode          = (SIMULATION == "TRUE") ? ADDR_MODE : ddr3_cs4_sync_out[19:17];
+      assign vio_data_mode          = (SIMULATION == "TRUE") ? DATA_MODE : ddr3_cs4_sync_out[22:20];
+
+      icon5 u_icon
+        (
+         .CONTROL0 (ddr3_cs0_control),
+         .CONTROL1 (ddr3_cs1_control),
+         .CONTROL2 (ddr3_cs2_control),
+         .CONTROL3 (ddr3_cs3_control),
+         .CONTROL4 (ddr3_cs4_control)
+         );
+
+      ila384_8 u_cs0
+        (
+         .CLK     (ddr3_cs0_clk),
+         .DATA    (ddr3_cs0_data),
+         .TRIG0   (ddr3_cs0_trig),
+         .CONTROL (ddr3_cs0_control)
+         );
+
+      vio_async_in256 u_cs1
+        (
+         .ASYNC_IN (ddr3_cs1_async_in),
+         .CONTROL  (ddr3_cs1_control)
+         );
+
+      vio_async_in256 u_cs2
+        (
+         .ASYNC_IN (ddr3_cs2_async_in),
+         .CONTROL  (ddr3_cs2_control)
+         );
+
+      vio_async_in256 u_cs3
+        (
+         .ASYNC_IN (ddr3_cs3_async_in),
+         .CONTROL  (ddr3_cs3_control)
+         );
+
+      vio_sync_out32 u_cs4
+        (
+         .SYNC_OUT (ddr3_cs4_sync_out),
+         .CLK      (ddr3_cs4_clk),
+         .CONTROL  (ddr3_cs4_control)
+         );
+    end
+  endgenerate
+
+
 
 endmodule

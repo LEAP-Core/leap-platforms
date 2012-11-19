@@ -49,7 +49,7 @@
 //   ____  ____
 //  /   /\/   /
 // /___/  \  /    Vendor: Xilinx
-// \   \   \/     Version: 3.9
+// \   \   \/     Version: 3.92
 //  \   \         Application: MIG
 //  /   /         Filename: phy_control_io.v
 // /___/   /\     Date Last Modified: $Date: 2011/06/02 07:18:02 $
@@ -93,7 +93,7 @@ module phy_control_io #
    parameter IODELAY_GRP     = "IODELAY_MIG",  // May be assigned unique name
                                               // when mult IP cores in design
    parameter DDR2_EARLY_CS   = 0     // set = 1 for >200 MHz DDR2 UDIMM designs
-			             // for early launch of CS
+                                     // for early launch of CS
    )
   (
    input                   clk_mem,        // full rate core clock
@@ -204,6 +204,7 @@ module phy_control_io #
   wire [CS_WIDTH*nCS_PER_RANK-1:0] odt_oq;
   wire                             parity_odelay;  
   wire                             parity_oq;  
+  wire                             reset_n_oq;
   wire                             ras_n_odelay;
   wire                             ras_n_oq;
   wire                             rst_cke_odt;  
@@ -423,7 +424,7 @@ module phy_control_io #
      )
     u_out_reset_n
       (
-       .Q  (ddr_reset_n),
+       .Q  (reset_n_oq),
        .C  (clk),
        .CE (1'b1),
        .D1 (mux_reset_n),
@@ -431,6 +432,12 @@ module phy_control_io #
        .R  (rst_r),
        .S  (1'b0)
        );
+
+  OBUF u_reset_n_obuf
+    (
+     .I (reset_n_oq),
+     .O (ddr_reset_n)
+     );
 
   //*****************************************************************
   // Note on generation of Control/Address signals - there are
@@ -457,17 +464,25 @@ module phy_control_io #
       //*******************************************************
       // CASE1: DDR3, write-leveling
       //*******************************************************
-      
-      assign ddr_ras_n = ras_n_oq;
+
+      OBUF u_ras_n_obuf
+        (
+         .I (ras_n_oq),
+         .O (ddr_ras_n)
+         );
 
     end else begin: gen_ras_n_nowrlvl      
       
       //*******************************************************
       // CASE2: DDR3, no write-leveling
       //*******************************************************
-        
-      assign ddr_ras_n = ras_n_odelay;
 
+      OBUF u_ras_n_obuf
+        (
+         .I (ras_n_odelay),
+         .O (ddr_ras_n)
+         );
+	
       (* IODELAY_GROUP = IODELAY_GRP *) IODELAYE1 #
         (
          .CINVCTRL_SEL          ("FALSE"),
@@ -553,11 +568,19 @@ module phy_control_io #
   generate
     if ((DRAM_TYPE == "DDR3") && (WRLVL == "ON")) begin: gen_cas_n_wrlvl      
 
-      assign ddr_cas_n = cas_n_oq;
+      OBUF u_cas_n_obuf
+        (
+         .I (cas_n_oq),
+         .O (ddr_cas_n)
+         );
 
     end else begin: gen_cas_n_nowrlvl            
 
-      assign ddr_cas_n = cas_n_odelay;
+      OBUF u_cas_n_obuf
+        (
+         .I (cas_n_odelay),
+         .O (ddr_cas_n)
+         );
       
       (* IODELAY_GROUP = IODELAY_GRP *) IODELAYE1 #
         (
@@ -644,11 +667,19 @@ module phy_control_io #
   generate
     if ((DRAM_TYPE == "DDR3") && (WRLVL == "ON")) begin: gen_we_n_wrlvl
 
-      assign ddr_we_n = we_n_oq;
-      
+      OBUF u_we_n_obuf
+        (
+         .I (we_n_oq),
+         .O (ddr_we_n)
+         );
+
     end else begin: gen_we_n_nowrlvl      
 
-      assign ddr_we_n = we_n_odelay;
+      OBUF u_we_n_obuf
+        (
+         .I (we_n_odelay),
+         .O (ddr_we_n)
+         );
 
       (* IODELAY_GROUP = IODELAY_GRP *) IODELAYE1 #
         (
@@ -738,12 +769,20 @@ module phy_control_io #
 
       if ((DRAM_TYPE == "DDR3") && (WRLVL == "ON")) begin: gen_cke_wrlvl
 
-        assign ddr_cke[cke_i] = cke_oq[cke_i];
+        OBUF u_cke_obuf
+          (
+           .I (cke_oq[cke_i]),
+           .O (ddr_cke[cke_i])
+           );
 
       end else begin: gen_cke_nowrlvl     
 
-        assign ddr_cke[cke_i] = cke_odelay[cke_i];
-          
+        OBUF u_cke_obuf
+          (
+           .I (cke_odelay[cke_i]),
+           .O (ddr_cke[cke_i])
+           );
+         
         (* IODELAY_GROUP = IODELAY_GRP *) IODELAYE1 #
           (
            .CINVCTRL_SEL          ("FALSE"),
@@ -840,12 +879,20 @@ module phy_control_io #
 
       if ((DRAM_TYPE == "DDR3") && (WRLVL == "ON")) begin: gen_cs_n_wrlvl
 
-        assign ddr_cs_n[cs_i] = cs_n_oq[cs_i];
+        OBUF u_cs_n_obuf
+          (
+           .I (cs_n_oq[cs_i]),
+           .O (ddr_cs_n[cs_i])
+           );
 
       end else begin: gen_cs_n_nowrlvl      
 
-        assign ddr_cs_n[cs_i] = cs_n_odelay[cs_i];
-          
+        OBUF u_cs_n_obuf
+          (
+           .I (cs_n_odelay[cs_i]),
+           .O (ddr_cs_n[cs_i])
+           );
+
         (* IODELAY_GROUP = IODELAY_GRP *) IODELAYE1 #
           (
            .CINVCTRL_SEL          ("FALSE"),
@@ -935,12 +982,20 @@ module phy_control_io #
 
       if ((DRAM_TYPE == "DDR3") && (WRLVL == "ON")) begin: gen_addr_wrlvl
 
-         assign ddr_addr[addr_i] = addr_oq[addr_i];
+        OBUF u_addr_obuf
+          (
+           .I (addr_oq[addr_i]),
+           .O (ddr_addr[addr_i])
+           );
 
       end else begin: gen_addr_nowrlvl     
 
-        assign ddr_addr[addr_i] = addr_odelay[addr_i];
-          
+        OBUF u_addr_obuf
+          (
+           .I (addr_odelay[addr_i]),
+           .O (ddr_addr[addr_i])
+           );
+
         (* IODELAY_GROUP = IODELAY_GRP *) IODELAYE1 #
           (
            .CINVCTRL_SEL          ("FALSE"),
@@ -1030,12 +1085,20 @@ module phy_control_io #
 
       if ((DRAM_TYPE == "DDR3") && (WRLVL == "ON")) begin: gen_ba_wrlvl
 
-        assign ddr_ba[ba_i] = ba_oq[ba_i];
+        OBUF u_bank_obuf
+          (
+           .I (ba_oq[ba_i]),
+           .O (ddr_ba[ba_i])
+           );
 
       end else begin: gen_ba_nowrlvl            
 
-        assign ddr_ba[ba_i] = ba_odelay[ba_i];
-          
+        OBUF u_bank_obuf
+          (
+           .I (ba_odelay[ba_i]),
+           .O (ddr_ba[ba_i])
+           );
+
         (* IODELAY_GROUP = IODELAY_GRP *) IODELAYE1 #
           (
            .CINVCTRL_SEL          ("FALSE"),
@@ -1126,11 +1189,19 @@ module phy_control_io #
 
       if ((DRAM_TYPE == "DDR3") && (WRLVL == "ON")) begin: gen_odt_wrlvl
 
-        assign ddr_odt[odt_i] = odt_oq[odt_i];
+        OBUF u_odt_obuf
+          (
+           .I (odt_oq[odt_i]),
+           .O (ddr_odt[odt_i])
+           );
 
       end else begin: gen_odt_nowrlvl   
 
-        assign ddr_odt[odt_i] = odt_odelay[odt_i];
+        OBUF u_odt_obuf
+          (
+           .I (odt_odelay[odt_i]),
+           .O (ddr_odt[odt_i])
+           );
           
         (* IODELAY_GROUP = IODELAY_GRP *) IODELAYE1 #
           (
@@ -1223,11 +1294,19 @@ module phy_control_io #
   generate  
     if ((DRAM_TYPE == "DDR3") && (WRLVL == "ON")) begin: gen_parity_wrlvl
 
-      assign ddr_parity = parity_oq;
+      OBUF u_parity_obuf
+        (
+         .I (parity_oq),
+         .O (ddr_parity)
+         );
 
     end else begin: gen_parity_nowrlvl     
-      
-      assign ddr_parity = parity_odelay;
+
+      OBUF u_parity_obuf
+        (
+         .I (parity_odelay),
+         .O (ddr_parity)
+         );
           
       (* IODELAY_GROUP = IODELAY_GRP *) IODELAYE1 #
         (

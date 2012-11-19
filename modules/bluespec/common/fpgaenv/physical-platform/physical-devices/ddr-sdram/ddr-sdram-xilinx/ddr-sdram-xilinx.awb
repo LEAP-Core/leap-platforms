@@ -14,3 +14,5 @@
 
 %param DRAM_MAX_OUTSTANDING_READS  8 "Maximum in-flight read requests"
 %param --global DRAM_DEBUG         0 "Non-zero enables debugging methods"
+
+%param DEBUG_DDR3                  0 "Enable DDR3 Debugging"

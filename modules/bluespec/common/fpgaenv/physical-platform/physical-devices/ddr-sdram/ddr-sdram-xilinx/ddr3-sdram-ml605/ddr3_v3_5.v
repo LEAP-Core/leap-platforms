@@ -49,7 +49,7 @@
 //   ____  ____
 //  /   /\/   /
 // /___/  \  /    Vendor             : Xilinx
-// \   \   \/     Version            : 3.9
+// \   \   \/     Version            : 3.92
 //  \   \         Application        : MIG
 //  /   /         Filename           : example_top.v
 // /___/   /\     Date Last Modified : $Date: 2011/06/02 07:18:00 $
@@ -85,8 +85,12 @@
 module ddr3_v3_5 #
   (
    parameter REFCLK_FREQ             = 200,
-                                       // # = 200 when design frequency <= 533 MHz,
-                                       //   = 300 when design frequency > 533 MHz.
+                                       // # = 200 for all design frequencies of
+                                       //         -1 speed grade devices
+                                       //   = 200 when design frequency < 480 MHz
+                                       //         for -2 and -3 speed grade devices.
+                                       //   = 300 when design frequency >= 480 MHz
+                                       //         for -2 and -3 speed grade devices.
    parameter IODELAY_GRP             = "IODELAY_MIG",
                                        // It is associated to a set of IODELAYs with
                                        // an IDELAYCTRL that have same IODELAY CONTROLLER
@@ -265,17 +269,24 @@ module ddr3_v3_5 #
 
    input                                sys_rst,   // System reset
 
+   // Debug info
+   output                               dbg_wrlvl_start,
+   output                               dbg_wrlvl_done,
+   output                               dbg_wrlvl_err,
+   output [1:0]                         dbg_rdlvl_start,
+   output [1:0]                         dbg_rdlvl_done,
+   output [1:0]                         dbg_rdlvl_err,
 
    input                                app_wdf_wren,
-   input [(4*PAYLOAD_WIDTH)-1:0]        app_wdf_data,
-   input [(4*PAYLOAD_WIDTH)/8-1:0]      app_wdf_mask,
+   input [APP_DATA_WIDTH-1:0]           app_wdf_data,
+   input [APP_MASK_WIDTH-1:0]           app_wdf_mask,
    input                                app_wdf_end,
    input [ADDR_WIDTH-1:0]               app_addr,
    input [2:0]                          app_cmd,
    input                                app_en,
    output                               app_rdy,
    output                               app_wdf_rdy,
-   output [(4*PAYLOAD_WIDTH)-1:0]       app_rd_data,
+   output [APP_DATA_WIDTH-1:0]          app_rd_data,
    output                               app_rd_data_valid,
    output                               app_rd_data_end,    // added
    output                               tb_rst_n,
@@ -413,8 +424,6 @@ module ddr3_v3_5 #
   wire [DQS_CNT_WIDTH-1:0]            dbg_sel_idel_rsync;
   wire [DQS_CNT_WIDTH-1:0]            dbg_pd_byte_sel;
   wire                                modify_enable_sel;
-  wire [2:0]                          data_mode_manual_sel;
-  wire [2:0]                          addr_mode_manual_sel;
   wire [2:0]                          vio_data_mode;
   wire [2:0]                          vio_addr_mode;
 

@@ -49,7 +49,7 @@
 //   ____  ____
 //  /   /\/   /
 // /___/  \  /    Vendor: Xilinx
-// \   \   \/     Version: 3.9
+// \   \   \/     Version: 3.92
 //  \   \         Application: MIG
 //  /   /         Filename: phy_top.v
 // /___/   /\     Date Last Modified: $Date: 2011/06/02 07:18:04 $
@@ -78,7 +78,7 @@
 ******************************************************************************/
 
 `timescale 1ps/1ps
-(* X_CORE_INFO = "mig_v3_9_ddr3_V6, Coregen 13.3" , CORE_GENERATION_INFO = "ddr3_V6_phy,mig_v3_9,{LANGUAGE=Verilog, SYNTHESIS_TOOL=ISE, LEVEL=PHY, AXI_ENABLE=0, NO_OF_CONTROLLERS=1, INTERFACE_TYPE=DDR3, CLK_PERIOD=2500, MEMORY_TYPE=SODIMM, MEMORY_PART=mt4jsf6464hy-1g1, DQ_WIDTH=64, ECC=OFF, DATA_MASK=1, BURST_MODE=8, BURST_TYPE=SEQ, OUTPUT_DRV=HIGH, RTT_NOM=60, REFCLK_FREQ=200, MMCM_ADV_BANDWIDTH=MMCM_ADV_BANDWIDTH, CLKFBOUT_MULT_F=6, CLKOUT_DIVIDE=3, DEBUG_PORT=ON, IODELAY_HP_MODE=ON, INTERNAL_VREF=0, DCI_INOUTS=1, CLASS_ADDR=II, INPUT_CLK_TYPE=DIFFERENTIAL}" *)
+(* X_CORE_INFO = "mig_v3_92_ddr3_V6, Coregen 14.2" , CORE_GENERATION_INFO = "ddr3_V6_phy,mig_v3_92,{LANGUAGE=Verilog, SYNTHESIS_TOOL=ISE, LEVEL=PHY, AXI_ENABLE=0, NO_OF_CONTROLLERS=1, INTERFACE_TYPE=DDR3, CLK_PERIOD=2500, MEMORY_TYPE=SODIMM, MEMORY_PART=mt4jsf6464hy-1g1, DQ_WIDTH=64, ECC=OFF, DATA_MASK=1, BURST_MODE=8, BURST_TYPE=SEQ, OUTPUT_DRV=HIGH, RTT_NOM=60, REFCLK_FREQ=200, MMCM_ADV_BANDWIDTH=MMCM_ADV_BANDWIDTH, CLKFBOUT_MULT_F=6, CLKOUT_DIVIDE=3, DEBUG_PORT=OFF, IODELAY_HP_MODE=ON, INTERNAL_VREF=0, DCI_INOUTS=1, CLASS_ADDR=I, INPUT_CLK_TYPE=SINGLE_ENDED}" *)
 module phy_top #
   (
    parameter TCQ             = 100,
@@ -1126,6 +1126,7 @@ module phy_top #
      .nCL             (nCL),
      .PD_TAP_REQ      (PD_TAP_REQ),
      .SIM_CAL_OPTION  (SIM_CAL_OPTION_W),
+     .REG_CTRL        (REG_CTRL),
      .DEBUG_PORT      (DEBUG_PORT)
      )
     u_phy_rdlvl
