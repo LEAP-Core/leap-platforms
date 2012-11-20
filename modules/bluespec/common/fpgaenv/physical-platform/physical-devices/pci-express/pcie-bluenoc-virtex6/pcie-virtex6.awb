@@ -6,7 +6,9 @@
 %sources -t BSV -v PUBLIC pcie-virtex6.bsv
 %sources -t UCF -v PRIVATE pcie-virtex6.ucf
 
-%sources -t VERILOG -v PRIVATE pcie-virtex6-include.v
+## Side effects of pcie-virtex6.bsv compilation
+%generated -t VERILOG mkBNoCBridgeSynth.v
+%generated -t VERILOG mkPCIEBlueNoCDevice.v
 
 %sources -t VERILOG -v PRIVATE gtx_drp_chanalign_fix_3752_v6.v
 %sources -t VERILOG -v PRIVATE gtx_rx_valid_filter_v6.v
