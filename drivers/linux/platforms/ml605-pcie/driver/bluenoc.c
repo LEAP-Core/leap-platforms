@@ -792,7 +792,13 @@ static ssize_t bluenoc_read(struct file* filp, char __user* buf, size_t count, l
     first_page_len = count;
   else
     first_page_len = PAGE_SIZE - offset;
+
   last_page_len = (unsigned int) ((unsigned long) (buf + count) & ~PAGE_MASK);
+  // Corner case when the start of the buffer is perfectly aligned
+  if (last_page_len == 0) {
+    last_page_len = PAGE_SIZE;
+  }
+
   if (num_pages > 4096) {
     printk(KERN_ERR "%s_%d: Read buffer is too large\n", DEV_NAME, this_board->board_number);
     err = -EFAULT;
@@ -1125,7 +1131,13 @@ static ssize_t bluenoc_write(struct file* filp, const char __user* buf, size_t c
     first_page_len = count;
   else
     first_page_len = PAGE_SIZE - offset;
+
   last_page_len = (unsigned int) ((unsigned long) (buf + count) & ~PAGE_MASK);
+  // Corner case when the start of the buffer is perfectly aligned
+  if (last_page_len == 0) {
+    last_page_len = PAGE_SIZE;
+  }
+
   if (num_pages > 4096) {
     printk(KERN_ERR "%s_%d: Write buffer is too large\n", DEV_NAME, this_board->board_number);
     err = -EFAULT;
