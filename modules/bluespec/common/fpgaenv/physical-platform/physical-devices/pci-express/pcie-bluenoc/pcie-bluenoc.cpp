@@ -126,13 +126,13 @@ PCIE_DEVICE_CLASS::Cleanup()
 
 
 bool
-PCIE_DEVICE_CLASS::Probe()
+PCIE_DEVICE_CLASS::Probe(bool block)
 {
     struct pollfd pcie_poll;
     pcie_poll.fd = pcieDev;
     pcie_poll.events = POLLIN | POLLPRI;
 
-    int result = poll(&pcie_poll, 1, 0);
+    int result = poll(&pcie_poll, 1, block ? -1 : 0);
     return (result > 0);
 }
 

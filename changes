@@ -15203,3 +15203,14 @@ Edge condition in BlueNoC driver caused 0-size region to be sent to DMA engine
 instead of a full page when the transfer was more than one page and the
 last page ended on a page boundary.  The result was some combination of
 data corruption and crashes.
+
+----------
+mcadler     Date: Sat Nov 24 15:43:21 EST 2012  CSN: CSN-leap-platforms-654
+                  Sat Nov 24 20:43:21 UTC 2012
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc
+ pcie-bluenoc.cpp          Locally Modified          653 
+ pcie-bluenoc.h            Locally Modified          653 
+
+Add option to Probe() to block until a message is available.

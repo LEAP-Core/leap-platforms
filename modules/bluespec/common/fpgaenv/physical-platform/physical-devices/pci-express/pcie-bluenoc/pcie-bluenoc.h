@@ -67,7 +67,7 @@ class PCIE_DEVICE_CLASS: public PLATFORMS_MODULE_CLASS
     void Cleanup();                    // cleanup
     void Init();                       // uninit
     void Uninit();                     // uninit
-    bool Probe();                      // probe for data
+    bool Probe(bool block = false);    // probe for data
 
     // Read up to count bytes into buffer.  The buffer must be 128-byte aligned
     // for use with the PCIe driver.  The actual number of bytes read is
