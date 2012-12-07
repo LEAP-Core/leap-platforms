@@ -135,7 +135,7 @@ FPGA_DDR_REQUEST
 //
 // mkDDRDevice
 //
-module mkDDRDevice
+module mkDDRDevice#(Clock rawClock, Reset rawReset)
     // interface:
     (DDR_DEVICE);
 

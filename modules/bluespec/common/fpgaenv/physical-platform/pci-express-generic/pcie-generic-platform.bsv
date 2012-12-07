@@ -20,7 +20,9 @@ import FIFO::*;
 import Vector::*;
 import Clocks::*;
 
-// The Physical Platform for the ML605 Virtex 6 with PCIE
+//
+// Standard physical platform for PCIe boards with on-board DDR storage
+//
 
 `include "awb/provides/pcie_device.bsh"
 `include "awb/provides/clocks_device.bsh"

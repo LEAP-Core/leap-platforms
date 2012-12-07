@@ -15214,3 +15214,49 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci
  pcie-bluenoc.h            Locally Modified          653 
 
 Add option to Probe() to block until a message is available.
+
+----------
+mcadler     Date: Fri Dec  7 16:09:53 EST 2012  CSN: CSN-leap-platforms-655
+                  Fri Dec  7 21:09:53 UTC 2012
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/ml605/pcie-dma
+ ml605-v6-pcie-dma.h       Locally Removed           654 
+ ml605-v6-pcie-dma.awb     Locally Removed           654 
+ ml605-v6-pcie-dma.bsv     Locally Removed           654 
+ xilinx.ut                 Locally Removed           654 
+ xilinx.sdc                Locally Removed           654 
+ ml605-v6-pcie-dma.ucf     Locally Removed           654 
+ xilinx.sdf                Locally Removed           654 
+ xilinx.xst                Locally Removed           654 
+ ml605-v6-pcie-dma.cpp     Locally Removed           654 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/simulation
+ sim-physical-platform.bsv Locally Modified          654 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-bram
+ ddr-sdram-bram.bsv        Locally Modified          654 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform
+ pci-express-generic/      Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic
+ pcie-generic-platform.h   Locally Added               0 
+ pcie-generic-platform.awb Locally Added               0 
+ pcie-generic-platform.bsv Locally Added               0 
+ config/                   Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic/config
+ ml605/                    Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic/config/ml605
+ ml605-v6-pcie-dma.awb     Locally Added               - 
+ ml605-v6-pcie-dma.ucf     Locally Added               - 
+ ml605-v6-pcie-dma.xst     Locally Added               - 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic
+ pcie-generic-platform.bsh Locally Added               0 
+ pcie-generic-platform.cpp Locally Added               0 
+
+Prepare to share standard PCIe board physical platforms instead of replicating
+the board wrapper.  So far this is just a restructuring of the ML605 code.

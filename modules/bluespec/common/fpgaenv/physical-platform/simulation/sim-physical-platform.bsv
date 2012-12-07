@@ -87,7 +87,7 @@ module mkPhysicalPlatform
     // The simulation platform emulates DDR using BRAM.  Having a DRAM-like
     // interface makes it easier to test clients of memory in simulation
     // instead of debugging on hardware.
-    DDR_DEVICE ram <- mkDDRDevice(clocked_by clk, reset_by rst);
+    DDR_DEVICE ram <- mkDDRDevice(clk, rst, clocked_by clk, reset_by rst);
 
     // Next, create the physical device that can trigger a soft reset. Pass along the
     // interface to the trigger module that the clocks device has given us.
