@@ -1,0 +1,34 @@
+%name ML605 Aurora Device, Single Lane, 3.125gbps (SMA)
+%desc ML605 Aurora Device, Single Lane, 3.125gbps (SMA)
+
+%provides ml605_aurora_device
+
+%sources -t BSV -v PUBLIC aurora-import.bsv
+
+%sources -t BSV -v PUBLIC aurora-ug.bsv
+
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3.v
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3_example_design.v
+
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3_aurora_lane.v
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3_channel_err_detect.v
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3_channel_init_sm.v
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3_chbond_count_dec.v
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3_clock_module.v
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3_err_detect.v
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3_frame_check.v
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3_frame_gen.v
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3_global_logic.v
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3_gtx.v
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3_hotplug.v
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3_idle_and_ver_gen.v
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3_lane_init_sm.v
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3_reset_logic.v
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3_rx_stream.v
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3_standard_cc_module.v
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3_sym_dec.v
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3_sym_gen.v
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3_transceiver_wrapper.v
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3_tx_stream.v
+
+%sources -t UCF -v PRIVATE aurora_8b10b_v5_3_example_design.ucf
