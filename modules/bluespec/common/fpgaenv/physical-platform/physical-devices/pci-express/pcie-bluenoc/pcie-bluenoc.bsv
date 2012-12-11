@@ -26,6 +26,7 @@ import Connectable::*;
 import TieOff::*;
 
 `include "awb/provides/librl_bsv_base.bsh"
+`include "awb/provides/physical_platform_config.bsh"
 `include "awb/provides/physical_platform_utils.bsh"
 `include "awb/provides/fpga_components.bsh"
 `include "awb/provides/pcie_device.bsh"
@@ -72,8 +73,14 @@ module mkPCIEDevice#(Clock rawClock, Reset rawReset)
     CLOCK_IMPORTER pcieClockP <- mkClockImporter();
     
     // Buffer clocks and reset before they are used
-    Clock pcieSysClkBuf <- mkClockIBUFDS_GTXE1(True, pcieClockP.clock, pcieClockN.clock);
+    Clock pcieSysClkBuf;
+    if (`FPGA_TECHNOLOGY == "Virtex6")
+        pcieSysClkBuf <- mkClockIBUFDS_GTXE1(True, pcieClockP.clock, pcieClockN.clock);
+    else
+        pcieSysClkBuf <- mkClockIBUFDS_GTE2(True, pcieClockP.clock, pcieClockN.clock);
+
     RESET_IMPORTER pcieReset <- mkResetImporter(clocked_by pcieSysClkBuf);  
+
 
     // Instantiate a PCIe endpoint
     BNOC_PCIE_DEV#(PCIE_BYTES_PER_BEAT) dev <-

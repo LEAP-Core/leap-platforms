@@ -1,0 +1,62 @@
+%name Hardware FPGA Components for Virtex 7
+%desc Hardware FPGA Components for Virtex 7
+
+%provides fpga_components
+
+%public bram.bsv bram-multi-read.bsv
+%public lutram.bsv
+%public user-clock.bsv user-clock-pll-virtex7.bsv user-clock-pll-common.bsv
+%public clock-buffers.bsv
+%public shiftreg.bsv
+
+%private Bram.v
+%private lutram.v
+%private user-clock-xilinx-virtex7.v
+%private user-clock-pll-common.v
+%private clock-buffers.v
+%private bscan-virtex5.v
+%private shiftreg.v
+
+%sources -t BSV -v PUBLIC  clock-import.bsv
+%sources -t VERILOG -v PRIVATE clock_import.v
+
+%sources -t BSV -v PUBLIC  differential-clock-import.bsv
+
+%sources -t BSV -v PUBLIC  reset-import.bsv
+%sources -t VERILOG -v PRIVATE reset_import.v
+
+%sources -t XCF -v PRIVATE xilinx-components.xcf
+%sources -t SDC -v PRIVATE xilinx-components.sdc
+
+%public floating-point-import.bsv
+%public floating-point-accel.bsv
+
+%public alu-support.bsv
+
+%private fp_add.v
+%private fp_mul.v
+%private fp_div.v
+%private fp_sqrt.v
+%private fp_cmp.v
+%private fp_cvt_s_to_d.v
+%private fp_cvt_i_to_d.v
+%private fp_cvt_d_to_s.v
+%private fp_cvt_i_to_s.v
+%private fp_cvt_d_to_i.v
+
+%private fp_add.ngc
+%private fp_mul.ngc
+%private fp_div.ngc
+%private fp_sqrt.ngc
+%private fp_cmp.ngc
+%private fp_cvt_s_to_d.ngc
+%private fp_cvt_i_to_d.ngc
+%private fp_cvt_d_to_s.ngc
+%private fp_cvt_i_to_s.ngc
+%private fp_cvt_d_to_i.ngc
+
+
+
+%param SYNTH 1            "Synthesize it to FPGAs"
+%param BROKEN_REGFILE 1   "0 if RegFile synthesizes correctly.  Nonzero for Xilinx Xst < version 11."
+%param XILINX_FAMILY "virtex7"  "Xilinx parameter describing the fpga architecture"

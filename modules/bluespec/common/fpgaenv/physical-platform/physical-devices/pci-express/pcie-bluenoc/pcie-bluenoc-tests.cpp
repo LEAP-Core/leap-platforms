@@ -35,11 +35,11 @@ PCIE_DEVICE_TESTS_CLASS::PCIE_DEVICE_TESTS_CLASS(int fd) :
     //
     // Get board info
     //
-	tBoardInfo board_info;
-	ioctl(pcieDev, BNOC_IDENTIFY, &board_info);
+    tBoardInfo board_info;
+    ioctl(pcieDev, BNOC_IDENTIFY, &board_info);
 
     printf("Board number:     %d\n", board_info.board_number);
-	if (board_info.is_active)
+    if (board_info.is_active)
     {
         bpb = board_info.bytes_per_beat;
 
@@ -58,22 +58,23 @@ PCIE_DEVICE_TESTS_CLASS::Test()
 {
     printf("Running PCIe Tests\n\n");
 
-    if (posix_memalign((void**)&outBuf, 128, 256 * 4096) != 0 ||
-		posix_memalign((void**)&inBuf, 128, 256 * 4096) != 0)
+    if (posix_memalign((void**)&cmdBuf, 1024, 1024) != 0 ||
+        posix_memalign((void**)&outBuf, 4096, 256 * 4096) != 0 ||
+        posix_memalign((void**)&inBuf, 4096, 256 * 4096) != 0)
     {
-		fprintf (stderr, "PCIe Device Tests: Failed to memalign I/O buffers: %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
-	}
-	
+        fprintf (stderr, "PCIe Device Tests: Failed to memalign I/O buffers: %s\n", strerror(errno));
+        exit(EXIT_FAILURE);
+    }
+    
     // Reset the design outside of the PCIe root complex
     assert(ioctl(pcieDev, BNOC_SOFT_RESET) >= 0);
 
     // Write a message to the sink
-    outBuf[0] = 2;   /* dst node */
-    outBuf[1] = 0;   /* src node */
-    outBuf[2] = 12;  /* msg length */
-    outBuf[3] = 1;   /* don't wait */
-    ssize_t result = write(pcieDev, outBuf, max(16, bpb));
+    cmdBuf[0] = 2;   /* dst node */
+    cmdBuf[1] = 0;   /* src node */
+    cmdBuf[2] = 12;  /* msg length */
+    cmdBuf[3] = 1;   /* don't wait */
+    ssize_t result = write(pcieDev, cmdBuf, max(16, bpb));
     assert(result > 0);
     if (result == 16)
         printf("Success: sent all %0d bytes to the sink\n", result);
@@ -126,20 +127,20 @@ PCIE_DEVICE_TESTS_CLASS::Test()
     //
     // Set the flooder to send messages back, then measure throughput.
     //
-    outBuf[0] = 3;    /* dst node */
-    outBuf[1] = 0;    /* src node */
-    outBuf[2] = 4;    /* msg length */
-    outBuf[3] = 1;    /* don't wait */
+    cmdBuf[0] = 3;    /* dst node */
+    cmdBuf[1] = 0;    /* src node */
+    cmdBuf[2] = 4;    /* msg length */
+    cmdBuf[3] = 1;    /* don't wait */
 
     // Request 1GB
     UINT64 req_bytes = 1024 * 1024 * 1024;
     UINT64 req_beats = req_bytes / bpb;
-    outBuf[4] = req_beats;
-    outBuf[5] = req_beats >> 8;
-    outBuf[6] = req_beats >> 16;
-    outBuf[7] = req_beats >> 24;
+    cmdBuf[4] = req_beats;
+    cmdBuf[5] = req_beats >> 8;
+    cmdBuf[6] = req_beats >> 16;
+    cmdBuf[7] = req_beats >> 24;
 
-    result = write(pcieDev, outBuf, max(8, bpb));
+    result = write(pcieDev, cmdBuf, max(8, bpb));
     if (result == -1) {
         perror("PCIe Tests (sending msg)");
         exit(EXIT_FAILURE);
@@ -280,7 +281,7 @@ PCIE_DEVICE_TESTS_CLASS::checkValue(UINT64 val, UINT64 expect)
 {
     if (val != expect)
     {
-        fprintf(stderr, " --- read error: expected 0x%llx, found 0x%llx\n", val, expect);
+        fprintf(stderr, " --- read error: expected 0x%llx, found 0x%llx\n", expect, val);
         return 1;
     }
 

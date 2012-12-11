@@ -15260,3 +15260,81 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic
 
 Prepare to share standard PCIe board physical platforms instead of replicating
 the board wrapper.  So far this is just a restructuring of the ML605 code.
+
+----------
+mcadler     Date: Mon Dec 10 22:00:30 EST 2012  CSN: CSN-leap-platforms-657
+                  Tue Dec 11 03:00:30 UTC 2012
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ user-clock-xilinx-virtex7.v Locally Added               0 
+ hardware-fpga-components-virtex7.awb Locally Added               0 
+ user-clock-pll-virtex7.bsv Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc
+ pcie-bluenoc-tests.cpp    Locally Modified          656 
+ pcie-bluenoc.cpp          Locally Modified          656 
+ pcie-bluenoc-tests.h      Locally Modified          656 
+ pcie-bluenoc.bsv          Locally Modified          656 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc-virtex6
+ pcie-virtex6.ucf          Locally Modified          656 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express
+ pcie-bluenoc-virtex7/     Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc-virtex7
+ v7_pcie_v1_7_pipe_clock.v Locally Added               0 
+ v7_pcie_v1_7_gtp_pipe_reset.v Locally Added               0 
+ v7_pcie_v1_7_gt_wrapper.v Locally Added               0 
+ v7_pcie_v1_7_axi_basic_tx_thrtl_ctl.v Locally Added               0 
+ v7_pcie_v1_7_qpll_drp.v   Locally Added               0 
+ v7_pcie_v1_7_axi_basic_rx_null_gen.v Locally Added               0 
+ xilinx_v7_pcie_wrapper.v  Locally Added               0 
+ v7_pcie_v1_7_axi_basic_rx_pipeline.v Locally Added               0 
+ v7_pcie_v1_7_pcie_bram_top_7x.v Locally Added               0 
+ v7_pcie_v1_7_pcie_pipe_pipeline.v Locally Added               0 
+ v7_pcie_v1_7_axi_basic_tx_pipeline.v Locally Added               0 
+ pcie-virtex7.awb          Locally Added               0 
+ v7_pcie_v1_7_rxeq_scan.v  Locally Added               0 
+ pcie-virtex7.ucf          Locally Added               0 
+ v7_pcie_v1_7_pipe_sync.v  Locally Added               0 
+ v7_pcie_v1_7_axi_basic_rx.v Locally Added               0 
+ v7_pcie_v1_7_gt_top.v     Locally Added               0 
+ v7_pcie_v1_7_pcie_pipe_lane.v Locally Added               0 
+ v7_pcie_v1_7_axi_basic_tx.v Locally Added               0 
+ v7_pcie_v1_7_pcie_bram_7x.v Locally Added               0 
+ v7_pcie_v1_7_pcie_top.v   Locally Added               0 
+ v7_pcie_v1_7_pipe_drp.v   Locally Added               0 
+ pcie-virtex7.bsv          Locally Added               0 
+ v7_pcie_v1_7_axi_basic_top.v Locally Added               0 
+ v7_pcie_v1_7_qpll_wrapper.v Locally Added               0 
+ v7_pcie_v1_7_pcie_pipe_misc.v Locally Added               0 
+ v7_pcie_v1_7_pipe_rate.v  Locally Added               0 
+ v7_pcie_v1_7_qpll_reset.v Locally Added               0 
+ v7_pcie_v1_7.v            Locally Added               0 
+ v7_pcie_v1_7_pcie_brams_7x.v Locally Added               0 
+ v7_pcie_v1_7_pipe_eq.v    Locally Added               0 
+ v7_pcie_v1_7_gtp_pipe_rate.v Locally Added               0 
+ v7_pcie_v1_7_gt_rx_valid_filter_7x.v Locally Added               0 
+ xilinx_pcie_2_1_ep_7x_08_lane_gen1_xc7vx485t-ffg1761-2_VC707.ucf Locally Added               0 
+ v7_pcie_v1_7_pipe_user.v  Locally Added               0 
+ v7_pcie_v1_7_pipe_wrapper.v Locally Added               0 
+ v7_pcie_v1_7_pcie_7x.v    Locally Added               0 
+ v7_pcie_v1_7_pipe_reset.v Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic/config
+ vc707/                    Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic/config/vc707
+ vc707-v7-pcie-dma.awb     Locally Added               0 
+ vc707-v7-pcie-dma.ucf     Locally Added               0 
+ vc707-v7-pcie-dma.xst     Locally Added               0 
+
+Directory drivers/linux/platforms/ml605-pcie/driver
+ bluenoc.c                 Locally Modified          656 
+
+- Virtex-7 PCIe (VC707) with channel I/O through BlueNoC.  (Requires very recent
+  Bluespec compiler.)
+
+- Virtex-7 clocks.

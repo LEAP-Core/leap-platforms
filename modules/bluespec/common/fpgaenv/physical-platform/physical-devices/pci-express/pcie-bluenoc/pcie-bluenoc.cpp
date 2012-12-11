@@ -78,6 +78,12 @@ PCIE_DEVICE_CLASS::Init()
     assert(board_info.is_active);
     bpb = board_info.bytes_per_beat;
 
+    //
+    // Enable driver debugging
+    //
+//    tDebugLevel dbg_lvl = DEBUG_DATA | DEBUG_DMA | DEBUG_INTR;
+//    ioctl(pcieDev, BNOC_SET_DEBUG_LEVEL, &dbg_lvl);
+
     if (Probe())
     {
         cerr << "*** Warning:  PCIe BlueNoC channel isn't empty on startup ***" << endl;

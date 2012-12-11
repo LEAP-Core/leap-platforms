@@ -929,7 +929,7 @@ static ssize_t bluenoc_read(struct file* filp, char __user* buf, size_t count, l
         goto unmap_sg_list;
       }
 #if USE_CHAINED_SGLIST_API
-      ++sg;
+      sg = sg_next(sg);
 #endif
     }
   }
@@ -1269,7 +1269,7 @@ static ssize_t bluenoc_write(struct file* filp, const char __user* buf, size_t c
         goto unmap_sg_list;
       }
 #if USE_CHAINED_SGLIST_API
-      ++sg;
+      sg = sg_next(sg);
 #endif
     }
   }

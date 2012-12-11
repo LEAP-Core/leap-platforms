@@ -35,6 +35,7 @@ class PCIE_DEVICE_TESTS_CLASS
     int pcieDev;                      // Device file descriptor
     int bpb;                          // Bytes per beat
 
+    unsigned char* cmdBuf;
     unsigned char* outBuf;
     unsigned char* inBuf;
 

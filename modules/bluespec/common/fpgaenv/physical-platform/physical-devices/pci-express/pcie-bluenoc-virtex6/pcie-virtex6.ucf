@@ -5,23 +5,19 @@
 ######################################################################################################
 # PIN ASSIGNMENTS
 ######################################################################################################
-INST   "*pcieSysClkBuf"                                      DIFF_TERM = "TRUE";
 
-NET    "pcieWires_leds[7]"                                       LOC = AD24 | IOSTANDARD = LVCMOS25 ;
-NET    "pcieWires_leds[6]"                                       LOC = AE24 | IOSTANDARD = LVCMOS25 ;
-NET    "pcieWires_leds[5]"                                       LOC = AG23 | IOSTANDARD = LVCMOS25 ;
-NET    "pcieWires_leds[4]"                                       LOC = AB23 | IOSTANDARD = LVCMOS25 ;
-NET    "pcieWires_leds[3]"                                       LOC = AE23 | IOSTANDARD = LVCMOS25 ;
-NET    "pcieWires_leds[2]"                                       LOC = AE22 | IOSTANDARD = LVCMOS25 ;
-NET    "pcieWires_leds[1]"                                       LOC = AC24 | IOSTANDARD = LVCMOS25 ;
-NET    "pcieWires_leds[0]"                                       LOC = AC22 | IOSTANDARD = LVCMOS25 ;
+NET    "pcieWires_leds[7]"                              LOC = AD24 | IOSTANDARD = LVCMOS25 ;
+NET    "pcieWires_leds[6]"                              LOC = AE24 | IOSTANDARD = LVCMOS25 ;
+NET    "pcieWires_leds[5]"                              LOC = AG23 | IOSTANDARD = LVCMOS25 ;
+NET    "pcieWires_leds[4]"                              LOC = AB23 | IOSTANDARD = LVCMOS25 ;
+NET    "pcieWires_leds[3]"                              LOC = AE23 | IOSTANDARD = LVCMOS25 ;
+NET    "pcieWires_leds[2]"                              LOC = AE22 | IOSTANDARD = LVCMOS25 ;
+NET    "pcieWires_leds[1]"                              LOC = AC24 | IOSTANDARD = LVCMOS25 ;
+NET    "pcieWires_leds[0]"                              LOC = AC22 | IOSTANDARD = LVCMOS25 ;
 
-#NET    "EN_pcieWires_refclk"                                               LOC = U23 ;
-#NET    "RST"                                               LOC = H10 | PULLUP | NODELAY | TIG ;
-
-NET    "EN_pcieWires_pcie_reset_wire"                           LOC = AE13 | PULLUP | NODELAY | TIG ;
-NET    "EN_pcieWires_pcie_clk_p"                                 LOC = P6;
-NET    "EN_pcieWires_pcie_clk_n"                                 LOC = P5;
+NET    "EN_pcieWires_pcie_reset_wire"                   LOC = AE13 | PULLUP | NODELAY | TIG ;
+NET    "EN_pcieWires_pcie_clk_p"                        LOC = P6 ;
+NET    "EN_pcieWires_pcie_clk_n"                        LOC = P5 ;
 
 
 ######################################################################################################
@@ -45,8 +41,8 @@ PIN    "*ep/ep/pcie_clocking_i/mmcm_adv_i.RST"          TIG;
 INST "m_llpi_phys_plat_pcie_dev/fifoRxData_elem*"       TNM=TG_trn_clk_125;
 INST "m_llpi_phys_plat_pcie_dev/fifoRxData_block*"      TNM=TG_trn_clk_250;
 
-INST "m_llpi_phys_plat_pcie_dev/fifoTxData_elem*"       TNM=TG_trn_clk_250;
-INST "m_llpi_phys_plat_pcie_dev/fifoTxData_block*"      TNM=TG_trn_clk_125;
+INST "m_llpi_phys_plat_pcie_dev/fifoTxData_*elem*"      TNM=TG_trn_clk_250;
+INST "m_llpi_phys_plat_pcie_dev/fifoTxData_*block*"     TNM=TG_trn_clk_125;
 
 # These are set conservatively at 250 MHz.  Could probably be 125 MHz but
 # timing is easy to meet.  Without them, the null crossing registers in
