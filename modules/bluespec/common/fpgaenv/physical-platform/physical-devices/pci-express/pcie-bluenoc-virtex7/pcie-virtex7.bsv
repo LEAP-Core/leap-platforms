@@ -53,7 +53,7 @@ import XilinxPCIE::*;
 //   is the PCIe source clock.
 //
 (* synthesize *)
-module mkPCIEBlueNoCDevice#(Clock pcieSysClkBuf, Reset pcieSysRstN)
+module mkPCIEBlueNoCDevice#(Clock pcieSysClkBuf, Reset pcieSysRst)
     // Interface:
     (BNOC_PCIE_DEV#(PCIE_BYTES_PER_BEAT));
 
@@ -61,7 +61,7 @@ module mkPCIEBlueNoCDevice#(Clock pcieSysClkBuf, Reset pcieSysRstN)
     PCIEParams pcie_params = defaultValue();
     PCIExpressV7#(8) ep <- mkPCIExpressEndpointV7(pcie_params,
                                                   clocked_by pcieSysClkBuf,
-                                                  reset_by pcieSysRstN);
+                                                  reset_by pcieSysRst);
 
     // Extract the clocks and resets from the endpoint.
     Clock epClock250  = ep.trn.clk;

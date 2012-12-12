@@ -15338,3 +15338,28 @@ Directory drivers/linux/platforms/ml605-pcie/driver
   Bluespec compiler.)
 
 - Virtex-7 clocks.
+
+----------
+mcadler     Date: Wed Dec 12 09:04:37 EST 2012  CSN: CSN-leap-platforms-658
+                  Wed Dec 12 14:04:37 UTC 2012
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc-virtex7
+ pcie-virtex7.ucf          Locally Modified          657 
+ pcie-virtex7.bsv          Locally Modified          657 
+ v7_pcie_v1_7.v            Locally Modified          657 
+
+- The PCIe reset signal in the Xilinx-generated Verilog has high fan-out
+  and the host machine crashes when reset timing is relaxed.  Reset was
+  already buffered in the driver, but with fan-out the tools rarely found
+  a timing solution at 250MHz.  Added explit fan-out during buffering,
+  using multiple registers.
+
+- Placement changes (UCF file):
+  - Add area groups for PCIe driver and the BlueNoC buffers.
+  - Move PCIe MMCM near the PCIe driver instead of the strange place Xilinx
+    tools recommended.
+  - Lock down PCIe driver BRAM locations per Xilinx coregen recommendation.
+  - Set the IOSTANDARD for PCIe I/O pins to get rid of the warnings.  The
+    VC707 master UCF file doesn't name the I/O standard for these pins,
+    so I used the default (LVCMOS18).

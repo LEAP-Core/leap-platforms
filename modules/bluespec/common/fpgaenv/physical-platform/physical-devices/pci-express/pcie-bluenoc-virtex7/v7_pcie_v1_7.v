@@ -816,7 +816,13 @@ module v7_pcie_v1_7 # (
   
   wire                 user_app_rdy; 
   reg                  user_app_rdy_req = 1'b0;
-  reg                  sys_rst_n_int    = 1'b1;
+  reg                  sys_rst_n_int_base = 1'b1;
+  reg                  sys_rst_n_intA   = 1'b1;
+  reg                  sys_rst_n_intB   = 1'b1;
+  reg                  sys_rst_n_intC   = 1'b1;
+  reg                  sys_rst_n_intD   = 1'b1;
+  reg                  sys_rst_n_intE   = 1'b1;
+  reg                  sys_rst_n_intF   = 1'b1;
   reg                  user_lnk_up_mux;
   reg                  mmcm_lock_int;
 
@@ -828,13 +834,25 @@ assign pl_received_hot_rst = pl_received_hot_rst_q;
   //--------------------------------------------------------------------------//
   // Register stages to separate interface nets from the rest of the design,  //
   // as required for the Tandem flow.                                         //
+  //                                                                          //
+  //  Fan-out to sys_rst_n_int consumers was a huge problem for meeting       //
+  //  timing.  Use multiple registers to shift fan-out to the write side.     //
+  //    --MAdler                                                              //
   //--------------------------------------------------------------------------//
   always @(posedge user_clk_out) begin
-    sys_rst_n_int <= #TCQ sys_rst_n;
+    sys_rst_n_int_base <= #TCQ sys_rst_n;
+  end
+  always @(posedge user_clk_out) begin
+    sys_rst_n_intA <= #TCQ sys_rst_n_int_base;
+    sys_rst_n_intB <= #TCQ sys_rst_n_int_base;
+    sys_rst_n_intC <= #TCQ sys_rst_n_int_base;
+    sys_rst_n_intD <= #TCQ sys_rst_n_int_base;
+    sys_rst_n_intE <= #TCQ sys_rst_n_int_base;
+    sys_rst_n_intF <= #TCQ sys_rst_n_int_base;
   end
 
   always @ (posedge user_clk_out) begin
-    if (!sys_rst_n_int) begin
+    if (!sys_rst_n_intA) begin
       mmcm_lock_int <= #TCQ 1'd0;
     end else begin
       mmcm_lock_int <= #TCQ PIPE_MMCM_LOCK_IN;
@@ -842,10 +860,10 @@ assign pl_received_hot_rst = pl_received_hot_rst_q;
   end
 
   // Register block outputs pl_received_hot_rst and phy_lnk_up to ease timing on block output
-  assign sys_or_hot_rst = !sys_rst_n_int || pl_received_hot_rst_q;
+  assign sys_or_hot_rst = !sys_rst_n_intB || pl_received_hot_rst_q;
   always @(posedge user_clk_out)
   begin
-    if (!sys_rst_n_int) begin
+    if (!sys_rst_n_intC) begin
       pl_received_hot_rst_q <= #TCQ 1'b0;
       pl_phy_lnk_up_q       <= #TCQ 1'b0;
     end else begin
@@ -857,7 +875,7 @@ assign pl_received_hot_rst = pl_received_hot_rst_q;
   // Generate user_lnk_up_mux
   always @(posedge user_clk_out)
   begin
-    if (!sys_rst_n_int) begin
+    if (!sys_rst_n_intD) begin
       user_lnk_up_mux <= #TCQ 1'b0;
     end else begin
       user_lnk_up_mux <= #TCQ user_lnk_up_int;
@@ -866,7 +884,7 @@ assign pl_received_hot_rst = pl_received_hot_rst_q;
 
   always @(posedge user_clk_out)
   begin
-    if (!sys_rst_n_int) begin
+    if (!sys_rst_n_intE) begin
       user_lnk_up_int <= #TCQ 1'b0;
     end else begin
       user_lnk_up_int <= #TCQ trn_lnk_up;
@@ -1764,7 +1782,7 @@ assign pl_received_hot_rst = pl_received_hot_rst_q;
 
     // Non PIPE Signals
     .sys_clk                       ( sys_clk             ),
-    .sys_rst_n                     ( sys_rst_n_int       ),
+    .sys_rst_n                     ( sys_rst_n_intF      ),
     .pipe_clk                      ( pipe_clk            ),
 
     .user_clk                      ( user_clk            ),
