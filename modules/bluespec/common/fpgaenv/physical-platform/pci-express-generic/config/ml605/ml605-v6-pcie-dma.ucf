@@ -25,9 +25,9 @@ disable = reg_sr_r;
 
 NET    "RST_N"                        LOC = H10 | IOSTANDARD = SSTL15 | PULLUP | NODELAY | TIG;
 
-NET    "CLK_P" TNM_NET = TNM_clk_in;  # 200 MHz sys0 XO
-NET    "CLK_P"                        LOC = J9 | IOSTANDARD = LVDS_25;
-NET    "CLK_N"                        LOC = H9 | IOSTANDARD = LVDS_25;
+NET    "CLK"   TNM_NET = TNM_clk_in;  # 200 MHz sys0 XO
+NET    "CLK"                          LOC = J9 | IOSTANDARD = LVDS_25;
+NET    "CLK_0"                        LOC = H9 | IOSTANDARD = LVDS_25;
 
 
 ######################################################################################################

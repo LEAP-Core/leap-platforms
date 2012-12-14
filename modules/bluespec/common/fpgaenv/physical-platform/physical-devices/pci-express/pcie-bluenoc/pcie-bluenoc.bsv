@@ -24,6 +24,7 @@ import XilinxCells::*;
 import BlueNoC::*;
 import Connectable::*;
 import TieOff::*;
+import GetPut::*;
 
 `include "awb/provides/librl_bsv_base.bsh"
 `include "awb/provides/physical_platform_config.bsh"
@@ -39,12 +40,17 @@ import TieOff::*;
 //   ties them to pins.
 //
 interface PCIE_WIRES;
-    method Action pcie_clk_n();  
-    method Action pcie_clk_p();  
-    method Action pcie_reset_wire();
+    (* always_ready, always_enabled *)
+    interface Put#(Bit#(1)) clk_p;
+    (* always_ready, always_enabled *)
+    interface Put#(Bit#(1)) clk_n;
+
+    (* always_ready, always_enabled *)
+    interface Put#(Bit#(1)) rst;
+
+    (* always_ready, always_enabled *)
     method Bit#(8) leds();
 
-    interface Clock clockPCIE;
     interface PCIE_EXP#(PCIE_LANES) pcie_exp;
 endinterface
 
@@ -69,8 +75,12 @@ module mkPCIEDevice#(Clock rawClock, Reset rawReset)
     (PCIE_DEVICE);
 
     // PCIe is driven by a different clock than the raw clock.
-    CLOCK_IMPORTER pcieClockN <- mkClockImporter();
-    CLOCK_IMPORTER pcieClockP <- mkClockImporter();
+    // The "clocked_by" is pure fiction.  By providing a top-level
+    // Clock type Bluespec is convinced that the put method is clocked
+    // and allows it to be tagged always_enabled.  Without a pseudo-clock,
+    // Bluespec believes the put method is never enabled.
+    CLOCK_FROM_PUT pcieClockN <- mkClockFromPut(clocked_by rawClock);
+    CLOCK_FROM_PUT pcieClockP <- mkClockFromPut(clocked_by rawClock);
     
     // Buffer clocks and reset before they are used
     Clock pcieSysClkBuf;
@@ -79,27 +89,31 @@ module mkPCIEDevice#(Clock rawClock, Reset rawReset)
     else
         pcieSysClkBuf <- mkClockIBUFDS_GTE2(True, pcieClockP.clock, pcieClockN.clock);
 
-    RESET_IMPORTER pcieReset <- mkResetImporter(clocked_by pcieSysClkBuf);  
+    // Construct reset.  The incoming reset wire must be "crossed"
+    // to the pcieSysClkBuf clock domain from the rawClock domain.  Like
+    // the clock crossing above, this crossing is fictitious and exists
+    // solely to keep the compiler from complaining about the module
+    // being clocked by a clock not exposed at the top.
+    RESET_FROM_PUT pcieReset <- mkResetFromPut(pcieSysClkBuf,
+                                               clocked_by rawClock);
 
 
     // Instantiate a PCIe endpoint
     BNOC_PCIE_DEV#(PCIE_BYTES_PER_BEAT) dev <-
-        mkPCIEBlueNoCDevice(pcieSysClkBuf, pcieReset.reset,
-                            clocked_by rawClock,
-                            reset_by rawReset);
+        mkPCIEBlueNoCDevice(pcieSysClkBuf, pcieReset.reset);
 
-    // Connect PCIe transmit and receive wires, not handled in Bluespec
-    PCIE_BURY pcieBury <- mkPCIE_BURY(clocked_by pcieSysClkBuf,
-                                      reset_by pcieReset.reset);
+    // Connect PCIe transmit and receive wires, not handled in Bluespec.
+    // Yet another fictitious clock domain crossing that reduces to wires.
+    PCIE_BURY pcieBury <- mkPCIE_BURY(rawClock, pcieSysClkBuf);
 
     (* fire_when_enabled, no_implicit_conditions *) 
     rule drivePCIE;
-        pcieBury.txn_bsv(dev.pcie_exp.txn);
-        pcieBury.txp_bsv(dev.pcie_exp.txp);
-        dev.pcie_exp.rxp(pcieBury.rxp_bsv);
-        dev.pcie_exp.rxn(pcieBury.rxn_bsv);
+        pcieBury.txn_dev(dev.pcie_exp.txn);
+        pcieBury.txp_dev(dev.pcie_exp.txp);
+        dev.pcie_exp.rxp(pcieBury.rxp_dev);
+        dev.pcie_exp.rxn(pcieBury.rxn_dev);
     endrule
-    
+
 
     //
     // Insert a simple network with some test ports, useful for debugging and
@@ -126,13 +140,20 @@ module mkPCIEDevice#(Clock rawClock, Reset rawReset)
         interface Reset reset = dev.driver.reset;
     endinterface
 
-    interface PCIE_WIRES  wires;
-        method pcie_clk_n = pcieClockN.clock_wire;  
-        method pcie_clk_p = pcieClockP.clock_wire;  
-        method pcie_reset_wire = pcieReset.reset_wire;
+    interface PCIE_WIRES wires;
+        interface Put clk_p;
+           method Action put(Bit#(1) clk) = pcieClockP.clock_wire.put(clk);
+        endinterface
+        interface Put clk_n;
+           method Action put(Bit#(1) clk) = pcieClockN.clock_wire.put(clk);
+        endinterface
+
+        interface Put rst;
+           method Action put(Bit#(1) rst) = pcieReset.reset_wire.put(rst);
+        endinterface
+
         method leds = ?; // dev.leds();
 
-        interface clockPCIE = pcieBury.clock;
         interface PCIE_EXP pcie_exp;
             method rxp = pcieBury.rxp_wire;
             method rxn = pcieBury.rxn_wire;

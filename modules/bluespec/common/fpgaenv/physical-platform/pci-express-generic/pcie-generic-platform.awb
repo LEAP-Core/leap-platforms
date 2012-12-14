@@ -12,3 +12,10 @@
 %sources -t BSV -v PUBLIC  pcie-generic-platform.bsv
 %sources -t CPP -v PRIVATE pcie-generic-platform.cpp
 %sources -t H   -v PUBLIC  pcie-generic-platform.h
+
+##
+## N_TOP_LEVEL_CLOCKS may not be 0 because the Bluespec preprocessor can test
+## only whether the parameter exists.  To export no clock and reset from
+## the top level remove the parameter from the platform configuration.
+##
+%param N_TOP_LEVEL_CLOCKS   2   "Number of clocks exposed in the top level interface"

@@ -11,7 +11,7 @@
 %param FPGA_PLATFORM      "ML605"              "FPGA Platform"
 %param FPGA_PART_XILINX   "xc6vlx240tff1156-1" "FPGA Part ID"
 %param FPGA_POSITION      2                    "FPGA Position (in Xilinx iMPACT)"
-%param MAP_OPTIONS        "-global_opt speed"  "Extra Xilinx Map Options"
+%param MAP_OPTIONS        ""                   "Extra Xilinx Map Options"
 %param FPGA_TECHNOLOGY    "Virtex6"            "FPGA Technology (Synplify)"
 %param FPGA_PART_SYNPLIFY "XC6VLX240T"         "FPGA Part (Synplify)"
 %param FPGA_SPEED         "-1"                 "FPGA Speed Grade (Synplify)"

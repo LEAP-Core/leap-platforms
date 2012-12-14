@@ -1,12 +1,10 @@
-%name Differential Crystal Clocks Device from Wires
-%desc Differential Crystal Clocks Device from Wires
+%name Differential Crystal Clocks Device from Clocks
+%desc Differential Crystal Clocks Device from Clocks
 
 %provides clocks_device
 %notes README
 
-%sources -t BSV -v PUBLIC  differential-clocks-vhdl-import.bsv
-%sources -t BSV -v PUBLIC  differential-clocks-device.bsv
-%sources -t VHD -v PRIVATE differential-clocks-device.vhd
+%sources -t BSV -v PUBLIC  differential-clocks-from-clocks.bsv
 
 %param --global MODEL_CLOCK_FREQ 50  "Desired model clock frequency (integer)."
 

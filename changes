@@ -15363,3 +15363,67 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci
   - Set the IOSTANDARD for PCIe I/O pins to get rid of the warnings.  The
     VC707 master UCF file doesn't name the I/O standard for these pins,
     so I used the default (LVCMOS18).
+
+----------
+mcadler     Date: Fri Dec 14 15:37:03 EST 2012  CSN: CSN-leap-platforms-659
+                  Fri Dec 14 20:37:03 UTC 2012
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ reset-import.bsv          Locally Modified          658 
+ clock-import.bsv          Locally Modified          658 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc
+ pcie-bury.v               Locally Modified          658 
+ pcie-bury.bsv             Locally Modified          658 
+ pcie-bluenoc.bsv          Locally Modified          658 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc-virtex6
+ pcie-virtex6.ucf          Locally Modified          658 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc-virtex7
+ pcie-virtex7.ucf          Locally Modified          658 
+ v7_pcie_v1_7.v            Locally Modified          658 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-xilinx/ddr3-sdram-ml605
+ ddr3-sdram.ucf            Locally Modified          658 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/differential
+ differential-clocks-device.awb Locally Modified          658 
+ differential-clocks-from-clocks.awb Locally Added               0 
+ README                    Locally Added               0 
+ differential-clocks-from-clocks.bsv Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic
+ pcie-generic-platform.awb Locally Modified          658 
+ pcie-generic-platform.bsv Locally Modified          658 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic/config/ml605
+ ml605-v6-pcie-dma.awb     Locally Modified          658 
+ ml605-v6-pcie-dma.ucf     Locally Modified          658 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic/config/vc707
+ vc707-v7-pcie-dma.awb     Locally Modified          658 
+ vc707-v7-pcie-dma.ucf     Locally Modified          658 
+
+- VC707 Xilinx PCIe driver system reset is buffered in a register that starts
+  out of reset.  Changed to start in reset.  The one cycle at startup out of
+  reset appears to have caused instability.  Let us hope this eliminates all
+  the startup errors.  Why would they write it this way?
+
+- PCIe generic platform (i.e. ML605 and VC707) now take advantage of the new
+  LEAP ability to export Bluespec Clock and Reset types at the top level.
+  We thus avoid the mess of importing clocks and can write always-enabled
+  top-level interface methods referenced to top-level Bluespec clocks.
+
+- Add new modules for importing clocks and resets using Put interfaces,
+  where the put() method can be always enabled.  This avoids exposing
+  spurious ready (RDY_) wires at the top level.  The modules also make
+  it easy to maintain the fiction for Bluespec that the incoming wires
+  are attached to some top-level exported clock -- required by the
+  compiler.
+
+- Simplify PCIE_EXP burying in the BlueNoC PCIe driver.  The old, complicated,
+  interface is replaced by wire copies and is now just a shim for a
+  fictitious Bluespec clock domain crossing.  In reality, wires are connected
+  from top-level to the driver.

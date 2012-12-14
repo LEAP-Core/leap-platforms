@@ -11,7 +11,7 @@
 %param FPGA_PLATFORM      "VC707"               "FPGA Platform"
 %param FPGA_PART_XILINX   "xc7vx485t-ffg1761-2" "FPGA Part ID"
 %param FPGA_POSITION      1                     "FPGA Position (in Xilinx iMPACT)"
-%param MAP_OPTIONS        "-global_opt speed"   "Extra Xilinx Map Options"
+%param MAP_OPTIONS        ""                    "Extra Xilinx Map Options"
 %param FPGA_TECHNOLOGY    "Virtex7"             "FPGA Technology (Synplify)"
 %param FPGA_PART_SYNPLIFY "XC7VX485T"           "FPGA Part (Synplify)"
 %param FPGA_SPEED         "-2"                  "FPGA Speed Grade (Synplify)"

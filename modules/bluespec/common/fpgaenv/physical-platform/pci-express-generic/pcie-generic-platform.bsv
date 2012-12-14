@@ -50,8 +50,6 @@ endinterface
 
 interface TOP_LEVEL_WIRES;
     // wires from devices
-    (* prefix = "" *)
-    interface CLOCKS_WIRES                        clocksWires;
     interface PCIE_WIRES                          pcieWires;
     interface DDR_WIRES                           ddrWires;
 endinterface
@@ -70,7 +68,7 @@ endinterface
 // This is a convenient way for the outside world to instantiate all the devices
 // and an aggregation of all the wires.
 
-module mkPhysicalPlatform
+module mkPhysicalPlatform#(Vector#(`N_TOP_LEVEL_CLOCKS, Clock) topClocks, Reset topReset)
     //interface: 
     (PHYSICAL_PLATFORM);
     
@@ -78,7 +76,7 @@ module mkPhysicalPlatform
     // action should be to instantiate the Clocks Physical Device and obtain interfaces
     // to clock and reset the other devices with.
     
-    CLOCKS_DEVICE clocks <- mkClocksDevice();
+    CLOCKS_DEVICE clocks <- mkClocksDevice(topClocks, topReset);
     
     Clock clk = clocks.driver.clock;
     Reset rst = clocks.driver.reset;
@@ -140,7 +138,6 @@ module mkPhysicalPlatform
     // Aggregate the wires
     //
     interface TOP_LEVEL_WIRES topLevelWires;
-        interface clocksWires = clocks.wires;
         interface pcieWires   = pcie.wires;
         interface ddrWires    = sdram.wires;
     endinterface

@@ -15,9 +15,9 @@ CONFIG PART = xc7vx485t-ffg1761-2;
 
 NET  "RST_N"                          LOC = AV40 | IOSTANDARD = LVCMOS18 | NODELAY | PULLUP;
 
-NET  "CLK_P"                          TNM_NET = TNM_clk_in;    # 200 MHz
-NET  "CLK_P"                          LOC = E19 | IOSTANDARD = LVDS;
-NET  "CLK_N"                          LOC = E18 | IOSTANDARD = LVDS;
+NET  "CLK"                            TNM_NET = TNM_clk_in;    # 200 MHz
+NET  "CLK"                            LOC = E19 | IOSTANDARD = LVDS;
+NET  "CLK_0"                          LOC = E18 | IOSTANDARD = LVDS;
 
 
 ######################################################################################################

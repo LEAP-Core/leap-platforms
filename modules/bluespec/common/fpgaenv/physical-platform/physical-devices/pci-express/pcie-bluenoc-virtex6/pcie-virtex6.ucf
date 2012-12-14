@@ -15,22 +15,23 @@ NET    "pcieWires_leds[2]"                              LOC = AE22 | IOSTANDARD 
 NET    "pcieWires_leds[1]"                              LOC = AC24 | IOSTANDARD = LVCMOS25 ;
 NET    "pcieWires_leds[0]"                              LOC = AC22 | IOSTANDARD = LVCMOS25 ;
 
-NET    "EN_pcieWires_pcie_reset_wire"                   LOC = AE13 | PULLUP | NODELAY | TIG ;
-NET    "EN_pcieWires_pcie_clk_p"                        LOC = P6 ;
-NET    "EN_pcieWires_pcie_clk_n"                        LOC = P5 ;
+NET    "pcieWires_rst_put"                              LOC = AE13 | PULLUP | NODELAY | TIG ;
+NET    "pcieWires_clk_p_put"                            LOC = P6 ;
+NET    "pcieWires_clk_n_put"                            LOC = P5 ;
 
 
 ######################################################################################################
 # CLOCK CONSTRAINTS
 ######################################################################################################
-NET    "EN_pcieWires_pcie_clk_p" TNM_NET = TG_pci_sys_clk_p;
-TIMESPEC TS_pci_sys_clk_p = PERIOD TG_pci_sys_clk_p 100 MHz HIGH 50%;
+
+NET    "pcieWires_clk_*_put" TNM_NET = TG_pci_sys_clk;
+TIMESPEC TS_pci_sys_clk = PERIOD TG_pci_sys_clk 100 MHz HIGH 50%;
 
 NET    "*ep/ep/pcie_clocking_i/clk_250" TNM_NET = TG_trn_clk_250;
-TIMESPEC TS_trn_clk_250 = PERIOD TG_trn_clk_250 TS_pci_sys_clk_p*2.5 HIGH 50 % PRIORITY 1;
+TIMESPEC TS_trn_clk_250 = PERIOD TG_trn_clk_250 TS_pci_sys_clk*2.5 HIGH 50 % PRIORITY 1;
 
 NET    "*ep/ep/pcie_clocking_i/clk_125" TNM_NET = TG_trn_clk_125;
-TIMESPEC TS_trn_clk_125 = PERIOD TG_trn_clk_125 TS_pci_sys_clk_p*1.25 HIGH 50 % PRIORITY 100;
+TIMESPEC TS_trn_clk_125 = PERIOD TG_trn_clk_125 TS_pci_sys_clk*1.25 HIGH 50 % PRIORITY 100;
 
 PIN    "*ep/ep/trn_reset_n_int_i.CLR"                   TIG;
 PIN    "*ep/ep/trn_reset_n_i.CLR"                       TIG;
@@ -77,17 +78,12 @@ INST "*ep/ep/pcie_2_0_i/pcie_gt_i/gtx_v6_i/GTXD[7].GTX" LOC = GTXE1_X0Y8;
 ######################################################################################################
 
 INST "m_llpi_phys_plat_pcie_dev/*"        AREA_GROUP = "AG_pcie_ep";
+INST "m_llpi_phys_plat_pcie_pcieSysClk*"  AREA_GROUP = "AG_pcie_ep";
 AREA_GROUP "AG_pcie_ep"                   RANGE = SLICE_X132Y105:SLICE_X159Y144;
 AREA_GROUP "AG_pcie_ep"                   GROUP = CLOSED;
 
 INST "m_llpi_phys_plat_pcie_dev/bridge/*" AREA_GROUP = "AG_pcie_bridge";
+INST "m_llpi_phys_plat_pcie_extPorts*"    AREA_GROUP = "AG_pcie_bridge";
 AREA_GROUP "AG_pcie_bridge"               RANGE = SLICE_X116Y34:SLICE_X159Y103;
 AREA_GROUP "AG_pcie_bridge"               GROUP = CLOSED;
-
-
-######################################################################################################
-# MISC CONSTRAINTS
-######################################################################################################
-
-INST "*OBUF*" SLEW = FAST;
 

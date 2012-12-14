@@ -1,0 +1,12 @@
+There are two implementations of differential clocks.  Both implementations
+provide a model clock at the requested frequency (AWB parameter
+MODEL_CLOCK_FREQ).  Both also provide a soft reset, triggered by
+softResetTrigger.
+
+Differential clocks from clocks converts a pair of Bluespec Clock types
+into a differential clock.  Most likely these clocks come from top-level
+clocks.
+
+Differential clocks from wires first convert clocks that are passed in
+as enable wires on methods into Bluespec Clock types.  Then the processing
+is the same as the clocks from clocks above.

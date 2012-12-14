@@ -816,13 +816,13 @@ module v7_pcie_v1_7 # (
   
   wire                 user_app_rdy; 
   reg                  user_app_rdy_req = 1'b0;
-  reg                  sys_rst_n_int_base = 1'b1;
-  reg                  sys_rst_n_intA   = 1'b1;
-  reg                  sys_rst_n_intB   = 1'b1;
-  reg                  sys_rst_n_intC   = 1'b1;
-  reg                  sys_rst_n_intD   = 1'b1;
-  reg                  sys_rst_n_intE   = 1'b1;
-  reg                  sys_rst_n_intF   = 1'b1;
+  reg                  sys_rst_n_int_base = 1'b0;
+  reg                  sys_rst_n_intA   = 1'b0;
+  reg                  sys_rst_n_intB   = 1'b0;
+  reg                  sys_rst_n_intC   = 1'b0;
+  reg                  sys_rst_n_intD   = 1'b0;
+  reg                  sys_rst_n_intE   = 1'b0;
+  reg                  sys_rst_n_intF   = 1'b0;
   reg                  user_lnk_up_mux;
   reg                  mmcm_lock_int;
 

@@ -15,9 +15,9 @@ NET  "pcieWires_leds[2]"              LOC = AR37 | IOSTANDARD = LVCMOS18 ;
 NET  "pcieWires_leds[1]"              LOC = AN39 | IOSTANDARD = LVCMOS18 ;
 NET  "pcieWires_leds[0]"              LOC = AM39 | IOSTANDARD = LVCMOS18 ;
 
-NET  "EN_pcieWires_pcie_reset_wire"   LOC = AV35 | IOSTANDARD = LVCMOS18 | PULLUP | NODELAY | TIG ;
-NET  "EN_pcieWires_pcie_clk_p"        LOC = AB8 | IOSTANDARD = LVDS ;
-NET  "EN_pcieWires_pcie_clk_n"        LOC = AB7 | IOSTANDARD = LVDS ;
+NET  "pcieWires_rst_put"              LOC = AV35 | IOSTANDARD = LVCMOS18 | PULLUP | NODELAY | TIG ;
+NET  "pcieWires_clk_p_put"            LOC = AB8 | IOSTANDARD = LVDS ;
+NET  "pcieWires_clk_n_put"            LOC = AB7 | IOSTANDARD = LVDS ;
 
 NET  "pcieWires_pcie_exp_rxp_i[0]"    LOC = Y4  | IOSTANDARD = LVCMOS18 ;
 NET  "pcieWires_pcie_exp_rxp_i[1]"    LOC = AA6 | IOSTANDARD = LVCMOS18 ;
@@ -60,7 +60,7 @@ NET  "pcieWires_pcie_exp_txn[7]"      LOC = AK3 | IOSTANDARD = LVCMOS18 ;
 # CLOCK CONSTRAINTS
 ######################################################################################################
 
-NET  "EN_pcieWires_pcie_clk_p" TNM_NET = TG_pci_sys_clk;
+NET  "pcieWires_clk_*_put" TNM_NET = TG_pci_sys_clk;
 TIMESPEC TS_pci_sys_clk = PERIOD TG_pci_sys_clk 100 MHz HIGH 50%;
 
 NET  "*pcie_dev/ep_pcie_ep/ext_clk.pipe_clock_i/clk_125mhz" TNM_NET = TG_pci_clk_125;
