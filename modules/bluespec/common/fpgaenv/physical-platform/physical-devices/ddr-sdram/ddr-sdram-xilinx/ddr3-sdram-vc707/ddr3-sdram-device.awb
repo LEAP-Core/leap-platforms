@@ -1,0 +1,67 @@
+%name VC707 DDR3 SDRAM
+%desc VC707 DDR3 SDRAM
+
+%provides ddr_sdram_xilinx_driver
+
+%sources -t BSV -v PUBLIC ddr3-sdram-verilog-import.bsv
+
+%sources -t UCF -v PRIVATE ddr3-sdram.ucf
+
+%sources -t VERILOG -v PRIVATE ddr3_v1_7.v
+%sources -t VERILOG -v PRIVATE ddr3_wrapper.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_arb_mux.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_arb_row_col.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_arb_select.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_bank_cntrl.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_bank_common.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_bank_compare.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_bank_mach.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_bank_queue.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_bank_state.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_clk_ibuf.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_col_mach.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_ddr_byte_group_io.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_ddr_byte_lane.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_ddr_calib_top.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_ddr_if_post_fifo.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_ddr_mc_phy.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_ddr_mc_phy_wrapper.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_ddr_of_pre_fifo.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_ddr_phy_4lanes.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_ddr_phy_ck_addr_cmd_delay.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_ddr_phy_dqs_found_cal.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_ddr_phy_dqs_found_cal_hr.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_ddr_phy_init.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_ddr_phy_oclkdelay_cal.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_ddr_phy_prbs_rdlvl.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_ddr_phy_rdlvl.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_ddr_phy_tempmon.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_ddr_phy_top.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_ddr_phy_wrcal.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_ddr_phy_wrlvl.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_ddr_prbs_gen.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_ecc_buf.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_ecc_dec_fix.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_ecc_gen.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_ecc_merge_enc.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_infrastructure.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_iodelay_ctrl.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_mc.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_mem_intfc.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_memc_ui_top_std.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_rank_cntrl.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_rank_common.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_rank_mach.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_round_robin_arb.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_tempmon.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_ui_cmd.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_ui_rd_data.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_ui_top.v
+%sources -t VERILOG -v PRIVATE mig_7series_v1_7_ui_wr_data.v
+
+
+%param DRAM_MIN_BURST     2   "Minimum burst size"
+%param DRAM_BEAT_WIDTH    256 "Bit width of one beat in a burst"
+%param DRAM_WORD_WIDTH    64  "Addressable object size"
+%param DRAM_ADDR_BITS     27  "Address bits per bank"
+%param DRAM_NUM_BANKS     1   "DDR banks"

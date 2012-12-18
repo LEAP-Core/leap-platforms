@@ -571,11 +571,11 @@ static int __devinit bluenoc_probe(struct pci_dev* dev, const struct pci_device_
     } else {
       /* create a device node via udev */
 #if DEVICE_CREATE_HAS_DRVDATA_ARG
-      device_create(bluenoc_class, NULL, this_device_number, NULL, "%s_%d", DEV_NAME, this_board->board_number);
+      device_create(bluenoc_class, NULL, this_device_number, NULL, "%s_%s", DEV_NAME, pci_name(this_board->pci_dev));
 #else
-      device_create(bluenoc_class, NULL, this_device_number, "%s_%d", DEV_NAME, this_board->board_number);
+      device_create(bluenoc_class, NULL, this_device_number, "%s_%s", DEV_NAME, pci_name(this_board->pci_dev));
 #endif
-      printk(KERN_INFO "%s: /dev/%s_%d device file created\n", DEV_NAME, DEV_NAME, this_board->board_number);
+      printk(KERN_INFO "%s: /dev/%s_%s device file created\n", DEV_NAME, DEV_NAME, pci_name(this_board->pci_dev));
     }
   }
 

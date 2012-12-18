@@ -34,8 +34,9 @@
 
 #include "asim/syntax.h"
 
-#include "asim/provides/umf.h"
-#include "asim/provides/pcie_device.h"
+#include "awb/provides/umf.h"
+#include "awb/provides/pcie_device.h"
+#include "awb/provides/physical_platform_utils.h"
 
 
 PCIE_DEVICE_CLASS::PCIE_DEVICE_CLASS(PLATFORMS_MODULE p) :
@@ -51,7 +52,7 @@ PCIE_DEVICE_CLASS::Init()
     if (initialized) return;
     initialized = true;
 
-	const char *dev_file = "/dev/bluenoc_1";
+	const char *dev_file = FPGA_DEV_PATH.c_str();
 	pcieDev = open(dev_file, O_RDWR);
 	if (pcieDev < 0) {
 		fprintf (stderr, "PCIe Device Error: Failed to open %s: %s\n", dev_file, strerror(errno));
@@ -81,7 +82,7 @@ PCIE_DEVICE_CLASS::Init()
     //
     // Enable driver debugging
     //
-//    tDebugLevel dbg_lvl = DEBUG_DATA | DEBUG_DMA | DEBUG_INTR;
+//    tDebugLevel dbg_lvl = DEBUG_DATA | DEBUG_INTR; // | DEBUG_DMA;
 //    ioctl(pcieDev, BNOC_SET_DEBUG_LEVEL, &dbg_lvl);
 
     if (Probe())
@@ -147,7 +148,12 @@ PCIE_DEVICE_CLASS::Probe(bool block)
 ssize_t
 PCIE_DEVICE_CLASS::Read(void *buf, size_t count)
 {
-    return read(pcieDev, buf, count);
+    ssize_t rc = read(pcieDev, buf, count);
+    if (rc <= 0)
+    {
+        fprintf(stderr, "PCIe read error:  ret=%d, errno=%d\n", rc, errno);
+        exit(1);
+    }
 }
 
 
@@ -155,5 +161,15 @@ PCIE_DEVICE_CLASS::Read(void *buf, size_t count)
 void
 PCIE_DEVICE_CLASS::Write(const void *buf, size_t count)
 {
-    VERIFY(write(pcieDev, buf, count) == count);
+    ssize_t wc = write(pcieDev, buf, count);
+    if (wc < 0)
+    {
+        fprintf(stderr, "PCIe write error:  ret=%d, errno=%d\n", wc, errno);
+        exit(1);
+    }
+    else if (wc != count)
+    {
+        fprintf(stderr, "PCIe write error:  only wrote %d of %d bytes\n", wc, count);
+        exit(1);
+    }
 }

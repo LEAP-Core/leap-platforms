@@ -60,8 +60,16 @@ NET  "pcieWires_pcie_exp_txn[7]"      LOC = AK3 | IOSTANDARD = LVCMOS18 ;
 # CLOCK CONSTRAINTS
 ######################################################################################################
 
+##
+## PCIe input clock (100 MHz)
+##
+
 NET  "pcieWires_clk_*_put" TNM_NET = TG_pci_sys_clk;
 TIMESPEC TS_pci_sys_clk = PERIOD TG_pci_sys_clk 100 MHz HIGH 50%;
+
+##
+## Clocks generated inside the PCIe driver
+##
 
 NET  "*pcie_dev/ep_pcie_ep/ext_clk.pipe_clock_i/clk_125mhz" TNM_NET = TG_pci_clk_125;
 TIMESPEC TS_pci_clk_125 = PERIOD TG_pci_clk_125 TS_pci_sys_clk*1.25 HIGH 50 % PRIORITY 1;
@@ -70,15 +78,23 @@ NET  "*pcie_dev/ep_pcie_ep/ext_clk.pipe_clock_i/clk_250mhz" TNM_NET = TG_pci_clk
 TIMESPEC TS_pci_clk_250 = PERIOD TG_pci_clk_250 TS_pci_sys_clk*2.5 HIGH 50 % PRIORITY 2;
 
 NET  "*pcie_dev/ep_pcie_ep/ext_clk.pipe_clock_i/userclk1" TNM_NET = TG_pci_clk_user1;
-TIMESPEC "TS_pci_clk_user1" = PERIOD "TG_pci_clk_user1" TS_pci_sys_clk*2.5 HIGH 50 % PRIORITY 2;
+TIMESPEC "TS_pci_clk_user1" = PERIOD "TG_pci_clk_user1" TS_pci_sys_clk*2.5 HIGH 50 %;
 
 NET  "*pcie_dev/ep_pcie_ep/ext_clk.pipe_clock_i/userclk2" TNM_NET = TG_pci_clk_user2;
-TIMESPEC "TS_pci_clk_user2" = PERIOD "TG_pci_clk_user2" TS_pci_sys_clk*2.5 HIGH 50 % PRIORITY 2;
+TIMESPEC "TS_pci_clk_user2" = PERIOD "TG_pci_clk_user2" TS_pci_sys_clk*2.5 HIGH 50 %;
+
+##
+## 125 MHz BlueNoC clock, generated in the Bluespec wrapper of the
+## PCIe driver from the 250 MHz clock.
+##
+
+NET  "*pcie_dev/ep_clkgen_pll_CLKOUT0" TNM_NET = TG_noc_clk_125;
+TIMESPEC TS_noc_clk_125 = PERIOD TG_noc_clk_125 TS_pci_clk_user2 /2 HIGH 50;
 
 
-NET "*pcie_dev/ep_pcie_ep/v7_pcie_v1_7_i/gt_top_i/pipe_wrapper_i/pipe_lane[*].pipe_rate.pipe_rate_i/*" TNM_NET = FFS "MC_PIPE";
-NET "*pcie_dev/ep_pcie_ep/v7_pcie_v1_7_i/gt_top_i/pipe_wrapper_i/PIPE_RESET_N_inv"                     TNM_NET = "MC_PIPE";
-TIMESPEC "TS_pipe_rate" = FROM "MC_PIPE" TS_pci_clk_user1*0.5;
+
+#NET "*pcie_dev/ep_pcie_ep/v7_pcie_v1_7_i/gt_top_i/pipe_wrapper_i/pipe_lane[*].pipe_rate.pipe_rate_i/*" TNM_NET = FFS "MC_PIPE";
+#TIMESPEC "TS_pipe_rate" = FROM "MC_PIPE" TS_pci_clk_user1*0.5;
 
 
 PIN "*pcie_dev/ep_pcie_ep/v7_pcie_v1_7_i/pcie_top_i/pcie_7x_i/pcie_block_i.PLPHYLNKUPN" TIG;
@@ -97,11 +113,14 @@ INST "m_llpi_phys_plat_pcie_dev/fifoRxData_block*"      TNM=TG_pci_clk_250;
 INST "m_llpi_phys_plat_pcie_dev/fifoTxData_*elem*"      TNM=TG_pci_clk_250;
 INST "m_llpi_phys_plat_pcie_dev/fifoTxData_*block*"     TNM=TG_pci_clk_125;
 
-TIMESPEC TS_pci_clk_125_to_250=FROM TG_pci_clk_125 TO TG_pci_clk_250 TS_pci_clk_125 DATAPATHONLY;
-TIMESPEC TS_pci_clk_250_to_125=FROM TG_pci_clk_250 TO TG_pci_clk_125 TS_pci_clk_125 DATAPATHONLY;
+TIMESPEC TS_pci_clk_125_to_250=FROM TG_pci_clk_125 TO TG_pci_clk_250 4ns DATAPATHONLY;
+TIMESPEC TS_pci_clk_250_to_125=FROM TG_pci_clk_250 TO TG_pci_clk_125 4ns DATAPATHONLY;
 
-TIMESPEC TS_pci_clk_125_to_user2=FROM TG_pci_clk_125 TO TG_pci_clk_user2 TS_pci_clk_125 DATAPATHONLY;
-TIMESPEC TS_pci_clk_user2_to_125=FROM TG_pci_clk_user2 TO TG_pci_clk_125 TS_pci_clk_125 DATAPATHONLY;
+TIMESPEC TS_pci_clk_125_to_user2=FROM TG_pci_clk_125 TO TG_pci_clk_user2 4ns DATAPATHONLY;
+TIMESPEC TS_pci_clk_user2_to_125=FROM TG_pci_clk_user2 TO TG_pci_clk_125 4ns DATAPATHONLY;
+
+TIMESPEC TS_pci_clk_noc_to_user2=FROM TG_noc_clk_125 TO TG_pci_clk_user2 4ns DATAPATHONLY;
+TIMESPEC TS_pci_clk_user2_to_noc=FROM TG_pci_clk_user2 TO TG_noc_clk_125 4ns DATAPATHONLY;
 
 
 ######################################################################################################

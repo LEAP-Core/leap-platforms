@@ -158,7 +158,7 @@ PCIE_DEVICE_TESTS_CLASS::Test()
     while (read_bytes < req_bytes)
     {
         result = read(pcieDev, inBuf, 65536);
-        if (result == -1) {
+        if (result < 0) {
             perror("PCIe Tests (receiving msg)");
             exit(EXIT_FAILURE);
         }
@@ -207,7 +207,7 @@ PCIE_DEVICE_TESTS_CLASS::doWrite(
     {
         size_t this_cnt = (count > 65536) ? 65536 : count;
         ssize_t n_written = write(fd, buf, this_cnt);
-        if (n_written == -1)
+        if (n_written < 0)
         {
             error(1, errno, "Failed to write to PCIe device");
         }
