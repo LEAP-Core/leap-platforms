@@ -54,16 +54,24 @@ interface AURORA_SINGLE_DEVICE_UG;
 		*/
 		interface Clock aurora_clk;
 		interface Reset aurora_rst;
+		interface Reset aurora_rst_n;
 endinterface
 
 import "BVI" aurora_8b10b_v5_3_example_design = 
-module mkAURORA_SINGLE_UG (AURORA_SINGLE_DEVICE_UG);
+module mkAURORA_SINGLE_UG#(Clock rawClock, Reset rawReset) (AURORA_SINGLE_DEVICE_UG);
 
-	default_clock input_clk(INIT_CLK);
-	default_reset input_rst(RESET_N);
+	input_clock (INIT_CLK) = rawClock;
+	input_reset (RESET_N) clocked_by(rawClock) = rawReset;
+
+	default_clock no_clock;
+	default_reset no_reset;
+
+//	default_clock input_clk(INIT_CLK);
+//	default_reset input_rst(RESET_N);
 
 	output_clock aurora_clk(USER_CLK);
-	output_reset aurora_rst(USER_RST) clocked_by (aurora_clk);
+	output_reset aurora_rst(USER_RST_N) clocked_by (aurora_clk);
+	output_reset aurora_rst_n(USER_RST) clocked_by (aurora_clk);
 
 	method gtxq_p(GTXQ0_P) enable((*inhigh*) gtxq_p_en) reset_by(no_reset) clocked_by(no_clock);
 	method gtxq_n(GTXQ0_N) enable((*inhigh*) gtxq_n_en) reset_by(no_reset) clocked_by(no_clock);

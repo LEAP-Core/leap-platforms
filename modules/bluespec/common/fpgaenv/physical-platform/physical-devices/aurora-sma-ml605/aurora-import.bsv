@@ -72,7 +72,7 @@ interface AURORA_DEVICE;
     interface AURORA_DRIVER driver;
 endinterface      
 
-module mkAURORA_DEVICE(AURORA_DEVICE);
+module mkAURORA_DEVICE#(Clock rawClock, Reset rawReset)(AURORA_DEVICE);
 	let clk <- exposeCurrentClock();
 	let rst <- exposeCurrentReset();
 
@@ -82,12 +82,13 @@ module mkAURORA_DEVICE(AURORA_DEVICE);
 	Reg#(Bit#(32)) rx_count_r <- mkReg(0);
 	Reg#(Bit#(32)) tx_count_r <- mkReg(0);
 
-	let ug_device <- mkAURORA_SINGLE_UG(clocked_by clk, reset_by rst);
+	let ug_device <- mkAURORA_SINGLE_UG(rawClock, rawReset, clocked_by clk, reset_by rst);
 	let aurora_clk = ug_device.aurora_clk;
 	let aurora_rst = ug_device.aurora_rst;
     
 	SyncFIFOCountIfc#(Bit#(16),8) serdes_rxfifo <- mkSyncFIFOCount( aurora_clk, aurora_rst, clk);
 	SyncFIFOCountIfc#(Bit#(16),8) serdes_txfifo <- mkSyncFIFOCount( clk, rst, aurora_clk);
+	/*
 	rule tx_move;
 		ug_device.tx_data_out(serdes_txfifo.first());
 		serdes_txfifo.deq();
@@ -96,7 +97,7 @@ module mkAURORA_DEVICE(AURORA_DEVICE);
 		let rx_value <- ug_device.rx_data_in();
 		serdes_rxfifo.enq(rx_value);
 	endrule
-
+*/
 	rule echo;
 		serdes_rxfifo.enq(serdes_txfifo.first());
 		serdes_txfifo.deq();
@@ -104,14 +105,22 @@ module mkAURORA_DEVICE(AURORA_DEVICE);
 
 
 	ReadOnly#(Bool) resetAssertedCast <- isResetAsserted(clocked_by aurora_clk, reset_by aurora_rst);
-//	pack(resetAssertedCast._read())
-
+	ReadOnly#(Bool) resetAssertedCastN <- isResetAsserted(clocked_by aurora_clk, reset_by ug_device.aurora_rst_n);
+//	pack(resetAssertedCast._read());
+	 ReadOnly#(Bool) resetCrossing <- mkNullCrossingWire(clk,resetAssertedCast._read, clocked_by aurora_clk, reset_by aurora_rst);
+	 ReadOnly#(Bool) resetCrossing2 <- mkNullCrossingWire(clk,resetAssertedCast._read, clocked_by aurora_clk, reset_by ug_device.aurora_rst_n);
+	 ReadOnly#(Bool) resetCrossingN <- mkNullCrossingWire(clk,resetAssertedCastN._read, clocked_by aurora_clk, reset_by ug_device.aurora_rst);
+	 ReadOnly#(Bool) resetCrossingN2 <- mkNullCrossingWire(clk,resetAssertedCastN._read, clocked_by aurora_clk, reset_by ug_device.aurora_rst_n);
 
 	Reg#(Bit#(32)) debugint <- mkReg(0);
 	FIFOF#(Bit#(16)) debugfifo <- mkFIFOF();
 	rule debug_loop;
 		if ( debugint >= 1024 * 1024*4 ) begin
-			let debugv = {rx_fifo_count_r[3:0], tx_fifo_count_r[3:0], rx_count_r[3:0], 
+			let debugv = {rx_fifo_count_r[3:0], tx_fifo_count_r[3:0],
+			pack( resetCrossing._read), 
+			pack( resetCrossing2._read), 
+			pack(resetCrossingN._read),
+			pack(resetCrossingN2._read),
 			
 			{ug_device.channel_up,
 		ug_device.lane_up,

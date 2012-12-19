@@ -95,7 +95,8 @@ module aurora_8b10b_v5_3_example_design #
     TXN,
 
 		USER_CLK,
-		USER_RST
+		USER_RST,
+		USER_RST_N
 		
 );
 
@@ -134,6 +135,7 @@ module aurora_8b10b_v5_3_example_design #
     output             TXN;
 
 		output						USER_CLK;
+		output             USER_RST_N;
 		output             USER_RST;
 
 //**************************External Register Declarations****************************
@@ -208,15 +210,16 @@ module aurora_8b10b_v5_3_example_design #
   assign rst_cc_module_i   = !lane_up_reduce_i;
 
 	assign USER_CLK = user_clk_i;
-	assign USER_RST = reset_i;
+	assign USER_RST_N = ~system_reset_i;
+	assign USER_RST = system_reset_i;
 
 	//wjun
 	/*
 	assign RESET = ~RESET_N;
 	assign GT_RESET_IN = ~RESET_N;
 	*/
-	assign RESET = RESET_N;
-	assign GT_RESET_IN = RESET_N;
+	assign RESET = ~RESET_N;
+	assign GT_RESET_IN = ~RESET_N;
 
 //_______________________________Clock Buffers_________________________________
  IBUFDS_GTXE1 IBUFDS_GTXE1_CLK1
