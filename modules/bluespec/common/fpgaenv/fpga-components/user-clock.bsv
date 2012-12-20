@@ -132,32 +132,11 @@ module mkUserClock#(Integer inFreq, Integer clockMultiplier, Integer clockDivide
 
     UserClock clk = ?;
 
-   // let's deal with relative primes...
-   let mult = clockMultiplier/gcd(clockMultiplier,clockDivider); 
-   let div  = clockDivider/gcd(clockMultiplier,clockDivider); 
-
-  `ifdef SYNTH
-
-    // FPGA synthesis...
-
-    `ifdef VIRTEX6
-	clk <- mkUserClock_Ratio_MMCM(inFreq, mult, div);
-    `else
-    
-	if (mult ==  div)
-    	    clk <- mkUserClock_Same;
-        else
-	    clk <- mkUserClock_Ratio(inFreq, mult, div);
-    `endif
-    
-  `else
-
-    // Clock ratios make no sense in Bluesim
+    // let's deal with relative primes...
+    let mult = clockMultiplier/gcd(clockMultiplier,clockDivider); 
+    let div  = clockDivider/gcd(clockMultiplier,clockDivider); 
 
     clk <- mkUserClock_Ratio(inFreq, mult, div);
-
-  `endif
-
     return clk;
 
 endmodule

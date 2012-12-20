@@ -15511,3 +15511,34 @@ Directory drivers/linux/platforms/ml605-pcie/driver
   get consistent device names even when multiple boards are present in a system.
 
 - Add Virtex 7 DDR3 SDRAM controller.
+
+----------
+mcadler     Date: Thu Dec 20 17:15:02 EST 2012  CSN: CSN-leap-platforms-662
+                  Thu Dec 20 22:15:02 UTC 2012
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ user-clock-mmcm-virtex6.v Locally Removed           661 
+ hardware-fpga-components-virtex6.awb Locally Removed           661 
+ user-clock.bsv            Locally Modified          661 
+ user-clock-pll-common.bsv Locally Modified          661 
+ clock_gen.v               Locally Removed           661 
+ user-clock-mmcm-virtex6.bsv Locally Removed           661 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic/config/ml605
+ ml605-v6-pcie-dma.ucf     Locally Modified          661 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic/config/vc707
+ vc707-v7-pcie-dma.ucf     Locally Modified          661 
+
+- Remove TIG on main model reset in ML605 and VC707.  Being larger and faster,
+  the VC707 is much more sensitive to timing errors.  The STDIO service
+  uses an automatically addressed ring that sends a message around the ring
+  on the first cycle after reset.  With a TIG on reset the long wire between
+  the service and the next ring stop dropped the message at high frequencies.
+
+- Stop using a Bluespec divide by 2 clock when the model frequency is half the
+  crystal frequency.  Always build an MMCM.  The Xilinx tools fail to see the
+  clock domain change and compute timing incorrectly.
+
+- Delete the unused and needlessly confusing old Virtex 6 clock code.

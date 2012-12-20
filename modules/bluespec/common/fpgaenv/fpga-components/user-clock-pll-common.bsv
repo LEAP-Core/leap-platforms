@@ -196,9 +196,9 @@ module mkUserClock_PLL#(Integer inFreq,
     // FPGA synthesis...
 
     if (inFreq == outFreq)
+    begin
         clk <- mkUserClock_Same;
-    else if (inFreq == outFreq * 2)
-        clk <- mkUserClock_DivideByTwo;
+    end
     else
     begin
         // Compute PLL parameters for desired frequency

@@ -27,7 +27,6 @@ NET  "CLK_0"                          LOC = E18 | IOSTANDARD = LVDS;
 TIMESPEC TS_clk_in = PERIOD TNM_clk_in 200 MHz HIGH 50 % ;
 
 NET  "RST_N"                          TIG;
-INST "*/rstSync/reset_hold*"          TIG;
 
 
 disable = reg_sr_o;

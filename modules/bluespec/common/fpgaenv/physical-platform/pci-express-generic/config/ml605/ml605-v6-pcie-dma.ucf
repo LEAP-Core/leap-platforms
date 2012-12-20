@@ -36,6 +36,4 @@ NET    "CLK_0"                        LOC = H9 | IOSTANDARD = LVDS_25;
 
 TIMESPEC TS_clk_in = PERIOD TNM_clk_in 200 MHz HIGH 50 % ;
 
-INST "*/rstSync/reset_hold*"          TIG;
-
 
