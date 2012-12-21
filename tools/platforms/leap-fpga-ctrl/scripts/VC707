@@ -1,7 +1,7 @@
 #!/bin/sh -p
 
 ##
-## Configuration script for Xilinx ML605 FPGA boards.
+## Configuration script for Xilinx VC707 FPGA boards.
 ##
 
 # Keep user from messing with PATH when running as root
@@ -118,6 +118,6 @@ case "$arg_command" in
     cp /usr/share/leap/state/${bus_id}_config /sys/bus/pci/devices/${bus_id}/config
 
     # Give user access to the device
-    echo "Activating device: ML605 ${arg_devid} ${arg_driver}"
+    echo "Activating device: VC707 ${arg_devid} ${arg_driver}"
     ;;
 esac

@@ -15542,3 +15542,45 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic/
   clock domain change and compute timing incorrectly.
 
 - Delete the unused and needlessly confusing old Virtex 6 clock code.
+
+----------
+mcadler     Date: Fri Dec 21 10:12:07 EST 2012  CSN: CSN-leap-platforms-663
+                  Fri Dec 21 15:12:07 UTC 2012
+
+
+Directory tools/platforms/leap-fpga-ctrl
+ Makefile.in               Locally Modified          662 
+
+Directory tools/platforms/leap-fpga-ctrl/scripts
+ ML605                     Locally Modified          662 
+ VC707                     Locally Added               0 
+
+Directory tools/platforms/leap-fpga-ctrl
+ Makefile.am               Locally Modified          662 
+
+Directory tools/platforms/leap-fpga-ctrl/etc
+ config-sample             Locally Modified          662 
+
+Directory drivers/linux/platforms
+ ml605-pcie/               Locally Removed           662 
+
+Directory drivers/linux/platforms/ml605-pcie
+ driver/                   Locally Removed           662 
+
+Directory drivers/linux/platforms/ml605-pcie/driver
+ bluenoc                   Locally Removed           662 
+ bluenoc.c                 Locally Removed           662 
+ Makefile                  Locally Removed           662 
+ bluenoc.h                 Locally Removed           662 
+
+Directory drivers/linux/platforms/ml605-pcie
+ dkms/                     Locally Removed           662 
+
+Directory drivers/linux/platforms/ml605-pcie/dkms
+ dkms.conf                 Locally Removed           662 
+
+- Move BlueNoC driver to generic location instead of ML605.
+- Provide the Intel versions of ML605 and VC707 scripts.  The MIT versions
+  were old.  Scripts are machine / OS specific anyway and just a starting
+  point for most users.
+

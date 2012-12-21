@@ -23,7 +23,16 @@ bus_id = 83:00.0
 # Optional programming cable ID (in case there are multiple programming cables)
 prog_cable_id = -target "xilinx_platformusb frequency=12000000 esn=00001097AA2F01"
 
-[ACP.2]
-class = ACP
-has_control_script = no
-dev = /dev/acp2
+[VC707.0]
+class = VC707
+has_control_script = yes
+bus_id = 0000:04:00.0
+prog_cable_id = -target "digilent_plugin frequency=30000000 device=SN:210201234286"
+dev = /dev/bluenoc_0000:04:00.0
+
+[VC707.1]
+class = VC707
+has_control_script = yes
+bus_id = 0000:83:00.0
+prog_cable_id = -target "digilent_plugin frequency=30000000 device=SN:210201258321"
+dev = /dev/bluenoc_0000:83:00.0
