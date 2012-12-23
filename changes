@@ -15584,3 +15584,15 @@ Directory drivers/linux/platforms/ml605-pcie/dkms
   were old.  Scripts are machine / OS specific anyway and just a starting
   point for most users.
 
+
+----------
+mcadler     Date: Sun Dec 23 11:56:21 EST 2012  CSN: CSN-leap-platforms-664
+                  Sun Dec 23 16:56:21 UTC 2012
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ lutram.bsv                Locally Modified          663 
+
+Add mkLUTRAMIfcToMemIfc to convert a LUTRAM's interface to a MEMORY_IFC.
+The current implementation has the timing of a normal BRAM:  read results
+are available a cycle after read requests.

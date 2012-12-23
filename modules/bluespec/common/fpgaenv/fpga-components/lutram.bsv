@@ -203,6 +203,39 @@ module mkLUTRAM#(t_DATA init)
 endmodule
 
 
+// ========================================================================
+//
+// Convert LUTRAM interface to MEMORY_IFC for replacing a block RAM.
+//
+// ========================================================================
+
+module mkLUTRAMIfcToMemIfc#(LUTRAM#(t_ADDR, t_DATA) lutram)
+    // Interface:
+    (MEMORY_IFC#(t_ADDR, t_DATA))
+    provisos(Bits#(t_DATA, t_DATA_SZ),
+             Bits#(t_ADDR, t_ADDR_SZ),
+             Bounded#(t_ADDR));
+
+    FIFOF#(t_DATA) readQ <- mkFIFOF();
+
+    method Action readReq(t_ADDR addr);
+        let v = lutram.sub(addr);
+        readQ.enq(v);
+    endmethod
+
+    method ActionValue#(t_DATA) readRsp();
+        let v = readQ.first();
+        readQ.deq();
+        return v;
+    endmethod
+
+    method t_DATA peek = readQ.first;
+    method Bool notEmpty = readQ.notEmpty;
+    method Bool notFull = readQ.notFull;
+
+    method Action write(t_ADDR addr, t_DATA val) = lutram.upd(addr, val);
+    method Bool writeNotFull() = True;
+endmodule
 
 
 // ========================================================================
