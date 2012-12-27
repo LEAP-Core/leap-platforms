@@ -56,13 +56,13 @@
 //
 //         
 `timescale 1 ns / 1 ps
-(* core_generation_info = "aurora_8b10b_v5_3,aurora_8b10b_v5_3,{user_interface=Legacy_LL, backchannel_mode=Sidebands, c_aurora_lanes=1, c_column_used=left, c_gt_clock_1=GTXQ0, c_gt_clock_2=None, c_gt_loc_1=1, c_gt_loc_10=X, c_gt_loc_11=X, c_gt_loc_12=X, c_gt_loc_13=X, c_gt_loc_14=X, c_gt_loc_15=X, c_gt_loc_16=X, c_gt_loc_17=X, c_gt_loc_18=X, c_gt_loc_19=X, c_gt_loc_2=X, c_gt_loc_20=X, c_gt_loc_21=X, c_gt_loc_22=X, c_gt_loc_23=X, c_gt_loc_24=X, c_gt_loc_25=X, c_gt_loc_26=X, c_gt_loc_27=X, c_gt_loc_28=X, c_gt_loc_29=X, c_gt_loc_3=X, c_gt_loc_30=X, c_gt_loc_31=X, c_gt_loc_32=X, c_gt_loc_33=X, c_gt_loc_34=X, c_gt_loc_35=X, c_gt_loc_36=X, c_gt_loc_37=X, c_gt_loc_38=X, c_gt_loc_39=X, c_gt_loc_4=X, c_gt_loc_40=X, c_gt_loc_41=X, c_gt_loc_42=X, c_gt_loc_43=X, c_gt_loc_44=X, c_gt_loc_45=X, c_gt_loc_46=X, c_gt_loc_47=X, c_gt_loc_48=X, c_gt_loc_5=X, c_gt_loc_6=X, c_gt_loc_7=X, c_gt_loc_8=X, c_gt_loc_9=X, c_lane_width=2, c_line_rate=3.125, c_nfc=false, c_nfc_mode=IMM, c_refclk_frequency=62.5, c_simplex=false, c_simplex_mode=TX, c_stream=true, c_ufc=false, flow_mode=None, interface_mode=Streaming, dataflow_config=Duplex}" *)
+(* core_generation_info = "aurora_8b10b_v5_3,aurora_8b10b_v5_3,{user_interface=Legacy_LL, backchannel_mode=Sidebands, c_aurora_lanes=1, c_column_used=left, c_gt_clock_1=GTXQ0, c_gt_clock_2=None, c_gt_loc_1=1, c_gt_loc_10=X, c_gt_loc_11=X, c_gt_loc_12=X, c_gt_loc_13=X, c_gt_loc_14=X, c_gt_loc_15=X, c_gt_loc_16=X, c_gt_loc_17=X, c_gt_loc_18=X, c_gt_loc_19=X, c_gt_loc_2=X, c_gt_loc_20=X, c_gt_loc_21=X, c_gt_loc_22=X, c_gt_loc_23=X, c_gt_loc_24=X, c_gt_loc_25=X, c_gt_loc_26=X, c_gt_loc_27=X, c_gt_loc_28=X, c_gt_loc_29=X, c_gt_loc_3=X, c_gt_loc_30=X, c_gt_loc_31=X, c_gt_loc_32=X, c_gt_loc_33=X, c_gt_loc_34=X, c_gt_loc_35=X, c_gt_loc_36=X, c_gt_loc_37=X, c_gt_loc_38=X, c_gt_loc_39=X, c_gt_loc_4=X, c_gt_loc_40=X, c_gt_loc_41=X, c_gt_loc_42=X, c_gt_loc_43=X, c_gt_loc_44=X, c_gt_loc_45=X, c_gt_loc_46=X, c_gt_loc_47=X, c_gt_loc_48=X, c_gt_loc_5=X, c_gt_loc_6=X, c_gt_loc_7=X, c_gt_loc_8=X, c_gt_loc_9=X, c_lane_width=2, c_line_rate=3.125, c_nfc=false, c_nfc_mode=IMM, c_refclk_frequency=125.0, c_simplex=false, c_simplex_mode=TX, c_stream=true, c_ufc=false, flow_mode=None, interface_mode=Streaming, dataflow_config=Duplex}" *)
 module aurora_8b10b_v5_3_RESET_LOGIC
 (
     // User IO
     RESET,
     USER_CLK,
- //   INIT_CLK_P,
+//    INIT_CLK_P,
 //    INIT_CLK_N,
 		INIT_CLK,
     GT_RESET_IN,
@@ -79,7 +79,7 @@ module aurora_8b10b_v5_3_RESET_LOGIC
     input              USER_CLK;
 //    input              INIT_CLK_P;
 //    input              INIT_CLK_N;
-		input								INIT_CLK;
+		input							INIT_CLK;
     input              GT_RESET_IN;
     input              TX_LOCK_IN;
     input              PLL_NOT_LOCKED;
@@ -105,7 +105,6 @@ module aurora_8b10b_v5_3_RESET_LOGIC
 // Simple Debouncer for Reset button. The debouncer has an
 // asynchronous reset tied to GT_RESET_IN. This is primarily for simulation, to ensure
 // that unknown values are not driven into the reset line
-	assign init_clk_i = INIT_CLK;
 
     always @(posedge USER_CLK or posedge gt_rst_r)
         if(gt_rst_r)
@@ -122,15 +121,17 @@ module aurora_8b10b_v5_3_RESET_LOGIC
 
     assign SYSTEM_RESET = reset_debounce_r4 || PLL_NOT_LOCKED;
 
-/*
   // Assign an IBUFDS to INIT_CLK
+	assign init_clk_i = INIT_CLK;
+	/*
   IBUFDS init_clk_ibufg_i
   (
    .I(INIT_CLK_P),
    .IB(INIT_CLK_N),
    .O(init_clk_i)
   );
-*/
+	*/
+
 
 // Debounce the GT_RESET_IN signal using the INIT_CLK
     always @(posedge init_clk_i)

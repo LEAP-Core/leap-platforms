@@ -58,13 +58,15 @@
 //
 //         
 `timescale 1 ns / 1 ps
-(* core_generation_info = "aurora_8b10b_v5_3,aurora_8b10b_v5_3,{user_interface=Legacy_LL, backchannel_mode=Sidebands, c_aurora_lanes=1, c_column_used=left, c_gt_clock_1=GTXQ0, c_gt_clock_2=None, c_gt_loc_1=1, c_gt_loc_10=X, c_gt_loc_11=X, c_gt_loc_12=X, c_gt_loc_13=X, c_gt_loc_14=X, c_gt_loc_15=X, c_gt_loc_16=X, c_gt_loc_17=X, c_gt_loc_18=X, c_gt_loc_19=X, c_gt_loc_2=X, c_gt_loc_20=X, c_gt_loc_21=X, c_gt_loc_22=X, c_gt_loc_23=X, c_gt_loc_24=X, c_gt_loc_25=X, c_gt_loc_26=X, c_gt_loc_27=X, c_gt_loc_28=X, c_gt_loc_29=X, c_gt_loc_3=X, c_gt_loc_30=X, c_gt_loc_31=X, c_gt_loc_32=X, c_gt_loc_33=X, c_gt_loc_34=X, c_gt_loc_35=X, c_gt_loc_36=X, c_gt_loc_37=X, c_gt_loc_38=X, c_gt_loc_39=X, c_gt_loc_4=X, c_gt_loc_40=X, c_gt_loc_41=X, c_gt_loc_42=X, c_gt_loc_43=X, c_gt_loc_44=X, c_gt_loc_45=X, c_gt_loc_46=X, c_gt_loc_47=X, c_gt_loc_48=X, c_gt_loc_5=X, c_gt_loc_6=X, c_gt_loc_7=X, c_gt_loc_8=X, c_gt_loc_9=X, c_lane_width=2, c_line_rate=3.125, c_nfc=false, c_nfc_mode=IMM, c_refclk_frequency=62.5, c_simplex=false, c_simplex_mode=TX, c_stream=true, c_ufc=false, flow_mode=None, interface_mode=Streaming, dataflow_config=Duplex}" *)
+(* core_generation_info = "aurora_8b10b_v5_3,aurora_8b10b_v5_3,{user_interface=Legacy_LL, backchannel_mode=Sidebands, c_aurora_lanes=1, c_column_used=left, c_gt_clock_1=GTXQ0, c_gt_clock_2=None, c_gt_loc_1=1, c_gt_loc_10=X, c_gt_loc_11=X, c_gt_loc_12=X, c_gt_loc_13=X, c_gt_loc_14=X, c_gt_loc_15=X, c_gt_loc_16=X, c_gt_loc_17=X, c_gt_loc_18=X, c_gt_loc_19=X, c_gt_loc_2=X, c_gt_loc_20=X, c_gt_loc_21=X, c_gt_loc_22=X, c_gt_loc_23=X, c_gt_loc_24=X, c_gt_loc_25=X, c_gt_loc_26=X, c_gt_loc_27=X, c_gt_loc_28=X, c_gt_loc_29=X, c_gt_loc_3=X, c_gt_loc_30=X, c_gt_loc_31=X, c_gt_loc_32=X, c_gt_loc_33=X, c_gt_loc_34=X, c_gt_loc_35=X, c_gt_loc_36=X, c_gt_loc_37=X, c_gt_loc_38=X, c_gt_loc_39=X, c_gt_loc_4=X, c_gt_loc_40=X, c_gt_loc_41=X, c_gt_loc_42=X, c_gt_loc_43=X, c_gt_loc_44=X, c_gt_loc_45=X, c_gt_loc_46=X, c_gt_loc_47=X, c_gt_loc_48=X, c_gt_loc_5=X, c_gt_loc_6=X, c_gt_loc_7=X, c_gt_loc_8=X, c_gt_loc_9=X, c_lane_width=2, c_line_rate=3.125, c_nfc=false, c_nfc_mode=IMM, c_refclk_frequency=125.0, c_simplex=false, c_simplex_mode=TX, c_stream=true, c_ufc=false, flow_mode=None, interface_mode=Streaming, dataflow_config=Duplex}" *)
 module aurora_8b10b_v5_3_example_design #
 (
      parameter   USE_CHIPSCOPE        = 0,
      parameter   SIM_GTXRESET_SPEEDUP = 1      
 )
 (
+
+// wjun ///////////////////////////////
 		RX_DATA_IN,
 		rx_en,
 		rx_rdy,
@@ -72,36 +74,41 @@ module aurora_8b10b_v5_3_example_design #
 		TX_DATA_OUT,
 		tx_en,
 		tx_rdy,
+    RESET_N,
 
     // User IO
-    //RESET,
-		RESET_N,
+//    RESET,
+/////////////////////////////////////////
+
     HARD_ERR,
     SOFT_ERR,
-//    ERR_COUNT,
+//    ERR_COUNT, // wjun
     LANE_UP,
     CHANNEL_UP,
+
+// wjun ///////////////////////////////
 //    INIT_CLK_P,
 //    INIT_CLK_N,
 		INIT_CLK,
 //    GT_RESET_IN,
+/////////////////////////////////////////
+
     GTXQ0_P,
     GTXQ0_N,
-    
-		// GT I/O
+    // GT I/O
     RXP,
     RXN,
     TXP,
     TXN,
-
+		
+// wjun ///////////////////////////////
 		USER_CLK,
 		USER_RST,
 		USER_RST_N
-		
+/////////////////////////////////////////
 );
 
 
-//***********************************Port Declarations*******************************
 		output [15:0] RX_DATA_IN;
 		input rx_en;
 		output rx_rdy;
@@ -109,23 +116,25 @@ module aurora_8b10b_v5_3_example_design #
 		input [15:0] TX_DATA_OUT;
 		input tx_en;
 		output tx_rdy;
-
+//***********************************Port Declarations*******************************
     // User I/O
+//    input              RESET;
 //    input              INIT_CLK_P;
-///    input              INIT_CLK_N;
-		input 						INIT_CLK;
+//    input              INIT_CLK_N;
 //    input              GT_RESET_IN;
+
+		input 						INIT_CLK;
 		input 						RESET_N;
+		// wjun 
 
     output             HARD_ERR;
     output             SOFT_ERR;
-//    output  [0:7]      ERR_COUNT;
+//    output  [0:7]      ERR_COUNT; // wjun
     output             LANE_UP;
     output             CHANNEL_UP;
     // Clocks
     input              GTXQ0_P;
     input              GTXQ0_N;
-//		input GTXQ0_left_i;
 
 
     // GT Serial I/O
@@ -134,23 +143,20 @@ module aurora_8b10b_v5_3_example_design #
     output             TXP;
     output             TXN;
 
+		// wjun
 		output						USER_CLK;
 		output             USER_RST_N;
 		output             USER_RST;
+		wire RESET;
+		wire GT_RESET_IN;
 
 //**************************External Register Declarations****************************
-//		reg [15:0] RX_DATA_IN; 
-		wire [15:0] TX_DATA_OUT;
     reg                HARD_ERR;
     reg                SOFT_ERR;
     reg     [0:7]      ERR_COUNT;    
     reg                LANE_UP;
     reg                CHANNEL_UP;
 //********************************Wire Declarations**********************************
-		// wjun
-		wire RESET;
-		wire GT_RESET_IN;
-
     // Stream TX Interface
     wire    [0:15]     tx_d_i;
     wire               tx_src_rdy_n_i;
@@ -206,20 +212,15 @@ module aurora_8b10b_v5_3_example_design #
     wire    [0:15]     tied_to_gnd_vec_i;
 //*********************************Main Body of Code**********************************
 
-  assign lane_up_reduce_i  = &lane_up_i;
-  assign rst_cc_module_i   = !lane_up_reduce_i;
-
+	// wjun
+	assign RESET = ~RESET_N;
+	assign GT_RESET_IN = ~RESET_N;
 	assign USER_CLK = user_clk_i;
 	assign USER_RST_N = ~system_reset_i;
 	assign USER_RST = system_reset_i;
 
-	//wjun
-	/*
-	assign RESET = ~RESET_N;
-	assign GT_RESET_IN = ~RESET_N;
-	*/
-	assign RESET = ~RESET_N;
-	assign GT_RESET_IN = ~RESET_N;
+  assign lane_up_reduce_i  = &lane_up_i;
+  assign rst_cc_module_i   = !lane_up_reduce_i;
 
 //_______________________________Clock Buffers_________________________________
  IBUFDS_GTXE1 IBUFDS_GTXE1_CLK1
@@ -230,7 +231,6 @@ module aurora_8b10b_v5_3_example_design #
  .O(GTXQ0_left_i),
  .ODIV2()
  );
- 
 
 
     // Instantiate a clock module for clock division.
@@ -243,15 +243,6 @@ module aurora_8b10b_v5_3_example_design #
         .PLL_NOT_LOCKED(pll_not_locked_i)
     );
 
-	// wjun
-	assign tx_d_i = TX_DATA_OUT;
-	assign RX_DATA_IN = rx_d_i;
-	/*
-	always @(posedge user_clk_i)
-	begin
-		RX_DATA_IN <= rx_d_i;
-	end
-	*/
 //____________________________Register User I/O___________________________________
 // Register User Outputs from core.
 
@@ -353,15 +344,19 @@ module aurora_8b10b_v5_3_example_design #
         .GT_RESET_OUT(gt_reset_i)
     );
 
-/*
-		assign system_reset_i = RESET;
-		assign gt_reset_i = RESET;
-		assign USER_RESET = system_reset_i;
-*/
+		// wjun
+		assign tx_d_i = TX_DATA_OUT;
+		assign RX_DATA_IN = rx_d_i;
 		assign tx_src_rdy_n_i = !(tx_en && channel_up_i && (!system_reset_i));
 		assign tx_rdy = (!tx_dst_rdy_n_i) && channel_up_i && (!system_reset_i) && !do_cc_i;
+    wire               rx_reset_c;
+    wire               rx_data_valid_c;
+  	assign rx_reset_c = system_reset_i || !channel_up_i;
+    assign  rx_data_valid_c    =   !rx_src_rdy_n_i;
+		assign rx_rdy = rx_data_valid_c && !rx_reset_c;
+
+/*
     //Connect a frame generator to the TX User interface
-		/*
     aurora_8b10b_v5_3_FRAME_GEN frame_gen_i
     (
         // User Interface
@@ -375,14 +370,7 @@ module aurora_8b10b_v5_3_example_design #
         .RESET(reset_i),
         .CHANNEL_UP(channel_up_i)
     );
-		*/
 
-    wire               rx_reset_c;
-    wire               rx_data_valid_c;
-  	assign rx_reset_c = system_reset_i || !channel_up_i;
-    assign  rx_data_valid_c    =   !rx_src_rdy_n_i;
-		assign rx_rdy = rx_data_valid_c && !rx_reset_c;
-		/*
     aurora_8b10b_v5_3_FRAME_CHECK frame_check_i
     (
         // User Interface
@@ -395,8 +383,7 @@ module aurora_8b10b_v5_3_example_design #
         .CHANNEL_UP(channel_up_i),
         .ERR_COUNT(err_count_i)
     );    
-		*/
-
+*/
 
 generate
 if (USE_CHIPSCOPE==1)

@@ -84,7 +84,7 @@ module mkAURORA_DEVICE#(Clock rawClock, Reset rawReset)(AURORA_DEVICE);
 
 	let ug_device <- mkAURORA_SINGLE_UG(rawClock, rawReset, clocked_by clk, reset_by rst);
 	let aurora_clk = ug_device.aurora_clk;
-	let aurora_rst = ug_device.aurora_rst;
+	let aurora_rst = ug_device.aurora_rst_n;
     
 	SyncFIFOCountIfc#(Bit#(16),8) serdes_rxfifo <- mkSyncFIFOCount( aurora_clk, aurora_rst, clk);
 	SyncFIFOCountIfc#(Bit#(16),8) serdes_txfifo <- mkSyncFIFOCount( clk, rst, aurora_clk);

@@ -16,8 +16,6 @@
 %sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3_chbond_count_dec.v
 %sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3_clock_module.v
 %sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3_err_detect.v
-%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3_frame_check.v
-%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3_frame_gen.v
 %sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3_global_logic.v
 %sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3_gtx.v
 %sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3_hotplug.v
@@ -32,3 +30,4 @@
 %sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3_tx_stream.v
 
 %sources -t UCF -v PRIVATE aurora_8b10b_v5_3_example_design.ucf
+

@@ -48,23 +48,26 @@
 ## 
 #################################################################################
 ## UCF generated for xc6vlx240t-ff1156-1 device
-# 62.5MHz GTX Reference clock constraint 
+# 125.0MHz GTX Reference clock constraint 
 NET "*/GTXQ0_left_i" TNM_NET = GT_REFCLK; 
-TIMESPEC TS_GTXQ0_LEFT_I = PERIOD "GT_REFCLK" 62.5 MHz HIGH 50%;
+TIMESPEC TS_GTXQ0_LEFT_I = PERIOD "GT_REFCLK" 125.0 MHz HIGH 50%;
 
 # User Clock Constraint: Value is selected based on the line rate (3.125 Gbps) and lane width (2-Byte)
-NET "CLK_auroraWires_aurora_clk" TNM_NET = USER_CLK;
-#NET "*/user_clk_i" TNM_NET = USER_CLK;
+NET "*/user_clk_i" TNM_NET = USER_CLK;
 TIMESPEC TS_USER_CLK_I = PERIOD "USER_CLK" 156.25 MHz HIGH 50%;
 #TIMESPEC TS_USER_CLK_I = PERIOD "USER_CLK" 6.4 ns HIGH 50%;
 
-NET auroraWires_aurora_clk_n_AURORA_GTXQ_IN LOC = AK5;
-NET auroraWires_aurora_clk_p_AURORA_GTXQ_IN LOC = AK6;
-#NET EN_auroraWires_gtxq_p  LOC=AK6; 
-#NET EN_auroraWires_gtxq_n  LOC=AK5; 
+#NET auroraWires_aurora_clk_n_AURORA_GTXQ_IN LOC = AK5;
+#NET auroraWires_aurora_clk_p_AURORA_GTXQ_IN LOC = AK6;
+
+NET auroraWires_aurora_clk_n_AURORA_GTXQ_IN LOC = H5;
+NET auroraWires_aurora_clk_p_AURORA_GTXQ_IN LOC = H6;
+
+#NET GTXQ0_P  LOC=AK6; 
+#NET GTXQ0_N  LOC=AK5; 
 ################################ Diff. INIT Clock Constraint ##########################
-#NET EN_auroraWires_init_clk_p LOC=J9;
-#NET EN_auroraWires_init_clk_n LOC=H9;
+#NET INIT_CLK_P LOC=J9;
+#NET INIT_CLK_N LOC=H9; 
 
 # 200 MHz board Clock Constraint  
 NET "*/reset_logic_i/init_clk_i" TNM_NET = INIT_CLK;
@@ -74,18 +77,18 @@ TIMESPEC TS_INIT_CLK = PERIOD "INIT_CLK" 5 ns HIGH 50%;
 TIMESPEC "TS_TIG1" = FROM "INIT_CLK" TO "USER_CLK" TIG; 
 
 ################################ Resets Buttons #################################
-#NET EN_auroraWires_aurora_rst           LOC=E31;   #BUTTON
-#NET EN_auroraWires_aurora_rst           PULLUP;
-#NET EN_auroraWires_aurora_gt_rst     LOC=F31;   #BUTTON
+#NET RESET           LOC=E31;   #BUTTON
+#NET RESET           PULLUP;
+#NET GT_RESET_IN     LOC=F31;   #BUTTON
 
 ################################ Errors Indicators ##############################
 #NET HARD_ERR      LOC=M15;   #LED
 #NET SOFT_ERR      LOC=M16;   #LED
-
 
 ################################ Channel and Lane up Indicators #################
 #This board supports a maximum of 12 lanes
 #NET CHANNEL_UP      LOC=G15;   #LED
 #NET LANE_UP         LOC=B15;   #LED
 ############################### GT Location ###################################
-INST *aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y0;
+#INST aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y0;
+INST aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y18;
