@@ -104,10 +104,10 @@ module mkAURORA_DEVICE#(Clock rawClock, Reset rawReset)(AURORA_DEVICE);
 	endrule
 
 
-	ReadOnly#(Bool) resetAssertedCast <- isResetAsserted(clocked_by aurora_clk, reset_by aurora_rst);
+	ReadOnly#(Bool) resetAssertedCast <- isResetAsserted(clocked_by aurora_clk, reset_by ug_device.aurora_rst);
 	ReadOnly#(Bool) resetAssertedCastN <- isResetAsserted(clocked_by aurora_clk, reset_by ug_device.aurora_rst_n);
 //	pack(resetAssertedCast._read());
-	 ReadOnly#(Bool) resetCrossing <- mkNullCrossingWire(clk,resetAssertedCast._read, clocked_by aurora_clk, reset_by aurora_rst);
+	 ReadOnly#(Bool) resetCrossing <- mkNullCrossingWire(clk,resetAssertedCast._read, clocked_by aurora_clk, reset_by ug_device.aurora_rst);
 	 ReadOnly#(Bool) resetCrossing2 <- mkNullCrossingWire(clk,resetAssertedCast._read, clocked_by aurora_clk, reset_by ug_device.aurora_rst_n);
 	 ReadOnly#(Bool) resetCrossingN <- mkNullCrossingWire(clk,resetAssertedCastN._read, clocked_by aurora_clk, reset_by ug_device.aurora_rst);
 	 ReadOnly#(Bool) resetCrossingN2 <- mkNullCrossingWire(clk,resetAssertedCastN._read, clocked_by aurora_clk, reset_by ug_device.aurora_rst_n);

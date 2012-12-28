@@ -108,9 +108,9 @@ module aurora_8b10b_v5_3_RESET_LOGIC
 
     always @(posedge USER_CLK or posedge gt_rst_r)
         if(gt_rst_r)
-            reset_debounce_r    <=  4'b0000;    
+            reset_debounce_r    <=  4'b1111;    
         else
-            reset_debounce_r    <=  {RESET,reset_debounce_r[0:2]}; 
+            reset_debounce_r    <=  {!RESET,reset_debounce_r[0:2]}; //Note: Using active low reset
 
     always @ (posedge USER_CLK)
     begin

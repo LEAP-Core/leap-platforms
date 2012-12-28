@@ -213,7 +213,7 @@ module aurora_8b10b_v5_3_example_design #
 //*********************************Main Body of Code**********************************
 
 	// wjun
-	assign RESET = ~RESET_N;
+	assign RESET = RESET_N;
 	assign GT_RESET_IN = ~RESET_N;
 	assign USER_CLK = user_clk_i;
 	assign USER_RST_N = ~system_reset_i;
