@@ -12,6 +12,7 @@
 ##
 INST "*_sdram_*_dramReady"                    TNM=TG_ram_clk;
 INST "*_sdram_*_dramReady_Model"              TNM=TG_model_clk;
+INST "*_clocks_*/reset_hold_*"                TNM=TG_model_clk;
 
 INST "*_sdram_*_syncRequestQ/Mram_fifoMem*"   TNM=TG_model_clk;
 INST "*_sdram_*_syncRequestQ/dDoutReg*"       TNM=TG_ram_clk;

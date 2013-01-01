@@ -50,8 +50,6 @@ endinterface
 
 interface TOP_LEVEL_WIRES;
     // wires from devices
-    (* prefix = "" *)
-    interface CLOCKS_WIRES                        clocksWires;
     interface PCIE_WIRES                          pcieWires;
     interface DDR_WIRES                           ddrWires;
 		interface AURORA_WIRES												auroraWires;
@@ -71,15 +69,15 @@ endinterface
 // This is a convenient way for the outside world to instantiate all the devices
 // and an aggregation of all the wires.
 
-module mkPhysicalPlatform
+module mkPhysicalPlatform#(Vector#(`N_TOP_LEVEL_CLOCKS, Clock) topClocks, Reset topReset)
     //interface: 
     (PHYSICAL_PLATFORM);
     
     // The Platform is instantiated inside a NULL clock domain. Our first course of
     // action should be to instantiate the Clocks Physical Device and obtain interfaces
     // to clock and reset the other devices with.
-    
-    CLOCKS_DEVICE clocks <- mkClocksDevice();
+
+    CLOCKS_DEVICE clocks <- mkClocksDevice(topClocks, topReset);    
     
     Clock clk = clocks.driver.clock;
     Reset rst = clocks.driver.reset;
@@ -90,6 +88,7 @@ module mkPhysicalPlatform
                                     clocks.driver.rawReset, 
                                     clocked_by clocks.driver.clock,
                                     reset_by clocks.driver.reset);
+
 
     // Next, create the physical device that can trigger a soft reset. Pass along the
     // interface to the trigger module that the clocks device has given us.
@@ -120,21 +119,15 @@ module mkPhysicalPlatform
         clocks.softResetTrigger.reset();
     endrule
 
-//    Clock pcieclk = pcie_device.driver.clock;
-//    Reset pcierst = pcie_device.driver.reset;
-		AURORA_DEVICE aurora_device <- mkAURORA_DEVICE(clocks.driver.rawClock, clocks.driver.rawReset, clocked_by clk, reset_by rst);
+    //    Clock pcieclk = pcie_device.driver.clock;
+    //    Reset pcierst = pcie_device.driver.reset;
+    AURORA_DEVICE aurora_device <- mkAURORA_DEVICE(clk, rst, clocked_by clk, reset_by rst);
 
     //
     // Aggregate the drivers
     //
     interface PHYSICAL_DRIVERS physicalDrivers;
-        interface CLOCKS_DRIVER clocksDriver;
-            interface Clock clock = clocks.driver.clock;
-            interface Reset reset = clocks.driver.reset;
-
-            interface Clock rawClock = clocks.driver.rawClock;
-            interface Reset rawReset = clocks.driver.rawReset;
-        endinterface //= clocks.driver;
+        interface clocksDriver= clocks.driver;
 
         interface pcieDriver = pcie.driver;
         interface ddrDriver  = sdram.driver;
@@ -145,7 +138,7 @@ module mkPhysicalPlatform
     // Aggregate the wires
     //
     interface TOP_LEVEL_WIRES topLevelWires;
-        interface clocksWires = clocks.wires;
+
         interface pcieWires   = pcie.wires;
         interface ddrWires    = sdram.wires;
 				interface auroraWires = aurora_device.wires;

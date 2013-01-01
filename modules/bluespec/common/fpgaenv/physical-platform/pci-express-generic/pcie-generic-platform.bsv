@@ -122,14 +122,7 @@ module mkPhysicalPlatform#(Vector#(`N_TOP_LEVEL_CLOCKS, Clock) topClocks, Reset 
     // Aggregate the drivers
     //
     interface PHYSICAL_DRIVERS physicalDrivers;
-        interface CLOCKS_DRIVER clocksDriver;
-            interface Clock clock = clocks.driver.clock;
-            interface Reset reset = clocks.driver.reset;
-
-            interface Clock rawClock = clocks.driver.rawClock;
-            interface Reset rawReset = clocks.driver.rawReset;
-        endinterface //= clocks.driver;
-
+        interface clocksDriver = clocks.driver;
         interface pcieDriver = pcie.driver;
         interface ddrDriver  = sdram.driver;
     endinterface

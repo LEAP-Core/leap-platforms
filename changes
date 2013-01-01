@@ -15596,3 +15596,29 @@ Directory modules/bluespec/common/fpgaenv/fpga-components
 Add mkLUTRAMIfcToMemIfc to convert a LUTRAM's interface to a MEMORY_IFC.
 The current implementation has the timing of a normal BRAM:  read results
 are available a cycle after read requests.
+
+----------
+kfleming    Date: Tue Jan  1 14:30:11 EST 2013  CSN: CSN-leap-platforms-667
+                  Tue Jan  1 19:30:11 UTC 2013
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/ml605/aurora-pcie-dma
+ ml605-v6-pcie-dma.bsv     Locally Modified          666 
+ aurora-ml605-v6-pcie-dma.awb Locally Modified          666 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-xilinx
+ ddr-sdram-xilinx.ucf      Locally Modified          666 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic/config/ml605
+ ml605-v6-pcie-dma.ucf     Locally Modified          666 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic
+ pcie-generic-platform.bsv Locally Modified          666 
+
+
+Two small changes
+
+1) Ported the ml605 physical platforms to the new-style from clocks constructor.
+
+2) Added a new TIG to the ddr3 ucf.  There were timing paths between
+the model reset and the syncWriteQ.
