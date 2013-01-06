@@ -15622,3 +15622,40 @@ Two small changes
 
 2) Added a new TIG to the ddr3 ucf.  There were timing paths between
 the model reset and the syncWriteQ.
+
+----------
+kfleming    Date: Sun Jan  6 15:16:51 EST 2013  CSN: CSN-leap-platforms-669
+                  Sun Jan  6 20:16:51 UTC 2013
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/ml605/aurora-pcie-dma
+ ml605-v6-pcie-dma.bsv     Locally Modified          668 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora-sma-ml605
+ aurora-sma.awb            Locally Modified          668 
+ XUPV5_AURORA_SINGLE_UG.bsv Locally Modified          668 
+ aurora_8b10b_v5_3_example_design.v Locally Modified          668 
+ XUPV5_AURORA_SINGLE.bsv   Locally Modified          668 
+ aurora-import.bsv         Locally Modified          668 
+ aurora-ug.bsv             Locally Modified          668 
+ aurora_8b10b_v5_3_example_design.ucf Locally Modified          668 
+
+
+Many changes to the ml605 aurora code.  The code can now transmit data
+between boards.  However, it routinely loses channel lock after
+exchanging ~10000 messages.  I'm attempting to resolve this issue now.  
+
+The flow-control layer needs to be cleaned up as well.
+
+Specific changes:
+
+1) Upgraded flow control protocol.  Old protocol was suspicious, and
+it seemed like deadlocks were possible.
+
+2) Fixed a number of declarations in ucf to match LEAP module hierarchy. 
+
+3) Fixed inhigh bug in verilog import.  We were transmitting random values. 
+
+4) Added extra debug registers at various points in the aurora code.
+These should be changed to debug scan at some point. 
+

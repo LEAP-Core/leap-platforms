@@ -3,7 +3,7 @@
 
 %provides ml605_aurora_device
 
-%sources -t BSV -v PUBLIC aurora-import.bsv
+%sources -t BSV -v PUBLIC XUPV5_AURORA_SINGLE.bsv
 
 %sources -t BSV -v PUBLIC aurora-ug.bsv
 

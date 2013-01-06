@@ -27,6 +27,7 @@
 
 import Clocks::*;
 import FIFOF::*;
+import FIFO::*;
 import FIFOLevel::*;
 import Connectable::*;
 import GetPut::*;
@@ -35,54 +36,20 @@ import Vector::*;
 `include "awb/provides/librl_bsv_base.bsh"
 `include "awb/provides/librl_bsv_storage.bsh"
 
-
 interface AURORA_WIRES;
+	method Action aurora_clk_n((* port="AURORA_GTXQ_IN" *) Bit#(1) clk_n);
+	method Action aurora_clk_p((* port="AURORA_GTXQ_IN" *) Bit#(1) clk_p);
 
-    method Action aurora_clk_n((* port="AURORA_GREFCLK_N_IN" *) Bit#(1) clk_n);
+//	method Action gtxq_p();
+//	method Action gtxq_n();
 
-    method Action aurora_clk_p((* port="AURORA_GREFCLK_P_IN" *) Bit#(1) clk_p);
-   
-    method Action aurora_rxn_in((* port="AURORA_RXN_IN" *) Bit#(1) rxn);
-
-    method Action aurora_rxp_in((* port="AURORA_RXP_IN" *) Bit#(1) rxp);
-
-    (* result = "AURORA_TXN_OUT" *)
-    method Bit#(1) aurora_txn_out();
-
-    (* result = "AURORA_TXP_OUT" *)
-    method Bit#(1) aurora_txp_out();
-
-
-    // Dummy GTP for clocking goodness
-
-    method Action rxn_in_dummy0((* port="RXN_IN_dummy0" *) Bit#(1) rxn);
-    method Action rxp_in_dummy0((* port="RXP_IN_dummy0" *) Bit#(1) rxp);
-
-    (* result = "TXN_OUT_dummy0" *)
-    method Bit#(1) txn_out_dummy0();
-
-    (* result = "TXP_OUT_dummy0" *)
-    method Bit#(1) txp_out_dummy0();
-
-    method Action rxn_in_dummy1((* port="RXN_IN_dummy1" *) Bit#(1) rxn);
-    method Action rxp_in_dummy1((* port="RXP_IN_dummy1" *) Bit#(1) rxp);
-
-    (* result = "TXN_OUT_dummy1" *)
-    method Bit#(1) txn_out_dummy1();
-
-    (* result = "TXP_OUT_dummy1" *)
-    method Bit#(1) txp_out_dummy1();
-
-    method Action rxn_in_dummy2((* port="RXN_IN_dummy2" *) Bit#(1) rxn);
-    method Action rxp_in_dummy2((* port="RXP_IN_dummy2" *) Bit#(1) rxp);
-
-    (* result = "TXN_OUT_dummy2" *)
-    method Bit#(1) txn_out_dummy2();
-
-    (* result = "TXP_OUT_dummy2" *)
-    method Bit#(1) txp_out_dummy2();
-      
+	method Action rxp_in(Bit#(1) i);
+	method Action rxn_in(Bit#(1) i);
+	method Bit#(1) txp_out();
+	method Bit#(1) txn_out();
+	interface Clock aurora_clk;
 endinterface
+
 
 // guarded interface
 // Notice that we do a 4 to 1 vectorization here.  This is to exploit the high bandwidth of the link relative to our
@@ -104,8 +71,8 @@ interface AURORA_DRIVER;
     method Bit#(32) rx_count;
     method Bit#(32) tx_count;
     method Bit#(32) error_count;
-    method UInt#(5) rx_fifo_count;
-    method UInt#(5) tx_fifo_count;
+    method Bit#(32) rx_fifo_count;
+    method Bit#(32) tx_fifo_count;
 
 endinterface
 
@@ -115,37 +82,44 @@ interface AURORA_DEVICE;
     interface AURORA_DRIVER driver;
 endinterface      
 
-typedef 16 BufferSize;
+typedef 64 BufferSize;
 
 module mkAURORA_DEVICE (AURORA_DEVICE);
 
-    let ug_device <- mkAURORA_SINGLE_UG();
+    let modelClock <- exposeCurrentClock();
 
-    // Repair the clock domain stuff down here...
-    let aurora_rst <- mkAsyncReset(10, ug_device.aurora_rst, ug_device.aurora_clk);
     let clk <- exposeCurrentClock();
     let rst <- exposeCurrentReset();
+    let ug_device <- mkAURORA_SINGLE_UG(clk,rst);
+    let controllerClk = ug_device.aurora_clk;
+    let controllerRst = ug_device.aurora_rst;
 
     Bit#(16) handshakeWords[4] = {'hdead,'hbeef,'hcafe,'hfeed};
 
-    Reg#(Bit#(16)) ccCycles  <- mkReg(maxBound, clocked_by(ug_device.aurora_clk), reset_by(aurora_rst)); 
-    Reg#(Bit#(2)) handshakeRX <- mkReg(0, clocked_by(ug_device.aurora_clk), reset_by(aurora_rst)); 
-    Reg#(Bit#(2)) handshakeTX <- mkReg(0, clocked_by(ug_device.aurora_clk), reset_by(aurora_rst)); 
-    COUNTER#(TAdd#(1,TLog#(BufferSize))) txCredits   <- mkLCounter(fromInteger(valueof(BufferSize)), clocked_by(ug_device.aurora_clk), reset_by(aurora_rst)); 
-    COUNTER#(TAdd#(1,TLog#(BufferSize))) rxCredits   <- mkLCounter(fromInteger(valueof(BufferSize)), clocked_by(ug_device.aurora_clk), reset_by(aurora_rst)); 
-    Reg#(Bool) handshakeRXDone <- mkReg(False, clocked_by(ug_device.aurora_clk), reset_by(aurora_rst)); 
-    Reg#(Bool) handshakeTXDone <- mkReg(False, clocked_by(ug_device.aurora_clk), reset_by(aurora_rst)); 
-    Reg#(Bool) ccLast <- mkReg(False, clocked_by(ug_device.aurora_clk), reset_by(aurora_rst)); 
+    Reg#(Bit#(8)) ccCycles  <- mkReg(maxBound, clocked_by(controllerClk), reset_by(controllerRst)); 
+    Reg#(Bit#(2)) handshakeRX <- mkReg(0, clocked_by(controllerClk), reset_by(controllerRst)); 
+    Reg#(Bit#(2)) flitCount <-  mkReg(0, clocked_by(controllerClk), reset_by(controllerRst));    
+    Reg#(Bool)    dropData <-  mkReg(True, clocked_by(controllerClk), reset_by(controllerRst)); 
+    Reg#(Bit#(2)) handshakeTX <- mkReg(0, clocked_by(controllerClk), reset_by(controllerRst)); 
+    COUNTER#(TAdd#(1,TLog#(TDiv#(BufferSize,4)))) txCredits   <- mkLCounter(fromInteger(valueof(BufferSize)/4), clocked_by(controllerClk), reset_by(controllerRst)); 
+    COUNTER#(TAdd#(1,TLog#(TDiv#(BufferSize,4)))) rxCredits   <- mkLCounter(0, clocked_by(controllerClk), reset_by(controllerRst)); 
+    Reg#(Bool) handshakeRXDone <- mkReg(False, clocked_by(controllerClk), reset_by(controllerRst)); 
+    Reg#(Bool) handshakeTXDone <- mkReg(False, clocked_by(controllerClk), reset_by(controllerRst)); 
+    Reg#(Bool) ccLast <- mkReg(False, clocked_by(controllerClk), reset_by(controllerRst)); 
 
-    SyncFIFOCountIfc#(Bit#(63),BufferSize) serdes_rxfifo <- mkSyncFIFOCount( ug_device.aurora_clk, aurora_rst, clk);
-    SyncFIFOCountIfc#(Bit#(63),BufferSize) serdes_txfifo <- mkSyncFIFOCount( clk, rst, ug_device.aurora_clk);
+    SyncFIFOCountIfc#(Bit#(63),TDiv#(BufferSize,4)) serdes_rxfifo <- mkSyncFIFOCount( controllerClk, controllerRst, clk);
+    SyncFIFOCountIfc#(Bit#(63),TDiv#(BufferSize,4)) serdes_txfifo <- mkSyncFIFOCount( clk, rst, controllerClk);
     
+    // need to make sure that flow control can come through
+    let serdes_infifo <- mkSizedBRAMFIFOF(4+valueof(BufferSize), clocked_by controllerClk, reset_by controllerRst);
+
     rule updateCCLast;
         ccLast <= ug_device.cc;
     endrule
 
     rule tickCC(ccCycles > 0 && ug_device.cc  && !ccLast);
         ccCycles <= ccCycles - 1;
+        $display("Ticking CC  %d", ccCycles);
     endrule
 
     rule txHandshake (ccCycles == 0 && !handshakeTXDone);
@@ -172,28 +146,30 @@ module mkAURORA_DEVICE (AURORA_DEVICE);
 
         if(handshakeRX + 1 == 0 && handshakeMatch)
         begin
+            $display("RX Handshake Done!");
             handshakeRXDone <= True;
         end
     endrule
 
 
-    MARSHALLER#(Bit#(16), Bit#(64)) marshaller <- mkSimpleMarshaller(clocked_by(ug_device.aurora_clk), 
-                                                                     reset_by(aurora_rst));
+    MARSHALLER#(Bit#(16), Bit#(64)) marshaller <- mkSimpleMarshallerHighToLow(clocked_by(controllerClk), 
+                                                                              reset_by(controllerRst));
 
     rule tx (handshakeTXDone && txCredits.value > 0);
         marshaller.enq({1'b0,serdes_txfifo.first});
         serdes_txfifo.deq;
 	txCredits.downBy(1);
+        $display("TX Sends Data %h, credits %d", serdes_txfifo.first, txCredits.value());
     endrule
 
-    // We stuffed BufferSize - rxCredits values into the fifo, and now there count values left.
-    // We can send back BufferSize - rxCredits - count values safely.    
-    let returnCount = fromInteger(valueof(BufferSize)) - rxCredits.value() - pack(serdes_rxfifo.sCount);
-    let returnThreshold = fromInteger(valueof(BufferSize)) - 4;
+    rule noCredit(txCredits.value == 0);
+        $display("TX Has no credits");
+    endrule
 
-    rule txFC(handshakeTXDone && ((returnCount > 0 && (!serdes_txfifo.dNotEmpty || txCredits.value == 0)) || returnCount > returnThreshold));
-        rxCredits.upBy(returnCount);
-        marshaller.enq({1'b1,zeroExtend(returnCount)});
+    rule txFC(handshakeTXDone && ((rxCredits.value() > 0 && (!serdes_txfifo.dNotEmpty || txCredits.value() == 0)) || rxCredits.value() > 14));
+        rxCredits.downBy(rxCredits.value());
+        marshaller.enq({1'b1,zeroExtend(rxCredits.value()),48'b0});
+        $display("TX Sends Flowcontrol %h", rxCredits.value());
     endrule
 
     rule txSend (handshakeTXDone);
@@ -201,55 +177,67 @@ module mkAURORA_DEVICE (AURORA_DEVICE);
         ug_device.send(marshaller.first);
     endrule
 
-    DEMARSHALLER#(Bit#(16), Bit#(64)) demarshaller <- mkSimpleDemarshaller(clocked_by(ug_device.aurora_clk), 
-                                                                           reset_by(aurora_rst));
+    DEMARSHALLER#(Bit#(16), Bit#(64)) demarshaller <- mkSimpleDemarshallerHighToLow(clocked_by(controllerClk), 
+                                                                                    reset_by(controllerRst));
 
-    rule rxDemarsh (handshakeRXDone);  // We always need to receive.  Strong assumption that demarshaller has one element. 
+    FIFO#(Bit#(15)) creditFIFO <- mkFIFO(clocked_by(controllerClk),
+                                         reset_by(controllerRst));
+ 
+
+    // use flit number to distinguish flow control. first flit is header.
+    rule rxIntake (handshakeRXDone);  // We always need to receive.  Strong assumption that demarshaller has one element.
         let data <- ug_device.receive;
-        demarshaller.enq(data);
+        flitCount <= flitCount + 1;
+        if(flitCount == 0)
+        begin
+            if(data[15] == 1)
+            begin
+	        // we got a flow control credit
+                creditFIFO.enq(truncate(data));
+                dropData <= True;
+                $display("RX Got credits %d", data[14:0]);
+            end
+            else
+            begin
+                dropData <= False;
+                serdes_infifo.enq(data);
+                $display("RX starts data %d", data);
+            end
+        end
+        else if(!dropData)
+        begin
+            serdes_infifo.enq(data);
+            $display("RX data %d", data);
+        end
+    endrule 
+
+    rule updateCredit;
+        creditFIFO.deq;  
+        $display("RX Updates Credits %d", creditFIFO.first());
+        txCredits.upBy(truncate(creditFIFO.first()));
     endrule
 
-    Bit#(1) flowcontrol = truncateLSB(demarshaller.first());
+    rule rxDemarsh;  
+        serdes_infifo.deq();
+        demarshaller.enq(serdes_infifo.first);
+    endrule
 
-    rule rxDoneFC (handshakeRXDone && flowcontrol == 1);  // Strong assumption that demarshaller has one element. 
-        demarshaller.deq;	
-        txCredits.upBy(truncate(demarshaller.first()));
-    endrule     
-
-    rule rxDone (handshakeRXDone && flowcontrol == 0);  // Strong assumption that demarshaller has one element. 
+    rule rxDone (handshakeRXDone);  // Strong assumption that demarshaller has one element. 
         demarshaller.deq;
-        rxCredits.downBy(1);
+        rxCredits.upBy(1);
         serdes_rxfifo.enq(truncate(demarshaller.first()));
     endrule
 
-    rule sendStats;
-        ug_device.stats(?, handshakeRXDone, handshakeTXDone, ?, serdes_rxfifo.sNotEmpty, serdes_rxfifo.sNotFull);
-    endrule
-   
     interface AURORA_WIRES wires;
-        method aurora_clk_n = ug_device.clk_n_in;
-        method aurora_clk_p = ug_device.clk_p_in;
-        method aurora_rxn_in = ug_device.rxn_in;
-        method aurora_rxp_in = ug_device.rxp_in;
-        method aurora_txn_out = ug_device.txn_out;
-        method aurora_txp_out = ug_device.txp_out;
+               method aurora_clk_p = ug_device.gtxq_p;
+               method aurora_clk_n = ug_device.gtxq_n;
 
-        method rxn_in_dummy0 = ug_device.rxn_in_dummy0;
-        method rxp_in_dummy0 = ug_device.rxp_in_dummy0;
-        method txn_out_dummy0 = ug_device.txn_out_dummy0;
-        method txp_out_dummy0 = ug_device.txp_out_dummy0;
-
-        method rxn_in_dummy1 = ug_device.rxn_in_dummy1;
-        method rxp_in_dummy1 = ug_device.rxp_in_dummy1;
-        method txn_out_dummy1 = ug_device.txn_out_dummy1;
-        method txp_out_dummy1 = ug_device.txp_out_dummy1;
-
-        method rxn_in_dummy2 = ug_device.rxn_in_dummy2;
-        method rxp_in_dummy2 = ug_device.rxp_in_dummy2;
-        method txn_out_dummy2 = ug_device.txn_out_dummy2;
-        method txp_out_dummy2 = ug_device.txp_out_dummy2;
-
-    endinterface
+		method rxp_in = ug_device.rxp_in;
+		method rxn_in = ug_device.rxn_in;
+		method txp_out = ug_device.txp_out;
+		method txn_out = ug_device.txn_out;
+		interface Clock aurora_clk = ug_device.aurora_clk;
+	endinterface
    
     interface AURORA_DRIVER driver;
         method write = serdes_txfifo.enq;
@@ -265,12 +253,12 @@ module mkAURORA_DEVICE (AURORA_DEVICE);
         method hard_err = ug_device.hard_err;
         method soft_err = ug_device.soft_err;
  
-        method status = ug_device.status;
+        method status = ?;
         method rx_count = ug_device.rx_count;
         method tx_count = ug_device.tx_count;
         method error_count = ug_device.error_count;
-        method rx_fifo_count = serdes_rxfifo.dCount;
-        method tx_fifo_count = serdes_txfifo.sCount;
+        method rx_fifo_count = zeroExtend(pack(serdes_rxfifo.dCount));
+        method tx_fifo_count = zeroExtend(pack(serdes_txfifo.sCount));
     endinterface
  
 endmodule

@@ -121,7 +121,7 @@ module mkPhysicalPlatform#(Vector#(`N_TOP_LEVEL_CLOCKS, Clock) topClocks, Reset 
 
     //    Clock pcieclk = pcie_device.driver.clock;
     //    Reset pcierst = pcie_device.driver.reset;
-    AURORA_DEVICE aurora_device <- mkAURORA_DEVICE(clk, rst, clocked_by clk, reset_by rst);
+    AURORA_DEVICE aurora_device <- mkAURORA_DEVICE(clocked_by clk, reset_by rst);
 
     //
     // Aggregate the drivers

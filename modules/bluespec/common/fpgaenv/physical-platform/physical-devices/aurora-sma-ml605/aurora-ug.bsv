@@ -26,8 +26,8 @@
 // unguarded interface
 
 interface AURORA_SINGLE_DEVICE_UG;
-	method Action tx_data_out(Bit#(16) tx);
-	method ActionValue#(Bit#(16)) rx_data_in();
+	method Action send(Bit#(16) tx);
+	method ActionValue#(Bit#(16)) receive();
 
     method Action rxn_in(Bit#(1) i);
     method Action rxp_in(Bit#(1) i);
@@ -46,12 +46,14 @@ interface AURORA_SINGLE_DEVICE_UG;
     method Bit#(1) lane_up;
     method Bit#(1) hard_err;
     method Bit#(1) soft_err;
-		/*
-    method Bit#(32) status;
+    method Bool    cc;
+		
+
     method Bit#(32) rx_count;
     method Bit#(32) tx_count;
     method Bit#(32) error_count;
-		*/
+
+		
 		interface Clock aurora_clk;
 		interface Reset aurora_rst;
 		interface Reset aurora_rst_n;
@@ -84,20 +86,24 @@ module mkAURORA_SINGLE_UG#(Clock rawClock, Reset rawReset) (AURORA_SINGLE_DEVICE
 	method LANE_UP lane_up;
 	method HARD_ERR hard_err;
 	method SOFT_ERR soft_err;
+        method cc_do_i cc;
+        method RX_COUNT rx_count;
+        method TX_COUNT tx_count;
+        method ERROR_COUNT error_count;
 
-	method tx_data_out(TX_DATA_OUT) enable((*inhigh*) tx_d_en) ready(tx_rdy) clocked_by(aurora_clk) reset_by(aurora_rst); 
-	method RX_DATA_IN rx_data_in() enable((*inhigh*) rx_en) ready(rx_rdy) clocked_by(aurora_clk) reset_by(aurora_rst);
+	method send(TX_DATA_OUT) enable(tx_en) ready(tx_rdy) clocked_by(aurora_clk) reset_by(aurora_rst); 
+	method RX_DATA_IN receive() enable((*inhigh*) rx_en) ready(rx_rdy) clocked_by(aurora_clk) reset_by(aurora_rst);
 /*
 	schedule (rxn_in, rxp_in, txn_out, txp_out, channel_up, lane_up, hard_err, soft_err) CF 
 		(rxn_in, rxp_in, txn_out, txp_out, channel_up, lane_up, hard_err, soft_err);
-	schedule (rx_data_in) CF (rxn_in, rxp_in, txn_out, txp_out, tx_data_out, channel_up, lane_up, hard_err, soft_err);
-	schedule (tx_data_out) CF (rxn_in, rxp_in, txn_out, txp_out, rx_data_in, channel_up, lane_up, hard_err, soft_err);
+	schedule (receive) CF (rxn_in, rxp_in, txn_out, txp_out, send, channel_up, lane_up, hard_err, soft_err);
+	schedule (send) CF (rxn_in, rxp_in, txn_out, txp_out, receive, channel_up, lane_up, hard_err, soft_err);
 	*/
 	schedule (gtxq_p, gtxq_n, rxn_in, rxp_in, txn_out, txp_out, channel_up, lane_up, hard_err, soft_err) CF 
 		(gtxq_p, gtxq_n, rxn_in, rxp_in, txn_out, txp_out, channel_up, lane_up, hard_err, soft_err);
-	schedule (rx_data_in) CF (gtxq_p, gtxq_n, rxn_in, rxp_in, txn_out, txp_out, tx_data_out, channel_up, lane_up, hard_err, soft_err);
-	schedule (tx_data_out) CF (gtxq_p, gtxq_n, rxn_in, rxp_in, txn_out, txp_out, rx_data_in, channel_up, lane_up, hard_err, soft_err);
-	schedule (tx_data_out) C (tx_data_out);
-	schedule (rx_data_in) C (rx_data_in);
+	schedule (receive) CF (gtxq_p, gtxq_n, rxn_in, rxp_in, txn_out, txp_out, send, channel_up, lane_up, hard_err, soft_err);
+	schedule (send) CF (gtxq_p, gtxq_n, rxn_in, rxp_in, txn_out, txp_out, receive, channel_up, lane_up, hard_err, soft_err);
+	schedule (send) C (send);
+	schedule (receive) C (receive);
 
 endmodule

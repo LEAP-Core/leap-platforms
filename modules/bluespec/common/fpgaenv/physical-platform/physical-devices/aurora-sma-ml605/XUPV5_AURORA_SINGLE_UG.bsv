@@ -82,7 +82,7 @@ interface AURORA_SINGLE_DEVICE_UG;
 
 endinterface
 
-import "BVI" aurora_8b10b_v5_2_example_design = 
+import "BVI" aurora_8b10b_v5_3_example_design = 
 module mkAURORA_SINGLE_UG (AURORA_SINGLE_DEVICE_UG);
    
     default_clock clk(INIT_CLK);

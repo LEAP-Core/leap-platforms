@@ -55,10 +55,11 @@ interface AURORA_DRIVER;
 	method Action write(Bit#(16) d);
     
 		// Debugging interface
-    method Bit#(1) channel_up;
-    method Bit#(1) lane_up;
-    method Bit#(1) hard_err;
-    method Bit#(1) soft_err;
+    method Bit#(1)  channel_up;
+    method Bit#(1)  lane_up;
+    method Bit#(1)  hard_err;
+    method Bit#(1)  soft_err;
+    method Bool     cc;
     method Bit#(32) status;
     method Bit#(32) rx_count;
     method Bit#(32) tx_count;
@@ -161,16 +162,7 @@ module mkAURORA_DEVICE#(Clock rawClock, Reset rawReset)(AURORA_DEVICE);
 	endrule
 */
 
-	interface AURORA_WIRES wires;
-method aurora_clk_p = ug_device.gtxq_p;
-method aurora_clk_n = ug_device.gtxq_n;
 
-		method rxp_in = ug_device.rxp_in;
-		method rxn_in = ug_device.rxn_in;
-		method txp_out = ug_device.txp_out;
-		method txn_out = ug_device.txn_out;
-		interface Clock aurora_clk = ug_device.aurora_clk;
-	endinterface
 	interface AURORA_DRIVER driver;
 	/*
 		method ActionValue#(Bit#(16)) read(); // = ug_device.rx_data_in;

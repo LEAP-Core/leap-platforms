@@ -53,7 +53,8 @@ NET "*/GTXQ0_left_i" TNM_NET = GT_REFCLK;
 TIMESPEC TS_GTXQ0_LEFT_I = PERIOD "GT_REFCLK" 125.0 MHz HIGH 50%;
 
 # User Clock Constraint: Value is selected based on the line rate (3.125 Gbps) and lane width (2-Byte)
-NET "*/aur_user_clk_i" TNM_NET = USER_CLK;
+NET "m_llpi_phys_plat_aurora_device_ug_device/USER_CLK" TNM_NET = USER_CLK;
+#NET "*/USER_CLK" TNM_NET = USER_CLK;
 TIMESPEC TS_USER_CLK_I = PERIOD "USER_CLK" 156.25 MHz HIGH 50%;
 #TIMESPEC TS_USER_CLK_I = PERIOD "USER_CLK" 6.4 ns HIGH 50%;
 
@@ -70,8 +71,8 @@ NET auroraWires_aurora_clk_p_AURORA_GTXQ_IN LOC = H6;
 #NET INIT_CLK_N LOC=H9; 
 
 # 200 MHz board Clock Constraint  
-NET "*/reset_logic_i/init_clk_i" TNM_NET = INIT_CLK;
-TIMESPEC TS_INIT_CLK = PERIOD "INIT_CLK" 5 ns HIGH 50%;
+#NET "m_llpi_phys_plat_aurora_device_ug_device/INIT_CLK" TNM_NET = INIT_CLK;
+#TIMESPEC TS_INIT_CLK = PERIOD "INIT_CLK" 5 ns HIGH 50%;
 
 ###### No cross clock domain analysis. Domains are not related ############## 
 TIMESPEC "TS_TIG1" = FROM "INIT_CLK" TO "USER_CLK" TIG; 
