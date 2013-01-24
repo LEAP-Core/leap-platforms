@@ -35,6 +35,7 @@ import Vector::*;
 
 `include "awb/provides/librl_bsv_base.bsh"
 `include "awb/provides/librl_bsv_storage.bsh"
+`include "awb/provides/aurora_driver.bsh"
 
 interface AURORA_WIRES;
 	method Action aurora_clk_n((* port="AURORA_GTXQ_IN" *) Bit#(1) clk_n);
@@ -47,8 +48,8 @@ interface AURORA_WIRES;
 	method Action rxn_in(Bit#(1) i);
 	method Bit#(1) txp_out();
 	method Bit#(1) txn_out();
-	method Bool reset_asserted();
-	method Bool device_reset_asserted();
+//	method Bool reset_asserted();
+//	method Bool device_reset_asserted();
         interface Reset aurora_rst;
 	interface Clock aurora_clk;
         interface Reset model_rst;
@@ -100,21 +101,22 @@ typedef TDiv#(BufferSize,4) AllCredits;
 typedef TDiv#(BufferSize,8) HalfCredits;
 typedef TMul#(3,TDiv#(BufferSize,16)) ThreeFourthsCredits;
 
-module mkAURORA_DEVICE (AURORA_DEVICE);
+
+module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG ug_device) (AURORA_DEVICE);
 
     let modelClock <- exposeCurrentClock();
 
     let clk <- exposeCurrentClock();
     let rst <- exposeCurrentReset();
     let isModelInRst <- isResetAsserted();
-    let ug_device <- mkAURORA_SINGLE_UG(clk,rst);
     let controllerClk = ug_device.aurora_clk;
     let controllerRst = ug_device.aurora_rst;
     let isAuroraInRst <- isResetAsserted(clocked_by controllerClk, reset_by controllerRst);
 
+
     Bit#(16) handshakeWords[4] = {'hdead,'hbeef,'hcafe,'hfeed};
 
-    Reg#(Bit#(16)) ccCycles  <- mkReg(maxBound, clocked_by(controllerClk), reset_by(controllerRst)); 
+    Reg#(Bit#(10)) ccCycles  <- mkReg(maxBound, clocked_by(controllerClk), reset_by(controllerRst)); 
     Reg#(Bit#(2)) handshakeRX <- mkReg(0, clocked_by(controllerClk), reset_by(controllerRst)); 
     Reg#(Bit#(2)) flitCount <-  mkReg(0, clocked_by(controllerClk), reset_by(controllerRst));    
     Reg#(Bool)    dropData <-  mkReg(True, clocked_by(controllerClk), reset_by(controllerRst)); 
@@ -271,6 +273,8 @@ module mkAURORA_DEVICE (AURORA_DEVICE);
             creditUnderflow <= True;
 	    rxDebugBuffer.trigger();
 	    txDebugBuffer.trigger();
+	    $display("RX credit underflow");
+            $finish;
         end
     endrule
 
@@ -296,8 +300,8 @@ module mkAURORA_DEVICE (AURORA_DEVICE);
 	method rxn_in = ug_device.rxn_in;
 	method txp_out = ug_device.txp_out;
 	method txn_out = ug_device.txn_out;
-	method reset_asserted = isModelInRst;
-    	method device_reset_asserted = isAuroraInRst;
+//	method reset_asserted = isModelInRst;
+//    	method device_reset_asserted = isAuroraInRst;
 	interface Clock model_clk = clk;
         interface Reset model_rst = rst;
 	interface Clock aurora_clk = ug_device.aurora_clk;

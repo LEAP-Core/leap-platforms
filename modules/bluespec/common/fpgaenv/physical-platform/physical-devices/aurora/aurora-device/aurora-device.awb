@@ -1,0 +1,11 @@
+%name Aurora Device Wrapper
+%desc Aurora Device Wrapper
+
+%provides aurora_device
+%requires aurora_driver
+%requires aurora_flowcontrol
+
+%sources -t BSV -v PUBLIC aurora-device.bsv
+%sources -t BSH -v PUBLIC aurora-device.bsh
+
+

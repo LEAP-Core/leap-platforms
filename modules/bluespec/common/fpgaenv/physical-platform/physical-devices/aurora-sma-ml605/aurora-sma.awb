@@ -1,9 +1,7 @@
 %name ML605 Aurora Device, Single Lane, 3.125gbps (SMA)
 %desc ML605 Aurora Device, Single Lane, 3.125gbps (SMA)
 
-%provides ml605_aurora_device
-
-%sources -t BSV -v PUBLIC XUPV5_AURORA_SINGLE.bsv
+%provides aurora_driver
 
 %sources -t BSV -v PUBLIC aurora-ug.bsv
 

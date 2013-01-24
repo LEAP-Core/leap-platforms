@@ -557,13 +557,13 @@ module aurora_8b10b_v5_3_gtx #
         .TXUSRCLK2                      (TXUSRCLK2_IN),
         //-------------- Transmit Ports - TX Driver and OOB signaling --------------
         .TXBUFDIFFCTRL                  (3'b100),
-        .TXDIFFCTRL                     (4'b1000),
+        .TXDIFFCTRL                     (4'b1000), //kfleming 0100
         .TXINHIBIT                      (tied_to_ground_i),
         .TXN                            (TXN_OUT),
         .TXP                            (TXP_OUT),
         .TXPOSTEMPHASIS                 (5'b00000),
         //------------- Transmit Ports - TX Driver and OOB signalling --------------
-        .TXPREEMPHASIS                  (4'b0000),
+        .TXPREEMPHASIS                  (4'b0000), //kfleming 0010
         //--------- Transmit Ports - TX Elastic Buffer and Phase Alignment ---------
         .TXBUFSTATUS                    (TXBUFSTATUS_OUT),
         //------ Transmit Ports - TX Elastic Buffer and Phase Alignment Ports ------

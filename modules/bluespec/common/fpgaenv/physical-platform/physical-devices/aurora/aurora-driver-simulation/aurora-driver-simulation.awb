@@ -1,0 +1,10 @@
+%name Aurora Driver, Simulation
+%desc Aurora Driver, Simulation
+
+%provides aurora_driver
+%requires unix_comm_device
+
+%sources -t BSV -v PUBLIC aurora-driver-simulation.bsv
+
+
+

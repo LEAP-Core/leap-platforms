@@ -47,6 +47,7 @@ interface AURORA_SINGLE_DEVICE_UG;
     method Bit#(1) hard_err;
     method Bit#(1) soft_err;
     method Bool    cc;
+    method Bool    receive_rdy;
 		
 
     method Bit#(32) rx_count;
@@ -90,6 +91,7 @@ module mkAURORA_SINGLE_UG#(Clock rawClock, Reset rawReset) (AURORA_SINGLE_DEVICE
         method RX_COUNT rx_count;
         method TX_COUNT tx_count;
         method ERROR_COUNT error_count;
+        method rx_rdy receive_rdy();
 
 	method send(TX_DATA_OUT) enable(tx_en) ready(tx_rdy) clocked_by(aurora_clk) reset_by(aurora_rst); 
 	method RX_DATA_IN receive() enable((*inhigh*) rx_en) ready(rx_rdy) clocked_by(aurora_clk) reset_by(aurora_rst);

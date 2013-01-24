@@ -407,7 +407,7 @@ module aurora_8b10b_v5_3_example_design #
 		// wjun
 		assign tx_d_i = TX_DATA_OUT;
 		assign RX_DATA_IN = rx_d_i;
-		assign tx_src_rdy_n_i = !(tx_en && channel_up_i && (!system_reset_i));
+		assign tx_src_rdy_n_i = !(tx_rdy && tx_en && channel_up_i && (!system_reset_i));
 		assign tx_rdy = (!tx_dst_rdy_n_i) && channel_up_i && (!system_reset_i) && !do_cc_i;
     wire               rx_reset_c;
     wire               rx_data_valid_c;

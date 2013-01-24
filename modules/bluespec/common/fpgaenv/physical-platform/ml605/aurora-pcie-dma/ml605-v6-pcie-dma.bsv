@@ -26,7 +26,7 @@ import Clocks::*;
 `include "awb/provides/clocks_device.bsh"
 `include "awb/provides/ddr_sdram_device.bsh"
 `include "awb/provides/physical_platform_utils.bsh"
-`include "awb/provides/ml605_aurora_device.bsh"
+`include "awb/provides/aurora_device.bsh"
 
 // PHYSICAL_DRIVERS
 
@@ -38,7 +38,7 @@ interface PHYSICAL_DRIVERS;
     interface CLOCKS_DRIVER                        clocksDriver;
     interface PCIE_DRIVER                          pcieDriver;
     interface Vector#(FPGA_DDR_BANKS, DDR_DRIVER)  ddrDriver;
-		interface AURORA_DRIVER													auroraDriver;
+    interface AURORA_DRIVER                        auroraDriver;
 endinterface
 
 // TOP_LEVEL_WIRES
@@ -52,7 +52,7 @@ interface TOP_LEVEL_WIRES;
     // wires from devices
     interface PCIE_WIRES                          pcieWires;
     interface DDR_WIRES                           ddrWires;
-		interface AURORA_WIRES												auroraWires;
+    interface AURORA_WIRES                        auroraWires;
 endinterface
 
 // PHYSICAL_PLATFORM
@@ -116,11 +116,9 @@ module mkPhysicalPlatform#(Vector#(`N_TOP_LEVEL_CLOCKS, Clock) topClocks, Reset 
 
     (* fire_when_enabled *)
     rule triggerModelReset (assertModelReset);
-        clocks.softResetTrigger.reset();
+//        clocks.softResetTrigger.reset();
     endrule
 
-    //    Clock pcieclk = pcie_device.driver.clock;
-    //    Reset pcierst = pcie_device.driver.reset;
     AURORA_DEVICE aurora_device <- mkAURORA_DEVICE(clocked_by clk, reset_by rst);
 
     //
@@ -131,7 +129,7 @@ module mkPhysicalPlatform#(Vector#(`N_TOP_LEVEL_CLOCKS, Clock) topClocks, Reset 
 
         interface pcieDriver = pcie.driver;
         interface ddrDriver  = sdram.driver;
-				interface auroraDriver = aurora_device.driver;
+        interface auroraDriver = aurora_device.driver;
     endinterface
     
     //
@@ -141,12 +139,7 @@ module mkPhysicalPlatform#(Vector#(`N_TOP_LEVEL_CLOCKS, Clock) topClocks, Reset 
 
         interface pcieWires   = pcie.wires;
         interface ddrWires    = sdram.wires;
-				interface auroraWires = aurora_device.wires;
+        interface auroraWires = aurora_device.wires;
     endinterface
                
 endmodule
-
-
-/*
-
-*/

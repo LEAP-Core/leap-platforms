@@ -15659,3 +15659,68 @@ it seemed like deadlocks were possible.
 4) Added extra debug registers at various points in the aurora code.
 These should be changed to debug scan at some point. 
 
+
+----------
+kfleming    Date: Wed Jan 23 21:01:07 EST 2013  CSN: CSN-leap-platforms-670
+                  Thu Jan 24 02:01:07 UTC 2013
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/ml605/aurora-pcie-dma
+ ml605-v6-pcie-dma.bsv     Locally Modified          669 
+ ml605-v6-pcie-dma.bsh     Locally Added               0 
+ aurora-ml605-v6-pcie-dma.awb Locally Modified          669 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices
+ aurora/                   Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora
+ aurora-flowcontrol/       Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-flowcontrol
+ XUPV5_AURORA_SINGLE.bsv   Locally Added               0 
+ aurora-device.awb         Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora
+ aurora-driver-simulation/ Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-driver-simulation
+ aurora-import.bsv         Locally Added               0 
+ aurora-driver-simulation.awb Locally Added               0 
+ aurora-driver-simulation.bsv Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora
+ aurora-device/            Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device
+ aurora-device.bsv         Locally Added               0 
+ aurora-device.bsh         Locally Added               0 
+ aurora-device.awb         Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora
+ aurora-device-simulation/ Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device-simulation
+ aurora-device-simulation.awb Locally Added               0 
+ aurora-device-simulation.bsv Locally Added               0 
+ aurora-device-simulation.bsh Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora-sma-ml605
+ aurora-sma.awb            Locally Modified          669 
+ aurora_8b10b_v5_3_hotplug.v Locally Modified          669 
+ aurora_8b10b_v5_3_example_design.v Locally Modified          669 
+ XUPV5_AURORA_SINGLE.bsv   Locally Modified          669 
+ aurora-ug.bsv             Locally Modified          669 
+ aurora_8b10b_v5_3_example_design.ucf Locally Modified          669 
+ aurora_8b10b_v5_3_gtx.v   Locally Modified          669 
+
+
+1) Refactored the aurora code to cleanly separate out the verilog
+driver from the upper portions of the stack.  It may be that as we add
+support for the ML707 that we will want to have a board-specific ucf
+module as well.  We could also do the same for the 5 and 6.125 Gbps
+transceivers.  I did not attempt to port the Virtex 5 devices although
+that may be a good idea.
+
+2) Fixed a few bugs in the aurora verilog.  Xilinx thoughfully reset
+the aurora block every few thousand cycles.  I also changed some gtx
+signal parameters to match the IBERT test bench. 

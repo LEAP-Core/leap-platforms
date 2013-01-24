@@ -7,10 +7,11 @@
 %requires pcie_device
 %requires ddr_sdram_device
 %requires physical_platform_utils
-%requires ml605_aurora_device
+%requires aurora_device
 %requires physical_platform_config
 
 %sources -t BSV -v PUBLIC  ml605-v6-pcie-dma.bsv
+%sources -t BSH -v PUBLIC  ml605-v6-pcie-dma.bsh
 %sources -t CPP -v PRIVATE ml605-v6-pcie-dma.cpp
 %sources -t H   -v PUBLIC  ml605-v6-pcie-dma.h
 

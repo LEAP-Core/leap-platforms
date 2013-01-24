@@ -1,0 +1,13 @@
+%name Simlutation Communication Device with Aurora Stack
+%desc Simlutation Communication Device with Aurora Stack
+
+%provides simulation_communication_device
+
+%requires aurora_driver
+%requires aurora_flowcontrol
+
+%sources -t BSV -v PUBLIC aurora-device-simulation.bsv
+%sources -t BSH -v PUBLIC aurora-device-simulation.bsh
+
+
+

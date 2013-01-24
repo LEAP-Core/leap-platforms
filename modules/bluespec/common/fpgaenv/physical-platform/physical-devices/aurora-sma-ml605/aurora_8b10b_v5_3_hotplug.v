@@ -70,8 +70,8 @@ module aurora_8b10b_v5_3_hotplug
 
 //***************************** Wire Declarations *****************************
 
- wire               link_reset_0;
- wire               link_reset_1;
+ reg               link_reset_0;
+ reg               link_reset_1;
         
 //***************************** Reg Declarations *****************************
 
@@ -97,8 +97,15 @@ module aurora_8b10b_v5_3_hotplug
             count_for_reset_r <= `DLY count_for_reset_r + 1'b1;
     end  
 
-      assign link_reset_0 =( (count_for_reset_r > 14'd5100) & (count_for_reset_r < 14'd10200) ) ? 1'b1 : 1'b0; 
-      assign link_reset_1 =( (count_for_reset_r > 14'd5100) & (count_for_reset_r < 14'd16300) ) ? 1'b1 : 1'b0; 
+   
+    always @(posedge USER_CLK)
+      begin
+	 link_reset_0 <=( (count_for_reset_r > 14'd5100) && (count_for_reset_r < 14'd10200) ) ? 1'b1 : 1'b0;
+	 link_reset_1 <=( (count_for_reset_r > 14'd5100) && (count_for_reset_r < 14'd16300) ) ? 1'b1 : 1'b0;
+      end 
+   
+//      assign link_reset_0 =( (count_for_reset_r > 14'd5100) & (count_for_reset_r < 14'd10200) ) ? 1'b1 : 1'b0; 
+//      assign link_reset_1 =( (count_for_reset_r > 14'd5100) & (count_for_reset_r < 14'd16300) ) ? 1'b1 : 1'b0; 
 
       assign LINK_RESET_OUT = {link_reset_1,link_reset_0};     
 
