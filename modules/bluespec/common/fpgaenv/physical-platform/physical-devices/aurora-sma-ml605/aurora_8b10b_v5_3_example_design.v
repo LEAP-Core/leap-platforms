@@ -68,33 +68,35 @@ module aurora_8b10b_v5_3_example_design #
 (
 
 // wjun ///////////////////////////////
-		RX_DATA_IN,
-		rx_en,
-		rx_rdy,
+    RX_DATA_IN,
+    rx_en,
+    rx_rdy,
 
-		TX_DATA_OUT,
-		tx_en,
-		tx_rdy,
+    TX_DATA_OUT,
+    tx_en,
+    tx_rdy,
     RESET_N,
 
- 
+    UNDERFLOW,
+    FLITCOUNT,
+    RXCREDIT,
+    TXCREDIT,
     // User IO
 //    RESET,
 /////////////////////////////////////////
     cc_do_i,
     HARD_ERR,
     SOFT_ERR,
-//    ERR_COUNT, // wjun
     LANE_UP,
     CHANNEL_UP,
         RX_COUNT,
     TX_COUNT,
     ERROR_COUNT,
+
 // wjun ///////////////////////////////
-//    INIT_CLK_P,
-//    INIT_CLK_N,
-		INIT_CLK,
-//    GT_RESET_IN,
+
+    INIT_CLK,
+
 /////////////////////////////////////////
 
     GTXQ0_P,
@@ -106,20 +108,20 @@ module aurora_8b10b_v5_3_example_design #
     TXN,
 		
 // wjun ///////////////////////////////
-		USER_CLK,
-		USER_RST,
-		USER_RST_N
+    USER_CLK,
+    USER_RST,
+    USER_RST_N
 /////////////////////////////////////////
 );
 
 
-		output [15:0] RX_DATA_IN;
-		input rx_en;
-		output rx_rdy;
+    output [15:0] RX_DATA_IN;
+    input rx_en;
+    output rx_rdy;
 
-		input [15:0] TX_DATA_OUT;
-		input tx_en;
-		output tx_rdy;
+    input [15:0] TX_DATA_OUT;
+    input tx_en;
+    output tx_rdy;
 //***********************************Port Declarations*******************************
     // User I/O
 //    input              RESET;
@@ -127,8 +129,12 @@ module aurora_8b10b_v5_3_example_design #
 //    input              INIT_CLK_N;
 //    input              GT_RESET_IN;
 
-		input 						INIT_CLK;
-		input 						RESET_N;
+    input INIT_CLK;
+    input RESET_N;
+    input UNDERFLOW;
+    input [1:0] FLITCOUNT;
+    input [7:0] RXCREDIT;
+    input [7:0] TXCREDIT;   
 		// wjun 
 
     // Other control signals
@@ -157,12 +163,12 @@ module aurora_8b10b_v5_3_example_design #
     output             TXP;
     output             TXN;
 
-		// wjun
-		output						USER_CLK;
-		output             USER_RST_N;
-		output             USER_RST;
-		wire RESET;
-		wire GT_RESET_I5AN;
+    // wjun
+    output             USER_CLK;
+    output             USER_RST_N;
+    output             USER_RST;
+    wire               RESET;
+    wire               GT_RESET_IN;
 
 //**************************External Register Declarations****************************
     reg                HARD_ERR;
@@ -230,24 +236,24 @@ module aurora_8b10b_v5_3_example_design #
 //*********************************Main Body of Code**********************************
     assign cc_do_i = do_cc_i;
 	// wjun
-	assign RESET = RESET_N;
-	assign GT_RESET_IN = ~RESET_N;
-	assign USER_CLK = user_clk_i;
-	assign USER_RST_N = (!system_reset_i);//system_reset_i;
-	assign USER_RST = (!system_reset_i);//system_reset_i;
+    assign RESET = RESET_N;
+    assign GT_RESET_IN = ~RESET_N;
+    assign USER_CLK = user_clk_i;
+    assign USER_RST_N = (!system_reset_i);//system_reset_i;
+    assign USER_RST = (!system_reset_i);//system_reset_i;
 
-  assign lane_up_reduce_i  = &lane_up_i;
-  assign rst_cc_module_i   = !lane_up_reduce_i;
+    assign lane_up_reduce_i  = &lane_up_i;
+    assign rst_cc_module_i   = !lane_up_reduce_i;
 
 //_______________________________Clock Buffers_________________________________
- IBUFDS_GTXE1 IBUFDS_GTXE1_CLK1
- (
- .I(GTXQ0_P),
- .IB(GTXQ0_N),
- .CEB(1'b0),
- .O(GTXQ0_left_i),
- .ODIV2()
- );
+     IBUFDS_GTXE1 IBUFDS_GTXE1_CLK1
+     (
+         .I(GTXQ0_P),
+         .IB(GTXQ0_N),
+         .CEB(1'b0),
+         .O(GTXQ0_left_i),
+         .ODIV2()
+     );
 
 
     // Instantiate a clock module for clock division.
@@ -290,7 +296,7 @@ module aurora_8b10b_v5_3_example_design #
 	end
 	else
 	begin
-            if(soft_err_i) 
+            if(tx_en && !tx_rdy) 
             begin
                error_count_next = ERROR_COUNT + 1;	       
             end	
@@ -394,9 +400,7 @@ module aurora_8b10b_v5_3_example_design #
     (
         .RESET(RESET),
         .USER_CLK(user_clk_i),
-//        .INIT_CLK_P(INIT_CLK_P),
-//        .INIT_CLK_N(INIT_CLK_N),
-				.INIT_CLK(INIT_CLK),
+        .INIT_CLK(INIT_CLK),
         .GT_RESET_IN(GT_RESET_IN),
         .TX_LOCK_IN(tx_lock_i),
         .PLL_NOT_LOCKED(pll_not_locked_i),
@@ -404,16 +408,16 @@ module aurora_8b10b_v5_3_example_design #
         .GT_RESET_OUT(gt_reset_i)
     );
 
-		// wjun
-		assign tx_d_i = TX_DATA_OUT;
-		assign RX_DATA_IN = rx_d_i;
-		assign tx_src_rdy_n_i = !(tx_rdy && tx_en && channel_up_i && (!system_reset_i));
-		assign tx_rdy = (!tx_dst_rdy_n_i) && channel_up_i && (!system_reset_i) && !do_cc_i;
-    wire               rx_reset_c;
-    wire               rx_data_valid_c;
-  	assign rx_reset_c = system_reset_i || !channel_up_i;
+    // wjun
+    assign tx_d_i = TX_DATA_OUT;
+    assign RX_DATA_IN = rx_d_i;
+    assign tx_src_rdy_n_i = !(tx_rdy && tx_en && channel_up_i && (!system_reset_i));
+    assign tx_rdy = (!tx_dst_rdy_n_i) && channel_up_i && (!system_reset_i) && (!do_cc_i) && (!warn_cc_i) ;
+    wire   rx_reset_c;
+    wire   rx_data_valid_c;
+    assign rx_reset_c = system_reset_i || !channel_up_i;
     assign  rx_data_valid_c    =   !rx_src_rdy_n_i;
-		assign rx_rdy = rx_data_valid_c && !rx_reset_c;
+    assign rx_rdy = rx_data_valid_c && !rx_reset_c;
 
 /*
     //Connect a frame generator to the TX User interface
@@ -450,36 +454,49 @@ generate
 if (USE_CHIPSCOPE==1)
 begin : chipscope1
 
+reg [63:0] sync_reg;
 
+always@(posedge user_clk_i)
+begin
+   sync_reg <= sync_in_i;
+end   
+   
 assign lane_up_i_i = &lane_up_i;
 assign tx_lock_i_i = tx_lock_i;
 
     // Shared VIO Inputs
         assign  sync_in_i[15:0]         =  tx_d_i;
         assign  sync_in_i[31:16]        =  rx_d_i;
-        assign  sync_in_i[39:32]        =  err_count_i;
-        assign  sync_in_i[56:40]        =  17'd0;
-        assign  sync_in_i[57]           =  1'b0;
-        assign  sync_in_i[58]           =  soft_err_i;
-        assign  sync_in_i[59]           =  hard_err_i;
-        assign  sync_in_i[60]           =  tx_lock_i_i;
-        assign  sync_in_i[61]           =  pll_not_locked_i;
-        assign  sync_in_i[62]           =  channel_up_i;
-        assign  sync_in_i[63]           =  lane_up_i_i;
-
-  
-
-  //-----------------------------------------------------------------
-  //  VIO core instance
-  //-----------------------------------------------------------------
-  v6_vio i_vio
-  
-    (
-      .control(icon_to_vio_i),
-      .clk(user_clk_i),
-      .sync_in(sync_in_i),
-      .sync_out(sync_out_i)
-    );
+        assign  sync_in_i[34]           =  FLITCOUNT[0];  
+        assign  sync_in_i[35]           =  FLITCOUNT[1];  
+        assign  sync_in_i[36]           =  UNDERFLOW;  
+        assign  sync_in_i[37]           =  rx_rdy;
+        assign  sync_in_i[38]           =  warn_cc_i;
+        assign  sync_in_i[39]           =  do_cc_i;
+        assign  sync_in_i[40]           =  soft_err_i;
+        assign  sync_in_i[41]           =  hard_err_i;
+        assign  sync_in_i[42]           =  tx_lock_i_i;
+        assign  sync_in_i[43]           =  pll_not_locked_i;
+        assign  sync_in_i[44]           =  channel_up_i;
+        assign  sync_in_i[45]           =  lane_up_i_i;
+        assign  sync_in_i[46]           =  tx_en;
+        assign  sync_in_i[47]           =  tx_rdy;
+        assign  sync_in_i[55:48]        =  RXCREDIT;
+        assign  sync_in_i[63:56]        =  TXCREDIT;
+   
+   
+   v6_ila ILA_inst
+           (
+	          .CONTROL(icon_to_vio_i), // INOUT BUS [35:0]
+	          .CLK(user_clk_i), // IN
+	          .TRIG0(sync_reg[7:0]), // IN BUS [7:0]
+	          .TRIG1(sync_reg[15:8]), // IN BUS [7:0]
+	          .TRIG2(sync_reg[23:16]), // IN BUS [7:0]
+	          .TRIG3(sync_reg[31:24]), // IN BUS [7:0]
+	          .TRIG4(sync_reg[39:32]), // IN BUS [7:0]
+	          .TRIG5(sync_reg[47:40]),
+   	          .TRIG6(sync_reg[55:48]),
+   	          .TRIG7(sync_reg[63:56]));
 
   //-----------------------------------------------------------------
   //  ICON core instance
@@ -487,7 +504,7 @@ assign tx_lock_i_i = tx_lock_i;
   v6_icon i_icon
   
     (
-      .control0(icon_to_vio_i)
+      .CONTROL0(icon_to_vio_i)
     );
   
                                                                                                                                                                        
@@ -513,30 +530,3 @@ end
 endgenerate //End generate for USE_CHIPSCOPE
 
 endmodule
-
-//-------------------------------------------------------------------
-//  ICON core module declaration
-//-------------------------------------------------------------------
-module v6_icon
-  (
-      control0
-  );
-  output [35:0] control0;
-endmodule
-
-//-------------------------------------------------------------------
-//  VIO core module declaration
-//-------------------------------------------------------------------
-module v6_vio
-  (
-    control,
-    clk,
-    sync_in,
-    sync_out
-  );
-  input  [35:0] control;
-  input  clk;
-  input  [63:0] sync_in;
-  output [15:0] sync_out;
-endmodule
-

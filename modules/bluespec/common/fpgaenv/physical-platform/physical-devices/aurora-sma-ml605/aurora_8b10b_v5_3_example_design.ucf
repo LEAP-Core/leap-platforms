@@ -64,9 +64,6 @@ TIMESPEC TS_USER_CLK_I = PERIOD "USER_CLK" 156.25 MHz HIGH 50%;
 NET auroraWires_aurora_clk_n_AURORA_GTXQ_IN LOC = H5;
 NET auroraWires_aurora_clk_p_AURORA_GTXQ_IN LOC = H6;
 
-NET auroraWires_reset_asserted LOC = AD21;
-NET auroraWires_device_reset_asserte LOC = AE21;
-
 #NET GTXQ0_P  LOC=AK6; 
 #NET GTXQ0_N  LOC=AK5; 
 ################################ Diff. INIT Clock Constraint ##########################

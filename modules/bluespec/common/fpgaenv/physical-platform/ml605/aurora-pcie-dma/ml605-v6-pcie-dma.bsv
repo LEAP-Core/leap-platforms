@@ -116,7 +116,7 @@ module mkPhysicalPlatform#(Vector#(`N_TOP_LEVEL_CLOCKS, Clock) topClocks, Reset 
 
     (* fire_when_enabled *)
     rule triggerModelReset (assertModelReset);
-//        clocks.softResetTrigger.reset();
+        clocks.softResetTrigger.reset();
     endrule
 
     AURORA_DEVICE aurora_device <- mkAURORA_DEVICE(clocked_by clk, reset_by rst);

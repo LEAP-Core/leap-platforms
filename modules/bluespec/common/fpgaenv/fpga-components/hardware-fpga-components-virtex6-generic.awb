@@ -16,6 +16,8 @@
 %private clock-buffers.v
 %private bscan-virtex5.v
 %private shiftreg.v
+%private v6_ila.v
+%private v6_icon.v
 
 %sources -t BSV -v PUBLIC  clock-import.bsv
 %sources -t VERILOG -v PRIVATE clock_import.v
@@ -54,6 +56,9 @@
 %private fp_cvt_d_to_s.ngc
 %private fp_cvt_i_to_s.ngc
 %private fp_cvt_d_to_i.ngc
+%private v6_icon.ngc
+%private v6_ila.ngc
+
 
 
 

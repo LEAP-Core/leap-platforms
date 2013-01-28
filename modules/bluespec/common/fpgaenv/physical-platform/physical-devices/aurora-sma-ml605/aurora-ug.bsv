@@ -48,7 +48,7 @@ interface AURORA_SINGLE_DEVICE_UG;
     method Bit#(1) soft_err;
     method Bool    cc;
     method Bool    receive_rdy;
-		
+    method Action   underflow(Bool underflow, Bit#(2) flitcount, Bit#(8) txcredits, Bit#(8) rxcredits);		
 
     method Bit#(32) rx_count;
     method Bit#(32) tx_count;
@@ -95,16 +95,12 @@ module mkAURORA_SINGLE_UG#(Clock rawClock, Reset rawReset) (AURORA_SINGLE_DEVICE
 
 	method send(TX_DATA_OUT) enable(tx_en) ready(tx_rdy) clocked_by(aurora_clk) reset_by(aurora_rst); 
 	method RX_DATA_IN receive() enable((*inhigh*) rx_en) ready(rx_rdy) clocked_by(aurora_clk) reset_by(aurora_rst);
-/*
-	schedule (rxn_in, rxp_in, txn_out, txp_out, channel_up, lane_up, hard_err, soft_err) CF 
-		(rxn_in, rxp_in, txn_out, txp_out, channel_up, lane_up, hard_err, soft_err);
-	schedule (receive) CF (rxn_in, rxp_in, txn_out, txp_out, send, channel_up, lane_up, hard_err, soft_err);
-	schedule (send) CF (rxn_in, rxp_in, txn_out, txp_out, receive, channel_up, lane_up, hard_err, soft_err);
-	*/
-	schedule (gtxq_p, gtxq_n, rxn_in, rxp_in, txn_out, txp_out, channel_up, lane_up, hard_err, soft_err) CF 
-		(gtxq_p, gtxq_n, rxn_in, rxp_in, txn_out, txp_out, channel_up, lane_up, hard_err, soft_err);
-	schedule (receive) CF (gtxq_p, gtxq_n, rxn_in, rxp_in, txn_out, txp_out, send, channel_up, lane_up, hard_err, soft_err);
-	schedule (send) CF (gtxq_p, gtxq_n, rxn_in, rxp_in, txn_out, txp_out, receive, channel_up, lane_up, hard_err, soft_err);
+        method underflow(UNDERFLOW,FLITCOUNT,TXCREDIT,RXCREDIT) enable((*inhigh*) underflow_en) clocked_by(aurora_clk) reset_by(aurora_rst);
+
+	schedule (gtxq_p, gtxq_n, rxn_in, rxp_in, txn_out, txp_out, channel_up, lane_up, hard_err, soft_err, cc, rx_count, tx_count, error_count, underflow) CF 
+		(gtxq_p, gtxq_n, rxn_in, rxp_in, txn_out, txp_out, channel_up, lane_up, hard_err, soft_err, cc, rx_count, tx_count, error_count, underflow);
+	schedule (receive) CF (gtxq_p, gtxq_n, rxn_in, rxp_in, txn_out, txp_out, send, channel_up, lane_up, hard_err, soft_err, cc, rx_count, tx_count, error_count, underflow);
+	schedule (send) CF (gtxq_p, gtxq_n, rxn_in, rxp_in, txn_out, txp_out, receive, channel_up, lane_up, hard_err, soft_err, cc, rx_count, tx_count, error_count, underflow);
 	schedule (send) C (send);
 	schedule (receive) C (receive);
 

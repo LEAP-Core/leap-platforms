@@ -40,16 +40,10 @@ import Vector::*;
 interface AURORA_WIRES;
 	method Action aurora_clk_n((* port="AURORA_GTXQ_IN" *) Bit#(1) clk_n);
 	method Action aurora_clk_p((* port="AURORA_GTXQ_IN" *) Bit#(1) clk_p);
-
-//	method Action gtxq_p();
-//	method Action gtxq_n();
-
 	method Action rxp_in(Bit#(1) i);
 	method Action rxn_in(Bit#(1) i);
 	method Bit#(1) txp_out();
 	method Bit#(1) txn_out();
-//	method Bool reset_asserted();
-//	method Bool device_reset_asserted();
         interface Reset aurora_rst;
 	interface Clock aurora_clk;
         interface Reset model_rst;
@@ -74,7 +68,6 @@ interface AURORA_DRIVER;
     method Bit#(1) hard_err;
     method Bit#(1) soft_err;
     method Bool     credit_underflow;
-    method Bit#(32) status;
     method Bit#(32) rx_count;
     method Bit#(32) tx_count;
     method Bit#(32) error_count;
@@ -95,6 +88,11 @@ interface AURORA_DEVICE;
     interface AURORA_WIRES wires;
     interface AURORA_DRIVER driver;
 endinterface      
+
+// Parameterizations for the aurora flow control interface.
+// Eventually, these should be codified as first order parameters.
+// Also the width of the interface should automatically adjust based on 
+// clock ratios.
 
 typedef 512 BufferSize;
 typedef TDiv#(BufferSize,4) AllCredits;
@@ -153,6 +151,10 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG ug_device) (AURORA_DEVICE);
     // need to make sure that flow control can come through
     let serdes_infifo <- mkSizedBRAMFIFOF(4*valueof(BufferSize), clocked_by controllerClk, reset_by controllerRst);
 
+
+    // Clock compensation occurs periodically in the phy.  We need to
+    // allow it to occur at least once before we attempt to send data.
+
     rule updateCCLast;
         ccLast <= ug_device.cc;
     endrule
@@ -161,6 +163,8 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG ug_device) (AURORA_DEVICE);
         ccCycles <= ccCycles - 1;
         $display("Ticking CC  %d", ccCycles);
     endrule
+
+    // Send a set of known values across to the other side, as a synchronization step
 
     rule txHandshake (ccCycles == 0 && !handshakeTXDone);
         handshakeTX <= handshakeTX + 1;
@@ -172,7 +176,10 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG ug_device) (AURORA_DEVICE);
         ug_device.send(handshakeWords[handshakeTX]);
     endrule
 
+    // This wire lets us check whether we ever drop data on receive.
     let rxFires <- mkPulseWire(clocked_by controllerClk, reset_by controllerRst);
+
+    // Receive and check handshake values.
 
     rule rxHandshake (!handshakeRXDone);
         let data <- ug_device.receive;
@@ -195,10 +202,37 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG ug_device) (AURORA_DEVICE);
     endrule
 
 
+
+    // Transmit side.  We can send three different message classes, which are encoded using the high
+    // order bits of the first flit.  
+    // 0X - normal message
+    // 11 - flow control credit
+    // 10 - hearbeat
+
     MARSHALLER#(Bit#(16), Bit#(64)) marshaller <- mkSimpleMarshallerHighToLow(clocked_by(controllerClk), 
                                                                               reset_by(controllerRst));
+    Reg#(Bit#(11)) heartbeat  <- mkReg(0, clocked_by(controllerClk), reset_by(controllerRst));
 
-    rule tx (handshakeTXDone && txCredits.value > 0);
+    rule beat;
+        heartbeat <= heartbeat + 1;
+    endrule
+
+    rule txHeartbeat (handshakeTXDone && heartbeat == 0);
+        marshaller.enq({2'b10,'hc001f00dd00d});
+    endrule
+
+    PulseWire transmittingCredits <- mkPulseWire(clocked_by(controllerClk), reset_by(controllerRst));
+    PulseWire updatingCredits <- mkPulseWire(clocked_by(controllerClk), reset_by(controllerRst));
+
+    rule txFC(handshakeTXDone && ((rxCredits.value() > fromInteger(valueof(HalfCredits)) && (!serdes_txfifo.dNotEmpty || txCredits.value() == 0)) || rxCredits.value() > fromInteger(valueof(ThreeFourthsCredits))));
+        rxCredits.setC(0);
+        marshaller.enq({2'b11,zeroExtend(rxCredits.value()),48'hdeadbeefcafe});
+        $display("TX Sends Flowcontrol %h", rxCredits.value());
+        txFlowcontrol <= txFlowcontrol + 1;
+        transmittingCredits.send();
+    endrule
+
+    rule txData(handshakeTXDone && txCredits.value > 0 && !transmittingCredits);
         marshaller.enq({1'b0,serdes_txfifo.first});
         serdes_txfifo.deq;
 	txCredits.downBy(1);
@@ -209,42 +243,49 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG ug_device) (AURORA_DEVICE);
         $display("TX Has no credits");
     endrule
 
-    rule txFC(handshakeTXDone && ((rxCredits.value() > fromInteger(valueof(HalfCredits)) && (!serdes_txfifo.dNotEmpty || txCredits.value() == 0)) || rxCredits.value() > fromInteger(valueof(ThreeFourthsCredits))));
-        rxCredits.downBy(rxCredits.value());
-        marshaller.enq({1'b1,zeroExtend(rxCredits.value()),48'b0});
-        $display("TX Sends Flowcontrol %h", rxCredits.value());
-        txFlowcontrol <= txFlowcontrol + 1;
-    endrule
-
     rule txSend (handshakeTXDone);
         marshaller.deq;
         ug_device.send(marshaller.first);
         txDebugBuffer.fifof.enq(marshaller.first);
     endrule
 
+
+    // Receive side.  We can send three different message classes, which are encoded using the high
+    // order bits of the first flit.  
+    // 0X - normal message
+    // 11 - flow control credit
+    // 10 - hearbeat
+    // The payload of the 1X message will be dropped - only the first flit contains useful information.
+    // Credit updates are decoupled from the main processing pipeline by way of a FIFO.
+
     DEMARSHALLER#(Bit#(16), Bit#(64)) demarshaller <- mkSimpleDemarshallerHighToLow(clocked_by(controllerClk), 
                                                                                     reset_by(controllerRst));
 
-    FIFO#(Bit#(15)) creditFIFO <- mkSizedFIFO(4,clocked_by(controllerClk),
-                                                reset_by(controllerRst));
+    FIFO#(Bit#(TAdd#(1,TLog#(TDiv#(BufferSize,4))))) creditFIFO <- mkSizedFIFO(4,clocked_by(controllerClk),
+                                                                                 reset_by(controllerRst));
  
 
     // use flit number to distinguish flow control. first flit is header.
-    rule rxIntake (handshakeRXDone);  // We always need to receive.  Strong assumption that demarshaller has one element.
+    rule rxIntake (handshakeRXDone);  // We always need to receive
         let data <- ug_device.receive;
         rxFires.send();
         flitCount <= flitCount + 1;
         rxDebugBuffer.fifof.enq(data);
         if(flitCount == 0)
         begin
-            if(data[15] == 1)
+            if(data[15:14] == 2'b11)
             begin
 	        // we got a flow control credit
                 rxFlowcontrol <= rxFlowcontrol + 1;
                 creditFIFO.enq(truncate(data));
                 dropData <= True;
                 $display("RX Got credits %d", data[14:0]);
-            end
+            end          
+            else if(data[15:14] == 2'b10)
+            begin
+                dropData <= True;
+                $display("RX Got heartbeat");
+            end          
             else
             begin
                 dropData <= False;
@@ -277,20 +318,29 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG ug_device) (AURORA_DEVICE);
             $finish;
         end
     endrule
-
+    
     rule rxDemarsh;  
         serdes_infifo.deq();
         demarshaller.enq(serdes_infifo.first);
     endrule
 
-    rule rxDone (handshakeRXDone);  // Strong assumption that demarshaller has one element. 
+    rule rxDone (handshakeRXDone && !transmittingCredits);   
         demarshaller.deq;
         rxCredits.upBy(1);
         serdes_rxfifo.enq(truncate(demarshaller.first()));
     endrule
 
+    // These methods are used in debugging the flow control.  They are tied to
+    // printfs in the aurora service layer. 
+
     mkConnection(toPut(txDebugBufferCrossing), toGet(txDebugBuffer.fifof));
     mkConnection(toPut(rxDebugBufferCrossing), toGet(rxDebugBuffer.fifof));
+
+    rule sendUnderflow;
+        ug_device.underflow(creditUnderflow, flitCount, zeroExtend(txCredits.value),  zeroExtend(rxCredits.value));       
+    endrule
+
+
      
     interface AURORA_WIRES wires;
         method aurora_clk_p = ug_device.gtxq_p;
@@ -300,8 +350,6 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG ug_device) (AURORA_DEVICE);
 	method rxn_in = ug_device.rxn_in;
 	method txp_out = ug_device.txp_out;
 	method txn_out = ug_device.txn_out;
-//	method reset_asserted = isModelInRst;
-//    	method device_reset_asserted = isAuroraInRst;
 	interface Clock model_clk = clk;
         interface Reset model_rst = rst;
 	interface Clock aurora_clk = ug_device.aurora_clk;
@@ -317,13 +365,11 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG ug_device) (AURORA_DEVICE);
 
         method first = serdes_rxfifo.first();
 
+        
         method channel_up = ug_device.channel_up;
         method lane_up = ug_device.lane_up;
         method hard_err = ug_device.hard_err;
         method soft_err = ug_device.soft_err;
- 
-        method status = ?;
-
         method rx_credit = rxCreditsCross.crossed();
         method credit_underflow = creditUnderflow.crossed();
         method tx_credit = txCreditsCross.crossed();

@@ -15724,3 +15724,41 @@ that may be a good idea.
 2) Fixed a few bugs in the aurora verilog.  Xilinx thoughfully reset
 the aurora block every few thousand cycles.  I also changed some gtx
 signal parameters to match the IBERT test bench. 
+
+----------
+kfleming    Date: Mon Jan 28 15:11:39 EST 2013  CSN: CSN-leap-platforms-671
+                  Mon Jan 28 20:11:39 UTC 2013
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ hardware-fpga-components-virtex6-generic.awb Locally Modified          670 
+ v6_ila.v                  Locally Added               0 
+ v6_icon.v                 Locally Added               0 
+ v6_ila.ngc                Locally Added               0 
+ v6_icon.ngc               Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/ml605/aurora-pcie-dma
+ ml605-v6-pcie-dma.bsv     Locally Modified          670 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-flowcontrol
+ XUPV5_AURORA_SINGLE.bsv   Locally Modified          670 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-driver-simulation
+ aurora-driver-simulation.bsv Locally Modified          670 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora-sma-ml605
+ aurora_8b10b_v5_3_example_design.v Locally Modified          670 
+ aurora-ug.bsv             Locally Modified          670 
+ aurora_8b10b_v5_3_example_design.ucf Locally Modified          670 
+
+
+1) Added icon and ila ngcs.  These are the components of the chipscope
+logic analyzer.  Currently, they are only used in xilinx-provided
+verilog as a low-level debugging aide. However, this sort of global
+resource is the kind of thing that is screaming for inclusion as a
+soft-service.
+
+2) Minor modifications and a flow control bug fix to the aurora flow
+control layer.  The aurora link is quite stable now, and I have
+sucessfully run a partitioned HAsim model on the ML605 setup. 
+
