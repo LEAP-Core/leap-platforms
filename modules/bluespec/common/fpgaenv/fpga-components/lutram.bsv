@@ -64,10 +64,13 @@ endmodule
 //   LUTRAMU_Async is used when LUT registers don't work due to bugs.
 //
 //   Xilinx Xst seems to have bugs with Verilog registers that look almost like
-//   block RAM but have readers needing results in the same cycle when the
-//   data size is greater than 1 bit.  The failed Xst inference seems to happen
-//   only when the index source is a register.  This function inverts the low
-//   bit of the index, guaranteeing that the index source is logic.
+//   block RAM but have readers needing results in the same cycle.  Before
+//   Virtex-7 this never happened when the data size was only 1 bit.  On
+//   Virtex-7 we now see the bug (using Xst) even in 1-bit data structures.
+//
+//   The failed Xst inference seems to happen only when the index source is a
+//   register.  This function inverts the low bit of the index, guaranteeing
+//   that the index source is logic.
 //
 module mkLUTRAMU_Async
     // interface:
@@ -109,7 +112,7 @@ module mkLUTRAMU
     Bool use_regfile = True;
 
     `ifdef SYNTH
-    if ((`BROKEN_REGFILE != 0) && (valueOf(t_DATA_SZ) > 1))
+    if (`BROKEN_REGFILE != 0)
     begin
         // There is a bug in some versions of Xilinx.  See the comment
         // on mkLUTRAMU_Async().

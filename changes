@@ -15762,3 +15762,18 @@ soft-service.
 control layer.  The aurora link is quite stable now, and I have
 sucessfully run a partitioned HAsim model on the ML605 setup. 
 
+
+----------
+mcadler     Date: Fri Feb  1 15:49:35 EST 2013  CSN: CSN-leap-platforms-672
+                  Fri Feb  1 20:49:35 UTC 2013
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ lutram.bsv                Locally Modified          671 
+
+Sigh.  The bug that won't die.  On Virtex-7 Xst started putting 1-bit wide
+LUTRAMs in block RAM despite the fact that a read on the cycle immediately
+following a write to the same address returns stale data.
+
+I had fixed (hacked around) this bug long ago for widths larger than 1 bit.
+At the time it appeared Xst never did this with 1-bit data.
