@@ -15777,3 +15777,14 @@ following a write to the same address returns stale data.
 
 I had fixed (hacked around) this bug long ago for widths larger than 1 bit.
 At the time it appeared Xst never did this with 1-bit data.
+
+----------
+mcadler     Date: Thu Feb 14 22:38:04 EST 2013  CSN: CSN-leap-platforms-673
+                  Fri Feb 15 03:38:04 UTC 2013
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ lutram.bsv                Locally Modified          672 
+ lutram.v                  Locally Modified          672 
+
+Add reset() method to LUTRAM.

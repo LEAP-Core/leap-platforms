@@ -15,7 +15,8 @@
 module LUTRAMUDualPort(CLK,
                        RST_N,
                        ADDR_IN, D_IN, WE,
-                       ADDR_1, D_OUT_1
+                       ADDR_1, D_OUT_1,
+                       USER_RST
                        );
    // synopsys template
    parameter                   addr_width = 1;
@@ -31,6 +32,9 @@ module LUTRAMUDualPort(CLK,
 
    input [addr_width - 1 : 0]  ADDR_1;
    output [data_width - 1 : 0] D_OUT_1;
+
+   // Currently ignored
+   input                       USER_RST;
 
    // synthesis attribute ram_style of arr is distributed
    reg [data_width - 1 : 0]    arr[lo:hi];

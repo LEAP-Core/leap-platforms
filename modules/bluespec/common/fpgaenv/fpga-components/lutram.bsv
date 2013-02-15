@@ -36,6 +36,9 @@ import Vector::*;
 interface LUTRAM#(type t_ADDR, type t_DATA);
     method Action upd(t_ADDR addr, t_DATA d);
     method t_DATA sub(t_ADDR addr);
+
+    // For initialized storage, reinvokes the initialization method.
+    method Action reset();
 endinterface: LUTRAM
 
 //
@@ -56,6 +59,10 @@ module mkLUTRAMU_RegFile
     //
     method Action upd(t_ADDR addr, t_DATA d) = mem.upd(addr, d);
     method t_DATA sub(t_ADDR addr) = mem.sub(addr);
+
+    method Action reset();
+        noAction;
+    endmethod
 endmodule
 
 
@@ -89,6 +96,10 @@ module mkLUTRAMU_Async
 
     method Action upd(t_ADDR addr, t_DATA d) = mem.upd(tweakAddr(addr), d);
     method t_DATA sub(t_ADDR addr) = mem.sub(tweakAddr(addr));
+
+    method Action reset();
+        noAction;
+    endmethod
 endmodule
 
 
@@ -146,8 +157,9 @@ module mkLUTRAMWith#(function t_DATA initfunc(t_ADDR idx))
     Reg#(Bool) initialized_m <- mkReg(False);
     Reg#(t_ADDR) init_idx <- mkReg(minBound);
     Wire#(Tuple2#(t_ADDR, t_DATA)) writeW <- mkWire();
+    PulseWire triggerReset <- mkPulseWire();
 
-    rule initializing (! initialized_m);
+    rule initializing (! initialized_m && ! triggerReset);
         mem.upd(init_idx, initfunc(init_idx));
 
         // Hack to avoid needing Eq proviso for comparison
@@ -157,14 +169,21 @@ module mkLUTRAMWith#(function t_DATA initfunc(t_ADDR idx))
         // Hack to avoid needing Arith proviso
         init_idx <= unpack(pack(init_idx) + 1);
     endrule
+
+    (* fire_when_enabled, no_implicit_conditions *)
+    (* descending_urgency = "newReset, initializing" *)
+    rule newReset (triggerReset);
+        init_idx <= minBound;
+        initialized_m <= False;
+    endrule
+
     
     (* fire_when_enabled *)
-    rule doWrite (initialized_m);
-    
+    rule doWrite (initialized_m && ! triggerReset);
         match {.addr, .d} = writeW;
         mem.upd(addr, d);
-    
     endrule
+
 
     //
     // Access methods
@@ -180,6 +199,9 @@ module mkLUTRAMWith#(function t_DATA initfunc(t_ADDR idx))
         return mem.sub(addr);
     endmethod
 
+    method Action reset() if (initialized_m);
+        triggerReset.send();
+    endmethod
 endmodule
 
 
@@ -265,6 +287,9 @@ endinterface: LUTRAM_READER_IFC
 interface LUTRAM_MULTI_READ#(numeric type n_READERS, type t_ADDR, type t_DATA);
     method Action upd(t_ADDR addr, t_DATA d);
     interface Vector#(n_READERS, LUTRAM_READER_IFC#(t_ADDR, t_DATA)) readPorts;
+
+    // For initialized storage, reinvokes the initialization method.
+    method Action reset();
 endinterface: LUTRAM_MULTI_READ
 
 
@@ -287,10 +312,14 @@ import "BVI" LUTRAMUDualPort = module mkLUTRAMUDualPort
 
     method D_OUT_1 sub(ADDR_1);
     method upd(ADDR_IN, D_IN) enable(WE);
+    method reset() enable (USER_RST);
 
     schedule upd C upd;
     schedule sub C sub;
     schedule upd CF sub;
+
+    schedule reset C reset;
+    schedule reset CF (sub, upd);
 endmodule
 
 
@@ -352,6 +381,9 @@ module mkMultiReadLUTRAMU
 
     interface readPorts = portsLocal;
 
+    method Action reset();
+        noAction;
+    endmethod
 endmodule
 
 
@@ -409,6 +441,10 @@ module mkMultiReadLUTRAMWith#(function t_DATA initfunc(t_ADDR idx))
 
     interface readPorts = portsLocal;
 
+    method Action reset() if (initialized_m);
+        init_idx <= minBound;
+        initialized_m <= False;
+    endmethod
 endmodule
 
 
