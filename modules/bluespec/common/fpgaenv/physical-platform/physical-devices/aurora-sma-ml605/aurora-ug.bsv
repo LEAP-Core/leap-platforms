@@ -35,14 +35,8 @@ interface AURORA_SINGLE_DEVICE_UG;
     method Bit#(1) txn_out();
     (* always_ready *)
     method Bit#(1) txp_out();
-//	method Action init_clk_p();
-//	method Action init_clk_n();
-(* always_enabled, always_ready *)
-	method Action gtxq_p(Bit#(1) d);
-	(* always_enabled, always_ready *)
-	method Action gtxq_n(Bit#(1) d);
     
-		method Bit#(1) channel_up;
+    method Bit#(1) channel_up;
     method Bit#(1) lane_up;
     method Bit#(1) hard_err;
     method Bit#(1) soft_err;
@@ -55,15 +49,16 @@ interface AURORA_SINGLE_DEVICE_UG;
     method Bit#(32) error_count;
 
 		
-		interface Clock aurora_clk;
-		interface Reset aurora_rst;
-		interface Reset aurora_rst_n;
+    interface Clock aurora_clk;
+    interface Reset aurora_rst;
+    interface Reset aurora_rst_n;
 endinterface
 
 import "BVI" aurora_8b10b_v5_3_example_design = 
-module mkAURORA_SINGLE_UG#(Clock rawClock, Reset rawReset) (AURORA_SINGLE_DEVICE_UG);
+module mkAURORA_SINGLE_UG#(Clock auroraRawClock, Clock rawClock, Reset rawReset) (AURORA_SINGLE_DEVICE_UG);
 
 	input_clock (INIT_CLK) = rawClock;
+	input_clock (GTX_CLK) =  auroraRawClock;
 	input_reset (RESET_N) clocked_by(rawClock) = rawReset;
 
 	default_clock no_clock;
@@ -76,8 +71,6 @@ module mkAURORA_SINGLE_UG#(Clock rawClock, Reset rawReset) (AURORA_SINGLE_DEVICE
 	output_reset aurora_rst(USER_RST_N) clocked_by (aurora_clk);
 	output_reset aurora_rst_n(USER_RST) clocked_by (aurora_clk);
 
-	method gtxq_p(GTXQ0_P) enable((*inhigh*) gtxq_p_en) reset_by(no_reset) clocked_by(no_clock);
-	method gtxq_n(GTXQ0_N) enable((*inhigh*) gtxq_n_en) reset_by(no_reset) clocked_by(no_clock);
 	method rxn_in(RXN) enable((*inhigh*) rx_n_en) reset_by(no_reset) clocked_by(no_clock);
 	method rxp_in(RXP) enable((*inhigh*) rx_p_en) reset_by(no_reset) clocked_by(no_clock);
 	method TXN txn_out() reset_by(no_reset) clocked_by(no_clock);
@@ -97,10 +90,10 @@ module mkAURORA_SINGLE_UG#(Clock rawClock, Reset rawReset) (AURORA_SINGLE_DEVICE
 	method RX_DATA_IN receive() enable((*inhigh*) rx_en) ready(rx_rdy) clocked_by(aurora_clk) reset_by(aurora_rst);
         method underflow(UNDERFLOW,FLITCOUNT,TXCREDIT,RXCREDIT) enable((*inhigh*) underflow_en) clocked_by(aurora_clk) reset_by(aurora_rst);
 
-	schedule (gtxq_p, gtxq_n, rxn_in, rxp_in, txn_out, txp_out, channel_up, lane_up, hard_err, soft_err, cc, rx_count, tx_count, error_count, underflow) CF 
-		(gtxq_p, gtxq_n, rxn_in, rxp_in, txn_out, txp_out, channel_up, lane_up, hard_err, soft_err, cc, rx_count, tx_count, error_count, underflow);
-	schedule (receive) CF (gtxq_p, gtxq_n, rxn_in, rxp_in, txn_out, txp_out, send, channel_up, lane_up, hard_err, soft_err, cc, rx_count, tx_count, error_count, underflow);
-	schedule (send) CF (gtxq_p, gtxq_n, rxn_in, rxp_in, txn_out, txp_out, receive, channel_up, lane_up, hard_err, soft_err, cc, rx_count, tx_count, error_count, underflow);
+	schedule (rxn_in, rxp_in, txn_out, txp_out, channel_up, lane_up, hard_err, soft_err, cc, rx_count, tx_count, error_count, underflow) CF 
+		(rxn_in, rxp_in, txn_out, txp_out, channel_up, lane_up, hard_err, soft_err, cc, rx_count, tx_count, error_count, underflow);
+	schedule (receive) CF (rxn_in, rxp_in, txn_out, txp_out, send, channel_up, lane_up, hard_err, soft_err, cc, rx_count, tx_count, error_count, underflow);
+	schedule (send) CF (rxn_in, rxp_in, txn_out, txp_out, receive, channel_up, lane_up, hard_err, soft_err, cc, rx_count, tx_count, error_count, underflow);
 	schedule (send) C (send);
 	schedule (receive) C (receive);
 

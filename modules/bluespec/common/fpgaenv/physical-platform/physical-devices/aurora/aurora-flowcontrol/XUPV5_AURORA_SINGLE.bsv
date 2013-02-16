@@ -38,8 +38,6 @@ import Vector::*;
 `include "awb/provides/aurora_driver.bsh"
 
 interface AURORA_WIRES;
-	method Action aurora_clk_n((* port="AURORA_GTXQ_IN" *) Bit#(1) clk_n);
-	method Action aurora_clk_p((* port="AURORA_GTXQ_IN" *) Bit#(1) clk_p);
 	method Action rxp_in(Bit#(1) i);
 	method Action rxn_in(Bit#(1) i);
 	method Bit#(1) txp_out();
@@ -343,8 +341,6 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG ug_device) (AURORA_DEVICE);
 
      
     interface AURORA_WIRES wires;
-        method aurora_clk_p = ug_device.gtxq_p;
-        method aurora_clk_n = ug_device.gtxq_n;
 
 	method rxp_in = ug_device.rxp_in;
 	method rxn_in = ug_device.rxn_in;

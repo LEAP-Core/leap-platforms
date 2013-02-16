@@ -15788,3 +15788,51 @@ Directory modules/bluespec/common/fpgaenv/fpga-components
  lutram.v                  Locally Modified          672 
 
 Add reset() method to LUTRAM.
+
+----------
+kfleming    Date: Sat Feb 16 13:24:03 EST 2013  CSN: CSN-leap-platforms-674
+                  Sat Feb 16 18:24:03 UTC 2013
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/ml605/aurora-pcie-dma
+ ml605-v6-pcie-dma.bsv     Locally Modified          673 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-flowcontrol
+ XUPV5_AURORA_SINGLE.bsv   Locally Modified          673 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-driver-simulation
+ aurora-driver-simulation.bsv Locally Modified          673 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora
+ aurora-device-ml605/      Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device-ml605
+ aurora-device-ml605.awb   Locally Added               0 
+ aurora-device-ml605.bsv   Locally Added               0 
+ aurora-device-ml605.bsh   Locally Added               0 
+ ml605_sma_aurora.ucf      Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora-sma-ml605
+ aurora-sma.awb            Locally Modified          673 
+ XUPV5_AURORA_SINGLE_UG.bsv Locally Removed           673 
+ aurora_8b10b_v5_3_example_design.v Locally Modified          673 
+ XUPV5_AURORA_SINGLE.bsv   Locally Removed           673 
+ aurora-ug.bsv             Locally Modified          673 
+ aurora_8b10b_v5_3_example_design.ucf Locally Removed           673 
+
+
+Modified the aurora logic for the ML605.  We now have distinct driver
+and flow control layers which may be instantiated many times per
+platform.  
+
+At the board level, a single AURORA_COMPLEX module
+(e.g. aurora-device-ml605.bsv) instantiates all the aurora drivers,
+enables us to have a vector of aurora interfaces per board.  The board
+level interface also allows us to distribute a shared clock among many
+different gtx blocks.
+
+To extend the interface to new boards, only the AURORA_COMPLEX needs
+to be changed.  For new boards, a new driver needs to be implemented
+targeting that board.  Note that as always Xilinx verilog is buggy and
+may need to be patched.
+

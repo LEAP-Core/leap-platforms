@@ -27,5 +27,5 @@
 %sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3_transceiver_wrapper.v
 %sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3_tx_stream.v
 
-%sources -t UCF -v PRIVATE aurora_8b10b_v5_3_example_design.ucf
+
 

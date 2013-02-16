@@ -1,0 +1,13 @@
+%name Aurora Device Wrapper ML605
+%desc Taps out the various Aurora channels on the ML605.
+
+%provides aurora_device
+%requires aurora_driver
+%requires aurora_flowcontrol
+
+%sources -t BSV -v PUBLIC aurora-device-ml605.bsv
+%sources -t BSH -v PUBLIC aurora-device-ml605.bsh
+%sources -t UCF -v PUBLIC ml605_sma_aurora.ucf
+
+%param NUM_AURORA_IFCS 1 "Number of Aurora Interfaces"
+

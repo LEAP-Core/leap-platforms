@@ -46,8 +46,7 @@ interface AURORA_SINGLE_DEVICE_UG;
     method Bit#(1) soft_err;
     method Bool    cc;
     method Bool    receive_rdy;
-    method Action  underflow(Bool underflow, Bit#(2) flits);
-		
+    method Action   underflow(Bool underflow, Bit#(2) flitcount, Bit#(8) txcredits, Bit#(8) rxcredits);				
 
     method Bit#(32) rx_count;
     method Bit#(32) tx_count;

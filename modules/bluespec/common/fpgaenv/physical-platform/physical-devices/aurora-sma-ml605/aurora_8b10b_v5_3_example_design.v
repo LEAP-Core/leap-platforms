@@ -99,8 +99,7 @@ module aurora_8b10b_v5_3_example_design #
 
 /////////////////////////////////////////
 
-    GTXQ0_P,
-    GTXQ0_N,
+    GTX_CLK,
     // GT I/O
     RXP,
     RXN,
@@ -153,9 +152,7 @@ module aurora_8b10b_v5_3_example_design #
     output [31:0] 	ERROR_COUNT;
    
     // Clocks
-    input              GTXQ0_P;
-    input              GTXQ0_N;
-
+    input              GTX_CLK;
 
     // GT Serial I/O
     input              RXP;
@@ -233,7 +230,9 @@ module aurora_8b10b_v5_3_example_design #
     wire        rst_cc_module_i;
 
     wire    [0:15]     tied_to_gnd_vec_i;
+
 //*********************************Main Body of Code**********************************
+    assign GTXQ0_left_i = GTX_CLK; 
     assign cc_do_i = do_cc_i;
 	// wjun
     assign RESET = RESET_N;
@@ -244,16 +243,6 @@ module aurora_8b10b_v5_3_example_design #
 
     assign lane_up_reduce_i  = &lane_up_i;
     assign rst_cc_module_i   = !lane_up_reduce_i;
-
-//_______________________________Clock Buffers_________________________________
-     IBUFDS_GTXE1 IBUFDS_GTXE1_CLK1
-     (
-         .I(GTXQ0_P),
-         .IB(GTXQ0_N),
-         .CEB(1'b0),
-         .O(GTXQ0_left_i),
-         .ODIV2()
-     );
 
 
     // Instantiate a clock module for clock division.
