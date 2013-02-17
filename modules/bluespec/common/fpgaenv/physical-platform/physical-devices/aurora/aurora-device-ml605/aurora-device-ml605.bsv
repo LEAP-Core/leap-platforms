@@ -45,6 +45,12 @@ interface AURORA_COMPLEX_WIRES;
     interface Put#(Bit#(1)) sma_clk_p;
     (* always_ready, always_enabled *)
     interface Put#(Bit#(1)) sma_clk_n;
+
+    (* always_ready, always_enabled *)
+    interface Put#(Bit#(1)) hpc_clk_p;
+    (* always_ready, always_enabled *)
+    interface Put#(Bit#(1)) hpc_clk_n;
+
     interface Vector#(`NUM_AURORA_IFCS,AURORA_WIRES) wires;
 endinterface 
 
@@ -57,26 +63,41 @@ module mkAURORA_DEVICE (AURORA_COMPLEX);
 
     Vector#(`NUM_AURORA_IFCS,AURORA_DRIVER) ifcDrivers = newVector();
     Vector#(`NUM_AURORA_IFCS,AURORA_WIRES)  ifcWires = newVector();
+    Vector#(`NUM_AURORA_IFCS,Clock)         ifcClocks = newVector();
 
     let clk <- exposeCurrentClock();
     let rst <- exposeCurrentReset();
 
-    // PCIe is driven by a different clock than the raw clock.
-    // The "clocked_by" is pure fiction.  By providing a top-level
-    // Clock type Bluespec is convinced that the put method is clocked
-    // and allows it to be tagged always_enabled.  Without a pseudo-clock,
-    // Bluespec believes the put method is never enabled.
+    // HPC Clock
+    CLOCK_FROM_PUT hpcClockN <- mkClockFromPut(clocked_by clk);
+    CLOCK_FROM_PUT hpcClockP <- mkClockFromPut(clocked_by clk);
+
+    let hpcClock <- mkClockIBUFDS_GTXE1(True, hpcClockP.clock, hpcClockN.clock);
+    
+    ifcClocks = replicate(hpcClock); 
+
+
+    // SMA Clock
     CLOCK_FROM_PUT smaClockN <- mkClockFromPut(clocked_by clk);
     CLOCK_FROM_PUT smaClockP <- mkClockFromPut(clocked_by clk);
 
     let smaClock <- mkClockIBUFDS_GTXE1(True, smaClockP.clock, smaClockN.clock);
 
-    let ug_device <- mkAURORA_SINGLE_UG(smaClock, clk, rst);
+    ifcClocks[0] = smaClock; // fix clock 0
 
-    let auroraFlowcontrol <- mkAURORA_FLOWCONTROL(ug_device);
+    
+    // Now we can instantiate the aurora devices enblock 
 
-    ifcDrivers[0] = auroraFlowcontrol.driver;
-    ifcWires[0]   = auroraFlowcontrol.wires;
+    for(Integer i = 0; i < `NUM_AURORA_IFCS; i = i + 1)
+    begin
+        // Instantiate the driver and flowcontrol
+        let ug_device <- mkAURORA_SINGLE_UG(ifcClocks[i], clk, rst);
+        let auroraFlowcontrol <- mkAURORA_FLOWCONTROL(ug_device);
+
+        ifcDrivers[i] = auroraFlowcontrol.driver;
+        ifcWires[i]   = auroraFlowcontrol.wires;
+    end
+
 
     interface AURORA_COMPLEX_WIRES wires;
 
@@ -89,6 +110,17 @@ module mkAURORA_DEVICE (AURORA_COMPLEX);
         interface Put sma_clk_n;
             method Action put(Bit#(1) clk);
                 smaClockN.clock_wire.put(clk);
+            endmethod
+        endinterface
+        interface Put hpc_clk_p;
+            method Action put(Bit#(1) clk);
+                hpcClockP.clock_wire.put(clk);
+            endmethod
+        endinterface
+
+        interface Put hpc_clk_n;
+            method Action put(Bit#(1) clk);
+                hpcClockN.clock_wire.put(clk);
             endmethod
         endinterface
 

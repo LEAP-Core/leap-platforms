@@ -15836,3 +15836,25 @@ to be changed.  For new boards, a new driver needs to be implemented
 targeting that board.  Note that as always Xilinx verilog is buggy and
 may need to be patched.
 
+
+----------
+kfleming    Date: Sun Feb 17 11:30:18 EST 2013  CSN: CSN-leap-platforms-675
+                  Sun Feb 17 16:30:18 UTC 2013
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device-ml605
+ aurora-device-ml605.awb   Locally Modified          674 
+ aurora-device-ml605.bsv   Locally Modified          674 
+ ml605_sma_aurora.ucf      Locally Modified          674 
+
+
+Changed the ML605 to have four additional Aurora SERDES channels.
+These channels are attached to the pinned out hpc connector.  
+
+Unfortunately, due to clock management issues, we cannot yet make use
+of all of the available SERDES.  Each SERDES appears to require its
+own MMCM if it is to be used individually.  It may be possible to
+relax this constraint, but I am not sure how to do it yet.
+
+Fortunately, the SERDES can be ganged to for a wider, multi-lane
+channel.  In this configuration, they can share a single MMCM.

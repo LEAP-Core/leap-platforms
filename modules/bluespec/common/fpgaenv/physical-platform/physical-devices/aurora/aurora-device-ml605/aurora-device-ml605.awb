@@ -9,5 +9,5 @@
 %sources -t BSH -v PUBLIC aurora-device-ml605.bsh
 %sources -t UCF -v PUBLIC ml605_sma_aurora.ucf
 
-%param NUM_AURORA_IFCS 1 "Number of Aurora Interfaces"
+%param NUM_AURORA_IFCS 5 "Number of Aurora Interfaces"
 
