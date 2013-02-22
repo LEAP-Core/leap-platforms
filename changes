@@ -15858,3 +15858,17 @@ relax this constraint, but I am not sure how to do it yet.
 
 Fortunately, the SERDES can be ganged to for a wider, multi-lane
 channel.  In this configuration, they can share a single MMCM.
+
+----------
+kfleming    Date: Fri Feb 22 13:23:32 EST 2013  CSN: CSN-leap-platforms-676
+                  Fri Feb 22 18:23:32 UTC 2013
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ hardware-fpga-components-virtex6-generic.awb Locally Modified          675 
+ icon-virtex6.bsv          Locally Added               0 
+ ila-virtex6.bsv           Locally Added               0 
+ v6_icon_wrapper.v         Locally Added               0 
+
+
+Wrapped ila and icon modules for use in bluespec. 
