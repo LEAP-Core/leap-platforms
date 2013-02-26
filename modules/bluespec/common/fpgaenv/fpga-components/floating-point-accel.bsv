@@ -173,8 +173,8 @@ module mkUnguardedFPCvtDtoS
     method FP_OUTPUT result();
         FP_OUTPUT res;
         let prim_res = fp.result();
-        // 32-bit single to 64-bit "single-as-double"
-        res.result = {toDoubleExp(prim_res), prim_res[22:0], 29'b0};
+        // 32-bit single stored in low 32 bits
+        res.result = zeroExtend(prim_res);
         res.overflow = fp.overflow();
         res.underflow = fp.underflow();
         res.invalidOp = 0;
@@ -221,8 +221,8 @@ module mkUnguardedFPCvtItoS
     method FP_OUTPUT result();
         FP_OUTPUT res;
         let prim_res = fp.result();
-        // 32-bit single to 64-bit "single-as-double"
-        res.result = {toDoubleExp(prim_res), prim_res[22:0], 29'b0};
+        // 32-bit single stored in low 32 bits
+        res.result = zeroExtend(prim_res);
         res.overflow = 0;
         res.underflow = 0;
         res.invalidOp = 0;
@@ -350,9 +350,10 @@ module mkFPAcceleratorCvtStoD (FP_ACCEL);
 endmodule
 
 
+//
 // Helper function for storing 32-bit singles in 64-bit format.
-
-function Bit#(12) toDoubleExp(Bit#(32) s);
+//
+function Bit#(12) fpSingleInDoubleExp(Bit#(32) s);
 
     Bit#(1) sign = s[31];
     Bit#(1) start = s[30];
@@ -375,9 +376,19 @@ function Bit#(12) toDoubleExp(Bit#(32) s);
 
 endfunction
 
+
+//
+// Single precision stored as double, Alpha-ISA style.
+//
+function Bit#(64) fpSingleInDouble(Bit#(32) s);
+    return {fpSingleInDoubleExp(s), s[22:0], 29'b0};
+endfunction
+
+
+//
 // Helper function for rounding to single precision.
 // Uses IEEE "round to nearest, even wins ties"
-
+//
 function Bit#(32) roundToSingle(Bit#(64) d);
 
     Bit#(1) sign = d[63];
@@ -406,12 +417,4 @@ function Bit#(32) roundToSingle(Bit#(64) d);
     Bit#(32) res = {sign, exp, significand};
     return res;
 
-endfunction
-
-
-//
-// Single precision to double, Alpha-ISA style.
-//
-function Bit#(64) toDouble(Bit#(32) s);
-    return {toDoubleExp(s), s[22:0], 29'b0};
 endfunction

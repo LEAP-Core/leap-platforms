@@ -15872,3 +15872,17 @@ Directory modules/bluespec/common/fpgaenv/fpga-components
 
 
 Wrapped ila and icon modules for use in bluespec. 
+
+----------
+mcadler     Date: Tue Feb 26 07:35:39 EST 2013  CSN: CSN-leap-platforms-677
+                  Tue Feb 26 12:35:39 UTC 2013
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ floating-point-accel.bsv  Locally Modified          676 
+
+Conversion from double to single took the resulting 32 bit single precision
+value and remapped it to be stored as a double, which is what Alpha wants.
+The Alpha pipeline took the remapped value and did the same thing, resulting
+in garbage.  Removed the remapping here, since this code is supposed to
+be ISA neutral.  Double to single now returns data in the low 32 bits.
