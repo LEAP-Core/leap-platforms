@@ -15886,3 +15886,14 @@ value and remapped it to be stored as a double, which is what Alpha wants.
 The Alpha pipeline took the remapped value and did the same thing, resulting
 in garbage.  Removed the remapping here, since this code is supposed to
 be ISA neutral.  Double to single now returns data in the low 32 bits.
+
+----------
+mcadler     Date: Wed Feb 27 09:29:34 EST 2013  CSN: CSN-leap-platforms-678
+                  Wed Feb 27 14:29:34 UTC 2013
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ floating-point-accel.bsv  Locally Modified          677 
+
+- cvtsd now expects float in low 32 bits instead of the Alpha representation.
+- Moved Alpha-specific float to double mapping functions to hasim-alpha.

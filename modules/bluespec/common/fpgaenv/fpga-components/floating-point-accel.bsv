@@ -240,10 +240,7 @@ module mkUnguardedFPCvtStoD
     PRIMITIVE_FP_CVT_S_TO_D fp <- mkPrimitiveFPCvtStoD();
 
     method Action operate(FP_INPUT in);
-        let op = in.operandA;
-        // 64-bit "single" to true single.
-        Bit#(32) true_s = {op[63:62], op[58:29]};
-        fp.operate(true_s);
+        fp.operate(truncate(in.operandA));
     endmethod
 
     method FP_OUTPUT result();
@@ -348,41 +345,6 @@ module mkFPAcceleratorCvtStoD (FP_ACCEL);
     return pipe;
 
 endmodule
-
-
-//
-// Helper function for storing 32-bit singles in 64-bit format.
-//
-function Bit#(12) fpSingleInDoubleExp(Bit#(32) s);
-
-    Bit#(1) sign = s[31];
-    Bit#(1) start = s[30];
-    Bit#(7) rest = s[29:23];
-    Bit#(8) exp = s[30:23];
-    
-    Bit#(11) new_exp;
-
-    case (exp)
-        8'b11111111:   new_exp = 11'b11111111111;
-        8'b00000000:   new_exp = 11'b00000000000;
-        default:
-            if (start == 0)
-                new_exp = {4'b0111, rest};
-            else
-                new_exp = {4'b1000, rest};
-    endcase
-
-    return {sign, new_exp};
-
-endfunction
-
-
-//
-// Single precision stored as double, Alpha-ISA style.
-//
-function Bit#(64) fpSingleInDouble(Bit#(32) s);
-    return {fpSingleInDoubleExp(s), s[22:0], 29'b0};
-endfunction
 
 
 //
