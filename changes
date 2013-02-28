@@ -15897,3 +15897,49 @@ Directory modules/bluespec/common/fpgaenv/fpga-components
 
 - cvtsd now expects float in low 32 bits instead of the Alpha representation.
 - Moved Alpha-specific float to double mapping functions to hasim-alpha.
+
+----------
+kfleming    Date: Thu Feb 28 16:24:12 EST 2013  CSN: CSN-leap-platforms-679
+                  Thu Feb 28 21:24:12 UTC 2013
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-flowcontrol
+ XUPV5_AURORA_SINGLE.bsv   Locally Modified          678 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device-ml605
+ aurora-device-ml605.awb   Locally Modified          678 
+ aurora-device-ml605.bsv   Locally Modified          678 
+ ml605_sma_aurora.ucf      Locally Modified          678 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora-sma-ml605
+ aurora-virtex6-4gbps.awb  Locally Added               0 
+ aurora-virtex6-5gbps.awb  Locally Added               0 
+ aurora-sma.awb            Locally Modified          678 
+ aurora_8b10b_v5_3_example_design.v Locally Modified          678 
+ aurora_8b10b_v5_3_clock_module_4gbps.v Locally Added               0 
+ aurora_8b10b_v5_3_clock_module_5gbps.v Locally Added               0 
+ aurora_8b10b_v5_3_gtx_4gbps.v Locally Added               0 
+ aurora_8b10b_v5_3_gtx_5gbps.v Locally Added               0 
+
+
+1) Added support for several different transceiver throughputs.  
+
+2) Refactored the SERDES flowcontrol layer to support different clock
+ratios by parameter.
+
+3) Simplified some program logic to achieve 200MHz timing closure.  I
+don't think it's likely that we'll be able to get beyond 200MHz, at
+least on the ML605.  
+
+Things that need to be done:
+
+1) Better code factoring.  Currently the aurora device ucf is
+hard-coded for 4gbps.  It would be nice if that were not the case.
+
+2) We're only using the 16-bit interface, and 5gbps, which requires
+that the flow control logic operates at 250MHz, is really not
+acheiveable.  However, Xilinx has a 32-bit interface which might allow
+us to get to 8gbps/lane.  
+
+3) Better area groups.  I took a stab at areagroups, and things seem
+to work, but it needs to be tightened up.

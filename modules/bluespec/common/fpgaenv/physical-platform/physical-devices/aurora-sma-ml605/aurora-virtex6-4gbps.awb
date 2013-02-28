@@ -1,5 +1,5 @@
-%name ML605 Aurora Device, Single Lane, 16-bit, 3.125gbps (SMA)
-%desc ML605 Aurora Device, Single Lane, 16-bit, 3.125gbps (SMA)
+%name ML605 Aurora Device, Single Lane, 16-bit, 4 gbps 
+%desc ML605 Aurora Device, Single Lane, 16-bit, 4 gbps 
 
 %provides aurora_driver
 
@@ -12,10 +12,10 @@
 %sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3_channel_err_detect.v
 %sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3_channel_init_sm.v
 %sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3_chbond_count_dec.v
-%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3_clock_module.v
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3_clock_module_4gbps.v
 %sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3_err_detect.v
 %sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3_global_logic.v
-%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3_gtx.v
+%sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3_gtx_4gbps.v
 %sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3_hotplug.v
 %sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3_idle_and_ver_gen.v
 %sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3_lane_init_sm.v

@@ -49,32 +49,32 @@
 #################################################################################
 ## UCF generated for xc6vlx240t-ff1156-1 device
 # 125.0MHz GTX Reference clock constraint 
-NET "m_llpi_phys_plat_aurora_device_smaClock_O" TNM_NET = GT_REFCLK_SMA; 
-NET "m_llpi_phys_plat_aurora_device_hpcClock_O" TNM_NET = GT_REFCLK_HPC; 
+NET "m_llpi_phys_plat_aurora_device/smaClock_O" TNM_NET = GT_REFCLK_SMA; 
+NET "m_llpi_phys_plat_aurora_device/hpcClock_O" TNM_NET = GT_REFCLK_HPC; 
 
 TIMESPEC TS_SMA_GTXQ0_LEFT_I = PERIOD "GT_REFCLK_SMA" 125.0 MHz HIGH 50%;
 TIMESPEC TS_HPC_GTXQ0_LEFT_I = PERIOD "GT_REFCLK_HPC" 125.0 MHz HIGH 50%;
 
 # User Clock Constraint: Value is selected based on the line rate (3.125 Gbps) and lane width (2-Byte)
-NET "m_llpi_phys_plat_aurora_device_ug_device/USER_CLK" TNM_NET = USER_CLK_SMA;
-NET "m_llpi_phys_plat_aurora_device_ug_device_1/USER_CLK" TNM_NET = USER_CLK_HPC1;
-NET "m_llpi_phys_plat_aurora_device_ug_device_2/USER_CLK" TNM_NET = USER_CLK_HPC2;
-NET "m_llpi_phys_plat_aurora_device_ug_device_3/USER_CLK" TNM_NET = USER_CLK_HPC3;
-NET "m_llpi_phys_plat_aurora_device_ug_device_4/USER_CLK" TNM_NET = USER_CLK_HPC4;
-NET "m_llpi_phys_plat_aurora_device_ug_device_5/USER_CLK" TNM_NET = USER_CLK_HPC5;
-NET "m_llpi_phys_plat_aurora_device_ug_device_6/USER_CLK" TNM_NET = USER_CLK_HPC6;
-NET "m_llpi_phys_plat_aurora_device_ug_device_7/USER_CLK" TNM_NET = USER_CLK_HPC7;
-NET "m_llpi_phys_plat_aurora_device_ug_device_8/USER_CLK" TNM_NET = USER_CLK_HPC8;
+NET "m_llpi_phys_plat_aurora_device/ug_device/USER_CLK" TNM_NET = USER_CLK_SMA;
+NET "m_llpi_phys_plat_aurora_device/ug_device_1/USER_CLK" TNM_NET = USER_CLK_HPC1;
+NET "m_llpi_phys_plat_aurora_device/ug_device_2/USER_CLK" TNM_NET = USER_CLK_HPC2;
+NET "m_llpi_phys_plat_aurora_device/ug_device_3/USER_CLK" TNM_NET = USER_CLK_HPC3;
+NET "m_llpi_phys_plat_aurora_device/ug_device_4/USER_CLK" TNM_NET = USER_CLK_HPC4;
+#NET "m_llpi_phys_plat_aurora_device/ug_device_5/USER_CLK" TNM_NET = USER_CLK_HPC5;
+#NET "m_llpi_phys_plat_aurora_device/ug_device_6/USER_CLK" TNM_NET = USER_CLK_HPC6;
+#NET "m_llpi_phys_plat_aurora_device/ug_device_7/USER_CLK" TNM_NET = USER_CLK_HPC7;
+#NET "m_llpi_phys_plat_aurora_device/ug_device_8/USER_CLK" TNM_NET = USER_CLK_HPC8;
 
-TIMESPEC TS_USER_CLK_SMA_I = PERIOD "USER_CLK_SMA" 156.25 MHz HIGH 50%;
-TIMESPEC TS_USER_CLK_HPC1_I = PERIOD "USER_CLK_HPC1" 156.25 MHz HIGH 50%;
-TIMESPEC TS_USER_CLK_HPC2_I = PERIOD "USER_CLK_HPC2" 156.25 MHz HIGH 50%;
-TIMESPEC TS_USER_CLK_HPC3_I = PERIOD "USER_CLK_HPC3" 156.25 MHz HIGH 50%;
-TIMESPEC TS_USER_CLK_HPC4_I = PERIOD "USER_CLK_HPC4" 156.25 MHz HIGH 50%;
-TIMESPEC TS_USER_CLK_HPC5_I = PERIOD "USER_CLK_HPC5" 156.25 MHz HIGH 50%;
-TIMESPEC TS_USER_CLK_HPC6_I = PERIOD "USER_CLK_HPC6" 156.25 MHz HIGH 50%;
-TIMESPEC TS_USER_CLK_HPC7_I = PERIOD "USER_CLK_HPC7" 156.25 MHz HIGH 50%;
-TIMESPEC TS_USER_CLK_HPC8_I = PERIOD "USER_CLK_HPC8" 156.25 MHz HIGH 50%;
+TIMESPEC TS_USER_CLK_SMA_I = PERIOD "USER_CLK_SMA" 200 MHz HIGH 50%;
+TIMESPEC TS_USER_CLK_HPC1_I = PERIOD "USER_CLK_HPC1" 200 MHz HIGH 50%;
+TIMESPEC TS_USER_CLK_HPC2_I = PERIOD "USER_CLK_HPC2" 200 MHz HIGH 50%;
+TIMESPEC TS_USER_CLK_HPC3_I = PERIOD "USER_CLK_HPC3" 200 MHz HIGH 50%;
+TIMESPEC TS_USER_CLK_HPC4_I = PERIOD "USER_CLK_HPC4" 200 MHz HIGH 50%;
+#TIMESPEC TS_USER_CLK_HPC5_I = PERIOD "USER_CLK_HPC5" 200 MHz HIGH 50%;
+#TIMESPEC TS_USER_CLK_HPC6_I = PERIOD "USER_CLK_HPC6" 200 MHz HIGH 50%;
+#TIMESPEC TS_USER_CLK_HPC7_I = PERIOD "USER_CLK_HPC7" 200 MHz HIGH 50%;
+#TIMESPEC TS_USER_CLK_HPC8_I = PERIOD "USER_CLK_HPC8" 200 MHz HIGH 50%;
 
 NET  auroraWires_sma_clk_n_put LOC = H5;
 NET  auroraWires_sma_clk_p_put LOC = H6;
@@ -84,7 +84,7 @@ NET  auroraWires_hpc_clk_p_put LOC = AD6;
 
 
 # 200 MHz board Clock Constraint  
-NET "m_llpi_phys_plat_aurora_device_ug_device/INIT_CLK" TNM_NET = INIT_CLK;
+NET "m_llpi_phys_plat_aurora_device/ug_device/INIT_CLK" TNM_NET = INIT_CLK;
 #TIMESPEC TS_INIT_CLK = PERIOD "INIT_CLK_SMA" 5 ns HIGH 50%;
 
 ###### No cross clock domain analysis. Domains are not related ############## 
@@ -93,19 +93,41 @@ TIMESPEC "TS_TIG1" = FROM "INIT_CLK" TO "USER_CLK_HPC1" TIG;
 TIMESPEC "TS_TIG2" = FROM "INIT_CLK" TO "USER_CLK_HPC2" TIG; 
 TIMESPEC "TS_TIG3" = FROM "INIT_CLK" TO "USER_CLK_HPC3" TIG; 
 TIMESPEC "TS_TIG4" = FROM "INIT_CLK" TO "USER_CLK_HPC4" TIG; 
-TIMESPEC "TS_TIG5" = FROM "INIT_CLK" TO "USER_CLK_HPC5" TIG; 
-TIMESPEC "TS_TIG6" = FROM "INIT_CLK" TO "USER_CLK_HPC6" TIG; 
-TIMESPEC "TS_TIG7" = FROM "INIT_CLK" TO "USER_CLK_HPC7" TIG; 
-TIMESPEC "TS_TIG8" = FROM "INIT_CLK" TO "USER_CLK_HPC8" TIG; 
+#TIMESPEC "TS_TIG5" = FROM "INIT_CLK" TO "USER_CLK_HPC5" TIG; 
+#TIMESPEC "TS_TIG6" = FROM "INIT_CLK" TO "USER_CLK_HPC6" TIG; 
+#TIMESPEC "TS_TIG7" = FROM "INIT_CLK" TO "USER_CLK_HPC7" TIG; 
+#TIMESPEC "TS_TIG8" = FROM "INIT_CLK" TO "USER_CLK_HPC8" TIG; 
 
 ############################### GT Location ###################################
 
-INST m_llpi_phys_plat_aurora_device_ug_device/aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y18; # sma cables
-INST m_llpi_phys_plat_aurora_device_ug_device_1/aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y0;
-INST m_llpi_phys_plat_aurora_device_ug_device_2/aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y1;
-INST m_llpi_phys_plat_aurora_device_ug_device_3/aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y4;
-INST m_llpi_phys_plat_aurora_device_ug_device_4/aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y5;
+INST m_llpi_phys_plat_aurora_device/ug_device/aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y18; # sma cables
+INST m_llpi_phys_plat_aurora_device/ug_device_1/aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y0;
+INST m_llpi_phys_plat_aurora_device/ug_device_2/aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y1;
+INST m_llpi_phys_plat_aurora_device/ug_device_3/aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y4;
+INST m_llpi_phys_plat_aurora_device/ug_device_4/aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y5;
 #INST m_llpi_phys_plat_aurora_device_ug_device_5/aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y4;
 #INST m_llpi_phys_plat_aurora_device_ug_device_6/aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y5;
 #INST m_llpi_phys_plat_aurora_device_ug_device_7/aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y6;
 #INST m_llpi_phys_plat_aurora_device_ug_device_8/aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y7;
+
+INST        "m_llpi_phys_plat_aurora_device/ug_device/*"            AREA_GROUP = "AG_ug_device";
+INST        "m_llpi_phys_plat_aurora_device/auroraFlowcontrol_*"    AREA_GROUP = "AG_ug_device";
+AREA_GROUP "AG_ug_device"                                           RANGE =  SLICE_X104Y180:SLICE_X159Y199;
+
+INST       "m_llpi_phys_plat_aurora_device/ug_device_1/*"            AREA_GROUP = "AG_ug_device_1";
+INST       "m_llpi_phys_plat_aurora_device/auroraFlowcontrol_1_*"    AREA_GROUP = "AG_ug_device_1";
+AREA_GROUP "AG_ug_device_1"                                          RANGE =  SLICE_X92Y0:SLICE_X159Y10;
+
+INST       "m_llpi_phys_plat_aurora_device/ug_device_2/*"            AREA_GROUP = "AG_ug_device_2";
+INST       "m_llpi_phys_plat_aurora_device/auroraFlowcontrol_2_*"    AREA_GROUP = "AG_ug_device_2";
+AREA_GROUP "AG_ug_device_2"                                          RANGE =   SLICE_X92Y11:SLICE_X159Y19;
+
+INST       "m_llpi_phys_plat_aurora_device/ug_device_3/*"            AREA_GROUP = "AG_ug_device_3";
+INST       "m_llpi_phys_plat_aurora_device/auroraFlowcontrol_3_*"    AREA_GROUP = "AG_ug_device_3";
+AREA_GROUP "AG_ug_device_3"                                          RANGE =   SLICE_X92Y40:SLICE_X115Y58;
+
+
+INST       "m_llpi_phys_plat_aurora_device/ug_device_4/*"            AREA_GROUP = "AG_ug_device_4";
+INST       "m_llpi_phys_plat_aurora_device/auroraFlowcontrol_4_*"    AREA_GROUP = "AG_ug_device_4";
+AREA_GROUP "AG_ug_device_4"                                          RANGE =   SLICE_X92Y20:SLICE_X159Y30;
+

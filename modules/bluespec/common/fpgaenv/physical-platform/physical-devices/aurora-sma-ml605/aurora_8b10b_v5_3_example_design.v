@@ -271,42 +271,6 @@ module aurora_8b10b_v5_3_example_design #
     reg  [31:0] tx_count_next;
     reg  [31:0] error_count_next;
 
-    always @(posedge USER_CLK)
-    begin
-	rx_count_next = RX_COUNT;
-        tx_count_next = TX_COUNT;
-        error_count_next = ERROR_COUNT;
- 
-	if(system_reset_i)
-	begin
-             rx_count_next = 0;
-	     tx_count_next = 0;
-             error_count_next = 0;
-	end
-	else
-	begin
-            if(tx_en && !tx_rdy) 
-            begin
-               error_count_next = ERROR_COUNT + 1;	       
-            end	
-     
-            if(tx_en && tx_rdy)
-	    begin
-                tx_count_next = TX_COUNT + 1; 
-	    end
-	   
-	    if(rx_rdy)
-	    begin
-                rx_count_next = RX_COUNT + 1; 
-	    end
-	end // else: !if(system_reset_i)
-       
-	RX_COUNT <= rx_count_next;
-	TX_COUNT <= tx_count_next;
-        ERROR_COUNT <= error_count_next;
-
-    end
-
 
 
 //____________________________Tie off unused signals_______________________________
@@ -397,17 +361,32 @@ module aurora_8b10b_v5_3_example_design #
         .GT_RESET_OUT(gt_reset_i)
     );
 
+    reg [15:0] RX_DATA_IN_delay;
+    reg        rx_rdy_delay;
+
+
+
     // wjun
     assign tx_d_i = TX_DATA_OUT;
-    assign RX_DATA_IN = rx_d_i;
-    assign tx_src_rdy_n_i = !(tx_rdy && tx_en && channel_up_i && (!system_reset_i));
-    assign tx_rdy = (!tx_dst_rdy_n_i) && channel_up_i && (!system_reset_i) && (!do_cc_i) && (!warn_cc_i) ;
+    assign RX_DATA_IN = RX_DATA_IN_delay;
+    assign rx_rdy = rx_rdy_delay;
+   
+    assign tx_src_rdy_n_i = !(tx_en);
+    assign tx_rdy = (!tx_dst_rdy_n_i) && (!do_cc_i);
     wire   rx_reset_c;
     wire   rx_data_valid_c;
     assign rx_reset_c = system_reset_i || !channel_up_i;
     assign  rx_data_valid_c    =   !rx_src_rdy_n_i;
-    assign rx_rdy = rx_data_valid_c && !rx_reset_c;
 
+    // Pipeline rx_rdy to improve pipeline performance
+    // we get away without having defaults due to the high
+    // level properties of the driver (it waits for man do_CC before data may be received)
+    always@(posedge user_clk_i)
+    begin
+        rx_rdy_delay <= rx_data_valid_c && !rx_reset_c;
+        RX_DATA_IN_delay <= rx_d_i;
+    end
+   
 /*
     //Connect a frame generator to the TX User interface
     aurora_8b10b_v5_3_FRAME_GEN frame_gen_i
@@ -443,6 +422,45 @@ generate
 if (USE_CHIPSCOPE==1)
 begin : chipscope1
 
+
+    always @(posedge USER_CLK)
+    begin
+	rx_count_next = RX_COUNT;
+        tx_count_next = TX_COUNT;
+        error_count_next = ERROR_COUNT;
+ 
+	if(system_reset_i)
+	begin
+             rx_count_next = 0;
+	     tx_count_next = 0;
+             error_count_next = 0;
+	end
+	else
+	begin
+            if(tx_en && !tx_rdy) 
+            begin
+               error_count_next = ERROR_COUNT + 1;	       
+            end	
+     
+            if(tx_en && tx_rdy)
+	    begin
+                tx_count_next = TX_COUNT + 1; 
+	    end
+	   
+	    if(rx_rdy)
+	    begin
+                rx_count_next = RX_COUNT + 1; 
+	    end
+	end // else: !if(system_reset_i)
+       
+	RX_COUNT <= rx_count_next;
+	TX_COUNT <= tx_count_next;
+        ERROR_COUNT <= error_count_next;
+
+    end
+
+   
+   
 reg [63:0] sync_reg;
 
 always@(posedge user_clk_i)

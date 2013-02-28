@@ -59,6 +59,7 @@ interface AURORA_COMPLEX;
    interface AURORA_COMPLEX_WIRES  wires;
 endinterface
 
+(*synthesize*)
 module mkAURORA_DEVICE (AURORA_COMPLEX);
 
     Vector#(`NUM_AURORA_IFCS,AURORA_DRIVER) ifcDrivers = newVector();
