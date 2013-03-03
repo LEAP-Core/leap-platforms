@@ -15943,3 +15943,18 @@ us to get to 8gbps/lane.
 
 3) Better area groups.  I took a stab at areagroups, and things seem
 to work, but it needs to be tightened up.
+
+----------
+mcadler     Date: Sun Mar  3 18:48:30 EST 2013  CSN: CSN-leap-platforms-680
+                  Sun Mar  3 23:48:30 UTC 2013
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ lutram.bsv                Locally Modified          679 
+
+Add a new LUTRAM that is initialized by a Get interface passed in as a
+function.  With this it is easy to initialize a LUTRAM from software by
+tying an RRR stream (morphed into a Get) directly to a RAM.  When we
+finally drop RRR and replace it with soft connections toGet() will be
+defined automatically, making initialization from software a one-line
+declaration.

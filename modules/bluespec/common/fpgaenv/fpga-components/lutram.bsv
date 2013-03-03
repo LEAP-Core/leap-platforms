@@ -32,6 +32,7 @@
 
 import RegFile::*;
 import Vector::*;
+import GetPut::*;
 
 interface LUTRAM#(type t_ADDR, type t_DATA);
     method Action upd(t_ADDR addr, t_DATA d);
@@ -190,8 +191,84 @@ module mkLUTRAMWith#(function t_DATA initfunc(t_ADDR idx))
     //
 
     method Action upd(t_ADDR addr, t_DATA d) if (initialized_m);
-        // The Bluesec scheduler is having a really hard time with the conflicting updates.
-        // In order to make its life easier we use a wire and clearly ME rules.
+        // The Bluesec scheduler is having a really hard time with the
+        // conflicting updates.  In order to make its life easier we use
+        // a wire and clearly ME rules.
+        writeW <= tuple2(addr, d);
+    endmethod
+
+    method t_DATA sub(t_ADDR addr) if (initialized_m);
+        return mem.sub(addr);
+    endmethod
+
+    method Action reset() if (initialized_m);
+        triggerReset.send();
+    endmethod
+endmodule
+
+
+//
+// LUTRAM Initialized with a Get source.  If the LUTRAM reset() is triggered
+// the Get source must provide the full initialization again.
+//
+// The Bool passed at the end of the initFunc, if true, indicates
+// initialization is complete even if all values have not been written.
+//
+// This is identical to mkLUTRAMWith except for initialization.
+//
+module mkLUTRAMWithGet#(function Get#(Tuple2#(t_DATA, Bool)) initFunc)
+    // interface:
+        (LUTRAM#(t_ADDR, t_DATA))
+    provisos(Bits#(t_DATA, t_DATA_SZ),
+             Bits#(t_ADDR, t_ADDR_SZ),
+             Bounded#(t_ADDR));
+
+    LUTRAM#(t_ADDR, t_DATA) mem <- mkLUTRAMU();
+
+    //
+    // Initialize storage
+    //
+
+    Reg#(Bool) initialized_m <- mkReg(False);
+    Reg#(t_ADDR) init_idx <- mkReg(minBound);
+    Wire#(Tuple2#(t_ADDR, t_DATA)) writeW <- mkWire();
+    PulseWire triggerReset <- mkPulseWire();
+
+    rule initializing (! initialized_m && ! triggerReset);
+        match {.v, .done} <- initFunc.get;
+        mem.upd(init_idx, v);
+
+        // Hack to avoid needing Eq proviso for comparison
+        t_ADDR max = maxBound;
+        initialized_m <= done || (pack(init_idx) == pack(max));
+
+        // Hack to avoid needing Arith proviso
+        init_idx <= unpack(pack(init_idx) + 1);
+    endrule
+
+    (* fire_when_enabled, no_implicit_conditions *)
+    (* descending_urgency = "newReset, initializing" *)
+    rule newReset (triggerReset);
+        init_idx <= minBound;
+        initialized_m <= False;
+    endrule
+
+    
+    (* fire_when_enabled *)
+    rule doWrite (initialized_m && ! triggerReset);
+        match {.addr, .d} = writeW;
+        mem.upd(addr, d);
+    endrule
+
+
+    //
+    // Access methods
+    //
+
+    method Action upd(t_ADDR addr, t_DATA d) if (initialized_m);
+        // The Bluesec scheduler is having a really hard time with the
+        // conflicting updates.  In order to make its life easier we use
+        // a wire and clearly ME rules.
         writeW <= tuple2(addr, d);
     endmethod
 
@@ -392,7 +469,7 @@ endmodule
 //
 // LUTRAM Initialized with a function :: idx -> data
 //
-module mkMultiReadLUTRAMWith#(function t_DATA initfunc(t_ADDR idx))
+module mkMultiReadLUTRAMWith#(function t_DATA initFunc(t_ADDR idx))
     // interface:
     (LUTRAM_MULTI_READ#(n_READERS, t_ADDR, t_DATA))
     provisos(Bits#(t_DATA, t_DATA_SZ),
@@ -409,7 +486,7 @@ module mkMultiReadLUTRAMWith#(function t_DATA initfunc(t_ADDR idx))
     Reg#(t_ADDR) init_idx <- mkReg(minBound);
 
     rule initializing (! initialized_m);
-        mem.upd(init_idx, initfunc(init_idx));
+        mem.upd(init_idx, initFunc(init_idx));
 
         // Hack to avoid needing Eq proviso for comparison
         t_ADDR max = maxBound;
