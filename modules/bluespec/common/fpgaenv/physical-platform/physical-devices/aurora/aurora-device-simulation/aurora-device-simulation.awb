@@ -9,5 +9,6 @@
 %sources -t BSV -v PUBLIC aurora-device-simulation.bsv
 %sources -t BSH -v PUBLIC aurora-device-simulation.bsh
 
+%param NUM_AURORA_IFCS 1 "Number of Aurora Interfaces"
 
 

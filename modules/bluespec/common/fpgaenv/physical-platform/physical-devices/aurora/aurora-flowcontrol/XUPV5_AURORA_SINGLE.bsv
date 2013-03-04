@@ -48,19 +48,17 @@ interface AURORA_WIRES;
 	interface Clock model_clk;
 endinterface
 
-typedef 6 InterfaceWords;
-typedef TSub#(TMul#(InterfaceWords,16),1) InterfaceWidth;
-typedef TMul#(InterfaceWords,16)          MarshalWidth;
+
 
 // guarded interface
 // Notice that we do a N to 1 vectorization here.  This is to exploit the high bandwidth of the link relative to our
 // clock frequency.  Ideally, we would choose vectorization intelligently based on MODEL_CLOCK_FREQ and the link
 // bandwidth, but I don't have time for that now, and making it a constant gets most of the performance. 
-interface AURORA_DRIVER;
-    method Action                 write(Bit#(InterfaceWidth) tx_word); // txusrclk 
+interface AURORA_DRIVER#(numeric type interface_width);
+    method Action                 write(Bit#(interface_width) tx_word); // txusrclk 
     method Bool                   write_ready(); // txusrclk 
     method Action                 deq(); // rxusrclk0     
-    method Bit#(InterfaceWidth)   first(); // rxusrclk0     
+    method Bit#(interface_width)   first(); // rxusrclk0     
 
 
     // Debugging interface
@@ -79,15 +77,13 @@ interface AURORA_DRIVER;
     method Bit#(16) data_drops;
     method Bit#(32) tx_fc;
     method Bit#(32) rx_fc;
-    interface Get#(Bit#(16)) rxDebug; 
-    interface Get#(Bit#(16)) txDebug; 
 
 endinterface
 
-interface AURORA_DEVICE;
+interface AURORA_DEVICE#(numeric type width);
     (* prefix = "" *)      
     interface AURORA_WIRES wires;
-    interface AURORA_DRIVER driver;
+    interface AURORA_DRIVER#(width) driver;
 endinterface      
 
 // Parameterizations for the aurora flow control interface.
@@ -95,13 +91,23 @@ endinterface
 // Also the width of the interface should automatically adjust based on 
 // clock ratios.
 
-typedef TMul#(256,InterfaceWords) BufferSize;
-typedef TDiv#(BufferSize,InterfaceWords) AllCredits;
-typedef TDiv#(AllCredits,2) HalfCredits;
-typedef TMul#(3,TDiv#(AllCredits,4)) ThreeFourthsCredits;
-
-
-module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG ug_device) (AURORA_DEVICE);
+module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ug_device, NumTypeParam#(interface_words) interfaceWordsParam) 
+    (AURORA_DEVICE#(interface_width))
+    provisos(Mul#(width,interface_words,marshal_width),
+             NumAlias#(128,total_credits),
+             Mul#(total_credits,interface_words,buffer_size),
+             Mul#(2,half_credits,total_credits), 
+             Mul#(4,quarter_credits,total_credits), 
+             Mul#(3,quarter_credits,three_quarters_credits), 
+             Add#(interface_width,1,marshal_width),
+             // The following provisos are produced by the header encoding protocol
+             Add#(2, width_extra, width),
+             Add#(credit_extra_extra_width, TAdd#(1,TLog#(total_credits)), width_extra),
+             Add#(credit_extra_width, TAdd#(1,TLog#(total_credits)), width), // comes from flow control
+             Add#(2, marshal_width_extra, marshal_width),
+             //Log#(interface_words, 1),
+             //Add#(magic_string_extra, 48, TMul#(width, TSub#(interface_words, 1))), // comes from the deadbeef identifier strings
+             Add#(width, TMul#(width,TSub#(interface_words,1)), marshal_width));
 
     let modelClock <- exposeCurrentClock();
 
@@ -113,19 +119,19 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG ug_device) (AURORA_DEVICE);
     let isAuroraInRst <- isResetAsserted(clocked_by controllerClk, reset_by controllerRst);
 
 
-    Bit#(16) handshakeWords[4] = {'hdead,'hbeef,'hcafe,'hfeed};
+    Bit#(width) handshakeWords[4] = {'hdeaddaed,'hbeeffeeb,'hcafeefac,'hfeeddeef};
 
-    Reg#(Bit#(10)) ccCycles  <- mkReg(maxBound, clocked_by(controllerClk), reset_by(controllerRst)); 
+    Reg#(Bit#(2)) ccCycles  <- mkReg(maxBound, clocked_by(controllerClk), reset_by(controllerRst)); 
     Reg#(Bit#(2)) handshakeRX <- mkReg(0, clocked_by(controllerClk), reset_by(controllerRst)); 
-    Reg#(Bit#(TAdd#(1,TLog#(InterfaceWords)))) flitCount <-  mkReg(0, clocked_by(controllerClk), reset_by(controllerRst));    
+    Reg#(Bit#(TAdd#(1,TLog#(interface_words)))) flitCount <-  mkReg(0, clocked_by(controllerClk), reset_by(controllerRst));    
     Reg#(Bool)    dropData <-  mkReg(True, clocked_by(controllerClk), reset_by(controllerRst)); 
     Reg#(Bit#(2)) handshakeTX <- mkReg(0, clocked_by(controllerClk), reset_by(controllerRst)); 
-    COUNTER#(TAdd#(1,TLog#(AllCredits))) txCredits   <- mkLCounter(fromInteger(valueof(AllCredits)), clocked_by(controllerClk), reset_by(controllerRst)); 
-    CrossingReg#(Bit#(16)) txCreditsCross <- mkNullCrossingReg(modelClock, fromInteger(valueof(AllCredits)), clocked_by controllerClk, reset_by controllerRst);
+    COUNTER#(TAdd#(1,TLog#(total_credits))) txCredits   <- mkLCounter(fromInteger(valueof(total_credits)), clocked_by(controllerClk), reset_by(controllerRst)); 
+    CrossingReg#(Bit#(16)) txCreditsCross <- mkNullCrossingReg(modelClock, fromInteger(valueof(total_credits)), clocked_by controllerClk, reset_by controllerRst);
     CrossingReg#(Bool) creditUnderflow <- mkNullCrossingReg(modelClock, False, clocked_by controllerClk, reset_by controllerRst);
 
 
-    COUNTER#(TAdd#(1,TLog#(AllCredits))) rxCredits   <- mkLCounter(0, clocked_by(controllerClk), reset_by(controllerRst)); 
+    COUNTER#(TAdd#(1,TLog#(total_credits))) rxCredits   <- mkLCounter(0, clocked_by(controllerClk), reset_by(controllerRst)); 
     CrossingReg#(Bit#(16)) rxCreditsCross <- mkNullCrossingReg(modelClock, 0, clocked_by controllerClk, reset_by controllerRst);
     CrossingReg#(Bit#(16)) dataDrops <- mkNullCrossingReg(modelClock, 0, clocked_by controllerClk, reset_by controllerRst);
     CrossingReg#(Bit#(32)) rxFlowcontrol <- mkNullCrossingReg(modelClock, 0, clocked_by controllerClk, reset_by controllerRst);
@@ -140,22 +146,18 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG ug_device) (AURORA_DEVICE);
     Reg#(Bool) handshakeTXDone <- mkReg(False, clocked_by(controllerClk), reset_by(controllerRst)); 
     Reg#(Bool) ccLast <- mkReg(False, clocked_by(controllerClk), reset_by(controllerRst)); 
 
-    SyncFIFOCountIfc#(Bit#(InterfaceWidth),8) serdes_rxfifo <- mkSyncFIFOCount( controllerClk, controllerRst, clk);
-    SyncFIFOCountIfc#(Bit#(InterfaceWidth),8) serdes_txfifo <- mkSyncFIFOCount( clk, rst, controllerClk);
+    SyncFIFOCountIfc#(Bit#(interface_width),8) serdes_rxfifo <- mkSyncFIFOCount( controllerClk, controllerRst, clk);
+    SyncFIFOCountIfc#(Bit#(interface_width),8) serdes_txfifo <- mkSyncFIFOCount( clk, rst, controllerClk);
 
     
     // need to make sure that flow control can come through
-    let serdes_infifo <- mkSizedBRAMFIFOF(valueof(BufferSize), clocked_by controllerClk, reset_by controllerRst);
+    let serdes_infifo <- mkSizedBRAMFIFOF(valueof(buffer_size), clocked_by controllerClk, reset_by controllerRst);
 
 
     // Clock compensation occurs periodically in the phy.  We need to
     // allow it to occur at least once before we attempt to send data.
 
-    rule updateCCLast;
-        ccLast <= ug_device.cc;
-    endrule
-
-    rule tickCC(ccCycles > 0 && ug_device.cc  && unpack(ug_device.channel_up) && !ccLast);
+    rule tickCC(ccCycles > 0 && ug_device.cc  && unpack(ug_device.channel_up));
         ccCycles <= ccCycles - 1;
         $display("Ticking CC  %d", ccCycles);
     endrule
@@ -205,7 +207,7 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG ug_device) (AURORA_DEVICE);
     // 11 - flow control credit
     // 10 - hearbeat
 
-    MARSHALLER#(Bit#(16), Bit#(MarshalWidth)) marshaller <- mkSimpleMarshallerHighToLow(clocked_by(controllerClk), 
+    MARSHALLER#(Bit#(width), Bit#(marshal_width)) marshaller <- mkSimpleMarshallerHighToLow(clocked_by(controllerClk), 
                                                                               reset_by(controllerRst));
     Reg#(Bit#(11)) heartbeat  <- mkReg(0, clocked_by(controllerClk), reset_by(controllerRst));
 
@@ -214,16 +216,16 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG ug_device) (AURORA_DEVICE);
     endrule
 
     rule txHeartbeat (handshakeTXDone && heartbeat == 0);
-        marshaller.enq({2'b10,'hc001f00dd00d});
+        marshaller.enq({2'b10,'h44444444});
     endrule
 
     PulseWire transmittingCredits <- mkPulseWire(clocked_by(controllerClk), reset_by(controllerRst));
     PulseWire updatingCredits <- mkPulseWire(clocked_by(controllerClk), reset_by(controllerRst));
 
-    rule txFC(handshakeTXDone && ((rxCredits.value() > fromInteger(valueof(HalfCredits)) && (!serdes_txfifo.dNotEmpty || txCredits.value() == 0)) || rxCredits.value() > fromInteger(valueof(ThreeFourthsCredits))));
+    rule txFC(handshakeTXDone && ((rxCredits.value() > fromInteger(valueof(half_credits)) && (!serdes_txfifo.dNotEmpty || txCredits.value() == 0)) || rxCredits.value() > fromInteger(valueof(three_quarters_credits))));
         rxCredits.setC(0);
-        Bit#(16) creditWord = {2'b11,zeroExtend(rxCredits.value())};
-        marshaller.enq({creditWord,zeroExtend(48'hdeadbeefcafe)});
+        Bit#(width) creditWord = {2'b11,zeroExtend(rxCredits.value())};
+        marshaller.enq({creditWord,'hc001f00dd00d});
         $display("TX Sends Flowcontrol %h", rxCredits.value());
         txFlowcontrol <= txFlowcontrol + 1;
         transmittingCredits.send();
@@ -254,10 +256,10 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG ug_device) (AURORA_DEVICE);
     // The payload of the 1X message will be dropped - only the first flit contains useful information.
     // Credit updates are decoupled from the main processing pipeline by way of a FIFO.
 
-    DEMARSHALLER#(Bit#(16), Bit#(MarshalWidth)) demarshaller <- mkSimpleDemarshallerHighToLow(clocked_by(controllerClk), 
+    DEMARSHALLER#(Bit#(width), Bit#(marshal_width)) demarshaller <- mkSimpleDemarshallerHighToLow(clocked_by(controllerClk), 
                                                                                     reset_by(controllerRst));
 
-    FIFO#(Bit#(TAdd#(1,TLog#(AllCredits)))) creditFIFO <- mkSizedFIFO(4,clocked_by(controllerClk),
+    FIFO#(Bit#(TAdd#(1,TLog#(total_credits)))) creditFIFO <- mkSizedFIFO(4,clocked_by(controllerClk),
                                                                                  reset_by(controllerRst));
  
 
@@ -266,7 +268,7 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG ug_device) (AURORA_DEVICE);
         let data <- ug_device.receive;
         rxFires.send();
 
-        if(flitCount + 1 == fromInteger(valueof(InterfaceWords)))
+        if(flitCount + 1 == fromInteger(valueof(interface_words)))
         begin
             flitCount <= 0;
         end
@@ -277,7 +279,7 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG ug_device) (AURORA_DEVICE);
 
         if(flitCount == 0)
         begin
-            if(data[15:14] == 2'b11)
+            if(truncateLSB(data) == 2'b11)
             begin
 	        // we got a flow control credit
                 rxFlowcontrol <= rxFlowcontrol + 1;
@@ -285,7 +287,7 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG ug_device) (AURORA_DEVICE);
                 dropData <= True;
                 $display("RX Got credits %d", data[14:0]);
             end          
-            else if(data[15:14] == 2'b10)
+            else if(truncateLSB(data) == 2'b10)
             begin
                 dropData <= True;
                 $display("RX Got heartbeat");
@@ -313,7 +315,7 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG ug_device) (AURORA_DEVICE);
         $display("RX Updates Credits %d", creditFIFO.first());
         txCredits.upBy(truncate(creditFIFO.first()));
         // Bad news - the flow control protocol is broken :(
-        if(zeroExtend(txCredits.value()) + creditFIFO.first() > fromInteger(valueof(AllCredits)))
+        if(zeroExtend(txCredits.value()) + creditFIFO.first() > fromInteger(valueof(total_credits)))
         begin
             creditUnderflow <= True;
 	    $display("RX credit underflow");
@@ -337,7 +339,7 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG ug_device) (AURORA_DEVICE);
 
 
     rule sendUnderflow;
-        //ug_device.underflow(creditUnderflow, flitCount, zeroExtend(txCredits.value),  zeroExtend(rxCredits.value));       
+        ug_device.underflow(creditUnderflow, flitCount[1:0], zeroExtend(txCredits.value),  zeroExtend(rxCredits.value));       
     endrule
 
 
@@ -379,8 +381,6 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG ug_device) (AURORA_DEVICE);
         method error_count = ug_device.error_count;
         method rx_fifo_count = zeroExtend(pack(serdes_rxfifo.dCount));
         method tx_fifo_count = zeroExtend(pack(serdes_txfifo.sCount));
-        interface Get rxDebug = ?;
-        interface Get txDebug = ?;
     endinterface
  
 endmodule

@@ -15958,3 +15958,71 @@ tying an RRR stream (morphed into a Get) directly to a RAM.  When we
 finally drop RRR and replace it with soft connections toGet() will be
 defined automatically, making initialization from software a one-line
 declaration.
+
+----------
+kfleming    Date: Mon Mar  4 13:42:56 EST 2013  CSN: CSN-leap-platforms-681
+                  Mon Mar  4 18:42:56 UTC 2013
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-flowcontrol
+ XUPV5_AURORA_SINGLE.bsv   Locally Modified          680 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-driver-simulation
+ aurora-driver-simulation.awb Locally Modified          680 
+ aurora-driver-simulation.bsv Locally Modified          680 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device-ml605
+ aurora-device-ml605.awb   Locally Modified          680 
+ aurora-device-ml605.bsv   Locally Modified          680 
+ ml605_sma_aurora.ucf      Locally Modified          680 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device-simulation
+ aurora-device-simulation.awb Locally Modified          680 
+ aurora-device-simulation.bsv Locally Modified          680 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora-sma-ml605
+ aurora_8b10b_v5_3_channel_err_detect_32.v Locally Added               0 
+ aurora-virtex6-4gbps.awb  Locally Modified          680 
+ aurora-virtex6-5gbps.awb  Locally Modified          680 
+ virtex6-16-4gbps.ucf      Locally Added               0 
+ aurora_8b10b_v5_3_32.v    Locally Added               0 
+ aurora_8b10b_v5_3_hotplug_32.v Locally Added               0 
+ aurora_8b10b_v5_3_chbond_count_dec_4byte.v Locally Added               0 
+ aurora_8b10b_v5_3_err_detect_4byte.v Locally Added               0 
+ aurora_8b10b_v5_3_transceiver_wrapper_32.v Locally Added               0 
+ aurora_8b10b_v5_3_sym_dec_4byte.v Locally Added               0 
+ aurora_8b10b_v5_3_channel_init_sm_32.v Locally Added               0 
+ aurora-virtex6-5gbps-32.awb Locally Added               0 
+ aurora_8b10b_v5_3_clock_module_5gbps_32.v Locally Added               0 
+ aurora_8b10b_v5_3_gtx_5gbps_32.v Locally Added               0 
+ aurora_8b10b_v5_3_idle_and_ver_gen_32.v Locally Added               0 
+ aurora_8b10b_v5_3_sym_gen_4byte.v Locally Added               0 
+ aurora_8b10b_v5_3_lane_init_sm_4byte.v Locally Added               0 
+ aurora_8b10b_v5_3_rx_stream_32.v Locally Added               0 
+ aurora_8b10b_v5_3_tx_stream_32.v Locally Added               0 
+ aurora-sma.awb            Locally Modified          680 
+ aurora_8b10b_v5_3_standard_cc_module_32.v Locally Added               0 
+ aurora_8b10b_v5_3_global_logic_32.v Locally Added               0 
+ aurora_8b10b_v5_3_example_design.v Locally Modified          680 
+ aurora-ug.bsv             Locally Modified          680 
+ aurora_8b10b_v5_3_aurora_lane_4byte.v Locally Added               0 
+ aurora-virtex6-4gbps-32.awb Locally Added               0 
+ aurora_8b10b_v5_3_clock_module_4gbps_32.v Locally Added               0 
+ aurora_8b10b_v5_3_gtx_4gbps_32.v Locally Added               0 
+
+
+1) 32-bit wide lanes for aurora now operational. This allows our flow
+control to operate at half the core transceiver frequency, and permits
+us to operate on transceivers operating at up to 8gbps.  Versus 16-bit
+lanes, we take a 10% latency hit.  However, the flowcontrol is much
+simpler at lower frequencies.
+
+2) Took advantage of new 32-bit code to implement 5gbps transceivers
+for the Virtex-6 part.  We can now get ~430MB/s/lane, the expected 25%
+improvement.
+
+
+TODO:
+
+The clock/gtx is replicated for each transciever operating point.
+This a lot of replication for ~5 clock parameters.

@@ -35,8 +35,12 @@ import Vector::*;
 
 `include "awb/provides/aurora_flowcontrol.bsh"
 `include "awb/provides/aurora_driver.bsh"
+`include "awb/provides/librl_bsv_base.bsh"
 
-typedef AURORA_DRIVER SIMULATION_COMMUNICATION_DRIVER;
+typedef 3 InterfaceWords;
+typedef `AURORA_INTERFACE_WIDTH InterfaceWidth;
+
+typedef AURORA_DRIVER#(TSub#(TMul#(InterfaceWords, InterfaceWidth),1)) SIMULATION_COMMUNICATION_DRIVER;
 typedef Empty         SIMULATION_COMMUNICATION_WIRES;
 
 interface SIMULATION_COMMUNICATION_DEVICE;
@@ -46,9 +50,10 @@ endinterface
  
 module mkSimulationCommunicationDevice#(String outgoing, String incoming) (SIMULATION_COMMUNICATION_DEVICE);
 
-    let ug_device <- mkAURORA_SINGLE_UG(outgoing, incoming);
+    AURORA_SINGLE_DEVICE_UG#(InterfaceWidth) ug_device <- mkAURORA_SINGLE_UG(outgoing, incoming);
 
-    let auroraFlowcontrol <- mkAURORA_FLOWCONTROL(ug_device);
+    NumTypeParam#(InterfaceWords) interfaceWidth = ?;
+    let auroraFlowcontrol <- mkAURORA_FLOWCONTROL(ug_device, interfaceWidth);
 
     interface driver = auroraFlowcontrol.driver;
  

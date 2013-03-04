@@ -29,16 +29,16 @@ import FIFOF::*;
 
 `include "awb/provides/unix_comm_device.bsh"
 
-interface AURORA_SINGLE_DEVICE_UG;
-    method Action send(Bit#(16) tx);
-    method ActionValue#(Bit#(16)) receive();
+interface AURORA_SINGLE_DEVICE_UG#(numeric type width);
+	method Action send(Bit#(width) tx);
+	method ActionValue#(Bit#(width)) receive();
 
     method Action rxn_in(Bit#(1) i);
     method Action rxp_in(Bit#(1) i);
+    (* always_ready *)
     method Bit#(1) txn_out();
+    (* always_ready *)
     method Bit#(1) txp_out();
-    method Action gtxq_p(Bit#(1) d);
-    method Action gtxq_n(Bit#(1) d);
     
     method Bit#(1) channel_up;
     method Bit#(1) lane_up;
@@ -46,7 +46,7 @@ interface AURORA_SINGLE_DEVICE_UG;
     method Bit#(1) soft_err;
     method Bool    cc;
     method Bool    receive_rdy;
-    method Action   underflow(Bool underflow, Bit#(2) flitcount, Bit#(8) txcredits, Bit#(8) rxcredits);				
+    method Action   underflow(Bool underflow, Bit#(2) flitcount, Bit#(8) txcredits, Bit#(8) rxcredits);		
 
     method Bit#(32) rx_count;
     method Bit#(32) tx_count;
@@ -55,11 +55,12 @@ interface AURORA_SINGLE_DEVICE_UG;
 		
     interface Clock aurora_clk;
     interface Reset aurora_rst;
-
+    interface Reset aurora_rst_n;
 endinterface
 
 
-module mkAURORA_SINGLE_UG#(String outgoing, String incoming) (AURORA_SINGLE_DEVICE_UG);
+module mkAURORA_SINGLE_UG#(String outgoing, String incoming) (AURORA_SINGLE_DEVICE_UG#(width))
+    provisos(Add#(width_extra, width, 256));
 
     let clk <- exposeCurrentClock;
     let rst <- exposeCurrentReset;
@@ -67,7 +68,7 @@ module mkAURORA_SINGLE_UG#(String outgoing, String incoming) (AURORA_SINGLE_DEVI
     let commDevice <-  mkUNIXCommDevice(outgoing, incoming);
 
     Reg#(Bit#(8)) ccAdjust <- mkReg(0);
-    FIFOF#(Bit#(16)) rxFIFO <- mkFIFOF();
+    FIFOF#(Bit#(width)) rxFIFO <- mkFIFOF();
     Reg#(Bit#(32)) rxCount <- mkReg(0);
     Reg#(Bit#(32)) txCount <- mkReg(0);
 
@@ -83,12 +84,12 @@ module mkAURORA_SINGLE_UG#(String outgoing, String incoming) (AURORA_SINGLE_DEVI
         rxFIFO.enq(data);
     endrule
 
-    method Action send(Bit#(16) tx) if(commDevice.driver.write_ready && !adjustTime);
+    method Action send(Bit#(width) tx) if(commDevice.driver.write_ready && !adjustTime);
         commDevice.driver.write(zeroExtend(tx));
         txCount <= txCount + 1;
     endmethod
 
-    method ActionValue#(Bit#(16)) receive() if(!adjustTime);
+    method ActionValue#(Bit#(width)) receive() if(!adjustTime);
         rxFIFO.deq();
         rxCount <= rxCount + 1;
         return rxFIFO.first;

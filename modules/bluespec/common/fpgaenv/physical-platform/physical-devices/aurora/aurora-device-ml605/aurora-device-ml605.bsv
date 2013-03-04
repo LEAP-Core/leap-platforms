@@ -37,8 +37,13 @@ import XilinxCells::*;
 `include "awb/provides/fpga_components.bsh"
 `include "awb/provides/aurora_flowcontrol.bsh"
 `include "awb/provides/aurora_driver.bsh"
+`include "awb/provides/librl_bsv_base.bsh"
 
-typedef Vector#(`NUM_AURORA_IFCS,AURORA_DRIVER) AURORA_COMPLEX_DRIVERS;
+typedef 3 InterfaceWords;
+typedef `AURORA_INTERFACE_WIDTH InterfaceWidth;
+
+typedef AURORA_DRIVER#(TSub#(TMul#(InterfaceWords, InterfaceWidth),1)) AURORA_COMPLEX_DRIVER;
+typedef Vector#(`NUM_AURORA_IFCS,AURORA_DRIVER#(TSub#(TMul#(InterfaceWords, InterfaceWidth),1))) AURORA_COMPLEX_DRIVERS;
 
 interface AURORA_COMPLEX_WIRES;
     (* always_ready, always_enabled *)
@@ -62,7 +67,7 @@ endinterface
 (*synthesize*)
 module mkAURORA_DEVICE (AURORA_COMPLEX);
 
-    Vector#(`NUM_AURORA_IFCS,AURORA_DRIVER) ifcDrivers = newVector();
+    Vector#(`NUM_AURORA_IFCS,AURORA_DRIVER#(TSub#(TMul#(InterfaceWords, InterfaceWidth),1))) ifcDrivers = newVector();
     Vector#(`NUM_AURORA_IFCS,AURORA_WIRES)  ifcWires = newVector();
     Vector#(`NUM_AURORA_IFCS,Clock)         ifcClocks = newVector();
 
@@ -92,8 +97,9 @@ module mkAURORA_DEVICE (AURORA_COMPLEX);
     for(Integer i = 0; i < `NUM_AURORA_IFCS; i = i + 1)
     begin
         // Instantiate the driver and flowcontrol
-        let ug_device <- mkAURORA_SINGLE_UG(ifcClocks[i], clk, rst);
-        let auroraFlowcontrol <- mkAURORA_FLOWCONTROL(ug_device);
+        AURORA_SINGLE_DEVICE_UG#(InterfaceWidth) ug_device <- mkAURORA_SINGLE_UG(ifcClocks[i], clk, rst);
+        NumTypeParam#(InterfaceWords) interfaceWidth = ?;
+        let auroraFlowcontrol <- mkAURORA_FLOWCONTROL(ug_device, interfaceWidth);
 
         ifcDrivers[i] = auroraFlowcontrol.driver;
         ifcWires[i]   = auroraFlowcontrol.wires;

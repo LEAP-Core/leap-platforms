@@ -25,9 +25,9 @@
 // instantiate dummy serial modules to route clock to the SMA GTP.
 // unguarded interface
 
-interface AURORA_SINGLE_DEVICE_UG;
-	method Action send(Bit#(16) tx);
-	method ActionValue#(Bit#(16)) receive();
+interface AURORA_SINGLE_DEVICE_UG#(numeric type width);
+	method Action send(Bit#(width) tx);
+	method ActionValue#(Bit#(width)) receive();
 
     method Action rxn_in(Bit#(1) i);
     method Action rxp_in(Bit#(1) i);
@@ -55,46 +55,49 @@ interface AURORA_SINGLE_DEVICE_UG;
 endinterface
 
 import "BVI" aurora_8b10b_v5_3_example_design = 
-module mkAURORA_SINGLE_UG#(Clock auroraRawClock, Clock rawClock, Reset rawReset) (AURORA_SINGLE_DEVICE_UG);
+module mkAURORA_SINGLE_UG#(Clock auroraRawClock, Clock rawClock, Reset rawReset) (AURORA_SINGLE_DEVICE_UG#(width));
 
-	input_clock (INIT_CLK) = rawClock;
-	input_clock (GTX_CLK) =  auroraRawClock;
-	input_reset (RESET_N) clocked_by(rawClock) = rawReset;
+    parameter WIDTH = valueOf(width);
 
-	default_clock no_clock;
-	default_reset no_reset;
+    input_clock (INIT_CLK) = rawClock;
+    input_clock (GTX_CLK) =  auroraRawClock;
+    input_reset (RESET_N) clocked_by(rawClock) = rawReset;
 
-//	default_clock input_clk(INIT_CLK);
-//	default_reset input_rst(RESET_N);
+    default_clock no_clock;
+    default_reset no_reset;
 
-	output_clock aurora_clk(USER_CLK);
-	output_reset aurora_rst(USER_RST_N) clocked_by (aurora_clk);
-	output_reset aurora_rst_n(USER_RST) clocked_by (aurora_clk);
+    output_clock aurora_clk(USER_CLK);
+    output_reset aurora_rst(USER_RST_N) clocked_by (aurora_clk);
+    output_reset aurora_rst_n(USER_RST) clocked_by (aurora_clk);
 
-	method rxn_in(RXN) enable((*inhigh*) rx_n_en) reset_by(no_reset) clocked_by(no_clock);
-	method rxp_in(RXP) enable((*inhigh*) rx_p_en) reset_by(no_reset) clocked_by(no_clock);
-	method TXN txn_out() reset_by(no_reset) clocked_by(no_clock);
-	method TXP txp_out() reset_by(no_reset) clocked_by(no_clock);
+    method rxn_in(RXN) enable((*inhigh*) rx_n_en) reset_by(no_reset) clocked_by(no_clock);
+    method rxp_in(RXP) enable((*inhigh*) rx_p_en) reset_by(no_reset) clocked_by(no_clock);
+    method TXN txn_out() reset_by(no_reset) clocked_by(no_clock);
+    method TXP txp_out() reset_by(no_reset) clocked_by(no_clock);
 
-	method CHANNEL_UP channel_up;
-	method LANE_UP lane_up;
-	method HARD_ERR hard_err;
-	method SOFT_ERR soft_err;
-        method cc_do_i cc;
-        method RX_COUNT rx_count;
-        method TX_COUNT tx_count;
-        method ERROR_COUNT error_count;
-        method rx_rdy receive_rdy();
+    method CHANNEL_UP channel_up;
+    method LANE_UP lane_up;
+    method HARD_ERR hard_err;
+    method SOFT_ERR soft_err;
+    method cc_do_i cc;
+    method RX_COUNT rx_count;
+    method TX_COUNT tx_count;
+    method ERROR_COUNT error_count;
+    method rx_rdy receive_rdy();
 
-	method send(TX_DATA_OUT) enable(tx_en) ready(tx_rdy) clocked_by(aurora_clk) reset_by(aurora_rst); 
-	method RX_DATA_IN receive() enable((*inhigh*) rx_en) ready(rx_rdy) clocked_by(aurora_clk) reset_by(aurora_rst);
-        method underflow(UNDERFLOW,FLITCOUNT,TXCREDIT,RXCREDIT) enable((*inhigh*) underflow_en) clocked_by(aurora_clk) reset_by(aurora_rst);
+    method send(TX_DATA_OUT) enable(tx_en) ready(tx_rdy) clocked_by(aurora_clk) reset_by(aurora_rst); 
+    method RX_DATA_IN receive() enable((*inhigh*) rx_en) ready(rx_rdy) clocked_by(aurora_clk) reset_by(aurora_rst);
+    method underflow(UNDERFLOW,FLITCOUNT,TXCREDIT,RXCREDIT) enable((*inhigh*) underflow_en) clocked_by(aurora_clk) reset_by(aurora_rst);
 
-	schedule (rxn_in, rxp_in, txn_out, txp_out, channel_up, lane_up, hard_err, soft_err, cc, rx_count, tx_count, error_count, underflow) CF 
-		(rxn_in, rxp_in, txn_out, txp_out, channel_up, lane_up, hard_err, soft_err, cc, rx_count, tx_count, error_count, underflow);
-	schedule (receive) CF (rxn_in, rxp_in, txn_out, txp_out, send, channel_up, lane_up, hard_err, soft_err, cc, rx_count, tx_count, error_count, underflow);
-	schedule (send) CF (rxn_in, rxp_in, txn_out, txp_out, receive, channel_up, lane_up, hard_err, soft_err, cc, rx_count, tx_count, error_count, underflow);
-	schedule (send) C (send);
-	schedule (receive) C (receive);
+    schedule (rxn_in, rxp_in, txn_out, txp_out, channel_up, lane_up, hard_err, soft_err, cc, rx_count, tx_count, error_count, underflow) CF 
+             (rxn_in, rxp_in, txn_out, txp_out, channel_up, lane_up, hard_err, soft_err, cc, rx_count, tx_count, error_count, underflow);
+
+    schedule (receive) CF (rxn_in, rxp_in, txn_out, txp_out, send, channel_up, lane_up, hard_err, soft_err, cc, rx_count, tx_count, error_count, underflow);
+    
+    schedule (send) CF (rxn_in, rxp_in, txn_out, txp_out, receive, channel_up, lane_up, hard_err, soft_err, cc, rx_count, tx_count, error_count, underflow);
+
+    schedule (send) C (send);
+	
+    schedule (receive) C (receive);
 
 endmodule

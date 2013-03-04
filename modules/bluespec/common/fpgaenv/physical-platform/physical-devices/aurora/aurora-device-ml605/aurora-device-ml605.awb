@@ -12,5 +12,5 @@
 %generated -t VERILOG mkAURORA_DEVICE.v
 %generated -t BA  mkAURORA_DEVICE.ba
 
-%param NUM_AURORA_IFCS 5 "Number of Aurora Interfaces"
+%param NUM_AURORA_IFCS 1 "Number of Aurora Interfaces"
 

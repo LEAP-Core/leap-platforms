@@ -6,5 +6,9 @@
 
 %sources -t BSV -v PUBLIC aurora-driver-simulation.bsv
 
+%param AURORA_INTERFACE_WIDTH 32 "Aurora Interface Width"
+
+
+
 
 

@@ -62,8 +62,9 @@
 (* keep_hierarchy="true" *)
 module aurora_8b10b_v5_3_example_design #
 (
-     parameter   USE_CHIPSCOPE        = 0,
-     parameter   SIM_GTXRESET_SPEEDUP = 1      
+     parameter   USE_CHIPSCOPE        = 1,
+     parameter   SIM_GTXRESET_SPEEDUP = 1,
+     parameter   WIDTH = 16      
 )
 (
 
@@ -114,11 +115,11 @@ module aurora_8b10b_v5_3_example_design #
 );
 
 
-    output [15:0] RX_DATA_IN;
+    output [WIDTH-1:0] RX_DATA_IN;
     input rx_en;
     output rx_rdy;
 
-    input [15:0] TX_DATA_OUT;
+    input [WIDTH-1:0] TX_DATA_OUT;
     input tx_en;
     output tx_rdy;
 //***********************************Port Declarations*******************************
@@ -178,11 +179,11 @@ module aurora_8b10b_v5_3_example_design #
     reg     [31:0]     ERROR_COUNT;
 //********************************Wire Declarations**********************************
     // Stream TX Interface
-    wire    [0:15]     tx_d_i;
+    wire    [0:WIDTH-1]     tx_d_i;
     wire               tx_src_rdy_n_i;
     wire               tx_dst_rdy_n_i;
     // Stream RX Interface
-    wire    [0:15]     rx_d_i;
+    wire    [0:WIDTH-1]     rx_d_i;
     wire               rx_src_rdy_n_i;
     // V5 Reference Clock Interface
     wire               GTXQ0_left_i;
@@ -229,7 +230,7 @@ module aurora_8b10b_v5_3_example_design #
     wire        lane_up_reduce_i;
     wire        rst_cc_module_i;
 
-    wire    [0:15]     tied_to_gnd_vec_i;
+    wire    [0:WIDTH-1]     tied_to_gnd_vec_i;
 
 //*********************************Main Body of Code**********************************
     assign GTXQ0_left_i = GTX_CLK; 
@@ -276,7 +277,8 @@ module aurora_8b10b_v5_3_example_design #
 //____________________________Tie off unused signals_______________________________
 
     // System Interface
-    assign  tied_to_gnd_vec_i   =   16'd0;
+ 
+    assign  tied_to_gnd_vec_i   =   {WIDTH{1'b0}};
     assign  power_down_i        =   1'b0;
     assign  loopback_i          =   3'b000;
 
@@ -361,7 +363,7 @@ module aurora_8b10b_v5_3_example_design #
         .GT_RESET_OUT(gt_reset_i)
     );
 
-    reg [15:0] RX_DATA_IN_delay;
+    reg [31:0] RX_DATA_IN_delay;
     reg        rx_rdy_delay;
 
 
@@ -472,8 +474,8 @@ assign lane_up_i_i = &lane_up_i;
 assign tx_lock_i_i = tx_lock_i;
 
     // Shared VIO Inputs
-        assign  sync_in_i[15:0]         =  tx_d_i;
-        assign  sync_in_i[31:16]        =  rx_d_i;
+        assign  sync_in_i[15:0]         =  tx_d_i[0:15];
+        assign  sync_in_i[31:16]        =  rx_d_i[0:15];
         assign  sync_in_i[34]           =  FLITCOUNT[0];  
         assign  sync_in_i[35]           =  FLITCOUNT[1];  
         assign  sync_in_i[36]           =  UNDERFLOW;  

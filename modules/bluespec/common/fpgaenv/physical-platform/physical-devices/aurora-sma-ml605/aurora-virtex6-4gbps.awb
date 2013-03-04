@@ -27,5 +27,5 @@
 %sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3_transceiver_wrapper.v
 %sources -t VERILOG -v PRIVATE aurora_8b10b_v5_3_tx_stream.v
 
-
+%param AURORA_INTERFACE_WIDTH 16 "Aurora Interface Width"
 
