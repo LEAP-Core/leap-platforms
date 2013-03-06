@@ -25,6 +25,8 @@
 // instantiate dummy serial modules to route clock to the SMA GTP.
 // unguarded interface
 
+`include "awb/provides/aurora_common.bsh"
+
 interface AURORA_SINGLE_DEVICE_UG#(numeric type width);
 	method Action send(Bit#(width) tx);
 	method ActionValue#(Bit#(width)) receive();
@@ -55,12 +57,19 @@ interface AURORA_SINGLE_DEVICE_UG#(numeric type width);
 endinterface
 
 import "BVI" aurora_8b10b_v5_3_example_design = 
-module mkAURORA_SINGLE_UG#(Clock auroraRawClock, Clock rawClock, Reset rawReset) (AURORA_SINGLE_DEVICE_UG#(width));
+module mkAURORA_SINGLE_UG#(AuroraGTXClockSpec pllClockSpec, Clock rawClock, Reset rawReset) 
+    (AURORA_SINGLE_DEVICE_UG#(width));
 
     parameter WIDTH = valueOf(width);
 
+    parameter RX_CLK25_DIVIDER = pllClockSpec.clk25_divider;
+    parameter RXPLL_DIVSEL45_FB = pllClockSpec.pll_divsel45_fb;
+    parameter TX_CLK25_DIVIDER = pllClockSpec.clk25_divider;
+    parameter TXPLL_DIVSEL45_FB = pllClockSpec.pll_divsel45_fb;
+    parameter USE_CHIPSCOPE = pllClockSpec.use_chipscope;
+
     input_clock (INIT_CLK) = rawClock;
-    input_clock (GTX_CLK) =  auroraRawClock;
+    input_clock (GTX_CLK) =  pllClockSpec.clock;
     input_reset (RESET_N) clocked_by(rawClock) = rawReset;
 
     default_clock no_clock;

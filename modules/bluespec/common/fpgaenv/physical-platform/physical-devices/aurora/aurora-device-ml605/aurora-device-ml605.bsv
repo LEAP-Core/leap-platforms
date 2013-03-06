@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2011 Massachusetts Institute of Technology
+// Copyright (C) 2013 Massachusetts Institute of Technology
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -36,6 +36,7 @@ import XilinxCells::*;
 
 `include "awb/provides/fpga_components.bsh"
 `include "awb/provides/aurora_flowcontrol.bsh"
+`include "awb/provides/aurora_common.bsh"
 `include "awb/provides/aurora_driver.bsh"
 `include "awb/provides/librl_bsv_base.bsh"
 
@@ -68,8 +69,9 @@ endinterface
 module mkAURORA_DEVICE (AURORA_COMPLEX);
 
     Vector#(`NUM_AURORA_IFCS,AURORA_DRIVER#(TSub#(TMul#(InterfaceWords, InterfaceWidth),1))) ifcDrivers = newVector();
-    Vector#(`NUM_AURORA_IFCS,AURORA_WIRES)  ifcWires = newVector();
-    Vector#(`NUM_AURORA_IFCS,Clock)         ifcClocks = newVector();
+    Vector#(`NUM_AURORA_IFCS,AURORA_WIRES)                                                   ifcWires = newVector();
+    Vector#(`NUM_AURORA_IFCS,AuroraGTXClockSpec)                                             ifcClocks = newVector();
+
 
     let clk <- exposeCurrentClock();
     let rst <- exposeCurrentReset();
@@ -80,8 +82,7 @@ module mkAURORA_DEVICE (AURORA_COMPLEX);
 
     let hpcClock <- mkClockIBUFDS_GTXE1(True, hpcClockP.clock, hpcClockN.clock);
     
-    ifcClocks = replicate(hpcClock); 
-
+    ifcClocks = replicate(AuroraGTXClockSpec{pll_divsel45_fb: 4, clk25_divider: 7, clock: hpcClock, use_chipscope: 0}); // We scrub these values from coregen. HPC clock is 156.25 MHz.
 
     // SMA Clock
     CLOCK_FROM_PUT smaClockN <- mkClockFromPut(clocked_by clk);
@@ -89,7 +90,7 @@ module mkAURORA_DEVICE (AURORA_COMPLEX);
 
     let smaClock <- mkClockIBUFDS_GTXE1(True, smaClockP.clock, smaClockN.clock);
 
-    ifcClocks[0] = smaClock; // fix clock 0
+    ifcClocks[0] = AuroraGTXClockSpec{pll_divsel45_fb: 5, clk25_divider: 5, clock: smaClock, use_chipscope: 0}; // We scrub these values from coregen. SMA clock is 125 MHz. 
 
     
     // Now we can instantiate the aurora devices enblock 

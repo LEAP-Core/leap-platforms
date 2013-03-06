@@ -53,9 +53,8 @@ NET "m_llpi_phys_plat_aurora_device/smaClock_O" TNM_NET = GT_REFCLK_SMA;
 NET "m_llpi_phys_plat_aurora_device/hpcClock_O" TNM_NET = GT_REFCLK_HPC; 
 
 TIMESPEC TS_SMA_GTXQ0_LEFT_I = PERIOD "GT_REFCLK_SMA" 125.0 MHz HIGH 50%;
-TIMESPEC TS_HPC_GTXQ0_LEFT_I = PERIOD "GT_REFCLK_HPC" 125.0 MHz HIGH 50%;
+TIMESPEC TS_HPC_GTXQ0_LEFT_I = PERIOD "GT_REFCLK_HPC" 156.25 MHz HIGH 50%; # the XM104 has a different clock.
 
-# User Clock Constraint: Value is selected based on the line rate (3.125 Gbps) and lane width (2-Byte)
 NET "m_llpi_phys_plat_aurora_device/ug_device/USER_CLK" TNM_NET = USER_CLK_SMA;
 NET "m_llpi_phys_plat_aurora_device/ug_device_1/USER_CLK" TNM_NET = USER_CLK_HPC1;
 NET "m_llpi_phys_plat_aurora_device/ug_device_2/USER_CLK" TNM_NET = USER_CLK_HPC2;
@@ -83,8 +82,8 @@ TIMESPEC TS_SYNC_CLK_HPC4_I = PERIOD "SYNC_CLK_HPC4" 250 MHz HIGH 50%;
 NET  auroraWires_sma_clk_n_put LOC = H5;
 NET  auroraWires_sma_clk_p_put LOC = H6;
 
-NET  auroraWires_hpc_clk_n_put LOC = AD5;
-NET  auroraWires_hpc_clk_p_put LOC = AD6;
+NET  auroraWires_hpc_clk_n_put LOC = AK5;
+NET  auroraWires_hpc_clk_p_put LOC = AK6;
 
 
 # 200 MHz board Clock Constraint  
@@ -104,34 +103,25 @@ TIMESPEC "TS_TIG4" = FROM "INIT_CLK" TO "USER_CLK_HPC4" TIG;
 
 ############################### GT Location ###################################
 
+# DP0 is X0Y7 (XM104 - SMA)
+# DP1 is X0Y6 (XM104 - SMA)
+# DP2 is X0Y5 (XM104 - SATA)
+# DP3 is X0Y4 (XM104 - SATA)
+# DP4 is X0Y3 (XM104 - CX4)
+# DP5 is X0Y2 (XM104 - CX4)
+# DP6 is X0Y1 (XM104 - CX4)
+# DP7 is X0Y0 (XM104 - CX4)
+
 INST m_llpi_phys_plat_aurora_device/ug_device/aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y18; # sma cables
-#INST m_llpi_phys_plat_aurora_device/ug_device_1/aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y0;
-#INST m_llpi_phys_plat_aurora_device/ug_device_2/aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y1;
-#INST m_llpi_phys_plat_aurora_device/ug_device_3/aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y4;
-#INST m_llpi_phys_plat_aurora_device/ug_device_4/aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y5;
+INST m_llpi_phys_plat_aurora_device/ug_device_1/aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y0;
+INST m_llpi_phys_plat_aurora_device/ug_device_2/aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y1;
+INST m_llpi_phys_plat_aurora_device/ug_device_3/aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y6;
+INST m_llpi_phys_plat_aurora_device/ug_device_4/aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y7;
+
 #INST m_llpi_phys_plat_aurora_device_ug_device_5/aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y4;
 #INST m_llpi_phys_plat_aurora_device_ug_device_6/aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y5;
 #INST m_llpi_phys_plat_aurora_device_ug_device_7/aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y6;
 #INST m_llpi_phys_plat_aurora_device_ug_device_8/aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y7;
 
-#INST        "m_llpi_phys_plat_aurora_device/ug_device/*"            AREA_GROUP = "AG_ug_device";
-#INST        "m_llpi_phys_plat_aurora_device/auroraFlowcontrol_*"    AREA_GROUP = "AG_ug_device";
-#AREA_GROUP "AG_ug_device"                                           RANGE =  SLICE_X104Y180:SLICE_X159Y199;
 
-#INST       "m_llpi_phys_plat_aurora_device/ug_device_1/*"            AREA_GROUP = "AG_ug_device_1";
-#INST       "m_llpi_phys_plat_aurora_device/auroraFlowcontrol_1_*"    AREA_GROUP = "AG_ug_device_1";
-#AREA_GROUP "AG_ug_device_1"                                          RANGE =  SLICE_X92Y0:SLICE_X159Y10;
-
-#INST       "m_llpi_phys_plat_aurora_device/ug_device_2/*"            AREA_GROUP = "AG_ug_device_2";
-#INST       "m_llpi_phys_plat_aurora_device/auroraFlowcontrol_2_*"    AREA_GROUP = "AG_ug_device_2";
-#AREA_GROUP "AG_ug_device_2"                                          RANGE =   SLICE_X92Y11:SLICE_X159Y19;
-
-#INST       "m_llpi_phys_plat_aurora_device/ug_device_3/*"            AREA_GROUP = "AG_ug_device_3";
-#INST       "m_llpi_phys_plat_aurora_device/auroraFlowcontrol_3_*"    AREA_GROUP = "AG_ug_device_3";
-#AREA_GROUP "AG_ug_device_3"                                          RANGE =   SLICE_X92Y40:SLICE_X115Y58;
-
-
-#INST       "m_llpi_phys_plat_aurora_device/ug_device_4/*"            AREA_GROUP = "AG_ug_device_4";
-#INST       "m_llpi_phys_plat_aurora_device/auroraFlowcontrol_4_*"    AREA_GROUP = "AG_ug_device_4";
-#AREA_GROUP "AG_ug_device_4"                                          RANGE =   SLICE_X92Y20:SLICE_X159Y30;
 

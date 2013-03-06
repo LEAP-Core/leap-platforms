@@ -1,0 +1,7 @@
+%name Aurora Common Definitions
+%desc Some types used to configure aurora devices
+
+%provides aurora_common
+
+%sources -t BSV -v PUBLIC aurora-common.bsv
+

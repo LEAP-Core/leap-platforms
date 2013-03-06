@@ -16026,3 +16026,43 @@ TODO:
 
 The clock/gtx is replicated for each transciever operating point.
 This a lot of replication for ~5 clock parameters.
+
+----------
+kfleming    Date: Wed Mar  6 15:53:36 EST 2013  CSN: CSN-leap-platforms-682
+                  Wed Mar  6 20:53:36 UTC 2013
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora
+ aurora-common/            Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-common
+ aurora-common.awb         Locally Added               0 
+ aurora-common.bsv         Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device-ml605
+ aurora-device-ml605.awb   Locally Modified          681 
+ aurora-device-ml605.bsv   Locally Modified          681 
+ ml605_sma_aurora.ucf      Locally Modified          681 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora-sma-ml605
+ aurora_8b10b_v5_3_32.v    Locally Modified          681 
+ aurora_8b10b_v5_3_transceiver_wrapper_32.v Locally Modified          681 
+ aurora_8b10b_v5_3_gtx_5gbps_32.v Locally Modified          681 
+ aurora_8b10b_v5_3_example_design.v Locally Modified          681 
+ aurora-ug.bsv             Locally Modified          681 
+ aurora_8b10b_v5_3_gtx_5gbps.v Locally Modified          681 
+
+
+1) Added support for different serdes oscillator frequencies.  This
+allows us to use the XM104 board in conjunction with other boards and
+the SMA based SERDES on the ML605.  
+
+2) Added some new data structures to describe these changes.
+
+We can now run multifpga implementations with >2 FPGAs!
+
+TODO:
+
+1) We need to handle different clock frequencies and widths in the
+same manner that we handle the oscillator frequencies. This will
+reduce the number of awb and files in the SERDES library. 

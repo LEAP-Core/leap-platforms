@@ -76,7 +76,11 @@ module aurora_8b10b_v5_3_gtx #
     // Share RX PLL parameter
     parameter   GTX_TX_CLK_SOURCE          =   "TXPLL",
     // Save power parameter
-    parameter   GTX_POWER_SAVE             =   10'b0000110100
+    parameter   GTX_POWER_SAVE             =   10'b0000110100,
+    parameter   RX_CLK25_DIVIDER           = 5,
+    parameter   RXPLL_DIVSEL45_FB          = 5,
+    parameter   TX_CLK25_DIVIDER           = 5,
+    parameter   TXPLL_DIVSEL45_FB          = 5
 )
 (
     //---------------------- Loopback and Powerdown Ports ----------------------
@@ -199,9 +203,9 @@ module aurora_8b10b_v5_3_gtx #
             .TXPLL_DIVSEL_FB                        (4),
             .TXPLL_DIVSEL_OUT                       (1),
             .TXPLL_DIVSEL_REF                       (1),
-            .TXPLL_DIVSEL45_FB                      (5),
+            .TXPLL_DIVSEL45_FB                      (TXPLL_DIVSEL45_FB),
             .TXPLL_LKDET_CFG                        (3'b111),
-            .TX_CLK25_DIVIDER                       (5),
+            .TX_CLK25_DIVIDER                       (TX_CLK25_DIVIDER),
             .TXPLL_SATA                             (2'b00),
             .TX_TDCC_CFG                            (2'b11),
             .PMA_CAS_CLK_EN                         ("FALSE"),
@@ -261,9 +265,9 @@ module aurora_8b10b_v5_3_gtx #
             .RXPLL_DIVSEL_FB                        (4),
             .RXPLL_DIVSEL_OUT                       (1),
             .RXPLL_DIVSEL_REF                       (1),
-            .RXPLL_DIVSEL45_FB                      (5),
+            .RXPLL_DIVSEL45_FB                      (RXPLL_DIVSEL45_FB),
             .RXPLL_LKDET_CFG                        (3'b111),
-            .RX_CLK25_DIVIDER                       (5),
+            .RX_CLK25_DIVIDER                       (RX_CLK25_DIVIDER),
 
            //-----------------------RX Interface-------------------------
             .GEN_RXUSRCLK                           ("FALSE"),

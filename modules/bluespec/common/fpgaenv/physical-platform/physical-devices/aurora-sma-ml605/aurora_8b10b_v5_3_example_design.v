@@ -62,9 +62,13 @@
 (* keep_hierarchy="true" *)
 module aurora_8b10b_v5_3_example_design #
 (
-     parameter   USE_CHIPSCOPE        = 1,
+     parameter   USE_CHIPSCOPE        = 0,
      parameter   SIM_GTXRESET_SPEEDUP = 1,
-     parameter   WIDTH = 16      
+     parameter   WIDTH = 16,
+     parameter   RX_CLK25_DIVIDER           = 5,
+     parameter   RXPLL_DIVSEL45_FB          = 5,
+     parameter   TX_CLK25_DIVIDER           = 5,
+     parameter   TXPLL_DIVSEL45_FB          = 5
 )
 (
 
@@ -294,7 +298,11 @@ module aurora_8b10b_v5_3_example_design #
     (*keep_hierarchy="true"*)
     aurora_8b10b_v5_3 #
     (
-        .SIM_GTXRESET_SPEEDUP(SIM_GTXRESET_SPEEDUP)
+        .SIM_GTXRESET_SPEEDUP(SIM_GTXRESET_SPEEDUP),
+        .RX_CLK25_DIVIDER(RX_CLK25_DIVIDER),
+        .RXPLL_DIVSEL45_FB(RXPLL_DIVSEL45_FB),
+        .TX_CLK25_DIVIDER(TX_CLK25_DIVIDER),
+        .TXPLL_DIVSEL45_FB(TXPLL_DIVSEL45_FB)
     )
     aurora_module_i
     (

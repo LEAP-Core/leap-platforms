@@ -72,8 +72,11 @@ module aurora_8b10b_v5_3_GTX_WRAPPER #
 (
 
     // Simulation attribute
-    parameter   SIM_GTXRESET_SPEEDUP=   0      // Set to 1 to speed up sim reset
-
+    parameter   SIM_GTXRESET_SPEEDUP=   0,      // Set to 1 to speed up sim reset
+    parameter   RX_CLK25_DIVIDER           = 5,
+    parameter   RXPLL_DIVSEL45_FB          = 5,
+    parameter   TX_CLK25_DIVIDER           = 5,
+    parameter   TXPLL_DIVSEL45_FB          = 5
 )
 (
 
@@ -230,7 +233,7 @@ output  [31:0]   RXDATA_OUT;
 
  assign  chbondi = chbondi_unused_i;
 
-   assign gtxtest_w = {3'b100,4'h0,LINK_RESET_IN[0],LINK_RESET_IN[0],LINK_RESET_IN[0],3'b0}; 
+ assign gtxtest_w = {3'b100,4'h0,LINK_RESET_IN[0],LINK_RESET_IN[0],LINK_RESET_IN[0],3'b0}; 
 
  assign rxreset_i = RXRESET_IN || LINK_RESET_IN[1];
 
@@ -243,7 +246,11 @@ aurora_8b10b_v5_3_gtx #
         // Share RX PLL parameter
         .GTX_TX_CLK_SOURCE          ("RXPLL"),
         // Save power parameter
-        .GTX_POWER_SAVE             (10'b0000110100)    
+        .GTX_POWER_SAVE             (10'b0000110100),
+        .RX_CLK25_DIVIDER(RX_CLK25_DIVIDER),
+        .RXPLL_DIVSEL45_FB(RXPLL_DIVSEL45_FB),
+        .TX_CLK25_DIVIDER(TX_CLK25_DIVIDER),
+        .TXPLL_DIVSEL45_FB(TXPLL_DIVSEL45_FB)
     )
 GTXE1_INST
     (
