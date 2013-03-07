@@ -16066,3 +16066,23 @@ TODO:
 1) We need to handle different clock frequencies and widths in the
 same manner that we handle the oscillator frequencies. This will
 reduce the number of awb and files in the SERDES library. 
+
+----------
+kfleming    Date: Thu Mar  7 15:08:42 EST 2013  CSN: CSN-leap-platforms-683
+                  Thu Mar  7 20:08:42 UTC 2013
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-xilinx
+ ddr-sdram-xilinx.bsv      Locally Modified          682 
+ ddr-sdram-xilinx.awb      Locally Modified          682 
+
+
+Two performance bug fixes:
+
+1) Command and write FIFOs were too small to cover the latency of a
+SyncFIFO.  This resulted in a throughput reduction.
+
+2) Number of reads in flight was not covering the latency of the
+memory.  Increased this to a reasonable size.
+
+These changes increase the performance of the ml605 sram debugger by 30%. 

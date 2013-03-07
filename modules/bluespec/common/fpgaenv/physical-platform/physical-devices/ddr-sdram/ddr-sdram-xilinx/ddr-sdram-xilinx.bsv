@@ -225,11 +225,11 @@ module mkDDRBank#(Clock rawClock, Reset rawReset)
     //
 
     // Request queue
-    SyncFIFOIfc#(FPGA_DDR_REQUEST) syncRequestQ <- mkSyncFIFO(2, modelClock, modelReset, controllerClock);
+    SyncFIFOIfc#(FPGA_DDR_REQUEST) syncRequestQ <- mkSyncFIFO(16, modelClock, modelReset, controllerClock);
 
     // Write data queue
     SyncFIFOIfc#(Tuple2#(FPGA_DDR_DUALEDGE_BEAT, FPGA_DDR_DUALEDGE_BEAT_MASK))
-        syncWriteDataQ <- mkSyncFIFO(2, modelClock, modelReset, controllerClock);
+        syncWriteDataQ <- mkSyncFIFO(16, modelClock, modelReset, controllerClock);
     
     // Debug signals
 `ifndef DEBUG_DDR3_Z
