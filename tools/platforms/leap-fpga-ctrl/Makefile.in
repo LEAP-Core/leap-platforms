@@ -493,8 +493,8 @@ install:
 	install --owner=root --group=root --mode=554 scripts/VC707 $(DESTDIR)$(datarootdir)/leap/scripts
 	mkdir -p $(DESTDIR)$(sysconfdir)/leap
 	install --owner=root --group=root --mode=444 etc/config-sample $(DESTDIR)$(sysconfdir)/leap
-	install --owner=root --group=root --mode=554 init/leap-fpga /etc/init.d/leap-fpga
-	chkconfig leap-fpga on
+	mkdir -p $(DESTDIR)$(sysconfdir)/init.d
+	install --owner=root --group=root --mode=554 init/leap-fpga $(DESTDIR)$(sysconfdir)/init.d/leap-fpga
 	mkdir -p $(DESTDIR)$(localstatedir)/lock/leap
 #chkconfig leap-fpga on	
 

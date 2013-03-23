@@ -16086,3 +16086,16 @@ SyncFIFO.  This resulted in a throughput reduction.
 memory.  Increased this to a reasonable size.
 
 These changes increase the performance of the ml605 sram debugger by 30%. 
+
+----------
+kfleming    Date: Fri Mar 22 22:13:28 EDT 2013  CSN: CSN-leap-platforms-684
+                  Sat Mar 23 02:13:28 UTC 2013
+
+
+Directory tools/platforms/leap-fpga-ctrl
+ Makefile.in               Locally Modified          683 
+ Makefile.am               Locally Modified          683 
+
+
+Paths were hardcoded into the leap-fpga-ctrl makefile, causing the
+release buildbots to explode.  
