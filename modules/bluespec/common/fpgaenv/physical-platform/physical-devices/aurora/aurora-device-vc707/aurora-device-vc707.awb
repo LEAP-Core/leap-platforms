@@ -1,0 +1,17 @@
+%name Aurora Device Wrapper VC707
+%desc Taps out the various Aurora channels on the VC707.
+
+%provides aurora_device
+%requires aurora_common
+%requires aurora_driver
+%requires aurora_flowcontrol
+
+%sources -t BSV -v PUBLIC aurora-device-vc707.bsv
+%sources -t BSH -v PUBLIC aurora-device-vc707.bsh
+
+%generated -t VERILOG mkAURORA_DEVICE.v
+%generated -t BA  mkAURORA_DEVICE.ba
+
+%param NUM_AURORA_IFCS 2 "Number of Aurora Interfaces"
+
+

@@ -18,10 +18,10 @@
 %private shiftreg.v
 
 %sources -t BSV -v PUBLIC  ila-virtex6.bsv
-%sources -t BSV -v PUBLIC  icon-virtex6.bsv
+%sources -t BSV -v PUBLIC  icon.bsv
 %private v6_ila.v
 %private v6_icon.v
-%sources -t VERILOG -v PRIVATE v6_icon_wrapper.v
+%sources -t VERILOG -v PRIVATE icon_wrapper.v
 
 %sources -t BSV -v PUBLIC  clock-import.bsv
 %sources -t VERILOG -v PRIVATE clock_import.v
@@ -65,7 +65,7 @@
 
 
 
-
+%param XILINX_GENERATION 6 "Which NGCs should we pick"
 %param SYNTH 1            "Synthesize it to FPGAs"
 %param BROKEN_REGFILE 1   "0 if RegFile synthesizes correctly.  Nonzero for Xilinx Xst < version 11."
 %param XILINX_FAMILY "virtex6"  "Xilinx parameter describing the fpga architecture"

@@ -69,6 +69,7 @@ interface AURORA_DRIVER#(numeric type interface_width);
     method Bool     credit_underflow;
     method Bit#(32) rx_count;
     method Bit#(32) tx_count;
+    method Bit#(32) heartbeat_count;
     method Bit#(32) error_count;
     method Bit#(32) rx_fifo_count;
     method Bit#(32) tx_fifo_count;
@@ -105,6 +106,7 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ug_device, NumTypeP
              Add#(credit_extra_extra_width, TAdd#(1,TLog#(total_credits)), width_extra),
              Add#(credit_extra_width, TAdd#(1,TLog#(total_credits)), width), // comes from flow control
              Add#(2, marshal_width_extra, marshal_width),
+             Add#(handshakeSpace, 10, width_extra),
              //Log#(interface_words, 1),
              //Add#(magic_string_extra, 48, TMul#(width, TSub#(interface_words, 1))), // comes from the deadbeef identifier strings
              Add#(width, TMul#(width,TSub#(interface_words,1)), marshal_width));
@@ -119,11 +121,11 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ug_device, NumTypeP
     let isAuroraInRst <- isResetAsserted(clocked_by controllerClk, reset_by controllerRst);
 
 
-    Bit#(width) handshakeWords[4] = {'hdeaddaed,'hbeeffeeb,'hcafeefac,'hfeeddeef};
 
-    Reg#(Bit#(2)) ccCycles  <- mkReg(maxBound, clocked_by(controllerClk), reset_by(controllerRst)); 
+    Reg#(Bit#(10)) ccCycles  <- mkReg(maxBound, clocked_by(controllerClk), reset_by(controllerRst)); 
     Reg#(Bit#(2)) handshakeRX <- mkReg(0, clocked_by(controllerClk), reset_by(controllerRst)); 
-    Reg#(Bit#(TAdd#(1,TLog#(interface_words)))) flitCount <-  mkReg(0, clocked_by(controllerClk), reset_by(controllerRst));    
+    Reg#(Bit#(TAdd#(1,TLog#(interface_words)))) flitCountRX <-  mkReg(0, clocked_by(controllerClk), reset_by(controllerRst));    
+    Reg#(Bit#(TAdd#(1,TLog#(interface_words)))) flitCountTX <-  mkReg(0, clocked_by(controllerClk), reset_by(controllerRst));    
     Reg#(Bool)    dropData <-  mkReg(True, clocked_by(controllerClk), reset_by(controllerRst)); 
     Reg#(Bit#(2)) handshakeTX <- mkReg(0, clocked_by(controllerClk), reset_by(controllerRst)); 
     COUNTER#(TAdd#(1,TLog#(total_credits))) txCredits   <- mkLCounter(fromInteger(valueof(total_credits)), clocked_by(controllerClk), reset_by(controllerRst)); 
@@ -136,13 +138,17 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ug_device, NumTypeP
     CrossingReg#(Bit#(16)) dataDrops <- mkNullCrossingReg(modelClock, 0, clocked_by controllerClk, reset_by controllerRst);
     CrossingReg#(Bit#(32)) rxFlowcontrol <- mkNullCrossingReg(modelClock, 0, clocked_by controllerClk, reset_by controllerRst);
     CrossingReg#(Bit#(32)) txFlowcontrol <- mkNullCrossingReg(modelClock, 0, clocked_by controllerClk, reset_by controllerRst);
+    CrossingReg#(Bit#(32)) heartbeatCount <- mkNullCrossingReg(modelClock, 0, clocked_by controllerClk, reset_by controllerRst);
  
     rule creditCross; 
         rxCreditsCross <= zeroExtend(rxCredits.value());
         txCreditsCross <= zeroExtend(txCredits.value());
     endrule
 
-    Reg#(Bool) handshakeRXDone <- mkReg(False, clocked_by(controllerClk), reset_by(controllerRst)); 
+    Reg#(Bool) handshakeRXDone <- mkReg(False, clocked_by(controllerClk), reset_by(controllerRst));  
+    Reg#(Bit#(5)) heartbeatTX <- mkReg(0, clocked_by(controllerClk), reset_by(controllerRst)); 
+    Reg#(Bit#(5)) heartbeatRX <- mkReg(0, clocked_by(controllerClk), reset_by(controllerRst)); 
+    Reg#(Bit#(5)) heartbeatConsecutive <- mkReg(0, clocked_by(controllerClk), reset_by(controllerRst)); 
     Reg#(Bool) handshakeTXDone <- mkReg(False, clocked_by(controllerClk), reset_by(controllerRst)); 
     Reg#(Bool) ccLast <- mkReg(False, clocked_by(controllerClk), reset_by(controllerRst)); 
 
@@ -160,46 +166,15 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ug_device, NumTypeP
     rule tickCC(ccCycles > 0 && ug_device.cc  && unpack(ug_device.channel_up));
         ccCycles <= ccCycles - 1;
         $display("Ticking CC  %d", ccCycles);
+    
     endrule
 
     // Send a set of known values across to the other side, as a synchronization step
-
-    rule txHandshake (ccCycles == 0 && !handshakeTXDone);
-        handshakeTX <= handshakeTX + 1;
-        if(handshakeTX + 1 == 0)
-        begin
-            handshakeTXDone <= True;
-        end
-
-        ug_device.send(handshakeWords[handshakeTX]);
-    endrule
 
     // This wire lets us check whether we ever drop data on receive.
     let rxFires <- mkPulseWire(clocked_by controllerClk, reset_by controllerRst);
 
     // Receive and check handshake values.
-
-    rule rxHandshake (!handshakeRXDone);
-        let data <- ug_device.receive;
-        rxFires.send();
-        Bool handshakeMatch = handshakeWords[handshakeRX] == data;
-        if(handshakeMatch)
-        begin
-            handshakeRX <= handshakeRX + 1;
-        end
-        else 
-        begin
-            handshakeRX <= 0;
-        end
-
-        if(handshakeRX + 1 == 0 && handshakeMatch)
-        begin
-            $display("RX Handshake Done!");
-            handshakeRXDone <= True;
-        end
-    endrule
-
-
 
     // Transmit side.  We can send three different message classes, which are encoded using the high
     // order bits of the first flit.  
@@ -215,23 +190,24 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ug_device, NumTypeP
         heartbeat <= heartbeat + 1;
     endrule
 
-    rule txHeartbeat (handshakeTXDone && heartbeat == 0);
-        marshaller.enq({2'b10,'h44444444});
+    rule txHeartbeat (ccCycles == 0 && heartbeat == 0 && flitCountTX == 0);
+        ug_device.send({2'b10,zeroExtend({heartbeatConsecutive,heartbeatTX})});
+        heartbeatTX <= heartbeatTX + 1;
     endrule
 
     PulseWire transmittingCredits <- mkPulseWire(clocked_by(controllerClk), reset_by(controllerRst));
     PulseWire updatingCredits <- mkPulseWire(clocked_by(controllerClk), reset_by(controllerRst));
 
-    rule txFC(handshakeTXDone && ((rxCredits.value() > fromInteger(valueof(half_credits)) && (!serdes_txfifo.dNotEmpty || txCredits.value() == 0)) || rxCredits.value() > fromInteger(valueof(three_quarters_credits))));
+    rule txFC(flitCountTX == 0 && ((rxCredits.value() > fromInteger(valueof(half_credits)) && (!marshaller.notEmpty() || txCredits.value() == 0)) || rxCredits.value() > fromInteger(valueof(three_quarters_credits))));
         rxCredits.setC(0);
         Bit#(width) creditWord = {2'b11,zeroExtend(rxCredits.value())};
-        marshaller.enq({creditWord,'hc001f00dd00d});
+        ug_device.send(creditWord);
         $display("TX Sends Flowcontrol %h", rxCredits.value());
         txFlowcontrol <= txFlowcontrol + 1;
         transmittingCredits.send();
     endrule
 
-    rule txData(handshakeTXDone && txCredits.value > 0 && !transmittingCredits);
+    rule txData(handshakeTXDone && txCredits.value > 0);
         marshaller.enq({1'b0,serdes_txfifo.first});
         serdes_txfifo.deq;
 	txCredits.downBy(1);
@@ -242,9 +218,17 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ug_device, NumTypeP
         $display("TX Has no credits");
     endrule
 
-    rule txSend (handshakeTXDone);
+    rule txSend (handshakeTXDone && !transmittingCredits);
         marshaller.deq;
         ug_device.send(marshaller.first);
+        if(flitCountTX + 1 == fromInteger(valueof(interface_words)))
+        begin
+            flitCountTX <= 0;
+        end
+        else
+        begin
+            flitCountTX <= flitCountTX + 1;
+        end
     endrule
 
 
@@ -264,45 +248,77 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ug_device, NumTypeP
  
 
     // use flit number to distinguish flow control. first flit is header.
-    rule rxIntake (handshakeRXDone);  // We always need to receive
+    rule rxIntake;  // We always need to receive
+        Bool adjustFlitCount = False;
+
         let data <- ug_device.receive;
         rxFires.send();
-
-        if(flitCount + 1 == fromInteger(valueof(interface_words)))
-        begin
-            flitCount <= 0;
-        end
-        else
-        begin
-            flitCount <= flitCount + 1;
-        end
-
-        if(flitCount == 0)
+        
+        if(flitCountRX == 0)
         begin
             if(truncateLSB(data) == 2'b11)
             begin
 	        // we got a flow control credit
-                rxFlowcontrol <= rxFlowcontrol + 1;
-                creditFIFO.enq(truncate(data));
-                dropData <= True;
-                $display("RX Got credits %d", data[14:0]);
+                if(handshakeRXDone)
+                begin
+                    rxFlowcontrol <= rxFlowcontrol + 1;
+                    creditFIFO.enq(truncate(data));
+                    $display("RX Got credits %d", data[14:0]);
+                end
             end          
             else if(truncateLSB(data) == 2'b10)
             begin
-                dropData <= True;
                 $display("RX Got heartbeat");
+                let heartbeatRXNew = data[4:0];
+                let heartbeatConsecutiveNew = data[9:5];
+                heartbeatRX <= heartbeatRXNew;
+                if(heartbeatRX + 1 == heartbeatRXNew)
+                begin
+                    heartbeatConsecutive <= heartbeatConsecutive + 1;
+                end
+
+                // We become ready to receive before we become ready to transmit.
+                // This ensures that we do not drop actual RX data, but still
+                // allows us to defend ourselves against early soft errors.
+                if(heartbeatConsecutive > 6 && heartbeatConsecutiveNew > 6)
+                begin
+                    handshakeRXDone <= True;
+                end 
+
+                if(heartbeatConsecutive > 8 && heartbeatConsecutiveNew > 8)
+                begin
+                    handshakeTXDone <= True;
+                end 
+
+                heartbeatCount <= heartbeatCount + 1;
             end          
             else
             begin
-                dropData <= False;
-                serdes_infifo.enq(data);
-                $display("RX starts data %d", data);
+                if(handshakeRXDone)
+                begin
+                    adjustFlitCount = True;
+                    serdes_infifo.enq(data);
+                    $display("RX starts data %d", data);
+                end
             end
         end
-        else if(!dropData)
+        else
         begin
+            adjustFlitCount = True;
             serdes_infifo.enq(data);
             $display("RX data %d", data);
+        end
+
+        if(adjustFlitCount)
+        begin
+            if(flitCountRX + 1 == fromInteger(valueof(interface_words)))
+            begin
+                flitCountRX <= 0;
+            end
+            else
+            begin
+                flitCountRX <= flitCountRX + 1;
+            end
         end
     endrule 
 
@@ -328,20 +344,20 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ug_device, NumTypeP
         demarshaller.enq(serdes_infifo.first);
     endrule
 
-    rule rxDone (handshakeRXDone && !transmittingCredits);   
+    rule rxDone (!transmittingCredits);   
         demarshaller.deq;
         rxCredits.upBy(1);
         serdes_rxfifo.enq(truncate(demarshaller.first()));
     endrule
+
 
     // These methods are used in debugging the flow control.  They are tied to
     // printfs in the aurora service layer. 
 
 
     rule sendUnderflow;
-        ug_device.underflow(creditUnderflow, flitCount[1:0], zeroExtend(txCredits.value),  zeroExtend(rxCredits.value));       
+        ug_device.underflow(creditUnderflow, {0,pack(handshakeTXDone)},  zeroExtend(txCredits.value),  zeroExtend(rxCredits.value));
     endrule
-
 
      
     interface AURORA_WIRES wires;
@@ -376,6 +392,7 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ug_device, NumTypeP
         method data_drops = dataDrops.crossed();
         method tx_fc = txFlowcontrol.crossed();
         method rx_fc = rxFlowcontrol.crossed();
+        method heartbeat_count = heartbeatCount.crossed();
         method rx_count = ug_device.rx_count;
         method tx_count = ug_device.tx_count;
         method error_count = ug_device.error_count;

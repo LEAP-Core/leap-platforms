@@ -1,0 +1,10 @@
+%name Aurora Device Wrapper Null
+%desc Provides empty definitions for an aurora device. 
+
+%provides aurora_device
+
+%sources -t BSV -v PUBLIC aurora-device-null.bsv
+
+%param NUM_AURORA_IFCS 1 "Number of Aurora Interfaces"
+
+

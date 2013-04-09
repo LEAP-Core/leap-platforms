@@ -28,6 +28,7 @@ import Clocks::*;
 `include "awb/provides/clocks_device.bsh"
 `include "awb/provides/ddr_sdram_device.bsh"
 `include "awb/provides/physical_platform_utils.bsh"
+`include "awb/provides/aurora_device.bsh"
 
 // PHYSICAL_DRIVERS
 
@@ -39,6 +40,7 @@ interface PHYSICAL_DRIVERS;
     interface CLOCKS_DRIVER                        clocksDriver;
     interface PCIE_DRIVER                          pcieDriver;
     interface Vector#(FPGA_DDR_BANKS, DDR_DRIVER)  ddrDriver;
+    interface AURORA_COMPLEX_DRIVERS               auroraDriver;
 endinterface
 
 // TOP_LEVEL_WIRES
@@ -52,6 +54,7 @@ interface TOP_LEVEL_WIRES;
     // wires from devices
     interface PCIE_WIRES                          pcieWires;
     interface DDR_WIRES                           ddrWires;
+    interface AURORA_COMPLEX_WIRES                auroraWires;
 endinterface
 
 // PHYSICAL_PLATFORM
@@ -117,6 +120,7 @@ module mkPhysicalPlatform#(Vector#(`N_TOP_LEVEL_CLOCKS, Clock) topClocks, Reset 
         clocks.softResetTrigger.reset();
     endrule
 
+    AURORA_COMPLEX aurora_device <- mkAURORA_DEVICE(clocked_by clk, reset_by rst);
 
     //
     // Aggregate the drivers
@@ -125,6 +129,7 @@ module mkPhysicalPlatform#(Vector#(`N_TOP_LEVEL_CLOCKS, Clock) topClocks, Reset 
         interface clocksDriver = clocks.driver;
         interface pcieDriver = pcie.driver;
         interface ddrDriver  = sdram.driver;
+        interface auroraDriver = aurora_device.drivers;
     endinterface
     
     //
@@ -133,6 +138,7 @@ module mkPhysicalPlatform#(Vector#(`N_TOP_LEVEL_CLOCKS, Clock) topClocks, Reset 
     interface TOP_LEVEL_WIRES topLevelWires;
         interface pcieWires   = pcie.wires;
         interface ddrWires    = sdram.wires;
+        interface auroraWires = aurora_device.wires;
     endinterface
                
 endmodule

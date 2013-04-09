@@ -16099,3 +16099,101 @@ Directory tools/platforms/leap-fpga-ctrl
 
 Paths were hardcoded into the leap-fpga-ctrl makefile, causing the
 release buildbots to explode.  
+
+----------
+keflemin    Date: Sun Jun  2 11:51:30 EDT 2013  CSN: CSN-leap-platforms-685
+                  Sun Jun  2 15:51:31 UTC 2013
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ hardware-fpga-components-virtex6-generic.awb Locally Modified          684 
+ icon-virtex6.bsv          Locally Removed           684 
+ v7_icon.ngc               Locally Added               0 
+ v7_icon.v                 Locally Added               0 
+ hardware-fpga-components-virtex7.awb Locally Modified          684 
+ icon.bsv                  Locally Added               - 
+ v7_ila.v                  Locally Added               0 
+ ila-virtex7.bsv           Locally Added               0 
+ v7_ila.ngc                Locally Added               0 
+ icon_wrapper.v            Locally Added               - 
+ v6_icon_wrapper.v         Locally Removed           684 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic
+ pcie-generic-platform.awb Locally Modified          684 
+ pcie-generic-platform.bsv Locally Modified          684 
+ pcie-generic-platform.bsh Locally Modified          684 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-flowcontrol
+ XUPV5_AURORA_SINGLE.bsv   Locally Modified          684 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora
+ aurora-driver-virtex7-64b66b/ Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-driver-virtex7-64b66b
+ aurora_64b66b_v7_3_64b66b_descrambler.v Locally Added               0 
+ aurora_64b66b_v7_3_tx_stream_datapath.v Locally Added               0 
+ aurora_64b66b_v7_3_gtx_to_aurora.v Locally Added               0 
+ aurora_64b66b_v7_3_global_logic.v Locally Added               0 
+ aurora_64b66b_v7_3_ch_bond_code_gen.v Locally Added               0 
+ aurora_64b66b_v7_3_err_detect.v Locally Added               0 
+ aurora_64b66b_v7_3_wrapper.v Locally Added               0 
+ aurora_64b66b_v7_3_width_conversion.v Locally Added               0 
+ aurora_64b66b_v7_3_aurora_lane.v Locally Added               0 
+ aurora_64b66b_v7_3_multi_wrapper.v Locally Added               0 
+ aurora_64b66b_v7_3_enable_generator.v Locally Added               0 
+ aurora_64b66b_v7_3_reset_logic.v Locally Added               0 
+ aurora_64b66b_v7_3_clock_module.v Locally Added               0 
+ aurora_64b66b_v7_3_lane_init_sm.v Locally Added               0 
+ aurora_64b66b_v7_3_cbcc_gtx_6466.v Locally Added               0 
+ aurora_64b66b_v7_3_64b66b_scrambler.v Locally Added               0 
+ aurora-virtex7-5gbps-64.awb Locally Added               0 
+ aurora_64b66b_v7_3_exdes.v Locally Added               0 
+ aurora_64b66b_v7_3_axi_to_ll.v Locally Added               0 
+ aurora_64b66b_v7_3_standard_cc_module.v Locally Added               0 
+ aurora_64b66b_v7_3_aurora_to_gtx.v Locally Added               0 
+ aurora_64b66b_v7_3.v      Locally Added               0 
+ aurora_64b66b_v7_3_sym_dec.v Locally Added               0 
+ aurora_64b66b_v7_3_block_sync_sm.v Locally Added               0 
+ aurora-import.bsv         Locally Added               0 
+ vc707_sma_aurora.ucf      Locally Added               0 
+ aurora-ug.bsv             Locally Added               0 
+ aurora_64b66b_v7_3_axi_to_drp.v Locally Added               0 
+ aurora_64b66b_v7_3_channel_init_sm.v Locally Added               0 
+ aurora_64b66b_v7_3_sym_gen.v Locally Added               0 
+ aurora_64b66b_v7_3_gtx.v  Locally Added               0 
+ aurora_64b66b_v7_3_rx_stream.v Locally Added               0 
+ aurora_64b66b_v7_3_tx_stream_control_sm.v Locally Added               0 
+ aurora_64b66b_v7_3_tx_stream.v Locally Added               0 
+ aurora_64b66b_v7_3_channel_err_detect.v Locally Added               0 
+ aurora_64b66b_v7_3_rx_stream_datapath.v Locally Added               0 
+ aurora_64b66b_v7_3_ll_to_axi.v Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora
+ aurora-device-vc707/      Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device-vc707
+ aurora-device-vc707.awb   Locally Added               0 
+ aurora-device-vc707.bsv   Locally Added               0 
+ aurora-device-vc707.bsh   Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora
+ aurora-device-null/       Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device-null
+ aurora-device-null.awb    Locally Added               0 
+ aurora-device-null.bsv    Locally Added               0 
+
+
+1) Aurora support for VC707 (and Virtex-7 in general), using a 64b/66b
+   transceiver clocked at 5gbps.  Transceiver currently experiences
+   soft errors at channel-up time.  These errors are patched by (2).
+
+2) Improved handshaking at flowcontrol startup time.  We now use
+   single messages for heartbeat and flowcontrol, which should improve
+   throughput and latency. Heartbeat now includes sequence ids.
+   Transceiver is not initialized until several sequential heartbeats
+   have been received by both sides.
+
+3) Made aurora a default in PCI-e generic builds.  Non-multifpga
+   builds include a null interface.
+

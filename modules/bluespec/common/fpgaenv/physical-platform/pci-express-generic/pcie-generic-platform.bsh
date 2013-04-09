@@ -3,3 +3,4 @@
 //
 
 `include "awb/provides/physical_platform_config.bsh"
+`include "awb/provides/aurora_device.bsh"
