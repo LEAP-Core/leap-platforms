@@ -16197,3 +16197,18 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aur
 3) Made aurora a default in PCI-e generic builds.  Non-multifpga
    builds include a null interface.
 
+
+----------
+mcadler     Date: Thu Apr 11 12:05:47 EDT 2013  CSN: CSN-leap-platforms-686
+                  Thu Apr 11 16:05:47 UTC 2013
+
+
+Directory tools/platforms/leap-fpga-ctrl
+ leap-fpga-ctrl.c          Locally Modified          685 
+
+We are seeing corruption during programming if two devices are programmed at the
+same time.  Change leap-fpga-ctrl to permit only one device to be in the
+programming state at a time.  No script changes are required, since other
+requests block until the lock is released.
+
+The --force option ignores the lock.

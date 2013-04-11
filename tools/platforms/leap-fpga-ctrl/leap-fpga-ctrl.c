@@ -18,6 +18,8 @@
 #define CONFIG_DIR SCRIPTSDIR "/"
 #define RES_DIR    LOCKDIR "/"
 
+#define PROG_LOCK_FILE  RES_DIR "leap-proglock"
+
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -460,6 +462,12 @@ int change_current_reservation(FPGA_STATE_T newState, char *newSignature)
         ftruncate(lockf, ftell(lf));
     }
 
+    if ((oldState == STATE_PROGRAM) && (newState != STATE_PROGRAM))
+    {
+        // Remove the programming lock file.  See program_dev() below.
+        unlink(PROG_LOCK_FILE);
+    }
+
     //
     // Lock file is left OPEN.  See note in routine description.
     //
@@ -643,6 +651,31 @@ void reserve(char *class)
 //
 void program_dev()
 {
+    //
+    // Xilinx USB programming appears to fail when two devices are programmed
+    // simultaneously.  Only allow one device to be programmed at a time.
+    //
+    int first_pass = 1;
+    while (1)
+    {
+        int plockf = open(PROG_LOCK_FILE, O_RDWR | O_CREAT | O_EXCL, 00644);
+        if (opt_force || (plockf != -1))
+        {
+            // Got the lock
+            FILE *pf = fdopen(plockf, "w");
+            fprintf(pf, "%d\n", cfg_id);
+            fclose(pf);
+            break;
+        }
+
+        if (first_pass)
+        {
+            printf("Waiting for FPGA programming lock...\n");
+            first_pass = 0;
+        }
+        sleep(5);
+    }
+
     change_current_reservation(STATE_PROGRAM, NULL);
     set_fpga_device_access(0, 0);
     invoke_helper_script(STATE_PROGRAM);
