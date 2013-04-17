@@ -40,7 +40,7 @@ import XilinxCells::*;
 `include "awb/provides/aurora_driver.bsh"
 `include "awb/provides/librl_bsv_base.bsh"
 
-typedef 1 InterfaceWords;
+typedef 2 InterfaceWords;
 typedef `AURORA_INTERFACE_WIDTH InterfaceWidth;
 
 typedef AURORA_DRIVER#(TSub#(TMul#(InterfaceWords, InterfaceWidth),1)) AURORA_COMPLEX_DRIVER;
