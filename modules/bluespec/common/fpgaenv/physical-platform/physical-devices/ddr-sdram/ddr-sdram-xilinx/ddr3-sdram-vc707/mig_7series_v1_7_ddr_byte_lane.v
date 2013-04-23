@@ -417,11 +417,14 @@ generate
 
 if ( PO_DATA_CTL == "TRUE" || ((RCLK_SELECT_LANE==ABCD) && (CKE_ODT_AUX =="TRUE")))  begin : phaser_in_gen
 
-(* DQS_AUTO_RECAL = DQS_AUTO_RECAL, DQS_FIND_PATTERN = DQS_FIND_PATTERN *) PHASER_IN_PHY #(
+PHASER_IN_PHY #(
   .BURST_MODE                       ( PI_BURST_MODE),
   .CLKOUT_DIV                       ( PI_CLKOUT_DIV),
   .SEL_CLK_OFFSET                   ( PI_SEL_CLK_OFFSET),
   .FINE_DELAY                       ( PI_FINE_DELAY),
+  .DQS_AUTO_RECAL                   ( DQS_AUTO_RECAL),
+  .DQS_FIND_PATTERN                 ( DQS_FIND_PATTERN),
+												   
   .FREQ_REF_DIV                     ( PI_FREQ_REF_DIV),
   .OUTPUT_CLK_SRC                   ( PI_OUTPUT_CLK_SRC),
   .SYNC_IN_DIV_RST                  ( PI_SYNC_IN_DIV_RST),
