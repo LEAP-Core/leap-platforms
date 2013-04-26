@@ -120,4 +120,22 @@ case "$arg_command" in
     # Give user access to the device
     echo "Activating device: VC707 ${arg_devid} ${arg_driver}"
     ;;
+
+  deactivate)
+    ##
+    ## The FPGA remains reserved, but not on the PCIe bus.
+    ##
+
+    # No need to rmmod the BlueNoC driver.  It will handle the device
+    # disappearing and reappering correctly.
+    if [ -f ${pci_disable} ]; then
+        echo "Disabling PCIe device..."
+        echo 1 > $pci_disable
+    fi
+
+    # Let the bus settle
+    sleep 1
+
+    ;;
+
 esac

@@ -16235,3 +16235,43 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr
 
 
 Fixed textual error that was causing XST 14.5 to fail.
+
+----------
+mcadler     Date: Fri Apr 26 16:47:58 EDT 2013  CSN: CSN-leap-platforms-689
+                  Fri Apr 26 20:47:58 UTC 2013
+
+
+Directory tools/platforms/leap-fpga-ctrl
+ leap-fpga-ctrl.c          Locally Modified          688 
+
+Directory tools/platforms/leap-fpga-ctrl/scripts
+ VC707                     Locally Modified          688 
+
+- Fix some bugs in leap-fpga-ctrl that left the programming lock file set
+  even when the FPGA isn't in programming state.  Without root it was impossible
+  for a user to recover the ability to program.
+
+- Allow transition to programming mode even when the lock is set if the lock
+  is for the FPGA associated with the new request.  This change allows users
+  to recover the ability to program an FPGA even when the lock file is left
+  around incorrectly by entering programming state.
+
+- Add a new INACTIVE state, allowing programming of multiple devices before
+  activating them.  Since only one device may be in programming state at a time
+  (due to a bug that corrupts FPGA state when multiple are programmed at once),
+  the sequence would be:
+      - Reserve all devices
+      - Program device 0
+      - Deactivate device 0
+      - Program device 1
+      - Deactivate device 1
+      ...
+      - Program device N
+      - Deactivate device N
+      - Activate device 0
+      - Activate device 1
+      ...
+      - Activate device N
+
+  It remains legal to transition directly from programming mode to active,
+  when appropriate.

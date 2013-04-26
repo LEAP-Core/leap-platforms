@@ -41,6 +41,7 @@ typedef enum
     STATE_RESERVED,
     STATE_PROGRAM,
     STATE_ACTIVE,
+    STATE_INACTIVE,
     STATE_RESET,
     STATE_LAST              // Must be last
 }
@@ -92,6 +93,9 @@ void state_print(FILE *f, FPGA_STATE_T state)
       case STATE_ACTIVE:
         s = "Active";
         break;
+      case STATE_INACTIVE:
+        s = "Inactive (reserved)";
+        break;
       default:
         s = "Unknown";
         break;
@@ -125,6 +129,10 @@ void invoke_helper_script(FPGA_STATE_T state)
 
       case STATE_ACTIVE:
         cmd = "activate";
+        break;
+
+      case STATE_INACTIVE:
+        cmd = "deactivate";
         break;
 
       default:
@@ -354,6 +362,12 @@ int change_current_reservation(FPGA_STATE_T newState, char *newSignature)
 
         if (n_retry++ == 20)
         {
+            if ((oldState != STATE_PROGRAM) && (newState == STATE_PROGRAM))
+            {
+                // Remove the failed programming lock file.
+                unlink(PROG_LOCK_FILE);
+            }
+
             error(1, 0, "Error - Failed to acquire lock file: %s", cfg_res_file);
         }
 
@@ -441,6 +455,12 @@ int change_current_reservation(FPGA_STATE_T newState, char *newSignature)
         }
         else
         {
+            if ((oldState != STATE_PROGRAM) && (newState == STATE_PROGRAM))
+            {
+                // Remove the failed programming lock file.
+                unlink(PROG_LOCK_FILE);
+            }
+
             error(1, 0, "Error - FPGA locked by %s", (pw != NULL) ? pw->pw_name : "<unknown user>");
         }
     }
@@ -659,7 +679,7 @@ void program_dev()
     while (1)
     {
         int plockf = open(PROG_LOCK_FILE, O_RDWR | O_CREAT | O_EXCL, 00644);
-        if (opt_force || (plockf != -1))
+        if (plockf != -1)
         {
             // Got the lock
             FILE *pf = fdopen(plockf, "w");
@@ -667,6 +687,24 @@ void program_dev()
             fclose(pf);
             break;
         }
+
+        // Is programming locked by this device already?  This should happen
+        // only if --force was used or if there is a bug in leap-fpga-ctrl.
+        FILE *pf = fopen(PROG_LOCK_FILE, "r");
+        if (pf != NULL)
+        {
+            int id;
+            int already_locked = 0;
+            if ((fscanf(pf, "%d", &id) == 1) && (id == cfg_id))
+            {
+                already_locked = 1;
+            }
+            fclose(pf);
+
+            if (already_locked) break;
+        }
+
+        if (opt_force) break;
 
         if (first_pass)
         {
@@ -708,6 +746,22 @@ void activate_dev()
     change_current_reservation(STATE_ACTIVE, NULL);
     invoke_helper_script(STATE_ACTIVE);
     set_fpga_device_access(1, 0);
+}
+
+
+//
+// deactivate_dev --
+//   Keep the device reserved but deactivate the device and disable programming.
+//
+//   Tasks:
+//     - Disable access to the programming cable
+//     - Remove the kernel driver for the FPGA
+//
+void deactivate_dev()
+{
+    change_current_reservation(STATE_INACTIVE, NULL);
+    invoke_helper_script(STATE_INACTIVE);
+    set_fpga_device_access(0, 0);
 }
 
 
@@ -769,6 +823,7 @@ void usage()
     fprintf(stderr, "Usage: leap-fpga-ctrl <--reserve[=FPGA class] |\n");
     fprintf(stderr, "                       --program |\n");
     fprintf(stderr, "                       --activate |\n");
+    fprintf(stderr, "                       --deactivate |\n");
     fprintf(stderr, "                       --drop-reservation |\n");
     fprintf(stderr, "                       --reset |\n");
     fprintf(stderr, "                       --setsignature |\n");
@@ -794,6 +849,7 @@ int main(int argc, char *argv[])
     static char *req_reserve_class = NULL;
     static int req_program_dev = 0;
     static int req_activate_dev = 0;
+    static int req_deactivate_dev = 0;
     static int req_drop_reservation = 0;
     static int req_reset = 0;
     static int req_set_signature = 0;
@@ -825,6 +881,7 @@ int main(int argc, char *argv[])
         {
             { "program", no_argument, &req_program_dev, 1 },
             { "activate", no_argument, &req_activate_dev, 1 },
+            { "deactivate", no_argument, &req_deactivate_dev, 1 },
             { "reserve", optional_argument, NULL, OPT_RESERVE },
             { "drop-reservation", no_argument, &req_drop_reservation, 1 },
             { "reset", no_argument, &req_reset, 1 },
@@ -892,6 +949,7 @@ int main(int argc, char *argv[])
     if (req_reserve +
         req_program_dev +
         req_activate_dev +
+        req_deactivate_dev +
         req_drop_reservation +
         req_reset +
         req_set_signature +
@@ -934,6 +992,7 @@ int main(int argc, char *argv[])
     if (req_reserve) reserve(req_reserve_class);
     if (req_program_dev) program_dev(signature);
     if (req_activate_dev) activate_dev();
+    if (req_deactivate_dev) deactivate_dev();
     if (req_drop_reservation) drop_reservation();
     if (req_set_signature) change_current_reservation(STATE_PROGRAM, signature);
     if (req_get_signature) current_reservation_state(stdout, SHOW_STATE_SIGNATURE);
