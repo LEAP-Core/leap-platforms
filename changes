@@ -16275,3 +16275,31 @@ Directory tools/platforms/leap-fpga-ctrl/scripts
 
   It remains legal to transition directly from programming mode to active,
   when appropriate.
+
+----------
+keflemin    Date: Sun Apr 28 19:57:01 EDT 2013  CSN: CSN-leap-platforms-690
+                  Sun Apr 28 23:57:01 UTC 2013
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-driver-virtex7-64b66b
+ aurora-virtex7-5gbps-64.awb Locally Modified          689 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-driver-virtex7-64b66b-10gbps
+ aurora-virtex7-5gbps-64.awb Locally Modified          689 
+ vc707_sma_aurora.ucf      Locally Modified          689 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device-vc707
+ aurora-device-vc707.bsv   Locally Modified          689 
+
+
+1) Changed location of SERDES transceivers to aide in timing closure.
+Previously the DRAM placement was making timing at 100MHz
+difficult. Now, 150MHz seems quite reliable.
+
+
+2) Added code to automatically determine the width of the gear box
+between the SERDES and model clock domains based on the frequencies of
+those domains.  This optimizes throughput automatically.  A broad
+search of the parameter space seems to indicate that we can't do
+better than 700 MB/s across a single lane. 
+

@@ -42,4 +42,4 @@
 
 
 %param AURORA_INTERFACE_WIDTH 64 "Aurora Interface Width"
-
+%param AURORA_INTERFACE_FREQ  78 "Aurora Interface Frequency"

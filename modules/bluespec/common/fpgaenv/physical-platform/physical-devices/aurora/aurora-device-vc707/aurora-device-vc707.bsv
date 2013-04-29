@@ -38,9 +38,12 @@ import XilinxCells::*;
 `include "awb/provides/aurora_flowcontrol.bsh"
 `include "awb/provides/aurora_common.bsh"
 `include "awb/provides/aurora_driver.bsh"
+`include "awb/provides/clocks_device.bsh"
 `include "awb/provides/librl_bsv_base.bsh"
 
-typedef 2 InterfaceWords;
+// Calculate the optimal interface width for a given user clock and
+// serdes clock.
+typedef TMax#(1,TDiv#(`AURORA_INTERFACE_FREQ, `MODEL_CLOCK_FREQ)) InterfaceWords; 
 typedef `AURORA_INTERFACE_WIDTH InterfaceWidth;
 
 typedef AURORA_DRIVER#(TSub#(TMul#(InterfaceWords, InterfaceWidth),1)) AURORA_COMPLEX_DRIVER;
@@ -84,7 +87,7 @@ module mkAURORA_DEVICE (AURORA_COMPLEX);
     
     ifcClocks = replicate(AuroraGTXClockSpec{pll_divsel45_fb: 4, clk25_divider: 7, clock: hpcClock, use_chipscope: 0}); // We scrub these values from coregen. HPC clock is 156.25 MHz.
 
-    ifcClocks[1] = AuroraGTXClockSpec{pll_divsel45_fb: 4, clk25_divider: 7, clock: hpcClock, use_chipscope: 1};
+    ifcClocks[1] = AuroraGTXClockSpec{pll_divsel45_fb: 4, clk25_divider: 7, clock: hpcClock, use_chipscope: 0};
 
     // SMA Clock
     CLOCK_FROM_PUT smaClockN <- mkClockFromPut(clocked_by clk);
@@ -92,7 +95,7 @@ module mkAURORA_DEVICE (AURORA_COMPLEX);
 
     let smaClock <- mkClockIBUFDS_GTE2(True, smaClockP.clock, smaClockN.clock);
 
-    ifcClocks[0] = AuroraGTXClockSpec{pll_divsel45_fb: 5, clk25_divider: 5, clock: smaClock, use_chipscope: 0}; // We scrub these values from coregen. SMA clock is 125 MHz. 
+    ifcClocks[0] = AuroraGTXClockSpec{pll_divsel45_fb: 5, clk25_divider: 5, clock: smaClock, use_chipscope: 1}; // We scrub these values from coregen. SMA clock is 125 MHz. 
 
     
     // Now we can instantiate the aurora devices enblock 
