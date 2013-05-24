@@ -16303,3 +16303,53 @@ those domains.  This optimizes throughput automatically.  A broad
 search of the parameter space seems to indicate that we can't do
 better than 700 MB/s across a single lane. 
 
+
+----------
+mcadler     Date: Fri May 24 13:52:27 EDT 2013  CSN: CSN-leap-platforms-691
+                  Fri May 24 17:52:27 UTC 2013
+
+
+Directory tools/platforms/leap-fpga-ctrl
+ leap-fpga-ctrl.c          Locally Modified          690 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/serial
+ xilinx.xst                Locally Modified          690 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/pcie
+ xilinx.xst                Locally Modified          690 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/jtag
+ xilinx.xst                Locally Modified          690 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/pcie-sata
+ xilinx.xst                Locally Modified          690 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/pcie-aurora
+ xilinx.xst                Locally Modified          690 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/aurora
+ xilinx.xst                Locally Modified          690 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/chipscope
+ xilinx.xst                Locally Modified          690 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/ml605/aurora-pcie-dma
+ xilinx.xst                Locally Modified          690 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup/serial
+ xilinx.xst                Locally Modified          690 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic/config/ml605
+ ml605-v6-pcie-dma.xst     Locally Modified          690 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic/config/vc707
+ vc707-v7-pcie-dma.xst     Locally Modified          690 
+
+- leap-fpga-ctrl now uses the bus_id field as the lock file name, when defined,
+  instead of the logical name.  This allows us to declare multiple logical
+  devices that are unique personalities of the same physical device.  For
+  example, it might be PCIe card that has multiple possible drivers.  Locking
+  one logical device locks all logical devices mapped to the same physical
+  device.
+
+- Add newline at the ends of .xst files.

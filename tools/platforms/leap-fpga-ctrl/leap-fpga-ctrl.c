@@ -270,7 +270,21 @@ void cfg_load_dev(int id)
         error(1, 0, "Error - reservation file path too long");
     }
     strcpy(cfg_res_file, RES_DIR);
-    strcat(cfg_res_file, sec);
+
+    if (cfg_bus_id != NULL)
+    {
+        // Use the bus ID as the name of the lock/status file so that two
+        // logical devices may be aliases for the same physical device.
+        // This allows us to specify multiple control scripts and environments
+        // depending on the driver that will be used to communicate with
+        // the FPGA.
+        strcat(cfg_res_file, cfg_bus_id);
+    }
+    else
+    {
+        // No bus name.  Use the logical device name.
+        strcat(cfg_res_file, sec);
+    }
 }
 
 
