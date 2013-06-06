@@ -16353,3 +16353,15 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic/
   device.
 
 - Add newline at the ends of .xst files.
+
+----------
+keflemin    Date: Thu Jun  6 16:15:58 EDT 2013  CSN: CSN-leap-platforms-692
+                  Thu Jun  6 20:15:58 UTC 2013
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic/config/vc707
+ vc707-v7-pcie-dma.awb     Locally Modified          691 
+ vc707-v7-pcie-dma.sdf     Locally Added               0 
+
+
+Added a synplify template file for the VC707.
