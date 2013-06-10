@@ -25,6 +25,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define ASCIILINESZ         (1024)
+
 /*
  * The following #include is necessary on many Unixes but not Linux.
  * It is not needed for Windows platforms.

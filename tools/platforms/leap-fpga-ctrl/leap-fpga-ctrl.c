@@ -14,6 +14,11 @@
 //   Author: Michael Adler
 //
 
+// Note on security
+// The iniparser code permits a maximum line size of ASCIILINESZ.
+// Sizing buffers operating on iniparser lines to reflect this greatly
+// aids in the security of this code.
+
 #define CFG_FILE   CONFDIR "/config"
 #define CONFIG_DIR SCRIPTSDIR "/"
 #define RES_DIR    LOCKDIR "/"
@@ -73,7 +78,7 @@ static int  cfg_has_script = 0;
 static char *cfg_fpga_dev = NULL;
 static char *cfg_bus_id = NULL;
 static char *cfg_prog_cable_id = NULL;
-static char cfg_res_file[1024];
+static char cfg_res_file[2*ASCIILINESZ]; // We concatenate two iniparser values to form this string
 
 void state_print(FILE *f, FPGA_STATE_T state)
 {
@@ -115,7 +120,7 @@ void invoke_helper_script(FPGA_STATE_T state)
 {
     pid_t pid;
     struct stat statb;
-    char script[1024];
+    char script[ASCIILINESZ];
     char *cmd;
 
     //
@@ -219,7 +224,8 @@ void invoke_helper_script(FPGA_STATE_T state)
 //
 char *cfg_get_str(char *dev, char *key)
 {
-    char buf[1024];
+    char buf[2*ASCIILINESZ];
+    char *cfg_value = NULL;
 
     if (strlen(dev) + strlen(key) + 2 > sizeof(buf))
     {
@@ -229,8 +235,19 @@ char *cfg_get_str(char *dev, char *key)
     strcpy(buf, dev);
     strcat(buf, ":");
     strcat(buf, key);
+ 
+    // check to make sure length is less than ASCIILINESZ
 
-    return iniparser_getstring(cfg, buf, NULL);
+    cfg_value = iniparser_getstring(cfg, buf, NULL);
+    if(cfg_value != NULL) 
+    {
+        if (strlen(cfg_value) > ASCIILINESZ)
+        {
+	    error(1, 0, "Error - configuration value too long");
+        }
+    }
+
+    return cfg_value; 
 }
 
 
@@ -265,12 +282,6 @@ void cfg_load_dev(int id)
     cfg_prog_cable_id = cfg_get_str(sec, "prog_cable_id");
 
     // Device-specific reservation lock file
-    if (strlen(RES_DIR) + strlen(sec) + 1 > sizeof(cfg_res_file))
-    {
-        error(1, 0, "Error - reservation file path too long");
-    }
-    strcpy(cfg_res_file, RES_DIR);
-
     if (cfg_bus_id != NULL)
     {
         // Use the bus ID as the name of the lock/status file so that two
@@ -278,11 +289,21 @@ void cfg_load_dev(int id)
         // This allows us to specify multiple control scripts and environments
         // depending on the driver that will be used to communicate with
         // the FPGA.
+        if (strlen(RES_DIR) + strlen(cfg_bus_id) + 1 > sizeof(cfg_res_file))
+        {
+            error(1, 0, "Error - reservation file path too long");
+        }
+        strcpy(cfg_res_file, RES_DIR);
         strcat(cfg_res_file, cfg_bus_id);
     }
     else
     {
         // No bus name.  Use the logical device name.
+        if (strlen(RES_DIR) + strlen(sec) + 1 > sizeof(cfg_res_file))
+        {
+            error(1, 0, "Error - reservation file path too long");
+        }
+        strcpy(cfg_res_file, RES_DIR);
         strcat(cfg_res_file, sec);
     }
 }

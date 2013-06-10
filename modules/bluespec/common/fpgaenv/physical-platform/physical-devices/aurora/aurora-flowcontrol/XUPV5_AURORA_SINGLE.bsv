@@ -106,7 +106,7 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ug_device, NumTypeP
              Add#(credit_extra_extra_width, TAdd#(1,TLog#(total_credits)), width_extra),
              Add#(credit_extra_width, TAdd#(1,TLog#(total_credits)), width), // comes from flow control
              Add#(2, marshal_width_extra, marshal_width),
-             Add#(handshakeSpace, 10, width_extra),
+             Add#(handshakeSpace, 11, width_extra),
              //Log#(interface_words, 1),
              //Add#(magic_string_extra, 48, TMul#(width, TSub#(interface_words, 1))), // comes from the deadbeef identifier strings
              Add#(width, TMul#(width,TSub#(interface_words,1)), marshal_width));
@@ -150,6 +150,7 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ug_device, NumTypeP
     Reg#(Bit#(5)) heartbeatRX <- mkReg(0, clocked_by(controllerClk), reset_by(controllerRst)); 
     Reg#(Bit#(5)) heartbeatConsecutive <- mkReg(0, clocked_by(controllerClk), reset_by(controllerRst)); 
     Reg#(Bool) handshakeTXDone <- mkReg(False, clocked_by(controllerClk), reset_by(controllerRst)); 
+    Reg#(Bool) heartbeatFirst <- mkReg(True, clocked_by(controllerClk), reset_by(controllerRst)); 
     Reg#(Bool) ccLast <- mkReg(False, clocked_by(controllerClk), reset_by(controllerRst)); 
 
     SyncFIFOCountIfc#(Bit#(interface_width),8) serdes_rxfifo <- mkSyncFIFOCount( controllerClk, controllerRst, clk);
@@ -191,7 +192,8 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ug_device, NumTypeP
     endrule
 
     rule txHeartbeat (ccCycles == 0 && heartbeat == 0 && flitCountTX == 0);
-        ug_device.send({2'b10,zeroExtend({heartbeatConsecutive,heartbeatTX})});
+        ug_device.send({2'b10,zeroExtend({pack(handshakeTXDone),heartbeatConsecutive,heartbeatTX})});
+        // We should stop counting if we have completed the handshake. XXX
         heartbeatTX <= heartbeatTX + 1;
     endrule
 
@@ -270,26 +272,38 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ug_device, NumTypeP
             begin
                 $display("RX Got heartbeat");
                 let heartbeatRXNew = data[4:0];
-                let heartbeatConsecutiveNew = data[9:5];
+                let heartbeatConsecutivePartner = data[9:5];
+                let handshakeTXDonePartner = data[10];
                 heartbeatRX <= heartbeatRXNew;
+
                 if(heartbeatRX + 1 == heartbeatRXNew)
                 begin
-                    heartbeatConsecutive <= heartbeatConsecutive + 1;
+
+                    // If I have not seen a heartbeat before and my
+                    // partner is initialized, I have some reset issue
+                    // and I should not handshake.
+ 
+                    if(!heartbeatFirst || (heartbeatFirst && handshakeTXDonePartner == 0))
+                    begin   
+                        heartbeatFirst <= False;
+                        heartbeatConsecutive <= heartbeatConsecutive + 1;
+                    end
                 end
 
                 // We become ready to receive before we become ready to transmit.
                 // This ensures that we do not drop actual RX data, but still
                 // allows us to defend ourselves against early soft errors.
-                if(heartbeatConsecutive > 6 && heartbeatConsecutiveNew > 6)
+                if(heartbeatConsecutive > 6 && heartbeatConsecutivePartner > 6)
                 begin
                     handshakeRXDone <= True;
                 end 
 
-                if(heartbeatConsecutive > 8 && heartbeatConsecutiveNew > 8)
+                if(heartbeatConsecutive > 8 && heartbeatConsecutivePartner > 8)
                 begin
                     handshakeTXDone <= True;
                 end 
 
+                
                 heartbeatCount <= heartbeatCount + 1;
             end          
             else
@@ -356,7 +370,7 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ug_device, NumTypeP
 
 
     rule sendUnderflow;
-        ug_device.underflow(creditUnderflow, {0,pack(handshakeTXDone)},  zeroExtend(txCredits.value),  zeroExtend(rxCredits.value));
+        ug_device.underflow(creditUnderflow, {0,pack(handshakeRXDone),pack(handshakeTXDone)},  zeroExtend(txCredits.value),  zeroExtend(rxCredits.value));
     endrule
 
      

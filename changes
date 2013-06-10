@@ -16365,3 +16365,33 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic/
 
 
 Added a synplify template file for the VC707.
+
+----------
+keflemin    Date: Mon Jun 10 13:41:18 EDT 2013  CSN: CSN-leap-platforms-693
+                  Mon Jun 10 17:41:18 UTC 2013
+
+
+Directory tools/platforms/leap-fpga-ctrl
+ leap-fpga-ctrl.c          Locally Modified          692 
+ iniparser.h               Locally Modified          692 
+ iniparser.c               Locally Modified          692 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-flowcontrol
+ XUPV5_AURORA_SINGLE.bsv   Locally Modified          692 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device-vc707
+ aurora-device-vc707.bsv   Locally Modified          692 
+
+
+1) Fixed potential (though very contrived) buffer overflow
+vulnerability in leap-fpga-ctrl.  Now all buffer are sized according
+to the maximum size allowed by iniparser, and this length is checked
+when accessing the configuration database. 
+
+2) Improved inter-fpga handshaking.  Aurora endpoints can now only
+initialize if the partner Aurora is, itself, not initialized.  This
+helps us deal with FPGAs which do not have the clean reset control of
+the LEAP PCIE interface.
+
+This implementation is a degenerate implementation of a more general
+epoch-based reset distribution mechanism.
