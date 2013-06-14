@@ -16413,3 +16413,16 @@ Directory admin/packages
  leap-platforms            Locally Modified          693 
 
 - v13.06 pre-release for leap-platforms
+
+----------
+mgambhir    Date: Fri Jun 14 18:03:42 EDT 2013  CSN: CSN-leap-platforms-696
+                  Fri Jun 14 22:03:42 UTC 2013
+
+
+Directory debian
+ changelog                 Locally Modified          695 
+
+Directory admin/packages
+ leap-platforms            Locally Modified          695 
+
+- v13.06 release of leap-platforms
