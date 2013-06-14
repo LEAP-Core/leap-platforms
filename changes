@@ -16395,3 +16395,21 @@ the LEAP PCIE interface.
 
 This implementation is a degenerate implementation of a more general
 epoch-based reset distribution mechanism.
+
+----------
+mgambhir    Date: Fri Jun 14 17:58:54 EDT 2013  CSN: CSN-leap-platforms-694
+                  Fri Jun 14 21:58:54 UTC 2013
+
+
+Directory .
+ configure                 Locally Modified          693 
+
+Directory debian
+ control                   Locally Modified          693 
+ changelog                 Locally Modified          693 
+ rules                     Locally Modified          693 
+
+Directory admin/packages
+ leap-platforms            Locally Modified          693 
+
+- v13.06 pre-release for leap-platforms
