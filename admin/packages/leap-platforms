@@ -7,5 +7,5 @@ Description=Description of platforms
 Name=leap-platforms
 Tag=v13.06
 Prerelease=0
-CSN=CSN-leap-platforms-696
+CSN=CSN-leap-platforms-697
 Dependencies=leap/v13.06

@@ -16426,3 +16426,14 @@ Directory admin/packages
  leap-platforms            Locally Modified          695 
 
 - v13.06 release of leap-platforms
+
+----------
+emer        Date: Sat Jun 15 14:26:39 EDT 2013  CSN: CSN-leap-platforms-697
+                  Sat Jun 15 18:26:39 UTC 2013
+
+
+Directory debian
+ control                   Locally Modified          696 
+
+Have apt recommend the .deb file leap-platforms-12.04, which have been 
+manually built and installed for the new LTS release - precise.
