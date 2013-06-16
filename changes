@@ -16413,3 +16413,15 @@ Directory admin/packages
  leap-platforms            Locally Modified          693 
 
 - v13.06 pre-release for leap-platforms
+
+----------
+keflemin    Date: Sat Jun 15 20:41:45 EDT 2013  CSN: CSN-leap-platforms-698
+                  Sun Jun 16 00:41:45 UTC 2013
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic/config/ml605
+ ml605-v6-pcie-dma.awb     Locally Modified          697 
+ ml605-v6-pcie-dma.sdf     Locally Added               0 
+
+
+Added synplify support for ML605. 
