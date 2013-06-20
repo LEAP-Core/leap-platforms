@@ -16425,3 +16425,13 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic/
 
 
 Added synplify support for ML605. 
+
+----------
+mgambhir    Date: Thu Jun 20 15:40:04 EDT 2013  CSN: CSN-leap-platforms-699
+                  Thu Jun 20 19:40:04 UTC 2013
+
+
+Directory admin/packages
+ leap-platforms            Locally Modified          698 
+
+added Sourceurl in admin/packages/leap-platforms for doxygen documentation
