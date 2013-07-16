@@ -16435,3 +16435,34 @@ Directory admin/packages
  leap-platforms            Locally Modified          698 
 
 added Sourceurl in admin/packages/leap-platforms for doxygen documentation
+
+----------
+keflemin    Date: Tue Jul 16 10:58:43 EDT 2013  CSN: CSN-leap-platforms-700
+                  Tue Jul 16 14:58:43 UTC 2013
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-driver-simulation
+ aurora-driver-simulation.awb Locally Modified          699 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora
+ aurora-reliable/          Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-reliable
+ aurora-reliable.bsv       Locally Added               0 
+ aurora-device.awb         Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device-simulation
+ aurora-device-simulation.bsv Locally Modified          699 
+
+
+Initial revision of a frame-based reliability layer for inter-FPGA
+links.  This serves as a drop-in replacement for the existing
+flowcontrol layer.
+
+Current verion implements a sliding window-based protocol with acks.
+Some features are missing.  Retransmission is currently disabled, and
+the checksum function is constant.  We also lack a self-healing
+function in the case of multiple errors.  Furthermore, we ignore error
+information propagated by the SERDES phy.  All of these issues will be
+addressed in a subsequent revision.  From a performance and area
+perspective, however, the code is largely complete.

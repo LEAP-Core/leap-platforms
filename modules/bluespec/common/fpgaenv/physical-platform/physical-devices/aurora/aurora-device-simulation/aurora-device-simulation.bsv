@@ -40,7 +40,8 @@ import Vector::*;
 typedef 3 InterfaceWords;
 typedef `AURORA_INTERFACE_WIDTH InterfaceWidth;
 
-typedef AURORA_DRIVER#(TSub#(TMul#(InterfaceWords, InterfaceWidth),1)) SIMULATION_COMMUNICATION_DRIVER;
+// This type unfortunately requires intimate knowledge of the parity behavior, etc.
+typedef AURORA_DRIVER#(TMul#(InterfaceWords, TSub#(InterfaceWidth,8))) SIMULATION_COMMUNICATION_DRIVER;
 typedef Empty         SIMULATION_COMMUNICATION_WIRES;
 
 interface SIMULATION_COMMUNICATION_DEVICE;
