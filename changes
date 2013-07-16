@@ -16466,3 +16466,18 @@ function in the case of multiple errors.  Furthermore, we ignore error
 information propagated by the SERDES phy.  All of these issues will be
 addressed in a subsequent revision.  From a performance and area
 perspective, however, the code is largely complete.
+
+----------
+keflemin    Date: Tue Jul 16 16:29:15 EDT 2013  CSN: CSN-leap-platforms-701
+                  Tue Jul 16 20:29:15 UTC 2013
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-reliable
+ aurora-reliable.bsv       Locally Modified          700 
+
+
+
+1) Added support for retransmission on ack timeout.  Fixed a handful of bugs 
+   related to this feature.
+
+2) Added CRC to acks.  Unchecked acks are slightly vulnerable to bit flips. 

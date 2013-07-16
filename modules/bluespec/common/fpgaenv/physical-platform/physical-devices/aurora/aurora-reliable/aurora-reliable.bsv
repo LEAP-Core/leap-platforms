@@ -42,6 +42,12 @@ import Vector::*;
     // 11 - frame ack
     // 10 - frame start
 
+// definitions of fragment headers
+Bit#(1) payload = 1'b0;
+Bit#(2) ack     = 2'b11;
+Bit#(2) header   = 2'b10;
+
+
 interface AURORA_WIRES;
 	method Action rxp_in(Bit#(1) i);
 	method Action rxn_in(Bit#(1) i);
@@ -117,6 +123,10 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ug_device, NumTypeP
              Add#(2,control_payload,width), // We use two bita to encode the control payload
              Add#(width_sequence_extra, TLog#(sequence_numbers), width),
              Add#(data_size_extra, TLog#(sequence_numbers), data_size),
+             Add#(parity_size, control_parity_extra, control_payload),
+             Add#(payload_ack_extra, TLog#(sequence_numbers), payload_size),
+             Add#(control_parity_payload_extra, TLog#(sequence_numbers), control_parity_extra),
+             Add#(trunc_extra, TLog#(sequence_numbers), TSub#(width, 2)),  // This two comes from the definition of ack below
              // interface provisos
              Mul#(data_size,interface_words,interface_width)
     );
@@ -140,16 +150,11 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ug_device, NumTypeP
 
         Vector#(payload_size,Bit#(1)) bitVec = unpack(bitsIn);
         return truncate(foldl(oneStep,0,bitVec));*/
-        return 0; 
+        let topBits = truncateLSB(bitsIn);
+        return topBits + 1; 
     endfunction
 
 
-
-    // definitions of fragment headers
-
-    Bit#(1) payload = 1'b0;
-    Bit#(2) ack     = 2'b11;
-    Bit#(2) header   = 2'b10;
 
     let modelClock <- exposeCurrentClock();
 
@@ -203,7 +208,7 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ug_device, NumTypeP
     FIFO#(Bit#(32)) frame_timeout <- mkSizedFIFO(valueof(max_frames));      
     FIFOF#(Bit#(TLog#(sequence_numbers))) ackSequenceNumberTX <- mkSizedFIFOF(valueof(max_frames));      
     FIFOF#(Bit#(TLog#(sequence_numbers))) ackSequenceNumberRX <- mkSizedFIFOF(valueof(max_frames));
-    FIFOF#(Bit#(TLog#(sequence_numbers))) ackRX <- mkSizedFIFOF(4);
+    FIFOF#(Bit#(TSub#(width,2))) ackRX <- mkSizedFIFOF(4);
     FIFOF#(Bit#(TLog#(sequence_numbers))) frame_in_progress <- mkSizedFIFOF(1); // Must be size 1.
     Reg#(Bit#(32)) timer <- mkReg(0);
 
@@ -268,7 +273,8 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ug_device, NumTypeP
     // since there's a timeout on acks we should transmit them quickly.
     rule txFC;
         ackSequenceNumberTX.deq();
-        Bit#(width) creditWord = {ack,zeroExtend(ackSequenceNumberTX.first)};
+        let hashAck =  hash(crc_poly, zeroExtend(ackSequenceNumberTX.first)); // we could use the parityRX, since there is a concept of stream here. 
+        Bit#(width) creditWord = {ack,hashAck,zeroExtend(ackSequenceNumberTX.first)};
         ug_device.send(creditWord);
         txFlowcontrol <= txFlowcontrol + 1;
         transmittingCredits.send;
@@ -306,14 +312,14 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ug_device, NumTypeP
     endrule
 
     // timeout wipes out the known world.
-  /*  rule timeout(False);// XXX DEbug only //(abs(timer - frame_timeout.first) > timeoutThreshold);
+    rule timeout(abs(timer - frame_timeout.first) > timeoutThreshold);
         frame_timeout.clear();
         ackSequenceNumberRX.clear();
         frame_in_progress.clear();
         tx_data_rewind_buffer.rewind();
         tx_sequence_rewind_buffer.rewind();
         $display("TX Timeout: %d", ackSequenceNumberRX.first);
-    endrule*/
+    endrule
 
     // Receive side.  We can send three different message classes, which are encoded using the high
     // order bits of the first flit.  
@@ -366,8 +372,10 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ug_device, NumTypeP
 
     rule handleAck(ackSequenceNumberRX.notEmpty);
         ackRX.deq;
+        let hashExpect = truncateLSB(ackRX.first);        
+        let hashAck =  hash(crc_poly, zeroExtend(ackSequenceNumberTX.first)); // we could use the parityRX, since there is a concept of stream here. 
         // If this was an expected ack, take action
-        if(ackSequenceNumberRX.first == ackRX.first)
+        if((ackSequenceNumberRX.first == truncate(ackRX.first)) && (hashAck == hashExpect))
         begin
             $display("RX ACK: %d", ackRX.first);
             frame_timeout.deq;
@@ -405,17 +413,17 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ug_device, NumTypeP
             provisionalFramePositionRX <= provisionalFramePositionRX + 1;
             // only enq if 1) hash matches 2) no previous errors in the frame 3) we haven't enqueued this data already
             // (i.e.) as part of a correct partial frames
-            $display("RX Data: pos: %d data: %h", provisionalFramePositionRX, serdes_infifo.first);
+            $display("RX Data: pos: %d hash: %h hashExpect: %h, data: %h", provisionalFramePositionRX, hashNext, hashExpected, serdes_infifo.first);
             $display("RX Nohash: %h", data);
-            $display("RX Status: pPos %d pSeq %d pos %d seq %d", provisionalFramePositionRX, provisionalSequenceNumberRX, framePositionRX, sequenceNumberRX);
+            $display("RX Status: pPos %d pSeq %d pos %d seq %d frameErrorRX %d", provisionalFramePositionRX, provisionalSequenceNumberRX, framePositionRX, sequenceNumberRX, frameErrorRX);
             $display("RX Wide: %h", serdes_infifo.first);
 
             // XXX remove for reliability tests
-            if(provisionalFramePositionRX != framePositionRX)
-            begin
-                $display("Positions not correct.");
-                $finish;
-            end
+            //if(provisionalFramePositionRX != framePositionRX)
+            //begin
+            //    $display("Positions not correct.");
+            //    $finish;
+            //end
 
             if(hashExpected == hashNext && !frameErrorRX) 
             begin
@@ -458,7 +466,12 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ug_device, NumTypeP
             // to deal with wrap around, we use an enlarged frame space.  The secondor clause handles the wrap case.
             Bit#(TLog#(sequence_numbers)) header_sequence = truncate(data);
             Bit#(1) header_top = truncateLSB(header_sequence);
-            frameErrorRX <= (sequenceNumberRX > truncate(header_sequence)) || (header_top > truncateLSB(sequenceNumberRX)) ;
+	    Bit#(1) seq_top = truncateLSB(sequenceNumberRX);
+
+            // Second clause handles the wrap-around case, where the leading 0 packets are younger than the leading 1 packets 
+            Bool frameErrorNext = (sequenceNumberRX < truncate(header_sequence)) || (seq_top == 1 && ((header_sequence < fromInteger(valueof(max_frames)))));
+            $display("frame error %d, seq clause %d, wrap clause %d", frameErrorNext, (sequenceNumberRX < truncate(header_sequence)),  (seq_top == 1 && ((header_sequence < fromInteger(valueof(max_frames))))));
+            frameErrorRX <= frameErrorNext;
             provisionalSequenceNumberRX <= header_sequence; 
             parityRX <= 0;
         end
