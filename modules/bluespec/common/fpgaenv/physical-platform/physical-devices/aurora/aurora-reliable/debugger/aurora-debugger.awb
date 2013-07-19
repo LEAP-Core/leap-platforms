@@ -1,0 +1,9 @@
+%name Aurora Device Reliable Flowcontrol Debugger
+%desc Aurora Device Reliable Flowcontrol Debugger
+
+%provides aurora_flowcontrol_debugger
+
+
+%sources -t BSV -v PUBLIC aurora-reliable-debugger.bsv
+
+

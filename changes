@@ -16481,3 +16481,43 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aur
    related to this feature.
 
 2) Added CRC to acks.  Unchecked acks are slightly vulnerable to bit flips. 
+
+----------
+keflemin    Date: Fri Jul 19 15:55:12 EDT 2013  CSN: CSN-leap-platforms-702
+                  Fri Jul 19 19:55:12 UTC 2013
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-flowcontrol
+ debugger/                 Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-flowcontrol/debugger
+ aurora-debugger.awb       Locally Added               0 
+ aurora-flowcontrol-debugger.bsv Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-flowcontrol
+ aurora-flowcontrol.bsv    Locally Added               - 
+ XUPV5_AURORA_SINGLE.bsv   Locally Removed           701 
+ aurora-device.awb         Locally Modified          701 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-reliable
+ aurora-reliable.bsv       Locally Modified          701 
+ debugger/                 Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-reliable/debugger
+ aurora-reliable-debugger.bsv Locally Added               0 
+ aurora-debugger.awb       Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-reliable
+ aurora-device.awb         Locally Modified          701 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device-vc707
+ aurora-device-vc707.bsv   Locally Modified          701 
+
+
+1) Refactored flowcontrol interface defintions to allow upper layers
+to use either reliable or basic flowcontrol
+
+2) Factored statistics collection to its own module.  The two link
+layer schemes have different statistics counters, and so must have
+different modules for accessing them.
+

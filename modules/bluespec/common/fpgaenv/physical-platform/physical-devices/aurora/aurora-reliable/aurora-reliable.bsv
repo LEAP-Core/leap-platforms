@@ -47,6 +47,53 @@ Bit#(1) payload = 1'b0;
 Bit#(2) ack     = 2'b11;
 Bit#(2) header   = 2'b10;
 
+typedef TMul#(interface_words, TSub#(word_width,7)) AURORA_INTERFACE_WIDTH#(numeric type interface_words, numeric type word_width);
+
+interface CRC#(numeric type poly_width, numeric type data_size);
+
+    method Bit#(TSub#(poly_width,1)) hash(Bit#(poly_width) poly, Bit#(data_size) bitsIn);
+
+endinterface
+
+
+module mkCRC#(Bit#(poly_width) crc_poly) (CRC#(poly_width, data_size))
+    provisos(
+        Add#(1,parity_size,poly_width),
+        Add#(data_extra, parity_size, data_size)
+    );
+
+
+    
+    // do a combinational crc.    
+    // use payload_size so as to chain in some bits from the previous word
+    function Bit#(parity_size) doHash(Bit#(poly_width) poly, Bit#(data_size) bitsIn);
+     
+        /*Bit#(parity_size) poly_trunc = truncateLSB(reverseBits(poly));
+
+        function Bit#(data_size) oneStep(Bit#(data_size) rem_temp, Bit#(1) bitIn);
+            Bit#(data_size) result = rem_temp >> 1;
+            if(bitIn==1) // grab top bit
+            begin
+                result = (rem_temp >> 1) ^ zeroExtend(poly_trunc);
+            end
+            return result;
+        endfunction 
+
+        Vector#(data_size,Bit#(1)) bitVec = unpack(bitsIn);
+        return truncate(foldl(oneStep,0,bitVec));*/
+
+        let topBits = truncateLSB(bitsIn);
+        return topBits + 1; 
+    endfunction
+
+    method hash (Bit#(poly_width) poly, Bit#(data_size) bitsIn) = doHash(poly, bitsIn);
+
+endmodule
+
+//(*synthesize*)
+//module mkCRCLocal#(Bit#(8) crc_poly) (CRC#(8, 63));
+//    let crc <- mkCRC(crc_poly);
+//endmodule
 
 interface AURORA_WIRES;
 	method Action rxp_in(Bit#(1) i);
@@ -80,15 +127,12 @@ interface AURORA_DRIVER#(numeric type interface_width);
     method Bool     credit_underflow;
     method Bit#(32) rx_count;
     method Bit#(32) tx_count;
-    method Bit#(32) heartbeat_count;
     method Bit#(32) error_count;
     method Bit#(32) rx_fifo_count;
     method Bit#(32) tx_fifo_count;
-    method Bit#(16) tx_credit;
-    method Bit#(16) rx_credit;
     method Bit#(16) data_drops;
-    method Bit#(32) tx_fc;
-    method Bit#(32) rx_fc;
+    method Bit#(32) rx_frames;
+    method Bit#(32) rx_frames_correct;
 
 endinterface
 
@@ -108,6 +152,7 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ug_device, NumTypeP
     provisos(
              // provisos for protocol
              NumAlias#(7, parity_size),
+             Add#(1, parity_size, poly_width),
              NumAlias#(64, frame_size),
              NumAlias#(2, max_frames),
              NumAlias#(8, sequence_numbers),
@@ -131,31 +176,6 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ug_device, NumTypeP
              Mul#(data_size,interface_words,interface_width)
     );
 
-    Bit#(8) crc_poly = 'h89; // a 7 bit crc poly
-
-    // do a combinational crc.    
-    // use payload_size so as to chain in some bits from the previous word
-    function Bit#(parity_size) hash(Bit#(poly_width) poly, Bit#(payload_size) bitsIn);
-     /*
-        Bit#(parity_size) poly_trunc = truncateLSB(reverseBits(poly));
-
-        function Bit#(payload_size) oneStep(Bit#(payload_size) rem_temp, Bit#(1) bitIn);
-            Bit#(payload_size) result = rem_temp >> 1;
-            if(bitIn==1) // grab top bit
-            begin
-                result = (rem_temp >> 1) ^ zeroExtend(poly_trunc);
-            end
-            return result;
-        endfunction 
-
-        Vector#(payload_size,Bit#(1)) bitVec = unpack(bitsIn);
-        return truncate(foldl(oneStep,0,bitVec));*/
-        let topBits = truncateLSB(bitsIn);
-        return topBits + 1; 
-    endfunction
-
-
-
     let modelClock <- exposeCurrentClock();
 
     let clk <- exposeCurrentClock();
@@ -165,35 +185,24 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ug_device, NumTypeP
     let controllerRst = ug_device.aurora_rst;
     let isAuroraInRst <- isResetAsserted(clocked_by controllerClk, reset_by controllerRst);
 
+    Bit#(poly_width) crc_poly = 'h89; // a 7 bit crc poly
 
+    CRC#(poly_width, payload_size) crcRX <- mkCRC(crc_poly);
+    CRC#(poly_width, payload_size) crcTX <- mkCRC(crc_poly);
 
     Reg#(Bit#(10)) ccCycles  <- mkReg(maxBound, clocked_by(controllerClk), reset_by(controllerRst)); 
-    Reg#(Bit#(2)) handshakeRX <- mkReg(0, clocked_by(controllerClk), reset_by(controllerRst)); 
-    Reg#(Bit#(TAdd#(1,TLog#(interface_words)))) flitCountRX <-  mkReg(0, clocked_by(controllerClk), reset_by(controllerRst));    
-    Reg#(Bit#(TAdd#(1,TLog#(interface_words)))) flitCountTX <-  mkReg(0, clocked_by(controllerClk), reset_by(controllerRst));    
     Reg#(Bool)    frameErrorRX <-  mkReg(True, clocked_by(controllerClk), reset_by(controllerRst)); 
-    Reg#(Bit#(2)) handshakeTX <- mkReg(0, clocked_by(controllerClk), reset_by(controllerRst)); 
 
-
-    COUNTER#(TAdd#(1,TLog#(total_credits))) rxCredits   <- mkLCounter(0, clocked_by(controllerClk), reset_by(controllerRst)); 
-    CrossingReg#(Bit#(16)) rxCreditsCross <- mkNullCrossingReg(modelClock, 0, clocked_by controllerClk, reset_by controllerRst);
     CrossingReg#(Bit#(16)) dataDrops <- mkNullCrossingReg(modelClock, 0, clocked_by controllerClk, reset_by controllerRst);
-    CrossingReg#(Bit#(32)) rxFlowcontrol <- mkNullCrossingReg(modelClock, 0, clocked_by controllerClk, reset_by controllerRst);
-    CrossingReg#(Bit#(32)) txFlowcontrol <- mkNullCrossingReg(modelClock, 0, clocked_by controllerClk, reset_by controllerRst);
-    CrossingReg#(Bit#(32)) heartbeatCount <- mkNullCrossingReg(modelClock, 0, clocked_by controllerClk, reset_by controllerRst);
- 
+    CrossingReg#(Bit#(32)) rxFrames <- mkNullCrossingReg(modelClock, 0, clocked_by controllerClk, reset_by controllerRst);
+    CrossingReg#(Bit#(32)) rxFramesCorrect <- mkNullCrossingReg(modelClock, 0, clocked_by controllerClk, reset_by controllerRst);
 
     Reg#(Bool) handshakeRXDone <- mkReg(False, clocked_by(controllerClk), reset_by(controllerRst));  
-    Reg#(Bit#(5)) heartbeatTX <- mkReg(0, clocked_by(controllerClk), reset_by(controllerRst)); 
-    Reg#(Bit#(5)) heartbeatRX <- mkReg(0, clocked_by(controllerClk), reset_by(controllerRst)); 
-    Reg#(Bit#(5)) heartbeatConsecutive <- mkReg(0, clocked_by(controllerClk), reset_by(controllerRst)); 
     Reg#(Bool) handshakeTXDone <- mkReg(False, clocked_by(controllerClk), reset_by(controllerRst)); 
-    Reg#(Bool) heartbeatFirst <- mkReg(True, clocked_by(controllerClk), reset_by(controllerRst)); 
     Reg#(Bool) ccLast <- mkReg(False, clocked_by(controllerClk), reset_by(controllerRst)); 
 
     SyncFIFOCountIfc#(Bit#(interface_width),8) serdes_rxfifo <- mkSyncFIFOCount( controllerClk, controllerRst, clk);
     SyncFIFOCountIfc#(Bit#(interface_width),8) serdes_txfifo <- mkSyncFIFOCount( clk, rst, controllerClk);
-
 
     Reg#(Bit#(TLog#(frame_size))) framePositionRX <- mkReg(0, clocked_by controllerClk, reset_by controllerRst);
     Reg#(Bit#(TLog#(frame_size))) provisionalFramePositionRX <- mkReg(0, clocked_by controllerClk, reset_by controllerRst);
@@ -205,12 +214,12 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ug_device, NumTypeP
     Reg#(Bit#(parity_size)) parityTX <- mkReg(0, clocked_by controllerClk, reset_by controllerRst);
     RewindFIFOVariableCommitLevel#(Bit#(data_size),frame_size) tx_data_rewind_buffer <- mkRewindFIFOVariableCommitLevel(clocked_by controllerClk, reset_by controllerRst);
     RewindFIFOVariableCommitLevel#(Bit#(TLog#(sequence_numbers)),max_frames) tx_sequence_rewind_buffer <- mkRewindFIFOVariableCommitLevel(clocked_by controllerClk, reset_by controllerRst);
-    FIFO#(Bit#(32)) frame_timeout <- mkSizedFIFO(valueof(max_frames));      
-    FIFOF#(Bit#(TLog#(sequence_numbers))) ackSequenceNumberTX <- mkSizedFIFOF(valueof(max_frames));      
-    FIFOF#(Bit#(TLog#(sequence_numbers))) ackSequenceNumberRX <- mkSizedFIFOF(valueof(max_frames));
-    FIFOF#(Bit#(TSub#(width,2))) ackRX <- mkSizedFIFOF(4);
-    FIFOF#(Bit#(TLog#(sequence_numbers))) frame_in_progress <- mkSizedFIFOF(1); // Must be size 1.
-    Reg#(Bit#(32)) timer <- mkReg(0);
+    FIFO#(Bit#(32)) frame_timeout <- mkSizedFIFO(valueof(max_frames), clocked_by controllerClk, reset_by controllerRst);      
+    FIFOF#(Bit#(TLog#(sequence_numbers))) ackSequenceNumberTX <- mkSizedFIFOF(valueof(max_frames), clocked_by controllerClk, reset_by controllerRst);      
+    FIFOF#(Bit#(TLog#(sequence_numbers))) ackSequenceNumberRX <- mkSizedFIFOF(valueof(max_frames), clocked_by controllerClk, reset_by controllerRst);
+    FIFOF#(Bit#(TSub#(width,2))) ackRX <- mkSizedFIFOF(4, clocked_by controllerClk, reset_by controllerRst);
+    FIFOF#(Bit#(TLog#(sequence_numbers))) frame_in_progress <- mkSizedFIFOF(1, clocked_by controllerClk, reset_by controllerRst); // Must be size 1.
+    Reg#(Bit#(32)) timer <- mkReg(0, clocked_by controllerClk, reset_by controllerRst);
 
     // need to make sure that flow control can come through
     PulseWire transmittingCredits <- mkPulseWire(clocked_by(controllerClk), reset_by(controllerRst));
@@ -273,10 +282,9 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ug_device, NumTypeP
     // since there's a timeout on acks we should transmit them quickly.
     rule txFC;
         ackSequenceNumberTX.deq();
-        let hashAck =  hash(crc_poly, zeroExtend(ackSequenceNumberTX.first)); // we could use the parityRX, since there is a concept of stream here. 
+        let hashAck =  crcTX.hash(crc_poly, zeroExtend(ackSequenceNumberTX.first)); // we could use the parityRX, since there is a concept of stream here. 
         Bit#(width) creditWord = {ack,hashAck,zeroExtend(ackSequenceNumberTX.first)};
         ug_device.send(creditWord);
-        txFlowcontrol <= txFlowcontrol + 1;
         transmittingCredits.send;
         $display("TX raw: %h", creditWord); 
         $display("TX ACK: %d", ackSequenceNumberTX.first);
@@ -291,7 +299,7 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ug_device, NumTypeP
 
     rule txSend (!transmittingCredits && frame_in_progress.notEmpty);
         tx_data_rewind_buffer.deq;
-        Bit#(parity_size) parity = hash(crc_poly, {parityTX, tx_data_rewind_buffer.first});
+        Bit#(parity_size) parity = crcTX.hash(crc_poly, {parityTX, tx_data_rewind_buffer.first});
         parityTX <= parity;
         let txRaw = {payload, parity, tx_data_rewind_buffer.first};
         ug_device.send(txRaw);
@@ -373,7 +381,7 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ug_device, NumTypeP
     rule handleAck(ackSequenceNumberRX.notEmpty);
         ackRX.deq;
         let hashExpect = truncateLSB(ackRX.first);        
-        let hashAck =  hash(crc_poly, zeroExtend(ackSequenceNumberTX.first)); // we could use the parityRX, since there is a concept of stream here. 
+        let hashAck =  crcRX.hash(crc_poly, zeroExtend(ackSequenceNumberTX.first)); // we could use the parityRX, since there is a concept of stream here. 
         // If this was an expected ack, take action
         if((ackSequenceNumberRX.first == truncate(ackRX.first)) && (hashAck == hashExpect))
         begin
@@ -408,7 +416,7 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ug_device, NumTypeP
             // However, we can't spuriously ack future packets.  To handle this issue, we need to have a few 
             // forbidden packets. 
 
-            let hashNext =  hash(crc_poly, {parityRX, data});
+            let hashNext =  crcRX.hash(crc_poly, {parityRX, data});
             parityRX <= hashNext;
             provisionalFramePositionRX <= provisionalFramePositionRX + 1;
             // only enq if 1) hash matches 2) no previous errors in the frame 3) we haven't enqueued this data already
@@ -437,9 +445,9 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ug_device, NumTypeP
                         // next up we should send the sequence number.
                         frameErrorRX <= True; // We need to see a header before commencing data
                         sequenceNumberRX <= sequenceNumberRX + 1; // we completed a packet
+                        rxFramesCorrect <= rxFramesCorrect + 1;
                     end
                   
-                    
                     framePositionRX <= framePositionRX + 1;                           
                 end
                 // If we got a frame without error, then we should send an ack.  
@@ -451,7 +459,7 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ug_device, NumTypeP
             end
             else 
             begin
-
+                // Need to shoot down whatever is in the marshaller
                 $display("RX Marsh: (drop) %h", data);
                 frameErrorRX <= True;
             end
@@ -459,6 +467,7 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ug_device, NumTypeP
         else // since acks went away we have only this leg.
         begin
             $display("RX Header: seq_no: %d", data);
+            rxFrames <= rxFrames + 1;
             // getting a header should cause us to reset our counters. but we should do this at the higher level.
             provisionalFramePositionRX <= 0;
             // did we get the right sequence number?  Since acks may be dropped at the transmitter, 
@@ -467,7 +476,7 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ug_device, NumTypeP
             Bit#(TLog#(sequence_numbers)) header_sequence = truncate(data);
             Bit#(1) header_top = truncateLSB(header_sequence);
 	    Bit#(1) seq_top = truncateLSB(sequenceNumberRX);
-
+            
             // Second clause handles the wrap-around case, where the leading 0 packets are younger than the leading 1 packets 
             Bool frameErrorNext = (sequenceNumberRX < truncate(header_sequence)) || (seq_top == 1 && ((header_sequence < fromInteger(valueof(max_frames)))));
             $display("frame error %d, seq clause %d, wrap clause %d", frameErrorNext, (sequenceNumberRX < truncate(header_sequence)),  (seq_top == 1 && ((header_sequence < fromInteger(valueof(max_frames))))));
@@ -504,24 +513,17 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ug_device, NumTypeP
         method deq = serdes_rxfifo.deq();
 
         method first = serdes_rxfifo.first();
-
         
         method channel_up = ug_device.channel_up;
         method lane_up = ug_device.lane_up;
         method hard_err = ug_device.hard_err;
         method soft_err = ug_device.soft_err;
-        method rx_credit = ?;
-        method credit_underflow = ?;//creditUnderflow.crossed();
-        method tx_credit = ?;
         method data_drops = dataDrops.crossed();
-        method tx_fc = txFlowcontrol.crossed();
-        method rx_fc = rxFlowcontrol.crossed();
-        method heartbeat_count = heartbeatCount.crossed();
         method rx_count = ug_device.rx_count;
         method tx_count = ug_device.tx_count;
         method error_count = ug_device.error_count;
-        method rx_fifo_count = zeroExtend(pack(serdes_rxfifo.dCount));
-        method tx_fifo_count = zeroExtend(pack(serdes_txfifo.sCount));
+        method rx_frames = rxFrames.crossed();
+        method rx_frames_correct = rxFramesCorrect.crossed();
     endinterface
  
 endmodule

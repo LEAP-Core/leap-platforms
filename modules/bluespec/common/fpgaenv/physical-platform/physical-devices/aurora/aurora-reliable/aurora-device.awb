@@ -1,7 +1,8 @@
-%name Aurora Device Relibale Flowcontrol
+%name Aurora Device Reliable Flowcontrol
 %desc Aurora Device Reliable Flowcontrol
 
 %provides aurora_flowcontrol
+%requires aurora_flowcontrol_debugger
 
 
 %sources -t BSV -v PUBLIC aurora-reliable.bsv

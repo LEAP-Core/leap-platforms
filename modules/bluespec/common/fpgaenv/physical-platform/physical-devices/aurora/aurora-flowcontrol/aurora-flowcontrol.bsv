@@ -81,6 +81,8 @@ interface AURORA_DRIVER#(numeric type interface_width);
 
 endinterface
 
+typedef TSub#(TMul#(interface_words, word_width),1) AURORA_INTERFACE_WIDTH#(numeric type interface_words, numeric type word_width);
+
 interface AURORA_DEVICE#(numeric type width);
     (* prefix = "" *)      
     interface AURORA_WIRES wires;

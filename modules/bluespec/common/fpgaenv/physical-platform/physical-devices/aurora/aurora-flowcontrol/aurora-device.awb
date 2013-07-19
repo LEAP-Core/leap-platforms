@@ -1,8 +1,9 @@
-%name Aurora Device Flowcontrol
-%desc Aurora Device Flowcontrol
+%name Aurora Device Flowcontrol 
+%desc Aurora Device Flowcontrol 
 
 %provides aurora_flowcontrol
+%requires aurora_flowcontrol_debugger
 
-%sources -t BSV -v PUBLIC XUPV5_AURORA_SINGLE.bsv
+%sources -t BSV -v PUBLIC aurora-flowcontrol.bsv
 
 
