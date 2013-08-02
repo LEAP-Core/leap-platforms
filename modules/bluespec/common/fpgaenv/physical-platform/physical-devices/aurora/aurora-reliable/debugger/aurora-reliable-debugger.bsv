@@ -35,8 +35,9 @@ import Vector::*;
 
 `include "awb/provides/librl_bsv_base.bsh"
 `include "awb/provides/librl_bsv_storage.bsh"
-`include "awb/provides/aurora_driver.bsh"
 `include "awb/provides/aurora_device.bsh"
+`include "awb/provides/aurora_driver.bsh"
+`include "awb/provides/aurora_flowcontrol.bsh"
 `include "awb/provides/stdio_service.bsh"
 `include "awb/provides/soft_services.bsh"
 `include "awb/provides/soft_strings.bsh"
@@ -49,7 +50,7 @@ module [CONNECTED_MODULE] mkAuroraDebugger#(Integer ifcNum, AURORA_COMPLEX_DRIVE
     STDIO#(Bit#(64)) stdio <- mkStdIO();  
     // periodic debug printout
     let aurSndMsg <- getGlobalStringUID("Aurora %d channel_up %x, lane_up %x, error_count %x rx_count %x tx_count %x \n");
-    let aurFCMsg <- getGlobalStringUID("Frames RX'ed: %x, Correct Frames RX'ed %x\n");
+    let aurFCMsg <- getGlobalStringUID("Frames RX'ed: %x, Correct Frames RX'ed %x, Acked Frames %x, Frames TX'ed %x, Correct Frames TX'ed %x, Timeouts %x\n");
     let aurCreditMsg <- getGlobalStringUID("Data_drops %x  \n");
 
     Reg#(Bit#(26)) counter <- mkReg(0);
@@ -67,7 +68,7 @@ module [CONNECTED_MODULE] mkAuroraDebugger#(Integer ifcNum, AURORA_COMPLEX_DRIVE
         end
         else if (counter + 1 == 2)
         begin
-            stdio.printf(aurFCMsg, list2(zeroExtend(pack(targetDriver.rx_frames)), zeroExtend(pack(targetDriver.rx_frames_correct))));
+            stdio.printf(aurFCMsg, list6(zeroExtend(pack(targetDriver.rx_frames)), zeroExtend(pack(targetDriver.rx_frames_correct)), zeroExtend(pack(targetDriver.rx_frames_acked)), zeroExtend(pack(targetDriver.tx_frames)), zeroExtend(pack(targetDriver.tx_frames_correct)), zeroExtend(pack(targetDriver.timeouts))));
         end
     endrule
        

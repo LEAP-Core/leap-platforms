@@ -47,15 +47,17 @@ Bit#(1) payload = 1'b0;
 Bit#(2) ack     = 2'b11;
 Bit#(2) header   = 2'b10;
 
-typedef TMul#(interface_words, TSub#(word_width,7)) AURORA_INTERFACE_WIDTH#(numeric type interface_words, numeric type word_width);
+typedef 8 ParitySize;
+
+typedef TMul#(interface_words, TSub#(word_width,TAdd#(1,ParitySize))) AURORA_INTERFACE_WIDTH#(numeric type interface_words, numeric type word_width);
 
 interface CRC#(numeric type poly_width, numeric type data_size);
 
-    method Bit#(TSub#(poly_width,1)) hash(Bit#(poly_width) poly, Bit#(data_size) bitsIn);
+    method ActionValue#(Bit#(TSub#(poly_width,1))) hash(Bit#(poly_width) poly, Bit#(data_size) bitsIn);
 
 endinterface
 
-
+/*
 module mkCRC#(Bit#(poly_width) crc_poly) (CRC#(poly_width, data_size))
     provisos(
         Add#(1,parity_size,poly_width),
@@ -66,9 +68,9 @@ module mkCRC#(Bit#(poly_width) crc_poly) (CRC#(poly_width, data_size))
     
     // do a combinational crc.    
     // use payload_size so as to chain in some bits from the previous word
-    function Bit#(parity_size) doHash(Bit#(poly_width) poly, Bit#(data_size) bitsIn);
-     
-        /*Bit#(parity_size) poly_trunc = truncateLSB(reverseBits(poly));
+    function ActionValue#(Bit#(parity_size)) doHash(Bit#(poly_width) poly, Bit#(data_size) bitsIn);
+        actionvalue
+        Bit#(parity_size) poly_trunc = truncateLSB(reverseBits(poly));
 
         function Bit#(data_size) oneStep(Bit#(data_size) rem_temp, Bit#(1) bitIn);
             Bit#(data_size) result = rem_temp >> 1;
@@ -80,15 +82,44 @@ module mkCRC#(Bit#(poly_width) crc_poly) (CRC#(poly_width, data_size))
         endfunction 
 
         Vector#(data_size,Bit#(1)) bitVec = unpack(bitsIn);
-        return truncate(foldl(oneStep,0,bitVec));*/
+        return truncate(foldr(oneStep,0,bitVec));
 
         let topBits = truncateLSB(bitsIn);
         return topBits + 1; 
+        endactionvalue
     endfunction
 
     method hash (Bit#(poly_width) poly, Bit#(data_size) bitsIn) = doHash(poly, bitsIn);
 
 endmodule
+*/
+
+(* noinline *)
+    function Bit#(8) doHash(Bit#(80) bitsIn);
+       
+            Bit#(9) poly = 'h183;
+            Bit#(8) poly_trunc = truncateLSB(reverseBits(poly));
+
+            //$display("Hash in %h", bitsIn);
+            function Bit#(80) oneStep(Bit#(1) bitIn, Bit#(80) rem_temp);
+                Bit#(80) result = rem_temp >> 1;
+                if(bitIn==1) // grab top bit
+                begin
+                    result = (rem_temp >> 1) ^ zeroExtend(poly_trunc);
+                end
+                return result;
+             endfunction
+
+            Vector#(80,Bit#(1)) bitVec = unpack(bitsIn);
+            return truncate(foldr(oneStep,0,bitVec));
+       
+    endfunction
+
+//(* inline *)
+//function Bit#(n) doCRC(Bit#(n) value);
+//    return hashBits(value);
+//endfunction
+
 
 //(*synthesize*)
 //module mkCRCLocal#(Bit#(8) crc_poly) (CRC#(8, 63));
@@ -133,6 +164,10 @@ interface AURORA_DRIVER#(numeric type interface_width);
     method Bit#(16) data_drops;
     method Bit#(32) rx_frames;
     method Bit#(32) rx_frames_correct;
+    method Bit#(32) rx_frames_acked;
+    method Bit#(32) tx_frames;
+    method Bit#(32) tx_frames_correct;
+    method Bit#(32) timeouts;
 
 endinterface
 
@@ -147,11 +182,11 @@ endinterface
 // Also the width of the interface should automatically adjust based on 
 // clock ratios.
 
-module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ug_device, NumTypeParam#(interface_words) interfaceWordsParam) 
+module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ugDevice, NumTypeParam#(interface_words) interfaceWordsParam) 
     (AURORA_DEVICE#(interface_width))
     provisos(
              // provisos for protocol
-             NumAlias#(7, parity_size),
+             NumAlias#(ParitySize, parity_size),
              Add#(1, parity_size, poly_width),
              NumAlias#(64, frame_size),
              NumAlias#(2, max_frames),
@@ -163,15 +198,18 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ug_device, NumTypeP
              Add#(1, payload_width, width),	
              Add#(data_size,parity_size,payload_size),
              Add#(1,payload_size,width), // We use one bit to encode the data payload
+             Add#(TAdd#(1,parity_size), data_size, width),
              // provisos related to in-band control
              Add#(TLog#(sequence_numbers), extra_control, control_payload),
              Add#(2,control_payload,width), // We use two bita to encode the control payload
              Add#(width_sequence_extra, TLog#(sequence_numbers), width),
              Add#(data_size_extra, TLog#(sequence_numbers), data_size),
-             Add#(parity_size, control_parity_extra, control_payload),
+             Add#(parity_size, control_data_size, control_payload),
              Add#(payload_ack_extra, TLog#(sequence_numbers), payload_size),
-             Add#(control_parity_payload_extra, TLog#(sequence_numbers), control_parity_extra),
+             Add#(control_parity_payload_extra, TLog#(sequence_numbers), control_data_size),
+             Add#(1, control_data_size, data_size),
              Add#(trunc_extra, TLog#(sequence_numbers), TSub#(width, 2)),  // This two comes from the definition of ack below
+             Add#(TAdd#(2,parity_size), control_data_size, width),
              // interface provisos
              Mul#(data_size,interface_words,interface_width)
     );
@@ -181,28 +219,29 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ug_device, NumTypeP
     let clk <- exposeCurrentClock();
     let rst <- exposeCurrentReset();
     let isModelInRst <- isResetAsserted();
-    let controllerClk = ug_device.aurora_clk;
-    let controllerRst = ug_device.aurora_rst;
+    let controllerClk = ugDevice.aurora_clk;
+    let controllerRst = ugDevice.aurora_rst;
     let isAuroraInRst <- isResetAsserted(clocked_by controllerClk, reset_by controllerRst);
 
-    Bit#(poly_width) crc_poly = 'h89; // a 7 bit crc poly
+    //Bit#(poly_width) crc_poly = 'h89; // a 7 bit crc poly
 
-    CRC#(poly_width, payload_size) crcRX <- mkCRC(crc_poly);
-    CRC#(poly_width, payload_size) crcTX <- mkCRC(crc_poly);
-
-    Reg#(Bit#(10)) ccCycles  <- mkReg(maxBound, clocked_by(controllerClk), reset_by(controllerRst)); 
+    Reg#(Bit#(3)) ccCycles  <- mkReg(maxBound, clocked_by(controllerClk), reset_by(controllerRst)); 
     Reg#(Bool)    frameErrorRX <-  mkReg(True, clocked_by(controllerClk), reset_by(controllerRst)); 
 
     CrossingReg#(Bit#(16)) dataDrops <- mkNullCrossingReg(modelClock, 0, clocked_by controllerClk, reset_by controllerRst);
     CrossingReg#(Bit#(32)) rxFrames <- mkNullCrossingReg(modelClock, 0, clocked_by controllerClk, reset_by controllerRst);
     CrossingReg#(Bit#(32)) rxFramesCorrect <- mkNullCrossingReg(modelClock, 0, clocked_by controllerClk, reset_by controllerRst);
+    CrossingReg#(Bit#(32)) rxFramesAcked <- mkNullCrossingReg(modelClock, 0, clocked_by controllerClk, reset_by controllerRst);
+    CrossingReg#(Bit#(32)) txFrames <- mkNullCrossingReg(modelClock, 0, clocked_by controllerClk, reset_by controllerRst);
+    CrossingReg#(Bit#(32)) txFramesCorrect <- mkNullCrossingReg(modelClock, 0, clocked_by controllerClk, reset_by controllerRst);
+    CrossingReg#(Bit#(32)) timeouts <- mkNullCrossingReg(modelClock, 0, clocked_by controllerClk, reset_by controllerRst);
 
     Reg#(Bool) handshakeRXDone <- mkReg(False, clocked_by(controllerClk), reset_by(controllerRst));  
     Reg#(Bool) handshakeTXDone <- mkReg(False, clocked_by(controllerClk), reset_by(controllerRst)); 
     Reg#(Bool) ccLast <- mkReg(False, clocked_by(controllerClk), reset_by(controllerRst)); 
 
-    SyncFIFOCountIfc#(Bit#(interface_width),8) serdes_rxfifo <- mkSyncFIFOCount( controllerClk, controllerRst, clk);
-    SyncFIFOCountIfc#(Bit#(interface_width),8) serdes_txfifo <- mkSyncFIFOCount( clk, rst, controllerClk);
+    SyncFIFOCountIfc#(Bit#(interface_width),8) serdesRxfifo <- mkSyncFIFOCount( controllerClk, controllerRst, clk);
+    SyncFIFOCountIfc#(Bit#(interface_width),8) serdesTxfifo <- mkSyncFIFOCount( clk, rst, controllerClk);
 
     Reg#(Bit#(TLog#(frame_size))) framePositionRX <- mkReg(0, clocked_by controllerClk, reset_by controllerRst);
     Reg#(Bit#(TLog#(frame_size))) provisionalFramePositionRX <- mkReg(0, clocked_by controllerClk, reset_by controllerRst);
@@ -212,45 +251,62 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ug_device, NumTypeP
     Reg#(Bit#(TLog#(sequence_numbers))) sequenceNumberTX <- mkReg(0, clocked_by controllerClk, reset_by controllerRst);
     Reg#(Bit#(parity_size)) parityRX <- mkReg(0, clocked_by controllerClk, reset_by controllerRst);
     Reg#(Bit#(parity_size)) parityTX <- mkReg(0, clocked_by controllerClk, reset_by controllerRst);
-    RewindFIFOVariableCommitLevel#(Bit#(data_size),frame_size) tx_data_rewind_buffer <- mkRewindFIFOVariableCommitLevel(clocked_by controllerClk, reset_by controllerRst);
-    RewindFIFOVariableCommitLevel#(Bit#(TLog#(sequence_numbers)),max_frames) tx_sequence_rewind_buffer <- mkRewindFIFOVariableCommitLevel(clocked_by controllerClk, reset_by controllerRst);
-    FIFO#(Bit#(32)) frame_timeout <- mkSizedFIFO(valueof(max_frames), clocked_by controllerClk, reset_by controllerRst);      
+    RewindFIFOVariableCommitLevel#(Bit#(data_size),TMul#(max_frames, frame_size)) txDataRewindBuffer <- mkRewindFIFOVariableCommitLevel(clocked_by controllerClk, reset_by controllerRst);
+    RewindFIFOVariableCommitLevel#(Bit#(TLog#(sequence_numbers)),max_frames) txSequenceRewindBuffer <- mkRewindFIFOVariableCommitLevel(clocked_by controllerClk, reset_by controllerRst);
+    FIFO#(Bit#(32)) frameTimeout <- mkSizedFIFO(valueof(max_frames), clocked_by controllerClk, reset_by controllerRst);      
     FIFOF#(Bit#(TLog#(sequence_numbers))) ackSequenceNumberTX <- mkSizedFIFOF(valueof(max_frames), clocked_by controllerClk, reset_by controllerRst);      
     FIFOF#(Bit#(TLog#(sequence_numbers))) ackSequenceNumberRX <- mkSizedFIFOF(valueof(max_frames), clocked_by controllerClk, reset_by controllerRst);
-    FIFOF#(Bit#(TSub#(width,2))) ackRX <- mkSizedFIFOF(4, clocked_by controllerClk, reset_by controllerRst);
-    FIFOF#(Bit#(TLog#(sequence_numbers))) frame_in_progress <- mkSizedFIFOF(1, clocked_by controllerClk, reset_by controllerRst); // Must be size 1.
+    FIFOF#(Bit#(TLog#(sequence_numbers))) ackRX <- mkSizedFIFOF(4, clocked_by controllerClk, reset_by controllerRst);
+    FIFOF#(Bit#(TLog#(sequence_numbers))) frameInProgress <- mkSizedFIFOF(1, clocked_by controllerClk, reset_by controllerRst); // Must be size 1.
     Reg#(Bit#(32)) timer <- mkReg(0, clocked_by controllerClk, reset_by controllerRst);
 
     // need to make sure that flow control can come through
     PulseWire transmittingCredits <- mkPulseWire(clocked_by(controllerClk), reset_by(controllerRst));
     PulseWire updatingCredits <- mkPulseWire(clocked_by(controllerClk), reset_by(controllerRst));
-    FIFOF#(Bit#(width)) serdes_infifo <- mkSizedBRAMFIFOF(valueof(total_credits), clocked_by controllerClk, reset_by controllerRst);
+    FIFOF#(Tuple2#(Bit#(1), Bit#(width))) serdesInfifo <- mkSizedBRAMFIFOF(valueof(total_credits), clocked_by controllerClk, reset_by controllerRst);
     MARSHALLER#(Bit#(data_size), Bit#(interface_width)) marshaller <- mkSimpleMarshallerHighToLow(clocked_by(controllerClk), 
                                                                                                       reset_by(controllerRst));
 
-    let timeoutThreshold = 200*`AURORA_INTERFACE_FREQ;
+    let timeoutFires <- mkPulseWire(clocked_by controllerClk, reset_by controllerRst);
+    let timeoutThreshold = 10*(fromInteger(valueof(frame_size)));
 
     rule timerCount;
         timer <= timer + 1;
     endrule    
 
-    rule sequenceStuff;
-        tx_sequence_rewind_buffer.enq(sequenceNumberTX);
-        sequenceNumberTX <= sequenceNumberTX + 1; 
-        $display("TX Sequence number going in rewind buffer"); 
+    rule sequenceStuffer;
+        txSequenceRewindBuffer.enq(sequenceNumberTX);
+        sequenceNumberTX <= sequenceNumberTX + 1;
+        if(`AURORA_RELIABLE_DEBUG > 0) 
+        begin 
+            $display("TX Sequence number going in rewind buffer"); 
+        end
     endrule
 
     rule passRewind;
-        tx_data_rewind_buffer.enq(marshaller.first);
+        txDataRewindBuffer.enq(marshaller.first);
         marshaller.deq;
-        $display("TX Marsh: %h", marshaller.first); 
+        if(`AURORA_RELIABLE_DEBUG > 0) 
+        begin  
+            $display("TX Marsh: %h", marshaller.first); 
+        end
     endrule
 
     // Clock compensation occurs periodically in the phy.  We need to
     // allow it to occur at least once before we attempt to send data.
-    rule tickCC(ccCycles > 0 && ug_device.cc  && unpack(ug_device.channel_up));
+    rule tickCC(ccCycles > 0 && ugDevice.cc  && unpack(ugDevice.channel_up));
         ccCycles <= ccCycles - 1;
-        $display("Ticking CC  %d", ccCycles);
+        if(`AURORA_RELIABLE_DEBUG > 0) 
+        begin  
+            $display("Ticking CC  %d", ccCycles);
+        end
+    endrule
+
+
+    rule crossDomain;
+        marshaller.enq(serdesTxfifo.first);
+        serdesTxfifo.deq;
+        $display("TX Link: %h", serdesTxfifo.first);
     endrule
 
     // Send a set of known values across to the other side, as a synchronization step
@@ -266,67 +322,81 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ug_device, NumTypeP
     // 11 - flow control credit
     // 10 - hearbeat
 
+    Bit#(parity_size) zeros = 0;
+ 
+    Wire#(Bit#(width)) hashWire <- mkWire(clocked_by(controllerClk), reset_by(controllerRst));
+    RWire#(Bit#(TSub#(width,parity_size))) ctrlPayloadWire <- mkRWire(clocked_by(controllerClk), reset_by(controllerRst));
+    //Bit#(parity_size) hashTX = truncate(hashBits(hashWire));
 
-    rule txHeader(!transmittingCredits && ccCycles == 0);
-        Bit#(width) header_flit = {header,zeroExtend(tx_sequence_rewind_buffer.first)};
-        ug_device.send(header_flit);
-        frame_in_progress.enq(?);
+
+    rule txHeader(!transmittingCredits && ccCycles == 0 && ugDevice.transmit_rdy);
+        Bit#(control_data_size) seqExtend = zeroExtend(txSequenceRewindBuffer.first);
+        hashWire <= {zeros, header, seqExtend};
+        $write("TX Hashing(header): %h, %h ->", zeros, {header, seqExtend});
+        ctrlPayloadWire.wset({header, seqExtend});
+        frameInProgress.enq(?);
         // reset fream state
         framePositionTX <= 0;
-        parityTX <= 0;
-        $display("TX header: %d", tx_sequence_rewind_buffer.first);
-        $display("TX raw: %h", header_flit); 
+        txFrames <= txFrames + 1;
     endrule
 
 
     // since there's a timeout on acks we should transmit them quickly.
-    rule txFC;
+    rule txFC(ccCycles == 0 && ugDevice.transmit_rdy);
         ackSequenceNumberTX.deq();
-        let hashAck =  crcTX.hash(crc_poly, zeroExtend(ackSequenceNumberTX.first)); // we could use the parityRX, since there is a concept of stream here. 
-        Bit#(width) creditWord = {ack,hashAck,zeroExtend(ackSequenceNumberTX.first)};
-        ug_device.send(creditWord);
+        Bit#(control_data_size) ackExtend = zeroExtend(ackSequenceNumberTX.first);
+        $write("TX Hashing(ack): %h -> ", {zeros, ack, ackExtend});
+        hashWire <= {zeros, ack, ackExtend};
+        ctrlPayloadWire.wset({ack, ackExtend});
         transmittingCredits.send;
-        $display("TX raw: %h", creditWord); 
-        $display("TX ACK: %d", ackSequenceNumberTX.first);
     endrule
 
-    rule crossDomain;
-        marshaller.enq(serdes_txfifo.first);
-        serdes_txfifo.deq;
-        $display("TX Link: %h", serdes_txfifo.first);
-    endrule
+    rule txSend (!transmittingCredits && frameInProgress.notEmpty && ugDevice.transmit_rdy);
+        txDataRewindBuffer.deq;
+        hashWire <= {parityTX, payload, txDataRewindBuffer.first};
+        $write("TX Hashing (data[%d]): %h, %h ->", framePositionTX, parityTX, txDataRewindBuffer.first);
+        ctrlPayloadWire.wset({payload, txDataRewindBuffer.first});
 
-
-    rule txSend (!transmittingCredits && frame_in_progress.notEmpty);
-        tx_data_rewind_buffer.deq;
-        Bit#(parity_size) parity = crcTX.hash(crc_poly, {parityTX, tx_data_rewind_buffer.first});
-        parityTX <= parity;
-        let txRaw = {payload, parity, tx_data_rewind_buffer.first};
-        ug_device.send(txRaw);
-        $display("TX raw: %h", txRaw); 
-        $display("TX Data: pos: %d data: %h",  framePositionTX , pack(txRaw) );
         if(framePositionTX + 1 == 0) // frame size must be a power of two
         begin
             // next up we should send the sequence number.
-            frame_in_progress.deq; 
-            frame_timeout.enq(timer);
-            tx_sequence_rewind_buffer.deq;
-            ackSequenceNumberRX.enq(tx_sequence_rewind_buffer.first);
+            frameInProgress.deq; 
+            frameTimeout.enq(timer);
+            txSequenceRewindBuffer.deq;
+            ackSequenceNumberRX.enq(txSequenceRewindBuffer.first);
         end
         else 
         begin
             framePositionTX <= framePositionTX + 1;
         end 
+
+    endrule
+
+    // Bottom half of three above rules, actually does the transmission
+    rule sendData(ctrlPayloadWire.wget matches tagged Valid .topHalf);
+        Bit#(parity_size) hashTX = doHash(zeroExtendNP(hashWire));
+        if(truncateLSB(topHalf) == payload || truncateLSB(topHalf) == header)
+        begin
+            parityTX <= hashTX;
+        end
+
+        $display("hash %h", hashTX);
+        ugDevice.send({topHalf,hashTX});
     endrule
 
     // timeout wipes out the known world.
-    rule timeout(abs(timer - frame_timeout.first) > timeoutThreshold);
-        frame_timeout.clear();
+    rule timeout(abs(timer - frameTimeout.first) > timeoutThreshold);
+        frameTimeout.clear();
         ackSequenceNumberRX.clear();
-        frame_in_progress.clear();
-        tx_data_rewind_buffer.rewind();
-        tx_sequence_rewind_buffer.rewind();
-        $display("TX Timeout: %d", ackSequenceNumberRX.first);
+        frameInProgress.clear();
+        txDataRewindBuffer.rewind();
+        txSequenceRewindBuffer.rewind();
+        timeoutFires.send;
+        if(`AURORA_RELIABLE_DEBUG > 0) 
+        begin  
+            $display("TX Timeout: %d", ackSequenceNumberRX.first);
+        end
+        timeouts <= timeouts + 1;
     endrule
 
     // Receive side.  We can send three different message classes, which are encoded using the high
@@ -344,102 +414,118 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ug_device, NumTypeP
     DEMARSHALLER#(Bit#(data_size), Bit#(interface_width)) demarshaller <- mkSimpleDemarshallerHighToLow(clocked_by(controllerClk), 
                                                                                     reset_by(controllerRst));
 
-    FIFO#(Bit#(TAdd#(1,TLog#(total_credits)))) creditFIFO <- mkSizedFIFO(4,clocked_by(controllerClk),
-                                                                                 reset_by(controllerRst));
- 
 
     // use flit number to distinguish flow control. first flit is header.
     rule rxIntake;  // We always need to receive
-        let data <- ug_device.receive;
+        let data <- ugDevice.receive;
         rxFires.send();
-        $display("RX raw: %h", data);
-        if(truncateLSB(data) == payload)
-        begin
-            serdes_infifo.enq(data); 
+      
+        // soft errors mean something bad happened in the encoding/on
+        // the channel, so we'll just drop this data.
+       
+        serdesInfifo.enq(tuple2(ugDevice.soft_err,data)); 
+        if(`AURORA_RELIABLE_DEBUG > 0) 
+        begin  
+            $display("RX raw: %h", data);
         end
-        else if(truncateLSB(data) == header)
-        begin
-          // getting a header should cause us to reset our counters. but we should do this at the higher level.
-            serdes_infifo.enq(data); 
-        end          
-        else if(truncateLSB(data) == ack)
-        begin     
-            ackRX.enq(truncate(data));
-        end
+       
     endrule 
 
-    rule fullDeath (!ackRX.notFull || !serdes_infifo.notFull());
+    rule fullDeath (!ackRX.notFull || !serdesInfifo.notFull());
        $display("rxIntake blocks, and we die");
        $finish;
     endrule
 
+    PulseWire dropFires <- mkPulseWire(clocked_by(controllerClk), reset_by(controllerRst));
 
-    rule drop(!rxFires && ug_device.receive_rdy());
+    rule drop(!rxFires && ugDevice.receive_rdy());
         dataDrops <= dataDrops + 1;
+        dropFires.send;
     endrule 
 
     rule handleAck(ackSequenceNumberRX.notEmpty);
         ackRX.deq;
-        let hashExpect = truncateLSB(ackRX.first);        
-        let hashAck =  crcRX.hash(crc_poly, zeroExtend(ackSequenceNumberTX.first)); // we could use the parityRX, since there is a concept of stream here. 
         // If this was an expected ack, take action
-        if((ackSequenceNumberRX.first == truncate(ackRX.first)) && (hashAck == hashExpect))
+        if((ackSequenceNumberRX.first == ackRX.first))
         begin
-            $display("RX ACK: %d", ackRX.first);
-            frame_timeout.deq;
+            frameTimeout.deq;
             ackSequenceNumberRX.deq;
-            tx_data_rewind_buffer.commit(tagged Valid fromInteger(valueof(frame_size)));
-            tx_sequence_rewind_buffer.commit(tagged Valid 1);
+            txDataRewindBuffer.commit(tagged Valid fromInteger(valueof(frame_size)));
+            txSequenceRewindBuffer.commit(tagged Valid 1);
+            txFramesCorrect <= txFramesCorrect + 1;
+            if(`AURORA_RELIABLE_DEBUG > 0) 
+            begin  
+                $display("RX ACK: %d", ackRX.first);
+            end
+
         end
         else 
         begin
-            $display("RX ACK: (dropped) expected: %d got: %d", ackSequenceNumberRX.first(), ackRX.first);
+            if(`AURORA_RELIABLE_DEBUG > 0) 
+            begin  
+                $display("RX ACK: (dropped) expected: %d got: %d", ackSequenceNumberRX.first(), ackRX.first);
+            end
         end
     endrule
    
     // drop ack (we got a duplicate ack/some unexpected state)
     rule dropAck(!ackSequenceNumberRX.notEmpty);
         ackRX.deq;
-        $display("RX ACK: (dropped) unexpected, got: %d", ackRX.first);
+        if(`AURORA_RELIABLE_DEBUG > 0) 
+        begin  
+            $display("RX ACK: (dropped) unexpected, got: %d", ackRX.first);
+        end
     endrule
 
     rule rxDemarsh; // if we put data into the demarshaller, it must be known, correct data, or we will die.
-        serdes_infifo.deq();
-     
-        Tuple3#(Bit#(1), Bit#(parity_size), Bit#(data_size)) fragment = unpack(serdes_infifo.first);
+        serdesInfifo.deq();
+        match {.softErr, .rawFragment} = serdesInfifo.first;     
 
-        match {.header, .hashExpected, .data} = fragment;
+        Tuple3#(Bit#(1), Bit#(data_size), Bit#(parity_size)) fragment = unpack(rawFragment);
 
-        if(header == payload)
+        match {.ctrl, .data, .hashExpected} = fragment;
+
+        Bool isPayload = ctrl == payload;
+        Bool isAck = truncateLSB(rawFragment) == ack;
+        Bool isHeader = truncateLSB(rawFragment) == header;
+
+        // Since we have cleverly aligned the packets, all hash computations are the same.
+        Bit#(parity_size) hashSalt = (isPayload)?parityRX:0;
+        //Bit#(parity_size) hashRX = truncate(hashBits({hashSalt,data}));
+        Bit#(parity_size) hashRX = doHash(zeroExtendNP({hashSalt,ctrl,data}));
+        Bool notCorrupt = hashRX == hashExpected && softErr == 0;
+
+        $display("**************");
+        $display("RX Hashes(parityRX %h): %h, %h = %h/%h", parityRX, hashSalt, data, hashRX, hashExpected);
+
+        $display("Fragment isPayload: %h isAck: %h, isHeader:%h", isPayload, isAck, isHeader);
+
+        if(isPayload)
         begin
+            parityRX <= hashRX;
+            $display("Handle payload");
             // The issue here is that acks may get dropped. So we need to ack every correct packet.
             // However, we can't spuriously ack future packets.  To handle this issue, we need to have a few 
             // forbidden packets. 
-
-            let hashNext =  crcRX.hash(crc_poly, {parityRX, data});
-            parityRX <= hashNext;
+            
             provisionalFramePositionRX <= provisionalFramePositionRX + 1;
             // only enq if 1) hash matches 2) no previous errors in the frame 3) we haven't enqueued this data already
             // (i.e.) as part of a correct partial frames
-            $display("RX Data: pos: %d hash: %h hashExpect: %h, data: %h", provisionalFramePositionRX, hashNext, hashExpected, serdes_infifo.first);
-            $display("RX Nohash: %h", data);
-            $display("RX Status: pPos %d pSeq %d pos %d seq %d frameErrorRX %d", provisionalFramePositionRX, provisionalSequenceNumberRX, framePositionRX, sequenceNumberRX, frameErrorRX);
-            $display("RX Wide: %h", serdes_infifo.first);
-
-            // XXX remove for reliability tests
-            //if(provisionalFramePositionRX != framePositionRX)
-            //begin
-            //    $display("Positions not correct.");
-            //    $finish;
+            $display("RX Data: pos: %d hashExpected: %h hashRX: %h, data: %h", provisionalFramePositionRX, hashExpected, hashRX, serdesInfifo.first);
+            //if(`AURORA_RELIABLE_DEBUG > 0) 
+            //begin  
+                
+                $display("RX Status: pPos %d pSeq %d pos %d seq %d frameErrorRX %d", provisionalFramePositionRX, provisionalSequenceNumberRX, framePositionRX, sequenceNumberRX, frameErrorRX);
+              
             //end
-
-            if(hashExpected == hashNext && !frameErrorRX) 
+           
+            if(notCorrupt && !frameErrorRX) 
             begin
                 // If we haven't seen this data before and we don't have an error, send it to the upper level. 
                 if(provisionalFramePositionRX == framePositionRX && provisionalSequenceNumberRX == sequenceNumberRX)
                 begin
                     demarshaller.enq(data);
-                    $display("RX Marsh: %h", data);
+
                     if(framePositionRX + 1 == 0) // frame_size must be a power of two
                     begin
                         // next up we should send the sequence number.
@@ -449,11 +535,23 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ug_device, NumTypeP
                     end
                   
                     framePositionRX <= framePositionRX + 1;                           
+
+                    //if(`AURORA_RELIABLE_DEBUG > 0) 
+                    //begin  
+                        $display("RX Marsh: %h", data);
+                    //end
+
+                end
+                else
+                begin 
+                    $display("RX Marsh: (repeat) %h", data);
                 end
                 // If we got a frame without error, then we should send an ack.  
                 if(provisionalFramePositionRX + 1 == 0)  // frame_size must be a power of two
                 begin
+                   $display("RX Sending ACK");
                    // If we got the last data correctly send an ack.
+                   rxFramesAcked <= rxFramesAcked + 1;
                    ackSequenceNumberTX.enq(provisionalSequenceNumberRX);
                 end
             end
@@ -464,66 +562,104 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ug_device, NumTypeP
                 frameErrorRX <= True;
             end
         end
-        else // since acks went away we have only this leg.
+        else if(isHeader)
         begin
-            $display("RX Header: seq_no: %d", data);
+
+            Bit#(TLog#(sequence_numbers)) headerSequence = truncate(data);
+            $display("Handle header");
             rxFrames <= rxFrames + 1;
             // getting a header should cause us to reset our counters. but we should do this at the higher level.
             provisionalFramePositionRX <= 0;
             // did we get the right sequence number?  Since acks may be dropped at the transmitter, 
             // we have a set of frame that we will acknowledge.  Future frames will not be acknowledged.
             // to deal with wrap around, we use an enlarged frame space.  The secondor clause handles the wrap case.
-            Bit#(TLog#(sequence_numbers)) header_sequence = truncate(data);
-            Bit#(1) header_top = truncateLSB(header_sequence);
-	    Bit#(1) seq_top = truncateLSB(sequenceNumberRX);
+            
+            Bit#(1) headerTop = truncateLSB(headerSequence);
+	    Bit#(1) seqTop = truncateLSB(sequenceNumberRX);
             
             // Second clause handles the wrap-around case, where the leading 0 packets are younger than the leading 1 packets 
-            Bool frameErrorNext = (sequenceNumberRX < truncate(header_sequence)) || (seq_top == 1 && ((header_sequence < fromInteger(valueof(max_frames)))));
-            $display("frame error %d, seq clause %d, wrap clause %d", frameErrorNext, (sequenceNumberRX < truncate(header_sequence)),  (seq_top == 1 && ((header_sequence < fromInteger(valueof(max_frames))))));
+            Bool frameErrorNext = (sequenceNumberRX < truncate(headerSequence) && 
+                                       !(headerTop == 1 && (sequenceNumberRX < fromInteger(valueof(max_frames))))) || 
+                                  (seqTop == 1 && ((headerSequence < fromInteger(valueof(max_frames))))) ||
+                                   !notCorrupt;
+            
             frameErrorRX <= frameErrorNext;
-            provisionalSequenceNumberRX <= header_sequence; 
-            parityRX <= 0;
+            provisionalSequenceNumberRX <= headerSequence; 
+            
+            parityRX <= hashRX;
+        
+            if(`AURORA_RELIABLE_DEBUG > 0) 
+            begin  
+                $display("RX Header: seq_no: %d", data);
+                $display("frame error %d, seq clause %d, wrap clause %d", frameErrorNext, (sequenceNumberRX < truncate(headerSequence)),  (seqTop == 1 && ((headerSequence < fromInteger(valueof(max_frames))))));
+            end
         end
+        else if(isAck)
+        begin
+            $display("Handle Ack");
+            if(notCorrupt)
+            begin
+                ackRX.enq(truncate(data));
+            end
+        end
+
+        $display("**************");
     endrule
+
 
     rule rxDone;   
         demarshaller.deq;
-        serdes_rxfifo.enq(truncate(demarshaller.first()));
-        $display("RX Link: %h", demarshaller.first);
+        serdesRxfifo.enq(truncate(demarshaller.first()));
+
+        //if(`AURORA_RELIABLE_DEBUG > 0) 
+        //begin  
+            $display("RX Link: %h", demarshaller.first);
+        //end
     endrule
 
+
+    rule sendUnderflow;
+        ugDevice.underflow(frameErrorRX, zeroExtend({pack(dropFires),pack(timeoutFires)}),  zeroExtend(txSequenceRewindBuffer.first),  zeroExtend(sequenceNumberRX));
+    endrule
      
     interface AURORA_WIRES wires;
 
-	method rxp_in = ug_device.rxp_in;
-	method rxn_in = ug_device.rxn_in;
-	method txp_out = ug_device.txp_out;
-	method txn_out = ug_device.txn_out;
+	method rxp_in = ugDevice.rxp_in;
+	method rxn_in = ugDevice.rxn_in;
+	method txp_out = ugDevice.txp_out;
+	method txn_out = ugDevice.txn_out;
 	interface Clock model_clk = clk;
         interface Reset model_rst = rst;
-	interface Clock aurora_clk = ug_device.aurora_clk;
-        interface Reset aurora_rst = ug_device.aurora_rst;
+	interface Clock aurora_clk = ugDevice.aurora_clk;
+        interface Reset aurora_rst = ugDevice.aurora_rst;
+
     endinterface
    
     interface AURORA_DRIVER driver;
-        method write = serdes_txfifo.enq;
 
-        method write_ready = serdes_txfifo.sNotFull();
+        method write = serdesTxfifo.enq;
 
-        method deq = serdes_rxfifo.deq();
+        method write_ready = serdesTxfifo.sNotFull();
 
-        method first = serdes_rxfifo.first();
+        method deq = serdesRxfifo.deq();
+
+        method first = serdesRxfifo.first();
         
-        method channel_up = ug_device.channel_up;
-        method lane_up = ug_device.lane_up;
-        method hard_err = ug_device.hard_err;
-        method soft_err = ug_device.soft_err;
+        method channel_up = ugDevice.channel_up;
+        method lane_up = ugDevice.lane_up;
+        method hard_err = ugDevice.hard_err;
+        method soft_err = ugDevice.soft_err;
         method data_drops = dataDrops.crossed();
-        method rx_count = ug_device.rx_count;
-        method tx_count = ug_device.tx_count;
-        method error_count = ug_device.error_count;
+        method rx_count = ugDevice.rx_count;
+        method tx_count = ugDevice.tx_count;
+        method error_count = ugDevice.error_count;
         method rx_frames = rxFrames.crossed();
         method rx_frames_correct = rxFramesCorrect.crossed();
+        method rx_frames_acked = rxFramesAcked.crossed();
+        method tx_frames = txFrames.crossed();
+        method tx_frames_correct = txFramesCorrect.crossed();
+        method timeouts = timeouts.crossed();
+
     endinterface
  
 endmodule

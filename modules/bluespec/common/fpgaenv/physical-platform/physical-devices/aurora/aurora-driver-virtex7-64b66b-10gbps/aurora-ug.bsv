@@ -43,6 +43,7 @@ interface AURORA_SINGLE_DEVICE_UG#(numeric type width);
     method Bit#(1) hard_err;
     method Bit#(1) soft_err;
     method Bool    cc;
+    method Bool    transmit_rdy;
     method Bool    receive_rdy;
     method Action   underflow(Bool underflow, Bit#(2) flitcount, Bit#(8) txcredits, Bit#(8) rxcredits);		
 
@@ -87,6 +88,7 @@ module mkAURORA_SINGLE_UG#(AuroraGTXClockSpec pllClockSpec, Clock rawClock, Rese
     method TX_COUNT tx_count;
     method ERROR_COUNT error_count;
     method rx_rdy receive_rdy();
+    method tx_rdy transmit_rdy();
 
     method underflow(UNDERFLOW,FLITCOUNT,TXCREDIT,RXCREDIT) enable((*inhigh*) underflow_en) clocked_by(aurora_clk) reset_by(aurora_rst);
 

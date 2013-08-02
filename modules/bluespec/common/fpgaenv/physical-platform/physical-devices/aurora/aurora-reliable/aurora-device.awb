@@ -6,5 +6,7 @@
 
 
 %sources -t BSV -v PUBLIC aurora-reliable.bsv
+%generated -t BA module_doHash.ba
+%generated -t VERILOG module_doHash.v
 
-
+%param AURORA_RELIABLE_DEBUG 0 "Enable Aurora Debug"

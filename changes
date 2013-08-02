@@ -16521,3 +16521,38 @@ to use either reliable or basic flowcontrol
 layer schemes have different statistics counters, and so must have
 different modules for accessing them.
 
+
+----------
+keflemin    Date: Fri Aug  2 14:01:44 EDT 2013  CSN: CSN-leap-platforms-703
+                  Fri Aug  2 18:01:44 UTC 2013
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-driver-simulation
+ aurora-driver-simulation.bsv Locally Modified          702 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-reliable
+ aurora-reliable.bsv       Locally Modified          702 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-reliable/debugger
+ aurora-reliable-debugger.bsv Locally Modified          702 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-reliable
+ aurora-device.awb         Locally Modified          702 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device-simulation
+ aurora-device-simulation.bsv Locally Modified          702 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-driver-virtex7-64b66b-10gbps
+ aurora-ug.bsv             Locally Modified          702 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc
+ pcie-bluenoc.cpp          Locally Modified          702 
+
+
+Two changes 
+
+1) Improvements to the reliable transport protocol, including using a
+wider hash.
+
+2) Removed soft reset from pcie software.  This functionality is
+subsumed by the new run scripts.
