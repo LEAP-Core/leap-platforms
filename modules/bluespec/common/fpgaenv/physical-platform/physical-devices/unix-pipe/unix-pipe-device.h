@@ -60,7 +60,7 @@ class UNIX_PIPE_DEVICE_CLASS: public PLATFORMS_MODULE_CLASS
     // process/pipe state (physical channel)
     int  inpipe[2], outpipe[2];
     int  childpid;
-    bool childAlive;
+    volatile bool childAlive;
 
     int ParentRead() const { return inpipe[0]; };
     int ParentWrite() const { return outpipe[1]; };

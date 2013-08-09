@@ -137,12 +137,24 @@ PCIE_DEVICE_CLASS::Probe(bool block)
 ssize_t
 PCIE_DEVICE_CLASS::Read(void *buf, size_t count)
 {
+    if (! initialized)
+    {
+        return 0;
+    }
+
     ssize_t rc = read(pcieDev, buf, count);
     if (rc <= 0)
     {
+        if (! initialized)
+        {
+            return 0;
+        }
+
         fprintf(stderr, "PCIe read error:  ret=%d, errno=%d\n", rc, errno);
         exit(1);
     }
+
+    return rc;
 }
 
 
@@ -150,6 +162,11 @@ PCIE_DEVICE_CLASS::Read(void *buf, size_t count)
 void
 PCIE_DEVICE_CLASS::Write(const void *buf, size_t count)
 {
+    if (! initialized)
+    {
+        return;
+    }
+
     ssize_t wc = write(pcieDev, buf, count);
     if (wc < 0)
     {

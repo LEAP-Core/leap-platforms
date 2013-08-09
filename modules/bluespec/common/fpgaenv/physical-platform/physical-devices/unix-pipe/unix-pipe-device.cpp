@@ -239,6 +239,8 @@ UNIX_PIPE_DEVICE_CLASS::Cleanup()
 bool
 UNIX_PIPE_DEVICE_CLASS::Probe()
 {
+    if (! childAlive) return false;
+
     // test for incoming data on physical channel
     struct timeval  timeout;
     int             data_available;
@@ -254,7 +256,7 @@ UNIX_PIPE_DEVICE_CLASS::Probe()
 
     if (data_available == -1)
     {
-        if (errno == EINTR)
+        if ((errno == EINTR) || ! childAlive)
         {
             data_available = 0;
         }

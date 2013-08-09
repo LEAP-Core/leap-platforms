@@ -16556,3 +16556,17 @@ wider hash.
 
 2) Removed soft reset from pcie software.  This functionality is
 subsumed by the new run scripts.
+
+----------
+mcadler     Date: Fri Aug  9 13:38:54 EDT 2013  CSN: CSN-leap-platforms-704
+                  Fri Aug  9 17:38:54 UTC 2013
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc
+ pcie-bluenoc.cpp          Locally Modified          703 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe
+ unix-pipe-device.h        Locally Modified          703 
+ unix-pipe-device.cpp      Locally Modified          703 
+
+Handle edge conditions during shutdown more cleanly.
