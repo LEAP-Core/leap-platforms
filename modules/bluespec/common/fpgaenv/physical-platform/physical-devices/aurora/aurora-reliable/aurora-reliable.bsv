@@ -338,6 +338,10 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ugDevice, NumTypePa
         // reset fream state
         framePositionTX <= 0;
         txFrames <= txFrames + 1;
+
+        // We start the timeout here so that corrupt partial packets
+        // can be retransmitted.
+        frameTimeout.enq(timer);     
     endrule
 
 
@@ -361,7 +365,6 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ugDevice, NumTypePa
         begin
             // next up we should send the sequence number.
             frameInProgress.deq; 
-            frameTimeout.enq(timer);
             txSequenceRewindBuffer.deq;
             ackSequenceNumberRX.enq(txSequenceRewindBuffer.first);
         end
@@ -392,10 +395,6 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ugDevice, NumTypePa
         txDataRewindBuffer.rewind();
         txSequenceRewindBuffer.rewind();
         timeoutFires.send;
-        if(`AURORA_RELIABLE_DEBUG > 0) 
-        begin  
-            $display("TX Timeout: %d", ackSequenceNumberRX.first);
-        end
         timeouts <= timeouts + 1;
     endrule
 

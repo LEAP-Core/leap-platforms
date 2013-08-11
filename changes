@@ -16570,3 +16570,31 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/uni
  unix-pipe-device.cpp      Locally Modified          703 
 
 Handle edge conditions during shutdown more cleanly.
+
+----------
+keflemin    Date: Sat Aug 10 21:35:41 EDT 2013  CSN: CSN-leap-platforms-705
+                  Sun Aug 11 01:35:41 UTC 2013
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-reliable
+ aurora-reliable.bsv       Locally Modified          704 
+
+Directory drivers/linux/platforms/bluenoc-pcie
+ ioctl/                    Locally Added               0 
+
+Directory drivers/linux/platforms/bluenoc-pcie/ioctl
+ bluenoc-ioctl.c           Locally Added               0 
+ Makefile                  Locally Added               0 
+
+
+1. Fixed deadlock issue in reliable inter-fpga procotol.  If a partial
+packet containing a data dependency is corrupted, retransmission will
+not occur because the packet never finishes.  To fix this we begin the
+timeout at the start of the packet, so that corrupt partial packets
+will eventually be retransmitted. 
+
+2.  Added bluenoc-ioctl, which allows scripts to interface with the
+bluenoc device driver.  This code, coupled with changed to the
+platform-specific scripts, subsumes the old soft-reset interface. It
+also gives the platform script precise control over the reset behavior
+of the FPGA, which is necessary for multifpgas.
