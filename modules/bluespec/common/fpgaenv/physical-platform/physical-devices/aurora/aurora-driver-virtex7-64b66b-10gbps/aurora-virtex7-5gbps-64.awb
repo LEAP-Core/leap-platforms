@@ -42,4 +42,5 @@
 
 
 %param AURORA_INTERFACE_WIDTH 64 "Aurora Interface Width"
+%param AURORA_INTERFACE_TIMING_PARAMETER 16 "Timing parameter used to size various counters"
 %param AURORA_INTERFACE_FREQ 156 "Aurora Interface Frequency"

@@ -16598,3 +16598,33 @@ bluenoc device driver.  This code, coupled with changed to the
 platform-specific scripts, subsumes the old soft-reset interface. It
 also gives the platform script precise control over the reset behavior
 of the FPGA, which is necessary for multifpgas.
+
+----------
+keflemin    Date: Sun Aug 11 14:22:21 EDT 2013  CSN: CSN-leap-platforms-706
+                  Sun Aug 11 18:22:21 UTC 2013
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-driver-simulation
+ aurora-driver-simulation.awb Locally Modified          705 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-driver-virtex7-64b66b-10gbps
+ aurora-virtex7-5gbps-64.awb Locally Modified          705 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora
+ aurora-reliable-handshake/ Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-reliable-handshake
+ aurora-reliable.bsv       Locally Added               0 
+ aurora-device.awb         Locally Added               0 
+
+
+1)Added parameter to aurora devices which controls the length of the
+intialization phase.  Long initialization phases seem to improve the
+reliability of some of the aurora interfaces, but they are burdensome
+in simulation.
+
+2) Added a reliable aurora protocol with intial handshaking.  In pure
+LEAP PCIE platforms, handshaking is not needed because we have
+software control of reset through the PCIE interface.  However, some
+platforms may not have this level of control and therefore require a
+handshaking scheme when coming out of reset. 

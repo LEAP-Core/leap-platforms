@@ -7,6 +7,7 @@
 %sources -t BSV -v PUBLIC aurora-driver-simulation.bsv
 
 %param AURORA_INTERFACE_WIDTH 32 "Aurora Interface Width"
+%param AURORA_INTERFACE_TIMING_PARAMETER 3 "Timing parameter used to size various counters"
 %param AURORA_INTERFACE_FREQ 100 "Aurora Interface Frequency"
 
 
