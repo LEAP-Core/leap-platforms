@@ -1,0 +1,12 @@
+%name Aurora Device Reliable Flowcontrol, with aggregated CRC
+%desc Aurora Device Reliable Flowcontrol, with aggregated CRC
+
+%provides aurora_flowcontrol
+%requires aurora_flowcontrol_debugger
+
+
+%sources -t BSV -v PUBLIC aurora-reliable.bsv
+%generated -t BA module_doHash.ba
+%generated -t VERILOG module_doHash.v
+
+%param AURORA_RELIABLE_DEBUG 0 "Enable Aurora Debug"

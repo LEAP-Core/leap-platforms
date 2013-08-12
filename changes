@@ -16628,3 +16628,23 @@ LEAP PCIE platforms, handshaking is not needed because we have
 software control of reset through the PCIE interface.  However, some
 platforms may not have this level of control and therefore require a
 handshaking scheme when coming out of reset. 
+
+----------
+keflemin    Date: Sun Aug 11 22:20:27 EDT 2013  CSN: CSN-leap-platforms-707
+                  Mon Aug 12 02:20:27 UTC 2013
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora
+ aurora-reliable-aggregate-crc/ Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-reliable-aggregate-crc
+ aurora-reliable.bsv       Locally Added               0 
+ aurora-device.awb         Locally Added               0 
+
+
+Yet another refinement to the reliable inter-fpga transport protocol.
+This version leverages the clock differential between the user and
+aurora domains to reduce the cost of the crc.  CRC is calculated over
+the user-domain word, rather than the aurora domain word, which is
+several times smaller.  Throughput is around 500MB/s, though I suspect
+it can be improved.
