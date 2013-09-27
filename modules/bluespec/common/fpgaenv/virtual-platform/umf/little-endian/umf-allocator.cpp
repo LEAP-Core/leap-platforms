@@ -42,6 +42,7 @@ UMF_ALLOCATOR_CLASS::UMF_ALLOCATOR_CLASS()
     for (int i = 0; i < UMF_POOL_SIZE; i++)
     {
         UMF_MESSAGE m = (UMF_MESSAGE) malloc(sizeof(UMF_MESSAGE_CLASS));
+        memset(m, 0, sizeof(UMF_MESSAGE_CLASS));
         freeList.Push(m);
     }
 }

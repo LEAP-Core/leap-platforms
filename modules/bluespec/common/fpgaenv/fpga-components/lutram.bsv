@@ -211,12 +211,15 @@ endmodule
 // LUTRAM Initialized with a Get source.  If the LUTRAM reset() is triggered
 // the Get source must provide the full initialization again.
 //
-// The Bool passed at the end of the initFunc, if true, indicates
-// initialization is complete even if all values have not been written.
+// initFunc returns a stream of initialization values, followed by a single
+// Invalid to indicate the end of the stream.  The module can cope with
+// streams shorter than the size of memory (initializes the rest with 0)
+// and streams longer than the size of memory (consumes the full stream
+// and drops extra entries.)
 //
 // This is identical to mkLUTRAMWith except for initialization.
 //
-module mkLUTRAMWithGet#(function Get#(Tuple2#(t_DATA, Bool)) initFunc)
+module mkLUTRAMWithGet#(function Get#(Maybe#(t_DATA)) initFunc)
     // interface:
         (LUTRAM#(t_ADDR, t_DATA))
     provisos(Bits#(t_DATA, t_DATA_SZ),
@@ -225,32 +228,76 @@ module mkLUTRAMWithGet#(function Get#(Tuple2#(t_DATA, Bool)) initFunc)
 
     LUTRAM#(t_ADDR, t_DATA) mem <- mkLUTRAMU();
 
-    //
-    // Initialize storage
-    //
-
-    Reg#(Bool) initialized_m <- mkReg(False);
-    Reg#(t_ADDR) init_idx <- mkReg(minBound);
     Wire#(Tuple2#(t_ADDR, t_DATA)) writeW <- mkWire();
     PulseWire triggerReset <- mkPulseWire();
 
-    rule initializing (! initialized_m && ! triggerReset);
-        match {.v, .done} <- initFunc.get;
-        mem.upd(init_idx, v);
+    // Are we initializing?
+    Reg#(Bool) initialized_m <- mkReg(False);
+    Reg#(Bool) finishInit <- mkReg(False);
+    Reg#(Bool) sinkInit <- mkReg(False);
+    Reg#(Bit#(t_ADDR_SZ)) init_idx <- mkReg(0);
 
-        // Hack to avoid needing Eq proviso for comparison
-        t_ADDR max = maxBound;
-        initialized_m <= done || (pack(init_idx) == pack(max));
+    // initializing --
+    //     When:   After a reset until every value is initialized.
+    //     Effect: Update the RAM with the user-provided initial value.
+    //
+    rule initializing (! initialized_m && ! finishInit);
+        let m_val <- initFunc.get;
 
-        // Hack to avoid needing Arith proviso
-        init_idx <= unpack(pack(init_idx) + 1);
+        if (m_val matches tagged Valid .v)
+        begin
+            t_ADDR init_idx_a = unpack(init_idx);
+            mem.upd(init_idx_a, v);
+
+            if (init_idx == maxBound)
+            begin
+                initialized_m <= True;
+                sinkInit <= True;
+            end
+
+            init_idx <= init_idx + 1;
+        end
+        else
+        begin
+            finishInit <= True;
+        end
     endrule
+
+    //
+    // zeroRemainder --
+    //     If init stream ends before the full memory is initialized then
+    //     complete initialization by writing 0 to the remainder.
+    //
+    rule zeroRemainder (! initialized_m && finishInit);
+        t_ADDR init_idx_a = unpack(init_idx);
+        mem.upd(init_idx_a, unpack(0));
+
+        if (init_idx == maxBound)
+        begin
+            initialized_m <= True;
+            finishInit <= False;
+        end
+
+        init_idx <= init_idx + 1;
+    endrule
+
+    //
+    // Sink any remaining initialization data, which is beyond the address
+    // space.
+    //
+    rule sink (initialized_m && sinkInit);
+        let m_val <- initFunc.get;
+        sinkInit <= ! isValid(m_val);
+    endrule
+
 
     (* fire_when_enabled, no_implicit_conditions *)
     (* descending_urgency = "newReset, initializing" *)
     rule newReset (triggerReset);
-        init_idx <= minBound;
         initialized_m <= False;
+        finishInit <= False;
+        sinkInit <= False;
+        init_idx <= 0;
     endrule
 
     

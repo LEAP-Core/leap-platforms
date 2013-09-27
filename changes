@@ -16648,3 +16648,19 @@ aurora domains to reduce the cost of the crc.  CRC is calculated over
 the user-domain word, rather than the aurora domain word, which is
 several times smaller.  Throughput is around 500MB/s, though I suspect
 it can be improved.
+
+----------
+mcadler     Date: Fri Sep 27 15:57:43 EDT 2013  CSN: CSN-leap-platforms-708
+                  Fri Sep 27 19:57:43 UTC 2013
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ lutram.bsv                Locally Modified          707 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian
+ umf-allocator.cpp         Locally Modified          707 
+
+- mkLUTRAMWithGet() now takes a Maybe#(t_DATA) instead of receiving EOF as
+  a separate entry in a tuple.  Same interface as mkMemInitializedWith().
+
+- Revert umf-allocator change.  UID 0 is reserved for the platform name.
