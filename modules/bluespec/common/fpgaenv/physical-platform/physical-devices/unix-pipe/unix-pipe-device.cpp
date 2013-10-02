@@ -146,7 +146,8 @@ UNIX_PIPE_DEVICE_CLASS::Init()
             strcpy(argv[0], hw_exe.c_str());
 
             // Feed in the simulator arguments
-            argv[1] = SIMULATOR_ARGS;
+            argv[1] = new char[strlen(SIMULATOR_ARGS) + 1];
+            strcpy(argv[1], SIMULATOR_ARGS);
 
             // Copy remaining argv pointers, including trailing NULL
             for (int i = 0; i < bluesimSwitches.BluesimArgc() + 1; i++)

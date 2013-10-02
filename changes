@@ -16664,3 +16664,13 @@ Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian
   a separate entry in a tuple.  Same interface as mkMemInitializedWith().
 
 - Revert umf-allocator change.  UID 0 is reserved for the platform name.
+
+----------
+mcadler     Date: Wed Oct  2 08:55:44 EDT 2013  CSN: CSN-leap-platforms-709
+                  Wed Oct  2 12:55:44 UTC 2013
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe
+ unix-pipe-device.cpp      Locally Modified          708 
+
+Compatible with gcc 4.8.
