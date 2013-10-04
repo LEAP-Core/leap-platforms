@@ -52,19 +52,30 @@ PCIE_DEVICE_CLASS::Init()
     if (initialized) return;
     initialized = true;
 
-	const char *dev_file = FPGA_DEV_PATH.c_str();
-	pcieDev = open(dev_file, O_RDWR);
-	if (pcieDev < 0) {
-		fprintf (stderr, "PCIe Device Error: Failed to open %s: %s\n", dev_file, strerror(errno));
-		exit(EXIT_FAILURE);
-	}
+    const char *dev_file = FPGA_DEV_PATH.c_str();
+    pcieDev = open(dev_file, O_RDWR);
+    if (pcieDev < 0) {
+        fprintf (stderr, "PCIe Device Error: Failed to open %s: %s\n", dev_file, strerror(errno));
+        exit(EXIT_FAILURE);
+    }
 
+    //
+    // Reset the FPGA -- allows running without reprogramming
+    //
+    int res = ioctl(pcieDev, BNOC_DEACTIVATE);
+    res = ioctl(pcieDev, BNOC_REACTIVATE);
+    res = ioctl(pcieDev, BNOC_SOFT_RESET);
+    if (res < 0)
+    {
+        fprintf (stderr, "Error: Failed to reset %s: %s\n", dev_file, strerror(errno));
+        exit(EXIT_FAILURE);
+    }
 
     //
     // Get board info
     //
-	tBoardInfo board_info;
-	ioctl(pcieDev, BNOC_IDENTIFY, &board_info);
+    tBoardInfo board_info;
+    ioctl(pcieDev, BNOC_IDENTIFY, &board_info);
     assert(board_info.is_active);
     bpb = board_info.bytes_per_beat;
 

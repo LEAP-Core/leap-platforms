@@ -34,6 +34,7 @@
 #include <errno.h>
 #include <assert.h>
 
+
 int Probe(int pcieDev)
 {
     int block = 0;
@@ -45,16 +46,23 @@ int Probe(int pcieDev)
     return (result > 0);
 }
 
+
+void Usage()
+{
+    fprintf(stderr, "Usage: bluenoc-ioctl <device> [activate | deactivate]\n");
+}
+
+
 void main(int argc, char *argv[]) {
 
     int pcieDev;                      // Device file descriptor                                                                                                                                                                            
     int bpb;                          // Bytes per beat 
     
 
-    if(argc < 3) 
+    if (argc < 3) 
     {
-        fprintf (stderr, "Not enough arguments to bluenoc-ioctl. Expected: bluenoc-ioctl device command\n");
-	exit(EXIT_FAILURE);
+        Usage();
+        exit(EXIT_FAILURE);
     }
 
 
@@ -62,7 +70,7 @@ void main(int argc, char *argv[]) {
     pcieDev = open(dev_file, O_RDWR);
     if (pcieDev < 0) 
     {
-        fprintf (stderr, "PCIe Device Error: Failed to open %s: %s\n", dev_file, strerror(errno));
+        fprintf(stderr, "PCIe Device Error: Failed to open %s: %s\n", dev_file, strerror(errno));
         exit(EXIT_FAILURE);
     }
 
@@ -71,36 +79,39 @@ void main(int argc, char *argv[]) {
     //
     int res = -1;
 
-    if(!strcmp(argv[2],"DEACTIVATE")) 
+    if (!strcmp(argv[2], "deactivate")) 
     {
         res = ioctl(pcieDev, BNOC_DEACTIVATE);        
 
-	tBoardInfo board_info;
-	ioctl(pcieDev, BNOC_IDENTIFY, &board_info);
-	assert(!board_info.is_active);
+        tBoardInfo board_info;
+        ioctl(pcieDev, BNOC_IDENTIFY, &board_info);
+        assert(!board_info.is_active);
 
     } 
-
-    if(!strcmp(argv[2],"REACTIVATE")) 
+    else if (!strcmp(argv[2], "activate")) 
     {
         res = ioctl(pcieDev, BNOC_REACTIVATE);        
 
-	tBoardInfo board_info;
-	ioctl(pcieDev, BNOC_IDENTIFY, &board_info);
-	assert(board_info.is_active);
+        tBoardInfo board_info;
+        ioctl(pcieDev, BNOC_IDENTIFY, &board_info);
+        assert(board_info.is_active);
 
         if (Probe(pcieDev))
         {
-            printf( "*** Warning:  PCIe BlueNoC channel isn't empty on startup ***\n" );
+            fprintf(stderr, "*** Warning:  PCIe BlueNoC channel isn't empty on startup ***\n" );
         }
 
     } 
-
-    if (res < 0)
+    else
     {
-        fprintf (stderr, "Error: Failed operation %s on %s: %s\n", argv[2], dev_file, strerror(errno));
+        fprintf(stderr, "Unknown command: %s\n", argv[2]);
+        Usage();
         exit(EXIT_FAILURE);
     }
 
-
+    if (res < 0)
+    {
+        fprintf(stderr, "Error: Failed operation %s on %s: %s\n", argv[2], dev_file, strerror(errno));
+        exit(EXIT_FAILURE);
+    }
 }

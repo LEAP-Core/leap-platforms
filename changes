@@ -16674,3 +16674,19 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/uni
  unix-pipe-device.cpp      Locally Modified          708 
 
 Compatible with gcc 4.8.
+
+----------
+mcadler     Date: Fri Oct  4 12:01:21 EDT 2013  CSN: CSN-leap-platforms-710
+                  Fri Oct  4 16:01:21 UTC 2013
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc
+ pcie-bluenoc.cpp          Locally Modified          709 
+
+Directory drivers/linux/platforms/bluenoc-pcie/ioctl
+ bluenoc-ioctl.c           Locally Modified          709 
+
+Put back the BlueNoC reset at the start.  I believe recent multi-FPGA reset
+management will work with this, but am not positive.  (Elliott is away.)
+For now, this makes ML605 work at MIT.  This will also support using gdb
+with a single FPGA and restarting a run without exiting gdb.
