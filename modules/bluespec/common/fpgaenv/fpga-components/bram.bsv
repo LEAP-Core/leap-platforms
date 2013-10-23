@@ -25,6 +25,7 @@ import FIFOF::*;
 import SpecialFIFOs::*;
 import Vector::*;
 import RegFile::*;
+import DReg::*;
 
 `include "asim/provides/librl_bsv_base.bsh"
 
@@ -160,6 +161,61 @@ module mkBRAMUnguarded
     method Bool notFull() = True;
 
     method Action write(t_ADDR addr, t_DATA val) = mem.write(pack(addr), pack(val));
+    method Bool writeNotFull() = True;
+endmodule
+
+//
+// mkBypassBRAMUnguarded --
+//     Creates an unguarded BRAM with a bypass path to handle the case of read and write touching the same address.
+//     Librl provides a similar functionality (mkReadBeforeWriteMemory), but with guards.  
+//
+module mkBypassBRAMUnguarded
+    // interface:
+        (BRAM#(t_ADDR, t_DATA))
+    provisos
+        (Bits#(t_ADDR, t_ADDR_SZ),
+         Eq#(t_ADDR),
+         Bits#(t_DATA, t_DATA_SZ));
+
+    `ifdef SYNTH
+    let mem <- (valueOf(t_ADDR_SZ) == 0 || valueOf(t_DATA_SZ) == 0)? mkBRAMUnguardedZero(): mkBRAMUnguardedNonZero();
+    `else
+    let mem <- mkBRAMUnguardedSim();
+    `endif
+
+    Reg#(Maybe#(t_ADDR)) readAddr <- mkDReg(tagged Invalid);
+    Reg#(Maybe#(t_ADDR)) writeAddr <- mkDReg(tagged Invalid);
+    Reg#(t_DATA) writeData <- mkRegU();
+
+    method Action readReq(t_ADDR addr);
+        mem.readReq(pack(addr));
+        readAddr <= tagged Valid addr;
+    endmethod
+
+    method ActionValue#(t_DATA) readRsp();
+       let m <- mem.readRsp();
+       let result = unpack(m);
+
+       if(readAddr matches tagged Valid .rAddr &&& 
+           writeAddr matches tagged Valid .wAddr &&&
+           rAddr == wAddr)
+        begin
+            result = writeData;    
+        end
+ 
+        return result;
+    endmethod
+
+    method t_DATA peek() = ?;     // Don't use this method
+    method Bool notEmpty() = ?;   // Don't use this method
+    method Bool notFull() = True;
+
+    method Action write(t_ADDR addr, t_DATA val);
+        mem.write(pack(addr), pack(val));
+        writeData <= val;
+        writeAddr <= tagged Valid addr;
+    endmethod
+
     method Bool writeNotFull() = True;
 endmodule
 

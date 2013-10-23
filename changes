@@ -16690,3 +16690,20 @@ Put back the BlueNoC reset at the start.  I believe recent multi-FPGA reset
 management will work with this, but am not positive.  (Elliott is away.)
 For now, this makes ML605 work at MIT.  This will also support using gdb
 with a single FPGA and restarting a run without exiting gdb.
+
+----------
+keflemin    Date: Wed Oct 23 12:31:32 EDT 2013  CSN: CSN-leap-platforms-711
+                  Wed Oct 23 16:31:32 UTC 2013
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ bram.bsv                  Locally Modified          710 
+
+
+Added a write-bypass unguarded BRAM.  If Xilinx configures the BRAM to
+be write-first, then simulataneous reads and writes to the same
+address result in the wrong read value.  This bram adds a
+register-based bypass to minimize the amount of scheduling in the
+unguarded BRAM.
+
+We should eventually investigate the write-first mode fully.
