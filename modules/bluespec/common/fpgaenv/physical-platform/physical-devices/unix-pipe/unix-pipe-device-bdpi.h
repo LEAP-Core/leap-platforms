@@ -38,10 +38,10 @@
 
 #define STDIN             0
 #define STDOUT            1
-#define DESC_HOST_2_FPGA  100
-#define DESC_FPGA_2_HOST  101
 #define BLOCK_SIZE        UMF_CHUNK_BYTES
 #define SELECT_TIMEOUT    0
+
+#define UNIX_DEVICE_DEBUG 0
 
 typedef struct _Channel
 {

@@ -28,7 +28,7 @@
 
 using namespace std;
 
-#define UMF_POOL_SIZE 32
+#define UMF_POOL_SIZE 8192
 
 // self-instantiate
 UMF_ALLOCATOR_CLASS UMF_ALLOCATOR_CLASS::instance;
@@ -41,7 +41,11 @@ UMF_ALLOCATOR_CLASS::UMF_ALLOCATOR_CLASS()
     // Preallocate some entries for the pool, hoping they will be contiguous
     for (int i = 0; i < UMF_POOL_SIZE; i++)
     {
-        UMF_MESSAGE m = (UMF_MESSAGE) malloc(sizeof(UMF_MESSAGE_CLASS));
+        // Zero out message to make valgrind happy
+        UMF_MESSAGE m = (UMF_MESSAGE) memset(malloc(sizeof(UMF_MESSAGE_CLASS)), 0, sizeof(UMF_MESSAGE_CLASS));
+	//void* buf =  malloc(sizeof(UMF_MESSAGE));
+	//UMF_MESSAGE m = ::new(buf) UMF_MESSAGE_CLASS();
+
         memset(m, 0, sizeof(UMF_MESSAGE_CLASS));
         freeList.Push(m);
     }

@@ -5,8 +5,11 @@
 %provides unix_pipe_device
 
 %sources -t BSV    -v PUBLIC  unix-pipe-device.bsv
+%sources -t BSV    -v PUBLIC  unix-pipe-li-device.bsv
 %sources -t BDPI_H -v PUBLIC  unix-pipe-device-bdpi.h
 %sources -t BDPI_C -v PRIVATE unix-pipe-device-bdpi.c
+
+%sources -t LOG -v PUBLIC  unix-pipe-li-device.log
 
 %sources -t H      -v PUBLIC  unix-pipe-device.h
 %sources -t CPP    -v PRIVATE unix-pipe-device.cpp
@@ -20,5 +23,8 @@
 %generated -t BA pipe_clear_reset.ba
 
 %param SIMULATOR_ARGS  "-w"  "Simulator Args"
+%param USE_PIPES  1  "Should the simulator use pipes"
+%param UNIX_DEVICE_DEBUG  0  "Should we print debug messages?"
+
 
 

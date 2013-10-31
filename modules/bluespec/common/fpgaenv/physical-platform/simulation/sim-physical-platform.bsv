@@ -35,7 +35,7 @@ import Vector::*;
 interface PHYSICAL_DRIVERS;
 
     interface CLOCKS_DRIVER    clocksDriver;
-    interface UNIX_PIPE_DRIVER unixPipeDriver;
+    interface UNIX_PIPE_LI_DRIVER unixPipeLIDriver;
     interface Vector#(FPGA_DDR_BANKS, DDR_DRIVER) ddrDriver;
 
 endinterface
@@ -49,9 +49,9 @@ endinterface
 
 interface TOP_LEVEL_WIRES;
     
-    interface CLOCKS_WIRES    clocksWires;
-    interface UNIX_PIPE_WIRES unixPipeWires;
-    interface DDR_WIRES       ddrWires;
+    interface CLOCKS_WIRES       clocksWires;
+    interface UNIX_PIPE_LI_WIRES unixPipeLIWires;
+    interface DDR_WIRES          ddrWires;
     
 endinterface
 
@@ -92,9 +92,9 @@ module mkPhysicalPlatform
     // Next, create the physical device that can trigger a soft reset. Pass along the
     // interface to the trigger module that the clocks device has given us.
 
-    UNIX_PIPE_DEVICE unix_pipe_device  <- mkUNIXPipeDevice(clocks_device.softResetTrigger,
-                                                           clocked_by clk,
-                                                           reset_by rst);
+    UNIX_PIPE_LI_DEVICE unix_pipe_li_device  <- mkUNIXPipeLIDevice(clocks_device.softResetTrigger,
+                                                                clocked_by clk,
+                                                                reset_by rst);
 
     // Finally, instantiate all other physical devices
 
@@ -102,9 +102,9 @@ module mkPhysicalPlatform
     
     interface PHYSICAL_DRIVERS physicalDrivers;
     
-        interface clocksDriver   = clocks_device.driver;
-        interface unixPipeDriver = unix_pipe_device.driver;
-        interface ddrDriver      = ram.driver;
+        interface clocksDriver     = clocks_device.driver;
+        interface unixPipeLIDriver = unix_pipe_li_device.driver;
+        interface ddrDriver        = ram.driver;
 
     endinterface
     
@@ -112,9 +112,9 @@ module mkPhysicalPlatform
     
     interface TOP_LEVEL_WIRES topLevelWires;
     
-        interface clocksWires    = clocks_device.wires;
-        interface unixPipeWires  = unix_pipe_device.wires;
-        interface ddrWires       = ram.wires;
+        interface clocksWires      = clocks_device.wires;
+        interface unixPipeLIWires  = unix_pipe_li_device.wires;
+        interface ddrWires         = ram.wires;
 
     endinterface
                

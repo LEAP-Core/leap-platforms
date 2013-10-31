@@ -34,7 +34,7 @@
 #include "platforms-module.h"
 #include "default-switches.h"
 
-#include "asim/provides/unix_pipe_device.h"
+#include "awb/provides/unix_pipe_device.h"
 
 
 using namespace std;
@@ -45,12 +45,110 @@ extern GLOBAL_ARGS globalArgs;
 //           UNIX Pipe Physical Device
 // ============================================
 
+// ============================================
+//           Class static functions
+// These functions are necessary to ensure that the
+// class constructor is non-blocking. 
+// ============================================
+
+void * UNIX_PIPE_DEVICE_CLASS::openReadThread(void *argv) {
+    UNIX_PIPE_DEVICE_CLASS *objectHandle = (UNIX_PIPE_DEVICE_CLASS*) argv;
+
+    int retries = 0;
+
+    do
+    {
+        objectHandle->inpipe[0] =  open(objectHandle->readFile.c_str(), O_RDONLY);
+        retries ++;
+        sleep(1);
+    } while ((objectHandle->inpipe[0] < 0) && (retries < 120));
+
+    if(objectHandle->inpipe[0] < 0) 
+    {
+        fprintf(stderr, "CPU Timed out waiting for %s, transfers on this line result in deadlocks\n", objectHandle->readFile.c_str());
+        exit(1);
+    }
+
+    if (objectHandle->ParentRead() < 0)
+    { 
+        perror("input pipe ReaderThread");
+        exit(1);
+    }
+
+    objectHandle->initReadComplete = 1;
+
+}
+
+void * UNIX_PIPE_DEVICE_CLASS::openWriteThread(void *argv) {
+    UNIX_PIPE_DEVICE_CLASS *objectHandle = (UNIX_PIPE_DEVICE_CLASS*) argv;
+
+    // create write side first
+    mkfifo(objectHandle->writeFile.c_str(), S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
+
+    // This should block...
+    objectHandle->outpipe[1] = open(objectHandle->writeFile.c_str(), O_WRONLY);
+
+    if (objectHandle->ParentWrite() < 0)
+    {
+      perror("output pipe WriterThread");
+        exit(1);
+    }
+
+    objectHandle->initWriteComplete = 1;
+
+}
+
+
+// ============================================
+//           Class member functions
+// ============================================
+
 // constructor: set up hardware partition
 UNIX_PIPE_DEVICE_CLASS::UNIX_PIPE_DEVICE_CLASS(
     PLATFORMS_MODULE p) :
         bluesimSwitches(),
-        PLATFORMS_MODULE_CLASS(p)
+        PLATFORMS_MODULE_CLASS(p),
+        initReadComplete(),
+        initWriteComplete(),
+        readFile("pipes/FROM_FPGA"),
+        writeFile("pipes/TO_FPGA")
 {
+    initReadComplete = 0;
+    initWriteComplete = 0;
+
+    const char *commDirectory = "pipes/";
+    
+    if(mkdir(commDirectory, S_IRWXU) != 0) 
+    {
+        if(errno != EEXIST)
+        {
+            fprintf(stderr, "Comm directory creation failed, bailing\n");
+            exit(1);
+        }
+    }
+
+
+    // Invoke threads for opening the I/O channels. This allows the
+    // constructor to terminate.  However, subsequent I/O requests
+    // will block until the initialization is complete.
+    if (pthread_create(&ReaderThreads[0],
+		       NULL,
+		       openReadThread,
+		       this))
+    {
+	perror("pthread_create, ReaderThread: ");
+	exit(1);
+    }
+
+    if (pthread_create(&WriterThreads[0],
+                       NULL,
+                       openWriteThread,
+                       this))
+    {
+      perror("pthread_create, WriterThread: ");
+      exit(1);
+    }
+
 }
 
 // destructor
@@ -63,151 +161,7 @@ UNIX_PIPE_DEVICE_CLASS::~UNIX_PIPE_DEVICE_CLASS()
 void
 UNIX_PIPE_DEVICE_CLASS::Init()
 {
-    childAlive = false;
-
-    //
-    // Usually this code forks the FPGA simulator.  If the environment variable
-    // HASIM_NAMED_PIPES exists then the simulator is persistent and was
-    // started manually.
-    //
-    bool forkSimulator = (getenv("HASIM_NAMED_PIPES") == NULL);
-
-    // create I/O pipes
-    if (! forkSimulator)
-    {
-        outpipe[1] = open("pipes/TO_FPGA", O_WRONLY);
-        if (ParentWrite() < 0)
-        {
-            perror("output pipe (pipes/TO_FPGA)");
-            exit(1);
-        }
-    }
-    else
-    {
-        if (pipe(inpipe) < 0 || pipe(outpipe) < 0)
-        {
-            perror("pipe");
-            exit(1);
-        }
-
-        // create target process
-        childpid = fork();
-        if (childpid < 0)
-        {
-            perror("fork");
-            exit(1);
-        }
-
-        if (childpid == 0)
-        {
-            // CHILD: setup pipes for hardware side
-            close(ParentRead());
-            close(ParentWrite());
-
-            if (dup2(ChildRead(), DESC_HOST_2_FPGA) != DESC_HOST_2_FPGA)
-            {
-                perror("dup2 DESC_HOST_2_FPGA");
-                exit(1);
-            }
-            if (dup2(ChildWrite(), DESC_FPGA_2_HOST) != DESC_FPGA_2_HOST)
-            {
-                perror("dup2 DESC_FPGA_2_HOST");
-                exit(1);
-            }
-
-            // launch hardware executable/download bitfile
-            string hw_bluesim = string(globalArgs->ModelDir()) + "/" + APM_NAME + "_hw.exe";
-            string hw_verilog = string(globalArgs->ModelDir()) + "/" + APM_NAME + "_hw.vexe";
-
-            struct stat buf;
-            string hw_exe;
-            if (! stat(hw_bluesim.c_str(), &buf))
-            {
-                hw_exe = hw_bluesim;
-            }
-            else if (! stat(hw_verilog.c_str(), &buf))
-            {
-                hw_exe = hw_verilog;
-            }
-            else
-            {
-                cerr << "Can't find either Bluesim or Verilog HW simulator." << endl;
-                cerr << "  Looked for Bluesim: " << hw_bluesim << endl;
-                cerr << "             Verilog: " << hw_verilog << endl;
-                exit(1);
-            }
-
-            // Make a copy of the argument vector so we can put the file name
-            // as argv[0]
-            char **argv = new char *[bluesimSwitches.BluesimArgc() + 3];
-
-            // Pointer to exe is argv[0]
-            argv[0] = new char[hw_exe.length() + 1];
-            strcpy(argv[0], hw_exe.c_str());
-
-            // Feed in the simulator arguments
-            argv[1] = new char[strlen(SIMULATOR_ARGS) + 1];
-            strcpy(argv[1], SIMULATOR_ARGS);
-
-            // Copy remaining argv pointers, including trailing NULL
-            for (int i = 0; i < bluesimSwitches.BluesimArgc() + 1; i++)
-            {
-                argv[i + 2] = bluesimSwitches.BluesimArgv()[i];
-            }
-
-            execvp(argv[0], argv);
-
-            // error
-            cerr << "Error attempting to invoke " << hw_exe << endl;
-            exit(1);
-        }
-        else
-        {
-            // PARENT: setup pipes for software side
-            close(ChildRead());
-            close(ChildWrite());
-        }
-    }
-
-    // make sure channel is working by exchanging message with FPGA
-    char buf[32] = "NULL";
-        
-    if (write(ParentWrite(), "SYN", 4) == -1)
-    {
-        perror("host/init/write");
-        exit(1);
-    }
-
-    //
-    // Had to delay opening named input pipe to here for accurate sync with
-    // the FPGA side.
-    //
-    if (! forkSimulator)
-    {
-        inpipe[0] =  open("pipes/FROM_FPGA", O_RDONLY);
-        if (ParentRead() < 0)
-        {
-            perror("input pipe (pipes/FROM_FPGA)");
-            exit(1);
-        }
-    }
-
-    if (read(ParentRead(), buf, 4) == -1)
-    {
-        perror("host/init/read");
-        exit(1);
-    }
-
-    if (strcmp(buf, "ACK") != 0)
-    {
-        fprintf(stderr, "host: incorrect ack message from FPGA: %s\n", buf);
-        exit(1);
-    }
-
-    // call default init so that we can continue
-    // chain if necessary
     PLATFORMS_MODULE_CLASS::Init();
-
     childAlive = true;
 }
 
@@ -240,7 +194,7 @@ UNIX_PIPE_DEVICE_CLASS::Cleanup()
 bool
 UNIX_PIPE_DEVICE_CLASS::Probe()
 {
-    if (! childAlive) return false;
+    if (!initReadComplete) return false;
 
     // test for incoming data on physical channel
     struct timeval  timeout;
@@ -283,6 +237,7 @@ UNIX_PIPE_DEVICE_CLASS::Probe()
 
     // no fresh data
     return false;
+
 }
 
 // blocking read
@@ -291,8 +246,13 @@ UNIX_PIPE_DEVICE_CLASS::Read(
     unsigned char* buf,
     int bytes_requested)
 {
+    while(!initReadComplete) 
+    {
+        sleep(1);
+    }
+
     // assume we can read data in one shot
-    int bytes_read = read(ParentRead(), buf, bytes_requested);
+    int bytes_read = read(inpipe[0], buf, bytes_requested);
 
     if (bytes_read == 0)
     {
@@ -303,7 +263,7 @@ UNIX_PIPE_DEVICE_CLASS::Read(
 
     if (bytes_read < bytes_requested)
     {
-        cerr << "unix-pipe: could not read requested bytes in one shot" << endl;
+      cerr << "unix-pipe: could not read requested bytes in one shot got: " << bytes_read << " requested: " << bytes_requested<< endl;
         CallbackExit(1);
     }
 }
@@ -314,10 +274,15 @@ UNIX_PIPE_DEVICE_CLASS::Write(
     unsigned char* buf,
     int bytes_requested)
 {
-    // assume we can write data in one shot
-    int bytes_written = write(ParentWrite(), buf, bytes_requested);
+    while(!initWriteComplete) 
+    {
+        sleep(1);
+    }
 
-    if (bytes_written < bytes_requested)
+    // assume we can write data in one shot
+    int bytes_written = write(outpipe[1], buf, bytes_requested);
+
+    if (bytes_written != bytes_requested)
     {
         cerr << "unix-pipe: could not write requested bytes in one shot" << endl;
         CallbackExit(1);

@@ -16707,3 +16707,38 @@ register-based bypass to minimize the amount of scheduling in the
 unguarded BRAM.
 
 We should eventually investigate the write-first mode fully.
+
+----------
+keflemin    Date: Wed Oct 30 19:58:06 EDT 2013  CSN: CSN-leap-platforms-712
+                  Wed Oct 30 23:58:06 UTC 2013
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian
+ umf-little-endian.cpp     Locally Modified          711 
+ umf-factory.h             Locally Added               0 
+ umf-little-endian.h       Locally Modified          711 
+ umf-allocator.cpp         Locally Modified          711 
+ umf-little-endian.awb     Locally Modified          711 
+ umf-template.h            Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/simulation
+ sim-physical-platform.bsv Locally Modified          711 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe
+ unix-pipe-device.h        Locally Modified          711 
+ unix-pipe-device.awb      Locally Modified          711 
+ unix-pipe-device.bsv      Locally Modified          711 
+ unix-pipe-li-device.bsv   Locally Added               0 
+ unix-pipe-device-bdpi.c   Locally Modified          711 
+ unix-pipe-device.cpp      Locally Modified          711 
+ unix-pipe-device-bdpi.h   Locally Modified          711 
+ unix-pipe-li-device.log   Locally Added               0 
+
+
+1) Added an abstract class to umf.  This allows type-specific
+definition of how to decode umf packets, and will eventually pave the
+way for automatic generation of type-specific handlers. 
+
+2) Changed unix pipe device to use filesystem fifos rather than pipes.
+This is because the bluesim simulator is now invoked from the run
+script, rather than from a C program.

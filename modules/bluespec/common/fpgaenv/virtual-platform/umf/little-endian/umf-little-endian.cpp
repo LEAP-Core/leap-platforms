@@ -40,6 +40,98 @@
 
 using namespace std;
 
+// decode header from chunk
+void
+UMF_MESSAGE_CLASS::DecodeHeader(
+    UMF_CHUNK chunk)
+{
+    header = chunk;
+
+    // note: length in encoded header is in terms of number of chunks
+    length = UMF_CHUNK_BYTES * (chunk & UMF_MSG_LENGTH_MASK);
+    chunk >>= UMF_MSG_LENGTH_BITS;
+
+    methodID  = chunk & UMF_METHOD_ID_MASK;
+    chunk >>= UMF_METHOD_ID_BITS;
+
+    serviceID = chunk & UMF_SERVICE_ID_MASK;
+    chunk >>= UMF_SERVICE_ID_BITS;
+
+    channelID = chunk & UMF_CHANNEL_ID_MASK;
+
+    phyPvt = chunk >> UMF_CHANNEL_ID_BITS;
+
+    if (length > UMF_MAX_MSG_BYTES)
+    {
+        cerr << "umf: message size too long: " << length << endl;
+        CallbackExit(1);
+    }
+}
+
+UMF_CHUNK
+UMF_MESSAGE_CLASS::GetHeader()
+{
+    return header;
+}
+
+
+// encode a header chunk from my internal info
+UMF_CHUNK UMF_MESSAGE_CLASS::EncodeHeaderWithPhyChannelPvt(unsigned int pvt)
+{
+    UMF_CHUNK chunk;
+
+    // convert length to number of chunks
+    unsigned int num_chunks = (length % UMF_CHUNK_BYTES) == 0 ?
+                              (length / UMF_CHUNK_BYTES)      :
+                              (length / UMF_CHUNK_BYTES) + 1;
+
+
+    chunk = pvt;
+
+    chunk <<= UMF_CHANNEL_ID_BITS;
+    chunk |= channelID;
+
+    chunk <<= UMF_SERVICE_ID_BITS;
+    chunk |= serviceID;
+
+    chunk <<= UMF_METHOD_ID_BITS;
+    chunk |= methodID;
+
+    chunk <<= UMF_MSG_LENGTH_BITS;
+    chunk |= num_chunks;
+
+    return chunk;
+}
+
+
+UMF_CHUNK
+UMF_MESSAGE_CLASS::EncodeHeader() 
+{
+    return EncodeHeaderWithPhyChannelPvt(0);
+}
+
+
+//
+// Char array based header encode/decode.  Both routines depend on the machine
+// being little endian and headers being 32 bits.
+//
+void UMF_MESSAGE_CLASS::DecodeHeader(
+    unsigned char header[])
+{
+    UMF_CHUNK chunk = *(UINT32 *) header;
+    DecodeHeader(chunk);
+}
+
+
+void
+UMF_MESSAGE_CLASS::EncodeHeader(
+    unsigned char buf[]) 
+{
+    UMF_CHUNK chunk = EncodeHeader();
+
+    *(UINT32*) buf = chunk;
+}
+
 // init
 void
 UMF_MESSAGE_CLASS::Init(
@@ -74,11 +166,33 @@ void
 UMF_MESSAGE_CLASS::Print(
     ostream &out)
 {
+    if(UMF_DEBUG)
+    {
+        return;
+    }
+
     out << "channelID: " << channelID << endl;
     out << "serviceID: " << serviceID << endl;
     out << "methodID : " << methodID  << endl;
     out << "length   : " << length    << endl;
-    out << "data     : ";
+
+    out << "Header   : ";
+    for (int i = 0; i < UMF_CHUNK_BYTES/sizeof(UINT32); i++)
+    {
+        out << std::setfill('0');
+        out << hex << std::setw(2) << UINT32(((UINT32*)&header)[i]) << " ";
+    }
+    out << endl;
+
+    out << "PhyPvt   : ";
+    for (int i = 0; i < UMF_CHUNK_BYTES/sizeof(UINT32); i++)
+    {
+        out << std::setfill('0');
+        out << hex << std::setw(2) << UINT32(((UINT32*)&phyPvt)[i]) << " ";
+    }
+    out << endl;
+
+    out << "Data     : ";
 
     for (int i = 0; i < length; i++)
     {

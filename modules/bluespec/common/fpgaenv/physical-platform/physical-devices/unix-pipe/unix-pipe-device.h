@@ -22,12 +22,13 @@
 #include "platforms-module.h"
 #include "command-switches.h"
 #include "asim/provides/umf.h"
+#include "tbb/atomic.h"
 
 #define STDIN             0
 #define STDOUT            1
 #define DESC_HOST_2_FPGA  100
 #define DESC_FPGA_2_HOST  101
-#define BLOCK_SIZE        4
+#define BLOCK_SIZE        UMF_CHUNK_BYTES 
 #define SELECT_TIMEOUT    1000
 
 // Command-line switches for Bluesim.
@@ -58,18 +59,27 @@ class UNIX_PIPE_DEVICE_CLASS: public PLATFORMS_MODULE_CLASS
     BLUESIM_SWITCH_CLASS bluesimSwitches;
   
     // process/pipe state (physical channel)
-    int  inpipe[2], outpipe[2];
-    int  childpid;
-    volatile bool childAlive;
+    int             inpipe[2], outpipe[2];
+    int             childpid;
+    volatile bool   childAlive;
+    std::string     readFile, writeFile; 
+    pthread_t       ReaderThreads[1];
+    pthread_t       WriterThreads[1];
 
     int ParentRead() const { return inpipe[0]; };
     int ParentWrite() const { return outpipe[1]; };
     int ChildRead() const { return outpipe[0]; };
     int ChildWrite() const { return inpipe[1]; };
 
+    class tbb::atomic<UINT64> initReadComplete;
+    class tbb::atomic<UINT64> initWriteComplete;
+
   public:
     UNIX_PIPE_DEVICE_CLASS(PLATFORMS_MODULE);
     ~UNIX_PIPE_DEVICE_CLASS();
+
+    static void * openReadThread(void *argv);
+    static void * openWriteThread(void *argv);
 
     void Init();
     void Cleanup();                    // cleanup

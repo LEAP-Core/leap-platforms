@@ -26,7 +26,7 @@ import Vector::*;
 `define POLL_INTERVAL   0
 
 // BDPI imports
-import "BDPI" function Action                  pipe_init();
+import "BDPI" function Action                  pipe_init(Bit#(8) usePipes);
 import "BDPI" function ActionValue#(Bit#(8))   pipe_open(Bit#(8) programID);
 import "BDPI" function ActionValue#(Bit#(129)) pipe_read(Bit#(8) handle);
 import "BDPI" function ActionValue#(Bit#(1))   pipe_can_write(Bit#(8) handle);
@@ -92,7 +92,7 @@ module mkUNIXPipeDevice#(SOFT_RESET_TRIGGER softResetTrigger)
 
     // initialize C code
     rule initialize(state == STATE_init0);
-        pipe_init();
+        pipe_init(`USE_PIPES);
         state <= STATE_init1;
     endrule
 
@@ -111,6 +111,11 @@ module mkUNIXPipeDevice#(SOFT_RESET_TRIGGER softResetTrigger)
         if (flag != `PIPE_NULL)
         begin
             UMF_CHUNK chunk = truncate(msg);
+            if(`UNIX_DEVICE_DEBUG == 1)
+            begin
+                $display("Driver read %h", chunk);
+            end
+
             readBuffer.enq(chunk);
         end
         pollCounter <= `POLL_INTERVAL;
@@ -124,6 +129,11 @@ module mkUNIXPipeDevice#(SOFT_RESET_TRIGGER softResetTrigger)
         if (can_write == 1)
         begin
             writeBuffer.deq();
+            if(`UNIX_DEVICE_DEBUG == 1)
+            begin
+                $display("Driver wrote %h", chunk);
+            end
+
             pipe_write(handle, zeroExtend(chunk));
         end
     endrule
@@ -150,6 +160,11 @@ module mkUNIXPipeDevice#(SOFT_RESET_TRIGGER softResetTrigger)
 
         // write
         method Action write(UMF_CHUNK chunk);
+            if(`UNIX_DEVICE_DEBUG == 1)
+            begin
+                $display("Writing Chunk %h", chunk);
+            end
+
             writeBuffer.enq(chunk);
         endmethod
         

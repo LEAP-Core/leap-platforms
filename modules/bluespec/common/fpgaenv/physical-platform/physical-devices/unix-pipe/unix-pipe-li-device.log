@@ -1,0 +1,2 @@
+Compilation message: "hw/model/multifpga_routing.bsh", line 11, column 78: SizeOfVia:PHYSICAL_CHANNEL_CLASS_write:128
+Compilation message: "hw/model/multifpga_routing.bsh", line 12, column 77: SizeOfVia:PHYSICAL_CHANNEL_CLASS_read:128

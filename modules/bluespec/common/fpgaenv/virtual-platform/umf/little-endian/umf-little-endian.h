@@ -68,12 +68,6 @@ class UMF_MESSAGE_CLASS: public PLATFORMS_MODULE_CLASS,
                          public ASIM_FREE_LIST_ELEMENT_CLASS<UMF_MESSAGE_CLASS>
 {
   private:   
-    // header info
-    UINT32 channelID;
-    UINT32 serviceID;
-    UINT32 methodID;
-    UINT32 length;
-    
     // For now we use fixed sized message buffers to simplify allocation.
     unsigned char message[UMF_MAX_MSG_BYTES];
     int readIndex;
@@ -81,6 +75,17 @@ class UMF_MESSAGE_CLASS: public PLATFORMS_MODULE_CLASS,
 
     // links
     UMF_MESSAGE next;
+    
+  // Allows us to overload decoding of headers
+  protected:
+
+    // header info
+    UINT32 channelID;
+    UINT32 serviceID;
+    UINT32 methodID;
+    UINT32 length;
+    UMF_CHUNK phyPvt;
+    UMF_CHUNK header;
     
   public:
     // constructor and destructor
@@ -102,20 +107,24 @@ class UMF_MESSAGE_CLASS: public PLATFORMS_MODULE_CLASS,
     int                GetServiceID()  { return serviceID; }
     int                GetMethodID()   { return methodID;  }
     int                GetLength()     { return length;    }
+    UMF_CHUNK          GetPhyPvt()     { return phyPvt;    }
     unsigned char*     GetMessage()    { return message;   }
     
     // header modifiers
-    void               SetChannelID(int cid)   { channelID = cid; }
-    void               SetServiceID(int sid)   { serviceID = sid; }
-    void               SetMethodID(int mid)    { methodID  = mid; }
-    void               SetLength(int len)      { length    = len; }
-    
+    void               SetChannelID(int cid)          { channelID = cid; }
+    void               SetServiceID(int sid)          { serviceID = sid; }
+    void               SetMethodID(int mid)           { methodID  = mid; }
+    void               SetLength(int len)             { length    = len; }
+    void               SetPhyPvt(UMF_CHUNK phyPvtNew) { phyPvt    = phyPvtNew; }    
+
+
     // other header utilities
-    inline void        DecodeHeader(unsigned char header[]);
-    inline void        DecodeHeader(UMF_CHUNK chunk);
-    inline void        EncodeHeader(unsigned char buf[]) const;
-    inline UMF_CHUNK   EncodeHeader() const;
-    inline UMF_CHUNK   EncodeHeaderWithPhyChannelPvt(unsigned int pvt) const;
+    virtual void        DecodeHeader(unsigned char header[]);
+    virtual void       DecodeHeader(UMF_CHUNK chunk);
+    virtual UMF_CHUNK   GetHeader();
+    virtual void        EncodeHeader(unsigned char buf[]);
+    virtual UMF_CHUNK   EncodeHeader();
+    virtual UMF_CHUNK  EncodeHeaderWithPhyChannelPvt(unsigned int pvt); // We may want to make this pure virtual
 
     // marshallers
     void               StartAppend();
@@ -192,90 +201,6 @@ UMF_MESSAGE_CLASS::Clear()
     writeIndex = 0;
 }
 
-// decode header from chunk
-inline void
-UMF_MESSAGE_CLASS::DecodeHeader(
-    UMF_CHUNK chunk)
-{
-    // note: length in encoded header is in terms of number of chunks
-    length = UMF_CHUNK_BYTES * (chunk & UMF_MSG_LENGTH_MASK);
-    chunk >>= UMF_MSG_LENGTH_BITS;
-
-    methodID  = chunk & UMF_METHOD_ID_MASK;
-    chunk >>= UMF_METHOD_ID_BITS;
-
-    serviceID = chunk & UMF_SERVICE_ID_MASK;
-    chunk >>= UMF_SERVICE_ID_BITS;
-
-    channelID = chunk & UMF_CHANNEL_ID_MASK;
-
-    if (length > UMF_MAX_MSG_BYTES)
-    {
-        cerr << "umf: message size too long: " << length << endl;
-        CallbackExit(1);
-    }
-}
-
-
-// encode a header chunk from my internal info
-inline UMF_CHUNK
-UMF_MESSAGE_CLASS::EncodeHeaderWithPhyChannelPvt(unsigned int pvt) const
-{
-    UMF_CHUNK chunk;
-
-    // convert length to number of chunks
-    unsigned int num_chunks = (length % UMF_CHUNK_BYTES) == 0 ?
-                              (length / UMF_CHUNK_BYTES)      :
-                              (length / UMF_CHUNK_BYTES) + 1;
-
-    chunk = pvt;
-
-    chunk <<= UMF_CHANNEL_ID_BITS;
-    chunk |= channelID;
-
-    chunk <<= UMF_SERVICE_ID_BITS;
-    chunk |= serviceID;
-
-    chunk <<= UMF_METHOD_ID_BITS;
-    chunk |= methodID;
-
-    chunk <<= UMF_MSG_LENGTH_BITS;
-    chunk |= num_chunks;
-
-    return chunk;
-}
-
-
-inline UMF_CHUNK
-UMF_MESSAGE_CLASS::EncodeHeader() const
-{
-    return EncodeHeaderWithPhyChannelPvt(0);
-}
-
-
-//
-// Char array based header encode/decode.  Both routines depend on the machine
-// being little endian and headers being 32 bits.
-//
-inline void
-UMF_MESSAGE_CLASS::DecodeHeader(
-    unsigned char header[])
-{
-    UMF_CHUNK chunk = *(UINT32 *) header;
-    DecodeHeader(chunk);
-}
-
-
-inline void
-UMF_MESSAGE_CLASS::EncodeHeader(
-    unsigned char buf[]) const
-{
-    UMF_CHUNK chunk = EncodeHeader();
-
-    *(UINT32*) buf = chunk;
-}
-
-
 //
 // demarshallers
 //
@@ -285,6 +210,7 @@ UMF_MESSAGE_CLASS::StartExtract()
 {
     readIndex = 0;
 }
+
 
 inline bool
 UMF_MESSAGE_CLASS::CanExtract(int nbytes) const
