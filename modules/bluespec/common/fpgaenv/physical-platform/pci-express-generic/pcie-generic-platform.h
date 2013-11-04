@@ -19,6 +19,7 @@
 #ifndef __PHYSICAL_PLATFORM__
 #define __PHYSICAL_PLATFORM__
 
+#include "asim/provides/physical_channel.h"
 #include "platforms-module.h"
 
 // ====================================================
@@ -31,11 +32,15 @@ typedef class PHYSICAL_DEVICES_CLASS* PHYSICAL_DEVICES;
 class PHYSICAL_DEVICES_CLASS: public PLATFORMS_MODULE_CLASS
 {
     private:
+        PHYSICAL_CHANNEL_CLASS pcieDev;
 
     public:
         // constructor-destructor
         PHYSICAL_DEVICES_CLASS(PLATFORMS_MODULE);
         ~PHYSICAL_DEVICES_CLASS();
+
+        PHYSICAL_CHANNEL GetLegacyPhysicalChannel() { return &pcieDev; }
+
 };
 
 #endif

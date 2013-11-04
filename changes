@@ -16742,3 +16742,25 @@ way for automatic generation of type-specific handlers.
 2) Changed unix pipe device to use filesystem fifos rather than pipes.
 This is because the bluesim simulator is now invoked from the run
 script, rather than from a C program.
+
+----------
+keflemin    Date: Mon Nov  4 14:01:13 EST 2013  CSN: CSN-leap-platforms-713
+                  Mon Nov  4 19:01:13 UTC 2013
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/simulation
+ sim-physical-platform.cpp Locally Modified          712 
+ sim-physical-platform.h   Locally Modified          712 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic
+ pcie-generic-platform.h   Locally Modified          712 
+ pcie-generic-platform.cpp Locally Modified          712 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe
+ unix-pipe-li-device.log   Locally Modified          712 
+
+
+1) Refactoring software side-physical devices to self-instantiate.
+Previously, the channelio instantiated the singleton physical channel.
+However, general programs may have many physical channels to many
+other platforms.

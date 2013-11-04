@@ -16,10 +16,13 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+#include "asim/provides/physical_channel.h"
 #include "asim/provides/physical_platform.h"
 
 PHYSICAL_DEVICES_CLASS::PHYSICAL_DEVICES_CLASS(
-    PLATFORMS_MODULE p) : PLATFORMS_MODULE_CLASS(p)
+    PLATFORMS_MODULE p) : 
+    PLATFORMS_MODULE_CLASS(p), 
+    pcieDev(this)
 {
 }
 
