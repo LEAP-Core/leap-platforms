@@ -192,7 +192,6 @@ AREA_GROUP "AG_pcie_ep"                   GROUP = CLOSED;
 
 INST "m_llpi_phys_plat_pcie_dev/bridge/*" AREA_GROUP = "AG_pcie_bridge";
 INST "m_llpi_phys_plat_pcie_extPorts*"    AREA_GROUP = "AG_pcie_bridge";
-AREA_GROUP "AG_pcie_bridge"               RANGE=SLICE_X160Y75:SLICE_X203Y141;
+AREA_GROUP "AG_pcie_bridge"               RANGE=SLICE_X160Y71:SLICE_X203Y141;
 AREA_GROUP "AG_pcie_bridge"               GROUP = CLOSED;
-
 

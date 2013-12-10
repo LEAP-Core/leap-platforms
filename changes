@@ -16764,3 +16764,20 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/uni
 Previously, the channelio instantiated the singleton physical channel.
 However, general programs may have many physical channels to many
 other platforms.
+
+----------
+mcadler     Date: Tue Dec 10 11:13:30 EST 2013  CSN: CSN-leap-platforms-714
+                  Tue Dec 10 16:13:30 UTC 2013
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc-virtex7
+ pcie-virtex7.ucf          Locally Modified          713 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-xilinx/ddr3-sdram-vc707
+ ddr3-sdram.ucf            Locally Modified          713 
+
+- Define a DDR3 controller closed area group to help timing closure.  The group
+  is on an edge of the FPGA adjacent to the memory pins.
+
+- Grow the PCIe controller area group a small amount to reduce timing closure
+  failures.
