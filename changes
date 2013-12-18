@@ -16781,3 +16781,20 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr
 
 - Grow the PCIe controller area group a small amount to reduce timing closure
   failures.
+
+----------
+keflemin    Date: Wed Dec 18 12:36:04 EST 2013  CSN: CSN-leap-platforms-715
+                  Wed Dec 18 17:36:04 UTC 2013
+
+
+Directory .
+ configure                 Locally Modified          714 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-driver-simulation
+ aurora-driver-simulation.bsv Locally Modified          714 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-reliable
+ aurora-reliable.bsv       Locally Modified          714 
+
+
+Removed some of the copious displays from the reliability layer code. 

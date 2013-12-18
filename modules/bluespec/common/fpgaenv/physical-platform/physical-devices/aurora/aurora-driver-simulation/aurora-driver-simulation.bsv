@@ -61,7 +61,7 @@ endinterface
 
 
 module mkAURORA_SINGLE_UG#(String outgoing, String incoming) (AURORA_SINGLE_DEVICE_UG#(width))
-    provisos(Add#(width_extra, width, 256));
+    provisos(Add#(width_extra, width, TMul#(`UNIX_COMM_NUM_WORDS, `UNIX_COMM_WORD_WIDTH))); // this is the size of the physical unix device.
 
     let clk <- exposeCurrentClock;
     let rst <- exposeCurrentReset;

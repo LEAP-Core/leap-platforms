@@ -306,7 +306,10 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ugDevice, NumTypePa
     rule crossDomain;
         marshaller.enq(serdesTxfifo.first);
         serdesTxfifo.deq;
-        $display("TX Link: %h", serdesTxfifo.first);
+        if(`AURORA_RELIABLE_DEBUG > 0) 
+        begin  
+            $display("TX Link: %h", serdesTxfifo.first);
+        end
     endrule
 
     // Send a set of known values across to the other side, as a synchronization step
@@ -332,7 +335,12 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ugDevice, NumTypePa
     rule txHeader(!transmittingCredits && ccCycles == 0 && ugDevice.transmit_rdy);
         Bit#(control_data_size) seqExtend = zeroExtend(txSequenceRewindBuffer.first);
         hashWire <= {zeros, header, seqExtend};
-        $write("TX Hashing(header): %h, %h ->", zeros, {header, seqExtend});
+
+        if(`AURORA_RELIABLE_DEBUG > 0) 
+        begin  
+            $write("TX Hashing(header): %h, %h ->", zeros, {header, seqExtend});
+        end
+
         ctrlPayloadWire.wset({header, seqExtend});
         frameInProgress.enq(?);
         // reset fream state
@@ -349,7 +357,12 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ugDevice, NumTypePa
     rule txFC(ccCycles == 0 && ugDevice.transmit_rdy);
         ackSequenceNumberTX.deq();
         Bit#(control_data_size) ackExtend = zeroExtend(ackSequenceNumberTX.first);
-        $write("TX Hashing(ack): %h -> ", {zeros, ack, ackExtend});
+
+        if(`AURORA_RELIABLE_DEBUG > 0) 
+        begin  
+            $write("TX Hashing(ack): %h -> ", {zeros, ack, ackExtend});
+        end
+
         hashWire <= {zeros, ack, ackExtend};
         ctrlPayloadWire.wset({ack, ackExtend});
         transmittingCredits.send;
@@ -358,7 +371,12 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ugDevice, NumTypePa
     rule txSend (!transmittingCredits && frameInProgress.notEmpty && ugDevice.transmit_rdy);
         txDataRewindBuffer.deq;
         hashWire <= {parityTX, payload, txDataRewindBuffer.first};
-        $write("TX Hashing (data[%d]): %h, %h ->", framePositionTX, parityTX, txDataRewindBuffer.first);
+
+        if(`AURORA_RELIABLE_DEBUG > 0) 
+        begin  
+            $write("TX Hashing (data[%d]): %h, %h ->", framePositionTX, parityTX, txDataRewindBuffer.first);
+        end
+
         ctrlPayloadWire.wset({payload, txDataRewindBuffer.first});
 
         if(framePositionTX + 1 == 0) // frame size must be a power of two
@@ -383,7 +401,11 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ugDevice, NumTypePa
             parityTX <= hashTX;
         end
 
-        $display("hash %h", hashTX);
+        if(`AURORA_RELIABLE_DEBUG > 0) 
+        begin  
+            $display("hash %h", hashTX);
+        end
+
         ugDevice.send({topHalf,hashTX});
     endrule
 
@@ -494,15 +516,23 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ugDevice, NumTypePa
         Bit#(parity_size) hashRX = doHash(zeroExtendNP({hashSalt,ctrl,data}));
         Bool notCorrupt = hashRX == hashExpected && softErr == 0;
 
-        $display("**************");
-        $display("RX Hashes(parityRX %h): %h, %h = %h/%h", parityRX, hashSalt, data, hashRX, hashExpected);
+        if(`AURORA_RELIABLE_DEBUG > 0) 
+        begin  
+            $display("**************");
+            $display("RX Hashes(parityRX %h): %h, %h = %h/%h", parityRX, hashSalt, data, hashRX, hashExpected);
 
-        $display("Fragment isPayload: %h isAck: %h, isHeader:%h", isPayload, isAck, isHeader);
+            $display("Fragment isPayload: %h isAck: %h, isHeader:%h", isPayload, isAck, isHeader);
+        end 
 
         if(isPayload)
         begin
             parityRX <= hashRX;
-            $display("Handle payload");
+
+            if(`AURORA_RELIABLE_DEBUG > 0) 
+            begin  
+                $display("Handle payload");
+            end
+
             // The issue here is that acks may get dropped. So we need to ack every correct packet.
             // However, we can't spuriously ack future packets.  To handle this issue, we need to have a few 
             // forbidden packets. 
@@ -510,13 +540,13 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ugDevice, NumTypePa
             provisionalFramePositionRX <= provisionalFramePositionRX + 1;
             // only enq if 1) hash matches 2) no previous errors in the frame 3) we haven't enqueued this data already
             // (i.e.) as part of a correct partial frames
-            $display("RX Data: pos: %d hashExpected: %h hashRX: %h, data: %h", provisionalFramePositionRX, hashExpected, hashRX, serdesInfifo.first);
-            //if(`AURORA_RELIABLE_DEBUG > 0) 
-            //begin  
-                
+
+            if(`AURORA_RELIABLE_DEBUG > 0) 
+            begin  
+                $display("RX Data: pos: %d hashExpected: %h hashRX: %h, data: %h", provisionalFramePositionRX, hashExpected, hashRX, serdesInfifo.first);                
                 $display("RX Status: pPos %d pSeq %d pos %d seq %d frameErrorRX %d", provisionalFramePositionRX, provisionalSequenceNumberRX, framePositionRX, sequenceNumberRX, frameErrorRX);
               
-            //end
+            end
            
             if(notCorrupt && !frameErrorRX) 
             begin
@@ -535,29 +565,39 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ugDevice, NumTypePa
                   
                     framePositionRX <= framePositionRX + 1;                           
 
-                    //if(`AURORA_RELIABLE_DEBUG > 0) 
-                    //begin  
+                    if(`AURORA_RELIABLE_DEBUG > 0) 
+                    begin  
                         $display("RX Marsh: %h", data);
-                    //end
+                    end
 
                 end
                 else
                 begin 
-                    $display("RX Marsh: (repeat) %h", data);
+                    if(`AURORA_RELIABLE_DEBUG > 0) 
+                    begin  
+                        $display("RX Marsh: (repeat) %h", data);
+                    end
                 end
                 // If we got a frame without error, then we should send an ack.  
                 if(provisionalFramePositionRX + 1 == 0)  // frame_size must be a power of two
                 begin
-                   $display("RX Sending ACK");
-                   // If we got the last data correctly send an ack.
-                   rxFramesAcked <= rxFramesAcked + 1;
-                   ackSequenceNumberTX.enq(provisionalSequenceNumberRX);
+                    if(`AURORA_RELIABLE_DEBUG > 0) 
+                    begin  
+                        $display("RX Sending ACK");
+                    end
+                    // If we got the last data correctly send an ack.
+                    rxFramesAcked <= rxFramesAcked + 1;
+                    ackSequenceNumberTX.enq(provisionalSequenceNumberRX);
                 end
             end
             else 
             begin
                 // Need to shoot down whatever is in the marshaller
-                $display("RX Marsh: (drop) %h", data);
+                if(`AURORA_RELIABLE_DEBUG > 0) 
+                begin  
+                    $display("RX Marsh: (drop) %h", data);
+                end
+
                 frameErrorRX <= True;
             end
         end
@@ -565,7 +605,10 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ugDevice, NumTypePa
         begin
 
             Bit#(TLog#(sequence_numbers)) headerSequence = truncate(data);
-            $display("Handle header");
+            if(`AURORA_RELIABLE_DEBUG > 0) 
+            begin  
+                $display("Handle header");
+            end
             rxFrames <= rxFrames + 1;
             // getting a header should cause us to reset our counters. but we should do this at the higher level.
             provisionalFramePositionRX <= 0;
@@ -595,14 +638,21 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ugDevice, NumTypePa
         end
         else if(isAck)
         begin
-            $display("Handle Ack");
+            if(`AURORA_RELIABLE_DEBUG > 0) 
+            begin  
+                $display("Handle Ack");
+            end
+
             if(notCorrupt)
             begin
                 ackRX.enq(truncate(data));
             end
         end
 
-        $display("**************");
+        if(`AURORA_RELIABLE_DEBUG > 0) 
+        begin  
+            $display("**************");
+        end
     endrule
 
 
@@ -610,10 +660,10 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ugDevice, NumTypePa
         demarshaller.deq;
         serdesRxfifo.enq(truncate(demarshaller.first()));
 
-        //if(`AURORA_RELIABLE_DEBUG > 0) 
-        //begin  
+        if(`AURORA_RELIABLE_DEBUG > 0) 
+        begin  
             $display("RX Link: %h", demarshaller.first);
-        //end
+        end
     endrule
 
 
