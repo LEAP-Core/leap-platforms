@@ -62,13 +62,16 @@ PCIE_DEVICE_CLASS::Init()
     //
     // Reset the FPGA -- allows running without reprogramming
     //
-    int res = ioctl(pcieDev, BNOC_DEACTIVATE);
-    res = ioctl(pcieDev, BNOC_REACTIVATE);
-    res = ioctl(pcieDev, BNOC_SOFT_RESET);
-    if (res < 0)
+    if (DO_SOFT_RESET)
     {
-        fprintf (stderr, "Error: Failed to reset %s: %s\n", dev_file, strerror(errno));
-        exit(EXIT_FAILURE);
+        int res = ioctl(pcieDev, BNOC_DEACTIVATE);
+        res = ioctl(pcieDev, BNOC_REACTIVATE);
+        res = ioctl(pcieDev, BNOC_SOFT_RESET);
+        if (res < 0)
+        {
+            fprintf (stderr, "Error: Failed to reset %s: %s\n", dev_file, strerror(errno));
+            exit(EXIT_FAILURE);
+        }
     }
 
     //

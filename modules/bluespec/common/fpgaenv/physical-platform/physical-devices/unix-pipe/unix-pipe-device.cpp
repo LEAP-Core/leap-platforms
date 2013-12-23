@@ -263,7 +263,7 @@ UNIX_PIPE_DEVICE_CLASS::Read(
 
     if (bytes_read < bytes_requested)
     {
-      cerr << "unix-pipe: could not read requested bytes in one shot got: " << bytes_read << " requested: " << bytes_requested<< endl;
+        cerr << "unix-pipe: could not read requested bytes in one shot got: " << bytes_read << " requested: " << bytes_requested<< endl;
         CallbackExit(1);
     }
 }

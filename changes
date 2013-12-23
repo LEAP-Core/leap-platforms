@@ -16867,3 +16867,30 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic
 - Clean up some formatting, switch to standard naming, remove hard tabs, etc.
 
 - VC707 compiled and tested.  ML605 compiled but not tested.
+
+----------
+keflemin    Date: Mon Dec 23 17:10:57 EST 2013  CSN: CSN-leap-platforms-717
+                  Mon Dec 23 22:10:57 UTC 2013
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/utils
+ physical-platform-utils.bsv Locally Modified          716 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc
+ pcie-bluenoc.cpp          Locally Modified          716 
+ pcie-bluenoc.awb          Locally Modified          716 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe
+ unix-pipe-device.awb      Locally Modified          716 
+ unix-pipe-device.bsv      Locally Modified          716 
+ unix-pipe-device.cpp      Locally Modified          716 
+
+
+1) Made bluenoc software soft reset an awb-parameter.  This way
+multifpga builds and external users can peaceably co-exist for the
+great good of mankind.
+
+2) Extended size of FPGA_PLATFORM_ID.  It was failing if there was a
+single FPGA platform.
+
+3) Fixed some spurious printouts in unix comm driver.  Shame on me. 

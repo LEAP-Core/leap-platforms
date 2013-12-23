@@ -67,6 +67,9 @@ interface UNIX_PIPE_DEVICE;
 
 endinterface
                   
+// Only the USE_PIPES option will work, so define it here.
+`define USE_PIPES 1
+
 // UNIX pipe module
 module mkUNIXPipeDevice#(SOFT_RESET_TRIGGER softResetTrigger)
     // interface
@@ -112,7 +115,7 @@ module mkUNIXPipeDevice#(SOFT_RESET_TRIGGER softResetTrigger)
         begin
             UMF_CHUNK chunk = truncate(msg);
             if(`UNIX_DEVICE_DEBUG == 1)
-            begin
+            begin 
                 $display("Driver read %h", chunk);
             end
 

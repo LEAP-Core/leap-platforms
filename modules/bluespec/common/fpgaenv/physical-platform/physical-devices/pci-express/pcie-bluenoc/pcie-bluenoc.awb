@@ -19,3 +19,6 @@
 
 %public pcie-bury.bsv
 %private pcie-bury.v
+
+%param DO_SOFT_RESET 1 "Do Bluenoc soft reset on start"
+

@@ -31,4 +31,4 @@ function Integer fpgaNumPlatforms() = `FPGA_NUM_PLATFORMS;
 // FPGA_PLATFORM_IDX is a container for FPGA_PLATFORM_ID.  Must be at least
 // one bit.
 //
-typedef UInt#(TMax#(1, TLog#(`FPGA_NUM_PLATFORMS))) FPGA_PLATFORM_ID;
+typedef UInt#(TMax#(1, TLog#(TAdd#(1,`FPGA_NUM_PLATFORMS)))) FPGA_PLATFORM_ID;
