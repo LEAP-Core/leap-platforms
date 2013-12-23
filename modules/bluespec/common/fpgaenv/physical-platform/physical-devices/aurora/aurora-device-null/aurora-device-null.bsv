@@ -34,6 +34,7 @@ interface AURORA_COMPLEX;
    interface AURORA_COMPLEX_WIRES  wires;
 endinterface
 
-module mkAURORA_DEVICE (AURORA_COMPLEX);
-
+module mkAuroraDevice#(Clock rawClock, Reset rawReset)
+    // Interface:
+    (AURORA_COMPLEX);
 endmodule

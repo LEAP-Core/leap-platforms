@@ -73,7 +73,10 @@ interface AURORA_DEVICE;
     interface AURORA_DRIVER driver;
 endinterface      
 
-module mkAURORA_DEVICE#(Clock rawClock, Reset rawReset)(AURORA_DEVICE);
+module mkAuroraDevice#(Clock rawClock, Reset rawReset)
+    // Interface:
+    (AURORA_DEVICE);
+
 	let clk <- exposeCurrentClock();
 	let rst <- exposeCurrentReset();
 

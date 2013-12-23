@@ -69,29 +69,27 @@ interface AURORA_COMPLEX;
 endinterface
 
 (*synthesize*)
-module mkAURORA_DEVICE (AURORA_COMPLEX);
+module mkAuroraDevice#(Clock rawClock, Reset rawReset)
+    // Interface:
+    (AURORA_COMPLEX);
 
     Vector#(`NUM_AURORA_IFCS,AURORA_COMPLEX_DRIVER) ifcDrivers = newVector();
     Vector#(`NUM_AURORA_IFCS,AURORA_WIRES)                                                   ifcWires = newVector();
     Vector#(`NUM_AURORA_IFCS,AuroraGTXClockSpec)                                             ifcClocks = newVector();
 
-
-    let clk <- exposeCurrentClock();
-    let rst <- exposeCurrentReset();
-
     // HPC Clock
-    CLOCK_FROM_PUT hpcClockN <- mkClockFromPut(clocked_by clk);
-    CLOCK_FROM_PUT hpcClockP <- mkClockFromPut(clocked_by clk);
+    CLOCK_FROM_PUT hpcClockN <- mkClockFromPut(clocked_by rawClock);
+    CLOCK_FROM_PUT hpcClockP <- mkClockFromPut(clocked_by rawClock);
 
     let hpcClock <- mkClockIBUFDS_GTE2(True, hpcClockP.clock, hpcClockN.clock);
     
     ifcClocks = replicate(AuroraGTXClockSpec{pll_divsel45_fb: 4, clk25_divider: 7, clock: hpcClock, use_chipscope: 0}); // We scrub these values from coregen. HPC clock is 156.25 MHz.
 
-    ifcClocks[1] = AuroraGTXClockSpec{pll_divsel45_fb: 4, clk25_divider: 7, clock: hpcClock, use_chipscope: 1};
+    ifcClocks[1] = AuroraGTXClockSpec{pll_divsel45_fb: 4, clk25_divider: 7, clock: hpcClock, use_chipscope: 0};
 
     // SMA Clock
-    CLOCK_FROM_PUT smaClockN <- mkClockFromPut(clocked_by clk);
-    CLOCK_FROM_PUT smaClockP <- mkClockFromPut(clocked_by clk);
+    CLOCK_FROM_PUT smaClockN <- mkClockFromPut(clocked_by rawClock);
+    CLOCK_FROM_PUT smaClockP <- mkClockFromPut(clocked_by rawClock);
 
     let smaClock <- mkClockIBUFDS_GTE2(True, smaClockP.clock, smaClockN.clock);
 
@@ -104,7 +102,7 @@ module mkAURORA_DEVICE (AURORA_COMPLEX);
     for(Integer i = 0; i < `NUM_AURORA_IFCS; i = i + 1)
     begin
         // Instantiate the driver and flowcontrol
-        AURORA_SINGLE_DEVICE_UG#(InterfaceWidth) ug_device <- mkAURORA_SINGLE_UG(ifcClocks[i], clk, rst);
+        AURORA_SINGLE_DEVICE_UG#(InterfaceWidth) ug_device <- mkAURORA_SINGLE_UG(ifcClocks[i], rawClock, rawReset);
         NumTypeParam#(InterfaceWords) interfaceWidth = ?;
         let auroraFlowcontrol <- mkAURORA_FLOWCONTROL(ug_device, interfaceWidth);
 

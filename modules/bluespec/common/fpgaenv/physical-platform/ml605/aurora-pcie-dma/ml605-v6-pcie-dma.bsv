@@ -119,7 +119,9 @@ module mkPhysicalPlatform#(Vector#(`N_TOP_LEVEL_CLOCKS, Clock) topClocks, Reset 
         clocks.softResetTrigger.reset();
     endrule
 
-    AURORA_COMPLEX aurora_device <- mkAURORA_DEVICE(clocked_by clk, reset_by rst);
+    AURORA_COMPLEX aurora_device <- mkAuroraDevice(clocks.driver.rawClock,
+                                                   clocks.driver.rawReset,
+                                                   clocked_by clk, reset_by rst);
 
     //
     // Aggregate the drivers

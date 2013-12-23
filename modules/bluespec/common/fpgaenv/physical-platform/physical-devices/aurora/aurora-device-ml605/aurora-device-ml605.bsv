@@ -66,7 +66,9 @@ interface AURORA_COMPLEX;
 endinterface
 
 (*synthesize*)
-module mkAURORA_DEVICE (AURORA_COMPLEX);
+module mkAuroraDevice#(Clock rawClock, Reset rawReset)
+    // Interface:
+    (AURORA_COMPLEX);
 
     Vector#(`NUM_AURORA_IFCS,AURORA_DRIVER#(TSub#(TMul#(InterfaceWords, InterfaceWidth),1))) ifcDrivers = newVector();
     Vector#(`NUM_AURORA_IFCS,AURORA_WIRES)                                                   ifcWires = newVector();

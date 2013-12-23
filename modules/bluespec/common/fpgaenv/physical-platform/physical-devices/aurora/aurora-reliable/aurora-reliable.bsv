@@ -94,25 +94,23 @@ module mkCRC#(Bit#(poly_width) crc_poly) (CRC#(poly_width, data_size))
 endmodule
 */
 
-(* noinline *)
+    (* noinline *)
     function Bit#(8) doHash(Bit#(80) bitsIn);
-       
-            Bit#(9) poly = 'h183;
-            Bit#(8) poly_trunc = truncateLSB(reverseBits(poly));
+        Bit#(9) poly = 'h183;
+        Bit#(8) poly_trunc = truncateLSB(reverseBits(poly));
 
-            //$display("Hash in %h", bitsIn);
-            function Bit#(80) oneStep(Bit#(1) bitIn, Bit#(80) rem_temp);
-                Bit#(80) result = rem_temp >> 1;
-                if(bitIn==1) // grab top bit
-                begin
-                    result = (rem_temp >> 1) ^ zeroExtend(poly_trunc);
-                end
-                return result;
-             endfunction
+        //$display("Hash in %h", bitsIn);
+        function Bit#(80) oneStep(Bit#(1) bitIn, Bit#(80) rem_temp);
+            Bit#(80) result = rem_temp >> 1;
+            if(bitIn==1) // grab top bit
+            begin
+                result = (rem_temp >> 1) ^ zeroExtend(poly_trunc);
+            end
+            return result;
+         endfunction
 
-            Vector#(80,Bit#(1)) bitVec = unpack(bitsIn);
-            return truncate(foldr(oneStep,0,bitVec));
-       
+        Vector#(80,Bit#(1)) bitVec = unpack(bitsIn);
+        return truncate(foldr(oneStep,0,bitVec));
     endfunction
 
 //(* inline *)
@@ -127,14 +125,14 @@ endmodule
 //endmodule
 
 interface AURORA_WIRES;
-	method Action rxp_in(Bit#(1) i);
-	method Action rxn_in(Bit#(1) i);
-	method Bit#(1) txp_out();
-	method Bit#(1) txn_out();
-        interface Reset aurora_rst;
-	interface Clock aurora_clk;
-        interface Reset model_rst;
-	interface Clock model_clk;
+    (* always_enabled, always_ready *)
+    method Action rxp_in(Bit#(1) i);
+    (* always_enabled, always_ready *)
+    method Action rxn_in(Bit#(1) i);
+    (* always_enabled, always_ready *)
+    method Bit#(1) txp_out();
+    (* always_enabled, always_ready *)
+    method Bit#(1) txn_out();
 endinterface
 
 
@@ -147,7 +145,7 @@ interface AURORA_DRIVER#(numeric type interface_width);
     method Action                 write(Bit#(interface_width) tx_word); // txusrclk 
     method Bool                   write_ready(); // txusrclk 
     method Action                 deq(); // rxusrclk0     
-    method Bit#(interface_width)   first(); // rxusrclk0     
+    method Bit#(interface_width)  first(); // rxusrclk0     
 
 
     // Debugging interface
@@ -155,12 +153,9 @@ interface AURORA_DRIVER#(numeric type interface_width);
     method Bit#(1) lane_up;
     method Bit#(1) hard_err;
     method Bit#(1) soft_err;
-    method Bool     credit_underflow;
     method Bit#(32) rx_count;
     method Bit#(32) tx_count;
     method Bit#(32) error_count;
-    method Bit#(32) rx_fifo_count;
-    method Bit#(32) tx_fifo_count;
     method Bit#(16) data_drops;
     method Bit#(32) rx_frames;
     method Bit#(32) rx_frames_correct;
@@ -168,7 +163,6 @@ interface AURORA_DRIVER#(numeric type interface_width);
     method Bit#(32) tx_frames;
     method Bit#(32) tx_frames_correct;
     method Bit#(32) timeouts;
-
 endinterface
 
 interface AURORA_DEVICE#(numeric type width);
@@ -177,12 +171,15 @@ interface AURORA_DEVICE#(numeric type width);
     interface AURORA_DRIVER#(width) driver;
 endinterface      
 
+//
 // Parameterizations for the aurora flow control interface.
 // Eventually, these should be codified as first order parameters.
 // Also the width of the interface should automatically adjust based on 
 // clock ratios.
-
-module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ugDevice, NumTypeParam#(interface_words) interfaceWordsParam) 
+//
+module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ugDevice,
+                             NumTypeParam#(interface_words) interfaceWordsParam)
+    // Interface:
     (AURORA_DEVICE#(interface_width))
     provisos(
              // provisos for protocol
@@ -195,7 +192,7 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ugDevice, NumTypePa
              Mul#(frame_size, max_frames, total_credits),
              Add#(0,TExp#(TLog#(frame_size)),frame_size),
              // provisos for data payload words
-             Add#(1, payload_width, width),	
+             Add#(1, payload_width, width), 
              Add#(data_size,parity_size,payload_size),
              Add#(1,payload_size,width), // We use one bit to encode the data payload
              Add#(TAdd#(1,parity_size), data_size, width),
@@ -263,9 +260,10 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ugDevice, NumTypePa
     // need to make sure that flow control can come through
     PulseWire transmittingCredits <- mkPulseWire(clocked_by(controllerClk), reset_by(controllerRst));
     PulseWire updatingCredits <- mkPulseWire(clocked_by(controllerClk), reset_by(controllerRst));
-    FIFOF#(Tuple2#(Bit#(1), Bit#(width))) serdesInfifo <- mkSizedBRAMFIFOF(valueof(total_credits), clocked_by controllerClk, reset_by controllerRst);
     MARSHALLER#(Bit#(data_size), Bit#(interface_width)) marshaller <- mkSimpleMarshallerHighToLow(clocked_by(controllerClk), 
                                                                                                       reset_by(controllerRst));
+    // Incoming BRAM FIFO feeds into a register-based FIFO to relax timing.
+    FIFOF#(Tuple2#(Bit#(1), Bit#(width))) serdesInfifo <- mkSizedSlowBRAMFIFOF(valueof(total_credits), clocked_by controllerClk, reset_by controllerRst);
 
     let timeoutFires <- mkPulseWire(clocked_by controllerClk, reset_by controllerRst);
     let timeoutThreshold = 10*(fromInteger(valueof(frame_size)));
@@ -332,7 +330,10 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ugDevice, NumTypePa
     //Bit#(parity_size) hashTX = truncate(hashBits(hashWire));
 
 
-    rule txHeader(!transmittingCredits && ccCycles == 0 && ugDevice.transmit_rdy);
+    rule txHeader(! transmittingCredits &&
+                  ! frameInProgress.notEmpty &&
+                  ccCycles == 0 &&
+                  ugDevice.transmit_rdy);
         Bit#(control_data_size) seqExtend = zeroExtend(txSequenceRewindBuffer.first);
         hashWire <= {zeros, header, seqExtend};
 
@@ -368,7 +369,9 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ugDevice, NumTypePa
         transmittingCredits.send;
     endrule
 
-    rule txSend (!transmittingCredits && frameInProgress.notEmpty && ugDevice.transmit_rdy);
+    rule txSend (! transmittingCredits &&
+                 frameInProgress.notEmpty &&
+                 ugDevice.transmit_rdy);
         txDataRewindBuffer.deq;
         hashWire <= {parityTX, payload, txDataRewindBuffer.first};
 
@@ -617,7 +620,7 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ugDevice, NumTypePa
             // to deal with wrap around, we use an enlarged frame space.  The secondor clause handles the wrap case.
             
             Bit#(1) headerTop = truncateLSB(headerSequence);
-	    Bit#(1) seqTop = truncateLSB(sequenceNumberRX);
+        Bit#(1) seqTop = truncateLSB(sequenceNumberRX);
             
             // Second clause handles the wrap-around case, where the leading 0 packets are younger than the leading 1 packets 
             Bool frameErrorNext = (sequenceNumberRX < truncate(headerSequence) && 
@@ -672,20 +675,13 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ugDevice, NumTypePa
     endrule
      
     interface AURORA_WIRES wires;
-
-	method rxp_in = ugDevice.rxp_in;
-	method rxn_in = ugDevice.rxn_in;
-	method txp_out = ugDevice.txp_out;
-	method txn_out = ugDevice.txn_out;
-	interface Clock model_clk = clk;
-        interface Reset model_rst = rst;
-	interface Clock aurora_clk = ugDevice.aurora_clk;
-        interface Reset aurora_rst = ugDevice.aurora_rst;
-
+        method rxp_in = ugDevice.rxp_in;
+        method rxn_in = ugDevice.rxn_in;
+        method txp_out = ugDevice.txp_out;
+        method txn_out = ugDevice.txn_out;
     endinterface
    
     interface AURORA_DRIVER driver;
-
         method write = serdesTxfifo.enq;
 
         method write_ready = serdesTxfifo.sNotFull();
@@ -708,7 +704,6 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ugDevice, NumTypePa
         method tx_frames = txFrames.crossed();
         method tx_frames_correct = txFramesCorrect.crossed();
         method timeouts = timeouts.crossed();
-
     endinterface
  
 endmodule

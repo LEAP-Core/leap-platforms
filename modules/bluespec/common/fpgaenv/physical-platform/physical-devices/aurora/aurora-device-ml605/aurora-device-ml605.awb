@@ -10,8 +10,8 @@
 %sources -t BSH -v PUBLIC aurora-device-ml605.bsh
 %sources -t UCF -v PUBLIC ml605_sma_aurora.ucf
 
-%generated -t VERILOG mkAURORA_DEVICE.v
-%generated -t BA  mkAURORA_DEVICE.ba
+%generated -t VERILOG mkAuroraDevice.v
+%generated -t BA  mkAuroraDevice.ba
 
 %param NUM_AURORA_IFCS 5 "Number of Aurora Interfaces"
 

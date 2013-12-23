@@ -16798,3 +16798,72 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aur
 
 
 Removed some of the copious displays from the reliability layer code. 
+
+----------
+mcadler     Date: Mon Dec 23 08:34:41 EST 2013  CSN: CSN-leap-platforms-716
+                  Mon Dec 23 13:34:41 UTC 2013
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/pcie-aurora
+ xilinx-xup-pcie-sata.bsv  Locally Modified          715 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/aurora
+ xilinx-xup-sata.bsv       Locally Modified          715 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/ml605/aurora-pcie-dma
+ ml605-v6-pcie-dma.bsv     Locally Modified          715 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-driver-virtex7-64b66b
+ aurora-import.bsv         Locally Modified          715 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-driver-simulation
+ aurora-import.bsv         Locally Modified          715 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device
+ aurora-device.bsv         Locally Modified          715 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-reliable
+ aurora-reliable.bsv       Locally Modified          715 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device-ml605
+ aurora-device-ml605.awb   Locally Modified          715 
+ aurora-device-ml605.bsv   Locally Modified          715 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-driver-virtex7-64b66b-10gbps
+ aurora-import.bsv         Locally Modified          715 
+ aurora-ug.bsv             Locally Modified          715 
+ vc707_sma_aurora.ucf      Locally Modified          715 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device-vc707
+ aurora-device-vc707.awb   Locally Modified          715 
+ aurora-device-vc707.bsv   Locally Modified          715 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device-null
+ aurora-device-null.bsv    Locally Modified          715 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/sata-aurora-3gbps
+ XUPV5_AURORA_SINGLE.bsv   Locally Modified          715 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/sata-aurora-3.125gbps
+ XUPV5_AURORA_SINGLE.bsv   Locally Modified          715 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora-sma-ml605
+ aurora-import.bsv         Locally Modified          715 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic
+ pcie-generic-platform.bsv Locally Modified          715 
+
+- Add area groups on VC707 for Aurora driver and reliability layers.  The
+  drivers are against the pins and the reliability layers next to the drivers.
+  These make a big difference on large designs.
+
+- Add an extra LUT-based FIFO buffer on the outbound path of the BRAM FIFO
+  in the reliability layer to relax timing.
+
+- Pass raw clock and reset to Aurora drivers, which are then used as the
+  fictitious clock inputs to some pins.  Using raw clock reduces the number
+  of exposed top level wires.
+
+- Clean up some formatting, switch to standard naming, remove hard tabs, etc.
+
+- VC707 compiled and tested.  ML605 compiled but not tested.

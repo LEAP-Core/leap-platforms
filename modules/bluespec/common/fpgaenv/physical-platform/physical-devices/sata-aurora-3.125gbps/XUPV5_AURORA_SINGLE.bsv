@@ -117,7 +117,9 @@ endinterface
 
 typedef 16 BufferSize;
 
-module mkAURORA_DEVICE (AURORA_DEVICE);
+module mkAuroraDevice#(Clock rawClock, Reset rawReset)
+    // Interface:
+    (AURORA_DEVICE);
 
     let ug_device <- mkAURORA_SINGLE_UG();
 

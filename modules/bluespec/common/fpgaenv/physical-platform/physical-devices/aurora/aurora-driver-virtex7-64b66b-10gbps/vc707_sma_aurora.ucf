@@ -78,10 +78,10 @@ TIMESPEC "TS_rxrecclk_32_HPC1" = PERIOD "rxrecclk_32_HPC1" 312.5 MHz HIGH 50%;
 
 
 NET "m_llpi_phys_plat_aurora_device/ug_device_0/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/enable_32_i" TNM_NET = FFS "enable_32_SMA";
-TIMESPEC "TS_enable_32_multiclk_SMA" = FROM  "enable_32_SMA"to "enable_32_SMA" TS_rxrecclk_32_SMA/2;
+TIMESPEC "TS_enable_32_multiclk_SMA" = FROM "enable_32_SMA" to "enable_32_SMA" TS_rxrecclk_32_SMA/2;
 
 NET "m_llpi_phys_plat_aurora_device/ug_device_1/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/enable_32_i" TNM_NET = FFS "enable_32_HPC1";
-TIMESPEC "TS_enable_32_multiclk_HPC1" = FROM  "enable_32_HPC1"to "enable_32_HPC1" TS_rxrecclk_32_HPC1/2;
+TIMESPEC "TS_enable_32_multiclk_HPC1" = FROM "enable_32_HPC1" to "enable_32_HPC1" TS_rxrecclk_32_HPC1/2;
 
 
 NET  auroraWires_sma_clk_n_put LOC = AH7;
@@ -136,8 +136,20 @@ INST m_llpi_phys_plat_aurora_device/ug_device_1/aurora_64b66b_v7_3_block_i/auror
 
 
 ## Area groups
-#INST "m_llpi_phys_plat_aurora_device/ug_device_1/aurora_64b66b_v7_3_block_i/*" AREA_GROUP = "AG_aurora_1";
-#AREA_GROUP "AG_aurora_1"                  RANGE=SLICE_X174Y325:SLICE_X221Y349;
-#AREA_GROUP "AG_aurora_1"                  GROUP=CLOSED;
+INST "m_llpi_phys_plat_aurora_device/ug_device_0/*" AREA_GROUP = "AG_aurora_0";
+AREA_GROUP "AG_aurora_0"                  RANGE=SLICE_X215Y0:SLICE_X221Y49;
+AREA_GROUP "AG_aurora_0"                  GROUP=CLOSED;
 
+INST "m_llpi_phys_plat_aurora_device/*auroraFlowcontrol_0*/*" AREA_GROUP = "AG_aurora_0_fc";
+AREA_GROUP "AG_aurora_0_fc"               RANGE=SLICE_X200Y0:SLICE_X214Y49;
+AREA_GROUP "AG_aurora_0_fc"               GROUP=CLOSED;
+
+
+INST "m_llpi_phys_plat_aurora_device/ug_device_1/*" AREA_GROUP = "AG_aurora_1";
+AREA_GROUP "AG_aurora_1"                  RANGE=SLICE_X215Y200:SLICE_X221Y249;
+AREA_GROUP "AG_aurora_1"                  GROUP=CLOSED;
+
+INST "m_llpi_phys_plat_aurora_device/*auroraFlowcontrol_1*/*" AREA_GROUP = "AG_aurora_1_fc";
+AREA_GROUP "AG_aurora_1_fc"               RANGE=SLICE_X196Y200:SLICE_X214Y249;
+AREA_GROUP "AG_aurora_1_fc"               GROUP=CLOSED;
 

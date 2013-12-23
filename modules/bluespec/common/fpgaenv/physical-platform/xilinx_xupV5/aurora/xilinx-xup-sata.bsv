@@ -88,7 +88,7 @@ module mkPhysicalPlatform
     // Next, create the physical device that can trigger a soft reset. Pass along the
     // interface to the trigger module that the clocks device has given us.
 
-   let aurora_device <- mkAURORA_DEVICE(clocked_by clk, reset_by rst);
+   let aurora_device <- mkAuroraDevice(clk, rst, clocked_by clk, reset_by rst);
 
     // Aggregate the drivers
     

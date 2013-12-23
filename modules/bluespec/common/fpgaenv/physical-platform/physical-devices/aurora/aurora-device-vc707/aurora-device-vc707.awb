@@ -9,8 +9,8 @@
 %sources -t BSV -v PUBLIC aurora-device-vc707.bsv
 %sources -t BSH -v PUBLIC aurora-device-vc707.bsh
 
-%generated -t VERILOG mkAURORA_DEVICE.v
-%generated -t BA  mkAURORA_DEVICE.ba
+%generated -t VERILOG mkAuroraDevice.v
+%generated -t BA  mkAuroraDevice.ba
 
 %param NUM_AURORA_IFCS 2 "Number of Aurora Interfaces"
 

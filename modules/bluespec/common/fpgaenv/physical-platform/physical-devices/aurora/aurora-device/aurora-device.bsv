@@ -36,7 +36,9 @@ import Vector::*;
 `include "awb/provides/aurora_flowcontrol.bsh"
 `include "awb/provides/aurora_driver.bsh"
 
-module mkAURORA_DEVICE (AURORA_DEVICE);
+module mkAuroraDevice#(Clock rawClock, Reset rawReset)
+    // Interface:
+    (AURORA_DEVICE);
 
     let modelClock <- exposeCurrentClock();
 
@@ -48,5 +50,4 @@ module mkAURORA_DEVICE (AURORA_DEVICE);
     let auroraFlowcontrol <- mkAURORA_FLOWCONTROL(ug_device);
 
     return auroraFlowcontrol;
- 
 endmodule
