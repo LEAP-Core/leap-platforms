@@ -16894,3 +16894,22 @@ great good of mankind.
 single FPGA platform.
 
 3) Fixed some spurious printouts in unix comm driver.  Shame on me. 
+
+----------
+mcadler     Date: Wed Dec 25 11:28:32 EST 2013  CSN: CSN-leap-platforms-718
+                  Wed Dec 25 16:28:32 UTC 2013
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-driver-virtex7-64b66b-10gbps
+ vc707_sma_aurora.ucf      Locally Modified          717 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device-vc707
+ aurora-device-vc707.awb   Locally Modified          717 
+ aurora-device-vc707.bsv   Locally Modified          717 
+
+- Tweak VC707 Aurora area groups for improved timing closure.
+
+- Add AURORA_IFC_WORDS parameter to control the width of the model's interface
+  to Aurora.  When 0 the size is picked automatically based on relative
+  frequencies.  The current default (3) appears to be a reasonable compromise
+  and keeps interface configuration constant as model frequency changes.

@@ -41,9 +41,15 @@ import XilinxCells::*;
 `include "awb/provides/clocks_device.bsh"
 `include "awb/provides/librl_bsv_base.bsh"
 
+`ifdef AURORA_IFC_WORDS_Z
 // Calculate the optimal interface width for a given user clock and
 // serdes clock.
-typedef TMax#(1,TDiv#(`AURORA_INTERFACE_FREQ, `MODEL_CLOCK_FREQ)) InterfaceWords; 
+typedef TMax#(1,TDiv#(`AURORA_INTERFACE_FREQ, `MODEL_CLOCK_FREQ)) InterfaceWords;
+`else
+// Fixed width.
+typedef `AURORA_IFC_WORDS InterfaceWords;
+`endif
+
 typedef `AURORA_INTERFACE_WIDTH InterfaceWidth;
 
 typedef AURORA_DRIVER#(AURORA_INTERFACE_WIDTH#(InterfaceWords, InterfaceWidth)) AURORA_COMPLEX_DRIVER;
@@ -61,7 +67,7 @@ interface AURORA_COMPLEX_WIRES;
     interface Put#(Bit#(1)) hpc_clk_n;
 
     interface Vector#(`NUM_AURORA_IFCS,AURORA_WIRES) wires;
-endinterface 
+endinterface
 
 interface AURORA_COMPLEX;
    interface AURORA_COMPLEX_DRIVERS drivers;
@@ -82,7 +88,7 @@ module mkAuroraDevice#(Clock rawClock, Reset rawReset)
     CLOCK_FROM_PUT hpcClockP <- mkClockFromPut(clocked_by rawClock);
 
     let hpcClock <- mkClockIBUFDS_GTE2(True, hpcClockP.clock, hpcClockN.clock);
-    
+
     ifcClocks = replicate(AuroraGTXClockSpec{pll_divsel45_fb: 4, clk25_divider: 7, clock: hpcClock, use_chipscope: 0}); // We scrub these values from coregen. HPC clock is 156.25 MHz.
 
     ifcClocks[1] = AuroraGTXClockSpec{pll_divsel45_fb: 4, clk25_divider: 7, clock: hpcClock, use_chipscope: 0};
@@ -93,10 +99,10 @@ module mkAuroraDevice#(Clock rawClock, Reset rawReset)
 
     let smaClock <- mkClockIBUFDS_GTE2(True, smaClockP.clock, smaClockN.clock);
 
-    ifcClocks[0] = AuroraGTXClockSpec{pll_divsel45_fb: 5, clk25_divider: 5, clock: smaClock, use_chipscope: 0}; // We scrub these values from coregen. SMA clock is 125 MHz. 
+    ifcClocks[0] = AuroraGTXClockSpec{pll_divsel45_fb: 5, clk25_divider: 5, clock: smaClock, use_chipscope: 0}; // We scrub these values from coregen. SMA clock is 125 MHz.
 
-    
-    // Now we can instantiate the aurora devices enblock 
+
+    // Now we can instantiate the aurora devices enblock
     // XXX fix me
 
     for(Integer i = 0; i < `NUM_AURORA_IFCS; i = i + 1)
@@ -139,5 +145,5 @@ module mkAuroraDevice#(Clock rawClock, Reset rawReset)
     endinterface
 
     interface drivers = ifcDrivers;
- 
+
 endmodule
