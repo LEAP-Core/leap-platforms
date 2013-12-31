@@ -57,8 +57,14 @@ class PCIE_DEVICE_CLASS: public PLATFORMS_MODULE_CLASS
     bool initialized;
     PCIE_DEVICE_COMMAND_SWITCHES_CLASS switches;
 
+    // Switches for acquiring device uniquifier. 
+    // Likely that there is a refactoring here.
+    BASIC_COMMAND_SWITCH_STRING deviceSwitch;
+
     int pcieDev;                      // Device file descriptor
     int bpb;                          // Bytes per beat
+
+    string *logicalName;
 
   public:
     PCIE_DEVICE_CLASS(PLATFORMS_MODULE);
@@ -80,6 +86,7 @@ class PCIE_DEVICE_CLASS: public PLATFORMS_MODULE_CLASS
 
     // Number of bytes per beat in the FPGA-side BlueNoC driver.
     UINT32 BytesPerBeat() const { return bpb; }
+    void RegisterLogicalDeviceName(string name);
 };
 
 #endif

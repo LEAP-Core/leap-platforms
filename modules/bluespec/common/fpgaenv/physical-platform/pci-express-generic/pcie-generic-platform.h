@@ -39,7 +39,11 @@ class PHYSICAL_DEVICES_CLASS: public PLATFORMS_MODULE_CLASS
         PHYSICAL_DEVICES_CLASS(PLATFORMS_MODULE);
         ~PHYSICAL_DEVICES_CLASS();
 
-        PHYSICAL_CHANNEL GetLegacyPhysicalChannel() { return &pcieDev; }
+        PHYSICAL_CHANNEL GetLegacyPhysicalChannel() 
+        { 
+            pcieDev.RegisterLogicalDeviceName("Legacy");
+            return &pcieDev; 
+        }
 
 };
 

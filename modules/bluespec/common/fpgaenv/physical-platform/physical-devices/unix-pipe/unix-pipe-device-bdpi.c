@@ -47,7 +47,7 @@ void cleanup()
 }
 
 /* initialize global data structures */
-void pipe_init(unsigned char usePipes)
+void pipe_init(unsigned char usePipes, char * platformID)
 {
   int i, read_bytes, retries = 0, flags;
     char buf[32];
@@ -86,6 +86,10 @@ void pipe_init(unsigned char usePipes)
         // XXX we may need to multithread this initialization.
 
         const char *commDirectory = "pipes/";
+        const char *toSuffix = "_TO";
+        const char *fromSuffix = "_FROM";
+        char * inputFileName = NULL;
+        char * outputFileName = NULL;
 
         if(mkdir(commDirectory, S_IRWXU) != 0) 
         {
@@ -96,15 +100,29 @@ void pipe_init(unsigned char usePipes)
             }
         }
 
+        inputFileName = (char*) malloc(strlen(commDirectory) + strlen(toSuffix) + strlen(platformID));
+        strcpy(inputFileName, commDirectory);
+        strcat(inputFileName, platformID);
+        strcat(inputFileName, toSuffix);
+
+        printf("Input file is %s", inputFileName);
+
+        outputFileName = (char*) malloc(strlen(commDirectory) + strlen(toSuffix) + strlen(platformID));
+        strcpy(outputFileName, commDirectory);
+        strcat(outputFileName, platformID);
+        strcat(outputFileName, fromSuffix);
         // make a fifo.
-        mkfifo("pipes/FROM_FPGA", S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
+
+        printf("Output file is %s", outputFileName);
+
+        mkfifo(outputFileName, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
 
 
         // opening the read side first, because it can be non-blocking.
         // It may fail if the fifo doesn't exist.
 
         // write side blocks until read side is open.
-        DESC_FPGA_2_HOST = open("pipes/FROM_FPGA", O_WRONLY);	
+        DESC_FPGA_2_HOST = open(outputFileName, O_WRONLY);	
         if (DESC_FPGA_2_HOST < 0)
         {
             perror("FPGA0 named outgoing pipe (pipes/FROM_FPGA)");
@@ -119,8 +137,8 @@ void pipe_init(unsigned char usePipes)
 	}
 
         do
-    	{
-            DESC_HOST_2_FPGA = open("pipes/TO_FPGA", O_RDONLY);
+    	{ 
+	    DESC_HOST_2_FPGA = open(inputFileName, O_RDONLY);
             retries++;
 	    sleep(1);
         } while (DESC_HOST_2_FPGA < 0 && retries < 120);

@@ -23,6 +23,7 @@
 %generated -t BA pipe_clear_reset.ba
 
 %param SIMULATOR_ARGS  "-w"  "Simulator Args"
+%param --global PLATFORM_ID     "Legacy"    "PlatformID, used in setting up i/o"
 %param UNIX_DEVICE_DEBUG  0  "Should we print debug messages?"
 
 

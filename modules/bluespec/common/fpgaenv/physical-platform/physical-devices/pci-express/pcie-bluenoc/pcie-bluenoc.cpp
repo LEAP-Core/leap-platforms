@@ -44,15 +44,29 @@ PCIE_DEVICE_CLASS::PCIE_DEVICE_CLASS(PLATFORMS_MODULE p) :
     initialized(false)
 {
   // nothing to do here
+  logicalName = NULL;
 }
 
 void
 PCIE_DEVICE_CLASS::Init()
 {
+    const char *dev_file = NULL;
+
     if (initialized) return;
     initialized = true;
 
-    const char *dev_file = FPGA_DEV_PATH.c_str();
+    
+    //Did we get a registration switch initialized?  
+
+    if ((deviceSwitch != NULL) && (deviceSwitch->SwitchValue() != NULL))
+    {
+        dev_file = (deviceSwitch->SwitchValue())->c_str();
+    }
+    else // Use the old initialization variable.
+    { 
+        dev_file = FPGA_DEV_PATH.c_str();
+    }
+
     pcieDev = open(dev_file, O_RDWR);
     if (pcieDev < 0) {
         fprintf (stderr, "PCIe Device Error: Failed to open %s: %s\n", dev_file, strerror(errno));
@@ -106,7 +120,11 @@ PCIE_DEVICE_CLASS::Init()
 
 // destructor
 PCIE_DEVICE_CLASS::~PCIE_DEVICE_CLASS()
-{
+{ 
+    if(logicalName != NULL)
+    {
+        delete logicalName;
+    }
     // cleanup
     Cleanup();
 }
@@ -192,4 +210,12 @@ PCIE_DEVICE_CLASS::Write(const void *buf, size_t count)
         fprintf(stderr, "PCIe write error:  only wrote %d of %d bytes\n", wc, count);
         exit(1);
     }
+}
+
+void 
+PCIE_DEVICE_CLASS::RegisterLogicalDeviceName(string name)
+{
+    logicalName = new string(name);
+    
+    deviceSwitch = new BASIC_COMMAND_SWITCH_STRING_CLASS(logicalName->c_str());
 }

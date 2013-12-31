@@ -55,17 +55,18 @@ void * UNIX_PIPE_DEVICE_CLASS::openReadThread(void *argv) {
     UNIX_PIPE_DEVICE_CLASS *objectHandle = (UNIX_PIPE_DEVICE_CLASS*) argv;
 
     int retries = 0;
+    string readFile(objectHandle->ioFile + "_FROM"); 
 
     do
     {
-        objectHandle->inpipe[0] =  open(objectHandle->readFile.c_str(), O_RDONLY);
+        objectHandle->inpipe[0] =  open(readFile.c_str(), O_RDONLY);
         retries ++;
         sleep(1);
     } while ((objectHandle->inpipe[0] < 0) && (retries < 120));
 
     if(objectHandle->inpipe[0] < 0) 
     {
-        fprintf(stderr, "CPU Timed out waiting for %s, transfers on this line result in deadlocks\n", objectHandle->readFile.c_str());
+        fprintf(stderr, "CPU Timed out waiting for %s, transfers on this line result in deadlocks\n", readFile.c_str());
         exit(1);
     }
 
@@ -81,12 +82,13 @@ void * UNIX_PIPE_DEVICE_CLASS::openReadThread(void *argv) {
 
 void * UNIX_PIPE_DEVICE_CLASS::openWriteThread(void *argv) {
     UNIX_PIPE_DEVICE_CLASS *objectHandle = (UNIX_PIPE_DEVICE_CLASS*) argv;
+    string writeFile(objectHandle->ioFile + "_TO"); 
 
     // create write side first
-    mkfifo(objectHandle->writeFile.c_str(), S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
+    mkfifo(writeFile.c_str(), S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
 
     // This should block...
-    objectHandle->outpipe[1] = open(objectHandle->writeFile.c_str(), O_WRONLY);
+    objectHandle->outpipe[1] = open(writeFile.c_str(), O_WRONLY);
 
     if (objectHandle->ParentWrite() < 0)
     {
@@ -110,11 +112,35 @@ UNIX_PIPE_DEVICE_CLASS::UNIX_PIPE_DEVICE_CLASS(
         PLATFORMS_MODULE_CLASS(p),
         initReadComplete(),
         initWriteComplete(),
-        readFile("pipes/FROM_FPGA"),
-        writeFile("pipes/TO_FPGA")
+        childAlive(),
+        ioFile() 
 {
     initReadComplete = 0;
     initWriteComplete = 0;
+    childAlive = false;
+
+}
+
+// destructor
+UNIX_PIPE_DEVICE_CLASS::~UNIX_PIPE_DEVICE_CLASS()
+{
+    // cleanup
+    Cleanup();
+}
+
+void
+UNIX_PIPE_DEVICE_CLASS::Init()
+{
+
+    // Let's find out what our file target is
+    if((deviceSwitch != NULL) && (deviceSwitch->SwitchValue() != NULL))
+    {
+        ioFile = "pipes/" + *(deviceSwitch->SwitchValue());
+    }
+    else 
+    {
+        ioFile = "pipes/Legacy"; 
+    }
 
     const char *commDirectory = "pipes/";
     
@@ -149,20 +175,9 @@ UNIX_PIPE_DEVICE_CLASS::UNIX_PIPE_DEVICE_CLASS(
       exit(1);
     }
 
-}
-
-// destructor
-UNIX_PIPE_DEVICE_CLASS::~UNIX_PIPE_DEVICE_CLASS()
-{
-    // cleanup
-    Cleanup();
-}
-
-void
-UNIX_PIPE_DEVICE_CLASS::Init()
-{
     PLATFORMS_MODULE_CLASS::Init();
     childAlive = true;
+
 }
 
 // override default chain-uninit method because
@@ -287,6 +302,13 @@ UNIX_PIPE_DEVICE_CLASS::Write(
         cerr << "unix-pipe: could not write requested bytes in one shot" << endl;
         CallbackExit(1);
     }
+}
+
+void UNIX_PIPE_DEVICE_CLASS::RegisterLogicalDeviceName(string name)
+{
+    logicalName = new string(name);
+    
+    deviceSwitch = new BASIC_COMMAND_SWITCH_STRING_CLASS(logicalName->c_str());
 }
 
 

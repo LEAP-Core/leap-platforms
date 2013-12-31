@@ -22,7 +22,11 @@ class PHYSICAL_DEVICES_CLASS: public PLATFORMS_MODULE_CLASS
         ~PHYSICAL_DEVICES_CLASS();
 
         // accessors to individual devices
-	PHYSICAL_CHANNEL GetLegacyPhysicalChannel() { return &unixPipeDevice; }
+	PHYSICAL_CHANNEL GetLegacyPhysicalChannel() 
+        { 
+            unixPipeDevice.RegisterLogicalDeviceName("Legacy");
+            return &unixPipeDevice;
+        }
 
 };
 

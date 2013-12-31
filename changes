@@ -16913,3 +16913,30 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aur
   to Aurora.  When 0 the size is picked automatically based on relative
   frequencies.  The current default (3) appears to be a reasonable compromise
   and keeps interface configuration constant as model frequency changes.
+
+----------
+keflemin    Date: Tue Dec 31 14:33:51 EST 2013  CSN: CSN-leap-platforms-719
+                  Tue Dec 31 19:33:51 UTC 2013
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/simulation
+ sim-physical-platform.h   Locally Modified          718 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic
+ pcie-generic-platform.h   Locally Modified          718 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc
+ pcie-bluenoc.cpp          Locally Modified          718 
+ pcie-bluenoc.h            Locally Modified          718 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe
+ unix-pipe-device.h        Locally Modified          718 
+ unix-pipe-device.awb      Locally Modified          718 
+ unix-pipe-device.bsv      Locally Modified          718 
+ unix-pipe-device-bdpi.c   Locally Modified          718 
+ unix-pipe-device.cpp      Locally Modified          718 
+
+
+Added support for runtime configuration of communications paths.  This
+was needed to support multiple hardware platforms communicating with
+software.
