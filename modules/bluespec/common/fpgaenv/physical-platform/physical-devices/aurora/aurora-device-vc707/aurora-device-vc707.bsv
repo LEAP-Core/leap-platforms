@@ -79,6 +79,16 @@ module mkAuroraDevice#(Clock rawClock, Reset rawReset)
     // Interface:
     (AURORA_COMPLEX);
 
+    Clock modelClock <- exposeCurrentClock();
+    Reset modelReset <- exposeCurrentReset();
+
+    //
+    // Trigger reset with either raw or model resets.
+    //
+    Reset modelResetInRaw <- mkAsyncReset(4, modelReset, rawClock);
+    Reset modelOrRawReset <- mkResetEither(modelResetInRaw, rawReset,
+                                           clocked_by rawClock);
+
     Vector#(`NUM_AURORA_IFCS,AURORA_COMPLEX_DRIVER) ifcDrivers = newVector();
     Vector#(`NUM_AURORA_IFCS,AURORA_WIRES)                                                   ifcWires = newVector();
     Vector#(`NUM_AURORA_IFCS,AuroraGTXClockSpec)                                             ifcClocks = newVector();
@@ -89,7 +99,8 @@ module mkAuroraDevice#(Clock rawClock, Reset rawReset)
 
     let hpcClock <- mkClockIBUFDS_GTE2(True, hpcClockP.clock, hpcClockN.clock);
 
-    ifcClocks = replicate(AuroraGTXClockSpec{pll_divsel45_fb: 4, clk25_divider: 7, clock: hpcClock, use_chipscope: 0}); // We scrub these values from coregen. HPC clock is 156.25 MHz.
+    // We scrub these values from coregen. HPC clock is 156.25 MHz.
+    ifcClocks = replicate(AuroraGTXClockSpec{pll_divsel45_fb: 4, clk25_divider: 7, clock: hpcClock, use_chipscope: 0});
 
     ifcClocks[1] = AuroraGTXClockSpec{pll_divsel45_fb: 4, clk25_divider: 7, clock: hpcClock, use_chipscope: 0};
 
@@ -99,16 +110,16 @@ module mkAuroraDevice#(Clock rawClock, Reset rawReset)
 
     let smaClock <- mkClockIBUFDS_GTE2(True, smaClockP.clock, smaClockN.clock);
 
-    ifcClocks[0] = AuroraGTXClockSpec{pll_divsel45_fb: 5, clk25_divider: 5, clock: smaClock, use_chipscope: 0}; // We scrub these values from coregen. SMA clock is 125 MHz.
-
+    // We scrub these values from coregen. SMA clock is 125 MHz.
+    ifcClocks[0] = AuroraGTXClockSpec{pll_divsel45_fb: 5, clk25_divider: 5, clock: smaClock, use_chipscope: 0};
 
     // Now we can instantiate the aurora devices enblock
-    // XXX fix me
-
     for(Integer i = 0; i < `NUM_AURORA_IFCS; i = i + 1)
     begin
         // Instantiate the driver and flowcontrol
-        AURORA_SINGLE_DEVICE_UG#(InterfaceWidth) ug_device <- mkAURORA_SINGLE_UG(ifcClocks[i], rawClock, rawReset);
+        AURORA_SINGLE_DEVICE_UG#(InterfaceWidth) ug_device <-
+            mkAURORA_SINGLE_UG(ifcClocks[i], rawClock, modelOrRawReset);
+
         NumTypeParam#(InterfaceWords) interfaceWidth = ?;
         let auroraFlowcontrol <- mkAURORA_FLOWCONTROL(ug_device, interfaceWidth);
 
