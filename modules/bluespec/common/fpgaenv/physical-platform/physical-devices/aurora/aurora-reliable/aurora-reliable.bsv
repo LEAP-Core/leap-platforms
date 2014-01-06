@@ -51,79 +51,6 @@ typedef 8 ParitySize;
 
 typedef TMul#(interface_words, TSub#(word_width,TAdd#(1,ParitySize))) AURORA_INTERFACE_WIDTH#(numeric type interface_words, numeric type word_width);
 
-interface CRC#(numeric type poly_width, numeric type data_size);
-
-    method ActionValue#(Bit#(TSub#(poly_width,1))) hash(Bit#(poly_width) poly, Bit#(data_size) bitsIn);
-
-endinterface
-
-/*
-module mkCRC#(Bit#(poly_width) crc_poly) (CRC#(poly_width, data_size))
-    provisos(
-        Add#(1,parity_size,poly_width),
-        Add#(data_extra, parity_size, data_size)
-    );
-
-
-    
-    // do a combinational crc.    
-    // use payload_size so as to chain in some bits from the previous word
-    function ActionValue#(Bit#(parity_size)) doHash(Bit#(poly_width) poly, Bit#(data_size) bitsIn);
-        actionvalue
-        Bit#(parity_size) poly_trunc = truncateLSB(reverseBits(poly));
-
-        function Bit#(data_size) oneStep(Bit#(data_size) rem_temp, Bit#(1) bitIn);
-            Bit#(data_size) result = rem_temp >> 1;
-            if(bitIn==1) // grab top bit
-            begin
-                result = (rem_temp >> 1) ^ zeroExtend(poly_trunc);
-            end
-            return result;
-        endfunction 
-
-        Vector#(data_size,Bit#(1)) bitVec = unpack(bitsIn);
-        return truncate(foldr(oneStep,0,bitVec));
-
-        let topBits = truncateLSB(bitsIn);
-        return topBits + 1; 
-        endactionvalue
-    endfunction
-
-    method hash (Bit#(poly_width) poly, Bit#(data_size) bitsIn) = doHash(poly, bitsIn);
-
-endmodule
-*/
-
-    (* noinline *)
-    function Bit#(8) doHash(Bit#(80) bitsIn);
-        Bit#(9) poly = 'h183;
-        Bit#(8) poly_trunc = truncateLSB(reverseBits(poly));
-
-        //$display("Hash in %h", bitsIn);
-        function Bit#(80) oneStep(Bit#(1) bitIn, Bit#(80) rem_temp);
-            Bit#(80) result = rem_temp >> 1;
-            if(bitIn==1) // grab top bit
-            begin
-                result = (rem_temp >> 1) ^ zeroExtend(poly_trunc);
-            end
-            return result;
-         endfunction
-
-        Vector#(80,Bit#(1)) bitVec = unpack(bitsIn);
-        return truncate(foldr(oneStep,0,bitVec));
-    endfunction
-
-//(* inline *)
-//function Bit#(n) doCRC(Bit#(n) value);
-//    return hashBits(value);
-//endfunction
-
-
-//(*synthesize*)
-//module mkCRCLocal#(Bit#(8) crc_poly) (CRC#(8, 63));
-//    let crc <- mkCRC(crc_poly);
-//endmodule
-
 interface AURORA_WIRES;
     (* always_enabled, always_ready *)
     method Action rxp_in(Bit#(1) i);
@@ -220,8 +147,6 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ugDevice,
     let controllerRst = ugDevice.aurora_rst;
     let isAuroraInRst <- isResetAsserted(clocked_by controllerClk, reset_by controllerRst);
 
-    //Bit#(poly_width) crc_poly = 'h89; // a 7 bit crc poly
-
     Reg#(Bit#(3)) ccCycles  <- mkReg(maxBound, clocked_by(controllerClk), reset_by(controllerRst)); 
     Reg#(Bool)    frameErrorRX <-  mkReg(True, clocked_by(controllerClk), reset_by(controllerRst)); 
 
@@ -267,6 +192,8 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ugDevice,
 
     let timeoutFires <- mkPulseWire(clocked_by controllerClk, reset_by controllerRst);
     let timeoutThreshold = 10*(fromInteger(valueof(frame_size)));
+
+    CRCGEN#(ParitySize, Bit#(width)) crcgen <- mkCRCGen8();
 
     rule timerCount;
         timer <= timer + 1;
@@ -398,7 +325,7 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ugDevice,
 
     // Bottom half of three above rules, actually does the transmission
     rule sendData(ctrlPayloadWire.wget matches tagged Valid .topHalf);
-        Bit#(parity_size) hashTX = doHash(zeroExtendNP(hashWire));
+        Bit#(parity_size) hashTX = crcgen.nextChunk(0, hashWire);
         if(truncateLSB(topHalf) == payload || truncateLSB(topHalf) == header)
         begin
             parityTX <= hashTX;
@@ -516,7 +443,7 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ugDevice,
         // Since we have cleverly aligned the packets, all hash computations are the same.
         Bit#(parity_size) hashSalt = (isPayload)?parityRX:0;
         //Bit#(parity_size) hashRX = truncate(hashBits({hashSalt,data}));
-        Bit#(parity_size) hashRX = doHash(zeroExtendNP({hashSalt,ctrl,data}));
+        Bit#(parity_size) hashRX = crcgen.nextChunk(0, zeroExtend({hashSalt,ctrl,data}));
         Bool notCorrupt = hashRX == hashExpected && softErr == 0;
 
         if(`AURORA_RELIABLE_DEBUG > 0) 

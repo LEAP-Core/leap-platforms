@@ -16940,3 +16940,15 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/uni
 Added support for runtime configuration of communications paths.  This
 was needed to support multiple hardware platforms communicating with
 software.
+
+----------
+mcadler     Date: Mon Jan  6 08:58:24 EST 2014  CSN: CSN-leap-platforms-720
+                  Mon Jan  6 13:58:24 UTC 2014
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-reliable
+ aurora-reliable.bsv       Locally Modified          719 
+ aurora-device.awb         Locally Modified          719 
+
+- Hash function bug left the majority of data bits unprotected.
+- Use new CRC generator in libRL.
