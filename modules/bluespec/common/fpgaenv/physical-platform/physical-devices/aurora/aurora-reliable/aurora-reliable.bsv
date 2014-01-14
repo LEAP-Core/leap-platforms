@@ -177,12 +177,12 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ugDevice,
     Reg#(Bit#(parity_size)) parityTX <- mkReg(0, clocked_by controllerClk, reset_by controllerRst);
     RewindFIFOVariableCommitLevel#(Bit#(data_size), TMul#(max_frames, frame_size)) txDataRewindBuffer <- mkRewindFIFOVariableCommitLevel(clocked_by controllerClk, reset_by controllerRst);
     RewindFIFOVariableCommitLevel#(Bit#(TLog#(sequence_numbers)), max_frames) txSequenceRewindBuffer <- mkRewindFIFOVariableCommitLevel(clocked_by controllerClk, reset_by controllerRst);
-    FIFO#(Bit#(32)) frameTimeout <- mkSizedFIFO(valueof(max_frames), clocked_by controllerClk, reset_by controllerRst);
+    FIFO#(Int#(32)) frameTimeout <- mkSizedFIFO(valueof(max_frames), clocked_by controllerClk, reset_by controllerRst);
     FIFOF#(Bit#(TLog#(sequence_numbers))) ackSequenceNumberTX <- mkSizedFIFOF(valueof(max_frames), clocked_by controllerClk, reset_by controllerRst);
     FIFOF#(Bit#(TLog#(sequence_numbers))) ackSequenceNumberRX <- mkSizedFIFOF(valueof(max_frames), clocked_by controllerClk, reset_by controllerRst);
     FIFOF#(Bit#(TLog#(sequence_numbers))) ackRX <- mkSizedFIFOF(4, clocked_by controllerClk, reset_by controllerRst);
     FIFOF#(Bit#(TLog#(sequence_numbers))) frameInProgress <- mkSizedFIFOF(1, clocked_by controllerClk, reset_by controllerRst); // Must be size 1.
-    Reg#(Bit#(32)) timer <- mkReg(0, clocked_by controllerClk, reset_by controllerRst);
+    Reg#(Int#(32)) timer <- mkReg(0, clocked_by controllerClk, reset_by controllerRst);
 
     // need to make sure that flow control can come through
     PulseWire transmittingCredits <- mkPulseWire(clocked_by(controllerClk), reset_by(controllerRst));
@@ -193,7 +193,7 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ugDevice,
     FIFOF#(Tuple2#(Bit#(1), Bit#(width))) serdesInfifo <- mkSizedSlowBRAMFIFOF(valueof(total_credits), clocked_by controllerClk, reset_by controllerRst);
 
     let timeoutFires <- mkPulseWire(clocked_by controllerClk, reset_by controllerRst);
-    let timeoutThreshold = 10*(fromInteger(valueof(frame_size)));
+    let timeoutThreshold = 100 * (fromInteger(valueof(total_credits)));
 
     CRCGEN#(ParitySize, Bit#(width)) crcgen <- mkAutoCRCGen();
     // Use a non-zero initial CRC value so that the data value 0 doesn't also

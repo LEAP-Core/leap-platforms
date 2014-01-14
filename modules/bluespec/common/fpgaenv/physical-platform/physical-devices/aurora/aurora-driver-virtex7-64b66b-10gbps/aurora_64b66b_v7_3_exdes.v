@@ -65,7 +65,7 @@
 (* keep_hierarchy="true" *)
 module aurora_64b66b_v7_3_exdes  #
 (
-     parameter   WIDTH                = 64,
+     parameter   WIDTH                = 128,
      parameter   USE_CHIPSCOPE        = 0,
      parameter   SIM_GTXRESET_SPEEDUP=   "TRUE"      // Set to 1 to speed up sim reset
      
@@ -120,11 +120,11 @@ module aurora_64b66b_v7_3_exdes  #
 
     // User I/O
 
-    output [0:63] RX_DATA_IN;
+    output [0:127] RX_DATA_IN;
     input rx_en;
     output rx_rdy;
 
-    input [0:63] TX_DATA_OUT;
+    input [0:127] TX_DATA_OUT;
     input tx_en;
     output tx_rdy;
 
@@ -136,7 +136,7 @@ module aurora_64b66b_v7_3_exdes  #
     output  [0:7]      ERR_COUNT;
 
 
-    output             LANE_UP;
+    output  [0:1]      LANE_UP;
     output             CHANNEL_UP;
     output cc_do_i;
     // Clocks
@@ -147,10 +147,10 @@ module aurora_64b66b_v7_3_exdes  #
     output             USER_RST;
 
     // GT Serial I/O
-    input              RXP;
-    input              RXN;
-    output             TXP;
-    output             TXN;
+    input   [0:1]      RXP;
+    input   [0:1]      RXN;
+    output  [0:1]      TXP;
+    output  [0:1]      TXN;
 
     // Debug
     input UNDERFLOW;
@@ -175,19 +175,19 @@ module aurora_64b66b_v7_3_exdes  #
     reg     [31:0]     ERROR_COUNT;
 
     //Global signals
-    reg                  LANE_UP;
+    reg       [0:1]      LANE_UP;
     reg                  CHANNEL_UP;
 
 //********************************Wire Declarations**********************************
     
     //Dut1
     //TX Interface
-    wire      [0:63]     tx_tdata_i;
+    wire      [0:127]    tx_tdata_i;
     wire                 tx_tvalid_i;        
     wire                 tx_tready_i;        
 
     //RX Interface
-    wire      [0:63]      rx_tdata_i; 
+    wire      [0:127]     rx_tdata_i; 
     wire                 rx_tvalid_i;        
 
 
@@ -195,12 +195,12 @@ module aurora_64b66b_v7_3_exdes  #
 
 
     //TX Interface
-    wire      [0:63]     tx_d_i;
+    wire      [0:127]    tx_d_i;
     wire                 tx_src_rdy_n_i;        
     wire                 tx_dst_rdy_n_i;        
 
     //RX Interface
-    wire      [0:63]      rx_d_i; 
+    wire      [0:127]     rx_d_i; 
     wire                 rx_src_rdy_n_i;        
 
 
@@ -212,7 +212,7 @@ module aurora_64b66b_v7_3_exdes  #
 
     //Status
     wire                 channel_up_i;        
-    wire                 lane_up_i;
+    wire      [0:1]      lane_up_i;
 
     //Clock Compensation Control Interface
     wire                 do_cc_i;        
@@ -245,6 +245,10 @@ module aurora_64b66b_v7_3_exdes  #
     wire               drprdy_out_i;
     wire               drpen_in_i;
     wire               drpwe_in_i;
+    wire    [15:0]     drpdo_out_lane1_i;
+    wire               drprdy_out_lane1_i;
+    wire               drpen_in_lane1_i;
+    wire               drpwe_in_lane1_i;
     wire    [7:0]      qpll_drpaddr_in_i;
     wire    [15:0]     qpll_drpdi_in_i;
     wire    [15:0]     qpll_drpdo_out_i;
@@ -321,6 +325,8 @@ module aurora_64b66b_v7_3_exdes  #
     assign  drpdi_in_i     =  16'h0;
     assign  drpwe_in_i   =  1'b0;
     assign  drpen_in_i    =  1'b0;
+    assign  drpwe_in_lane1_i   =  1'b0;
+    assign  drpen_in_lane1_i    =  1'b0;
     assign  qpll_drpaddr_in_i   =  8'h0;
     assign  qpll_drpdi_in_i     =  16'h0;
     assign  qpll_drpen_in_i    =  1'b0;
@@ -383,6 +389,10 @@ module aurora_64b66b_v7_3_exdes  #
         .DRPRDY_OUT(drprdy_out_i),
         .DRPEN_IN(drpen_in_i),
         .DRPWE_IN(drpwe_in_i),
+        .DRPDO_OUT_LANE1(drpdo_out_lane1_i),
+        .DRPRDY_OUT_LANE1(drprdy_out_lane1_i),
+        .DRPEN_IN_LANE1(drpen_in_lane1_i),
+        .DRPWE_IN_LANE1(drpwe_in_lane1_i),
         //---------------------- GTXE2 COMMON DRP Ports ----------------------
         .QPLL_DRPADDR_IN(qpll_drpaddr_in_i),
         .QPLL_DRPDI_IN(qpll_drpdi_in_i),
@@ -417,7 +427,7 @@ module aurora_64b66b_v7_3_exdes  #
     assign rx_reset_c = system_reset_i || !channel_up_i;
     assign  rx_data_valid_c    =   !rx_src_rdy_n_i;
 
-    reg [63:0] RX_DATA_IN_delay;
+    reg [127:0] RX_DATA_IN_delay;
     reg        rx_rdy_delay;
 
     // Pipeline rx_rdy to improve pipeline performance
@@ -537,7 +547,7 @@ else
 begin : no_chipscope1
                                                                                                                                                                        
     // Shared VIO Inputs
-        assign  sync_in_i         =  64'h0;
+        assign  sync_in_i         =  128'h0;
 
 end
 

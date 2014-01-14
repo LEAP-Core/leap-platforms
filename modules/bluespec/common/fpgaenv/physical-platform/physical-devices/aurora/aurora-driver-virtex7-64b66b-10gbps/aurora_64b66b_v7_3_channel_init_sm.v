@@ -111,23 +111,23 @@ module aurora_64b66b_v7_3_CHANNEL_INIT_SM
 //***********************************Port Declarations*******************************
 
     // MGT Interface
-    input                   CH_BOND_DONE;
+    input        [0:1]      CH_BOND_DONE;
     output                  EN_CHAN_SYNC;
     output                  CHAN_BOND_RESET;
     
     // Aurora Lane Interface
     output                  GEN_NA_IDLES;
     output                  RESET_LANES;
-    input                   RX_NA_IDLES;
-    input                   RX_CC;
-    input                   REMOTE_READY;
-    input                   RX_CB;
-    input                   RX_IDLES;
+    input        [0:1]      RX_NA_IDLES;
+    input        [0:1]      RX_CC;
+    input        [0:1]      REMOTE_READY;
+    input        [0:1]      RX_CB;
+    input        [0:1]      RX_IDLES;
     
     // System Interface
     input                   USER_CLK;
     input                   RESET;
-    input                   LANE_UP;
+    input        [0:1]      LANE_UP;
     output                  CHANNEL_UP;
 
     // Channel Init State Machine Interface
@@ -137,10 +137,16 @@ module aurora_64b66b_v7_3_CHANNEL_INIT_SM
 //***************************External Register Declarations***************************
 
     reg                       CHANNEL_UP;
+    reg                       CHAN_BOND_RESET;
 
 //***************************Internal Register Declarations***************************
     // State registers
     reg                      wait_for_lane_up_r;
+    reg                      channel_bond_r;
+    reg                      bond_passed_r;
+    reg                      rx_cb_r;
+    reg                      chan_bond_timeout_r;
+    reg           [0:2]      watchdog_count_r;
     reg                      wait_for_remote_r;
     reg                      ready_r;
     reg                      any_na_idles_r;
@@ -151,9 +157,17 @@ module aurora_64b66b_v7_3_CHANNEL_INIT_SM
 //*********************************Wire Declarations**********************************
 
     wire                     reset_lanes_c;
+    wire                     all_ch_bond_done_c;
+    wire                     en_chan_sync_dlyd_i;
+    wire                     chan_bond_timeout_i;
+    wire                     en_chan_sync_done_i;
+    wire                     bonding_watchdog_done_i;
+    wire                     chan_bond_reset_i;
+    wire                     reset_watchdog;
     wire                     channel_up_c;
 
     // Next state signals
+    wire                     next_channel_bond_c;
     wire                     next_wait_for_remote_c;
     wire                     next_ready_c;
                 
@@ -167,15 +181,17 @@ module aurora_64b66b_v7_3_CHANNEL_INIT_SM
     // State registers
     always @(posedge USER_CLK)
     begin 
-        if(RESET|RESET_CHANNEL|!(|LANE_UP))
+        if(RESET|RESET_CHANNEL|!(|LANE_UP)|chan_bond_reset_i)
         begin
             wait_for_lane_up_r <=  `DLY    1'b1;
+            channel_bond_r     <=  `DLY    1'b0;
             wait_for_remote_r  <=  `DLY    1'b0;
             ready_r            <=  `DLY    1'b0;
         end
         else
         begin
             wait_for_lane_up_r <=  `DLY    1'b0;
+            channel_bond_r     <=  `DLY    next_channel_bond_c;
             wait_for_remote_r  <=  `DLY    next_wait_for_remote_c;
             ready_r            <=  `DLY    next_ready_c;
         end
@@ -183,7 +199,13 @@ module aurora_64b66b_v7_3_CHANNEL_INIT_SM
 
 
     // Next state logic
-    assign  next_wait_for_remote_c   =   (wait_for_lane_up_r) |
+    assign  next_channel_bond_c      =   (wait_for_lane_up_r) |
+                                         (channel_bond_r & !bond_passed_r) |
+                                         (ready_r & !bond_passed_r) |
+                                         (wait_for_remote_r & !bond_passed_r) |
+                                         (!bond_passed_r);
+
+    assign  next_wait_for_remote_c   =   (channel_bond_r & bond_passed_r )|
                                          (wait_for_remote_r & (any_na_idles_r | rx_cc_r)) |
                                          (wait_for_remote_r & !remote_ready_r) |
                                          (ready_r & any_na_idles_r);
@@ -226,15 +248,85 @@ module aurora_64b66b_v7_3_CHANNEL_INIT_SM
 
     );
 
-    assign EN_CHAN_SYNC     = 1'b0;
+    //_____________________________Channel Bonding_______________________________
 
-    assign CHAN_BOND_RESET  = 1'b0;
+    FD #(
+        .INIT(1'b0)
+    ) en_chan_sync_flop_i (
+        .D(channel_bond_r),
+        .C(USER_CLK),
+        .Q(EN_CHAN_SYNC)
+    );
 
+    // This logic takes care of channel bonding timeout. The idea here is to reset the
+    // channel bonding logic if bonding does not happen within the timeout period. We take 64
+    // cycles as time out for channel bonding reset.    
+    SRLC32E #(
+            .INIT(32'h00000000)
+    ) SRLC32E_inst_0 (
+            .Q(en_chan_sync_dlyd_i),// SRL data output
+            .Q31(),                 // SRL cascade output pin
+            .A(5'b11111),           // 5-bit shift depth select input 
+            .CE(1'b1),              // Clock enable input
+            .CLK(USER_CLK),         // Clock input
+            .D(channel_bond_r)      // SRL data input
+    );
+
+    SRLC32E #(
+            .INIT(32'h00000000)
+    ) SRLC32E_inst_1 (
+            .Q(en_chan_sync_done_i),// SRL data output
+            .Q31(),                 // SRL cascade output pin
+            .A(5'b11111),           // 5-bit shift depth select input 
+            .CE(1'b1),              // Clock enable input
+            .CLK(USER_CLK),         // Clock input
+            .D(en_chan_sync_dlyd_i) // SRL data input
+    );
+
+    // Generate the watchdog done signal
+    assign chan_bond_timeout_i = en_chan_sync_done_i & !bond_passed_r;
+
+    always @(posedge USER_CLK)
+    begin
+         chan_bond_timeout_r  <=  `DLY    chan_bond_timeout_i;
+    end
+
+    assign reset_watchdog = chan_bond_timeout_i & !chan_bond_timeout_r;
+
+    always @(posedge USER_CLK)
+    begin
+         if(RESET)
+                watchdog_count_r <=  `DLY 3'b000;
+         else if(reset_watchdog) 
+                watchdog_count_r <=  `DLY 3'b111;
+         else if(watchdog_count_r>0) 
+                watchdog_count_r <=  `DLY watchdog_count_r-1;
+    end
+
+    assign chan_bond_reset_i       = (watchdog_count_r>0)?1'b1:1'b0;
+
+    always @(posedge USER_CLK)
+    begin
+         CHAN_BOND_RESET  <=  `DLY    chan_bond_reset_i;
+    end
+
+    // This wide AND gate collects the CH_BOND_DONE signals.  We register the
+    // output of the AND gate.  Note that register is a one shot that is reset
+    // only when the state changes.
+    assign all_ch_bond_done_c = &(CH_BOND_DONE);
+                                
+    always @(posedge USER_CLK)
+    begin
+        if( all_ch_bond_done_c )
+                bond_passed_r  <=  `DLY    1'b1;
+        else
+                bond_passed_r  <=  `DLY    1'b0;
+    end
 
     //_____________________________Idle Pattern Generation and Reception_______________________________
 
     // Generate NA idles when until channel bonding is complete
-    assign GEN_NA_IDLES   = wait_for_lane_up_r;
+    assign GEN_NA_IDLES   = wait_for_lane_up_r|channel_bond_r ;
 
     // The NA IDles will be coming in on all the lanes. OR them to decide when to go into and out of
     // wait_for_remote_r state. This OR gate may need to be pipelined for greater number of lanes
@@ -242,6 +334,7 @@ module aurora_64b66b_v7_3_CHANNEL_INIT_SM
     begin
         rx_cc_r        <= `DLY |( RX_CC);
         remote_ready_r <= `DLY |( REMOTE_READY);
+        rx_cb_r        <= `DLY &( RX_CB);        
         any_na_idles_r <= `DLY |( RX_NA_IDLES);
         any_idles_r    <= `DLY |( RX_IDLES);
     end

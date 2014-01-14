@@ -119,7 +119,7 @@ module aurora_64b66b_v7_3_TX_STREAM
 
 
     // LocalLink Interface
-    input      [0:63]     TX_D;
+    input      [0:127]    TX_D;
     input                 TX_SRC_RDY_N;
 
     output                TX_DST_RDY_N;
@@ -146,9 +146,9 @@ module aurora_64b66b_v7_3_TX_STREAM
     
 
     
-    output                TX_PE_DATA_V;
-    output     [0:63]     TX_PE_DATA;
-    output                GEN_CC;
+    output     [0:1]      TX_PE_DATA_V;
+    output     [0:127]    TX_PE_DATA;
+    output     [0:1]      GEN_CC;
 
     
     

@@ -95,8 +95,8 @@ module aurora_64b66b_v7_3_CHANNEL_ERR_DETECT
 //***********************************Port Declarations*******************************
 
     //Aurora Lane Interface
-    input              HARD_ERR;
-    input              LANE_UP;
+    input   [0:1]      HARD_ERR;
+    input   [0:1]      LANE_UP;
 
 
     //System Interface

@@ -65,7 +65,7 @@
 // No of quads in design 1
 
 `timescale 1ns / 1ps
-(* core_generation_info = "aurora_64b66b_v7_3,aurora_64b66b_v7_3,{c_aurora_lanes=1, c_column_used=right, c_gt_clock_1=GTXQ0, c_gt_clock_2=None, c_gt_loc_1=1, c_gt_loc_10=X, c_gt_loc_11=X, c_gt_loc_12=X, c_gt_loc_13=X, c_gt_loc_14=X, c_gt_loc_15=X, c_gt_loc_16=X, c_gt_loc_17=X, c_gt_loc_18=X, c_gt_loc_19=X, c_gt_loc_2=X, c_gt_loc_20=X, c_gt_loc_21=X, c_gt_loc_22=X, c_gt_loc_23=X, c_gt_loc_24=X, c_gt_loc_25=X, c_gt_loc_26=X, c_gt_loc_27=X, c_gt_loc_28=X, c_gt_loc_29=X, c_gt_loc_3=X, c_gt_loc_30=X, c_gt_loc_31=X, c_gt_loc_32=X, c_gt_loc_33=X, c_gt_loc_34=X, c_gt_loc_35=X, c_gt_loc_36=X, c_gt_loc_37=X, c_gt_loc_38=X, c_gt_loc_39=X, c_gt_loc_4=X, c_gt_loc_40=X, c_gt_loc_41=X, c_gt_loc_42=X, c_gt_loc_43=X, c_gt_loc_44=X, c_gt_loc_45=X, c_gt_loc_46=X, c_gt_loc_47=X, c_gt_loc_48=X, c_gt_loc_5=X, c_gt_loc_6=X, c_gt_loc_7=X, c_gt_loc_8=X, c_gt_loc_9=X, c_lane_width=4, c_line_rate=10.0, c_gt_type=gtx, c_qpll=true, c_nfc=false, c_nfc_mode=IMM, c_refclk_frequency=156.25, c_simplex=false, c_simplex_mode=TX, c_stream=true, c_ufc=false, c_user_k=false,flow_mode=None, interface_mode=Streaming, dataflow_config=Duplex,}" *)
+(* core_generation_info = "aurora_64b66b_v7_3,aurora_64b66b_v7_3,{c_aurora_lanes=2, c_column_used=right, c_gt_clock_1=GTXQ0, c_gt_clock_2=None, c_gt_loc_1=1, c_gt_loc_10=X, c_gt_loc_11=X, c_gt_loc_12=X, c_gt_loc_13=X, c_gt_loc_14=X, c_gt_loc_15=X, c_gt_loc_16=X, c_gt_loc_17=X, c_gt_loc_18=X, c_gt_loc_19=X, c_gt_loc_2=2, c_gt_loc_20=X, c_gt_loc_21=X, c_gt_loc_22=X, c_gt_loc_23=X, c_gt_loc_24=X, c_gt_loc_25=X, c_gt_loc_26=X, c_gt_loc_27=X, c_gt_loc_28=X, c_gt_loc_29=X, c_gt_loc_3=X, c_gt_loc_30=X, c_gt_loc_31=X, c_gt_loc_32=X, c_gt_loc_33=X, c_gt_loc_34=X, c_gt_loc_35=X, c_gt_loc_36=X, c_gt_loc_37=X, c_gt_loc_38=X, c_gt_loc_39=X, c_gt_loc_4=X, c_gt_loc_40=X, c_gt_loc_41=X, c_gt_loc_42=X, c_gt_loc_43=X, c_gt_loc_44=X, c_gt_loc_45=X, c_gt_loc_46=X, c_gt_loc_47=X, c_gt_loc_48=X, c_gt_loc_5=X, c_gt_loc_6=X, c_gt_loc_7=X, c_gt_loc_8=X, c_gt_loc_9=X, c_lane_width=4, c_line_rate=10.0, c_gt_type=gtx, c_qpll=true, c_nfc=false, c_nfc_mode=IMM, c_refclk_frequency=156.25, c_simplex=false, c_simplex_mode=TX, c_stream=true, c_ufc=false, c_user_k=false,flow_mode=None, interface_mode=Streaming, dataflow_config=Duplex,}" *)
 
 module aurora_64b66b_v7_3_MULTI_GT #
 (
@@ -139,6 +139,68 @@ module aurora_64b66b_v7_3_MULTI_GT #
     input  [2:0]  GT0_TXPRBSSEL_IN,
             //--------------- Transmit Ports - TX Ports for PCI Express ----------------
     input         GT0_TXELECIDLE_IN,
+    //____________________________CHANNEL PORTS________________________________
+    //-------------- Channel - Dynamic Reconfiguration Port (DRP) --------------
+    input  [8:0]  GT1_DRPADDR_IN,
+    input         GT1_DRP_CLK_IN,
+    input  [15:0] GT1_DRPDI_IN,
+    output [15:0] GT1_DRPDO_OUT,
+    input         GT1_DRPEN_IN,
+    output        GT1_DRPRDY_OUT,
+    input         GT1_DRPWE_IN,
+    //----------------------------- Eye Scan Ports -----------------------------
+//    output        GT1_EYESCANDATAERROR_OUT,
+    //---------------------- Loopback and Powerdown Ports ----------------------
+    input  [2:0]  GT1_LOOPBACK_IN,
+    //----------------------------- Receive Ports ------------------------------
+    input         GT1_RXUSERRDY_IN,
+    //------------ Receive Ports - 64b66b and 64b67b Gearbox Ports -------------
+    output        GT1_RXDATAVALID_OUT,
+    input         GT1_RXGEARBOXSLIP_IN,
+    output [1:0]  GT1_RXHEADER_OUT,
+    output        GT1_RXHEADERVALID_OUT,
+            //--------------------- Receive Ports - PRBS Detection ---------------------
+    input         GT1_RXPRBSCNTRESET_IN,
+//    output        GT1_RXPRBSERR_OUT,
+    input  [2:0]  GT1_RXPRBSSEL_IN_IN,
+            //----------------- Receive Ports - RX Data Path interface -----------------
+    input          GT1_GTRXRESET_IN,
+    output  [31:0] GT1_RXDATA_OUT,
+    output         GT1_RXOUTCLK_OUT,
+    input          GT1_RXPCSRESET_IN,
+    input          GT1_RXUSRCLK_IN,
+    input          GT1_RXUSRCLK2_IN,
+            //----- Receive Ports - RX Driver,OOB signalling,Coupling and Eq.,CDR ------
+    input         GT1_GTXRXN_IN,
+    input         GT1_GTXRXP_IN,
+//    output        GT1_RXCDRLOCK_OUT,
+//    output        GT1_RXELECIDLE_OUT,
+            //------ Receive Ports - RX Elastic Buffer and Phase Alignment Ports -------
+    input         GT1_RXBUFRESET_IN,
+//    output  [2:0]   GT1_RXBUFSTATUS_OUT,
+            //---------------------- Receive Ports - RX PLL Ports ----------------------
+    output        GT1_RXRESETDONE_OUT,
+            //------------ Transmit Ports - 64b66b and 64b67b Gearbox Ports ------------
+    input         GT1_TXUSERRDY_IN,
+    input  [1:0]  GT1_TXHEADER_IN,
+    input  [6:0]  GT1_TXSEQUENCE_IN,
+            //---------------- Transmit Ports - TX Data Path interface -----------------
+    input         GT1_GTTXRESET_IN,
+    input  [63:0] GT1_TXDATA_IN,
+    output        GT1_TXOUTCLK_OUT,
+//    output        GT1_TXOUTCLKFABRIC_OUT,
+    input         GT1_TXPCSRESET_IN,
+    input         GT1_TXUSRCLK_IN,
+    input         GT1_TXUSRCLK2_IN,
+            //-------------- Transmit Ports - TX Driver and OOB signaling --------------
+    output        GT1_GTXTXN_OUT,
+    output        GT1_GTXTXP_OUT,
+            //--------------------- Transmit Ports - TX PLL Ports ----------------------
+    output         GT1_TXRESETDONE_OUT,
+            //------------------- Transmit Ports - TX PRBS Generator -------------------
+    input  [2:0]  GT1_TXPRBSSEL_IN,
+            //--------------- Transmit Ports - TX Ports for PCI Express ----------------
+    input         GT1_TXELECIDLE_IN,
 
     //____________________________COMMON PORTS________________________________
     //-------------------- Common Block  - Ref Clock Ports ---------------------
@@ -195,7 +257,7 @@ module aurora_64b66b_v7_3_MULTI_GT #
     (
         //_____________________________________________________________________
         //_____________________________________________________________________
-// ACTIVE GT in Q1 1
+// ACTIVE GT in Q1 2
 // ACTIVE GT in Q2 0
 // Calculated ACTIVE GT in Q2 0
 // ACTIVE GT in Q3 0
@@ -209,7 +271,7 @@ module aurora_64b66b_v7_3_MULTI_GT #
 
         .QPLLCLK_IN                     (gt_qpllclk_quad1_i),
         .QPLLREFCLK_IN                  (gt_qpllrefclk_quad1_i),
-//GT_QUAD1 is 0
+//GT_QUAD1 is 1
         //-------------- Channel - Dynamic Reconfiguration Port (DRP) --------------
         .DRPADDR_IN                 (GT0_DRPADDR_IN),
         .DRPCLK_IN                  (GT0_DRP_CLK_IN),
@@ -274,6 +336,107 @@ module aurora_64b66b_v7_3_MULTI_GT #
         .TXPRBSSEL_IN               (GT0_TXPRBSSEL_IN),
         //--------------- Transmit Ports - TX Ports for PCI Express ----------------
         .TXELECIDLE_IN              (GT0_TXELECIDLE_IN)
+
+    );
+
+ 
+
+    //*************************************************************************************************
+    //-----------------------------------GT INSTANCE-----------------------------------------------
+    //*************************************************************************************************
+    AURORA_64B66B_V7_3_GTX # 
+    (
+        // Simulation attributes
+        .GT_SIM_GTRESET_SPEEDUP   (WRAPPER_SIM_GTRESET_SPEEDUP),
+        .SIM_VERSION              (SIM_VERSION),
+        .RX_DFE_KL_CFG2_IN        (RX_DFE_KL_CFG2_IN),
+        .PCS_RSVD_ATTR_IN         (48'h000000000000),
+        .PMA_RSV_IN               (PMA_RSV_IN)
+
+    ) 
+    AURORA_64B66B_V7_3_GTX_INST_LANE1
+    (
+        //_____________________________________________________________________
+        //_____________________________________________________________________
+// ACTIVE GT in Q1 2
+// ACTIVE GT in Q2 0
+// Calculated ACTIVE GT in Q2 0
+// ACTIVE GT in Q3 0
+// ACTIVE GT in Q4 0
+// ACTIVE GT in Q5 0
+// ACTIVE GT in Q6 0
+// ACTIVE GT in Q7 0
+// ACTIVE GT in Q8 0
+// ACTIVE GT in Q9 0
+        //-------------------------------- QPLL ---------------------------------
+
+        .QPLLCLK_IN                     (gt_qpllclk_quad1_i),
+        .QPLLREFCLK_IN                  (gt_qpllrefclk_quad1_i),
+//GT_QUAD1 is 0
+        //-------------- Channel - Dynamic Reconfiguration Port (DRP) --------------
+        .DRPADDR_IN                 (GT1_DRPADDR_IN),
+        .DRPCLK_IN                  (GT1_DRP_CLK_IN),
+        .DRPDI_IN                   (GT1_DRPDI_IN),
+        .DRPDO_OUT                  (GT1_DRPDO_OUT),
+        .DRPEN_IN                   (GT1_DRPEN_IN),
+        .DRPRDY_OUT                 (GT1_DRPRDY_OUT),
+        .DRPWE_IN                   (GT1_DRPWE_IN),
+        //----------------------------- Eye Scan Ports -----------------------------
+        .EYESCANDATAERROR_OUT       (),
+        //---------------------- Loopback and Powerdown Ports ----------------------
+        .LOOPBACK_IN                (GT1_LOOPBACK_IN),
+        //----------------------------- Receive Ports ------------------------------
+        .RXUSERRDY_IN               (GT1_RXUSERRDY_IN),
+        //------------ Receive Ports - 64b66b and 64b67b Gearbox Ports -------------
+        .RXDATAVALID_OUT            (GT1_RXDATAVALID_OUT),
+        .RXGEARBOXSLIP_IN           (GT1_RXGEARBOXSLIP_IN),
+        .RXHEADER_OUT               (GT1_RXHEADER_OUT),
+        .RXHEADERVALID_OUT          (GT1_RXHEADERVALID_OUT),
+        //--------------------- Receive Ports - PRBS Detection ---------------------
+        .RXPRBSCNTRESET_IN          (GT1_RXPRBSCNTRESET_IN),
+        .RXPRBSERR_OUT              (),
+        .RXPRBSSEL_IN               (GT1_RXPRBSSEL_IN_IN),
+        //----------------- Receive Ports - RX Data Path interface -----------------
+        .GTRXRESET_IN               (GT1_GTRXRESET_IN),
+        .RXDATA_OUT                 (GT1_RXDATA_OUT),
+        .RXOUTCLK_OUT               (GT1_RXOUTCLK_OUT),
+        .RXPCSRESET_IN              (GT1_RXPCSRESET_IN),
+        .RXUSRCLK_IN                (GT1_RXUSRCLK_IN),
+        .RXUSRCLK2_IN               (GT1_RXUSRCLK2_IN),
+         
+        //----- Receive Ports - RX Driver,OOB signalling,Coupling and Eq.,CDR ------
+        .GTXRXN_IN                  (GT1_GTXRXN_IN),
+        .GTXRXP_IN                  (GT1_GTXRXP_IN),
+        .RXELECIDLE_OUT              (), 
+        .RXCDRLOCK_OUT              (),
+        //------ Receive Ports - RX Elastic Buffer and Phase Alignment Ports -------
+        .RXBUFRESET_IN              (GT1_RXBUFRESET_IN),
+        .RXBUFSTATUS_OUT            (),
+        //---------------------- Receive Ports - RX PLL Ports ----------------------
+        .RXRESETDONE_OUT            (GT1_RXRESETDONE_OUT),
+        //----------------------------- Transmit Ports -----------------------------
+        .TXUSERRDY_IN               (GT1_TXUSERRDY_IN),
+        //------------ Transmit Ports - 64b66b and 64b67b Gearbox Ports ------------
+        .TXHEADER_IN                (GT1_TXHEADER_IN),
+        .TXSEQUENCE_IN              (GT1_TXSEQUENCE_IN),
+        //---------------- Transmit Ports - TX Data Path interface -----------------
+        .GTTXRESET_IN               (GT1_GTTXRESET_IN),
+        .TXDATA_IN                  (GT1_TXDATA_IN),
+        .TXOUTCLK_OUT               (GT1_TXOUTCLK_OUT),
+        .TXOUTCLKFABRIC_OUT         (),
+        .TXOUTCLKPCS_OUT            (),
+        .TXPCSRESET_IN              (GT1_TXPCSRESET_IN),
+        .TXUSRCLK_IN                (GT1_TXUSRCLK_IN),
+        .TXUSRCLK2_IN               (GT1_TXUSRCLK2_IN),
+        //-------------- Transmit Ports - TX Driver and OOB signaling --------------
+        .GTXTXN_OUT                 (GT1_GTXTXN_OUT),
+        .GTXTXP_OUT                 (GT1_GTXTXP_OUT),
+        //--------------------- Transmit Ports - TX PLL Ports ----------------------
+        .TXRESETDONE_OUT            (GT1_TXRESETDONE_OUT),
+        //------------------- Transmit Ports - TX PRBS Generator -------------------
+        .TXPRBSSEL_IN               (GT1_TXPRBSSEL_IN),
+        //--------------- Transmit Ports - TX Ports for PCI Express ----------------
+        .TXELECIDLE_IN              (GT1_TXELECIDLE_IN)
 
     );
 

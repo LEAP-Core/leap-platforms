@@ -58,7 +58,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 `timescale 1 ns/1 ps
-(* core_generation_info = "aurora_64b66b_v7_3,aurora_64b66b_v7_3,{c_aurora_lanes=1, c_column_used=right, c_gt_clock_1=GTXQ0, c_gt_clock_2=None, c_gt_loc_1=1, c_gt_loc_10=X, c_gt_loc_11=X, c_gt_loc_12=X, c_gt_loc_13=X, c_gt_loc_14=X, c_gt_loc_15=X, c_gt_loc_16=X, c_gt_loc_17=X, c_gt_loc_18=X, c_gt_loc_19=X, c_gt_loc_2=X, c_gt_loc_20=X, c_gt_loc_21=X, c_gt_loc_22=X, c_gt_loc_23=X, c_gt_loc_24=X, c_gt_loc_25=X, c_gt_loc_26=X, c_gt_loc_27=X, c_gt_loc_28=X, c_gt_loc_29=X, c_gt_loc_3=X, c_gt_loc_30=X, c_gt_loc_31=X, c_gt_loc_32=X, c_gt_loc_33=X, c_gt_loc_34=X, c_gt_loc_35=X, c_gt_loc_36=X, c_gt_loc_37=X, c_gt_loc_38=X, c_gt_loc_39=X, c_gt_loc_4=X, c_gt_loc_40=X, c_gt_loc_41=X, c_gt_loc_42=X, c_gt_loc_43=X, c_gt_loc_44=X, c_gt_loc_45=X, c_gt_loc_46=X, c_gt_loc_47=X, c_gt_loc_48=X, c_gt_loc_5=X, c_gt_loc_6=X, c_gt_loc_7=X, c_gt_loc_8=X, c_gt_loc_9=X, c_lane_width=4, c_line_rate=5.0, c_gt_type=gtx, c_qpll=false, c_nfc=false, c_nfc_mode=IMM, c_refclk_frequency=156.25, c_simplex=false, c_simplex_mode=TX, c_stream=true, c_ufc=false, c_user_k=false,flow_mode=None, interface_mode=Streaming, dataflow_config=Duplex,}" *)
+(* core_generation_info = "aurora_64b66b_v7_3,aurora_64b66b_v7_3,{c_aurora_lanes=2, c_column_used=right, c_gt_clock_1=GTXQ0, c_gt_clock_2=None, c_gt_loc_1=1, c_gt_loc_10=X, c_gt_loc_11=X, c_gt_loc_12=X, c_gt_loc_13=X, c_gt_loc_14=X, c_gt_loc_15=X, c_gt_loc_16=X, c_gt_loc_17=X, c_gt_loc_18=X, c_gt_loc_19=X, c_gt_loc_2=2, c_gt_loc_20=X, c_gt_loc_21=X, c_gt_loc_22=X, c_gt_loc_23=X, c_gt_loc_24=X, c_gt_loc_25=X, c_gt_loc_26=X, c_gt_loc_27=X, c_gt_loc_28=X, c_gt_loc_29=X, c_gt_loc_3=X, c_gt_loc_30=X, c_gt_loc_31=X, c_gt_loc_32=X, c_gt_loc_33=X, c_gt_loc_34=X, c_gt_loc_35=X, c_gt_loc_36=X, c_gt_loc_37=X, c_gt_loc_38=X, c_gt_loc_39=X, c_gt_loc_4=X, c_gt_loc_40=X, c_gt_loc_41=X, c_gt_loc_42=X, c_gt_loc_43=X, c_gt_loc_44=X, c_gt_loc_45=X, c_gt_loc_46=X, c_gt_loc_47=X, c_gt_loc_48=X, c_gt_loc_5=X, c_gt_loc_6=X, c_gt_loc_7=X, c_gt_loc_8=X, c_gt_loc_9=X, c_lane_width=4, c_line_rate=10.0, c_gt_type=gtx, c_qpll=true, c_nfc=false, c_nfc_mode=IMM, c_refclk_frequency=156.25, c_simplex=false, c_simplex_mode=TX, c_stream=true, c_ufc=false, c_user_k=false,flow_mode=None, interface_mode=Streaming, dataflow_config=Duplex,}" *)
 module aurora_64b66b_v7_3_AXI_TO_DRP #
 (
     parameter            DATA_WIDTH         = 16 // DATA bus width
@@ -73,19 +73,28 @@ module aurora_64b66b_v7_3_AXI_TO_DRP #
     input     [31:0]       S_AXI_AWADDR,
     input                 S_AXI_AWVALID,
     output                S_AXI_AWREADY,
+    input                 S_AXI_AWVALID_LANE1,
+    output                S_AXI_AWREADY_LANE1,
     //-------------------- Write Data Channel -----------------------------
     input     [31:0]      S_AXI_WDATA,
     input                 S_AXI_WVALID,
     output                S_AXI_WREADY,
     output                S_AXI_BVALID,
+    input                 S_AXI_WVALID_LANE1,
+    output                S_AXI_WREADY_LANE1,
+    output                S_AXI_BVALID_LANE1,
     //-------------------- Read Address Channel ---------------------------
     input      [31:0]      S_AXI_ARADDR,
     input                 S_AXI_ARVALID,
     output                S_AXI_ARREADY,
+    input                 S_AXI_ARVALID_LANE1,
+    output                S_AXI_ARREADY_LANE1,
     //-------------------- Read Data Channel -----------------------------
     output      [31:0]     S_AXI_RDATA,
     output                 S_AXI_RVALID,
     input                  S_AXI_RREADY,
+    output                 S_AXI_RVALID_LANE1,
+    input                  S_AXI_RREADY_LANE1,
 
    //---------------------- GT DRP Ports ----------------------
     output   [8:0]   DRPADDR_IN,
@@ -94,6 +103,10 @@ module aurora_64b66b_v7_3_AXI_TO_DRP #
     input            DRPRDY_OUT,
     output           DRPEN_IN,
     output           DRPWE_IN,
+    input  [15:0]    DRPDO_OUT_LANE1,
+    input            DRPRDY_OUT_LANE1,
+    output           DRPEN_IN_LANE1,
+    output           DRPWE_IN_LANE1,
 
     // System Interface
     input                 DRP_CLK_IN
@@ -105,6 +118,10 @@ module aurora_64b66b_v7_3_AXI_TO_DRP #
     wire    rd_addr_en_i;
     wire    wr_data_en_i;
     wire    rd_data_en_i;
+    wire    wr_addr_en_lane1_i;
+    wire    rd_addr_en_lane1_i;
+    wire    wr_data_en_lane1_i;
+    wire    rd_data_en_lane1_i;
 
 //*********************************Main Body of Code**********************************
 
@@ -114,6 +131,10 @@ module aurora_64b66b_v7_3_AXI_TO_DRP #
   assign S_AXI_ARREADY = 1'b1;
   assign S_AXI_WREADY = 1'b1;
   assign S_AXI_RVALID = 1'b1;
+  assign S_AXI_AWREADY_LANE1 = 1'b1;
+  assign S_AXI_ARREADY_LANE1 = 1'b1;
+  assign S_AXI_WREADY_LANE1 = 1'b1;
+  assign S_AXI_RVALID_LANE1 = 1'b1;
 
 // Generate enables for write & read DRP operations
 
@@ -121,19 +142,30 @@ module aurora_64b66b_v7_3_AXI_TO_DRP #
   assign rd_addr_en = S_AXI_ARVALID && S_AXI_ARREADY;
   assign wr_data_en = S_AXI_WVALID && S_AXI_WREADY;
   assign rd_data_en = S_AXI_RVALID && S_AXI_RREADY;
+  assign wr_addr_en_lane1 = S_AXI_AWVALID_LANE1 && S_AXI_AWREADY_LANE1;
+  assign rd_addr_en_lane1 = S_AXI_ARVALID_LANE1 && S_AXI_ARREADY_LANE1;
+  assign wr_data_en_lane1 = S_AXI_WVALID_LANE1 && S_AXI_WREADY_LANE1;
+  assign rd_data_en_lane1 = S_AXI_RVALID_LANE1 && S_AXI_RREADY_LANE1;
 
   assign DRPADDR_IN          =  (wr_addr_en) ? S_AXI_AWADDR[8:0] 
                                : (rd_addr_en) ? S_AXI_ARADDR[8:0] : 
+ (wr_addr_en_lane1) ? S_AXI_AWADDR[8:0] 
+                               : (rd_addr_en_lane1) ? S_AXI_ARADDR[8:0] : 
                                'h0; 
   assign DRPDI_IN            =  (wr_data_en) ? S_AXI_WDATA[15:0] : 
+ (wr_data_en_lane1) ? S_AXI_WDATA[15:0] : 
                                'h0;
 
   assign S_AXI_RDATA[15:0]   =  (rd_data_en) ? DRPDO_OUT : 
+ (rd_data_en_lane1) ? DRPDO_OUT_LANE1 : 
                                'h0;
 
   assign DRPEN_IN   = (wr_addr_en) ? 1'b1 : (rd_addr_en) ? 1'b1 : 1'b0;
+  assign DRPEN_IN_LANE1   = (wr_addr_en_lane1) ? 1'b1 : (rd_addr_en_lane1) ? 1'b1 : 1'b0;
   assign DRPWE_IN   = (wr_data_en) ? 1'b1 : 1'b0; 
+  assign DRPWE_IN_LANE1   = (wr_data_en_lane1) ? 1'b1 : 1'b0; 
 
   assign S_AXI_BVALID = DRPRDY_OUT;
+  assign S_AXI_BVALID_LANE1 = DRPRDY_OUT_LANE1;
 
 endmodule

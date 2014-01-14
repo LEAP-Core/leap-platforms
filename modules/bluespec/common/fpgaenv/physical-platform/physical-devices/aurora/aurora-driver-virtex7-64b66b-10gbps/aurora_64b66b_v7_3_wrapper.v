@@ -66,13 +66,16 @@
 // No of quads in design 1
 
 `timescale 1ns / 1ps
-(* core_generation_info = "aurora_64b66b_v7_3,aurora_64b66b_v7_3,{c_aurora_lanes=1, c_column_used=right, c_gt_clock_1=GTXQ0, c_gt_clock_2=None, c_gt_loc_1=1, c_gt_loc_10=X, c_gt_loc_11=X, c_gt_loc_12=X, c_gt_loc_13=X, c_gt_loc_14=X, c_gt_loc_15=X, c_gt_loc_16=X, c_gt_loc_17=X, c_gt_loc_18=X, c_gt_loc_19=X, c_gt_loc_2=X, c_gt_loc_20=X, c_gt_loc_21=X, c_gt_loc_22=X, c_gt_loc_23=X, c_gt_loc_24=X, c_gt_loc_25=X, c_gt_loc_26=X, c_gt_loc_27=X, c_gt_loc_28=X, c_gt_loc_29=X, c_gt_loc_3=X, c_gt_loc_30=X, c_gt_loc_31=X, c_gt_loc_32=X, c_gt_loc_33=X, c_gt_loc_34=X, c_gt_loc_35=X, c_gt_loc_36=X, c_gt_loc_37=X, c_gt_loc_38=X, c_gt_loc_39=X, c_gt_loc_4=X, c_gt_loc_40=X, c_gt_loc_41=X, c_gt_loc_42=X, c_gt_loc_43=X, c_gt_loc_44=X, c_gt_loc_45=X, c_gt_loc_46=X, c_gt_loc_47=X, c_gt_loc_48=X, c_gt_loc_5=X, c_gt_loc_6=X, c_gt_loc_7=X, c_gt_loc_8=X, c_gt_loc_9=X, c_lane_width=4, c_line_rate=10.0, c_gt_type=gtx, c_qpll=true, c_nfc=false, c_nfc_mode=IMM, c_refclk_frequency=156.25, c_simplex=false, c_simplex_mode=TX, c_stream=true, c_ufc=false, c_user_k=false,flow_mode=None, interface_mode=Streaming, dataflow_config=Duplex,}" *)
+(* core_generation_info = "aurora_64b66b_v7_3,aurora_64b66b_v7_3,{c_aurora_lanes=2, c_column_used=right, c_gt_clock_1=GTXQ0, c_gt_clock_2=None, c_gt_loc_1=1, c_gt_loc_10=X, c_gt_loc_11=X, c_gt_loc_12=X, c_gt_loc_13=X, c_gt_loc_14=X, c_gt_loc_15=X, c_gt_loc_16=X, c_gt_loc_17=X, c_gt_loc_18=X, c_gt_loc_19=X, c_gt_loc_2=2, c_gt_loc_20=X, c_gt_loc_21=X, c_gt_loc_22=X, c_gt_loc_23=X, c_gt_loc_24=X, c_gt_loc_25=X, c_gt_loc_26=X, c_gt_loc_27=X, c_gt_loc_28=X, c_gt_loc_29=X, c_gt_loc_3=X, c_gt_loc_30=X, c_gt_loc_31=X, c_gt_loc_32=X, c_gt_loc_33=X, c_gt_loc_34=X, c_gt_loc_35=X, c_gt_loc_36=X, c_gt_loc_37=X, c_gt_loc_38=X, c_gt_loc_39=X, c_gt_loc_4=X, c_gt_loc_40=X, c_gt_loc_41=X, c_gt_loc_42=X, c_gt_loc_43=X, c_gt_loc_44=X, c_gt_loc_45=X, c_gt_loc_46=X, c_gt_loc_47=X, c_gt_loc_48=X, c_gt_loc_5=X, c_gt_loc_6=X, c_gt_loc_7=X, c_gt_loc_8=X, c_gt_loc_9=X, c_lane_width=4, c_line_rate=10.0, c_gt_type=gtx, c_qpll=true, c_nfc=false, c_nfc_mode=IMM, c_refclk_frequency=156.25, c_simplex=false, c_simplex_mode=TX, c_stream=true, c_ufc=false, c_user_k=false,flow_mode=None, interface_mode=Streaming, dataflow_config=Duplex,}" *)
 
 module aurora_64b66b_v7_3_WRAPPER #
 (
     // Channel bond MASTER/SLAVE connection
-    parameter CHAN_BOND_MODE_0      = 2'b00,
-    parameter CHAN_BOND_MODE_1      = 2'b00,
+    parameter CHAN_BOND_MODE_0 = 2'b01,
+    parameter CHAN_BOND_MODE_0_LANE1 = 2'b10,
+    
+    parameter CHAN_BOND_MODE_1 = 2'b01,
+    parameter CHAN_BOND_MODE_1_LANE1 = 2'b10,
 // Simulation attributes
     parameter   SIM_GTXRESET_SPEEDUP=   "FALSE"      // Set to 1 to speed up sim reset 
 )
@@ -81,46 +84,67 @@ module aurora_64b66b_v7_3_WRAPPER #
 
    //----------------- Receive Ports - Channel Bonding Ports -----------------
     ENCHANSYNC_IN,
+    ENCHANSYNC_IN_LANE1,
     CHBONDDONE_OUT,
+    CHBONDDONE_OUT_LANE1,
     //RXLOSSOFSYNC indication
     RXLOSSOFSYNC_OUT,
+    RXLOSSOFSYNC_OUT_LANE1,
 //----------------- Receive Ports - Clock Correction Ports -----------------
     RXBUFERR_OUT,
+    RXBUFERR_OUT_LANE1,
     //----------------- Receive Ports - RX Data Path interface -----------------
     RXDATA_OUT,
+    RXDATA_OUT_LANE1,
     RXHEADER_OUT,
+    RXHEADER_OUT_LANE1,
     RXRESET_IN,
+    RXRESET_IN_LANE1,
     RXUSRCLK2_IN,
     //----- Receive Ports - RX Driver,OOB signalling,Coupling and Eq.,CDR ------
     RX1N_IN,
+    RX1N_IN_LANE1,
     RX1P_IN,
+    RX1P_IN_LANE1,
     //--------------- Receive Ports - RX Polarity Control Ports ----------------
     CHECK_POLARITY_IN,
     RXPOLARITY_IN,
     RX_NEG_OUT,
+    CHECK_POLARITY_IN_LANE1,
+    RXPOLARITY_IN_LANE1,
+    RX_NEG_OUT_LANE1,
 //------------------- Shared Ports - Tile and PLL Ports --------------------
     REFCLK1_IN,
     GTXRESET_IN,
     RESET,
     CHAN_BOND_RESET,
     PLLLKDET_OUT,
+    PLLLKDET_OUT_LANE1,
     POWERDOWN_IN,
     TXOUTCLK1_OUT,
+    TXOUTCLK1_OUT_LANE1,
     //-------------- Transmit Ports - 64b66b TX Header Ports --------------
     TXHEADER_IN,
+    TXHEADER_IN_LANE1,
     //---------------- Transmit Ports - TX Data Path interface -----------------
     TXDATA_IN,
+    TXDATA_IN_LANE1,
     TXRESET_IN,
+    TXRESET_IN_LANE1,
     TXUSRCLK_IN,
     TXUSRCLK2_IN,
     TXBUFERR_OUT,
+    TXBUFERR_OUT_LANE1,
     //--------------Data Valid Signals for Local Link
     TXDATAVALID_OUT,
     TXDATAVALID_SYMGEN_OUT,
     RXDATAVALID_OUT,
+    RXDATAVALID_OUT_LANE1,
     //------------- Transmit Ports - TX Driver and OOB signalling --------------
     TX1N_OUT,
+    TX1N_OUT_LANE1,
     TX1P_OUT,
+    TX1P_OUT_LANE1,
    //---------------------- Loopback Port ----------------------
    LOOPBACK_IN,
    //---------------------- GTXE2 CHANNEL DRP Ports ----------------------
@@ -131,6 +155,10 @@ module aurora_64b66b_v7_3_WRAPPER #
    DRPRDY_OUT,
    DRPEN_IN,
    DRPWE_IN,
+   DRPDO_OUT_LANE1,
+   DRPRDY_OUT_LANE1,
+   DRPEN_IN_LANE1,
+   DRPWE_IN_LANE1,
    //---------------------- GTXE2 COMMON DRP Ports ----------------------
    QPLL_DRPADDR_IN,
    QPLL_DRPDI_IN,
@@ -157,6 +185,16 @@ module aurora_64b66b_v7_3_WRAPPER #
     output   [63:0]   RXDATA_OUT; 
     output   [1:0]    RXHEADER_OUT; 
     input             RXRESET_IN;
+ 
+    input             ENCHANSYNC_IN_LANE1; 
+    output            CHBONDDONE_OUT_LANE1;
+    output            RXLOSSOFSYNC_OUT_LANE1;
+    //----------------- Receive Ports - Clock Correction Ports -----------------
+    output            RXBUFERR_OUT_LANE1;
+    //----------------- Receive Ports - RX Data Path interface -----------------
+    output   [63:0]   RXDATA_OUT_LANE1; 
+    output   [1:0]    RXHEADER_OUT_LANE1; 
+    input             RXRESET_IN_LANE1;
     input             RXUSRCLK2_IN;
     //----- Receive Ports - RX Driver,OOB signalling,Coupling and Eq.,CDR ------
  
@@ -166,12 +204,21 @@ module aurora_64b66b_v7_3_WRAPPER #
     input             CHECK_POLARITY_IN;
     input             RXPOLARITY_IN;
     output reg        RX_NEG_OUT;
+ 
+    input             RX1N_IN_LANE1;  
+    input             RX1P_IN_LANE1;  
+    //--------------- Receive Ports - RX Polarity Control Ports ----------------
+    input             CHECK_POLARITY_IN_LANE1;
+    input             RXPOLARITY_IN_LANE1;
+    output reg        RX_NEG_OUT_LANE1;
     //------------------- Shared Ports - Tile and PLL Ports --------------------
     input             REFCLK1_IN;
     input             GTXRESET_IN;
     input             CHAN_BOND_RESET;
     output            PLLLKDET_OUT;
+    output            PLLLKDET_OUT_LANE1;
     output            TXOUTCLK1_OUT;
+    output            TXOUTCLK1_OUT_LANE1;
     input             POWERDOWN_IN;
     input             RESET;
     //-------------- Transmit Ports - 8b10b Encoder Control Ports --------------
@@ -180,14 +227,22 @@ module aurora_64b66b_v7_3_WRAPPER #
     input    [63:0]   TXDATA_IN; 
     input             TXRESET_IN;
     output            TXBUFERR_OUT;
+    input    [1:0]    TXHEADER_IN_LANE1; 
+    //---------------- Transmit Ports - TX Data Path interface -----------------
+    input    [63:0]   TXDATA_IN_LANE1; 
+    input             TXRESET_IN_LANE1;
+    output            TXBUFERR_OUT_LANE1;
     input             TXUSRCLK_IN;
     input             TXUSRCLK2_IN;
     //------------- Transmit Ports - TX Driver and OOB signalling --------------
     output            TX1N_OUT;
     output            TX1P_OUT;
+    output            TX1N_OUT_LANE1;
+    output            TX1P_OUT_LANE1;
     output            TXDATAVALID_OUT;
     output            TXDATAVALID_SYMGEN_OUT;
     output            RXDATAVALID_OUT;
+    output            RXDATAVALID_OUT_LANE1;
    //---------------------- GTXE2 CHANNEL DRP Ports ----------------------
     input   [8:0]   DRPADDR_IN;
     input           DRP_CLK_IN;
@@ -196,6 +251,10 @@ module aurora_64b66b_v7_3_WRAPPER #
     output          DRPRDY_OUT;
     input           DRPEN_IN;
     input           DRPWE_IN;
+    output  [15:0]  DRPDO_OUT_LANE1;
+    output          DRPRDY_OUT_LANE1;
+    input           DRPEN_IN_LANE1;
+    input           DRPWE_IN_LANE1;
  
    //---------------------- GTXE2 COMMON DRP Ports ----------------------
     input   [7:0]   QPLL_DRPADDR_IN;
@@ -214,18 +273,26 @@ module aurora_64b66b_v7_3_WRAPPER #
     // floating input port connection signals
     wire     [1:0]          open_rxbufstatus_i;
     wire                    open_txbufstatus_i;
+    wire     [1:0]          open_rxbufstatus_lane1_i;
+    wire                    open_txbufstatus_lane1_i;
     //  wire to output lock signal
     wire                    tx_plllkdet_i;
     wire                    rx_plllkdet_i;
+    wire                    tx_plllkdet_lane1_i;
+    wire                    rx_plllkdet_lane1_i;
 
     // Electrical idle reset logic signals
     wire                    resetdone_i;
     wire                    rx_resetdone_i;
     reg                     rx_resetdone_i2;
     wire                    tx_resetdone_i;
+    wire                    rx_resetdone_lane1_i;
+    reg                     rx_resetdone_lane1_i2;
+    wire                    tx_resetdone_lane1_i;
 
     // Channel Bonding 
     wire     [4:0]          chbondi;
+    wire     [4:0]          chbondi_lane1;
    
     wire     [4:0]          chbondi_unused_i;
     wire     [4:0]          chbondo_to_slaves_i;
@@ -279,6 +346,42 @@ module aurora_64b66b_v7_3_WRAPPER #
     reg                     rx_polarity_r2;
     reg                     check_polarity_r; 
     reg                     check_polarity_r2; 
+    wire  [1:0]             txheader_lane1_i;
+    wire  [63:0]            scrambled_data_lane1_i;
+     
+    wire  [63:0]            new_rxdata_from_gtx_lane1_i;
+    wire  [31:0]            rxdata_from_gtx_lane1_i;
+    wire  [1:0]             new_rxheader_from_gtx_lane1_i;
+    wire  [1:0]             rxheader_from_gtx_lane1_i;
+    wire                    rxgearboxslip_lane1_i;
+    wire                    new_rxheadervalid_lane1_i;
+    wire                    rxheadervalid_lane1_i;
+    wire                    new_rxdatavalid_lane1_i;
+    wire                    rxdatavalid_lane1_i;
+    wire                    open_rxheader_lane1_i;
+    wire                    rxlossofsync_out_lane1_i;  
+    wire  [63:0]            rxdata_to_fifo_lane1_i;
+    wire                    rxrecclk_from_gtx_lane1_i;
+    wire  [0:6]             not_connected_lane1_i;
+
+    reg   [1:0]             rxheader_to_fifo_lane1_i2;
+    reg   [63:0]            rxdata_to_fifo_lane1_i2;
+    reg                     rxdatavalid_to_fifo_lane1_i2;
+    reg   [1:0]             rxheader_to_fifo_lane1_i3;
+    reg   [63:0]            rxdata_to_fifo_lane1_i3;
+    reg                     rxdatavalid_to_fifo_lane1_i3;
+    reg   [1:0]             rxheader_to_fifo_lane1_i4;
+    reg   [63:0]            rxdata_to_fifo_lane1_i4;
+    reg                     rxdatavalid_to_fifo_lane1_i4;
+    reg   [1:0]             rxheader_to_fifo_lane1_i5;
+    reg   [63:0]            rxdata_to_fifo_lane1_i5;
+    reg                     rxdatavalid_to_fifo_lane1_i5;
+
+    reg   [1:0]             rxheader_from_gtx_lane1_r;
+    reg                     rx_polarity_lane1_r;
+    reg                     rx_polarity_lane1_r2;
+    reg                     check_polarity_lane1_r; 
+    reg                     check_polarity_lane1_r2; 
  
     reg                     reset_blocksync_r;
     reg                     rx_resetdone_r1;                        
@@ -302,9 +405,13 @@ module aurora_64b66b_v7_3_WRAPPER #
     wire                    gtx_reset_comb;
     reg   [1:0]             txheader_r;
     reg   [1:0]             tx_hdr_r;
+    reg   [1:0]             txheader_lane1_r;
+    reg   [1:0]             tx_hdr_lane1_r;
  
     wire  [1:0]             rxbuferr_out_i;
+    wire  [1:0]             rxbuferr_out_lane1_i;
     wire  [1:0]             link_reset_0_c;
+    wire  [1:0]             link_reset_1_c;
     wire                    link_reset_c;
 
    wire                     gt_qpllclk_quad1_i;
@@ -314,6 +421,8 @@ module aurora_64b66b_v7_3_WRAPPER #
     wire                    gtxreset_i;
     reg                    rxdatavalid_to_fifo_i;
     reg  [1:0]             rxheader_to_fifo_i;
+    reg                    rxdatavalid_to_fifo_lane1_i;
+    reg  [1:0]             rxheader_to_fifo_lane1_i;
     wire                    tied_to_vcc_i;
     reg    [7:0]      reset_counter = 8'd0; 
 //********************************* Main Body of Code**************************
@@ -325,18 +434,23 @@ module aurora_64b66b_v7_3_WRAPPER #
     // Assign lock signals
 
 assign  PLLLKDET_OUT  = gt_qplllock_i;
+assign  PLLLKDET_OUT_LANE1  = gt_qplllock_i;
 
 
     assign  RXBUFERR_OUT  =   rxbuferr_out_i[1]  || rxbuferr_out_i[0];
+    assign  RXBUFERR_OUT_LANE1  =   rxbuferr_out_lane1_i[1]  || rxbuferr_out_lane1_i[0];
 
     assign  TXBUFERR_OUT  =  1'b0; 
+    assign  TXBUFERR_OUT_LANE1  =  1'b0; 
 
     // Channel Bonding
     assign  chbondi_unused_i  = 5'b0;
 
     assign  chbondi = chbondi_unused_i;
+    assign  chbondi_lane1 = chbondo_to_slaves_i;
 
-    assign resetdone_i = rx_resetdone_i2 & tx_resetdone_i;
+    assign resetdone_i = rx_resetdone_i2 & tx_resetdone_i & 
+                         rx_resetdone_lane1_i2 & tx_resetdone_lane1_i ;
 
  
     //Special reset requirement for GTX GB
@@ -431,7 +545,9 @@ assign  PLLLKDET_OUT  = gt_qplllock_i;
 
     assign  gtx_rx_pcsreset_comb =  !rx_resetdone_r2 | rx_reset_r2;
 
-    assign  rx_reset_i           =  !mmcm_locked_out_i | rx_reset_r2 | link_reset_0_c[1];
+    assign  rx_reset_i           =  !mmcm_locked_out_i | rx_reset_r2 | link_reset_0_c[1] 
+                                    | link_reset_1_c[1];
+ 
 
     //Synchronize gtx_rx_pcsreset_comb with rxrecclk_64_i
     always @(posedge rxrecclk_to_pll_i)
@@ -473,15 +589,20 @@ assign  PLLLKDET_OUT  = gt_qplllock_i;
 
 
     assign gtxreset_i = (!reset_counter[7]) ? 1'b0 : (!(gt_qplllock_i) );
-    assign  qpllreset_i = GTXRESET_IN | link_reset_0_c[0];
+    assign  qpllreset_i = GTXRESET_IN | link_reset_0_c[0] 
+                                    | link_reset_1_c[0];
+ 
  
 
     always @ (posedge TXUSRCLK2_IN)
     begin
         tx_hdr_r   <= `DLY TXHEADER_IN;
+        tx_hdr_lane1_r   <= `DLY TXHEADER_IN_LANE1;
     end
 
-  assign LINK_RESET_OUT =  link_reset_0_c[0];
+  assign LINK_RESET_OUT =  link_reset_0_c[0] 
+                                    | link_reset_1_c[0];
+ 
 
 
     //*************************************************************************************************
@@ -546,7 +667,50 @@ aurora_64b66b_v7_3_multi_gt_i
        .GT0_GTXTXP_OUT(TX1P_OUT),
        .GT0_TXRESETDONE_OUT(tx_resetdone_i),
        .GT0_TXPRBSSEL_IN(tied_to_ground_vec_i[2:0]),
-       .GT0_TXELECIDLE_IN(tied_to_ground_i)
+       .GT0_TXELECIDLE_IN(tied_to_ground_i),
+      .GT1_DRPADDR_IN(DRPADDR_IN),
+      .GT1_DRP_CLK_IN(tied_to_ground_i),
+      .GT1_DRPDI_IN(DRPDI_IN),
+      .GT1_DRPDO_OUT(DRPDO_OUT_LANE1),
+      .GT1_DRPEN_IN(DRPEN_IN_LANE1),
+      .GT1_DRPRDY_OUT(DRPRDY_OUT_LANE1),
+      .GT1_DRPWE_IN(DRPWE_IN_LANE1),
+      .GT1_LOOPBACK_IN(LOOPBACK_IN),
+      .GT1_RXUSERRDY_IN(mmcm_locked_out_i),
+      .GT1_RXDATAVALID_OUT(rxdatavalid_lane1_i),
+      .GT1_RXGEARBOXSLIP_IN(rxgearboxslip_lane1_i),
+      .GT1_RXHEADER_OUT(rxheader_from_gtx_lane1_i),
+      .GT1_RXHEADERVALID_OUT(rxheadervalid_lane1_i),
+      .GT1_RXPRBSCNTRESET_IN(tied_to_ground_i),
+      .GT1_RXPRBSSEL_IN_IN(tied_to_ground_vec_i[2:0]),
+      .GT1_GTRXRESET_IN(gtxreset_i),
+      .GT1_RXDATA_OUT(rxdata_from_gtx_lane1_i),
+      .GT1_RXOUTCLK_OUT(rxrecclk_from_gtx_lane1_i),
+      .GT1_RXPCSRESET_IN(tied_to_ground_i),
+      .GT1_RXUSRCLK_IN(rxrecclk_to_pll_i),
+      .GT1_RXUSRCLK2_IN(rxrecclk_to_pll_i),
+      .GT1_GTXRXN_IN(RX1N_IN_LANE1),
+      .GT1_GTXRXP_IN(RX1P_IN_LANE1),
+//      .GT_RXCDRRESET_LANE1_IN(tied_to_ground_i),
+      .GT1_RXBUFRESET_IN(tied_to_ground_i),
+      .GT1_RXRESETDONE_OUT(rx_resetdone_lane1_i),
+//      .GT_TXPRECURSORINV_LANE1_IN(tied_to_ground_i),
+      .GT1_TXUSERRDY_IN(TXCLK_LOCK),
+              //------------ Transmit Ports - 64b66b and 64b67b Gearbox Ports ------------
+       .GT1_TXHEADER_IN(tx_hdr_lane1_r),
+       .GT1_TXSEQUENCE_IN              (txsequence_i),
+              //---------------- Transmit Ports - TX Data Path interface -----------------
+        .GT1_GTTXRESET_IN               (gtxreset_i),
+        .GT1_TXDATA_IN (scrambled_data_lane1_i),
+       .GT1_TXOUTCLK_OUT(TXOUTCLK1_OUT_LANE1),
+       .GT1_TXPCSRESET_IN(tied_to_ground_i),
+       .GT1_TXUSRCLK_IN(TXUSRCLK_IN),
+       .GT1_TXUSRCLK2_IN(TXUSRCLK2_IN),
+       .GT1_GTXTXN_OUT(TX1N_OUT_LANE1),
+       .GT1_GTXTXP_OUT(TX1P_OUT_LANE1),
+       .GT1_TXRESETDONE_OUT(tx_resetdone_lane1_i),
+       .GT1_TXPRBSSEL_IN(tied_to_ground_vec_i[2:0]),
+       .GT1_TXELECIDLE_IN(tied_to_ground_i)
 );
 
  
@@ -714,6 +878,173 @@ aurora_64b66b_v7_3_multi_gt_i
       .RD_CLK (RXUSRCLK2_IN),
       .INIT_CLK (INIT_CLK),
       .LINK_RESET(link_reset_0_c)
+    );
+ 
+ 
+   //#########################scrambler instantiation########################
+    aurora_64b66b_v7_3_SCRAMBLER_64B66B #
+    (
+       .TX_DATA_WIDTH(64)
+    )
+    aurora_64b66b_v7_3_scrambler_64b66b_gtx0_lane1_i
+    (
+      // User Interface
+       .UNSCRAMBLED_DATA_IN(TXDATA_IN_LANE1),
+       .SCRAMBLED_DATA_OUT(scrambled_data_lane1_i),
+       .DATA_VALID_IN(data_valid_i),
+
+       // System Interface
+       .USER_CLK(TXUSRCLK2_IN),
+       .SYSTEM_RESET(gtx_reset_comb)
+    );
+
+    
+    //---------------------------Polarity Control Logic---------------------
+    //Double synchronize CHECK_POLARITY_IN signal to account for domain crossing
+    always @(posedge rxrecclk_to_pll_i)
+    begin
+          check_polarity_lane1_r   <= `DLY CHECK_POLARITY_IN_LANE1;
+          check_polarity_lane1_r2  <= `DLY check_polarity_lane1_r;
+    end
+
+    //Logic to account for polarity reversal
+    always @(posedge rxrecclk_to_pll_i)
+    begin
+      if(check_polarity_lane1_r2 && (rxheader_from_gtx_lane1_i == 2'b01) && rxheadervalid_lane1_i)
+          RX_NEG_OUT_LANE1     <= `DLY   1'b1;
+      else if(check_polarity_r2 && RX_NEG_OUT )
+          RX_NEG_OUT_LANE1     <= `DLY   1'b1;
+      else
+          RX_NEG_OUT_LANE1     <= `DLY   1'b0;
+    end
+
+    //Finally double synchronize RX_POLARITY_IN signal and port map to RXPOLARITY0/1
+    always @(posedge rxrecclk_to_pll_i)
+    begin
+          rx_polarity_lane1_r   <= `DLY RXPOLARITY_IN_LANE1;
+          rx_polarity_lane1_r2  <= `DLY rx_polarity_lane1_r;
+    end
+
+    always @(posedge rxrecclk_to_pll_i)
+    if(enable_32_i)
+    begin
+          rxdatavalid_to_fifo_lane1_i  <= `DLY new_rxdatavalid_lane1_i;
+          rxheader_to_fifo_lane1_i  <= `DLY new_rxheader_from_gtx_lane1_i;
+    end
+
+    //##########################descrambler instantiation########################
+    aurora_64b66b_v7_3_DESCRAMBLER_64B66B #
+    (
+       .RX_DATA_WIDTH(64)
+    )
+    aurora_64b66b_v7_3_descrambler_64b66b_gtx0_lane1_i
+    (
+       // User Interface
+       .SCRAMBLED_DATA_IN(new_rxdata_from_gtx_lane1_i),
+       .UNSCRAMBLED_DATA_OUT(rxdata_to_fifo_lane1_i),
+       .DATA_VALID_IN(new_rxdatavalid_lane1_i),
+
+       // System Interface
+       .USER_CLK(rxrecclk_to_pll_i),
+       .ENABLE(enable_32_i),  
+       .SYSTEM_RESET(!rxlossofsync_out_lane1_i)
+    );
+
+    //#########################block sync instantiation############################## 
+    aurora_64b66b_v7_3_BLOCK_SYNC_SM #
+    (
+      .SH_CNT_MAX(64),
+      .SH_INVALID_CNT_MAX(16)
+    )
+    aurora_64b66b_v7_3_block_sync_sm_gtx0_lane1_i
+    (
+      // User Interface
+      .BLOCKSYNC_OUT(rxlossofsync_out_lane1_i),
+      .RXGEARBOXSLIP_OUT(rxgearboxslip_lane1_i),
+      .RXHEADER_IN(rxheader_from_gtx_lane1_i),
+      .RXHEADERVALID_IN(rxheadervalid_lane1_i),
+
+      // System Interface
+      .USER_CLK(rxrecclk_to_pll_i),
+      .SYSTEM_RESET(reset_blocksync_r)
+    );
+
+    always @ (posedge rxrecclk_to_pll_i)
+    begin
+        rx_resetdone_lane1_i2 <= `DLY rx_resetdone_lane1_i;
+    end 
+
+    aurora_64b66b_v7_3_WIDTH_CONVERSION  #
+    (
+      .INPUT_WIDTH(4),
+      .OUTPUT_WIDTH(8)
+    )
+    aurora_64b66b_v7_3_width_conversion_lane1_i
+    (
+      .RESET(!rx_resetdone_lane1_i2),
+      .ENABLE(enable_32_i),
+      .USER_CLK(rxrecclk_to_pll_i),
+      .HEADER_IN(rxheader_from_gtx_lane1_i),
+      .HEADER_OUT(new_rxheader_from_gtx_lane1_i),
+      .DATA_IN(rxdata_from_gtx_lane1_i),
+      .DATA_OUT(new_rxdata_from_gtx_lane1_i),
+      .DATAVALID_IN(rxdatavalid_lane1_i),
+      .DATAVALID_OUT(new_rxdatavalid_lane1_i)
+    );
+
+    always @ (posedge rxrecclk_to_pll_i)
+    begin
+       rxheader_to_fifo_lane1_i2 <= `DLY rxheader_to_fifo_lane1_i;
+       rxheader_to_fifo_lane1_i3 <= `DLY rxheader_to_fifo_lane1_i2;
+       rxheader_to_fifo_lane1_i4 <= `DLY rxheader_to_fifo_lane1_i3;
+       rxheader_to_fifo_lane1_i5 <= `DLY rxheader_to_fifo_lane1_i4;
+
+       rxdatavalid_to_fifo_lane1_i2 <= `DLY rxdatavalid_to_fifo_lane1_i;
+       rxdatavalid_to_fifo_lane1_i3 <= `DLY rxdatavalid_to_fifo_lane1_i2;
+       rxdatavalid_to_fifo_lane1_i4 <= `DLY rxdatavalid_to_fifo_lane1_i3;
+       rxdatavalid_to_fifo_lane1_i5 <= `DLY rxdatavalid_to_fifo_lane1_i4;
+
+       rxdata_to_fifo_lane1_i2 <= `DLY rxdata_to_fifo_lane1_i;
+       rxdata_to_fifo_lane1_i3 <= `DLY rxdata_to_fifo_lane1_i2;
+       rxdata_to_fifo_lane1_i4 <= `DLY rxdata_to_fifo_lane1_i3;
+       rxdata_to_fifo_lane1_i5 <= `DLY rxdata_to_fifo_lane1_i4;
+    end
+
+   
+    //#########################CBCC module instantiation########################
+    aurora_64b66b_v7_3_CLOCK_CORRECTION_CHANNEL_BONDING #
+    (
+      .CH_BOND_MAX_SKEW (2'b10),
+      .CH_BOND_MODE   (CHAN_BOND_MODE_0_LANE1)
+
+    )
+    cbcc_gtx0_lane1_i
+    (
+
+      //Write Interface 
+      .GTX_RX_DATA_IN (rxdata_to_fifo_lane1_i5),
+      .GTX_RX_DATAVALID_IN(rxdatavalid_to_fifo_lane1_i5),
+      .GTX_RX_HEADER_IN(rxheader_to_fifo_lane1_i5),
+      .WR_ENABLE(enable_32_i),
+      .USER_CLK(rxrecclk_to_pll_i),
+      .RXLOSSOFSYNC_IN(rxlossofsync_out_lane1_i),
+      .ENCHANSYNC(ENCHANSYNC_IN_LANE1),
+      .CHAN_BOND_RESET(CHAN_BOND_RESET),
+
+      //Read Interface
+      .CC_RX_DATA_OUT(RXDATA_OUT_LANE1),
+      .CC_RX_BUF_STATUS_OUT(rxbuferr_out_lane1_i),
+      .CC_RX_DATAVALID_OUT(RXDATAVALID_OUT_LANE1),
+      .CC_RX_HEADER_OUT(RXHEADER_OUT_LANE1),
+      .CC_RXLOSSOFSYNC_OUT(RXLOSSOFSYNC_OUT_LANE1),
+
+      .CHBONDI (chbondi_lane1),
+      .CHBONDO (),
+      .RXCHANISALIGNED(CHBONDDONE_OUT_LANE1),
+      .RESET(gtx_rx_pcsreset_comb),
+      .RD_CLK (RXUSRCLK2_IN),
+      .INIT_CLK (INIT_CLK),
+      .LINK_RESET(link_reset_1_c)
     );
  
 

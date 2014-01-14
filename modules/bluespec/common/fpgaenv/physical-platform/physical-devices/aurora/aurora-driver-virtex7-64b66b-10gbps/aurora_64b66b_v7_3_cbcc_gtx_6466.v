@@ -164,6 +164,7 @@ module  aurora_64b66b_v7_3_CLOCK_CORRECTION_CHANNEL_BONDING #
     reg     [3:0]      en_rd_counter;
     reg                CB_align_ver;
     reg                gtx_rxdatavalid_r;
+    reg                fifo_reset_r;
     reg                rxlossofsync_r;
     reg                rxdatavalid_dlyd1_r;
     reg                CC_detect_pulse_r; 
@@ -171,9 +172,11 @@ module  aurora_64b66b_v7_3_CLOCK_CORRECTION_CHANNEL_BONDING #
     reg                do_cc_insert_r;
     reg                CC_detect_dlyd1;
     reg                CB_detect_dlyd1;
-    reg                rxlossofsync_r1;
-    reg                rxlossofsync_r2 = 1'b0;
-    reg                reset_cbcc_comb_rdclk;
+(* ASYNC_REG = " {TRUE}" *) (* shift_extract = "{no}" *) reg    chan_bond_reset_r1;
+    reg                chan_bond_reset_r2 = 1'b1;
+(* shift_extract = "{no}" *)     reg                fifo_reset_comb_r;
+    reg                fifo_reset_comb_r2;
+    reg                fifo_reset_comb_r3;
     reg                cc_rxlossofsync_r1;
     reg                cc_rxlossofsync_r2;
     reg                cc_rxlossofsync_r3;
@@ -254,30 +257,23 @@ module  aurora_64b66b_v7_3_CLOCK_CORRECTION_CHANNEL_BONDING #
 
     //################################# Beginning of Code ##############################
     // reset_cbcc_comb is used as an asynchronous reset in the design 
-    // Double synchronize RXLOSSOFSYNC_IN to account for domain crossing.
-    // Even if both clocks are from same source, double synchronization
-    // is employed to account for the routing delay
+    // Double synchronize CHAN_BOND_RESET to account for domain crossing.
     always @(posedge USER_CLK)
     if(WR_ENABLE)
     begin
-        rxlossofsync_r1  <= `DLY  RXLOSSOFSYNC_IN;
-        rxlossofsync_r2  <= `DLY  rxlossofsync_r1;
-    end
+        chan_bond_reset_r1  <= `DLY  CHAN_BOND_RESET;
+        chan_bond_reset_r2  <= `DLY  chan_bond_reset_r1;
+    end 
 
-    assign reset_cbcc_comb = RESET | !rxlossofsync_r2;
+    assign reset_cbcc_comb = RESET | chan_bond_reset_r2;
 
-    always @(posedge RD_CLK or posedge reset_cbcc_comb)
+    always @(posedge USER_CLK or posedge reset_cbcc_comb)
     begin
         if(reset_cbcc_comb)
-         reset_cbcc_comb_rdclk  <= `DLY  1'b1;
-        else
-         reset_cbcc_comb_rdclk  <= `DLY  reset_cbcc_comb;
-    end
-
-    always @(posedge RD_CLK)
-     begin
-       reset_cbcc_comb_r  <= `DLY  reset_cbcc_comb_rdclk;
-     end
+         reset_cbcc_comb_r  <= `DLY  1'b1;
+        else if(WR_ENABLE)
+         reset_cbcc_comb_r  <= `DLY  reset_cbcc_comb;
+    end 
 
     initial
     begin
@@ -313,11 +309,21 @@ module  aurora_64b66b_v7_3_CLOCK_CORRECTION_CHANNEL_BONDING #
     assign i_am_slave  =(CH_BOND_MODE[1]) ;
     assign i_am_master =(CH_BOND_MODE[0]);
 
+    // Generate fifo_reset_r flag to reset FIFO36
+    always @(posedge RD_CLK or posedge reset_cbcc_comb_rdclk_r2)
+    begin
+          if(reset_cbcc_comb_rdclk_r2)
+                     fifo_reset_r   <= `DLY 1'b1;
+          else if(ENCHANSYNC)
+                     fifo_reset_r   <= `DLY 1'b0;
+    end
+
     // The following logic will ensure that the RDEN will be held until it crosses the almost empty mark.
- 
     always @(posedge RD_CLK or posedge reset_cbcc_comb_rdclk_r2)
     begin
          if (reset_cbcc_comb_rdclk_r2)
+                     en_rd_counter   <= `DLY 4'b0;
+         else if(fifo_reset_i || (wait_for_wr_en_rd2 != 2'h3)) 
                      en_rd_counter   <= `DLY 4'b0;
          else if(en_rd_counter <FIFO_DEPTH_START+3)
                      en_rd_counter   <= `DLY en_rd_counter+1;
@@ -496,6 +502,43 @@ module  aurora_64b66b_v7_3_CLOCK_CORRECTION_CHANNEL_BONDING #
 
     assign  rxdatavalid_lookahead_rdfifo  = fifo_dout_i[66];
 
+    assign  fifo_reset_comb = fifo_reset_r | reset_cbcc_comb;
+
+    // Delay fifo_reset_comb by four cycles to account datapath delay
+//    SRLC32E #(
+//            .INIT(32'h00000000)
+//    ) SRLC32E_inst_3 (
+//            .Q(fifo_reset_i),       // SRL data output
+//            .Q31(),                 // SRL cascade output pin
+//            .A(5'b00011),           // 5-bit shift depth select input
+//            .CE(WR_ENABLE),              // Clock enable input
+//            .CLK(USER_CLK),           // Clock input
+//            .D(fifo_reset_comb)     // SRL data input
+//    );
+
+    always @ (posedge USER_CLK)
+    begin
+          fifo_reset_comb_r  <= `DLY fifo_reset_comb;
+          fifo_reset_comb_r2 <= `DLY fifo_reset_comb_r;
+          fifo_reset_comb_r3 <= `DLY fifo_reset_comb_r2;
+          fifo_reset_int       <= `DLY fifo_reset_comb_r3;
+    end
+
+//    FD #(
+//        .INIT(1'b0)
+//    ) fdr_fifo_i (
+//        .D(fifo_reset_comb_r3),
+//        .C(USER_CLK),
+//        .Q(fifo_reset_i)
+//    );
+
+    assign fifo_reset_i = fifo_reset_int;
+ 
+//    always @ (posedge USER_CLK)
+//    begin
+//          fifo_reset_i2 <= `DLY fifo_reset_i;
+//    end
+
     // Delay GTX_RX_DATAVALID_IN by two cycles
     // to enable CB logic wait on CB
     SRLC32E #(
@@ -512,9 +555,44 @@ module  aurora_64b66b_v7_3_CLOCK_CORRECTION_CHANNEL_BONDING #
     initial
             do_rd_en =1'b0;
 
-    always @(posedge RD_CLK or posedge reset_cbcc_comb_rdclk_r2)
+    always @(posedge USER_CLK) 
     begin
-        if(reset_cbcc_comb_rdclk_r2)
+        if(fifo_reset_i)
+   
+          wait_for_wr_en <=  `DLY 2'h0;
+        else if(wait_for_wr_en < 2'h3)
+          wait_for_wr_en <=  `DLY wait_for_wr_en + 1'b1;
+        else
+          wait_for_wr_en <=  `DLY wait_for_wr_en;
+    end
+
+    always @(posedge RD_CLK)
+    begin
+       wait_for_wr_en_rd <= `DLY  wait_for_wr_en; 
+       wait_for_wr_en_rd2 <= `DLY  wait_for_wr_en_rd;
+    end 
+
+    always @(posedge USER_CLK)
+    begin
+       wait_for_wr_en_wr <= `DLY  wait_for_wr_en; 
+       wait_for_wr_en_wr2 <= `DLY  wait_for_wr_en_wr;
+       wait_for_wr_en_wr3 <= `DLY  wait_for_wr_en_wr2;
+       wait_for_wr_en_wr4 <= `DLY  wait_for_wr_en_wr3;
+    end
+
+    always @(posedge RD_CLK) 
+    begin
+        if(fifo_reset_i)
+   
+          wait_for_rd_en <=  `DLY 4'h0;
+        else if(wait_for_rd_en < 4'h6)
+          wait_for_rd_en <=  `DLY wait_for_rd_en + 1'b1;
+        else
+          wait_for_rd_en <=  `DLY wait_for_rd_en;
+    end
+    always @(posedge RD_CLK or posedge fifo_reset_i)
+    begin
+        if(fifo_reset_i)               
                      do_rd_en        <=  `DLY    1'b0;
         else if(hold_rd_en_init)
                      do_rd_en        <=  `DLY    1'b0;
@@ -522,7 +600,7 @@ module  aurora_64b66b_v7_3_CLOCK_CORRECTION_CHANNEL_BONDING #
                      do_rd_en        <=  `DLY    1'b1;
         else if(!rd_en_datavalid & !ENCHANSYNC & !cc_datavalid_mask)
                      do_rd_en        <=  `DLY    1'b0;
-        else
+        else                      
                      do_rd_en        <=  `DLY    1'b1;
     end
 
@@ -543,19 +621,19 @@ module  aurora_64b66b_v7_3_CLOCK_CORRECTION_CHANNEL_BONDING #
            do_wr_en =1'b0;
 
 
-    always @(posedge USER_CLK or posedge reset_cbcc_comb)
+    always @(posedge USER_CLK or posedge fifo_reset_i) 
     begin
-        if(reset_cbcc_comb)
+        if(fifo_reset_i || (wait_for_wr_en_wr4 != 2'h3))   
                      do_wr_en         <=  `DLY    1'b0;
         else if(WR_ENABLE)
           begin
-          if(overflow_flag_c)
+          if(overflow_flag_c) 
                      do_wr_en         <=  `DLY    1'b0;
           else if(do_cc_delete_c)
                      do_wr_en         <=  `DLY    1'b0;
           else if(!raw_data_r[66])
                      do_wr_en         <=  `DLY    1'b0;
-          else
+          else        
                      do_wr_en         <=  `DLY    1'b1;
           end
         else if(!WR_ENABLE) 
@@ -664,7 +742,7 @@ module  aurora_64b66b_v7_3_CLOCK_CORRECTION_CHANNEL_BONDING #
                   .DIP(fifo_din_i[71:64]),
                   .RDCLK(RD_CLK),               
                   .RDEN(do_rd_en_i),
-                  .RST(reset_cbcc_comb),
+                  .RST(fifo_reset_i),
                   .WRCLK(USER_CLK),                         
                   .WREN(do_wr_en)
                );

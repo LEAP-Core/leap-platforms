@@ -103,20 +103,20 @@ module aurora_64b66b_v7_3_GLOBAL_LOGIC
 //***********************************Port Declarations*******************************
 
     // GTX Interface
-    input                  CH_BOND_DONE;
+    input       [0:1]      CH_BOND_DONE;
     output                 EN_CHAN_SYNC;
     output                 CHAN_BOND_RESET;
 
     // Aurora Lane Interface
-    input                  LANE_UP;
-    input                  HARD_ERR;
-    input                  GOT_NA_IDLES;
-    input                  GOT_CCS;
-    input                  REMOTE_READY;
-    input                  GOT_CBS;    
-    input                  GOT_IDLES;
+    input       [0:1]      LANE_UP;
+    input       [0:1]      HARD_ERR;
+    input       [0:1]      GOT_NA_IDLES;
+    input       [0:1]      GOT_CCS;
+    input       [0:1]      REMOTE_READY;
+    input       [0:1]      GOT_CBS;    
+    input       [0:1]      GOT_IDLES;
     output                 GEN_NA_IDLES;
-    output                 GEN_CH_BOND;
+    output      [0:1]      GEN_CH_BOND;
     output                 RESET_LANES;
 
     // System Interface

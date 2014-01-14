@@ -94,14 +94,14 @@ module aurora_64b66b_v7_3_TX_STREAM_DATAPATH
 
 
     // LocalLink Interface
-    input     [0:63]     TX_D;
+    input     [0:127]    TX_D;
     input                TX_SRC_RDY_N;
 
 
 
     // Aurora Lane Interface
-    output               TX_PE_DATA_V;
-    output    [0:63]     TX_PE_DATA;
+    output    [0:1]      TX_PE_DATA_V;
+    output    [0:127]    TX_PE_DATA;
 
 
     // TX_STREAM Control Module Interface
@@ -112,8 +112,8 @@ module aurora_64b66b_v7_3_TX_STREAM_DATAPATH
 
 //**************************External Register Declarations****************************
 
-    reg       [0:63]     TX_PE_DATA;
-    reg                  TX_PE_DATA_V;
+    reg       [0:127]    TX_PE_DATA;
+    reg       [0:1]      TX_PE_DATA_V;
 
 //******************************Internal Wire Declarations****************************
 
@@ -122,7 +122,8 @@ module aurora_64b66b_v7_3_TX_STREAM_DATAPATH
 
 
 
-    wire      [0:63]     tx_pe_data_c;
+    wire      [0:127]    tx_pe_data_c;
+    wire      [0:1]      tx_pe_data_v_c;
 
 //*********************************Main Body of Code**********************************
 
@@ -137,12 +138,22 @@ module aurora_64b66b_v7_3_TX_STREAM_DATAPATH
 
     assign  tx_pe_data_c =  TX_D;
 
+    //Assign tx_pe_data_v_c based on Protocol rules
+    //IN SA=1 Following rules are followed
+    //1. Lanes higher than SEP can't have data
+    //2. UFCH is sent only on the last lane
+    assign tx_pe_data_v_c[0] =                                (ll_valid_c) ? 1'b1 :
+                               1'b0 ;
+
+    assign tx_pe_data_v_c[1] =                                (ll_valid_c) ? 1'b1 :
+                               1'b0 ;
+
 
     // Implement the data out register.
     always @(posedge USER_CLK)
     begin
         TX_PE_DATA      <=  `DLY    tx_pe_data_c;
-        TX_PE_DATA_V    <=  `DLY    in_frame_c;
+        TX_PE_DATA_V    <=  `DLY    tx_pe_data_v_c;
     end
 
 

@@ -121,7 +121,7 @@ module  aurora_64b66b_v7_3_TX_STREAM_CONTROL_SM
     // TX_STREAM Control Module Interface
 
     // Aurora Lane Interface
-    output                   GEN_CC;
+    output        [0:1]      GEN_CC;
 
 
 
@@ -197,7 +197,14 @@ module  aurora_64b66b_v7_3_TX_STREAM_CONTROL_SM
         .D(do_cc_r),
         .C(USER_CLK),
         .R(~CHANNEL_UP),
-        .Q(GEN_CC )
+        .Q(GEN_CC [0])
+    );
+    FDR gen_cc_flop_1_i
+    (
+        .D(do_cc_r),
+        .C(USER_CLK),
+        .R(~CHANNEL_UP),
+        .Q(GEN_CC [1])
     );
 
 

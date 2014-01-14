@@ -119,10 +119,19 @@ TIMESPEC "TS_TIG4" = FROM "INIT_CLK" TO "USER_CLK_HPC4" TIG;
 # DP7 is X1Y23 (XM104 - CX4)
 
 
+NET "m_llpi_phys_plat_aurora_device/ug_device_0/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/cbcc_gtx0_i/fifo_reset_i" TIG; 
+NET "m_llpi_phys_plat_aurora_device/ug_device_0/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/cbcc_gtx0_lane1_i/fifo_reset_i" TIG; 
+
+NET "m_llpi_phys_plat_aurora_device/ug_device_1/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/cbcc_gtx0_i/fifo_reset_i" TIG; 
+NET "m_llpi_phys_plat_aurora_device/ug_device_1/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/cbcc_gtx0_lane1_i/fifo_reset_i" TIG; 
+
 INST m_llpi_phys_plat_aurora_device/ug_device_0/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/aurora_64b66b_v7_3_multi_gt_i/AURORA_64B66B_V7_3_GTX_INST/gtxe2_i LOC=GTXE2_CHANNEL_X1Y0; # on board sma cables
+INST m_llpi_phys_plat_aurora_device/ug_device_0/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/aurora_64b66b_v7_3_multi_gt_i/AURORA_64B66B_V7_3_GTX_INST_LANE1/gtxe2_i LOC=GTXE2_CHANNEL_X1Y1; # on board sma cables
 #INST m_llpi_phys_plat_aurora_device/ug_device_0/aurora_module_i/gt_wrapper_i/aurora_8b10b_v8_3_multi_gt_i/gtxe2_common_i LOC=GTXE2_COMMON_X1Y0;
 
-INST m_llpi_phys_plat_aurora_device/ug_device_1/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/aurora_64b66b_v7_3_multi_gt_i/AURORA_64B66B_V7_3_GTX_INST/gtxe2_i LOC=GTXE2_CHANNEL_X1Y19; # xm104 sata cables
+INST m_llpi_phys_plat_aurora_device/ug_device_1/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/aurora_64b66b_v7_3_multi_gt_i/AURORA_64B66B_V7_3_GTX_INST/gtxe2_i LOC=GTXE2_CHANNEL_X1Y18; # xm104 sata cables
+INST m_llpi_phys_plat_aurora_device/ug_device_1/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/aurora_64b66b_v7_3_multi_gt_i/AURORA_64B66B_V7_3_GTX_INST_LANE1/gtxe2_i LOC=GTXE2_CHANNEL_X1Y19; # xm104 sata cables
+
 #INST m_llpi_phys_plat_aurora_device/ug_device_1/aurora_module_i/gt_wrapper_i/aurora_8b10b_v8_3_multi_gt_i/gtxe2_common_i LOC=GTXE2_COMMON_X1Y27;
 
 #INST m_llpi_phys_plat_aurora_device/ug_device_2/aurora_module_i/gt_wrapper_i/aurora_8b10b_v8_3_multi_gt_i/gt0_aurora_8b10b_v8_3_i/gtxe2_i LOC=GTXE2_CHANNEL_X1Y26; # xm104 sata cables
@@ -137,19 +146,19 @@ INST m_llpi_phys_plat_aurora_device/ug_device_1/aurora_64b66b_v7_3_block_i/auror
 
 ## Area groups
 INST "m_llpi_phys_plat_aurora_device/ug_device_0/*" AREA_GROUP = "AG_aurora_0";
-AREA_GROUP "AG_aurora_0"                  RANGE=SLICE_X214Y0:SLICE_X221Y49;
+AREA_GROUP "AG_aurora_0"                  RANGE=SLICE_X206Y0:SLICE_X221Y63;
 AREA_GROUP "AG_aurora_0"                  GROUP=CLOSED;
 
 INST "m_llpi_phys_plat_aurora_device/*auroraFlowcontrol_0*/*" AREA_GROUP = "AG_aurora_0_fc";
-AREA_GROUP "AG_aurora_0_fc"               RANGE=SLICE_X200Y0:SLICE_X213Y49;
+AREA_GROUP "AG_aurora_0_fc"               RANGE=SLICE_X184Y0:SLICE_X205Y63;
 AREA_GROUP "AG_aurora_0_fc"               GROUP=CLOSED;
 
 
 INST "m_llpi_phys_plat_aurora_device/ug_device_1/*" AREA_GROUP = "AG_aurora_1";
-AREA_GROUP "AG_aurora_1"                  RANGE=SLICE_X214Y186:SLICE_X221Y249;
+AREA_GROUP "AG_aurora_1"                  RANGE=SLICE_X206Y186:SLICE_X221Y249;
 AREA_GROUP "AG_aurora_1"                  GROUP=CLOSED;
 
 INST "m_llpi_phys_plat_aurora_device/*auroraFlowcontrol_1*/*" AREA_GROUP = "AG_aurora_1_fc";
-AREA_GROUP "AG_aurora_1_fc"               RANGE=SLICE_X196Y200:SLICE_X213Y249;
+AREA_GROUP "AG_aurora_1_fc"               RANGE=SLICE_X184Y186:SLICE_X205Y249;
 AREA_GROUP "AG_aurora_1_fc"               GROUP=CLOSED;
 

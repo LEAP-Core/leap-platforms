@@ -1,0 +1,28 @@
+Core type:              Aurora 64B66B
+
+Core Options:
+
+  Line Rate:            10 Gbps
+  GT REFCLK:            156.250 MHz
+  Dataflow Mode:        Duplex
+  Interface:            Streaming
+  Flow Control:         None
+
+  User K:               Off (unchecked)
+  Vivado Lab Tools:     Off (unchecked)
+
+  DRP:                  Native
+
+GT Selections:
+
+  Column Used:          right
+  Lanes:                2
+  GT Type:              gtx
+
+  Lane Assignmnt:       GTXQ0 (1) X1Y0 / (2) X1Y1  (we'll change these in UCF/XDC file)
+  GT Refclk1:           GTXQ0
+  GT Refclk2:           None
+
+Shared Logic:
+
+  Include Shared Logic in core

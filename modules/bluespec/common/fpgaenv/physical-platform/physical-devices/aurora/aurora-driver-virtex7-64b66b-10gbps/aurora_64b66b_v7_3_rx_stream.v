@@ -100,14 +100,14 @@ module aurora_64b66b_v7_3_RX_STREAM
 
 
     // LocalLink RX Interface
-    output   [0:63]     RX_D;
+    output   [0:127]    RX_D;
     output              RX_SRC_RDY_N;
 
 
 
     // Aurora Lane Interface
-    input    [0:63]     RX_PE_DATA;
-    input               RX_PE_DATA_V;
+    input    [0:127]    RX_PE_DATA;
+    input    [0:1]      RX_PE_DATA_V;
 
 
 

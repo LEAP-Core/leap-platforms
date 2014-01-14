@@ -60,7 +60,7 @@ endinterface
 
 import "BVI" aurora_64b66b_v7_3_exdes = 
 module mkAURORA_SINGLE_UG#(AuroraGTXClockSpec pllClockSpec, Clock rawClock, Reset rawReset) 
-    (AURORA_SINGLE_DEVICE_UG#(64));
+    (AURORA_SINGLE_DEVICE_UG#(`AURORA_INTERFACE_WIDTH));
 
     parameter USE_CHIPSCOPE = pllClockSpec.use_chipscope;
 

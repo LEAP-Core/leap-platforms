@@ -16972,3 +16972,50 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aur
   SERDES, but it seems safer.
 
 - Some clean up of the reliability layer.
+
+----------
+mcadler     Date: Mon Jan 13 19:13:05 EST 2014  CSN: CSN-leap-platforms-722
+                  Tue Jan 14 00:13:05 UTC 2014
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-reliable
+ aurora-reliable.bsv       Locally Modified          721 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-driver-virtex7-64b66b-10gbps
+ aurora_64b66b_v7_3_tx_stream_datapath.v Locally Modified          721 
+ aurora_64b66b_v7_3_global_logic.v Locally Modified          721 
+ aurora_64b66b_v7_3_ch_bond_code_gen.v Locally Modified          721 
+ aurora_64b66b_v7_3_wrapper.v Locally Modified          721 
+ aurora_64b66b_v7_3_multi_wrapper.v Locally Modified          721 
+ aurora_64b66b_v7_3_reset_logic.v Locally Modified          721 
+ aurora_64b66b_v7_3_cbcc_gtx_6466.v Locally Modified          721 
+ aurora-virtex7-5gbps-64.awb Locally Modified          721 
+ aurora_64b66b_v7_3_exdes.v Locally Modified          721 
+ aurora_64b66b_v7_3_axi_to_ll.v Locally Modified          721 
+ aurora_64b66b_v7_3.v      Locally Modified          721 
+ vc707_sma_aurora.ucf      Locally Modified          721 
+ aurora-ug.bsv             Locally Modified          721 
+ aurora_64b66b_v7_3_axi_to_drp.v Locally Modified          721 
+ README                    Locally Added               0 
+ aurora_64b66b_v7_3_channel_init_sm.v Locally Modified          721 
+ aurora_64b66b_v7_3_gtx.v  Locally Modified          721 
+ aurora_64b66b_v7_3_rx_stream.v Locally Modified          721 
+ aurora_64b66b_v7_3_tx_stream_control_sm.v Locally Modified          721 
+ aurora_64b66b_v7_3_tx_stream.v Locally Modified          721 
+ aurora_64b66b_v7_3_channel_err_detect.v Locally Modified          721 
+ aurora_64b66b_v7_3_rx_stream_datapath.v Locally Modified          721 
+ aurora_64b66b_v7_3_ll_to_axi.v Locally Modified          721 
+
+- Fix Aurora reliability timeout to use Int instead of Bit, since it depends on
+  the absolute value of the difference in some times.  It would have triggered
+  some spurious timeouts, though very very few.
+
+- Increase timeout threshold a bit, after seeing a storm of timeouts in
+  simulation.  This only matters when there are errors on the line.
+
+- Switch the driver to use two lanes instead of one to double the theoretical
+  bandwidth with no change in latency.  We'll have to see whether this is the
+  right long term choice, since it limits the number of available I/O connectors
+  and increases area due to larger buffers.  For now it improves HAsim
+  performance by at least 20%.
+

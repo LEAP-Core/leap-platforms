@@ -91,7 +91,7 @@ module aurora_64b66b_v7_3_CHANNEL_BOND_GEN
     // Global Logic Interface
     input                 CHANNEL_UP;
 
-    output                GEN_CH_BOND;
+    output     [0:1]      GEN_CH_BOND;
 
     // System Interface
     input                  USER_CLK;
@@ -100,7 +100,7 @@ module aurora_64b66b_v7_3_CHANNEL_BOND_GEN
 
 //***************************External Register Declarations***************************
 
-    reg                   GEN_CH_BOND;
+    reg        [0:1]      GEN_CH_BOND;
 
 //*********************************Wire Declarations**********************************
     wire                  free_count_done;
@@ -127,7 +127,9 @@ module aurora_64b66b_v7_3_CHANNEL_BOND_GEN
     always @(posedge USER_CLK)
     begin
           
-        GEN_CH_BOND  <= `DLY !CHANNEL_UP & free_count_done ;    
+        GEN_CH_BOND[0]  <= `DLY !CHANNEL_UP & free_count_done ;    
+          
+        GEN_CH_BOND[1]  <= `DLY !CHANNEL_UP & free_count_done ;    
     
     end
     

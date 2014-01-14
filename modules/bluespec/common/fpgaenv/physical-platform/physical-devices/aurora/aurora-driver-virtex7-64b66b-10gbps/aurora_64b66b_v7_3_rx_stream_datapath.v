@@ -94,15 +94,15 @@ module aurora_64b66b_v7_3_RX_STREAM_DATAPATH
     
    
     //Aurora Lane Interface
-    input     [0:63]     RX_PE_DATA; 
-    input                RX_PE_DATA_V;
+    input     [0:127]    RX_PE_DATA; 
+    input     [0:1]      RX_PE_DATA_V;
        
     
     // Global Logic
     input                    CHANNEL_UP;
 
     //LocalLink Interface
-    output    [0:63]     RX_D;              
+    output    [0:127]    RX_D;              
     output               RX_SRC_RDY_N;
 
     
@@ -114,7 +114,7 @@ module aurora_64b66b_v7_3_RX_STREAM_DATAPATH
     
 //****************************External Register Declarations**************************
 
-    reg       [0:63]     RX_D;    
+    reg       [0:127]    RX_D;    
     
     reg                  RX_SRC_RDY_N;
 
@@ -126,7 +126,7 @@ module aurora_64b66b_v7_3_RX_STREAM_DATAPATH
 
     always @(posedge USER_CLK)
       if(RESET) 
-            RX_D   <=  `DLY    64'b0;      
+            RX_D   <=  `DLY    128'b0;      
       
       else if ( CHANNEL_UP & |RX_PE_DATA_V  ) 
             RX_D   <=  `DLY    RX_PE_DATA;      
