@@ -17019,3 +17019,25 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aur
   and increases area due to larger buffers.  For now it improves HAsim
   performance by at least 20%.
 
+
+----------
+mcadler     Date: Wed Jan 15 07:56:17 EST 2014  CSN: CSN-leap-platforms-723
+                  Wed Jan 15 12:56:17 UTC 2014
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-reliable
+ aurora-reliable.bsv       Locally Modified          722 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-driver-virtex7-64b66b-10gbps
+ vc707_sma_aurora.ucf      Locally Modified          722 
+
+- Move replay buffer to BRAM instead of LUTRAM.  Reduce area group size
+  to reflect the change.
+
+- Double frame size to cover round trip Aurora latency on VC707.  This also
+  halves the number of ACK packets.
+
+- Increase timeout threshold.  Short timeout only matters for errors.
+  False triggers generate packet storms.  Since the receive buffers are
+  currently before the CRC/ACK code, back-pressure from the client can
+  trigger timeouts.

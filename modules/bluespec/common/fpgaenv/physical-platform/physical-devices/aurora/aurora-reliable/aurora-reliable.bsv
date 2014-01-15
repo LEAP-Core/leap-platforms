@@ -113,7 +113,7 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ugDevice,
              // provisos for protocol
              NumAlias#(ParitySize, parity_size),
              Add#(1, parity_size, poly_width),
-             NumAlias#(64, frame_size),
+             NumAlias#(128, frame_size),
              NumAlias#(2, max_frames),
              NumAlias#(8, sequence_numbers),
              Add#(1, parity_size, poly_width),
@@ -175,8 +175,14 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ugDevice,
     Reg#(Bit#(TLog#(sequence_numbers))) sequenceNumberTX <- mkReg(0, clocked_by controllerClk, reset_by controllerRst);
     Reg#(Bit#(parity_size)) parityRX <- mkReg(0, clocked_by controllerClk, reset_by controllerRst);
     Reg#(Bit#(parity_size)) parityTX <- mkReg(0, clocked_by controllerClk, reset_by controllerRst);
-    RewindFIFOVariableCommitLevel#(Bit#(data_size), TMul#(max_frames, frame_size)) txDataRewindBuffer <- mkRewindFIFOVariableCommitLevel(clocked_by controllerClk, reset_by controllerRst);
-    RewindFIFOVariableCommitLevel#(Bit#(TLog#(sequence_numbers)), max_frames) txSequenceRewindBuffer <- mkRewindFIFOVariableCommitLevel(clocked_by controllerClk, reset_by controllerRst);
+
+    RewindFIFOVariableCommitLevel#(Bit#(data_size),
+                                   TMul#(max_frames, frame_size))
+        txDataRewindBuffer <- mkRewindBRAMFIFOVariableCommitLevel(clocked_by controllerClk, reset_by controllerRst);
+    RewindFIFOVariableCommitLevel#(Bit#(TLog#(sequence_numbers)),
+                                   max_frames)
+        txSequenceRewindBuffer <- mkRewindFIFOVariableCommitLevel(clocked_by controllerClk, reset_by controllerRst);
+
     FIFO#(Int#(32)) frameTimeout <- mkSizedFIFO(valueof(max_frames), clocked_by controllerClk, reset_by controllerRst);
     FIFOF#(Bit#(TLog#(sequence_numbers))) ackSequenceNumberTX <- mkSizedFIFOF(valueof(max_frames), clocked_by controllerClk, reset_by controllerRst);
     FIFOF#(Bit#(TLog#(sequence_numbers))) ackSequenceNumberRX <- mkSizedFIFOF(valueof(max_frames), clocked_by controllerClk, reset_by controllerRst);
@@ -193,7 +199,7 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ugDevice,
     FIFOF#(Tuple2#(Bit#(1), Bit#(width))) serdesInfifo <- mkSizedSlowBRAMFIFOF(valueof(total_credits), clocked_by controllerClk, reset_by controllerRst);
 
     let timeoutFires <- mkPulseWire(clocked_by controllerClk, reset_by controllerRst);
-    let timeoutThreshold = 100 * (fromInteger(valueof(total_credits)));
+    let timeoutThreshold = 1000 * (fromInteger(valueof(total_credits)));
 
     CRCGEN#(ParitySize, Bit#(width)) crcgen <- mkAutoCRCGen();
     // Use a non-zero initial CRC value so that the data value 0 doesn't also
@@ -328,7 +334,7 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ugDevice,
     endrule
 
     //
-    // Bottom half of three above rules, actually does the transmission
+    // Bottom half of three above rules, actually does the transmission.
     //
     (* fire_when_enabled *)
     rule sendData (ctrlPayloadWire.wget matches tagged Valid .topHalf);
@@ -350,7 +356,17 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ugDevice,
     // Recover from loss of incoming messages.  Wipe out state and attempt
     // to resume.
     //
-    rule timeout (abs(timer - frameTimeout.first) > timeoutThreshold);
+    // Timeout is decided in two stages to relax FPGA timing.
+    //
+    FIFO#(Bool) timeoutQ <- mkFIFO1(clocked_by controllerClk, reset_by controllerRst);
+
+    rule timeoutTest (abs(timer - frameTimeout.first) > timeoutThreshold);
+        timeoutQ.enq(?);
+    endrule
+
+    rule timeout (True);
+        timeoutQ.deq();
+
         frameTimeout.clear();
         ackSequenceNumberRX.clear();
         frameInProgress.clear();
