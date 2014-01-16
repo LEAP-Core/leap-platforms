@@ -17041,3 +17041,23 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aur
   False triggers generate packet storms.  Since the receive buffers are
   currently before the CRC/ACK code, back-pressure from the client can
   trigger timeouts.
+
+----------
+mcadler     Date: Thu Jan 16 09:34:42 EST 2014  CSN: CSN-leap-platforms-724
+                  Thu Jan 16 14:34:42 UTC 2014
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-driver-virtex7-64b66b-10gbps
+ vc707_sma_aurora.ucf      Locally Modified          723 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc-virtex7
+ pcie-virtex7.ucf          Locally Modified          723 
+
+- You might expect that Xilinx map/par would be smart enough that when logic
+  is constrained to an area group it would pick connected BRAM nearby instead
+  of on the other side of the chip.  You would be wrong.  Lock BRAM to area
+  groups.
+
+- Merge the Aurora driver and flow control groups into one.  They share a clock
+  domain.  Merging allows for a smaller total footprint, since map appears to
+  have area requirements before it begins to optimize.

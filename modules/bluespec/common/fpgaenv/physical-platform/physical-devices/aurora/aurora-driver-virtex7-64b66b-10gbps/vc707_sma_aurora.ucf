@@ -146,21 +146,14 @@ INST m_llpi_phys_plat_aurora_device/ug_device_1/aurora_64b66b_v7_3_block_i/auror
 
 ## Area groups
 INST "m_llpi_phys_plat_aurora_device/ug_device_0/*" AREA_GROUP = "AG_aurora_0";
-AREA_GROUP "AG_aurora_0"                  RANGE=SLICE_X206Y0:SLICE_X221Y63;
+INST "m_llpi_phys_plat_aurora_device/*auroraFlowcontrol_0*" AREA_GROUP = "AG_aurora_0";
+AREA_GROUP "AG_aurora_0"                  RANGE=SLICE_X190Y0:SLICE_X221Y49;
+AREA_GROUP "AG_aurora_0"                  RANGE=RAMB36_X14Y6:RAMB36_X14Y7, RAMB36_X13Y5:RAMB36_X13Y8;
 AREA_GROUP "AG_aurora_0"                  GROUP=CLOSED;
-
-INST "m_llpi_phys_plat_aurora_device/*auroraFlowcontrol_0*" AREA_GROUP = "AG_aurora_0_fc";
-AREA_GROUP "AG_aurora_0_fc"               RANGE=SLICE_X192Y0:SLICE_X205Y63;
-AREA_GROUP "AG_aurora_1_fc"               RANGE=RAMB36_X13Y5:RAMB36_X13Y8;
-AREA_GROUP "AG_aurora_0_fc"               GROUP=CLOSED;
 
 
 INST "m_llpi_phys_plat_aurora_device/ug_device_1/*" AREA_GROUP = "AG_aurora_1";
-AREA_GROUP "AG_aurora_1"                  RANGE=SLICE_X206Y186:SLICE_X221Y249;
+INST "m_llpi_phys_plat_aurora_device/*auroraFlowcontrol_1*" AREA_GROUP = "AG_aurora_1";
+AREA_GROUP "AG_aurora_1"                  RANGE=SLICE_X190Y200:SLICE_X221Y249;
+AREA_GROUP "AG_aurora_1"                  RANGE=RAMB36_X14Y43:RAMB36_X14Y44, RAMB36_X13Y42:RAMB36_X13Y45;
 AREA_GROUP "AG_aurora_1"                  GROUP=CLOSED;
-
-INST "m_llpi_phys_plat_aurora_device/*auroraFlowcontrol_1*" AREA_GROUP = "AG_aurora_1_fc";
-AREA_GROUP "AG_aurora_1_fc"               RANGE=SLICE_X192Y186:SLICE_X205Y249;
-AREA_GROUP "AG_aurora_1_fc"               RANGE=RAMB36_X13Y42:RAMB36_X13Y45;
-AREA_GROUP "AG_aurora_1_fc"               GROUP=CLOSED;
-
