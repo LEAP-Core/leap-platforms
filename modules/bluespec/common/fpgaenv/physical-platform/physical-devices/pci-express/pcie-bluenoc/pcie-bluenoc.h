@@ -24,7 +24,7 @@
 #include "platforms-module.h"
 #include "awb/provides/umf.h"
 #include "awb/provides/command_switches.h"
-
+#include "tbb/atomic.h"
 
 typedef class PCIE_DEVICE_COMMAND_SWITCHES_CLASS* PCIE_DEVICE_COMMAND_SWITCHES;
 class PCIE_DEVICE_COMMAND_SWITCHES_CLASS : COMMAND_SWITCH_VOID_CLASS
@@ -51,10 +51,10 @@ class PCIE_DEVICE_COMMAND_SWITCHES_CLASS : COMMAND_SWITCH_VOID_CLASS
 
 
 typedef class PCIE_DEVICE_CLASS* PCIE_DEVICE;
-class PCIE_DEVICE_CLASS: public PLATFORMS_MODULE_CLASS
+class PCIE_DEVICE_CLASS
 {
   private:
-    bool initialized;
+    class tbb::atomic<bool> initialized;
     PCIE_DEVICE_COMMAND_SWITCHES_CLASS switches;
 
     // Switches for acquiring device uniquifier. 
@@ -71,7 +71,7 @@ class PCIE_DEVICE_CLASS: public PLATFORMS_MODULE_CLASS
     ~PCIE_DEVICE_CLASS();
 
     void Cleanup();                    // cleanup
-    void Init();                       // uninit
+    bool Init();                       // uninit
     void Uninit();                     // uninit
     bool Probe(bool block = false);    // probe for data
 

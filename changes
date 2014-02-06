@@ -17061,3 +17061,20 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci
 - Merge the Aurora driver and flow control groups into one.  They share a clock
   domain.  Merging allows for a smaller total footprint, since map appears to
   have area requirements before it begins to optimize.
+
+----------
+keflemin    Date: Thu Feb  6 10:03:44 EST 2014  CSN: CSN-leap-platforms-725
+                  Thu Feb  6 15:03:44 UTC 2014
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc
+ pcie-bluenoc.cpp          Locally Modified          724 
+ pcie-bluenoc.h            Locally Modified          724 
+
+
+1) Changed bluenoc driver to remain uninitialized in certain cases. In
+the uninitialized cases, it is known that no reads/writes will happen
+on the devices.
+
+2) Removed PLATFORM_MODULE inheritance for bluenoc object. It buys us
+nothing and we were forced to check "initialized" on every operation.

@@ -39,21 +39,24 @@
 #include "awb/provides/physical_platform_utils.h"
 
 
-PCIE_DEVICE_CLASS::PCIE_DEVICE_CLASS(PLATFORMS_MODULE p) :
-    PLATFORMS_MODULE_CLASS(p),
-    initialized(false)
+PCIE_DEVICE_CLASS::PCIE_DEVICE_CLASS(PLATFORMS_MODULE p):
+    initialized()
 {
-  // nothing to do here
-  logicalName = NULL;
+    initialized = false;
+    logicalName = NULL;
+    pcieDev = -1;
 }
 
-void
+bool
 PCIE_DEVICE_CLASS::Init()
 {
+
     const char *dev_file = NULL;
 
-    if (initialized) return;
-    initialized = true;
+    if (initialized) 
+    {
+        return true;
+    }
 
     
     //Did we get a registration switch initialized?  
@@ -65,6 +68,19 @@ PCIE_DEVICE_CLASS::Init()
     else // Use the old initialization variable.
     { 
         dev_file = FPGA_DEV_PATH.c_str();
+
+        // Some PCIE drivers may be declared, but not used, especially
+        // in multiple FPGA builds.  We detect this by comparing
+        // against the dynamic default for FPGA path.  If DYNDEFAULT
+        // is not provided, it means we have a new-style build and we
+        // should not expect this device to ever be used. So we note
+        // that we don't expect it to be used and future calls to the
+        // device will result in failure. 
+
+        if (FPGA_DEV_PATH_DYNDEFAULT == FPGA_DEV_PATH) 
+        {
+            return false;
+	}
     }
 
     pcieDev = open(dev_file, O_RDWR);
@@ -115,16 +131,20 @@ PCIE_DEVICE_CLASS::Init()
         delete tests;
         exit(0);
     }
+
+    initialized = true;
+    return true;
 }
 
 
 // destructor
 PCIE_DEVICE_CLASS::~PCIE_DEVICE_CLASS()
 { 
-    if(logicalName != NULL)
+    if (logicalName != NULL)
     {
         delete logicalName;
     }
+
     // cleanup
     Cleanup();
 }
@@ -138,9 +158,6 @@ PCIE_DEVICE_CLASS::Uninit()
     // do basic cleanup
     Cleanup();
 
-    // call default uninit so that we can continue
-    // chain if necessary
-    PLATFORMS_MODULE_CLASS::Uninit();
 }
 
 
@@ -148,8 +165,12 @@ PCIE_DEVICE_CLASS::Uninit()
 void
 PCIE_DEVICE_CLASS::Cleanup()
 {
-    close(pcieDev);
     initialized = false;
+    if(pcieDev >= 0)
+    { 
+        close(pcieDev);
+        pcieDev = 0;
+    }
 }
 
 
@@ -169,18 +190,13 @@ PCIE_DEVICE_CLASS::Probe(bool block)
 ssize_t
 PCIE_DEVICE_CLASS::Read(void *buf, size_t count)
 {
-    if (! initialized)
-    {
-        return 0;
-    }
-
     ssize_t rc = read(pcieDev, buf, count);
     if (rc <= 0)
     {
         if (! initialized)
-        {
-            return 0;
-        }
+	{
+	  return 0;
+	}
 
         fprintf(stderr, "PCIe read error:  ret=%d, errno=%d\n", rc, errno);
         exit(1);
@@ -194,19 +210,28 @@ PCIE_DEVICE_CLASS::Read(void *buf, size_t count)
 void
 PCIE_DEVICE_CLASS::Write(const void *buf, size_t count)
 {
-    if (! initialized)
-    {
-        return;
-    }
-
+    // This code appears to be totally broken.  If write is called on
+    // an uninitialized channel, the caller has no way of knowing that
+    // the call failed.
+   
     ssize_t wc = write(pcieDev, buf, count);
     if (wc < 0)
     {
+        if (! initialized)
+	{
+	    return;
+	}
+
         fprintf(stderr, "PCIe write error:  ret=%d, errno=%d\n", wc, errno);
         exit(1);
     }
     else if (wc != count)
     {
+        if (! initialized)
+	{
+            return;
+	}
+
         fprintf(stderr, "PCIe write error:  only wrote %d of %d bytes\n", wc, count);
         exit(1);
     }
