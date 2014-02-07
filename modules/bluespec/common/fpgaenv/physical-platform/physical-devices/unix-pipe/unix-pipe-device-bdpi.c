@@ -105,15 +105,11 @@ void pipe_init(unsigned char usePipes, char * platformID)
         strcat(inputFileName, platformID);
         strcat(inputFileName, toSuffix);
 
-        printf("Input file is %s", inputFileName);
-
         outputFileName = (char*) malloc(strlen(commDirectory) + strlen(toSuffix) + strlen(platformID));
         strcpy(outputFileName, commDirectory);
         strcat(outputFileName, platformID);
         strcat(outputFileName, fromSuffix);
         // make a fifo.
-
-        printf("Output file is %s", outputFileName);
 
         mkfifo(outputFileName, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
 

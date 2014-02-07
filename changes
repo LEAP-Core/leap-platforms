@@ -17078,3 +17078,14 @@ on the devices.
 
 2) Removed PLATFORM_MODULE inheritance for bluenoc object. It buys us
 nothing and we were forced to check "initialized" on every operation.
+
+----------
+keflemin    Date: Fri Feb  7 13:21:17 EST 2014  CSN: CSN-leap-platforms-726
+                  Fri Feb  7 18:21:17 UTC 2014
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe
+ unix-pipe-device-bdpi.c   Locally Modified          725 
+
+
+Removed spurious printfs from pipe device.
