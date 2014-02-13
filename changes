@@ -17089,3 +17089,275 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/uni
 
 
 Removed spurious printfs from pipe device.
+
+----------
+mcadler     Date: Thu Feb 13 18:03:58 EST 2014  CSN: CSN-leap-platforms-727
+                  Thu Feb 13 23:03:58 UTC 2014
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ bram.bsv                  Locally Modified          726 
+ bram-multi-read.bsv       Locally Modified          726 
+ clock-buffers.bsv         Locally Modified          726 
+ alu-support.bsv           Locally Modified          726 
+ reset-import.bsv          Locally Modified          726 
+ lutram.bsv                Locally Modified          726 
+ user-clock.bsv            Locally Modified          726 
+ user-clock-xilinx.bsv     Locally Modified          726 
+ user-clock-pll-common.bsv Locally Modified          726 
+ user-clock-pll-virtex5.bsv Locally Modified          726 
+ user-clock-pll-virtex6.bsv Locally Modified          726 
+ user-clock-pll-virtex7.bsv Locally Modified          726 
+ clock-import.bsv          Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian
+ umf-little-endian.cpp     Locally Modified          726 
+ umf-factory.h             Locally Modified          726 
+ umf-awb-size-hacks.h      Locally Modified          726 
+ umf-little-endian.h       Locally Modified          726 
+ umf-allocator.cpp         Locally Modified          726 
+ umf-template.h            Locally Modified          726 
+ umf-little-endian.bsv     Locally Modified          726 
+ umf-allocator.h           Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/utils
+ soft-reset.bsv            Locally Modified          726 
+ physical-platform-utils.bsv Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/serial
+ xilinx-xup-serial.cpp     Locally Modified          726 
+ xilinx-xup-serial.h       Locally Modified          726 
+ xilinx-xup-serial.bsv     Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/pcie
+ xilinx-xup-pcie.cpp       Locally Modified          726 
+ xilinx-xup-pcie.h         Locally Modified          726 
+ xilinx-xup-pcie.bsv       Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/jtag
+ xilinx-xup-jtag.bsv       Locally Modified          726 
+ xilinx-xup-jtag.cpp       Locally Modified          726 
+ xilinx-xup-jtag.h         Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/pcie-sata
+ xilinx-xup-pcie-sata.h    Locally Modified          726 
+ xilinx-xup-pcie-sata.bsv  Locally Modified          726 
+ xilinx-xup-pcie-sata.cpp  Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/pcie-aurora
+ xilinx-xup-pcie-sata.h    Locally Modified          726 
+ xilinx-xup-pcie-sata.bsv  Locally Modified          726 
+ xilinx-xup-pcie-sata.cpp  Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/aurora
+ xilinx-xup-sata.h         Locally Modified          726 
+ xilinx-xup-sata.bsv       Locally Modified          726 
+ xilinx-xup-sata.cpp       Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/chipscope
+ xilinx-xup-chipscope.cpp  Locally Modified          726 
+ xilinx-xup-chipscope.h    Locally Modified          726 
+ xilinx-xup-chipscope.bsv  Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/ml605/serial
+ ml605-serial.bsv          Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/ml605/aurora-pcie-dma
+ ml605-v6-pcie-dma.h       Locally Modified          726 
+ ml605-v6-pcie-dma.bsv     Locally Modified          726 
+ ml605-v6-pcie-dma.cpp     Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/simulation
+ sim-physical-platform.bsv Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/debuggers/htg-virtex5
+ htg-debugger.cpp          Locally Modified          726 
+ htg-debugger.h            Locally Modified          726 
+ htg-debugger.bsv          Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/debuggers/null
+ null-debugger.h           Locally Modified          726 
+ null-debugger.bsv         Locally Modified          726 
+ null-debugger.cpp         Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/xilinx_xup/serial
+ xilinx-xup-serial.cpp     Locally Modified          726 
+ xilinx-xup-serial.h       Locally Modified          726 
+ xilinx-xup-serial.bsv     Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/jtag
+ htg-v5-jtag.h             Locally Modified          726 
+ htg-v5-jtag.bsv           Locally Modified          726 
+ htg-v5-jtag.cpp           Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-disabled
+ htg-v5-pcie-disabled.bsv  Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/htg_virtex5/pcie-enabled
+ htg-v5-pcie-enabled.cpp   Locally Modified          726 
+ htg-v5-pcie-enabled.h     Locally Modified          726 
+ htg-v5-pcie-enabled.bsv   Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/serial/ublaze-serial
+ serial-device.h           Locally Modified          726 
+ serial-device.cpp         Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/serial/physical-serial
+ serial-device.h           Locally Modified          726 
+ serial-device.cpp         Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/jtag/altera
+ jtag-device.cpp           Locally Modified          726 
+ jtag-device.h             Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/jtag/xilinx
+ jtag-device.cpp           Locally Modified          726 
+ jtag-device.h             Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-flowcontrol/debugger
+ aurora-flowcontrol-debugger.bsv Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-flowcontrol
+ aurora-flowcontrol.bsv    Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-common
+ aurora-common.bsv         Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-driver-virtex7-64b66b
+ aurora-import.bsv         Locally Modified          726 
+ aurora-ug.bsv             Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-reliable-aggregate-crc
+ aurora-reliable.bsv       Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-driver-simulation
+ aurora-import.bsv         Locally Modified          726 
+ aurora-driver-simulation.bsv Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device
+ aurora-device.bsv         Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-reliable
+ aurora-reliable.bsv       Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-reliable/debugger
+ aurora-reliable-debugger.bsv Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device-ml605
+ aurora-device-ml605.bsv   Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device-simulation
+ aurora-device-simulation.bsv Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-driver-virtex7-64b66b-10gbps
+ aurora-import.bsv         Locally Modified          726 
+ aurora-ug.bsv             Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device-vc707
+ aurora-device-vc707.bsv   Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-reliable-handshake
+ aurora-reliable.bsv       Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device-null
+ aurora-device-null.bsv    Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/switches
+ general-switch-device.bsv Locally Modified          726 
+ general-switch-vhdl-import.bsv Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/sata-aurora-3gbps
+ XUPV5_AURORA_SINGLE_UG.bsv Locally Modified          726 
+ XUPV5_AURORA_SINGLE.bsv   Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/sata-aurora-3.125gbps
+ XUPV5_AURORA_SINGLE_UG.bsv Locally Modified          726 
+ XUPV5_AURORA_SINGLE.bsv   Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc
+ pcie-bluenoc-tests.cpp    Locally Modified          726 
+ pcie-bluenoc.cpp          Locally Modified          726 
+ bluenoc-simple-switch.bsv Locally Modified          726 
+ pcie-bury.bsv             Locally Modified          726 
+ pcie-bluenoc.h            Locally Modified          726 
+ pcie-bluenoc-tests.h      Locally Modified          726 
+ pcie-bluenoc-ifc.bsv      Locally Modified          726 
+ pcie-bluenoc.bsv          Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-csr
+ pci-express-device.bsv    Locally Modified          726 
+ pci-express-vhdl-import.bsv Locally Modified          726 
+ pci-express-c-import-mmap.h Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-xupv5
+ pcie-device.cpp           Locally Modified          726 
+ pcie-device.h             Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc-virtex6
+ pcie-virtex6.bsv          Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc-virtex7
+ pcie-virtex7.bsv          Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora-sma-ml605
+ aurora-import.bsv         Locally Modified          726 
+ aurora-ug.bsv             Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-xilinx
+ ddr-sdram-xilinx.bsv      Locally Modified          726 
+ ddr-sdram-xilinx.bsh      Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-xilinx/ddr3-sdram-vc707
+ ddr3-sdram-verilog-import.bsv Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-xilinx/ddr2-sdram-v5-htg
+ ddr2-sdram-device.bsv     Locally Modified          726 
+ ddr2-pll.bsv              Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-xilinx
+ ddr-sdram-xilinx.h        Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-bram
+ ddr-sdram-bram.bsv        Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe
+ unix-pipe-device.h        Locally Modified          726 
+ unix-pipe-device.bsv      Locally Modified          726 
+ unix-pipe-li-device.bsv   Locally Modified          726 
+ unix-pipe-device-bdpi.c   Locally Modified          726 
+ unix-pipe-device.cpp      Locally Modified          726 
+ unix-pipe-device-bdpi.h   Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/fixed-ml605
+ single-ended-clocks-device.bsv Locally Modified          726 
+ single-ended-clocks-import.bsv Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/simulation
+ sim-clocks-device.bsv     Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/null
+ null-clocks-device.bsv    Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/differential
+ differential-clocks-vhdl-import.bsv Locally Modified          726 
+ differential-clocks-device.bsv Locally Modified          726 
+ differential-clocks-from-clocks.bsv Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/single-ended
+ single-ended-clocks-device.bsv Locally Modified          726 
+ single-ended-clocks-import.bsv Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic
+ pcie-generic-platform.h   Locally Modified          726 
+ pcie-generic-platform.bsv Locally Modified          726 
+ pcie-generic-platform.cpp Locally Modified          726 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/altera_jtag/jtag
+ altera-jtag.h             Locally Modified          726 
+ altera-jtag.bsv           Locally Modified          726 
+ altera-jtag.cpp           Locally Modified          726 
+
+Directory drivers/linux/platforms/bluenoc-pcie/ioctl
+ bluenoc-ioctl.c           Locally Modified          726 
+
+Switch to BSD license.
