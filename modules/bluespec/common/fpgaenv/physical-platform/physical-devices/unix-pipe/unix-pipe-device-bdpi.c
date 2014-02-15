@@ -96,36 +96,46 @@ void pipe_init(unsigned char usePipes, char * platformID)
         // the software model.  It allows someone to force this side to exit
         // by sending anything other than "SYN" on the incoming pipe.
         //
-        // XXX we may need to multithread this initialization.
-
-        const char *commDirectory = "pipes/";
+        char *executionDirectory = getenv("LEAP_EXECUTION_DIRECTORY");
+        char *commDirectory = NULL;
         const char *toSuffix = "_TO";
         const char *fromSuffix = "_FROM";
         char * inputFileName = NULL;
         char * outputFileName = NULL;
+        const char *pipes = "/pipes/"; 
 
-        if(mkdir(commDirectory, S_IRWXU) != 0) 
+        if (executionDirectory != NULL)
         {
-            if(errno != EEXIST)
+	    commDirectory = (char*) malloc(strlen(pipes) + strlen(executionDirectory + 1));
+            strcpy(commDirectory, executionDirectory);
+            strcat(commDirectory, pipes);
+        } 
+        else
+        {
+  	    commDirectory = pipes;
+        }
+
+        if (mkdir(commDirectory, S_IRWXU) != 0) 
+        {
+            if (errno != EEXIST)
             {
 	        fprintf(stderr, "Comm directory creation failed, bailing\n");
 	        exit(1);
             }
         }
 
-        inputFileName = (char*) malloc(strlen(commDirectory) + strlen(toSuffix) + strlen(platformID));
+        inputFileName = (char*) malloc(strlen(commDirectory) + strlen(toSuffix) + strlen(platformID) + 1);
         strcpy(inputFileName, commDirectory);
         strcat(inputFileName, platformID);
         strcat(inputFileName, toSuffix);
 
-        outputFileName = (char*) malloc(strlen(commDirectory) + strlen(toSuffix) + strlen(platformID));
+        outputFileName = (char*) malloc(strlen(commDirectory) + strlen(fromSuffix) + strlen(platformID) + 1);
         strcpy(outputFileName, commDirectory);
         strcat(outputFileName, platformID);
         strcat(outputFileName, fromSuffix);
+
         // make a fifo.
-
         mkfifo(outputFileName, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
-
 
         // opening the read side first, because it can be non-blocking.
         // It may fail if the fifo doesn't exist.

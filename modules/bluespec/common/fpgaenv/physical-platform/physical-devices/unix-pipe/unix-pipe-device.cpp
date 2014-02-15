@@ -31,6 +31,7 @@
 
 #include <stdio.h>
 #include <unistd.h>
+#include <stdlib.h>
 #include <strings.h>
 #include <assert.h>
 #include <stdlib.h>
@@ -144,22 +145,30 @@ UNIX_PIPE_DEVICE_CLASS::~UNIX_PIPE_DEVICE_CLASS()
 void
 UNIX_PIPE_DEVICE_CLASS::Init()
 {
+    string executionDirectory = "";
+    char * leapExecutionDirectory = getenv("LEAP_EXECUTION_DIRECTORY");
+    // Newer builds will tell us where the pipes file is
+    // located. Let's find out. 
+    if (leapExecutionDirectory != NULL)
+    {
+       executionDirectory = leapExecutionDirectory;
+    }
 
     // Let's find out what our file target is
-    if((deviceSwitch != NULL) && (deviceSwitch->SwitchValue() != NULL))
+    if ((deviceSwitch != NULL) && (deviceSwitch->SwitchValue() != NULL))
     {
-        ioFile = "pipes/" + *(deviceSwitch->SwitchValue());
+        ioFile = executionDirectory + "/pipes/" + *(deviceSwitch->SwitchValue());
     }
     else 
     {
-        ioFile = "pipes/Legacy"; 
+        ioFile = executionDirectory + "/pipes/Legacy"; 
     }
 
-    const char *commDirectory = "pipes/";
+    string commDirectory = executionDirectory + "/pipes/";
     
-    if(mkdir(commDirectory, S_IRWXU) != 0) 
+    if (mkdir(commDirectory.c_str(), S_IRWXU) != 0) 
     {
-        if(errno != EEXIST)
+        if (errno != EEXIST)
         {
             fprintf(stderr, "Comm directory creation failed, bailing\n");
             exit(1);
