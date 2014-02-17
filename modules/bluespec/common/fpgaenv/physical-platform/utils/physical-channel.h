@@ -29,36 +29,28 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef __PHYSICAL_PLATFORM__
-#define __PHYSICAL_PLATFORM__
+#ifndef __PHYSICAL_CHANNEL__
+#define __PHYSICAL_CHANNEL__
 
-#include "asim/provides/physical_channel.h"
-#include "asim/provides/physical_platform_utils.h"
-#include "platforms-module.h"
-
-// ====================================================
-//             Physical Platform
-// ====================================================
-
-// This class is a collection of all physical devices
-// present on the Simulation Physical Platform
-typedef class PHYSICAL_DEVICES_CLASS* PHYSICAL_DEVICES;
-class PHYSICAL_DEVICES_CLASS: public PLATFORMS_MODULE_CLASS
+#include "awb/provides/umf.h"
+// tbb should really not be included here.  This should be viewed as a
+// temporary consideration until a better interface is agreed upon.
+#include "tbb/concurrent_queue.h"
+#include "awb/provides/physical_platform_utils.h"
+ 
+typedef class PHYSICAL_CHANNEL_CLASS* PHYSICAL_CHANNEL;
+class PHYSICAL_CHANNEL_CLASS: public PLATFORMS_MODULE_CLASS
 {
-    private:
-        PCIE_BLUENOC_PHYSICAL_CHANNEL_CLASS pcieDev;
 
-    public:
-        // constructor-destructor
-        PHYSICAL_DEVICES_CLASS(PLATFORMS_MODULE);
-        ~PHYSICAL_DEVICES_CLASS();
-
-        PHYSICAL_CHANNEL GetLegacyPhysicalChannel() 
-        { 
-            pcieDev.RegisterLogicalDeviceName("Legacy");
-            return &pcieDev; 
-        }
-
+  public: 
+    PHYSICAL_CHANNEL_CLASS(PLATFORMS_MODULE p);  
+    ~PHYSICAL_CHANNEL_CLASS();  
+    virtual UMF_MESSAGE Read() = 0;             // blocking read
+    virtual UMF_MESSAGE TryRead() = 0;          // non-blocking read        
+    virtual void        Write(UMF_MESSAGE) = 0; // write                           
+    virtual class tbb::concurrent_bounded_queue<UMF_MESSAGE> *GetWriteQ() = 0; 
+    virtual void SetUMFFactory(UMF_FACTORY factoryInit) = 0;
+    virtual void RegisterLogicalDeviceName(string name) = 0;
 };
 
-#endif
+#endif 

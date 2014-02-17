@@ -17373,3 +17373,31 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/uni
 
 
 Modified unix device drivers to make enable new platform sandboxing.
+
+----------
+keflemin    Date: Mon Feb 17 15:53:00 EST 2014  CSN: CSN-leap-platforms-729
+                  Mon Feb 17 20:53:00 UTC 2014
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/utils
+ physical-channel.cpp      Locally Added               0 
+ utils.awb                 Locally Modified          728 
+ physical-channel.h        Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/simulation
+ sim-physical-platform.cpp Locally Modified          728 
+ sim-physical-platform.h   Locally Modified          728 
+ sim-physical-platform.bsv Locally Modified          728 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe
+ unix-pipe-device.cpp      Locally Modified          728 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic
+ pcie-generic-platform.h   Locally Modified          728 
+
+
+Newer execution environments may have multiple platforms communicating
+with software.  As a result, software may have multiple kinds of
+physical channels/physical devices.  This check in adds support for
+these configurations by changing the PHYSICAL_CHANNEL class to a pure
+virtual base class.

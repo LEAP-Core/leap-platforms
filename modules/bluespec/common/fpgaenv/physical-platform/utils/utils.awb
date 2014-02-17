@@ -4,8 +4,10 @@
 
 %provides physical_platform_utils
 
-%sources -t BSV -v PUBLIC  physical-platform-utils.bsv
-%sources -t BSV -v PUBLIC  soft-reset.bsv
+%sources -t BSV -v PUBLIC   physical-platform-utils.bsv
+%sources -t BSV -v PUBLIC   soft-reset.bsv
+%sources -t H   -v PUBLIC   physical-channel.h
+%sources -t CPP -v PRIVATE  physical-channel.cpp
 
 %param --dynamic FPGA_DEV_PATH  ""  "FPGA device(s) allocated (comma separated)"
 

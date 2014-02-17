@@ -86,6 +86,7 @@ void * UNIX_PIPE_DEVICE_CLASS::openReadThread(void *argv) {
 
     if (objectHandle->ParentRead() < 0)
     { 
+        printf("Failed trying to open %s\n", readFile.c_str());
         perror("input pipe ReaderThread");
         exit(1);
     }
@@ -102,12 +103,15 @@ void * UNIX_PIPE_DEVICE_CLASS::openWriteThread(void *argv) {
     mkfifo(writeFile.c_str(), S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
 
     // This should block...
+    // maybe we need to wait a while for the FPGA to come up.
     objectHandle->outpipe[1] = open(writeFile.c_str(), O_WRONLY);
 
     if (objectHandle->ParentWrite() < 0)
     {
-      perror("output pipe WriterThread");
-        exit(1);
+       printf("Failed trying to open %s\n", writeFile.c_str());
+
+       perror("output pipe WriterThread");
+       exit(1);
     }
 
     objectHandle->initWriteComplete = 1;

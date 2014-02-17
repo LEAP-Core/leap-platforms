@@ -1,4 +1,4 @@
-#include "asim/provides/physical_platform.h"
+#include "awb/provides/physical_platform.h"
 
 PHYSICAL_DEVICES_CLASS::PHYSICAL_DEVICES_CLASS(
     PLATFORMS_MODULE p) :

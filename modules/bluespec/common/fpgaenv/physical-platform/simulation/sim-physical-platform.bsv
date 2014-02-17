@@ -34,10 +34,10 @@
 import Clocks::*;
 import Vector::*;
 
-`include "clocks_device.bsh"
-`include "unix_pipe_device.bsh"
+`include "awb/provides/clocks_device.bsh"
+`include "awb/provides/unix_pipe_device.bsh"
 `include "awb/provides/ddr_sdram_device.bsh"
-`include "physical_platform_utils.bsh"
+`include "awb/provides/physical_platform_utils.bsh"
 
 // PHYSICAL_DRIVERS
 
