@@ -136,7 +136,7 @@ UNIX_PIPE_DEVICE_CLASS::UNIX_PIPE_DEVICE_CLASS(
     initReadComplete = 0;
     initWriteComplete = 0;
     childAlive = false;
-
+    deviceSwitch = NULL;
 }
 
 // destructor

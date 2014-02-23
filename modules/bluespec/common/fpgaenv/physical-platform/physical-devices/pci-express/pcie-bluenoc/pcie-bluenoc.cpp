@@ -58,6 +58,7 @@ PCIE_DEVICE_CLASS::PCIE_DEVICE_CLASS(PLATFORMS_MODULE p):
     initialized = false;
     logicalName = NULL;
     pcieDev = -1;
+    deviceSwitch = NULL;
 }
 
 bool

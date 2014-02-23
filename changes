@@ -17401,3 +17401,18 @@ with software.  As a result, software may have multiple kinds of
 physical channels/physical devices.  This check in adds support for
 these configurations by changing the PHYSICAL_CHANNEL class to a pure
 virtual base class.
+
+----------
+keflemin    Date: Sun Feb 23 17:02:44 EST 2014  CSN: CSN-leap-platforms-730
+                  Sun Feb 23 22:02:44 UTC 2014
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc
+ pcie-bluenoc.cpp          Locally Modified          729 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe
+ unix-pipe-device.cpp      Locally Modified          729 
+
+
+
+Fixed obvious initialization errors caught by valgrind.
