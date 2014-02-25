@@ -17428,3 +17428,18 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/uni
 
 Fixed typo in unix communication pipe.  This was a misplaced pointer
 which was causing occasional segfaults in bluesim.
+
+----------
+keflemin    Date: Tue Feb 25 10:24:28 EST 2014  CSN: CSN-leap-platforms-732
+                  Tue Feb 25 15:24:28 UTC 2014
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe
+ unix-pipe-device.cpp      Locally Modified          731 
+
+
+Unix device now only accepts path directives from run script.  The
+hard coded value was resulting in erroneous program failure in the
+case that the pipe device was declared and initialized, but not used.
+Now, if the pipe device is declared, but not used, it will not be
+initialized.

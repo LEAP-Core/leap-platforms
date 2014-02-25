@@ -84,13 +84,6 @@ void * UNIX_PIPE_DEVICE_CLASS::openReadThread(void *argv) {
         exit(1);
     }
 
-    if (objectHandle->ParentRead() < 0)
-    { 
-        printf("Failed trying to open %s\n", readFile.c_str());
-        perror("input pipe ReaderThread");
-        exit(1);
-    }
-
     objectHandle->initReadComplete = 1;
 
 }
@@ -165,7 +158,8 @@ UNIX_PIPE_DEVICE_CLASS::Init()
     }
     else 
     {
-        ioFile = executionDirectory + "/pipes/Legacy"; 
+        // This device is not being used. No initialization necessary...
+        return;
     }
 
     string commDirectory = executionDirectory + "/pipes/";
