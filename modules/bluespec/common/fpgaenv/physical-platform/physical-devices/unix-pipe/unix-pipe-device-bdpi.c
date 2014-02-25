@@ -90,12 +90,6 @@ void pipe_init(unsigned char usePipes, char * platformID)
 
     if (usePipes > 0)
     {
-        //
-        // Start by opening only the input named pipe.  That way we can read
-        // the initial SYN message to see whether the connection is really from
-        // the software model.  It allows someone to force this side to exit
-        // by sending anything other than "SYN" on the incoming pipe.
-        //
         char *executionDirectory = getenv("LEAP_EXECUTION_DIRECTORY");
         char *commDirectory = NULL;
         const char *toSuffix = "_TO";
@@ -106,7 +100,7 @@ void pipe_init(unsigned char usePipes, char * platformID)
 
         if (executionDirectory != NULL)
         {
-	    commDirectory = (char*) malloc(strlen(pipes) + strlen(executionDirectory + 1));
+  	    commDirectory = (char*) malloc(strlen(pipes) + strlen(executionDirectory) + 1);
             strcpy(commDirectory, executionDirectory);
             strcat(commDirectory, pipes);
         } 
@@ -171,8 +165,6 @@ void pipe_init(unsigned char usePipes, char * platformID)
 
     }
 
-    /* make sure channel is working by exchanging
-     * message with software */
     if(UNIX_DEVICE_DEBUG)
     {
         printf("FPGA: Initialization complete\n");

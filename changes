@@ -17416,3 +17416,15 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/uni
 
 
 Fixed obvious initialization errors caught by valgrind.
+
+----------
+keflemin    Date: Mon Feb 24 20:52:35 EST 2014  CSN: CSN-leap-platforms-731
+                  Tue Feb 25 01:52:35 UTC 2014
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe
+ unix-pipe-device-bdpi.c   Locally Modified          730 
+
+
+Fixed typo in unix communication pipe.  This was a misplaced pointer
+which was causing occasional segfaults in bluesim.
