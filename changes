@@ -17443,3 +17443,21 @@ hard coded value was resulting in erroneous program failure in the
 case that the pipe device was declared and initialized, but not used.
 Now, if the pipe device is declared, but not used, it will not be
 initialized.
+
+----------
+keflemin    Date: Tue Mar  4 16:18:29 EST 2014  CSN: CSN-leap-platforms-733
+                  Tue Mar  4 21:18:29 UTC 2014
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian
+ umf-little-endian.h       Locally Modified          732 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe
+ unix-pipe-device.cpp      Locally Modified          732 
+
+
+1) Added new methods to support single endianess in umf.  Removed all
+reverse methods.  These are broken and should not be used.
+
+2) Refactored error condition in unix pipe.  Both if clauses had the
+same root cause, so there was not a need for two of them. 

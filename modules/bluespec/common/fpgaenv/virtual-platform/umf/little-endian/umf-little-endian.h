@@ -162,16 +162,9 @@ class UMF_MESSAGE_CLASS: public PLATFORMS_MODULE_CLASS,
     UINT64             ExtractUINT64();
     UINT64             ExtractUINT(int nbytes);
     UMF_CHUNK          ExtractChunk();
-    
-    // Reverse extraction
-    void               StartReverseExtract();
-    bool               CanReverseExtract() const;
-    UMF_CHUNK          ReverseExtractChunk();
-    void               ReverseExtractChunks(int nchunks, UMF_CHUNK dst[]);
-    // Manage full extraction, calling routings above and returning the number
-    // of chunks extracted.
-    int                ReverseExtractAllChunks(UMF_CHUNK dst[]);
-    
+    void               ExtractChunks(int nchunks, UMF_CHUNK dst[]);
+    int                ExtractAllChunks(UMF_CHUNK dst[]);    
+
     // other
     void               Print(ostream &out);
     int                BytesUnwritten() const { return length - writeIndex; }
@@ -317,6 +310,25 @@ UMF_MESSAGE_CLASS::ExtractChunk()
 
 
 //
+// ExtractChunks --
+//     Copy multiple chunks.
+//
+inline void
+UMF_MESSAGE_CLASS::ExtractChunks(int nchunks, UMF_CHUNK dst[])
+{
+    ASSERTX(nchunks * sizeof(UMF_CHUNK) + readIndex < length);
+    const UMF_CHUNK* src = (UMF_CHUNK *)(&message[readIndex]);
+
+    readIndex += nchunks * sizeof(UMF_CHUNK);
+
+    while (nchunks--)
+    {
+        *dst++ = *src++;
+    }
+}
+
+
+//
 // marshallers: most of these are trivial for little-endian machines
 //
 
@@ -417,80 +429,20 @@ UMF_MESSAGE_CLASS::AppendChunks(
 
 
 //
-// reverse (MSByte -> LSByte) read methods
-//
-
-inline void
-UMF_MESSAGE_CLASS::StartReverseExtract()
-{
-    WARN(writeIndex == length,
-         "umf: [WARNING] attempt to reverse-read from incomplete message, are you sure you want to do this?");
-
-    readIndex = length;
-
-    // Make sure any residue left in the last chunk has 0s.
-    UINT32 residue = readIndex % sizeof(UMF_CHUNK);
-    if (residue != 0)
-    {
-        // Adjust read index so it is a multiple of the chunk size.  After
-        // calling this it is obligatory to call ReverseExtractChunk().
-        int extra_bytes = sizeof(UMF_CHUNK) - residue;
-        readIndex += extra_bytes;
-        ASSERTX(readIndex <= UMF_MAX_MSG_BYTES);
-
-        memset(&message[length + 1], 0, extra_bytes);
-    }
-}
-
-inline bool
-UMF_MESSAGE_CLASS::CanReverseExtract() const
-{
-    return (readIndex > 0);
-}
-
-inline UMF_CHUNK
-UMF_MESSAGE_CLASS::ReverseExtractChunk()
-{
-    // if readIndex = i, we want to read bytes (i - CHUNK_SIZE) .. (i - 1)
-
-    // copy the data behind the pointer and rewind the pointer
-    readIndex -= sizeof(UMF_CHUNK);
-    return *(UMF_CHUNK *)(&message[readIndex]);
-}
-
-//
-// ReverseExtractChunks --
-//     Copy multiple chunks in reverse order.
-//
-inline void
-UMF_MESSAGE_CLASS::ReverseExtractChunks(int nchunks, UMF_CHUNK dst[])
-{
-    ASSERTX(nchunks * sizeof(UMF_CHUNK) <= readIndex);
-    const UMF_CHUNK* src = (UMF_CHUNK *)(&message[readIndex]);
-
-    readIndex -= nchunks * sizeof(UMF_CHUNK);
-
-    while (nchunks--)
-    {
-        *dst++ = *--src;
-    }
-}
-
-//
-// ReverseExtractAllChunks --
-//     Manage a full reverse extraction, returning the number of chunks
+// ExtractAllChunks --
+//     Manage a full extraction, returning the number of chunks
 //     extracted.
 //
 inline int
-UMF_MESSAGE_CLASS::ReverseExtractAllChunks(UMF_CHUNK dst[])
+UMF_MESSAGE_CLASS::ExtractAllChunks(UMF_CHUNK dst[])
 {
-    StartReverseExtract();
+    StartExtract();
 
     int n_chunks = 0;
-    while (CanReverseExtract())
+    while (CanExtract())
     {
-        *dst++ = ReverseExtractChunk();
-        n_chunks += 1;
+      *dst++ = ExtractChunk();
+      n_chunks += 1;
     }
 
     return n_chunks;

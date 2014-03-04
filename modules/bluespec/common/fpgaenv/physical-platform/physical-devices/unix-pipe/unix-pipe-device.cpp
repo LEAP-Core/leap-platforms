@@ -195,7 +195,6 @@ UNIX_PIPE_DEVICE_CLASS::Init()
       exit(1);
     }
 
-    PLATFORMS_MODULE_CLASS::Init();
     childAlive = true;
 
 }
@@ -205,12 +204,10 @@ UNIX_PIPE_DEVICE_CLASS::Init()
 void
 UNIX_PIPE_DEVICE_CLASS::Uninit()
 {
+
     // do basic cleanup
     Cleanup();
 
-    // call default uninit so that we can continue
-    // chain if necessary
-    PLATFORMS_MODULE_CLASS::Uninit();
 }
 
 // cleanup: close the pipe.  The other side will exit.
@@ -289,17 +286,13 @@ UNIX_PIPE_DEVICE_CLASS::Read(
     // assume we can read data in one shot
     int bytes_read = read(inpipe[0], buf, bytes_requested);
 
-    if (bytes_read == 0)
+    // pipe read something funny, which implies that hardware process
+    // has terminated or that we are in the process of tearing down
+    // the software side.
+    if (bytes_read != bytes_requested)
     {
-        // pipe read returned 0 => hardware process has terminated, so exit
         childAlive = false;
         CallbackExit(0);
-    }
-
-    if (bytes_read < bytes_requested)
-    {
-        cerr << "unix-pipe: could not read requested bytes in one shot got: " << bytes_read << " requested: " << bytes_requested<< endl;
-        CallbackExit(1);
     }
 }
 
