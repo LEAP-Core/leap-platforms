@@ -17461,3 +17461,18 @@ reverse methods.  These are broken and should not be used.
 
 2) Refactored error condition in unix pipe.  Both if clauses had the
 same root cause, so there was not a need for two of them. 
+
+----------
+keflemin    Date: Tue Mar  4 22:34:00 EST 2014  CSN: CSN-leap-platforms-734
+                  Wed Mar  5 03:34:00 UTC 2014
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc
+ pcie-bluenoc.cpp          Locally Modified          733 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe
+ unix-pipe-device.cpp      Locally Modified          733 
+
+
+Improved code for deciding how to address software-side physical
+devices.  Some legacy multifpga builds were not handled correctly. 

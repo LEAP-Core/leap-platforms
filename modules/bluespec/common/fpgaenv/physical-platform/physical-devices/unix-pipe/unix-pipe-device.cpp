@@ -130,6 +130,7 @@ UNIX_PIPE_DEVICE_CLASS::UNIX_PIPE_DEVICE_CLASS(
     initWriteComplete = 0;
     childAlive = false;
     deviceSwitch = NULL;
+    logicalName = NULL;
 }
 
 // destructor
@@ -155,6 +156,11 @@ UNIX_PIPE_DEVICE_CLASS::Init()
     if ((deviceSwitch != NULL) && (deviceSwitch->SwitchValue() != NULL))
     {
         ioFile = executionDirectory + "/pipes/" + *(deviceSwitch->SwitchValue());
+    }
+    else if((logicalName != NULL) && (*logicalName == "Legacy"))
+    {  
+        // backwards compatible support for old-style RRR. 
+        ioFile = executionDirectory + "/pipes/Legacy";
     }
     else 
     {
@@ -320,7 +326,7 @@ UNIX_PIPE_DEVICE_CLASS::Write(
 void UNIX_PIPE_DEVICE_CLASS::RegisterLogicalDeviceName(string name)
 {
     logicalName = new string(name);
-    
+
     deviceSwitch = new BASIC_COMMAND_SWITCH_STRING_CLASS(logicalName->c_str());
 }
 

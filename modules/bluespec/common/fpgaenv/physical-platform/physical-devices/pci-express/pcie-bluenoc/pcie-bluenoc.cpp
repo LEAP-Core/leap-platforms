@@ -79,7 +79,7 @@ PCIE_DEVICE_CLASS::Init()
     {
         dev_file = (deviceSwitch->SwitchValue())->c_str();
     }
-    else // Use the old initialization variable.
+    else if((logicalName != NULL) && (*logicalName == "Legacy"))
     { 
         dev_file = FPGA_DEV_PATH.c_str();
 
@@ -95,6 +95,11 @@ PCIE_DEVICE_CLASS::Init()
         {
             return false;
 	}
+    }
+    else 
+    {
+        // We are not using this device.
+        return false; 
     }
 
     pcieDev = open(dev_file, O_RDWR);
