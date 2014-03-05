@@ -17476,3 +17476,15 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/uni
 
 Improved code for deciding how to address software-side physical
 devices.  Some legacy multifpga builds were not handled correctly. 
+
+----------
+keflemin    Date: Wed Mar  5 14:36:53 EST 2014  CSN: CSN-leap-platforms-735
+                  Wed Mar  5 19:36:53 UTC 2014
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe
+ unix-pipe-device.cpp      Locally Modified          734 
+
+
+Added some functionality to unix-pipe-device to allow it to check
+whether a teardown is in progress.

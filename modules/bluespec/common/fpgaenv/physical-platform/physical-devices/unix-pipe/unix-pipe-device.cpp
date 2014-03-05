@@ -297,9 +297,19 @@ UNIX_PIPE_DEVICE_CLASS::Read(
     // the software side.
     if (bytes_read != bytes_requested)
     {
-        childAlive = false;
-        CallbackExit(0);
+
+        // Check to see if there's an uninit in progress, in which
+        // case a short return value is expected.
+        if (!UninitInProgress())
+        {  
+            cout << "Unexpected Read Short Count.  Did the simulation/FPGA terminate?" << endl; 
+            CallbackExit(0);
+        }
+
+        // otherwise, kill this thread
+        pthread_exit(NULL);
     }
+
 }
 
 // write
@@ -318,8 +328,16 @@ UNIX_PIPE_DEVICE_CLASS::Write(
 
     if (bytes_written != bytes_requested)
     {
-        cerr << "unix-pipe: could not write requested bytes in one shot" << endl;
-        CallbackExit(1);
+        // Check to see if there's an uninit in progress, in which
+        // case a short return value is expected.
+        if (!UninitInProgress())
+        {
+            cout << "Unexpected Write Short Count.  Did the simulation/FPGA terminate?" << endl; 
+            CallbackExit(0);
+        }
+
+        // otherwise, kill this thread
+        pthread_exit(NULL);
     }
 }
 
