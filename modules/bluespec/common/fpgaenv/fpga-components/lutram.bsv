@@ -136,7 +136,7 @@ module mkLUTRAMU
 
     Bool use_regfile = True;
 
-    `ifdef SYNTH
+    `ifndef SYNTH_Z
     if (`BROKEN_REGFILE != 0)
     begin
         // There is a bug in some versions of Xilinx.  See the comment
@@ -488,7 +488,7 @@ module mkMultiReadLUTRAMU
     //
 
     Bool use_regfile = True;
-    `ifdef SYNTH
+    `ifndef SYNTH_Z
         use_regfile = False;
     `endif
 

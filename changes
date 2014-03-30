@@ -17488,3 +17488,17 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/uni
 
 Added some functionality to unix-pipe-device to allow it to check
 whether a teardown is in progress.
+
+----------
+keflemin    Date: Sun Mar 30 16:26:44 EDT 2014  CSN: CSN-leap-platforms-736
+                  Sun Mar 30 20:26:44 UTC 2014
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ bram.bsv                  Locally Modified          735 
+ software-fpga-components.awb Locally Modified          735 
+ lutram.bsv                Locally Modified          735 
+
+
+Added a SYNTH definition to the simulation awb components.  In
+practice, this means that ifdefs keying on SYNTH now key on SYNTH_Z.

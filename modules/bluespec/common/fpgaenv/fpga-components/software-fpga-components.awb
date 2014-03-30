@@ -12,4 +12,5 @@
 %public shiftreg-sim.bsv
 
 %param MAGIC_SIMULATION_CLOCK_FACTOR 10000 "Used to determine periods for ratioed clocks - making it larger may increase clock resolution"
+%param SYNTH 0  "Synthesize it to FPGAs"
 

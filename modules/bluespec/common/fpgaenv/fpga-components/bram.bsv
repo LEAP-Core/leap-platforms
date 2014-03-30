@@ -156,7 +156,7 @@ module mkBRAMUnguarded
         (Bits#(t_ADDR, t_ADDR_SZ),
          Bits#(t_DATA, t_DATA_SZ));
 
-    `ifdef SYNTH
+    `ifndef SYNTH_Z
     let mem <- (valueOf(t_ADDR_SZ) == 0 || valueOf(t_DATA_SZ) == 0)? mkBRAMUnguardedZero(): mkBRAMUnguardedNonZero();
     `else
     let mem <- mkBRAMUnguardedSim();
@@ -190,7 +190,7 @@ module mkBypassBRAMUnguarded
          Eq#(t_ADDR),
          Bits#(t_DATA, t_DATA_SZ));
 
-    `ifdef SYNTH
+    `ifndef SYNTH_Z
     let mem <- (valueOf(t_ADDR_SZ) == 0 || valueOf(t_DATA_SZ) == 0)? mkBRAMUnguardedZero(): mkBRAMUnguardedNonZero();
     `else
     let mem <- mkBRAMUnguardedSim();
