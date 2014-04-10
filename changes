@@ -17502,3 +17502,14 @@ Directory modules/bluespec/common/fpgaenv/fpga-components
 
 Added a SYNTH definition to the simulation awb components.  In
 practice, this means that ifdefs keying on SYNTH now key on SYNTH_Z.
+
+----------
+mcadler     Date: Wed Apr  9 22:57:30 EDT 2014  CSN: CSN-leap-platforms-737
+                  Thu Apr 10 02:57:30 UTC 2014
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ bram.bsv                  Locally Modified          736 
+ lutram.bsv                Locally Modified          736 
+
+Include librl_bsv_base.

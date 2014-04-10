@@ -33,6 +33,9 @@
 // Author: Michael Adler
 //
 
+`include "awb/provides/librl_bsv_base.bsh"
+
+
 //
 // LUT-based storage that compiles more effeciently than a vector in a register.
 //
