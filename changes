@@ -17513,3 +17513,14 @@ Directory modules/bluespec/common/fpgaenv/fpga-components
  lutram.bsv                Locally Modified          736 
 
 Include librl_bsv_base.
+
+----------
+keflemin    Date: Mon Apr 14 14:19:02 EDT 2014  CSN: CSN-leap-platforms-738
+                  Mon Apr 14 18:19:02 UTC 2014
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe
+ unix-pipe-li-device.log   Locally Modified          737 
+
+
+Format of log messages for inter-platform width changed. 

@@ -1,4 +1,4 @@
-Compilation message: "hw/model/multifpga_routing.bsh", line 11, column 78: SizeOfVia:physicalDevices->GetUNIXPipeDevice0()_write:128
-Compilation message: "hw/model/multifpga_routing.bsh", line 12, column 77: SizeOfVia:physicalDevices->GetUNIXPipeDevice0()_read:128
-Compilation message: "hw/model/multifpga_routing.bsh", line 11, column 78: SizeOfVia:physicalDevices->GetUNIXPipeDevice1()_write:128
-Compilation message: "hw/model/multifpga_routing.bsh", line 12, column 77: SizeOfVia:physicalDevices->GetUNIXPipeDevice1()_read:128
+Compilation message: "hw/model/multifpga_routing.bsh", line 11, column 78: SizeOfVia:physicalDevices->GetUNIXPipeDevice0():egress:128
+Compilation message: "hw/model/multifpga_routing.bsh", line 12, column 77: SizeOfVia:physicalDevices->GetUNIXPipeDevice0():ingress:128
+Compilation message: "hw/model/multifpga_routing.bsh", line 11, column 78: SizeOfVia:physicalDevices->GetUNIXPipeDevice1():egress:128
+Compilation message: "hw/model/multifpga_routing.bsh", line 12, column 77: SizeOfVia:physicalDevices->GetUNIXPipeDevice1():ingress:128
