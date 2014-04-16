@@ -1,0 +1,36 @@
+
+# /
+/Makefile
+/config.log
+/config.status
+/autom4te.cache
+/build-arch-stamp
+/build-indep-stamp
+/config.guess
+/config.sub
+
+# /debian/
+/debian/files
+/debian/*.log
+/debian/*.substvars
+/debian/*.debhelper
+/debian/leap-platforms
+/debian/leap-platforms-bin
+/debian/leap-platforms-HEAD
+/debian/leap-platforms-??.??
+/debian/leap-platforms-xupv5
+
+# /tools/
+/tools/Makefile
+
+# /tools/platforms/
+/tools/platforms/Makefile
+
+# /tools/platforms/leap-fpga-ctrl/
+/tools/platforms/leap-fpga-ctrl/Makefile
+/tools/platforms/leap-fpga-ctrl/.deps
+/tools/platforms/leap-fpga-ctrl/*.o
+/tools/platforms/leap-fpga-ctrl/leap-fpga-ctrl
+
+# /tools/platforms/leap-fpga-ctrl/init/
+/tools/platforms/leap-fpga-ctrl/init/leap-fpga
