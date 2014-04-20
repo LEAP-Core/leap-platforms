@@ -6,6 +6,8 @@
 
 %notes README
 
+%generated -t VERILOG mkDDRBankSynth.v
+
 %public ddr-sdram-xilinx.bsv
 %public ddr-sdram-xilinx.bsh
 %public ddr-sdram-xilinx.h

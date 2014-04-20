@@ -207,18 +207,18 @@ INST "*/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_C.ddr_byte_lane_C/ddr_by
 INST "*/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_B.ddr_byte_lane_B/ddr_byte_group_io/*slave_ts" LOC=OLOGIC_X1Y319;
 INST "*/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_A.ddr_byte_lane_A/ddr_byte_group_io/*slave_ts" LOC=OLOGIC_X1Y307;
 
-#INST "*_dramCtrl*/*/u_ddr3_infrastructure/plle2_i" LOC=PLLE2_ADV_X1Y5;
-#INST "*_dramCtrl*/*/u_ddr3_infrastructure/mmcm_i" LOC=MMCME2_ADV_X1Y5;
+INST "m_llpi_phys_plat_sdram_b_0_ddrSynth/dramCtrl*/*/u_ddr3_infrastructure/plle2_i" LOC=PLLE2_ADV_X1Y6;
+INST "m_llpi_phys_plat_sdram_b_0_ddrSynth/dramCtrl*/*/u_ddr3_infrastructure/mmcm_i" LOC=MMCME2_ADV_X1Y6;
 
 
-NET "*_dramCtrl*/*/iserdes_clk" TNM_NET = "TNM_ISERDES_CLK";
-INST "*_dramCtrl*/*/mc0/mc_read_idle_r" TNM = "TNM_SOURCE_IDLE";
-INST "*_dramCtrl*/*/input_[?].iserdes_dq_.iserdesdq" TNM = "TNM_DEST_ISERDES";
+NET  "m_llpi_phys_plat_sdram_b_0_ddrSynth/dramCtrl*/*/iserdes_clk" TNM_NET = "TNM_ISERDES_CLK";
+INST "m_llpi_phys_plat_sdram_b_0_ddrSynth/dramCtrl*/*/mc0/mc_read_idle_r" TNM = "TNM_SOURCE_IDLE";
+INST "m_llpi_phys_plat_sdram_b_0_ddrSynth/dramCtrl*/*/input_[?].iserdes_dq_.iserdesdq" TNM = "TNM_DEST_ISERDES";
 TIMESPEC "TS_ISERDES_CLOCK" = PERIOD "TNM_ISERDES_CLK" 2500 ps;
 TIMESPEC TS_MULTICYCLEPATH = FROM "TNM_SOURCE_IDLE" TO "TNM_DEST_ISERDES" TS_ISERDES_CLOCK*6;
           
 
-INST "*_dramCtrl*/*/device_temp_sync_r1*" TNM="TNM_MULTICYCLEPATH_DEVICE_TEMP_SYNC";
+INST "m_llpi_phys_plat_sdram_b_0_ddrSynth/dramCtrl*/*/device_temp_sync_r1*" TNM="TNM_MULTICYCLEPATH_DEVICE_TEMP_SYNC";
 TIMESPEC "TS_MULTICYCLEPATH_DEVICE_TEMP_SYNC" = TO "TNM_MULTICYCLEPATH_DEVICE_TEMP_SYNC" 20 ns DATAPATHONLY;
 
 

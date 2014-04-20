@@ -124,6 +124,67 @@ interface DDR_DRIVER;
 endinterface
 
 
+//
+// DDR_DRIVER_SYNTH
+//
+// Same interface as above.  However, debug signals are explicitly exported as set of 
+// boolean methods, which enables us to put Bluespec-style synthesis boundaries on 
+// the bank code.  
+//
+
+interface DDR_DRIVER_SYNTH;
+    // Read request/response pair.  NOTE: every read request generates
+    // FPGA_DDR_BURST_LENGTH responses.  If the address is not aligned to
+    // the full response the DRAM controller rotates the response so the
+    // requested address is returned in the low bits of the first response.
+    method Action readReq(FPGA_DDR_ADDRESS addr);
+    method ActionValue#(FPGA_DDR_DUALEDGE_BEAT) readRsp();
+
+    // Write requests and data are separate since the data will ultimately
+    // be streamed to the DDR controller.
+    method Action writeReq(FPGA_DDR_ADDRESS addr);
+
+    // Write data corresponding to a write request.  Call writeData
+    // FPGA_DDR_BURST_LENGTH times for every write request.  The order of
+    // writeReq() and writeData() calls are not important.
+    method Action writeData(FPGA_DDR_DUALEDGE_BEAT data, FPGA_DDR_DUALEDGE_BEAT_MASK mask);
+
+    method Bool stateReady();
+    method Bool init();
+    method Bool mergeReqQ_notEmpty();
+    method Bool mergeReqQ_notFull();
+    method Bool syncRequestQ_notFull();
+    method Bool syncWriteDataQ_notFull();
+    method Bool syncReadDataQ_notEmpty();
+
+`ifndef DEBUG_DDR3_Z
+
+    method Bool debug_wrlvl_start();
+    method Bool debug_wrlvl_done();
+    method Bool debug_wrlvl_err();
+
+    method Bool debug_rdlvl_start_0();
+    method Bool debug_rdlvl_start_1();
+    method Bool debug_rdlvl_done_0();
+    method Bool debug_rdlvl_done_1();
+    method Bool debug_rdlvl_err_0();
+    method Bool debug_rdlvl_err_1();
+
+`endif
+
+`ifndef DRAM_DEBUG_Z
+    // Methods enabled only for debugging the controller:
+
+    // Get status.  Should never block.
+    method Bit#(64) statusCheck();
+    // Set the maximum number of outstanding reads permitted.  Useful for
+    // calibrating sync buffer sizes.
+    method Action setMaxReads(Bit#(TLog#(TAdd#(`DRAM_MAX_OUTSTANDING_READS, 1))) maxReads);
+`endif
+endinterface
+
+
+
 typedef Vector#(FPGA_DDR_BANKS, DDR_BANK_WIRES) DDR_WIRES;
 
 
@@ -143,11 +204,21 @@ endinterface
 
 //
 // DDR_BANK --
-//     A bank is one driver and corresponding wires.
+//     A bank is one driver and corresponding wires, but in this case 
+//     debug signals have been wrapped.
 //
 interface DDR_BANK;
     interface DDR_DRIVER driver;
     interface DDR_BANK_WIRES wires;
+endinterface
+
+//
+// DDR_BANK_SYNTH --
+//     A bank is one driver and corresponding wires.
+//
+interface DDR_BANK_SYNTH;
+    interface DDR_DRIVER_SYNTH driver;
+    interface DDR_BANK_WIRES   wires;
 endinterface
 
 
@@ -193,11 +264,67 @@ FPGA_DDR_STATE
 
 
 //
-// mkDDRDevice
+// Debug DDR interface, exported to upper levels. 
 //
 module mkDDRBank#(Clock rawClock, Reset rawReset)
     // interface:
     (DDR_BANK);
+
+    DDR_BANK_SYNTH ddrSynth <- mkDDRBankSynth(rawClock, rawReset);
+  
+    //
+    // Debug scan state
+    //
+    List#(Tuple2#(String, Bool)) ds_data = List::nil;
+    ds_data = List::cons(tuple2("Xilinx DDR SDRAM ready", ddrSynth.driver.stateReady), ds_data);
+    ds_data = List::cons(tuple2("Xilinx DDR SDRAM initPhase", ddrSynth.driver.init), ds_data);
+    ds_data = List::cons(tuple2("Xilinx DDR SDRAM mergeReqQ not empty", ddrSynth.driver.mergeReqQ_notEmpty), ds_data);
+    ds_data = List::cons(tuple2("Xilinx DDR SDRAM mergeReqQ not full", ddrSynth.driver.mergeReqQ_notFull), ds_data);
+    ds_data = List::cons(tuple2("Xilinx DDR SDRAM syncRequestQ not full", ddrSynth.driver.syncRequestQ_notFull), ds_data);
+    ds_data = List::cons(tuple2("Xilinx DDR SDRAM syncWriteDataQ not full", ddrSynth.driver.syncWriteDataQ_notFull), ds_data);
+    ds_data = List::cons(tuple2("Xilinx DDR SDRAM syncReadDataQ not empty", ddrSynth.driver.syncReadDataQ_notEmpty), ds_data);
+
+`ifndef DEBUG_DDR3_Z
+    ds_data = List::cons(tuple2("Xilinx DDR SDRAM dbg_wrlvl_start",  ddrSynth.driver.debug_wrlvl_start), ds_data);
+    ds_data = List::cons(tuple2("Xilinx DDR SDRAM dbg_wrlvl_done",  ddrSynth.driver.debug_wrlvl_done), ds_data);
+    ds_data = List::cons(tuple2("Xilinx DDR SDRAM dbg_wrlvl_err",  ddrSynth.driver.debug_wrlvl_err), ds_data);
+
+    ds_data = List::cons(tuple2("Xilinx DDR SDRAM dbg_rdlvl_start[0]", ddrSynth.driver.debug_rdlvl_start_0), ds_data);
+    ds_data = List::cons(tuple2("Xilinx DDR SDRAM dbg_rdlvl_start[1]",  ddrSynth.driver.debug_rdlvl_start_1), ds_data);
+    ds_data = List::cons(tuple2("Xilinx DDR SDRAM dbg_rdlvl_done[0]",  ddrSynth.driver.debug_rdlvl_done_0), ds_data);
+    ds_data = List::cons(tuple2("Xilinx DDR SDRAM dbg_rdlvl_done[1]",  ddrSynth.driver.debug_rdlvl_done_1), ds_data);
+    ds_data = List::cons(tuple2("Xilinx DDR SDRAM dbg_rdlvl_err[0]",  ddrSynth.driver.debug_rdlvl_err_0), ds_data);
+    ds_data = List::cons(tuple2("Xilinx DDR SDRAM dbg_rdlvl_err[1] ",  ddrSynth.driver.debug_rdlvl_err_1), ds_data);
+`endif
+
+    let debugScanData = ds_data;
+
+    interface DDR_DRIVER driver;
+        method readReq = ddrSynth.driver.readReq;
+        method readRsp = ddrSynth.driver.readRsp;
+        method writeReq = ddrSynth.driver.writeReq;
+        method writeData = ddrSynth.driver.writeData;
+        method debugScanState = debugScanData;
+
+`ifndef DRAM_DEBUG_Z
+
+        method statusCheck = ddrSynth.driver.statusCheck;
+        method setMaxReads = ddrSynth.driver.setMaxReads;
+
+`endif
+    endinterface       
+    
+    interface wires = ddrSynth.wires;
+
+endmodule
+
+//
+// Bluespec synthesizable ddr interface. 
+//
+(* synthesize *) 
+module mkDDRBankSynth#(Clock rawClock, Reset rawReset)
+    // interface:
+    (DDR_BANK_SYNTH);
     
     Clock modelClock <- exposeCurrentClock();
     Reset modelReset <- exposeCurrentReset();
@@ -520,35 +647,8 @@ module mkDDRBank#(Clock rawClock, Reset rawReset)
         mkReg(`DRAM_MAX_OUTSTANDING_READS);
 `endif
 
-    //
-    // Debug scan state
-    //
-    List#(Tuple2#(String, Bool)) ds_data = List::nil;
-    ds_data = List::cons(tuple2("Xilinx DDR SDRAM ready", (state == STATE_ready)), ds_data);
-    ds_data = List::cons(tuple2("Xilinx DDR SDRAM initPhase", unpack(initPhase)), ds_data);
-    ds_data = List::cons(tuple2("Xilinx DDR SDRAM mergeReqQ not empty", mergeReqQ.notEmpty), ds_data);
-    ds_data = List::cons(tuple2("Xilinx DDR SDRAM mergeReqQ not full", mergeReqQ.ports[0].notFull), ds_data);
-    ds_data = List::cons(tuple2("Xilinx DDR SDRAM syncRequestQ not full", syncRequestQ.notFull), ds_data);
-    ds_data = List::cons(tuple2("Xilinx DDR SDRAM syncWriteDataQ not full", syncWriteDataQ.notFull), ds_data);
-    ds_data = List::cons(tuple2("Xilinx DDR SDRAM syncReadDataQ not empty", syncReadDataQ.notEmpty), ds_data);
 
-`ifndef DEBUG_DDR3_Z
-    ds_data = List::cons(tuple2("Xilinx DDR SDRAM dbg_wrlvl_start", dbg_wrlvl_start), ds_data);
-    ds_data = List::cons(tuple2("Xilinx DDR SDRAM dbg_wrlvl_done", dbg_wrlvl_done), ds_data);
-    ds_data = List::cons(tuple2("Xilinx DDR SDRAM dbg_wrlvl_err", dbg_wrlvl_err), ds_data);
-
-    ds_data = List::cons(tuple2("Xilinx DDR SDRAM dbg_rdlvl_start[0]", unpack(dbg_rdlvl_start[0])), ds_data);
-    ds_data = List::cons(tuple2("Xilinx DDR SDRAM dbg_rdlvl_start[1]", unpack(dbg_rdlvl_start[1])), ds_data);
-    ds_data = List::cons(tuple2("Xilinx DDR SDRAM dbg_rdlvl_done[0]", unpack(dbg_rdlvl_done[0])), ds_data);
-    ds_data = List::cons(tuple2("Xilinx DDR SDRAM dbg_rdlvl_done[1]", unpack(dbg_rdlvl_done[1])), ds_data);
-    ds_data = List::cons(tuple2("Xilinx DDR SDRAM dbg_rdlvl_err[0]", unpack(dbg_rdlvl_err[0])), ds_data);
-    ds_data = List::cons(tuple2("Xilinx DDR SDRAM dbg_rdlvl_err[1]", unpack(dbg_rdlvl_err[1])), ds_data);
-`endif
-
-    let debugScanData = ds_data;
-
-
-    interface DDR_DRIVER driver;
+    interface DDR_DRIVER_SYNTH driver;
 
 /*
 RAM status:0
@@ -626,9 +726,31 @@ RAM status:0
             syncWriteDataQ.enq(tuple2(data, mask));
         endmethod
 
-        method List#(Tuple2#(String, Bool)) debugScanState();
-            return debugScanData;
-        endmethod
+        // Debug state for debug scan.
+
+        method Bool stateReady = (state == STATE_ready);
+        method Bool init = unpack(initPhase);
+        method Bool mergeReqQ_notEmpty = mergeReqQ.notEmpty;
+        method Bool mergeReqQ_notFull = mergeReqQ.ports[0].notFull;
+        method Bool syncRequestQ_notFull = syncRequestQ.notFull;
+        method Bool syncWriteDataQ_notFull = syncWriteDataQ.notFull;
+        method Bool syncReadDataQ_notEmpty = syncReadDataQ.notEmpty;
+
+`ifndef DEBUG_DDR3_Z
+
+        method Bool debug_wrlvl_start = dbg_wrlvl_start;
+        method Bool debug_wrlvl_done = dbg_wrlvl_done;
+        method Bool debug_wrlvl_err = dbg_wrlvl_err;
+
+        method Bool debug_rdlvl_start_0 = unpack(dbg_rdlvl_start[0]);
+        method Bool debug_rdlvl_start_1 = unpack(dbg_rdlvl_start[1]);
+        method Bool debug_rdlvl_done_0 = unpack(dbg_rdlvl_done[0]);
+        method Bool debug_rdlvl_done_1 = unpack(dbg_rdlvl_done[1]);
+        method Bool debug_rdlvl_err_0 = unpack(dbg_rdlvl_err[0]);
+        method Bool debug_rdlvl_err_1 = unpack(dbg_rdlvl_err[1]);
+
+`endif
+        
     endinterface
 
 
