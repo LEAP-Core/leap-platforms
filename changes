@@ -17524,3 +17524,26 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/uni
 
 
 Format of log messages for inter-platform width changed. 
+
+----------
+keflemin    Date: Sat Apr 19 21:44:48 EDT 2014  CSN: CSN-leap-platforms-739
+                  Sun Apr 20 01:44:48 UTC 2014
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-xilinx
+ ddr-sdram-xilinx.bsv      Locally Modified          738 
+ ddr-sdram-xilinx.ucf      Locally Modified          738 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-xilinx/ddr3-sdram-vc707
+ ddr3-sdram.ucf            Locally Modified          738 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-xilinx/ddr2-sdram-v5-htg
+ ddr2-sdram-sync-tig.ucf   Locally Modified          738 
+ ddr2-sdram.ucf            Locally Modified          738 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-xilinx
+ ddr-sdram-xilinx.awb      Locally Modified          738 
+
+
+Wrapped DDR driver in bluespec-style synthesis boundary.  This enables
+us to account for ddr driver area when quoting LEAP area usage.
