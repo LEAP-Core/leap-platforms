@@ -226,11 +226,6 @@ inline void
 UMF_MESSAGE_CLASS::CheckExtractSanity(
     int nbytes)
 {
-    ASSERT(CanExtract(nbytes),
-           "umf: message read underflow: readIndex = "
-           << readIndex << " writeIndex = " << writeIndex
-           << " nbytes = " << nbytes );
-
     WARN(writeIndex == length,
          "umf: [WARNING] attempt to read from incomplete message, are you sure you want to do this?");
 }

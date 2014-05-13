@@ -29,13 +29,11 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-`include "awb/provides/physical_platform_utils.bsh"
-
-function Integer fpgaNumPlatforms() = `FPGA_NUM_PLATFORMS;
+`include "awb/provides/physical_platform_defs.bsh"
 
 //
-// FPGA_PLATFORM_IDX is a container for FPGA_PLATFORM_ID.  Must be at least
-// one bit.
+// Convert preprocessor parameters to functions so they are included as part
+// of the physical platform.
 //
-typedef UInt#(TMax#(1, TLog#(TAdd#(1,`FPGA_NUM_PLATFORMS)))) FPGA_PLATFORM_ID;
- 
+function Integer fpgaPlatformID()   = `FPGA_PLATFORM_ID;
+function String  fpgaPlatformName() = `FPGA_PLATFORM_NAME;
