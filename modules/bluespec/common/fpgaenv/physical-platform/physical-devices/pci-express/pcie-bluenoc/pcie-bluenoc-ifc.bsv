@@ -33,7 +33,7 @@ import MsgFormat::*;
 import PCIE::*;
 
 `include "awb/provides/pcie_bluenoc_ifc.bsh"
-
+`include "awb/provides/umf.bsh"
 
 //
 // Common interface definitions used by top level BlueNoC PCIe bridge and the
@@ -45,10 +45,10 @@ typedef `PCIE_LANES PCIE_LANES;
 
         
 //
-// PCIE_DRIVER --
+// PCIE_ --
 //   Expose the PCIe device as a network port.
 // 
-interface PCIE_DRIVER;
+interface PCIE_LOW_LEVEL_DRIVER;
     interface MsgPort#(PCIE_BYTES_PER_BEAT) noc;
 
     interface Clock clock;
@@ -56,12 +56,27 @@ interface PCIE_DRIVER;
 endinterface
 
 
+// interface
+interface PCIE_DRIVER;
+    method ActionValue#(UMF_CHUNK) read();
+    method Action                  write(UMF_CHUNK chunk);
+
+    // this interface needed for LIM compiler.
+    method UMF_CHUNK first();
+    method Action    deq();
+    method Bool      write_ready();
+   
+    interface Clock clock;
+    interface Reset reset;
+
+endinterface
+
 //
 // BNOC_PCIE_DEV --
 //
 //   Internal interface for connection to the BlueNoC bridge and PCIe device.
 //
 interface BNOC_PCIE_DEV#(numeric type n_BPB);
-    interface PCIE_DRIVER driver;
+    interface PCIE_LOW_LEVEL_DRIVER driver;
     interface PCIE_EXP#(PCIE_LANES) pcie_exp;
 endinterface

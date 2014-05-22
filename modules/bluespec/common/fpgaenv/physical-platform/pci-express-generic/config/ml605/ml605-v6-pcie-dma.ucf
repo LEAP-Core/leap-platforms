@@ -23,11 +23,11 @@ disable = reg_sr_r;
 # PIN ASSIGNMENTS
 ######################################################################################################
 
-NET    "RST_N"                        LOC = H10 | IOSTANDARD = SSTL15 | PULLUP | NODELAY;
+NET    "clocksWires_rst_put"                        LOC = H10 | IOSTANDARD = SSTL15 | PULLUP | NODELAY;
 
-NET    "CLK"   TNM_NET = TNM_clk_in;  # 200 MHz sys0 XO
-NET    "CLK"                          LOC = J9 | IOSTANDARD = LVDS_25;
-NET    "CLK_0"                        LOC = H9 | IOSTANDARD = LVDS_25;
+NET    "clocksWires_clk_p_put"   TNM_NET = TNM_clk_in;  # 200 MHz sys0 XO
+NET    "clocksWires_clk_p_put"                          LOC = J9 | IOSTANDARD = LVDS_25;
+NET    "clocksWires_clk_n_put"                        LOC = H9 | IOSTANDARD = LVDS_25;
 
 
 ######################################################################################################

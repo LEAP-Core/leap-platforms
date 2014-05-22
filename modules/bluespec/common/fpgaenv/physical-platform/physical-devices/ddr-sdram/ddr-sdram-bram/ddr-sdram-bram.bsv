@@ -102,7 +102,6 @@ interface DDR_DRIVER;
     // writeReq() and writeData() calls are not important.
     method Action writeData(FPGA_DDR_DUALEDGE_BEAT data, FPGA_DDR_DUALEDGE_BEAT_MASK mask);
 
-    method List#(Tuple2#(String, Bool)) debugScanState();
 
 `ifndef DRAM_DEBUG_Z
     // Methods enabled only for debugging the controller:
@@ -394,7 +393,4 @@ module mkDDRBank
         writeDataQ.enq(tuple2(data, mask));
     endmethod
 
-    method List#(Tuple2#(String, Bool)) debugScanState();
-        return List::nil;
-    endmethod
 endmodule

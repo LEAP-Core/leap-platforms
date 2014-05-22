@@ -33,6 +33,7 @@
 
 import Clocks::*;
 import XilinxCells::*;
+import GetPut::*;
 
 `include "physical_platform_utils.bsh"
 `include "fpga_components.bsh"
@@ -57,16 +58,16 @@ endinterface
 //
 
 interface CLOCKS_WIRES;
+
+    //(* always_ready, always_enabled *)
+    interface Put#(Bit#(1)) clk_p;
+
+    //(* always_ready, always_enabled *)
+    interface Put#(Bit#(1)) clk_n;
+
+    //(* always_ready, always_enabled *)
+    interface Put#(Bit#(1)) rst;
     
-    (* prefix = "", enable = "CLK_P" *)
-    method Action clock_p_wire();
-
-    (* prefix = "", enable = "CLK_N" *)
-    method Action clock_n_wire();
-
-    (* prefix = "", enable = "RST_N" *)
-    method Action reset_n_wire();
-     
 endinterface
 
 //
@@ -95,11 +96,32 @@ module mkClocksDevice
     //
     // STAGE 1: get the crystal clock by instantiating the primitive clocks device
     //
-    
-    PRIMITIVE_DIFFERENTIAL_CLOCKS_DEVICE crystalClocks <- mkPrimitiveDifferentialClock();
-    
-    Clock rawClock = crystalClocks.clock;
-    Reset rawReset = crystalClocks.reset;
+
+    // PCIe is driven by a different clock than the raw clock.
+    // The "clocked_by" is pure fiction.  By providing a top-level
+    // Clock type Bluespec is convinced that the put method is clocked
+    // and allows it to be tagged always_enabled.  Without a pseudo-clock,
+    // Bluespec believes the put method is never enabled.
+    CLOCK_FROM_PUT incomingClockN <- mkClockFromPut;
+    CLOCK_FROM_PUT incomingClockP <- mkClockFromPut;
+
+    Clock rawClock <- mkClockIBUFDS(incomingClockP.clock, incomingClockN.clock);
+
+    // Construct reset.  The incoming reset wire must be "crossed"
+    // to the incomingSysClkBuf clock domain from the rawClock domain.  Like
+    // the clock crossing above, this crossing is fictitious and exists
+    // solely to keep the compiler from complaining about the module
+    // being clocked by a clock not exposed at the top.
+    RESET_FROM_PUT incomingReset <- mkResetFromPut(rawClock,
+                                                   clocked_by rawClock);
+
+    Wire#(Bit#(1)) buffRst <- mkIBUF(clocked_by rawClock, reset_by incomingReset.reset);
+ 
+    rule transferRst;
+        incomingReset.reset_wire.put(buffRst);
+    endrule
+        
+    Reset rawReset = incomingReset.reset;
     
     if(`RESET_ACTIVE_HIGH > 0)
     begin     
@@ -159,10 +181,15 @@ module mkClocksDevice
     
     interface CLOCKS_WIRES wires;
        
-        method clock_n_wire   = crystalClocks.clock_n_wire;
-        method clock_p_wire   = crystalClocks.clock_p_wire;
-        method reset_n_wire   = crystalClocks.reset_n_wire;
-            
+        interface clk_n   = incomingClockN.clock_wire;
+        interface clk_p   = incomingClockP.clock_wire;
+
+        interface Put rst;
+            method Action put(Bit#(1) rst);
+                buffRst <= rst;
+            endmethod
+        endinterface
+
     endinterface
     
     // soft reset trigger

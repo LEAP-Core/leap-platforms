@@ -17570,3 +17570,58 @@ check is for the wrong endianess.
 BSV-visible module touched by the multiple FPGA compiler between its
 frontend and backend passes.  This will eventually simplify scons
 caching.
+
+----------
+keflemin    Date: Thu May 22 16:59:23 EDT 2014  CSN: CSN-leap-platforms-741
+                  Thu May 22 20:59:23 UTC 2014
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/utils
+ physical-defs.awb         Locally Modified          740 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc
+ pcie-bluenoc-ifc.bsv      Locally Modified          740 
+ pcie-bluenoc.awb          Locally Modified          740 
+ pcie-bluenoc.bsv          Locally Modified          740 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc-virtex6
+ pcie-virtex6.ucf          Locally Modified          740 
+ pcie-virtex6.bsv          Locally Modified          740 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc-virtex7
+ pcie-virtex7.ucf          Locally Modified          740 
+ pcie-virtex7.bsv          Locally Modified          740 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-xilinx
+ ddr-sdram-xilinx.bsv      Locally Modified          740 
+ ddr-sdram-xilinx.ucf      Locally Modified          740 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-xilinx/ddr3-sdram-vc707
+ ddr3-sdram.ucf            Locally Modified          740 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-bram
+ ddr-sdram-bram.bsv        Locally Modified          740 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/differential
+ differential-clocks-vhdl-import.bsv Locally Removed           740 
+ differential-clocks-device.vhd Locally Removed           740 
+ differential-clocks-device.awb Locally Modified          740 
+ differential-clocks-device.bsv Locally Modified          740 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic
+ pcie-generic-platform.awb Locally Modified          740 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic/config/ml605
+ ml605-v6-pcie-dma.ucf     Locally Modified          740 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic/config/vc707
+ vc707-v7-pcie-dma.ucf     Locally Modified          740 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic
+ pcie-generic-platform.bsv Locally Modified          740 
+
+
+1) Reworked pcie to use bluespec's buffer primitives. This was
+necessary because we turned off automatic I/O buffer insertion in XST. 
+
+2) Fixed ucf to reflect new platform compilation organization. 

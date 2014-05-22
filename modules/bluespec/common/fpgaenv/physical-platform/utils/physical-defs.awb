@@ -12,5 +12,5 @@
 ##
 
 %param --global FPGA_PLATFORM_ID   0         "ID of multi-FPGA target"
-%param --global FPGA_PLATFORM_NAME "Unknown" "Name of multi-FPGA target"
+%param --global FPGA_PLATFORM_NAME "platform" "Name of multi-FPGA target"
 

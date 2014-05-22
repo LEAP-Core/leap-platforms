@@ -42,6 +42,8 @@ import Clocks::*;
 `include "awb/provides/ddr_sdram_device.bsh"
 `include "awb/provides/physical_platform_utils.bsh"
 `include "awb/provides/aurora_device.bsh"
+`include "awb/provides/soft_connections.bsh"
+
 
 // PHYSICAL_DRIVERS
 
@@ -65,6 +67,7 @@ endinterface
 
 interface TOP_LEVEL_WIRES;
     // wires from devices
+    interface CLOCKS_WIRES                        clocksWires;
     interface PCIE_WIRES                          pcieWires;
     interface DDR_WIRES                           ddrWires;
     interface AURORA_COMPLEX_WIRES                auroraWires;
@@ -84,7 +87,7 @@ endinterface
 // This is a convenient way for the outside world to instantiate all the devices
 // and an aggregation of all the wires.
 
-module mkPhysicalPlatform#(Vector#(`N_TOP_LEVEL_CLOCKS, Clock) topClocks, Reset topReset)
+module [CONNECTED_MODULE] mkPhysicalPlatform
     //interface: 
     (PHYSICAL_PLATFORM);
     
@@ -92,7 +95,7 @@ module mkPhysicalPlatform#(Vector#(`N_TOP_LEVEL_CLOCKS, Clock) topClocks, Reset 
     // action should be to instantiate the Clocks Physical Device and obtain interfaces
     // to clock and reset the other devices with.
     
-    CLOCKS_DEVICE clocks <- mkClocksDevice(topClocks, topReset);
+    CLOCKS_DEVICE clocks <- mkClocksDevice();
     
     Clock clk = clocks.driver.clock;
     Reset rst = clocks.driver.reset;
@@ -101,14 +104,16 @@ module mkPhysicalPlatform#(Vector#(`N_TOP_LEVEL_CLOCKS, Clock) topClocks, Reset 
     // differential clock.
     DDR_DEVICE sdram <- mkDDRDevice(clocks.driver.rawClock,
                                     clocks.driver.rawReset, 
-                                    clocked_by clocks.driver.clock,
-                                    reset_by clocks.driver.reset);
+                                    clocked_by clk,
+                                    reset_by rst);
 
     // Next, create the physical device that can trigger a soft reset. Pass along the
     // interface to the trigger module that the clocks device has given us.
 
     PCIE_DEVICE pcie <- mkPCIEDevice(clocks.driver.rawClock,
-                                     clocks.driver.rawReset);
+                                     clocks.driver.rawReset,
+                                     clocked_by clk,
+                                     reset_by rst);
 
     //
     // Pass reset from PCIe to the model.  The host holds reset long enough that
@@ -142,8 +147,8 @@ module mkPhysicalPlatform#(Vector#(`N_TOP_LEVEL_CLOCKS, Clock) topClocks, Reset 
     //
     interface PHYSICAL_DRIVERS physicalDrivers;
         interface clocksDriver = clocks.driver;
-        interface pcieDriver = pcie.driver;
-        interface ddrDriver  = sdram.driver;
+        interface pcieDriver   = pcie.driver;
+        interface ddrDriver    = sdram.driver;
         interface auroraDriver = aurora_device.drivers;
     endinterface
     
@@ -151,6 +156,7 @@ module mkPhysicalPlatform#(Vector#(`N_TOP_LEVEL_CLOCKS, Clock) topClocks, Reset 
     // Aggregate the wires
     //
     interface TOP_LEVEL_WIRES topLevelWires;
+        interface clocksWires = clocks.wires;
         interface pcieWires   = pcie.wires;
         interface ddrWires    = sdram.wires;
         interface auroraWires = aurora_device.wires;
