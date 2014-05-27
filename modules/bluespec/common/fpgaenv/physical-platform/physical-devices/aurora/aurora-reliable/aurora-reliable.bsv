@@ -45,6 +45,7 @@ import Vector::*;
 `include "awb/provides/librl_bsv_base.bsh"
 `include "awb/provides/librl_bsv_storage.bsh"
 `include "awb/provides/aurora_driver.bsh"
+`include "awb/provides/aurora_common.bsh"
 `include "awb/provides/aurora_driver_params.bsh"
 
 
@@ -61,18 +62,6 @@ typedef 8 ParitySize;
 
 typedef TMul#(interface_words, TSub#(word_width, TAdd#(1, ParitySize)))
     AURORA_INTERFACE_WIDTH#(numeric type interface_words, numeric type word_width);
-
-interface AURORA_WIRES;
-    (* always_enabled, always_ready *)
-    method Action rxp_in(Bit#(1) i);
-    (* always_enabled, always_ready *)
-    method Action rxn_in(Bit#(1) i);
-    (* always_enabled, always_ready *)
-    method Bit#(1) txp_out();
-    (* always_enabled, always_ready *)
-    method Bit#(1) txn_out();
-endinterface
-
 
 //
 // AURORA_DRIVER --

@@ -17625,3 +17625,54 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic
 necessary because we turned off automatic I/O buffer insertion in XST. 
 
 2) Fixed ucf to reflect new platform compilation organization. 
+
+----------
+keflemin    Date: Tue May 27 18:35:39 EDT 2014  CSN: CSN-leap-platforms-742
+                  Tue May 27 22:35:39 UTC 2014
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ obuf.bsv                  Locally Added               0 
+ shiftreg-sim.bsv          Locally Modified          741 
+ bram-multi-read.bsv       Locally Modified          741 
+ alu-support.bsv           Locally Modified          741 
+ software-fpga-components.awb Locally Modified          741 
+ hardware-fpga-components-virtex7.awb Locally Modified          741 
+ shiftreg.bsv              Locally Modified          741 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-common
+ aurora-common.bsv         Locally Modified          741 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-reliable
+ aurora-reliable.bsv       Locally Modified          741 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device-ml605
+ ml605_sma_aurora.ucf      Locally Modified          741 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device-simulation
+ aurora-device-simulation.awb Locally Modified          741 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-driver-virtex7-64b66b-10gbps
+ vc707_sma_aurora.ucf      Locally Modified          741 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device-vc707
+ aurora-device-vc707.bsv   Locally Modified          741 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc
+ pcie-bluenoc-driver.bsv   Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/simulation
+ sim-clocks-device.bsv     Locally Modified          741 
+
+
+
+1) Added missing bluenoc driver file. 
+
+2) Removed all instances of "asim/provides". These caused spurious
+recompilation in some cases.
+
+3) Added OBUF module and used it to decorate Aurora I/Os.  This did
+not fix the brokeness of the aurora drivers after the platform
+compilation reorganization.  TODO: Aurora clocks still being removed
+by ngdbuild, breaking all multifpga designs targeting the VC707.
+

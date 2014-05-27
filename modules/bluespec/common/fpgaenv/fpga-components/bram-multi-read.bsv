@@ -40,7 +40,7 @@ import FIFO::*;
 import FIFOF::*;
 import SpecialFIFOs::*;
 
-`include "asim/provides/librl_bsv_base.bsh"
+`include "awb/provides/librl_bsv_base.bsh"
 
 //
 // Interfaces
