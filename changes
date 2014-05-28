@@ -17676,3 +17676,22 @@ not fix the brokeness of the aurora drivers after the platform
 compilation reorganization.  TODO: Aurora clocks still being removed
 by ngdbuild, breaking all multifpga designs targeting the VC707.
 
+
+----------
+keflemin    Date: Wed May 28 10:18:25 EDT 2014  CSN: CSN-leap-platforms-743
+                  Wed May 28 14:18:25 UTC 2014
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device-ml605
+ aurora-device-ml605.bsv   Locally Modified          742 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-driver-virtex7-64b66b-10gbps
+ vc707_sma_aurora.ucf      Locally Modified          742 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device-vc707
+ aurora-device-vc707.bsv   Locally Modified          742 
+
+
+Aurora devices require IBUF on their clock pins.  This is a little
+strange because the PCIE device does not appear to require such a
+declaration.

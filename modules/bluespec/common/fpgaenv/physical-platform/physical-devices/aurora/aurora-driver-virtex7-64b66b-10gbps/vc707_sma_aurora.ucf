@@ -84,10 +84,9 @@ TIMESPEC "TS_enable_32_multiclk_SMA" = FROM "enable_32_SMA" to "enable_32_SMA" T
 NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_1/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/enable_32_i" TNM_NET = FFS "enable_32_HPC1";
 TIMESPEC "TS_enable_32_multiclk_HPC1" = FROM "enable_32_HPC1" to "enable_32_HPC1" TS_rxrecclk_32_HPC1/2;
 
-#m_sys_sys_vp_m_mod_device_topLevelWires_auroraWires_sma_clk_n_put
-#
-NET  "m_sys_sys_vp_m_mod/device_topLevelWires_auroraWires_sma_clk_n_put" LOC = AH7;
-NET  "m_sys_sys_vp_m_mod_device_topLevelWires_auroraWires_sma_clk_p_put" LOC = AH8;
+#SMA
+NET  "auroraWires_sma_clk_n_put" LOC = AH7;
+NET  "auroraWires_sma_clk_p_put" LOC = AH8;
 
 #HPC1 -- GBTCLK1 on XM104
 NET  "auroraWires_hpc_clk_n_put" LOC = E9;
