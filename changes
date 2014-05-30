@@ -17695,3 +17695,13 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aur
 Aurora devices require IBUF on their clock pins.  This is a little
 strange because the PCIE device does not appear to require such a
 declaration.
+
+----------
+hjyang      Date: Fri May 30 12:35:30 EDT 2014  CSN: CSN-leap-platforms-744
+                  Fri May 30 16:35:30 UTC 2014
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-xilinx/ddr3-sdram-ml605
+ ddr3-sdram.ucf            Locally Modified          743 
+
+A fix for building ml605 models.
