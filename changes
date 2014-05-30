@@ -17705,3 +17705,13 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr
  ddr3-sdram.ucf            Locally Modified          743 
 
 A fix for building ml605 models.
+
+----------
+hjyang      Date: Fri May 30 18:00:54 EDT 2014  CSN: CSN-leap-platforms-745
+                  Fri May 30 22:00:54 UTC 2014
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc-virtex6
+ pcie-virtex6.ucf          Locally Modified          744 
+
+Another fix to pass ngdbuild for ml605 models.
