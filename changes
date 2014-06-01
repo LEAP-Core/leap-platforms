@@ -17715,3 +17715,13 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci
  pcie-virtex6.ucf          Locally Modified          744 
 
 Another fix to pass ngdbuild for ml605 models.
+
+----------
+hjyang      Date: Sat May 31 22:20:03 EDT 2014  CSN: CSN-leap-platforms-746
+                  Sun Jun  1 02:20:03 UTC 2014
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc
+ pcie-bluenoc.bsv          Locally Modified          745 
+
+Add IBUF on clocks for ml605.
