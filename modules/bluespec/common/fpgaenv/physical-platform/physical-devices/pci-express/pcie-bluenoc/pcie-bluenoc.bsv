@@ -161,19 +161,16 @@ module mkPCIELowLevelDevice#(Clock rawClock, Reset rawReset)
     Wire#(Bit#(1)) clkN;
     Wire#(Bit#(1)) clkP; 
     
-    if (`FPGA_TECHNOLOGY == "Virtex6")
-    begin
-        // Put IBUF on clocks.
-        clkN <- mkIBUF(clocked_by rawClock, reset_by rawReset);
-        clkP <- mkIBUF(clocked_by rawClock, reset_by rawReset);
-        rule driveSMAN;
-            pcieClockN.clock_wire.put(clkN);
-        endrule
+    // Put IBUF on clocks.
+    clkN <- mkIBUF(clocked_by rawClock, reset_by rawReset);
+    clkP <- mkIBUF(clocked_by rawClock, reset_by rawReset);
+    rule driveSMAN;
+        pcieClockN.clock_wire.put(clkN);
+    endrule
 
-        rule driveSMAP;
-            pcieClockP.clock_wire.put(clkP);
-        endrule
-    end
+    rule driveSMAP;
+        pcieClockP.clock_wire.put(clkP);
+    endrule
 
     interface PCIE_LOW_LEVEL_DRIVER driver;
         interface MsgPort noc = extPorts[1];
@@ -185,18 +182,12 @@ module mkPCIELowLevelDevice#(Clock rawClock, Reset rawReset)
     interface PCIE_WIRES wires;
         interface Put clk_p;
             method Action put(Bit#(1) clk);
-                if (`FPGA_TECHNOLOGY == "Virtex6")
-                    clkP <= clk;
-                else
-                    pcieClockP.clock_wire.put(clk);
+                clkP <= clk;
             endmethod
         endinterface
         interface Put clk_n;
             method Action put(Bit#(1) clk);
-                if (`FPGA_TECHNOLOGY == "Virtex6")
-                    clkN <= clk;
-                else
-                    pcieClockN.clock_wire.put(clk);
+                clkN <= clk;
             endmethod
         endinterface
 

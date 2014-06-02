@@ -17725,3 +17725,14 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci
  pcie-bluenoc.bsv          Locally Modified          745 
 
 Add IBUF on clocks for ml605.
+
+----------
+keflemin    Date: Mon Jun  2 18:11:38 EDT 2014  CSN: CSN-leap-platforms-747
+                  Mon Jun  2 22:11:38 UTC 2014
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc
+ pcie-bluenoc.bsv          Locally Modified          746 
+
+
+Removed guards on ibuf code -- the ibuf work on the VC707.  
