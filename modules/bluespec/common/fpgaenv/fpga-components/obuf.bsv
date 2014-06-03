@@ -34,6 +34,30 @@
 // Notice that it is safe to include this code in software FPGA
 // components, so long as it is not actually instantiated. 
 
+import "BVI" IBUFDS =
+module vMkClockIBUFDS_NP#(Clock clk_p, Clock clk_n)(ClockGenIfc);
+   default_clock no_clock;
+   default_reset no_reset;
+
+   input_clock clk_p(I)  = clk_p;
+   input_clock clk_n(IB) = clk_n;
+
+   output_clock gen_clk(O);
+
+//   parameter DIFF_TERM = "TRUE";
+
+   path(I,  O);
+   path(IB, O);
+
+   same_family(clk_p, gen_clk);
+endmodule: vMkClockIBUFDS_NP
+
+module mkClockIBUFDS_NP#(Clock clk_p, Clock clk_n)(Clock);
+   let _m <- vMkClockIBUFDS_NP(clk_p, clk_n);
+   return _m.gen_clk;
+endmodule: mkClockIBUFDS_NP
+
+
 import "BVI" OBUF =
 module vMkOBUF(Wire#(one_bit))
    provisos(Bits#(one_bit, 1));

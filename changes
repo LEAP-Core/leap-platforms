@@ -17736,3 +17736,38 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci
 
 
 Removed guards on ibuf code -- the ibuf work on the VC707.  
+
+----------
+keflemin    Date: Tue Jun  3 14:25:12 EDT 2014  CSN: CSN-leap-platforms-748
+                  Tue Jun  3 18:25:12 UTC 2014
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ obuf.bsv                  Locally Modified          747 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic/config/vc707
+ vc707-v7-pcie-dma.ucf     Locally Modified          747 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc
+ pcie-bluenoc.bsv          Locally Modified          747 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc-virtex7
+ pcie-virtex7.bsv          Locally Modified          747 
+
+
+Added support for the Bluespec 2014.05 compiler.
+
+**** WARNING WARNING WARNING ****
+**** WARNING WARNING WARNING ****
+**** WARNING WARNING WARNING ****
+
+This commit breaks support for old compilers when targeting LEAP's
+pcie drivers, as the Bluespec implementation has changed.  You must
+upgrade your compiler past this point.
+
+**** WARNING WARNING WARNING ****
+**** WARNING WARNING WARNING ****
+**** WARNING WARNING WARNING ****
+
+Otherwise, I added support for not using DIFF_TERM='True' for IBUFDS.
+This was breakage introduced by Bluespec.

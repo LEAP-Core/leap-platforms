@@ -164,11 +164,12 @@ module mkPCIELowLevelDevice#(Clock rawClock, Reset rawReset)
     // Put IBUF on clocks.
     clkN <- mkIBUF(clocked_by rawClock, reset_by rawReset);
     clkP <- mkIBUF(clocked_by rawClock, reset_by rawReset);
-    rule driveSMAN;
+
+    rule driveClkN;
         pcieClockN.clock_wire.put(clkN);
     endrule
 
-    rule driveSMAP;
+    rule driveClkP;
         pcieClockP.clock_wire.put(clkP);
     endrule
 
@@ -208,6 +209,7 @@ module mkPCIELowLevelDevice#(Clock rawClock, Reset rawReset)
 
         interface clock = rawClock;
         interface clockSys = pcieSysClkBuf;
+
     endinterface
 
 endmodule
