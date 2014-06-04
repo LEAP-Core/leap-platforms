@@ -29,41 +29,11 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-// Primitive Differential Clock: Drive the differential signals into
-// a buffer and get an output single-ended clock. Reset can be passed-thru
-// or be driven through a buffer.
+`include "awb/provides/physical_platform_defs.bsh"
 
-import Clocks::*;
-
-interface PRIMITIVE_CLOCKS_DEVICE;
-
-    // Wires to be sent to the top level
-
-    method Action clock_p_wire();
-    method Action clock_n_wire();
-    method Action reset_n_wire();
-    
-    // Drivers exposed to the model
-        
-    interface Clock clock;
-    interface Reset reset;
-        
-endinterface
-
-import "BVI" differential_clocks_device = module mkPrimitiveClocksDevice
-    // interface:
-                 (PRIMITIVE_CLOCKS_DEVICE);
-
-    default_clock no_clock;
-    default_reset no_reset;
-  
-    output_clock clock(clk_out);
-    output_reset reset(rst_n_out) clocked_by(clock);
-  
-    method clock_p_wire() enable(clk_p);
-    method clock_n_wire() enable(clk_n);
-    method reset_n_wire() enable(rst_n);
-
-    schedule (clock_p_wire, clock_n_wire, reset_n_wire) CF (clock_p_wire, clock_n_wire, reset_n_wire);
-        
-endmodule
+//
+// Convert preprocessor parameters to functions so they are included as part
+// of the physical platform.
+//
+function Integer fpgaPlatformID()   = `FPGA_PLATFORM_ID;
+function String  fpgaPlatformName() = `FPGA_PLATFORM_NAME;

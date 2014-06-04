@@ -87,6 +87,7 @@ module mkPCIEBlueNoCDevice#(Clock pcieSysClkBuf, Reset pcieSysRst)
     mkTieOff(ep.cfg);
     mkTieOff(ep.cfg_err);
     mkTieOff(ep.pl);
+    mkTieOff(ep.cfg_interrupt);
 
     // Note our PCI ID
     PciId myID = PciId { bus:  ep.cfg.bus_number(),
@@ -184,8 +185,36 @@ module mkPCIEBlueNoCDevice#(Clock pcieSysClkBuf, Reset pcieSysRst)
         soft_reset.assertReset();
     endrule
 
+    // These interfaces appear to be used by some Bluespec-provided
+    // interface software. We disable them here. 
 
-    interface PCIE_DRIVER driver;
+    // Bluespec added these new interfaces in 2014.05
+    (* fire_when_enabled, no_implicit_conditions *)
+    rule drive_status_pcie_link_up;
+          bridge.status_pcie_link_is_up(ep.trn.link_up); 
+    endrule
+
+    (* fire_when_enabled, no_implicit_conditions *)
+    rule drive_status_bluenoc_link_up;
+       bridge.status_bluenoc_link_is_up(bridge.is_activated());
+    endrule
+
+    (* fire_when_enabled, no_implicit_conditions *)
+    rule drive_status_interrupts_enabled;
+       bridge.status_interrupts_enabled(intr_ok);
+    endrule
+
+    (* fire_when_enabled, no_implicit_conditions *)
+    rule drive_status_memory_enabled;
+       bridge.status_memory_enabled(False);
+    endrule
+
+    (* fire_when_enabled, no_implicit_conditions *)
+    rule drive_status_out_of_reset;
+       bridge.status_out_of_reset(False);
+    endrule  
+
+    interface PCIE_LOW_LEVEL_DRIVER driver;
         interface MsgPort noc = bridge.noc;
 
         interface Clock clock = epClock125;

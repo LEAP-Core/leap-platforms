@@ -46,6 +46,8 @@ import RWire::*;
 `include "awb/provides/librl_bsv_base.bsh"
 `include "awb/provides/ddr_sdram_device.bsh"
 `include "awb/provides/ddr_sdram_xilinx_driver.bsh"
+`include "awb/provides/soft_connections.bsh"
+`include "awb/provides/debug_scan_service.bsh"
 
 
 //
@@ -109,8 +111,6 @@ interface DDR_DRIVER;
     // FPGA_DDR_BURST_LENGTH times for every write request.  The order of
     // writeReq() and writeData() calls are not important.
     method Action writeData(FPGA_DDR_DUALEDGE_BEAT data, FPGA_DDR_DUALEDGE_BEAT_MASK mask);
-
-    method List#(Tuple2#(String, Bool)) debugScanState();
 
 `ifndef DRAM_DEBUG_Z
     // Methods enabled only for debugging the controller:
@@ -225,7 +225,7 @@ endinterface
 //
 // mkDDRDevice
 //
-module mkDDRDevice#(Clock rawClock, Reset rawReset)
+module [CONNECTED_MODULE] mkDDRDevice#(Clock rawClock, Reset rawReset)
     // interface:
     (DDR_DEVICE);
 
@@ -266,7 +266,7 @@ FPGA_DDR_STATE
 //
 // Debug DDR interface, exported to upper levels. 
 //
-module mkDDRBank#(Clock rawClock, Reset rawReset)
+module [CONNECTED_MODULE] mkDDRBank#(Clock rawClock, Reset rawReset)
     // interface:
     (DDR_BANK);
 
@@ -275,36 +275,37 @@ module mkDDRBank#(Clock rawClock, Reset rawReset)
     //
     // Debug scan state
     //
-    List#(Tuple2#(String, Bool)) ds_data = List::nil;
-    ds_data = List::cons(tuple2("Xilinx DDR SDRAM ready", ddrSynth.driver.stateReady), ds_data);
-    ds_data = List::cons(tuple2("Xilinx DDR SDRAM initPhase", ddrSynth.driver.init), ds_data);
-    ds_data = List::cons(tuple2("Xilinx DDR SDRAM mergeReqQ not empty", ddrSynth.driver.mergeReqQ_notEmpty), ds_data);
-    ds_data = List::cons(tuple2("Xilinx DDR SDRAM mergeReqQ not full", ddrSynth.driver.mergeReqQ_notFull), ds_data);
-    ds_data = List::cons(tuple2("Xilinx DDR SDRAM syncRequestQ not full", ddrSynth.driver.syncRequestQ_notFull), ds_data);
-    ds_data = List::cons(tuple2("Xilinx DDR SDRAM syncWriteDataQ not full", ddrSynth.driver.syncWriteDataQ_notFull), ds_data);
-    ds_data = List::cons(tuple2("Xilinx DDR SDRAM syncReadDataQ not empty", ddrSynth.driver.syncReadDataQ_notEmpty), ds_data);
+    DEBUG_SCAN_FIELD_LIST dbg_list = List::nil;
+
+    dbg_list <- addDebugScanField(dbg_list,"Xilinx DDR SDRAM ready", ddrSynth.driver.stateReady);
+    dbg_list <- addDebugScanField(dbg_list,"Xilinx DDR SDRAM initPhase", ddrSynth.driver.init);
+    dbg_list <- addDebugScanField(dbg_list,"Xilinx DDR SDRAM mergeReqQ not empty", ddrSynth.driver.mergeReqQ_notEmpty);
+    dbg_list <- addDebugScanField(dbg_list,"Xilinx DDR SDRAM mergeReqQ not full", ddrSynth.driver.mergeReqQ_notFull);
+    dbg_list <- addDebugScanField(dbg_list,"Xilinx DDR SDRAM syncRequestQ not full", ddrSynth.driver.syncRequestQ_notFull);
+    dbg_list <- addDebugScanField(dbg_list,"Xilinx DDR SDRAM syncWriteDataQ not full", ddrSynth.driver.syncWriteDataQ_notFull);
+    dbg_list <- addDebugScanField(dbg_list,"Xilinx DDR SDRAM syncReadDataQ not empty", ddrSynth.driver.syncReadDataQ_notEmpty);
 
 `ifndef DEBUG_DDR3_Z
-    ds_data = List::cons(tuple2("Xilinx DDR SDRAM dbg_wrlvl_start",  ddrSynth.driver.debug_wrlvl_start), ds_data);
-    ds_data = List::cons(tuple2("Xilinx DDR SDRAM dbg_wrlvl_done",  ddrSynth.driver.debug_wrlvl_done), ds_data);
-    ds_data = List::cons(tuple2("Xilinx DDR SDRAM dbg_wrlvl_err",  ddrSynth.driver.debug_wrlvl_err), ds_data);
+    dbg_list <- addDebugScanField(dbg_list,"Xilinx DDR SDRAM dbg_wrlvl_start",  ddrSynth.driver.debug_wrlvl_start);
+    dbg_list <- addDebugScanField(dbg_list,"Xilinx DDR SDRAM dbg_wrlvl_done",  ddrSynth.driver.debug_wrlvl_done);
+    dbg_list <- addDebugScanField(dbg_list,"Xilinx DDR SDRAM dbg_wrlvl_err",  ddrSynth.driver.debug_wrlvl_err);
 
-    ds_data = List::cons(tuple2("Xilinx DDR SDRAM dbg_rdlvl_start[0]", ddrSynth.driver.debug_rdlvl_start_0), ds_data);
-    ds_data = List::cons(tuple2("Xilinx DDR SDRAM dbg_rdlvl_start[1]",  ddrSynth.driver.debug_rdlvl_start_1), ds_data);
-    ds_data = List::cons(tuple2("Xilinx DDR SDRAM dbg_rdlvl_done[0]",  ddrSynth.driver.debug_rdlvl_done_0), ds_data);
-    ds_data = List::cons(tuple2("Xilinx DDR SDRAM dbg_rdlvl_done[1]",  ddrSynth.driver.debug_rdlvl_done_1), ds_data);
-    ds_data = List::cons(tuple2("Xilinx DDR SDRAM dbg_rdlvl_err[0]",  ddrSynth.driver.debug_rdlvl_err_0), ds_data);
-    ds_data = List::cons(tuple2("Xilinx DDR SDRAM dbg_rdlvl_err[1] ",  ddrSynth.driver.debug_rdlvl_err_1), ds_data);
+    dbg_list <- addDebugScanField(dbg_list,"Xilinx DDR SDRAM dbg_rdlvl_start[0]", ddrSynth.driver.debug_rdlvl_start_0);
+    dbg_list <- addDebugScanField(dbg_list,"Xilinx DDR SDRAM dbg_rdlvl_start[1]",  ddrSynth.driver.debug_rdlvl_start_1);
+    dbg_list <- addDebugScanField(dbg_list,"Xilinx DDR SDRAM dbg_rdlvl_done[0]",  ddrSynth.driver.debug_rdlvl_done_0);
+    dbg_list <- addDebugScanField(dbg_list,"Xilinx DDR SDRAM dbg_rdlvl_done[1]",  ddrSynth.driver.debug_rdlvl_done_1);
+    dbg_list <- addDebugScanField(dbg_list,"Xilinx DDR SDRAM dbg_rdlvl_err[0]",  ddrSynth.driver.debug_rdlvl_err_0);
+    dbg_list <- addDebugScanField(dbg_list,"Xilinx DDR SDRAM dbg_rdlvl_err[1] ",  ddrSynth.driver.debug_rdlvl_err_1);
 `endif
 
-    let debugScanData = ds_data;
+
+    let dbgNode <- mkDebugScanNode("Local Memory (ddr-sdram-xilinx.bsv)", dbg_list);
 
     interface DDR_DRIVER driver;
         method readReq = ddrSynth.driver.readReq;
         method readRsp = ddrSynth.driver.readRsp;
         method writeReq = ddrSynth.driver.writeReq;
         method writeData = ddrSynth.driver.writeData;
-        method debugScanState = debugScanData;
 
 `ifndef DRAM_DEBUG_Z
 

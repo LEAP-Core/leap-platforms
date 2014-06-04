@@ -5,6 +5,7 @@
 
 %requires aurora_driver
 %requires aurora_flowcontrol
+%requires aurora_common
 
 %sources -t BSV -v PUBLIC aurora-device-simulation.bsv
 %sources -t BSH -v PUBLIC aurora-device-simulation.bsh

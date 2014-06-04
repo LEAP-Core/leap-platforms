@@ -135,33 +135,56 @@ module mkAuroraDevice#(Clock rawClock, Reset rawReset)
 
         NumTypeParam#(InterfaceWords) interfaceWidth = ?;
         let auroraFlowcontrol <- mkAURORA_FLOWCONTROL(ug_device, interfaceWidth);
-
+        let auroraWires <- mkAuroraIOBUF(auroraFlowcontrol.wires, clocked_by rawClock, reset_by rawReset);
+ 
         ifcDrivers[i] = auroraFlowcontrol.driver;
-        ifcWires[i]   = auroraFlowcontrol.wires;
+        ifcWires[i]   = auroraWires;
     end
+
+    // Place IBUF on clock lines.
+    Wire#(Bit#(1)) smaN <- mkIBUF(clocked_by rawClock, reset_by rawReset);
+    Wire#(Bit#(1)) smaP <- mkIBUF(clocked_by rawClock, reset_by rawReset);
+    Wire#(Bit#(1)) hpcN <- mkIBUF(clocked_by rawClock, reset_by rawReset);
+    Wire#(Bit#(1)) hpcP <- mkIBUF(clocked_by rawClock, reset_by rawReset);
+
+    rule driveSMAN;
+        smaClockN.clock_wire.put(smaN);
+    endrule
+
+    rule driveSMAP;
+        smaClockP.clock_wire.put(smaP);
+    endrule
+
+    rule driveHPCN;
+        hpcClockN.clock_wire.put(hpcN);
+    endrule
+
+    rule driveHPCP;
+        hpcClockP.clock_wire.put(hpcP);
+    endrule
 
     interface AURORA_COMPLEX_WIRES wires;
 
         interface Put sma_clk_p;
             method Action put(Bit#(1) clk);
-                smaClockP.clock_wire.put(clk);
+                smaP <= clk;
             endmethod
         endinterface
 
         interface Put sma_clk_n;
             method Action put(Bit#(1) clk);
-                smaClockN.clock_wire.put(clk);
+                smaN <= clk;
             endmethod
         endinterface
         interface Put hpc_clk_p;
             method Action put(Bit#(1) clk);
-                hpcClockP.clock_wire.put(clk);
+                hpcP <= clk;
             endmethod
         endinterface
 
         interface Put hpc_clk_n;
             method Action put(Bit#(1) clk);
-                hpcClockN.clock_wire.put(clk);
+                hpcN <= clk;
             endmethod
         endinterface
 

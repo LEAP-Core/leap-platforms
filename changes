@@ -17547,3 +17547,242 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr
 
 Wrapped DDR driver in bluespec-style synthesis boundary.  This enables
 us to account for ddr driver area when quoting LEAP area usage.
+
+----------
+keflemin    Date: Tue May 13 08:04:29 EDT 2014  CSN: CSN-leap-platforms-740
+                  Tue May 13 12:04:29 UTC 2014
+
+
+Directory modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian
+ umf-little-endian.h       Locally Modified          739 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/utils
+ physical-defs.awb         Locally Added               0 
+ physical-platform-utils.bsv Locally Modified          739 
+ physical-platform-defs.bsv Locally Added               0 
+ utils.awb                 Locally Modified          739 
+
+
+1) Removed invalid error check from umf-little-endian. This error
+check is for the wrong endianess.
+
+2) Added new physical definitions module.  This module is the only
+BSV-visible module touched by the multiple FPGA compiler between its
+frontend and backend passes.  This will eventually simplify scons
+caching.
+
+----------
+keflemin    Date: Thu May 22 16:59:23 EDT 2014  CSN: CSN-leap-platforms-741
+                  Thu May 22 20:59:23 UTC 2014
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/utils
+ physical-defs.awb         Locally Modified          740 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc
+ pcie-bluenoc-ifc.bsv      Locally Modified          740 
+ pcie-bluenoc.awb          Locally Modified          740 
+ pcie-bluenoc.bsv          Locally Modified          740 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc-virtex6
+ pcie-virtex6.ucf          Locally Modified          740 
+ pcie-virtex6.bsv          Locally Modified          740 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc-virtex7
+ pcie-virtex7.ucf          Locally Modified          740 
+ pcie-virtex7.bsv          Locally Modified          740 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-xilinx
+ ddr-sdram-xilinx.bsv      Locally Modified          740 
+ ddr-sdram-xilinx.ucf      Locally Modified          740 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-xilinx/ddr3-sdram-vc707
+ ddr3-sdram.ucf            Locally Modified          740 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-bram
+ ddr-sdram-bram.bsv        Locally Modified          740 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/differential
+ differential-clocks-vhdl-import.bsv Locally Removed           740 
+ differential-clocks-device.vhd Locally Removed           740 
+ differential-clocks-device.awb Locally Modified          740 
+ differential-clocks-device.bsv Locally Modified          740 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic
+ pcie-generic-platform.awb Locally Modified          740 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic/config/ml605
+ ml605-v6-pcie-dma.ucf     Locally Modified          740 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic/config/vc707
+ vc707-v7-pcie-dma.ucf     Locally Modified          740 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic
+ pcie-generic-platform.bsv Locally Modified          740 
+
+
+1) Reworked pcie to use bluespec's buffer primitives. This was
+necessary because we turned off automatic I/O buffer insertion in XST. 
+
+2) Fixed ucf to reflect new platform compilation organization. 
+
+----------
+keflemin    Date: Tue May 27 18:35:39 EDT 2014  CSN: CSN-leap-platforms-742
+                  Tue May 27 22:35:39 UTC 2014
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ obuf.bsv                  Locally Added               0 
+ shiftreg-sim.bsv          Locally Modified          741 
+ bram-multi-read.bsv       Locally Modified          741 
+ alu-support.bsv           Locally Modified          741 
+ software-fpga-components.awb Locally Modified          741 
+ hardware-fpga-components-virtex7.awb Locally Modified          741 
+ shiftreg.bsv              Locally Modified          741 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-common
+ aurora-common.bsv         Locally Modified          741 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-reliable
+ aurora-reliable.bsv       Locally Modified          741 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device-ml605
+ ml605_sma_aurora.ucf      Locally Modified          741 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device-simulation
+ aurora-device-simulation.awb Locally Modified          741 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-driver-virtex7-64b66b-10gbps
+ vc707_sma_aurora.ucf      Locally Modified          741 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device-vc707
+ aurora-device-vc707.bsv   Locally Modified          741 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc
+ pcie-bluenoc-driver.bsv   Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/simulation
+ sim-clocks-device.bsv     Locally Modified          741 
+
+
+
+1) Added missing bluenoc driver file. 
+
+2) Removed all instances of "asim/provides". These caused spurious
+recompilation in some cases.
+
+3) Added OBUF module and used it to decorate Aurora I/Os.  This did
+not fix the brokeness of the aurora drivers after the platform
+compilation reorganization.  TODO: Aurora clocks still being removed
+by ngdbuild, breaking all multifpga designs targeting the VC707.
+
+
+----------
+keflemin    Date: Wed May 28 10:18:25 EDT 2014  CSN: CSN-leap-platforms-743
+                  Wed May 28 14:18:25 UTC 2014
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device-ml605
+ aurora-device-ml605.bsv   Locally Modified          742 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-driver-virtex7-64b66b-10gbps
+ vc707_sma_aurora.ucf      Locally Modified          742 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device-vc707
+ aurora-device-vc707.bsv   Locally Modified          742 
+
+
+Aurora devices require IBUF on their clock pins.  This is a little
+strange because the PCIE device does not appear to require such a
+declaration.
+
+----------
+hjyang      Date: Fri May 30 12:35:30 EDT 2014  CSN: CSN-leap-platforms-744
+                  Fri May 30 16:35:30 UTC 2014
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-xilinx/ddr3-sdram-ml605
+ ddr3-sdram.ucf            Locally Modified          743 
+
+A fix for building ml605 models.
+
+----------
+hjyang      Date: Fri May 30 18:00:54 EDT 2014  CSN: CSN-leap-platforms-745
+                  Fri May 30 22:00:54 UTC 2014
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc-virtex6
+ pcie-virtex6.ucf          Locally Modified          744 
+
+Another fix to pass ngdbuild for ml605 models.
+
+----------
+hjyang      Date: Sat May 31 22:20:03 EDT 2014  CSN: CSN-leap-platforms-746
+                  Sun Jun  1 02:20:03 UTC 2014
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc
+ pcie-bluenoc.bsv          Locally Modified          745 
+
+Add IBUF on clocks for ml605.
+
+----------
+keflemin    Date: Mon Jun  2 18:11:38 EDT 2014  CSN: CSN-leap-platforms-747
+                  Mon Jun  2 22:11:38 UTC 2014
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc
+ pcie-bluenoc.bsv          Locally Modified          746 
+
+
+Removed guards on ibuf code -- the ibuf work on the VC707.  
+
+----------
+keflemin    Date: Tue Jun  3 14:25:12 EDT 2014  CSN: CSN-leap-platforms-748
+                  Tue Jun  3 18:25:12 UTC 2014
+
+
+Directory modules/bluespec/common/fpgaenv/fpga-components
+ obuf.bsv                  Locally Modified          747 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic/config/vc707
+ vc707-v7-pcie-dma.ucf     Locally Modified          747 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc
+ pcie-bluenoc.bsv          Locally Modified          747 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc-virtex7
+ pcie-virtex7.bsv          Locally Modified          747 
+
+
+Added support for the Bluespec 2014.05 compiler.
+
+**** WARNING WARNING WARNING ****
+**** WARNING WARNING WARNING ****
+**** WARNING WARNING WARNING ****
+
+This commit breaks support for old compilers when targeting LEAP's
+pcie drivers, as the Bluespec implementation has changed.  You must
+upgrade your compiler past this point.
+
+**** WARNING WARNING WARNING ****
+**** WARNING WARNING WARNING ****
+**** WARNING WARNING WARNING ****
+
+Otherwise, I added support for not using DIFF_TERM='True' for IBUFDS.
+This was breakage introduced by Bluespec.
+
+----------
+keflemin    Date: Wed Jun  4 07:32:42 EDT 2014  CSN: CSN-leap-platforms-749
+                  Wed Jun  4 11:32:42 UTC 2014
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-driver-virtex7-64b66b-10gbps
+ vc707_sma_aurora.ucf      Locally Modified          748 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device-vc707
+ aurora-device-vc707.bsv   Locally Modified          748 
+
+
+Since operation of multifpga builds seems stable, reverted ucf and
+aurora device code to remove chipscope.

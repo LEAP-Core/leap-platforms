@@ -13,11 +13,11 @@ CONFIG PART = xc7vx485t-ffg1761-2;
 # PIN ASSIGNMENTS
 ######################################################################################################
 
-NET  "RST_N"                          LOC = AV40 | IOSTANDARD = LVCMOS18 | NODELAY | PULLUP;
+NET  "clocksWires_rst_put"                          LOC = AV40 | IOSTANDARD = LVCMOS18 | NODELAY | PULLUP | TIG;
 
-NET  "CLK"                            TNM_NET = TNM_clk_in;    # 200 MHz
-NET  "CLK"                            LOC = E19 | IOSTANDARD = LVDS;
-NET  "CLK_0"                          LOC = E18 | IOSTANDARD = LVDS;
+NET  "clocksWires_clk_p_put"                        TNM_NET = TNM_clk_in;    # 200 MHz
+NET  "clocksWires_clk_p_put"                        LOC = E19 | IOSTANDARD = DIFF_SSTL15;
+NET  "clocksWires_clk_n_put"                        LOC = E18 | IOSTANDARD = DIFF_SSTL15;
 
 
 ######################################################################################################
@@ -25,8 +25,6 @@ NET  "CLK_0"                          LOC = E18 | IOSTANDARD = LVDS;
 ######################################################################################################
 
 TIMESPEC TS_clk_in = PERIOD TNM_clk_in 200 MHz HIGH 50 % ;
-
-NET  "RST_N"                          TIG;
 
 
 disable = reg_sr_o;

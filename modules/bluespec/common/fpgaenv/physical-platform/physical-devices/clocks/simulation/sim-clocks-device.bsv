@@ -33,8 +33,8 @@
 
 import Clocks::*;
 
-`include "asim/provides/physical_platform_utils.bsh"
-`include "asim/provides/fpga_components.bsh"
+`include "awb/provides/physical_platform_utils.bsh"
+`include "awb/provides/fpga_components.bsh"
 
 //
 // CLOCKS_DRIVER: clocks exported to the model

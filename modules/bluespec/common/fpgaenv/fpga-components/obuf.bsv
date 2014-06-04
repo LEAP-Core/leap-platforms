@@ -29,54 +29,63 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-import MsgFormat::*;
-import PCIE::*;
+// Provides a BSV wrapper around the Xilinx OBUF component. 
 
-`include "awb/provides/pcie_bluenoc_ifc.bsh"
-`include "awb/provides/umf.bsh"
+// Notice that it is safe to include this code in software FPGA
+// components, so long as it is not actually instantiated. 
 
-//
-// Common interface definitions used by top level BlueNoC PCIe bridge and the
-// lower-level devices.
-//
+import "BVI" IBUFDS =
+module vMkClockIBUFDS_NP#(Clock clk_p, Clock clk_n)(ClockGenIfc);
+   default_clock no_clock;
+   default_reset no_reset;
 
-typedef `PCIE_BYTES_PER_BEAT PCIE_BYTES_PER_BEAT;
-typedef `PCIE_LANES PCIE_LANES;
+   input_clock clk_p(I)  = clk_p;
+   input_clock clk_n(IB) = clk_n;
 
-        
-//
-// PCIE_ --
-//   Expose the PCIe device as a network port.
-// 
-interface PCIE_LOW_LEVEL_DRIVER;
-    interface MsgPort#(PCIE_BYTES_PER_BEAT) noc;
+   output_clock gen_clk(O);
 
-    interface Clock clock;
-    interface Reset reset;
-endinterface
+//   parameter DIFF_TERM = "TRUE";
+
+   path(I,  O);
+   path(IB, O);
+
+   same_family(clk_p, gen_clk);
+endmodule: vMkClockIBUFDS_NP
+
+module mkClockIBUFDS_NP#(Clock clk_p, Clock clk_n)(Clock);
+   let _m <- vMkClockIBUFDS_NP(clk_p, clk_n);
+   return _m.gen_clk;
+endmodule: mkClockIBUFDS_NP
 
 
-// interface
-interface PCIE_DRIVER;
-    method ActionValue#(UMF_CHUNK) read();
-    method Action                  write(UMF_CHUNK chunk);
+import "BVI" OBUF =
+module vMkOBUF(Wire#(one_bit))
+   provisos(Bits#(one_bit, 1));
 
-    // this interface needed for LIM compiler.
-    method UMF_CHUNK first();
-    method Action    deq();
-    method Bool      write_ready();
-   
-    interface Clock clock;
-    interface Reset reset;
+   default_clock clk();
+   default_reset rstn();
 
-endinterface
+   method      _write(I) enable((*inhigh*)en);
+   method O    _read;
 
-//
-// BNOC_PCIE_DEV --
-//
-//   Internal interface for connection to the BlueNoC bridge and PCIe device.
-//
-interface BNOC_PCIE_DEV#(numeric type n_BPB);
-    interface PCIE_LOW_LEVEL_DRIVER driver;
-    interface PCIE_EXP#(PCIE_LANES) pcie_exp;
-endinterface
+   path(I, O);
+
+   schedule _write SB _read;
+   schedule _write C  _write;
+   schedule _read  CF _read;
+endmodule: vMkOBUF
+
+module mkOBUF(Wire#(a))
+   provisos(Bits#(a, sa));
+
+   Vector#(sa, Wire#(Bit#(1))) _bufg <- replicateM(vMkOBUF);
+
+   method a _read;
+      return unpack(pack(readVReg(_bufg)));
+   endmethod
+
+   method Action _write(a x);
+      writeVReg(_bufg, unpack(pack(x)));
+   endmethod
+endmodule: mkOBUF
+

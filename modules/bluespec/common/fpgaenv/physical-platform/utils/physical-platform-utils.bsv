@@ -31,13 +31,6 @@
 
 `include "awb/provides/physical_platform_utils.bsh"
 
-//
-// Convert preprocessor parameters to functions so they are included as part
-// of the physical platform.
-//
-function Integer fpgaPlatformID()   = `FPGA_PLATFORM_ID;
-function String  fpgaPlatformName() = `FPGA_PLATFORM_NAME;
-
 function Integer fpgaNumPlatforms() = `FPGA_NUM_PLATFORMS;
 
 //
@@ -45,3 +38,4 @@ function Integer fpgaNumPlatforms() = `FPGA_NUM_PLATFORMS;
 // one bit.
 //
 typedef UInt#(TMax#(1, TLog#(TAdd#(1,`FPGA_NUM_PLATFORMS)))) FPGA_PLATFORM_ID;
+ 

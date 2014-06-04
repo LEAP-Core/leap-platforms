@@ -65,16 +65,21 @@ interface PCIE_WIRES;
     method Bit#(8) leds();
 
     interface PCIE_EXP#(PCIE_LANES) pcie_exp;
+
+    // Needed to shut bluespec up.
+    interface Clock clock;
+    interface Clock clockSys;
+
 endinterface
 
 
-//
-// PCIE_DEVICE --
+
+// PCIE_DEVICE_IFC--
 //
 //   By convention a Device is a driver and a wires.
 //
-interface PCIE_DEVICE;
-    interface PCIE_DRIVER driver;
+interface PCIE_LOW_LEVEL_DEVICE;
+    interface PCIE_LOW_LEVEL_DRIVER driver;
     interface PCIE_WIRES  wires;
 endinterface
 
@@ -83,9 +88,11 @@ endinterface
 // mkPCIEDevice --
 //   Wrap the PCIe core device in a generic interface.
 //
-module mkPCIEDevice#(Clock rawClock, Reset rawReset)
+module mkPCIELowLevelDevice#(Clock rawClock, Reset rawReset)
     // Interface:
-    (PCIE_DEVICE);
+    (PCIE_LOW_LEVEL_DEVICE);
+
+    //  Needed so that Bluespec doesn't complain about missing top-level clocks.
 
     // PCIe is driven by a different clock than the raw clock.
     // The "clocked_by" is pure fiction.  By providing a top-level
@@ -108,8 +115,13 @@ module mkPCIEDevice#(Clock rawClock, Reset rawReset)
     // solely to keep the compiler from complaining about the module
     // being clocked by a clock not exposed at the top.
     RESET_FROM_PUT pcieReset <- mkResetFromPut(pcieSysClkBuf,
-                                               clocked_by rawClock);
+                                               clocked_by pcieSysClkBuf);
 
+    Wire#(Bit#(1)) buffRst <- mkIBUF(clocked_by pcieSysClkBuf, reset_by pcieReset.reset);
+ 
+    rule transferRst;
+        pcieReset.reset_wire.put(buffRst);
+    endrule
 
     // Instantiate a PCIe endpoint
     BNOC_PCIE_DEV#(PCIE_BYTES_PER_BEAT) dev <-
@@ -146,7 +158,22 @@ module mkPCIEDevice#(Clock rawClock, Reset rawReset)
     mkTieOff(extPorts[0]);
 
 
-    interface PCIE_DRIVER driver;
+    Wire#(Bit#(1)) clkN;
+    Wire#(Bit#(1)) clkP; 
+    
+    // Put IBUF on clocks.
+    clkN <- mkIBUF(clocked_by rawClock, reset_by rawReset);
+    clkP <- mkIBUF(clocked_by rawClock, reset_by rawReset);
+
+    rule driveClkN;
+        pcieClockN.clock_wire.put(clkN);
+    endrule
+
+    rule driveClkP;
+        pcieClockP.clock_wire.put(clkP);
+    endrule
+
+    interface PCIE_LOW_LEVEL_DRIVER driver;
         interface MsgPort noc = extPorts[1];
 
         interface Clock clock = dev.driver.clock;
@@ -155,14 +182,20 @@ module mkPCIEDevice#(Clock rawClock, Reset rawReset)
 
     interface PCIE_WIRES wires;
         interface Put clk_p;
-           method Action put(Bit#(1) clk) = pcieClockP.clock_wire.put(clk);
+            method Action put(Bit#(1) clk);
+                clkP <= clk;
+            endmethod
         endinterface
         interface Put clk_n;
-           method Action put(Bit#(1) clk) = pcieClockN.clock_wire.put(clk);
+            method Action put(Bit#(1) clk);
+                clkN <= clk;
+            endmethod
         endinterface
 
         interface Put rst;
-           method Action put(Bit#(1) rst) = pcieReset.reset_wire.put(rst);
+           method Action put(Bit#(1) rst);
+              buffRst <= rst;
+           endmethod
         endinterface
 
         method leds = ?; // dev.leds();
@@ -173,6 +206,10 @@ module mkPCIEDevice#(Clock rawClock, Reset rawReset)
             method txp = pcieBury.txp_wire;
             method txn = pcieBury.txn_wire;
         endinterface
+
+        interface clock = rawClock;
+        interface clockSys = pcieSysClkBuf;
+
     endinterface
 
 endmodule

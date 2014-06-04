@@ -1,0 +1,16 @@
+
+%name Common Physical Platform Definitions
+%desc Definitions specific to a physical platform, mostly filled in by lim compiler
+
+%provides physical_platform_defs
+
+%sources -t BSV -v PUBLIC   physical-platform-defs.bsv
+
+##
+## These will be filled in automatically by the multi-FPGA build rules.
+## FPGA_PLATFORM_ID will always be less than FPGA_NUM_PLATFORMS.
+##
+
+%param --global FPGA_PLATFORM_ID   0         "ID of multi-FPGA target"
+%param --global FPGA_PLATFORM_NAME "platform" "Name of multi-FPGA target"
+

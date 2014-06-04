@@ -34,6 +34,8 @@
 %sources -t XCF -v PRIVATE xilinx-components.xcf
 %sources -t SDC -v PRIVATE xilinx-components.sdc
 
+%sources -t BSV -v PUBLIC  obuf.bsv
+
 %public floating-point-import.bsv
 %public floating-point-accel.bsv
 

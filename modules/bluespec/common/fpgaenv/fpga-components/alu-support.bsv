@@ -38,7 +38,7 @@
 import Vector::*;
 import RWire::*;
 
-`include "asim/provides/librl_bsv_base.bsh"
+`include "awb/provides/librl_bsv_base.bsh"
 
 
 // ===================================================================

@@ -49,17 +49,18 @@
 #################################################################################
 ## UCF generated for xc6vlx240t-ff1156-1 device
 # 125.0MHz GTX Reference clock constraint 
-NET "m_llpi_phys_plat_aurora_device/smaClock_O" TNM_NET = GT_REFCLK_SMA; 
-NET "m_llpi_phys_plat_aurora_device/hpcClock_O" TNM_NET = GT_REFCLK_HPC; 
+
+NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/smaClock_O" TNM_NET = GT_REFCLK_SMA; 
+NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/hpcClock_O" TNM_NET = GT_REFCLK_HPC; 
 
 TIMESPEC TS_SMA_GTXQ0_LEFT_I = PERIOD "GT_REFCLK_SMA" 125.0 MHz HIGH 50%;
 TIMESPEC TS_HPC_GTXQ0_LEFT_I = PERIOD "GT_REFCLK_HPC" 156.25 MHz HIGH 50%; # the XM104 has a different clock.
 
-NET "m_llpi_phys_plat_aurora_device/ug_device/USER_CLK" TNM_NET = USER_CLK_SMA;
-NET "m_llpi_phys_plat_aurora_device/ug_device_1/USER_CLK" TNM_NET = USER_CLK_HPC1;
-NET "m_llpi_phys_plat_aurora_device/ug_device_2/USER_CLK" TNM_NET = USER_CLK_HPC2;
-NET "m_llpi_phys_plat_aurora_device/ug_device_3/USER_CLK" TNM_NET = USER_CLK_HPC3;
-NET "m_llpi_phys_plat_aurora_device/ug_device_4/USER_CLK" TNM_NET = USER_CLK_HPC4;
+NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device/USER_CLK" TNM_NET = USER_CLK_SMA;
+NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_1/USER_CLK" TNM_NET = USER_CLK_HPC1;
+NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_2/USER_CLK" TNM_NET = USER_CLK_HPC2;
+NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_3/USER_CLK" TNM_NET = USER_CLK_HPC3;
+NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_4/USER_CLK" TNM_NET = USER_CLK_HPC4;
 
 TIMESPEC TS_USER_CLK_SMA_I = PERIOD "USER_CLK_SMA" 125 MHz HIGH 50%;
 TIMESPEC TS_USER_CLK_HPC1_I = PERIOD "USER_CLK_HPC1" 125 MHz HIGH 50%;
@@ -67,11 +68,11 @@ TIMESPEC TS_USER_CLK_HPC2_I = PERIOD "USER_CLK_HPC2" 125 MHz HIGH 50%;
 TIMESPEC TS_USER_CLK_HPC3_I = PERIOD "USER_CLK_HPC3" 125 MHz HIGH 50%;
 TIMESPEC TS_USER_CLK_HPC4_I = PERIOD "USER_CLK_HPC4" 125 MHz HIGH 50%;
 
-NET "m_llpi_phys_plat_aurora_device/ug_device/clock_module_i/SYNC_CLK" TNM_NET = SYNC_CLK_SMA;
-NET "m_llpi_phys_plat_aurora_device/ug_device_1/clock_module_i/SYNC_CLK" TNM_NET = SYNC_CLK_HPC1;
-NET "m_llpi_phys_plat_aurora_device/ug_device_2/clock_module_i/SYNC_CLK" TNM_NET = SYNC_CLK_HPC2;
-NET "m_llpi_phys_plat_aurora_device/ug_device_3/clock_module_i/SYNC_CLK" TNM_NET = SYNC_CLK_HPC3;
-NET "m_llpi_phys_plat_aurora_device/ug_device_4/clock_module_i/SYNC_CLK" TNM_NET = SYNC_CLK_HPC4;
+NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device/clock_module_i/SYNC_CLK" TNM_NET = SYNC_CLK_SMA;
+NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_1/clock_module_i/SYNC_CLK" TNM_NET = SYNC_CLK_HPC1;
+NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_2/clock_module_i/SYNC_CLK" TNM_NET = SYNC_CLK_HPC2;
+NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_3/clock_module_i/SYNC_CLK" TNM_NET = SYNC_CLK_HPC3;
+NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_4/clock_module_i/SYNC_CLK" TNM_NET = SYNC_CLK_HPC4;
  
 TIMESPEC TS_SYNC_CLK_SMA_I = PERIOD "SYNC_CLK_SMA" 250 MHz HIGH 50%;
 TIMESPEC TS_SYNC_CLK_HPC1_I = PERIOD "SYNC_CLK_HPC1" 250 MHz HIGH 50%;
@@ -87,7 +88,7 @@ NET  auroraWires_hpc_clk_p_put LOC = AK6;
 
 
 # 200 MHz board Clock Constraint  
-NET "m_llpi_phys_plat_aurora_device/ug_device/INIT_CLK" TNM_NET = INIT_CLK;
+NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device/INIT_CLK" TNM_NET = INIT_CLK;
 #TIMESPEC TS_INIT_CLK = PERIOD "INIT_CLK_SMA" 5 ns HIGH 50%;
 
 ###### No cross clock domain analysis. Domains are not related ############## 
@@ -112,16 +113,16 @@ TIMESPEC "TS_TIG4" = FROM "INIT_CLK" TO "USER_CLK_HPC4" TIG;
 # DP6 is X0Y1 (XM104 - CX4)
 # DP7 is X0Y0 (XM104 - CX4)
 
-INST m_llpi_phys_plat_aurora_device/ug_device/aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y18; # sma cables
-INST m_llpi_phys_plat_aurora_device/ug_device_1/aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y0;
-INST m_llpi_phys_plat_aurora_device/ug_device_2/aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y1;
-INST m_llpi_phys_plat_aurora_device/ug_device_3/aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y6;
-INST m_llpi_phys_plat_aurora_device/ug_device_4/aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y7;
+INST m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device/aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y18; # sma cables
+INST m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_1/aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y0;
+INST m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_2/aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y1;
+INST m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_3/aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y6;
+INST m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_4/aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y7;
 
-#INST m_llpi_phys_plat_aurora_device_ug_device_5/aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y4;
-#INST m_llpi_phys_plat_aurora_device_ug_device_6/aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y5;
-#INST m_llpi_phys_plat_aurora_device_ug_device_7/aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y6;
-#INST m_llpi_phys_plat_aurora_device_ug_device_8/aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y7;
+#INST m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device_ug_device_5/aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y4;
+#INST m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device_ug_device_6/aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y5;
+#INST m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device_ug_device_7/aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y6;
+#INST m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device_ug_device_8/aurora_module_i/gtx_wrapper_i/GTXE1_INST/gtxe1_i LOC=GTXE1_X0Y7;
 
 
 

@@ -107,11 +107,11 @@ NET "*pcie_dev/ep_pcie_ep/v7_pcie_v1_7_i/gt_top_i/pipe_wrapper_i/user_resetdone*
 NET "*pcie_dev/ep_pcie_ep/v7_pcie_v1_7_i/gt_top_i/pipe_wrapper_i/pipe_reset.pipe_reset_i/cpllreset" TIG;
 
 
-INST "m_llpi_phys_plat_pcie_dev/fifoRxData_elem*"       TNM=TG_pci_clk_125;
-INST "m_llpi_phys_plat_pcie_dev/fifoRxData_block*"      TNM=TG_pci_clk_250;
+INST "m_sys_sys_vp_m_mod/llpi_phys_plat_pcie_pcie_dev/fifoRxData_elem*"       TNM=TG_pci_clk_125;
+INST "m_sys_sys_vp_m_mod/llpi_phys_plat_pcie_pcie_dev/fifoRxData_block*"      TNM=TG_pci_clk_250;
 
-INST "m_llpi_phys_plat_pcie_dev/fifoTxData_*elem*"      TNM=TG_pci_clk_250;
-INST "m_llpi_phys_plat_pcie_dev/fifoTxData_*block*"     TNM=TG_pci_clk_125;
+INST "m_sys_sys_vp_m_mod/llpi_phys_plat_pcie_pcie_dev/fifoTxData_*elem*"      TNM=TG_pci_clk_250;
+INST "m_sys_sys_vp_m_mod/llpi_phys_plat_pcie_pcie_dev/fifoTxData_*block*"     TNM=TG_pci_clk_125;
 
 TIMESPEC TS_pci_clk_125_to_250=FROM TG_pci_clk_125 TO TG_pci_clk_250 4ns DATAPATHONLY;
 TIMESPEC TS_pci_clk_250_to_125=FROM TG_pci_clk_250 TO TG_pci_clk_125 4ns DATAPATHONLY;
@@ -185,13 +185,13 @@ INST "*pcie_dev/ep_pcie_ep/v7_pcie_v1_7_i/pcie_top_i/pcie_7x_i/pcie_bram_top/pci
 # AREA ASSIGNMENTS
 ######################################################################################################
 
-INST "m_llpi_phys_plat_pcie_dev/*"        AREA_GROUP = "AG_pcie_ep";
-INST "m_llpi_phys_plat_pcie_pcieSysClk*"  AREA_GROUP = "AG_pcie_ep";
+INST "m_sys_sys_vp_m_mod/llpi_phys_plat_pcie_pcie_dev/*"        AREA_GROUP = "AG_pcie_ep";
+INST "m_sys_sys_vp_m_mod/llpi_phys_plat_pcie_pcie_pcieSysClk*"  AREA_GROUP = "AG_pcie_ep";
 AREA_GROUP "AG_pcie_ep"                   RANGE=SLICE_X204Y65:SLICE_X221Y141;
 AREA_GROUP "AG_pcie_ep"                   GROUP = CLOSED;
 
-INST "m_llpi_phys_plat_pcie_dev/bridge/*" AREA_GROUP = "AG_pcie_bridge";
-INST "m_llpi_phys_plat_pcie_extPorts*"    AREA_GROUP = "AG_pcie_bridge";
+INST "m_sys_sys_vp_m_mod/llpi_phys_plat_pcie_pcie_dev/bridge/*" AREA_GROUP = "AG_pcie_bridge";
+INST "m_sys_sys_vp_m_mod/llpi_phys_plat_pcie_pcie_extPorts*"    AREA_GROUP = "AG_pcie_bridge";
 AREA_GROUP "AG_pcie_bridge"               RANGE=SLICE_X160Y71:SLICE_X203Y141;
 AREA_GROUP "AG_pcie_bridge"               RANGE=RAMB36_X12Y17:RAMB36_X12Y22;
 AREA_GROUP "AG_pcie_bridge"               GROUP = CLOSED;

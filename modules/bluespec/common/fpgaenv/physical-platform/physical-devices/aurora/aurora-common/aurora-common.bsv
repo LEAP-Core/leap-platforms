@@ -37,6 +37,11 @@
 // the other device. This module is slightly complicated by the need to 
 // instantiate dummy serial modules to route clock to the SMA GTP.
 
+import XilinxCells::*;
+
+// we provide our own OBUF for now.
+`include "awb/provides/fpga_components.bsh"
+
 typedef struct {
 
     Integer pll_divsel45_fb;
@@ -45,3 +50,47 @@ typedef struct {
     Clock   clock;
 
 } AuroraGTXClockSpec deriving (Eq);
+
+interface AURORA_WIRES;
+    (* always_enabled, always_ready *)
+    method Action rxp_in(Bit#(1) i);
+    (* always_enabled, always_ready *)
+    method Action rxn_in(Bit#(1) i);
+    (* always_enabled, always_ready *)
+    method Bit#(1) txp_out();
+    (* always_enabled, always_ready *)
+    method Bit#(1) txn_out();
+endinterface
+
+module mkAuroraIOBUF#(AURORA_WIRES wiresIn) (AURORA_WIRES);
+
+    Wire#(Bit#(1)) buffRXN <- mkIBUF();
+    Wire#(Bit#(1)) buffRXP <- mkIBUF();
+
+    Wire#(Bit#(1)) buffTXN <- mkOBUF();
+    Wire#(Bit#(1)) buffTXP <- mkOBUF();
+ 
+    rule transferRXN;
+        wiresIn.rxn_in(buffRXN);
+    endrule
+
+    rule transferRXP;
+        wiresIn.rxp_in(buffRXP);
+    endrule
+
+    rule transferTXN;
+        buffTXN._write(wiresIn.txn_out);
+    endrule
+
+    rule transferTXP;
+        buffTXP._write(wiresIn.txp_out);
+    endrule
+
+    method rxn_in = buffRXN._write;
+    method rxp_in = buffRXP._write;
+
+    method txn_out = buffTXN._read;
+    method txp_out = buffTXP._read;
+
+endmodule
+

@@ -3,6 +3,7 @@
 %desc Common Utilities shared by multiple Platforms
 
 %provides physical_platform_utils
+%requires physical_platform_defs
 
 %sources -t BSV -v PUBLIC   physical-platform-utils.bsv
 %sources -t BSV -v PUBLIC   soft-reset.bsv
@@ -15,6 +16,4 @@
 ## These will be filled in automatically by the multi-FPGA build rules.
 ## FPGA_PLATFORM_ID will always be less than FPGA_NUM_PLATFORMS.
 ##
-%param --global FPGA_PLATFORM_ID   0         "ID of multi-FPGA target"
-%param --global FPGA_PLATFORM_NAME "Unknown" "Name of multi-FPGA target"
 %param --global FPGA_NUM_PLATFORMS 1         "Number of FPGA targets"

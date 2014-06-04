@@ -185,7 +185,7 @@ module mkPCIEBlueNoCDevice#(Clock pcieSysClkBuf, Reset pcieSysRstN)
     endrule
 
 
-    interface PCIE_DRIVER driver;
+    interface PCIE_LOW_LEVEL_DRIVER driver;
         interface MsgPort noc = bridge.noc;
 
         interface Clock clock = epClock125;
