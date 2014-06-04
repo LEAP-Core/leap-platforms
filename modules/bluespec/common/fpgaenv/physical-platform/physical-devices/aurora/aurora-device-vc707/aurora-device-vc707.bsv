@@ -124,7 +124,7 @@ module mkAuroraDevice#(Clock rawClock, Reset rawReset)
     let smaClock <- mkClockIBUFDS_GTE2(True, smaClockP.clock, smaClockN.clock);
 
     // We scrub these values from coregen. SMA clock is 125 MHz.
-    ifcClocks[0] = AuroraGTXClockSpec{pll_divsel45_fb: 5, clk25_divider: 5, clock: smaClock, use_chipscope: 1};
+    ifcClocks[0] = AuroraGTXClockSpec{pll_divsel45_fb: 5, clk25_divider: 5, clock: smaClock, use_chipscope: 0};
 
     // Now we can instantiate the aurora devices enblock
     for(Integer i = 0; i < `NUM_AURORA_IFCS; i = i + 1)

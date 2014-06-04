@@ -149,12 +149,12 @@ INST m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_1/aurora_64b66b_v
 INST "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_0/*" AREA_GROUP = "AG_aurora_0";
 INST "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/*auroraFlowcontrol_0*" AREA_GROUP = "AG_aurora_0";
 AREA_GROUP "AG_aurora_0"                  RANGE=SLICE_X190Y0:SLICE_X221Y49;
-#AREA_GROUP "AG_aurora_0"                  RANGE=RAMB36_X14Y6:RAMB36_X14Y7, RAMB36_X13Y5:RAMB36_X13Y8;
+AREA_GROUP "AG_aurora_0"                  RANGE=RAMB36_X14Y6:RAMB36_X14Y7, RAMB36_X13Y5:RAMB36_X13Y8;
 AREA_GROUP "AG_aurora_0"                  GROUP=CLOSED;
 
 
 INST "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_1/*" AREA_GROUP = "AG_aurora_1";
 INST "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/*auroraFlowcontrol_1*" AREA_GROUP = "AG_aurora_1";
 AREA_GROUP "AG_aurora_1"                  RANGE=SLICE_X190Y200:SLICE_X221Y249;
-#AREA_GROUP "AG_aurora_1"                  RANGE=RAMB36_X14Y43:RAMB36_X14Y44, RAMB36_X13Y42:RAMB36_X13Y45;
+AREA_GROUP "AG_aurora_1"                  RANGE=RAMB36_X14Y43:RAMB36_X14Y44, RAMB36_X13Y42:RAMB36_X13Y45;
 AREA_GROUP "AG_aurora_1"                  GROUP=CLOSED;
