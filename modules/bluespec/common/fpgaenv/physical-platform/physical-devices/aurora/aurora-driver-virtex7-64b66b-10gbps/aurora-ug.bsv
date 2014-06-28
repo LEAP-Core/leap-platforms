@@ -44,13 +44,9 @@ interface AURORA_SINGLE_DEVICE_UG#(numeric type width);
     method Action send(Bit#(width) tx);
     method ActionValue#(Bit#(width)) receive();
 
-    (* always_enabled, always_ready *)
     method Action rxn_in(Bit#(1) i);
-    (* always_enabled, always_ready *)
     method Action rxp_in(Bit#(1) i);
-    (* always_enabled, always_ready *)
     method Bit#(1) txn_out();
-    (* always_enabled, always_ready *)
     method Bit#(1) txp_out();
     
     method Bit#(1) channel_up;
@@ -88,8 +84,8 @@ module mkAURORA_SINGLE_UG#(AuroraGTXClockSpec pllClockSpec, Clock rawClock, Rese
     output_reset aurora_rst(USER_RST_N) clocked_by (aurora_clk);
     output_reset aurora_rst_n(USER_RST) clocked_by (aurora_clk);
 
-    method rxn_in(RXN) enable((*inhigh*) rx_n_en) reset_by(no_reset) clocked_by(rawClock);
-    method rxp_in(RXP) enable((*inhigh*) rx_p_en) reset_by(no_reset) clocked_by(rawClock);
+    method rxn_in(RXN) enable(rx_n_en) reset_by(no_reset) clocked_by(rawClock);
+    method rxp_in(RXP) enable(rx_p_en) reset_by(no_reset) clocked_by(rawClock);
     method TXN txn_out() reset_by(no_reset) clocked_by(rawClock);
     method TXP txp_out() reset_by(no_reset) clocked_by(rawClock);
 

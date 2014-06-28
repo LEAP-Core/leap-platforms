@@ -67,7 +67,7 @@ import "BVI" clock_import = module mkClockFromPut
     output_clock clock(clk_out);
   
     interface Put clock_wire;
-        method put(clk_in) enable((*inhigh*) en0);
+        method put(clk_in) enable(en0);
     endinterface
 
     schedule clock_wire_put CF clock_wire_put;

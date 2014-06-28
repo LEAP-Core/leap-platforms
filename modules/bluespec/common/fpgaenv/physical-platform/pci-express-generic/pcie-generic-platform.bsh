@@ -2,5 +2,14 @@
 // Include details of the specific physical platform
 //
 
+import PCIE::*;
+import XilinxCells::*;
+import BlueNoC::*;
+
 `include "awb/provides/physical_platform_config.bsh"
 `include "awb/provides/aurora_device.bsh"
+`include "awb/provides/aurora_common.bsh"
+`include "awb/provides/pcie_device.bsh"
+`include "awb/provides/clocks_device.bsh"
+`include "awb/provides/ddr_sdram_device.bsh"
+`include "ddr_sdram_xilinx_driver.bsh"

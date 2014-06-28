@@ -53,22 +53,26 @@ import GetPut::*;
 //   ties them to pins.
 //
 interface PCIE_WIRES;
-    (* always_ready, always_enabled *)
+
     interface Put#(Bit#(1)) clk_p;
-    (* always_ready, always_enabled *)
+
     interface Put#(Bit#(1)) clk_n;
 
-    (* always_ready, always_enabled *)
     interface Put#(Bit#(1)) rst;
 
-    (* always_ready, always_enabled *)
     method Bit#(8) leds();
 
     interface PCIE_EXP#(PCIE_LANES) pcie_exp;
 
     // Needed to shut bluespec up.
-    interface Clock clock;
-    interface Clock clockSys;
+    interface Clock clockOut;
+    interface Reset resetOut;
+    interface Clock rawClockOut;
+    interface Reset rawResetOut;
+    interface Clock devClockOut;
+    interface Reset devResetOut;
+    interface Clock clockSysOut;
+    interface Reset resetSysOut;
 
 endinterface
 
@@ -93,6 +97,8 @@ module mkPCIELowLevelDevice#(Clock rawClock, Reset rawReset)
     (PCIE_LOW_LEVEL_DEVICE);
 
     //  Needed so that Bluespec doesn't complain about missing top-level clocks.
+    Clock clock <- exposeCurrentClock;
+    Reset reset <- exposeCurrentReset;
 
     // PCIe is driven by a different clock than the raw clock.
     // The "clocked_by" is pure fiction.  By providing a top-level
@@ -131,7 +137,7 @@ module mkPCIELowLevelDevice#(Clock rawClock, Reset rawReset)
     // Yet another fictitious clock domain crossing that reduces to wires.
     PCIE_BURY pcieBury <- mkPCIE_BURY(rawClock, pcieSysClkBuf);
 
-    (* fire_when_enabled, no_implicit_conditions *) 
+    //(* fire_when_enabled, no_implicit_conditions *) 
     rule drivePCIE;
         pcieBury.txn_dev(dev.pcie_exp.txn);
         pcieBury.txp_dev(dev.pcie_exp.txp);
@@ -207,9 +213,14 @@ module mkPCIELowLevelDevice#(Clock rawClock, Reset rawReset)
             method txn = pcieBury.txn_wire;
         endinterface
 
-        interface clock = rawClock;
-        interface clockSys = pcieSysClkBuf;
-
+        interface rawClockOut = rawClock;
+        interface rawResetOut = rawReset;
+        interface clockOut = clock;
+        interface resetOut = reset;
+        interface clockSysOut = pcieSysClkBuf;
+        interface resetSysOut = pcieReset.reset;
+        interface devClockOut = dev.driver.clock;
+        interface devResetOut = dev.driver.reset;
     endinterface
 
 endmodule

@@ -59,13 +59,10 @@ endinterface
 
 interface CLOCKS_WIRES;
 
-    //(* always_ready, always_enabled *)
     interface Put#(Bit#(1)) clk_p;
 
-    //(* always_ready, always_enabled *)
     interface Put#(Bit#(1)) clk_n;
 
-    //(* always_ready, always_enabled *)
     interface Put#(Bit#(1)) rst;
     
 endinterface

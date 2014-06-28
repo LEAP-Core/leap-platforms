@@ -61,7 +61,7 @@ import "BVI" reset_import = module mkResetFromPut#(Clock dClock)
     output_reset reset(reset_out) clocked_by(ddClock);
 
     interface Put reset_wire;
-        method put(reset_in) enable((*inhigh*) en0);
+        method put(reset_in) enable(en0);
     endinterface
 
     schedule reset_wire_put CF reset_wire_put;

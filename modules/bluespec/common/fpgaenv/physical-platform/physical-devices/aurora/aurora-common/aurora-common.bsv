@@ -52,14 +52,15 @@ typedef struct {
 } AuroraGTXClockSpec deriving (Eq);
 
 interface AURORA_WIRES;
-    (* always_enabled, always_ready *)
+
     method Action rxp_in(Bit#(1) i);
-    (* always_enabled, always_ready *)
+
     method Action rxn_in(Bit#(1) i);
-    (* always_enabled, always_ready *)
+
     method Bit#(1) txp_out();
-    (* always_enabled, always_ready *)
+
     method Bit#(1) txn_out();
+
 endinterface
 
 module mkAuroraIOBUF#(AURORA_WIRES wiresIn) (AURORA_WIRES);

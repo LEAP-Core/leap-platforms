@@ -104,6 +104,11 @@ module aurora_64b66b_v7_3_exdes  #
     RXN,
     TXP,
     TXN,
+
+    // Dummy signals 
+    rx_n_en,
+    rx_p_en,
+ 
     // Debug
     RX_COUNT,
     TX_COUNT,
@@ -151,6 +156,10 @@ module aurora_64b66b_v7_3_exdes  #
     input   [0:1]      RXN;
     output  [0:1]      TXP;
     output  [0:1]      TXN;
+
+    // Dummy Bluespec Signals
+    input rx_p_en;
+    input rx_n_en;
 
     // Debug
     input UNDERFLOW;

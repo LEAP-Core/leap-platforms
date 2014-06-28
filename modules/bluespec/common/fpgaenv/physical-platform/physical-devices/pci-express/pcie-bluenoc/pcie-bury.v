@@ -6,6 +6,10 @@ module pcie_bury(rxp_in,
 		 rxn_out,
                  txp_out,
                  txn_out,
+                 en0,
+                 en1,
+                 en2,
+                 en3
 );
 
     input [7:0] rxp_in;
@@ -13,6 +17,11 @@ module pcie_bury(rxp_in,
     input [7:0] txp_in;
     input [7:0] txn_in;
 
+    input       en0;
+    input       en1;
+    input       en2;
+    input       en3;   
+   
     output [7:0] rxp_out; 
     output [7:0] rxn_out; 
     output [7:0] txp_out; 

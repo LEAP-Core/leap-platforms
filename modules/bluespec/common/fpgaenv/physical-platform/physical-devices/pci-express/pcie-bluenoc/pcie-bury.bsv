@@ -43,22 +43,20 @@ interface PCIE_BURY;
 
     // Wires to be sent to the top level
 
-    (* always_enabled, always_ready *)
     method Action rxp_wire(Bit#(8) i);
-    (* always_enabled, always_ready *)
+
     method Action rxn_wire(Bit#(8) i);
-    (* always_enabled, always_ready *)
+
     method Bit#(8) txp_wire;
-    (* always_enabled, always_ready *)
+
     method Bit#(8) txn_wire;
 
-    (* always_enabled, always_ready *)
     method Bit#(8) rxp_dev();
-    (* always_enabled, always_ready *)
+
     method Bit#(8) rxn_dev();
-    (* always_enabled, always_ready *)
+
     method Action txp_dev(Bit#(8) i);
-    (* always_enabled, always_ready *)
+
     method Action txn_dev(Bit#(8) i);
 
 endinterface
@@ -73,16 +71,16 @@ import "BVI" pcie_bury = module mkPCIE_BURY#(Clock topClock, Clock devClock)
     default_clock no_clock;
     default_reset no_reset;
 
-    method rxp_wire(rxp_in)  enable((*inhigh*)en1) clocked_by(tClock);
-    method rxn_wire(rxn_in)  enable((*inhigh*)en0) clocked_by(tClock);
+    method rxp_wire(rxp_in)  enable(en1) clocked_by(tClock);
+    method rxn_wire(rxn_in)  enable(en0) clocked_by(tClock);
     method txp_out txp_wire  clocked_by(tClock);
     method txn_out txn_wire  clocked_by(tClock);
 
     method rxp_out rxp_dev() clocked_by(dClock);
     method rxn_out rxn_dev() clocked_by(dClock);
-    method txp_dev(txp_in)   enable((*inhigh*)en2) clocked_by(dClock);
-    method txn_dev(txn_in)   enable((*inhigh*)en3) clocked_by(dClock);
-   
+    method txp_dev(txp_in)   enable(en2) clocked_by(dClock);
+    method txn_dev(txn_in)   enable(en3) clocked_by(dClock);
+    
     schedule (txp_dev,txn_dev,rxp_dev,rxn_dev,
               txp_wire,txn_wire,rxp_wire,rxn_wire) CF 
               (txp_dev,txn_dev,rxp_dev,rxn_dev,

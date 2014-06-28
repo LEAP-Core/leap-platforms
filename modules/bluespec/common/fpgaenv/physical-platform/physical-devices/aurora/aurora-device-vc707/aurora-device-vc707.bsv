@@ -30,7 +30,7 @@
 //
 
 // This module interfaces to the SMA cables on the
-// XUPV5. However only certain of the generated verilog and ucf files
+// VC707. However only certain of the generated verilog and ucf files
 // are needed to characterize this interface, and it can be used a model 
 // for high-speed board to board serial on other development boards. The 
 // device interface consists of a simple FIFO with guaranteed transport to
@@ -69,14 +69,11 @@ typedef AURORA_DRIVER#(AURORA_INTERFACE_WIDTH#(InterfaceWords, InterfaceWidth)) 
 typedef Vector#(`NUM_AURORA_IFCS, AURORA_COMPLEX_DRIVER) AURORA_COMPLEX_DRIVERS;
 
 interface AURORA_COMPLEX_WIRES;
-    (* always_ready, always_enabled *)
+
     interface Put#(Bit#(1)) sma_clk_p;
-    (* always_ready, always_enabled *)
     interface Put#(Bit#(1)) sma_clk_n;
 
-    (* always_ready, always_enabled *)
     interface Put#(Bit#(1)) hpc_clk_p;
-    (* always_ready, always_enabled *)
     interface Put#(Bit#(1)) hpc_clk_n;
 
     interface Vector#(`NUM_AURORA_IFCS,AURORA_WIRES) wires;
