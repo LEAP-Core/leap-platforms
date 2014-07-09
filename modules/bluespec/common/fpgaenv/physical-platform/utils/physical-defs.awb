@@ -13,4 +13,5 @@
 
 %param --global FPGA_PLATFORM_ID   0         "ID of multi-FPGA target"
 %param --global FPGA_PLATFORM_NAME "platform" "Name of multi-FPGA target"
+%param --global EXPOSE_ALL_CONNECTIONS 0 "True if we should expose all soft connections"
 
