@@ -50,6 +50,7 @@
 #include "awb/provides/umf.h"
 #include "awb/provides/pcie_device.h"
 #include "awb/provides/physical_platform_utils.h"
+#include "awb/provides/physical_platform_defs.h"
 
 
 PCIE_DEVICE_CLASS::PCIE_DEVICE_CLASS(PLATFORMS_MODULE p):
@@ -58,7 +59,7 @@ PCIE_DEVICE_CLASS::PCIE_DEVICE_CLASS(PLATFORMS_MODULE p):
     initialized = false;
     logicalName = NULL;
     pcieDev = -1;
-    deviceSwitch = NULL;
+    deviceSwitch = new COMMAND_SWITCH_DICTIONARY_CLASS("DEVICE_DICTIONARY");
 }
 
 bool
@@ -74,12 +75,11 @@ PCIE_DEVICE_CLASS::Init()
 
     
     //Did we get a registration switch initialized?  
-
-    if ((deviceSwitch != NULL) && (deviceSwitch->SwitchValue() != NULL))
+    if ((logicalName != NULL) && (deviceSwitch->SwitchValue(*logicalName) != NULL))
     {
-        dev_file = (deviceSwitch->SwitchValue())->c_str();
+        dev_file = (deviceSwitch->SwitchValue(*logicalName))->c_str();
     }
-    else if((logicalName != NULL) && (*logicalName == "Legacy"))
+    else if((logicalName != NULL) && (*logicalName == FPGA_PLATFORM_NAME))
     { 
         dev_file = FPGA_DEV_PATH.c_str();
 
@@ -260,6 +260,4 @@ void
 PCIE_DEVICE_CLASS::RegisterLogicalDeviceName(string name)
 {
     logicalName = new string(name);
-    
-    deviceSwitch = new BASIC_COMMAND_SWITCH_STRING_CLASS(logicalName->c_str());
 }

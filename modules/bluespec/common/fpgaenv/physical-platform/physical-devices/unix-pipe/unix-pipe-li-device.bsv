@@ -34,9 +34,15 @@
 import FIFOF::*;
 import Vector::*;
 
-`include "umf.bsh"
-`include "physical_platform_utils.bsh"
-`include "unix_pipe_device.bsh"
+`include "awb/provides/umf.bsh"
+`include "awb/provides/physical_platform_utils.bsh"
+`include "awb/provides/unix_pipe_device.bsh"
+
+`include "awb/provides/soft_connections.bsh"
+`include "awb/provides/soft_services.bsh"
+`include "awb/provides/soft_services_lib.bsh"
+`include "awb/provides/soft_services_deps.bsh"
+
 
 interface UNIX_PIPE_LI_DRIVER;
 
@@ -56,7 +62,7 @@ interface UNIX_PIPE_LI_DEVICE;
     interface UNIX_PIPE_LI_WIRES  wires;
 endinterface
 
-module mkUNIXPipeLIDevice#(SOFT_RESET_TRIGGER softResetTrigger) (UNIX_PIPE_LI_DEVICE);
+module [CONNECTED_MODULE] mkUNIXPipeLIDevice#(SOFT_RESET_TRIGGER softResetTrigger) (UNIX_PIPE_LI_DEVICE);
 
     let unixPipe <- mkUNIXPipeDevice(softResetTrigger); 
 

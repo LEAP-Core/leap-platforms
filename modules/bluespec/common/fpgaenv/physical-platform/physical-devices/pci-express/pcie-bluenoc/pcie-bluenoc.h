@@ -72,7 +72,7 @@ class PCIE_DEVICE_CLASS
 
     // Switches for acquiring device uniquifier. 
     // Likely that there is a refactoring here.
-    BASIC_COMMAND_SWITCH_STRING deviceSwitch;
+    COMMAND_SWITCH_DICTIONARY deviceSwitch;
 
     int pcieDev;                      // Device file descriptor
     int bpb;                          // Bytes per beat

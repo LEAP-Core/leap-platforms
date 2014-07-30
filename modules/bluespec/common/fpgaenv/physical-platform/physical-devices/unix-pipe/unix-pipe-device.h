@@ -73,8 +73,8 @@ class UNIX_PIPE_DEVICE_CLASS: public PLATFORMS_MODULE_CLASS
     BLUESIM_SWITCH_CLASS bluesimSwitches;
 
     // switches for acquiring device uniquifier
-    BASIC_COMMAND_SWITCH_STRING deviceSwitch;
-  
+    COMMAND_SWITCH_DICTIONARY deviceSwitch;
+
     // process/pipe state (physical channel)
     int                       inpipe[2], outpipe[2];
     int                       childpid;

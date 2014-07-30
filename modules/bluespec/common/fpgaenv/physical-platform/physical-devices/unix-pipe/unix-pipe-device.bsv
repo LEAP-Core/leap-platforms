@@ -32,6 +32,11 @@
 import FIFOF::*;
 import Vector::*;
 
+`include "awb/provides/soft_connections.bsh"
+`include "awb/provides/soft_services.bsh"
+`include "awb/provides/soft_services_lib.bsh"
+`include "awb/provides/soft_services_deps.bsh"
+
 `include "umf.bsh"
 `include "physical_platform_utils.bsh"
 
@@ -84,7 +89,7 @@ endinterface
 `define USE_PIPES 1
 
 // UNIX pipe module
-module mkUNIXPipeDevice#(SOFT_RESET_TRIGGER softResetTrigger)
+module [CONNECTED_MODULE] mkUNIXPipeDevice#(SOFT_RESET_TRIGGER softResetTrigger)
     // interface
                   (UNIX_PIPE_DEVICE);
     
@@ -97,6 +102,9 @@ module mkUNIXPipeDevice#(SOFT_RESET_TRIGGER softResetTrigger)
     FIFOF#(UMF_CHUNK) readBuffer  <- mkFIFOF();
     FIFOF#(UMF_CHUNK) writeBuffer <- mkFIFOF();
 
+    // Name
+    let platformName <- getSynthesisBoundaryPlatform();
+
     // ==============================================================
     //                            Rules
     // ==============================================================
@@ -108,7 +116,7 @@ module mkUNIXPipeDevice#(SOFT_RESET_TRIGGER softResetTrigger)
 
     // initialize C code
     rule initialize(state == STATE_init0);
-        pipe_init(`USE_PIPES,`PLATFORM_ID);
+        pipe_init(`USE_PIPES, platformName);
         state <= STATE_init1;
     endrule
 

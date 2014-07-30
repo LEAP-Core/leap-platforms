@@ -49,6 +49,7 @@
 #include "default-switches.h"
 
 #include "awb/provides/unix_pipe_device.h"
+#include "awb/provides/physical_platform_defs.h"
 
 
 using namespace std;
@@ -129,8 +130,8 @@ UNIX_PIPE_DEVICE_CLASS::UNIX_PIPE_DEVICE_CLASS(
     initReadComplete = 0;
     initWriteComplete = 0;
     childAlive = false;
-    deviceSwitch = NULL;
     logicalName = NULL;
+    deviceSwitch = new COMMAND_SWITCH_DICTIONARY_CLASS("DEVICE_DICTIONARY");
 }
 
 // destructor
@@ -143,8 +144,10 @@ UNIX_PIPE_DEVICE_CLASS::~UNIX_PIPE_DEVICE_CLASS()
 void
 UNIX_PIPE_DEVICE_CLASS::Init()
 {
+
     string executionDirectory = "";
     char * leapExecutionDirectory = getenv("LEAP_EXECUTION_DIRECTORY");
+
     // Newer builds will tell us where the pipes file is
     // located. Let's find out. 
     if (leapExecutionDirectory != NULL)
@@ -153,14 +156,14 @@ UNIX_PIPE_DEVICE_CLASS::Init()
     }
 
     // Let's find out what our file target is
-    if ((deviceSwitch != NULL) && (deviceSwitch->SwitchValue() != NULL))
+    if ((logicalName != NULL) && (deviceSwitch->SwitchValue(*logicalName) != NULL))
     {
-        ioFile = executionDirectory + "/pipes/" + *(deviceSwitch->SwitchValue());
+        ioFile = executionDirectory + "/pipes/" + *(deviceSwitch->SwitchValue(*logicalName));
     }
-    else if((logicalName != NULL) && (*logicalName == "Legacy"))
+    else if((logicalName != NULL) && (*logicalName == FPGA_PLATFORM_NAME))
     {  
         // backwards compatible support for old-style RRR. 
-        ioFile = executionDirectory + "/pipes/Legacy";
+        ioFile = executionDirectory + "/pipes/" + *logicalName;
     }
     else 
     {
@@ -168,6 +171,7 @@ UNIX_PIPE_DEVICE_CLASS::Init()
         return;
     }
 
+    fflush(stdout);
     string commDirectory = executionDirectory + "/pipes/";
     
     if (mkdir(commDirectory.c_str(), S_IRWXU) != 0) 
@@ -344,8 +348,6 @@ UNIX_PIPE_DEVICE_CLASS::Write(
 void UNIX_PIPE_DEVICE_CLASS::RegisterLogicalDeviceName(string name)
 {
     logicalName = new string(name);
-
-    deviceSwitch = new BASIC_COMMAND_SWITCH_STRING_CLASS(logicalName->c_str());
 }
 
 

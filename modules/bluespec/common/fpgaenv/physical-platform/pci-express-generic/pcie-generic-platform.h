@@ -34,6 +34,7 @@
 
 #include "asim/provides/physical_channel.h"
 #include "asim/provides/physical_platform_utils.h"
+#include "awb/provides/physical_platform_defs.h"
 #include "platforms-module.h"
 
 // ====================================================
@@ -55,7 +56,7 @@ class PHYSICAL_DEVICES_CLASS: public PLATFORMS_MODULE_CLASS
 
         PHYSICAL_CHANNEL GetLegacyPhysicalChannel() 
         { 
-            pcieDev.RegisterLogicalDeviceName("Legacy");
+            pcieDev.RegisterLogicalDeviceName(FPGA_PLATFORM_NAME);
             return &pcieDev; 
         }
 

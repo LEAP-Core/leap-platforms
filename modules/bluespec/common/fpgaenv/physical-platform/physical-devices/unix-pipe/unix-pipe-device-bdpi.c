@@ -40,6 +40,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <pthread.h>
 
 #include "unix-pipe-device-bdpi.h"
 
@@ -47,8 +48,12 @@
 static Channel OCHT[MAX_OPEN_CHANNELS];
 static Channel *freeList;
 static unsigned char initialized = 0;
+static unsigned char initializedInFlight = 0;
+static char *platformID;
 static unsigned char need_reset = 1;
 static unsigned char persistent = 0;
+static pthread_t initThread;
+static pthread_t ;
 
 int DESC_HOST_2_FPGA;
 int DESC_FPGA_2_HOST;
@@ -59,13 +64,118 @@ void cleanup()
 {
 }
 
-/* initialize global data structures */
-void pipe_init(unsigned char usePipes, char * platformID)
+void* open_channel(void* arg) 
 {
-  int i, read_bytes, retries = 0, flags;
+    char *executionDirectory = getenv("LEAP_EXECUTION_DIRECTORY");
+    char *commDirectory = NULL;
+    const char *toSuffix = "_TO";
+    const char *fromSuffix = "_FROM";
+    char * inputFileName = NULL;
+    char * outputFileName = NULL;
+    const char *pipes = "/pipes/"; 
+    int i, read_bytes, retries = 0, flags;
     char buf[32];
 
-    if (initialized) return;
+
+    if(UNIX_DEVICE_DEBUG) 
+    {
+        printf("Beginning pipe device initialization\n");
+    }
+
+    if (executionDirectory != NULL)
+    {
+        commDirectory = (char*) malloc(strlen(pipes) + strlen(executionDirectory) + 1);
+        strcpy(commDirectory, executionDirectory);
+        strcat(commDirectory, pipes);
+    } 
+    else
+    {
+        commDirectory = pipes;
+    }
+
+    if (mkdir(commDirectory, S_IRWXU) != 0) 
+    {
+        if (errno != EEXIST)
+        {
+            fprintf(stderr, "Comm directory creation failed, bailing\n");
+            exit(1);
+        }
+    }
+
+    inputFileName = (char*) malloc(strlen(commDirectory) + strlen(toSuffix) + strlen(platformID) + 1);
+    strcpy(inputFileName, commDirectory);
+    strcat(inputFileName, platformID);
+    strcat(inputFileName, toSuffix);
+
+    outputFileName = (char*) malloc(strlen(commDirectory) + strlen(fromSuffix) + strlen(platformID) + 1);
+    strcpy(outputFileName, commDirectory);
+    strcat(outputFileName, platformID);
+    strcat(outputFileName, fromSuffix);
+
+    // make a fifo.
+    mkfifo(outputFileName, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
+
+    // opening the read side first, because it can be non-blocking.
+    // It may fail if the fifo doesn't exist.
+
+    // write side blocks until read side is open.
+    if(UNIX_DEVICE_DEBUG) 
+    {
+        printf("FPGA opening output: %s\n", outputFileName);
+        fflush(stdout);
+    }
+
+    DESC_FPGA_2_HOST = open(outputFileName, O_WRONLY);	
+    if (DESC_FPGA_2_HOST < 0)
+    {
+        perror("FPGA0 named outgoing pipe (pipes/FROM_FPGA)");
+        exit(1);
+    }
+
+
+    flags = fcntl(DESC_FPGA_2_HOST, F_GETFL, 0);
+    if(UNIX_DEVICE_DEBUG)
+    {
+        printf("Flags DESC_FPGA_2_HOST: %x\n", flags);
+    }
+
+    if(UNIX_DEVICE_DEBUG) 
+    {
+        printf("FPGA opening input: %s", inputFileName); 
+        fflush(stdout);
+    }
+
+    do
+    { 
+        DESC_HOST_2_FPGA = open(inputFileName, O_RDONLY);
+        retries++;
+        sleep(1);
+    } while (DESC_HOST_2_FPGA < 0 && retries < 120);
+
+    if (DESC_HOST_2_FPGA < 0)
+    {
+        perror("named incoming pipe (pipes/TO_FPGA)");
+        exit(1);
+    }
+
+    if(UNIX_DEVICE_DEBUG)
+    {
+        printf("FPGA: Initialization complete\n");
+    }
+    // Tell the main thread we're done. 
+    __sync_fetch_and_add(&initialized,1);
+}
+
+/* initialize global data structures */
+void pipe_init(unsigned char usePipes, char * platformIDIn)
+{
+    int i;
+    // No need to cause a thread bomb by way of too many threads. 
+    if (initializedInFlight) return;
+
+    // Make a copy of platformID, in case we lose it on function exit. 
+    platformID = (char*) malloc(strlen(platformIDIn) + 1);
+    strcpy(platformID, platformIDIn);
 
     assert(MAX_OPEN_CHANNELS >= 2);
 
@@ -85,90 +195,10 @@ void pipe_init(unsigned char usePipes, char * platformID)
     OCHT[MAX_OPEN_CHANNELS - 1].prev = &OCHT[MAX_OPEN_CHANNELS - 2];
     OCHT[MAX_OPEN_CHANNELS - 1].next = &OCHT[0];
 
-    /* flags */
-    initialized = 1;
-
-    if (usePipes > 0)
-    {
-        char *executionDirectory = getenv("LEAP_EXECUTION_DIRECTORY");
-        char *commDirectory = NULL;
-        const char *toSuffix = "_TO";
-        const char *fromSuffix = "_FROM";
-        char * inputFileName = NULL;
-        char * outputFileName = NULL;
-        const char *pipes = "/pipes/"; 
-
-        if (executionDirectory != NULL)
-        {
-  	    commDirectory = (char*) malloc(strlen(pipes) + strlen(executionDirectory) + 1);
-            strcpy(commDirectory, executionDirectory);
-            strcat(commDirectory, pipes);
-        } 
-        else
-        {
-  	    commDirectory = pipes;
-        }
-
-        if (mkdir(commDirectory, S_IRWXU) != 0) 
-        {
-            if (errno != EEXIST)
-            {
-	        fprintf(stderr, "Comm directory creation failed, bailing\n");
-	        exit(1);
-            }
-        }
-
-        inputFileName = (char*) malloc(strlen(commDirectory) + strlen(toSuffix) + strlen(platformID) + 1);
-        strcpy(inputFileName, commDirectory);
-        strcat(inputFileName, platformID);
-        strcat(inputFileName, toSuffix);
-
-        outputFileName = (char*) malloc(strlen(commDirectory) + strlen(fromSuffix) + strlen(platformID) + 1);
-        strcpy(outputFileName, commDirectory);
-        strcat(outputFileName, platformID);
-        strcat(outputFileName, fromSuffix);
-
-        // make a fifo.
-        mkfifo(outputFileName, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
-
-        // opening the read side first, because it can be non-blocking.
-        // It may fail if the fifo doesn't exist.
-
-        // write side blocks until read side is open.
-        DESC_FPGA_2_HOST = open(outputFileName, O_WRONLY);	
-        if (DESC_FPGA_2_HOST < 0)
-        {
-            perror("FPGA0 named outgoing pipe (pipes/FROM_FPGA)");
-            exit(1);
-        }
-
-
-        flags = fcntl(DESC_FPGA_2_HOST, F_GETFL, 0);
-        if(UNIX_DEVICE_DEBUG)
-	{
-            printf("Flags DESC_FPGA_2_HOST: %x\n", flags);
-	}
-
-        do
-    	{ 
-	    DESC_HOST_2_FPGA = open(inputFileName, O_RDONLY);
-            retries++;
-	    sleep(1);
-        } while (DESC_HOST_2_FPGA < 0 && retries < 120);
-
-        if (DESC_HOST_2_FPGA < 0)
-        {
-            perror("named incoming pipe (pipes/TO_FPGA)");
-            exit(1);
-        }
-
-
-    }
-
-    if(UNIX_DEVICE_DEBUG)
-    {
-        printf("FPGA: Initialization complete\n");
-    }
+    // This function must be non-blocking, so our initializer must
+    // happen in another thread.
+    pthread_create(&initThread, NULL, &open_channel, platformID);
+    initializedInFlight = 1;
 }
 
 /* trigger FPGA reset */
@@ -190,8 +220,6 @@ unsigned char pipe_open(unsigned char serviceID)
 {
     int i;
     Channel *channel;
-
-    assert(initialized == 1);
 
     /* try to allocate new channel from OCHT */
     if (freeList == NULL)
