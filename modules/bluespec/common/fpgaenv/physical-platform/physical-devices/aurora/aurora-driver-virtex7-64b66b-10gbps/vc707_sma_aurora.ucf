@@ -119,6 +119,15 @@ TIMESPEC "TS_TIG4" = FROM "INIT_CLK" TO "USER_CLK_HPC4" TIG;
 # DP6 is X1Y22 (XM104 - CX4)
 # DP7 is X1Y23 (XM104 - CX4)
 
+#Schematic of VC707.
+#  |------|CX4  20-23|-----|CX4  12-15    |----|
+#  |       SMA  24-25       SMA  16-17         |
+#  |       SATA 26-27       SATA 18-19         |
+#  |ETH    HPC1             HPC2               |
+#  |                                           |
+#  |                                           |
+#  |-----| PCIE |------------------------------|
+#
 
 NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_0/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/cbcc_gtx0_i/fifo_reset_i" TIG; 
 NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_0/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/cbcc_gtx0_lane1_i/fifo_reset_i" TIG; 
@@ -132,6 +141,9 @@ INST m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_0/aurora_64b66b_v
 
 INST m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_1/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/aurora_64b66b_v7_3_multi_gt_i/AURORA_64B66B_V7_3_GTX_INST/gtxe2_i LOC=GTXE2_CHANNEL_X1Y18; # xm104 sata cables
 INST m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_1/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/aurora_64b66b_v7_3_multi_gt_i/AURORA_64B66B_V7_3_GTX_INST_LANE1/gtxe2_i LOC=GTXE2_CHANNEL_X1Y19; # xm104 sata cables
+
+#INST m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_1/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/aurora_64b66b_v7_3_multi_gt_i/AURORA_64B66B_V7_3_GTX_INST/gtxe2_i LOC=GTXE2_CHANNEL_X1Y16; # xm104 sma cables
+#INST m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_1/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/aurora_64b66b_v7_3_multi_gt_i/AURORA_64B66B_V7_3_GTX_INST_LANE1/gtxe2_i LOC=GTXE2_CHANNEL_X1Y17; # xm104 sma cables
 
 #INST m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_1/aurora_module_i/gt_wrapper_i/aurora_8b10b_v8_3_multi_gt_i/gtxe2_common_i LOC=GTXE2_COMMON_X1Y27;
 
