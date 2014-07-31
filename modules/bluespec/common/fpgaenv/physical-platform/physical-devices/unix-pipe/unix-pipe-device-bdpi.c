@@ -45,15 +45,17 @@
 #include "unix-pipe-device-bdpi.h"
 
 /* global table of open channel handles */
+static pthread_t initThread;
 static Channel OCHT[MAX_OPEN_CHANNELS];
 static Channel *freeList;
-static unsigned char initialized = 0;
+volatile static unsigned char initialized = 0;
 static unsigned char initializedInFlight = 0;
-static char *platformID;
-static unsigned char need_reset = 1;
+static unsigned char need_reset = 0;
 static unsigned char persistent = 0;
-static pthread_t initThread;
-static pthread_t ;
+static int readOpenComplete = 0;
+static char * inputFileName = NULL;
+static char * outputFileName = NULL;
+
 
 int DESC_HOST_2_FPGA;
 int DESC_FPGA_2_HOST;
@@ -64,17 +66,58 @@ void cleanup()
 {
 }
 
-void* open_channel(void* arg) 
+int open_channel() 
+{
+    int flags;
+
+    if (UNIX_DEVICE_DEBUG) 
+    {
+        printf("FPGA opening input: %s\n", inputFileName); 
+        fflush(stdout);
+    }
+   
+    DESC_HOST_2_FPGA = open(inputFileName, O_RDONLY | O_NONBLOCK);
+
+    // File open was successful. Now fix blocking I/O
+    if (DESC_HOST_2_FPGA >= 0) 
+    {
+        flags = fcntl(DESC_FPGA_2_HOST, F_GETFL, 0);
+        fcntl(DESC_FPGA_2_HOST, F_SETFL, flags ^ O_NONBLOCK);
+        readOpenComplete = 1;
+    }
+
+    return DESC_HOST_2_FPGA;    
+}
+
+/* initialize global data structures */
+void pipe_init(unsigned char usePipes, char * platformID)
 {
     char *executionDirectory = getenv("LEAP_EXECUTION_DIRECTORY");
     char *commDirectory = NULL;
     const char *toSuffix = "_TO";
     const char *fromSuffix = "_FROM";
-    char * inputFileName = NULL;
-    char * outputFileName = NULL;
     const char *pipes = "/pipes/"; 
-    int i, read_bytes, retries = 0, flags;
-    char buf[32];
+    int i;
+
+    if (initialized) return;
+
+    assert(MAX_OPEN_CHANNELS >= 2);
+
+    /* initialize free list, we'll maintain it as
+     * a circular doubly linked list */
+    bzero(OCHT, sizeof(Channel) * MAX_OPEN_CHANNELS);
+
+    freeList = &OCHT[0];
+    OCHT[0].prev = &OCHT[MAX_OPEN_CHANNELS - 1];
+    OCHT[0].next = &OCHT[1];
+    for (i = 1; i < MAX_OPEN_CHANNELS - 1; i++)
+    {
+        OCHT[i].tableIndex = i;
+        OCHT[i].prev = &OCHT[i-1];
+        OCHT[i].next = &OCHT[i+1];
+    }
+    OCHT[MAX_OPEN_CHANNELS - 1].prev = &OCHT[MAX_OPEN_CHANNELS - 2];
+    OCHT[MAX_OPEN_CHANNELS - 1].next = &OCHT[0];
 
 
     if(UNIX_DEVICE_DEBUG) 
@@ -90,7 +133,8 @@ void* open_channel(void* arg)
     } 
     else
     {
-        commDirectory = pipes;
+        commDirectory = (char*) malloc(strlen(pipes) + 1);
+        strcpy(commDirectory,pipes);
     }
 
     if (mkdir(commDirectory, S_IRWXU) != 0) 
@@ -98,6 +142,7 @@ void* open_channel(void* arg)
         if (errno != EEXIST)
         {
             fprintf(stderr, "Comm directory creation failed, bailing\n");
+            fflush(stderr);
             exit(1);
         }
     }
@@ -128,77 +173,15 @@ void* open_channel(void* arg)
     DESC_FPGA_2_HOST = open(outputFileName, O_WRONLY);	
     if (DESC_FPGA_2_HOST < 0)
     {
-        perror("FPGA0 named outgoing pipe (pipes/FROM_FPGA)");
+        perror("FPGA failure to open write side, exiting\n");
+        fprintf(stderr,"Exiting simulator!\n");
+        fflush(stderr);
         exit(1);
     }
 
 
-    flags = fcntl(DESC_FPGA_2_HOST, F_GETFL, 0);
-    if(UNIX_DEVICE_DEBUG)
-    {
-        printf("Flags DESC_FPGA_2_HOST: %x\n", flags);
-    }
-
-    if(UNIX_DEVICE_DEBUG) 
-    {
-        printf("FPGA opening input: %s", inputFileName); 
-        fflush(stdout);
-    }
-
-    do
-    { 
-        DESC_HOST_2_FPGA = open(inputFileName, O_RDONLY);
-        retries++;
-        sleep(1);
-    } while (DESC_HOST_2_FPGA < 0 && retries < 120);
-
-    if (DESC_HOST_2_FPGA < 0)
-    {
-        perror("named incoming pipe (pipes/TO_FPGA)");
-        exit(1);
-    }
-
-    if(UNIX_DEVICE_DEBUG)
-    {
-        printf("FPGA: Initialization complete\n");
-    }
     // Tell the main thread we're done. 
-    __sync_fetch_and_add(&initialized,1);
-}
-
-/* initialize global data structures */
-void pipe_init(unsigned char usePipes, char * platformIDIn)
-{
-    int i;
-    // No need to cause a thread bomb by way of too many threads. 
-    if (initializedInFlight) return;
-
-    // Make a copy of platformID, in case we lose it on function exit. 
-    platformID = (char*) malloc(strlen(platformIDIn) + 1);
-    strcpy(platformID, platformIDIn);
-
-    assert(MAX_OPEN_CHANNELS >= 2);
-
-    /* initialize free list, we'll maintain it as
-     * a circular doubly linked list */
-    bzero(OCHT, sizeof(Channel) * MAX_OPEN_CHANNELS);
-
-    freeList = &OCHT[0];
-    OCHT[0].prev = &OCHT[MAX_OPEN_CHANNELS - 1];
-    OCHT[0].next = &OCHT[1];
-    for (i = 1; i < MAX_OPEN_CHANNELS - 1; i++)
-    {
-        OCHT[i].tableIndex = i;
-        OCHT[i].prev = &OCHT[i-1];
-        OCHT[i].next = &OCHT[i+1];
-    }
-    OCHT[MAX_OPEN_CHANNELS - 1].prev = &OCHT[MAX_OPEN_CHANNELS - 2];
-    OCHT[MAX_OPEN_CHANNELS - 1].next = &OCHT[0];
-
-    // This function must be non-blocking, so our initializer must
-    // happen in another thread.
-    pthread_create(&initThread, NULL, &open_channel, platformID);
-    initializedInFlight = 1;
+    initialized = 1;
 }
 
 /* trigger FPGA reset */
@@ -228,6 +211,8 @@ unsigned char pipe_open(unsigned char serviceID)
          * we should return an error value to the
          * model, but for now, just crash out.. TODO */
         cleanup();
+        printf("Exiting due to null free list\n");
+        fflush(stderr);
         exit(1);
     }
 
@@ -266,10 +251,15 @@ void pipe_read(unsigned int* resultptr, unsigned char handle)
     int done;
     Channel *channel;
 
-    if (! initialized)
+    if (! readOpenComplete)
     {
-        resultptr[4] = PIPE_NULL;
-        return;
+        // Try to open the outbound pipe
+        if(open_channel() < 0)
+        {
+            // not open yet...
+            resultptr[4] = PIPE_NULL;
+            return;
+        }
     }
 
     /* lookup OCHT */
@@ -306,6 +296,8 @@ void pipe_read(unsigned int* resultptr, unsigned char handle)
             else
             {
                 perror("select");
+                fprintf(stderr,"Exiting simulator!\n");
+                fflush(stderr);
                 exit(1);
             }
         }
@@ -320,6 +312,7 @@ void pipe_read(unsigned int* resultptr, unsigned char handle)
             if (data_available != 1 || FD_ISSET(DESC_HOST_2_FPGA, &readfds) == 0)
             {
                 fprintf(stderr, "activity detected on unknown descriptor\n");
+                fflush(stderr);
                 exit(1);
             }
 
@@ -343,12 +336,19 @@ void pipe_read(unsigned int* resultptr, unsigned char handle)
                 }
                 else
                 {
+                    if(UNIX_DEVICE_DEBUG)
+                    {
+                        printf("Exiting due to bytes read == 0\n"); 
+                        fflush(stderr);
+                    }
+
                     exit(0);
                 }
             }
             else if (bytes_read == -1)
             {
                 fprintf(stderr, "Error %d in unix-pipe-device-bdpi::pipe_read()\n", errno);
+                fflush(stderr);
                 exit(1);
             }
 
@@ -416,7 +416,9 @@ unsigned char pipe_can_write(unsigned char handle)
         }
         else
         {
+            fprintf(stderr,"Exiting simulator!\n");
             perror("select");
+            fflush(stderr);
             exit(1);
         }
     }
@@ -434,6 +436,7 @@ void pipe_write(unsigned char handle, unsigned int* data)
     if (! initialized)
     {
         fprintf(stderr, "unix-pipe-device-bdpi.c: Write is called while uninitialized\n");
+        fflush(stderr);
         exit(1);
     }
 
@@ -459,12 +462,14 @@ void pipe_write(unsigned char handle, unsigned int* data)
     if (bytes_written == -1)
     {
         fprintf(stderr, "         HW side exiting (pipe closed)\n");
+        fflush(stderr);
         cleanup();
         exit(1);
     }
     else if (bytes_written < BDPI_CHUNK_BYTES)
     {
         fprintf(stderr, "could not write complete chunk.\n");
+        fflush(stderr);
         cleanup();
         exit(1);
     }
