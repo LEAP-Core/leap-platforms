@@ -46,6 +46,7 @@ import Connectable::*;
 import GetPut::*;
 import Vector::*;
 import XilinxCells::*;
+import DefaultValue::*;
 
 `include "awb/provides/fpga_components.bsh"
 `include "awb/provides/aurora_flowcontrol.bsh"
@@ -122,10 +123,10 @@ module mkAuroraDevice#(Clock rawClock, Reset rawReset)
     end
 
     // Place IBUF on clock lines.
-    Wire#(Bit#(1)) smaN <- mkIBUF(clocked_by rawClock, reset_by rawReset);
-    Wire#(Bit#(1)) smaP <- mkIBUF(clocked_by rawClock, reset_by rawReset);
-    Wire#(Bit#(1)) hpcN <- mkIBUF(clocked_by rawClock, reset_by rawReset);
-    Wire#(Bit#(1)) hpcP <- mkIBUF(clocked_by rawClock, reset_by rawReset);
+    Wire#(Bit#(1)) smaN <- mkIBUF(defaultValue, clocked_by rawClock, reset_by rawReset);
+    Wire#(Bit#(1)) smaP <- mkIBUF(defaultValue, clocked_by rawClock, reset_by rawReset);
+    Wire#(Bit#(1)) hpcN <- mkIBUF(defaultValue, clocked_by rawClock, reset_by rawReset);
+    Wire#(Bit#(1)) hpcP <- mkIBUF(defaultValue, clocked_by rawClock, reset_by rawReset);
 
     rule driveSMAN;
         smaClockN.clock_wire.put(smaN);

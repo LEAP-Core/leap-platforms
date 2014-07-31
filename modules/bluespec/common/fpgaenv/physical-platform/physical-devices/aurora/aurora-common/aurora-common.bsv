@@ -38,6 +38,7 @@
 // instantiate dummy serial modules to route clock to the SMA GTP.
 
 import XilinxCells::*;
+import DefaultValue::*;
 
 // we provide our own OBUF for now.
 `include "awb/provides/fpga_components.bsh"
@@ -65,11 +66,11 @@ endinterface
 
 module mkAuroraIOBUF#(AURORA_WIRES wiresIn) (AURORA_WIRES);
 
-    Wire#(Bit#(1)) buffRXN <- mkIBUF();
-    Wire#(Bit#(1)) buffRXP <- mkIBUF();
+    Wire#(Bit#(1)) buffRXN <- mkIBUF(defaultValue);
+    Wire#(Bit#(1)) buffRXP <- mkIBUF(defaultValue);
 
-    Wire#(Bit#(1)) buffTXN <- mkOBUF();
-    Wire#(Bit#(1)) buffTXP <- mkOBUF();
+    Wire#(Bit#(1)) buffTXN <- mkOBUF(defaultValue);
+    Wire#(Bit#(1)) buffTXP <- mkOBUF(defaultValue);
  
     rule transferRXN;
         wiresIn.rxn_in(buffRXN);

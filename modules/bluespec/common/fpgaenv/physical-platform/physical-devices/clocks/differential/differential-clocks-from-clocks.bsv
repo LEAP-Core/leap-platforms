@@ -36,6 +36,7 @@
 import Vector::*;
 import Clocks::*;
 import XilinxCells::*;
+import DefaultValue::*;
 
 `include "physical_platform_utils.bsh"
 `include "fpga_components.bsh"
@@ -80,7 +81,7 @@ module mkClocksDevice#(Vector#(2, Clock) crystalClocks, Reset resetWire)
     // STAGE 1: Convert to a single clock and buffer clock and reset.
     //
     
-    Clock rawClock <- mkClockIBUFDS(crystalClocks[0], crystalClocks[1]);
+    Clock rawClock <- mkClockIBUFDS(defaultValue, crystalClocks[0], crystalClocks[1]);
     
     Reset rawReset <- mkResetIBUF(reset_by resetWire);
     if (`RESET_ACTIVE_HIGH > 0)

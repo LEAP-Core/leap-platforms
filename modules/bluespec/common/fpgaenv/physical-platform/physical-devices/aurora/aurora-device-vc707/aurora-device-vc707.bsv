@@ -46,6 +46,7 @@ import Connectable::*;
 import GetPut::*;
 import Vector::*;
 import XilinxCells::*;
+import DefaultValue::*;
 
 `include "awb/provides/fpga_components.bsh"
 `include "awb/provides/aurora_flowcontrol.bsh"
@@ -107,7 +108,7 @@ module mkAuroraDevice#(Clock rawClock, Reset rawReset)
     CLOCK_FROM_PUT hpcClockN <- mkClockFromPut(clocked_by rawClock);
     CLOCK_FROM_PUT hpcClockP <- mkClockFromPut(clocked_by rawClock);
 
-    let hpcClock <- mkClockIBUFDS_GTE2(True, hpcClockP.clock, hpcClockN.clock);
+    let hpcClock <- mkClockIBUFDS_GTE2(defaultValue, True, hpcClockP.clock, hpcClockN.clock);
 
     // We scrub these values from coregen. HPC clock is 156.25 MHz.
     ifcClocks = replicate(AuroraGTXClockSpec{pll_divsel45_fb: 4, clk25_divider: 7, clock: hpcClock, use_chipscope: 0});
@@ -118,7 +119,7 @@ module mkAuroraDevice#(Clock rawClock, Reset rawReset)
     CLOCK_FROM_PUT smaClockN <- mkClockFromPut(clocked_by rawClock);
     CLOCK_FROM_PUT smaClockP <- mkClockFromPut(clocked_by rawClock);
 
-    let smaClock <- mkClockIBUFDS_GTE2(True, smaClockP.clock, smaClockN.clock);
+    let smaClock <- mkClockIBUFDS_GTE2(defaultValue, True, smaClockP.clock, smaClockN.clock);
 
     // We scrub these values from coregen. SMA clock is 125 MHz.
     ifcClocks[0] = AuroraGTXClockSpec{pll_divsel45_fb: 5, clk25_divider: 5, clock: smaClock, use_chipscope: 0};
@@ -139,10 +140,10 @@ module mkAuroraDevice#(Clock rawClock, Reset rawReset)
     end
 
     // Place IBUF on clock lines.
-    Wire#(Bit#(1)) smaN <- mkIBUF(clocked_by rawClock, reset_by rawReset);
-    Wire#(Bit#(1)) smaP <- mkIBUF(clocked_by rawClock, reset_by rawReset);
-    Wire#(Bit#(1)) hpcN <- mkIBUF(clocked_by rawClock, reset_by rawReset);
-    Wire#(Bit#(1)) hpcP <- mkIBUF(clocked_by rawClock, reset_by rawReset);
+    Wire#(Bit#(1)) smaN <- mkIBUF(defaultValue, clocked_by rawClock, reset_by rawReset);
+    Wire#(Bit#(1)) smaP <- mkIBUF(defaultValue, clocked_by rawClock, reset_by rawReset);
+    Wire#(Bit#(1)) hpcN <- mkIBUF(defaultValue, clocked_by rawClock, reset_by rawReset);
+    Wire#(Bit#(1)) hpcP <- mkIBUF(defaultValue, clocked_by rawClock, reset_by rawReset);
 
     rule driveSMAN;
         smaClockN.clock_wire.put(smaN);

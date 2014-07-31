@@ -29,6 +29,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
+`include "awb/provides/pcie_bluenoc_ifc.bsh"
 
 //
 // Pass PCIe I/O wires from the top-level to the PCIe driver.  This involves
@@ -43,21 +44,21 @@ interface PCIE_BURY;
 
     // Wires to be sent to the top level
 
-    method Action rxp_wire(Bit#(8) i);
+    method Action rxp_wire(Bit#(PCIE_LANES) i);
 
-    method Action rxn_wire(Bit#(8) i);
+    method Action rxn_wire(Bit#(PCIE_LANES) i);
 
-    method Bit#(8) txp_wire;
+    method Bit#(PCIE_LANES) txp_wire;
 
-    method Bit#(8) txn_wire;
+    method Bit#(PCIE_LANES) txn_wire;
 
-    method Bit#(8) rxp_dev();
+    method Bit#(PCIE_LANES) rxp_dev();
 
-    method Bit#(8) rxn_dev();
+    method Bit#(PCIE_LANES) rxn_dev();
 
-    method Action txp_dev(Bit#(8) i);
+    method Action txp_dev(Bit#(PCIE_LANES) i);
 
-    method Action txn_dev(Bit#(8) i);
+    method Action txn_dev(Bit#(PCIE_LANES) i);
 
 endinterface
 
@@ -67,6 +68,8 @@ import "BVI" pcie_bury = module mkPCIE_BURY#(Clock topClock, Clock devClock)
   
     input_clock tClock() = topClock;
     input_clock dClock() = devClock;
+
+    parameter WIDTH = valueOf(PCIE_LANES);
 
     default_clock no_clock;
     default_reset no_reset;

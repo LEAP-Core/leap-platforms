@@ -38,6 +38,7 @@ import BlueNoC::*;
 import Connectable::*;
 import TieOff::*;
 import GetPut::*;
+import DefaultValue::*;
 
 `include "awb/provides/librl_bsv_base.bsh"
 `include "awb/provides/physical_platform_config.bsh"
@@ -111,9 +112,9 @@ module mkPCIELowLevelDevice#(Clock rawClock, Reset rawReset)
     // Buffer clocks and reset before they are used
     Clock pcieSysClkBuf;
     if (`FPGA_TECHNOLOGY == "Virtex6")
-        pcieSysClkBuf <- mkClockIBUFDS_GTXE1(True, pcieClockP.clock, pcieClockN.clock);
+        pcieSysClkBuf <- mkClockIBUFDS_GTXE1(defaultValue, True, pcieClockP.clock, pcieClockN.clock);
     else
-        pcieSysClkBuf <- mkClockIBUFDS_GTE2(True, pcieClockP.clock, pcieClockN.clock);
+        pcieSysClkBuf <- mkClockIBUFDS_GTE2(defaultValue, True, pcieClockP.clock, pcieClockN.clock);
 
     // Construct reset.  The incoming reset wire must be "crossed"
     // to the pcieSysClkBuf clock domain from the rawClock domain.  Like
@@ -123,7 +124,7 @@ module mkPCIELowLevelDevice#(Clock rawClock, Reset rawReset)
     RESET_FROM_PUT pcieReset <- mkResetFromPut(pcieSysClkBuf,
                                                clocked_by pcieSysClkBuf);
 
-    Wire#(Bit#(1)) buffRst <- mkIBUF(clocked_by pcieSysClkBuf, reset_by pcieReset.reset);
+    Wire#(Bit#(1)) buffRst <- mkIBUF(defaultValue, clocked_by pcieSysClkBuf, reset_by pcieReset.reset);
  
     rule transferRst;
         pcieReset.reset_wire.put(buffRst);
@@ -168,8 +169,8 @@ module mkPCIELowLevelDevice#(Clock rawClock, Reset rawReset)
     Wire#(Bit#(1)) clkP; 
     
     // Put IBUF on clocks.
-    clkN <- mkIBUF(clocked_by rawClock, reset_by rawReset);
-    clkP <- mkIBUF(clocked_by rawClock, reset_by rawReset);
+    clkN <- mkIBUF(defaultValue, clocked_by rawClock, reset_by rawReset);
+    clkP <- mkIBUF(defaultValue, clocked_by rawClock, reset_by rawReset);
 
     rule driveClkN;
         pcieClockN.clock_wire.put(clkN);

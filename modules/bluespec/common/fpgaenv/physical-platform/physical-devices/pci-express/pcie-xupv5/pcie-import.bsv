@@ -1,6 +1,7 @@
 import Vector::*;
 import Clocks::*;
 import LevelFIFO::*;
+import DefaultValue::*;
 
 `include "physical_platform_utils.bsh"
 `include "fpga_components.bsh"
@@ -60,7 +61,7 @@ module mkPCIEDevice#(Clock rawClock, Reset rawReset) (PCIE_DEVICE);
     // bridge expects its reset to be synchronized...
 
     // Buffer clocks and reset before they are used
-    Clock sys_clk_buf <- mkClockIBUFDS(pcieClockP.clock, pcieClockN.clock);
+    Clock sys_clk_buf <- mkClockIBUFDS(defaultValue, pcieClockP.clock, pcieClockN.clock);
 
     // make a pretty ASync reset from the incoming rst...
 
