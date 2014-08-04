@@ -50,8 +50,8 @@
 ## UCF generated for xc6vlx240t-ff1156-1 device
 # 125.0MHz GTX Reference clock constraint 
 
-NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/smaClock_O" TNM_NET = GT_REFCLK_SMA; 
-NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/hpcClock_O" TNM_NET = GT_REFCLK_HPC; 
+NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_0/GTXQ0_left_i" TNM_NET = GT_REFCLK_SMA; 
+NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_1/GTXQ0_left_i" TNM_NET = GT_REFCLK_HPC; 
 
 TIMESPEC TS_SMA_GTXQ0_LEFT_I = PERIOD "GT_REFCLK_SMA" 125.0 MHz HIGH 50%;
 TIMESPEC TS_HPC_GTXQ0_LEFT_I = PERIOD "GT_REFCLK_HPC" 156.25 MHz HIGH 50%; # the XM104 has a different clock.
@@ -84,17 +84,8 @@ TIMESPEC "TS_enable_32_multiclk_SMA" = FROM "enable_32_SMA" to "enable_32_SMA" T
 NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_1/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/enable_32_i" TNM_NET = FFS "enable_32_HPC1";
 TIMESPEC "TS_enable_32_multiclk_HPC1" = FROM "enable_32_HPC1" to "enable_32_HPC1" TS_rxrecclk_32_HPC1/2;
 
-#SMA
-NET  "auroraWires_sma_clk_n_put" LOC = AH7;
-NET  "auroraWires_sma_clk_p_put" LOC = AH8;
-
-#HPC1 -- GBTCLK1 on XM104
-NET  "auroraWires_hpc_clk_n_put" LOC = E9;
-NET  "auroraWires_hpc_clk_p_put" LOC = E10;
-
-
 # 200 MHz board Clock Constraint  
-NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_0/INIT_CLK" TNM_NET = INIT_CLK;
+NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_0/INIT_CLK_i" TNM_NET = INIT_CLK;
 #TIMESPEC TS_INIT_CLK = PERIOD "INIT_CLK_SMA" 5 ns HIGH 50%;
 
 ###### No cross clock domain analysis. Domains are not related ############## 
@@ -119,15 +110,33 @@ TIMESPEC "TS_TIG4" = FROM "INIT_CLK" TO "USER_CLK_HPC4" TIG;
 # DP6 is X1Y22 (XM104 - CX4)
 # DP7 is X1Y23 (XM104 - CX4)
 
-#Schematic of VC707.
-#  |------|CX4  20-23|-----|CX4  12-15    |----|
-#  |       SMA  24-25       SMA  16-17         |
-#  |       SATA 26-27       SATA 18-19         |
-#  |ETH    HPC1             HPC2               |
-#  |                                           |
-#  |                                           |
-#  |-----| PCIE |------------------------------|
+
+# Schematic of VC707.
+#  |------|CX4  20-23 GBTCLK1 pA10/nA9 |-----|CX4  12-15 GBTCLK1 pT8/nT7 |----|
+#  |       SMA  24-25 GBTCLK0 pE10/nE9        SMA  16-17 GBTCLK0 pK8/nK7      |
+#  |       SATA 26-27 GBTCLK0                 SATA 18-19 GBTCLK0              |
+#  |ETH    FMC1/HPC1                          FMC2/HPC2                       |
+#  |                                                                          |
+#  |                                                                          |
+#  |-----| PCIE |-------------------------------------------------------------|
 #
+
+#SMA 
+NET  "auroraWires_sma_clk_n_put" LOC = AH7;
+NET  "auroraWires_sma_clk_p_put" LOC = AH8;
+
+#HPC1 -- GBTCLK0 on XM104
+NET  "auroraWires_hpc_clk_n_put" LOC = E9;
+NET  "auroraWires_hpc_clk_p_put" LOC = E10;
+
+#HPC1 -- GBTCLK0 on XM104
+#NET  "auroraWires_hpc_clk_n_put" LOC = K7;
+#NET  "auroraWires_hpc_clk_p_put" LOC = K8;
+
+#HPC2 -- GBTCLK1 on XM104
+#NET  "auroraWires_hpc_2_clk_n_put" LOC = T7;
+#NET  "auroraWires_hpc_2_clk_p_put" LOC = T8;
+
 
 NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_0/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/cbcc_gtx0_i/fifo_reset_i" TIG; 
 NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_0/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/cbcc_gtx0_lane1_i/fifo_reset_i" TIG; 
@@ -170,3 +179,4 @@ INST "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/*auroraFlowcontrol_1*" ARE
 AREA_GROUP "AG_aurora_1"                  RANGE=SLICE_X190Y200:SLICE_X221Y249;
 AREA_GROUP "AG_aurora_1"                  RANGE=RAMB36_X14Y43:RAMB36_X14Y44, RAMB36_X13Y42:RAMB36_X13Y45;
 AREA_GROUP "AG_aurora_1"                  GROUP=CLOSED;
+

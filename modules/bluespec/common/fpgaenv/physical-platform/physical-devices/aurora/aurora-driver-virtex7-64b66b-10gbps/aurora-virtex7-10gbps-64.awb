@@ -38,7 +38,7 @@
 %sources -t VERILOG -v PRIVATE aurora_64b66b_v7_3_tx_stream_datapath.v
 %sources -t VERILOG -v PRIVATE aurora_64b66b_v7_3_width_conversion.v
 %sources -t VERILOG -v PRIVATE aurora_64b66b_v7_3_wrapper.v
-%sources -t UCF -v PUBLIC vc707_sma_aurora.ucf
+
 
 
 %param AURORA_INTERFACE_WIDTH            128   "Aurora Interface Width"

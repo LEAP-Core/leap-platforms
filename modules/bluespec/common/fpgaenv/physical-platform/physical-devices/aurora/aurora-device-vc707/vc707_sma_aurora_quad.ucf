@@ -1,0 +1,194 @@
+##################################################################################
+## (c) Copyright 2008 Xilinx, Inc. All rights reserved.
+##
+## This file contains confidential and proprietary information
+## of Xilinx, Inc. and is protected under U.S. and
+## international copyright and other intellectual property
+## laws.
+##
+## DISCLAIMER
+## This disclaimer is not a license and does not grant any
+## rights to the materials distributed herewith. Except as
+## otherwise provided in a valid license issued to you by
+## Xilinx, and to the maximum extent permitted by applicable
+## law: (1) THESE MATERIALS ARE MADE AVAILABLE "AS IS" AND
+## WITH ALL FAULTS, AND XILINX HEREBY DISCLAIMS ALL WARRANTIES
+## AND CONDITIONS, EXPRESS, IMPLIED, OR STATUTORY, INCLUDING
+## BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, NON-
+## INFRINGEMENT, OR FITNESS FOR ANY PARTICULAR PURPOSE; and
+## (2) Xilinx shall not be liable (whether in contract or tort,
+## including negligence, or under any other theory of
+## liability) for any loss or damage of any kind or nature
+## related to, arising under or in connection with these
+## materials, including for any direct, or any indirect,
+## special, incidental, or consequential loss or damage
+## (including loss of data, profits, goodwill, or any type of
+## loss or damage suffered as a result of any action brought
+## by a third party) even if such damage or loss was
+## reasonably foreseeable or Xilinx had been advised of the
+## possibility of the same.
+##
+## CRITICAL APPLICATIONS
+## Xilinx products are not designed or intended to be fail-
+## safe, or for use in any application requiring fail-safe
+## performance, such as life-support or safety devices or
+## systems, Class III medical devices, nuclear facilities,
+## applications related to the deployment of airbags, or any
+## other applications that could lead to death, personal
+## injury, or severe property or environmental damage
+## (individually and collectively, "Critical
+## Applications"). Customer assumes the sole risk and
+## liability of any use of Xilinx products in Critical
+## Applications, subject only to applicable laws and
+## regulations governing limitations on product liability.
+##
+## THIS COPYRIGHT NOTICE AND DISCLAIMER MUST BE RETAINED AS
+## PART OF THIS FILE AT ALL TIMES.
+## 
+## 
+#################################################################################
+## UCF generated for xc6vlx240t-ff1156-1 device
+# 125.0MHz GTX Reference clock constraint 
+ 
+#NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/hpcClockN_0_clk_out" TNM_NET = GT_REFCLK_HPC0; 
+NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_0/GTXQ0_left_i" TNM_NET = GT_REFCLK_HPC0; 
+NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_1/GTXQ0_left_i" TNM_NET = GT_REFCLK_HPC1; 
+NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_2/GTXQ0_left_i" TNM_NET = GT_REFCLK_HPC2; 
+
+#TIMESPEC TS_SMA_GTXQ0_LEFT_I = PERIOD "GT_REFCLK_SMA" 125.0 MHz HIGH 50%;
+TIMESPEC TS_HPC0_GTXQ0_LEFT_I = PERIOD "GT_REFCLK_HPC0" 156.25 MHz HIGH 50%; # the XM104 has a different clock.
+TIMESPEC TS_HPC1_GTXQ0_LEFT_I = PERIOD "GT_REFCLK_HPC1" 156.25 MHz HIGH 50%; # the XM104 has a different clock.
+TIMESPEC TS_HPC2_GTXQ0_LEFT_I = PERIOD "GT_REFCLK_HPC2" 156.25 MHz HIGH 50%; # the XM104 has a different clock.
+
+NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_0/user_clk_i" TNM_NET = USER_CLK_HPC0;
+NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_1/user_clk_i" TNM_NET = USER_CLK_HPC1;
+NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_2/user_clk_i" TNM_NET = USER_CLK_HPC2;
+
+TIMESPEC TS_USER_CLK_HPC0_I = PERIOD "USER_CLK_HPC0" 156.25 MHz HIGH 50%;
+TIMESPEC TS_USER_CLK_HPC1_I = PERIOD "USER_CLK_HPC1" 156.25 MHz HIGH 50%;
+TIMESPEC TS_USER_CLK_HPC2_I = PERIOD "USER_CLK_HPC2" 156.25 MHz HIGH 50%;
+
+NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_0/sync_clk_i" TNM_NET = SYNC_CLK_HPC0;
+NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_1/sync_clk_i" TNM_NET = SYNC_CLK_HPC1;
+NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_2/sync_clk_i" TNM_NET = SYNC_CLK_HPC2;
+ 
+TIMESPEC TS_SYNC_CLK_HPC0_I = PERIOD "SYNC_CLK_HPC0" 312.5 MHz HIGH 50%;
+TIMESPEC TS_SYNC_CLK_HPC1_I = PERIOD "SYNC_CLK_HPC1" 312.5 MHz HIGH 50%;
+TIMESPEC TS_SYNC_CLK_HPC2_I = PERIOD "SYNC_CLK_HPC2" 312.5 MHz HIGH 50%;
+
+# Constraints for RX Recovered clocks
+
+NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_0/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/rxrecclk_to_pll_i" TNM_NET = "rxrecclk_32_HPC0";
+TIMESPEC "TS_rxrecclk_32_HPC0" = PERIOD "rxrecclk_32_HPC0" 312.5 MHz HIGH 50%;
+
+NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_1/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/rxrecclk_to_pll_i" TNM_NET = "rxrecclk_32_HPC1";
+TIMESPEC "TS_rxrecclk_32_HPC1" = PERIOD "rxrecclk_32_HPC1" 312.5 MHz HIGH 50%;
+
+NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_2/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/rxrecclk_to_pll_i" TNM_NET = "rxrecclk_32_HPC2";
+TIMESPEC "TS_rxrecclk_32_HPC2" = PERIOD "rxrecclk_32_HPC2" 312.5 MHz HIGH 50%;
+
+NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_0/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/enable_32_i" TNM_NET = FFS "enable_32_HPC0";
+TIMESPEC "TS_enable_32_multiclk_HPC0" = FROM "enable_32_HPC0" to "enable_32_HPC0" TS_rxrecclk_32_HPC0/2;
+NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_1/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/enable_32_i" TNM_NET = FFS "enable_32_HPC1";
+TIMESPEC "TS_enable_32_multiclk_HPC1" = FROM "enable_32_HPC1" to "enable_32_HPC1" TS_rxrecclk_32_HPC1/2;
+NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_2/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/enable_32_i" TNM_NET = FFS "enable_32_HPC2";
+TIMESPEC "TS_enable_32_multiclk_HPC2" = FROM "enable_32_HPC2" to "enable_32_HPC2" TS_rxrecclk_32_HPC2/2;
+
+# 200 MHz board Clock Constraint  
+NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_0/INIT_CLK_i" TNM_NET = INIT_CLK;
+#TIMESPEC TS_INIT_CLK = PERIOD "INIT_CLK_SMA" 5 ns HIGH 50%;
+
+###### No cross clock domain analysis. Domains are not related ############## 
+TIMESPEC "TS_TIG0" = FROM "INIT_CLK" TO "USER_CLK_HPC0" TIG; 
+TIMESPEC "TS_TIG1" = FROM "INIT_CLK" TO "USER_CLK_HPC1" TIG; 
+TIMESPEC "TS_TIG2" = FROM "INIT_CLK" TO "USER_CLK_HPC2" TIG; 
+TIMESPEC "TS_TIG3" = FROM "INIT_CLK" TO "USER_CLK_HPC3" TIG; 
+TIMESPEC "TS_TIG4" = FROM "INIT_CLK" TO "USER_CLK_HPC4" TIG; 
+#TIMESPEC "TS_TIG5" = FROM "INIT_CLK" TO "USER_CLK_HPC5" TIG; 
+#TIMESPEC "TS_TIG6" = FROM "INIT_CLK" TO "USER_CLK_HPC6" TIG; 
+#TIMESPEC "TS_TIG7" = FROM "INIT_CLK" TO "USER_CLK_HPC7" TIG; 
+#TIMESPEC "TS_TIG8" = FROM "INIT_CLK" TO "USER_CLK_HPC8" TIG; 
+
+############################### GT Location ###################################
+# HPC1
+# DP0 is X1Y24 (XM104 - SMA)
+# DP1 is X1Y25 (XM104 - SMA)
+# DP2 is X1Y26 (XM104 - SATA)
+# DP3 is X1Y27 (XM104 - SATA)
+# DP4 is X1Y20 (XM104 - CX4)
+# DP5 is X1Y21 (XM104 - CX4)
+# DP6 is X1Y22 (XM104 - CX4)
+# DP7 is X1Y23 (XM104 - CX4)
+
+#Schematic of VC707.
+#  |------|CX4  20-23 GBTCLK1 pA10/nA9 |-----|CX4  12-15 GBTCLK1 pT8/nT7 |----|
+#  |       SMA  24-25 GBTCLK0 pE10/nE9        SMA  16-17 GBTCLK0 pK8/nK7      |
+#  |       SATA 26-27 GBTCLK0                 SATA 18-19 GBTCLK0              |
+#  |ETH    FMC1/HPC1                          FMC2/HPC2                       |
+#  |                                                                          |
+#  |                                                                          |
+#  |-----| PCIE |-------------------------------------------------------------|
+#
+
+
+NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_0/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/cbcc_gtx0_i/fifo_reset_i" TIG; 
+NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_0/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/cbcc_gtx0_lane1_i/fifo_reset_i" TIG; 
+
+NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_1/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/cbcc_gtx0_i/fifo_reset_i" TIG; 
+NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_1/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/cbcc_gtx0_lane1_i/fifo_reset_i" TIG; 
+
+NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_2/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/cbcc_gtx0_i/fifo_reset_i" TIG; 
+NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_2/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/cbcc_gtx0_lane1_i/fifo_reset_i" TIG; 
+
+NET  "auroraWires_hpc_clk_n_0_put" LOC = T7;
+NET  "auroraWires_hpc_clk_p_0_put" LOC = T8;
+INST m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_0/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/aurora_64b66b_v7_3_multi_gt_i/AURORA_64B66B_V7_3_GTX_INST/gtxe2_i LOC=GTXE2_CHANNEL_X1Y12; # on board sma cables
+INST m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_0/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/aurora_64b66b_v7_3_multi_gt_i/AURORA_64B66B_V7_3_GTX_INST_LANE1/gtxe2_i LOC=GTXE2_CHANNEL_X1Y13; # on board sma cables
+#INST m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_0/aurora_module_i/gt_wrapper_i/aurora_8b10b_v8_3_multi_gt_i/gtxe2_common_i LOC=GTXE2_COMMON_X1Y0;
+
+NET  "auroraWires_hpc_clk_n_1_put" LOC = E9;
+NET  "auroraWires_hpc_clk_p_1_put" LOC = E10;
+INST m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_1/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/aurora_64b66b_v7_3_multi_gt_i/AURORA_64B66B_V7_3_GTX_INST/gtxe2_i LOC=GTXE2_CHANNEL_X1Y26; # xm104 sata cables
+INST m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_1/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/aurora_64b66b_v7_3_multi_gt_i/AURORA_64B66B_V7_3_GTX_INST_LANE1/gtxe2_i LOC=GTXE2_CHANNEL_X1Y27; # xm104 sata cables
+
+
+NET  "auroraWires_hpc_clk_n_2_put" LOC = K7;
+NET  "auroraWires_hpc_clk_p_2_put" LOC = K8;
+INST m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_2/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/aurora_64b66b_v7_3_multi_gt_i/AURORA_64B66B_V7_3_GTX_INST/gtxe2_i LOC=GTXE2_CHANNEL_X1Y18; # xm104 sata cables
+INST m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_2/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/aurora_64b66b_v7_3_multi_gt_i/AURORA_64B66B_V7_3_GTX_INST_LANE1/gtxe2_i LOC=GTXE2_CHANNEL_X1Y19; # xm104 sata cables
+
+
+## Area groups
+#INST "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/*" AREA_GROUP = "AG_aurora_0";
+#AREA_GROUP "AG_aurora_0"                  RANGE=SLICE_X185Y150:SLICE_X221Y300;
+#AREA_GROUP "AG_aurora_0"                  RANGE=RAMB36_X14Y30:RAMB36_X14Y67, RAMB36_X13Y30:RAMB36_X13Y67;
+#AREA_GROUP "AG_aurora_0"                  GROUP=CLOSED;
+
+
+# HPC1 CX4 Quad Area Group
+#INST "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_0/*" AREA_GROUP = "AG_aurora_0";
+#INST "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/*auroraFlowcontrol_0*" AREA_GROUP = "AG_aurora_0";
+#AREA_GROUP "AG_aurora_0"                  RANGE=SLICE_X185Y250:SLICE_X221Y299;
+#AREA_GROUP "AG_aurora_0"                  RANGE=RAMB36_X14Y50:RAMB36_X14Y59, RAMB36_X13Y50:RAMB36_X13Y59;
+#AREA_GROUP "AG_aurora_0"                  GROUP=CLOSED;
+
+# HPC2 CX4 Quad Area Group
+INST "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_0/*" AREA_GROUP = "AG_aurora_0";
+INST "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/*auroraFlowcontrol_0*" AREA_GROUP = "AG_aurora_0";
+AREA_GROUP "AG_aurora_0"                  RANGE=SLICE_X185Y150:SLICE_X221Y199;
+AREA_GROUP "AG_aurora_0"                  RANGE=RAMB36_X14Y30:RAMB36_X14Y39, RAMB36_X13Y30:RAMB36_X13Y39;
+AREA_GROUP "AG_aurora_0"                  GROUP=CLOSED;
+
+# HPC1 Sata Quad Area Group
+INST "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_1/*" AREA_GROUP = "AG_aurora_1";
+INST "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/*auroraFlowcontrol_1*" AREA_GROUP = "AG_aurora_1";
+AREA_GROUP "AG_aurora_1"                  RANGE=SLICE_X185Y300:SLICE_X221Y349;
+AREA_GROUP "AG_aurora_1"                  RANGE=RAMB36_X14Y60:RAMB36_X14Y69, RAMB36_X13Y60:RAMB36_X13Y69;
+AREA_GROUP "AG_aurora_1"                  GROUP=CLOSED;
+
+# HPC2 Sata Quad Area Group
+INST "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_2/*" AREA_GROUP = "AG_aurora_2";
+INST "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/*auroraFlowcontrol_2*" AREA_GROUP = "AG_aurora_2";
+AREA_GROUP "AG_aurora_2"                  RANGE=SLICE_X185Y200:SLICE_X221Y249;
+AREA_GROUP "AG_aurora_2"                  RANGE=RAMB36_X14Y40:RAMB36_X14Y49, RAMB36_X13Y40:RAMB36_X13Y49;
+AREA_GROUP "AG_aurora_2"                  GROUP=CLOSED;
