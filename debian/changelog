@@ -1,7 +1,8 @@
-leap-platforms (13.06~svn20120412r593+lucid) lucid; urgency=low
+leap-platforms
+(14.08~git1407160382r1b42b4e158f9b0b54618cbf3a188c03e766a813b+precise) precise; urgency=low
 
   [ Joel Emer ]
 
-  * Move to version v13.06. Version v12.04-v12.02 were never released.
+  * Move to version v14.08
 
- -- Joel Emer <emer@csail.mit.edu>  Thu, 12 Apr 2012 12:42:25 -0400
+ -- Joel Emer <emer@csail.mit.edu>  Tue, 05 Aug 2014 15:36:25 -0400
