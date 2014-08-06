@@ -9,7 +9,7 @@
 
 %param --global MAKE_ALL_TARGET   "bit"        "Target of 'make all'.  Most likely bit, exe or vexe."
 
-%param FPGA_PLATFORM      "VC707"               "FPGA Platform"
+%param --global FPGA_PLATFORM      "VC707"               "FPGA Platform"
 %param FPGA_PART_XILINX   "xc7vx485t-ffg1761-2" "FPGA Part ID"
 %param FPGA_POSITION      1                     "FPGA Position (in Xilinx iMPACT)"
 %param MAP_OPTIONS        ""                    "Extra Xilinx Map Options"

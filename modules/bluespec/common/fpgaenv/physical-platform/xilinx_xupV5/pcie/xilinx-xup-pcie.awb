@@ -17,7 +17,7 @@
 
 %param --global MAKE_ALL_TARGET      "bit"       "Target of 'make all'.  Most likely bit, exe or vexe."
 
-%param FPGA_PLATFORM   "XUPV5" "FPGA Platform"
+%param --global FPGA_PLATFORM   "XUPV5" "FPGA Platform"
 
 %param FPGA_PART_XILINX   "xc5vlx110tff1136-1" "FPGA Part ID (XST)"
 %param FPGA_TECHNOLOGY    "Virtex5"             "FPGA Technology (Synplify)"

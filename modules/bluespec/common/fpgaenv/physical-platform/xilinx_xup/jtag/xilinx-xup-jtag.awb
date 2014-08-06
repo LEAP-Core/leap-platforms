@@ -26,4 +26,4 @@
 %param MAP_OPTIONS        ""                "Extra Map Options"
 %param SYNTHESIS_TOOL     "xst"             "Synthesis tool, xst or synplify_pro supported"
 
-%param FPGA_PLATFORM      "XUPv2"           "FPGA Platform"
+%param --global FPGA_PLATFORM      "XUPv2"           "FPGA Platform"
