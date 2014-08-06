@@ -77,6 +77,7 @@ static char *cfg_class = NULL;
 static int  cfg_has_script = 0;
 static char *cfg_fpga_dev = NULL;
 static char *cfg_bus_id = NULL;
+static char *cfg_location = NULL;
 static char *cfg_prog_cable_id = NULL;
 static char cfg_res_file[2*ASCIILINESZ]; // We concatenate two iniparser values to form this string
 
@@ -280,6 +281,7 @@ void cfg_load_dev(int id)
     cfg_fpga_dev = cfg_get_str(sec, "dev");
     cfg_bus_id = cfg_get_str(sec, "bus_id");
     cfg_prog_cable_id = cfg_get_str(sec, "prog_cable_id");
+    cfg_location = cfg_get_str(sec, "location");
 
     // Device-specific reservation lock file
     if (cfg_bus_id != NULL)
@@ -848,6 +850,8 @@ void get_config(char *req)
         printf("%s\n", cfg_prog_cable_id ? cfg_prog_cable_id : "");
     else if (! strcmp(req, "id"))
         printf("%d\n", cfg_id);
+    else if (! strcmp(req, "location"))
+        printf("%d\n", cfg_location);
     else
         error(1, 0, "Error - Unexpected getconfig request (%s)", req);
 }

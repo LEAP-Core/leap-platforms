@@ -22,9 +22,24 @@
 %generated -t BA pipe_receive_reset.ba
 %generated -t BA pipe_clear_reset.ba
 
+%generated -t VPI_C vpi_wrapper_pipe_init.c
+%generated -t VPI_C vpi_wrapper_pipe_open.c
+%generated -t VPI_C vpi_wrapper_pipe_read.c
+%generated -t VPI_C vpi_wrapper_pipe_can_write.c
+%generated -t VPI_C vpi_wrapper_pipe_write.c
+%generated -t VPI_C vpi_wrapper_pipe_receive_reset.c
+%generated -t VPI_C vpi_wrapper_pipe_clear_reset.c
+
+%generated -t VPI_H vpi_wrapper_pipe_init.h
+%generated -t VPI_H vpi_wrapper_pipe_open.h
+%generated -t VPI_H vpi_wrapper_pipe_read.h
+%generated -t VPI_H vpi_wrapper_pipe_can_write.h
+%generated -t VPI_H vpi_wrapper_pipe_write.h
+%generated -t VPI_H vpi_wrapper_pipe_receive_reset.h
+%generated -t VPI_H vpi_wrapper_pipe_clear_reset.h
+
 %param SIMULATOR_ARGS  "-w"  "Simulator Args"
 %param --global PLATFORM_ID     "Legacy"    "PlatformID, used in setting up i/o"
 %param UNIX_DEVICE_DEBUG  0  "Should we print debug messages?"
-
 
 

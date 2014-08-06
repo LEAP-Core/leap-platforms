@@ -140,20 +140,23 @@ NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_1/aurora_64b66b_v
 NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_2/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/cbcc_gtx0_i/fifo_reset_i" TIG; 
 NET "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_2/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/cbcc_gtx0_lane1_i/fifo_reset_i" TIG; 
 
-NET  "auroraWires_hpc_clk_n_0_put" LOC = T7;
-NET  "auroraWires_hpc_clk_p_0_put" LOC = T8;
-INST m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_0/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/aurora_64b66b_v7_3_multi_gt_i/AURORA_64B66B_V7_3_GTX_INST/gtxe2_i LOC=GTXE2_CHANNEL_X1Y12; # on board sma cables
-INST m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_0/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/aurora_64b66b_v7_3_multi_gt_i/AURORA_64B66B_V7_3_GTX_INST_LANE1/gtxe2_i LOC=GTXE2_CHANNEL_X1Y13; # on board sma cables
+NET  "auroraWires_hpc_clk_p_0_put" LOC = A10;
+NET  "auroraWires_hpc_clk_n_0_put" LOC = A9;
+
+INST m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_0/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/aurora_64b66b_v7_3_multi_gt_i/AURORA_64B66B_V7_3_GTX_INST/gtxe2_i LOC=GTXE2_CHANNEL_X1Y20; # on board sma cables
+INST m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_0/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/aurora_64b66b_v7_3_multi_gt_i/AURORA_64B66B_V7_3_GTX_INST_LANE1/gtxe2_i LOC=GTXE2_CHANNEL_X1Y21; # on board sma cables
 #INST m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_0/aurora_module_i/gt_wrapper_i/aurora_8b10b_v8_3_multi_gt_i/gtxe2_common_i LOC=GTXE2_COMMON_X1Y0;
 
-NET  "auroraWires_hpc_clk_n_1_put" LOC = E9;
 NET  "auroraWires_hpc_clk_p_1_put" LOC = E10;
+NET  "auroraWires_hpc_clk_n_1_put" LOC = E9;
+
 INST m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_1/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/aurora_64b66b_v7_3_multi_gt_i/AURORA_64B66B_V7_3_GTX_INST/gtxe2_i LOC=GTXE2_CHANNEL_X1Y26; # xm104 sata cables
 INST m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_1/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/aurora_64b66b_v7_3_multi_gt_i/AURORA_64B66B_V7_3_GTX_INST_LANE1/gtxe2_i LOC=GTXE2_CHANNEL_X1Y27; # xm104 sata cables
 
 
-NET  "auroraWires_hpc_clk_n_2_put" LOC = K7;
 NET  "auroraWires_hpc_clk_p_2_put" LOC = K8;
+NET  "auroraWires_hpc_clk_n_2_put" LOC = K7;
+
 INST m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_2/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/aurora_64b66b_v7_3_multi_gt_i/AURORA_64B66B_V7_3_GTX_INST/gtxe2_i LOC=GTXE2_CHANNEL_X1Y18; # xm104 sata cables
 INST m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_2/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/aurora_64b66b_v7_3_multi_gt_i/AURORA_64B66B_V7_3_GTX_INST_LANE1/gtxe2_i LOC=GTXE2_CHANNEL_X1Y19; # xm104 sata cables
 
@@ -166,18 +169,19 @@ INST m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_2/aurora_64b66b_v
 
 
 # HPC1 CX4 Quad Area Group
-#INST "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_0/*" AREA_GROUP = "AG_aurora_0";
-#INST "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/*auroraFlowcontrol_0*" AREA_GROUP = "AG_aurora_0";
-#AREA_GROUP "AG_aurora_0"                  RANGE=SLICE_X185Y250:SLICE_X221Y299;
-#AREA_GROUP "AG_aurora_0"                  RANGE=RAMB36_X14Y50:RAMB36_X14Y59, RAMB36_X13Y50:RAMB36_X13Y59;
-#AREA_GROUP "AG_aurora_0"                  GROUP=CLOSED;
-
-# HPC2 CX4 Quad Area Group
 INST "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_0/*" AREA_GROUP = "AG_aurora_0";
 INST "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/*auroraFlowcontrol_0*" AREA_GROUP = "AG_aurora_0";
-AREA_GROUP "AG_aurora_0"                  RANGE=SLICE_X185Y150:SLICE_X221Y199;
-AREA_GROUP "AG_aurora_0"                  RANGE=RAMB36_X14Y30:RAMB36_X14Y39, RAMB36_X13Y30:RAMB36_X13Y39;
-AREA_GROUP "AG_aurora_0"                  GROUP=CLOSED;
+AREA_GROUP "AG_aurora_0"                   RANGE=SLICE_X185Y250:SLICE_X221Y299;
+# It appears that RAM are not present on X14Y50-55.  Odd....
+AREA_GROUP "AG_aurora_0"                   RANGE=RAMB36_X14Y55:RAMB36_X14Y59, RAMB36_X13Y50:RAMB36_X13Y59;
+AREA_GROUP "AG_aurora_0"                   GROUP=CLOSED;
+
+# HPC2 CX4 Quad Area Group 
+#INST "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_0/*" AREA_GROUP = "AG_aurora_0";
+#INST "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/*auroraFlowcontrol_0*" AREA_GROUP = "AG_aurora_0";
+#AREA_GROUP "AG_aurora_0"                  RANGE=SLICE_X185Y150:SLICE_X221Y199;
+#AREA_GROUP "AG_aurora_0"                  RANGE=RAMB36_X14Y30:RAMB36_X14Y39, RAMB36_X13Y30:RAMB36_X13Y39;
+#AREA_GROUP "AG_aurora_0"                  GROUP=CLOSED;
 
 # HPC1 Sata Quad Area Group
 INST "m_sys_sys_vp_m_mod/llpi_phys_plat_aurora_device/ug_device_1/*" AREA_GROUP = "AG_aurora_1";
