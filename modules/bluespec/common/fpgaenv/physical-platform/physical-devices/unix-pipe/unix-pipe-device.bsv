@@ -146,7 +146,7 @@ module [CONNECTED_MODULE] mkUNIXPipeDevice#(SOFT_RESET_TRIGGER softResetTrigger)
     endrule
 
     // write chunk from write buffer into C code
-    rule write_bdpi (state == STATE_ready);
+    rule write_bdpi (state == STATE_ready && writeBuffer.notEmpty());
         UMF_CHUNK chunk = writeBuffer.first();
 
         let can_write <- pipe_can_write(handle);

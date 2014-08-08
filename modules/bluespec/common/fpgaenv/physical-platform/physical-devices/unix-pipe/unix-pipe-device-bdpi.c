@@ -57,8 +57,8 @@ static char * inputFileName = NULL;
 static char * outputFileName = NULL;
 
 
-int DESC_HOST_2_FPGA;
-int DESC_FPGA_2_HOST;
+static int DESC_HOST_2_FPGA = -1;
+static int DESC_FPGA_2_HOST = -1;
 
 
 /* internal helper functions */
@@ -66,27 +66,41 @@ void cleanup()
 {
 }
 
-int open_channel() 
+int open_channel(const char * fileName, int * fildes, int flags) 
 {
-    int flags;
+    int flagsBase;
 
     if (UNIX_DEVICE_DEBUG) 
     {
-        printf("FPGA opening input: %s\n", inputFileName); 
+        printf("SIM opening input: %s\n", fileName); 
         fflush(stdout);
     }
    
-    DESC_HOST_2_FPGA = open(inputFileName, O_RDONLY | O_NONBLOCK);
+    (*fildes) = open(fileName, flags | O_NONBLOCK);
 
     // File open was successful. Now fix blocking I/O
-    if (DESC_HOST_2_FPGA >= 0) 
+    if ((*fildes) >= 0) 
     {
-        flags = fcntl(DESC_FPGA_2_HOST, F_GETFL, 0);
-        fcntl(DESC_FPGA_2_HOST, F_SETFL, flags ^ O_NONBLOCK);
-        readOpenComplete = 1;
+        flagsBase = fcntl((*fildes), F_GETFL, 0);
+        fcntl((*fildes), F_SETFL, flagsBase ^ O_NONBLOCK);
+ 
+        if (UNIX_DEVICE_DEBUG) 
+        {
+            printf("SIM succeeded in opening file: %s\n", fileName); 
+            fflush(stdout);
+        }
+
+    }
+    else
+    {
+        if (UNIX_DEVICE_DEBUG) 
+        {
+            printf("SIM open failed: %s\n", fileName); 
+            fflush(stdout);
+        }
     }
 
-    return DESC_HOST_2_FPGA;    
+    return (*fildes);    
 }
 
 /* initialize global data structures */
@@ -170,15 +184,14 @@ void pipe_init(unsigned char usePipes, char * platformID)
         fflush(stdout);
     }
 
-    DESC_FPGA_2_HOST = open(outputFileName, O_WRONLY);	
-    if (DESC_FPGA_2_HOST < 0)
-    {
-        perror("FPGA failure to open write side, exiting\n");
-        fprintf(stderr,"Exiting simulator!\n");
-        fflush(stderr);
-        exit(1);
-    }
+    // Attempt to open write side
+    open_channel(outputFileName, &DESC_FPGA_2_HOST, O_WRONLY);
+    open_channel(inputFileName,  &DESC_HOST_2_FPGA, O_RDONLY);
 
+    if(UNIX_DEVICE_DEBUG) 
+    {
+        printf("Pipe open of %s, initialization routine complete\n", outputFileName);
+    }
 
     // Tell the main thread we're done. 
     initialized = 1;
@@ -251,13 +264,24 @@ void pipe_read(unsigned int* resultptr, unsigned char handle)
     int done;
     Channel *channel;
 
-    if (! readOpenComplete)
+    if (DESC_HOST_2_FPGA < 0)
     {
+        if(UNIX_DEVICE_DEBUG) 
+        {
+            printf("pipe read attempting open\n");
+        }
+
         // Try to open the outbound pipe
-        if(open_channel() < 0)
+        if(open_channel(inputFileName, &DESC_HOST_2_FPGA, O_RDONLY) < 0)
         {
             // not open yet...
             resultptr[4] = PIPE_NULL;
+
+            if(UNIX_DEVICE_DEBUG) 
+            {
+                printf("pipe read open attempt failed\n");
+            }
+
             return;
         }
     }
@@ -389,9 +413,13 @@ unsigned char pipe_can_write(unsigned char handle)
     fd_set writefds;
     struct timeval timeout;
 
-    if (! initialized)
+
+    if (DESC_FPGA_2_HOST < 0)
     {
-        return 0;
+        if(open_channel(outputFileName, &DESC_FPGA_2_HOST, O_WRONLY) < 0)
+        {
+            return 0;
+        }
     }
 
     assert(handle < MAX_OPEN_CHANNELS);
