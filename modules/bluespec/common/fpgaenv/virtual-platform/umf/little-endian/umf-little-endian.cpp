@@ -75,7 +75,7 @@ UMF_MESSAGE_CLASS::DecodeHeader(
     if (length > UMF_MAX_MSG_BYTES)
     {
         cerr << "umf: message size too long: " << length << endl;
-        CallbackExit(1);
+        allocator->CallbackExit(1);
     }
 }
 
@@ -143,14 +143,6 @@ UMF_MESSAGE_CLASS::EncodeHeader(
     *(UINT32*) buf = chunk;
 }
 
-// init
-void
-UMF_MESSAGE_CLASS::Init(
-    PLATFORMS_MODULE p)
-{
-    parent = p;
-}
-
 // allocate a new message: pipe through to the allocator
 void *
 UMF_MESSAGE_CLASS::operator new(size_t size)
@@ -212,3 +204,37 @@ UMF_MESSAGE_CLASS::Print(
     }
     out << dec << endl;
 }
+
+inline void
+UMF_MESSAGE_CLASS::AppendUINT(
+    UINT64 data,
+    int nbytes)
+{
+    if (nbytes > 8)
+    {
+        cerr << "umf: AppendUINT can take 8 bytes maximum" << endl;
+        allocator->CallbackExit(1);
+    }
+
+    AppendBytes(nbytes, (unsigned char*) &data);
+}
+
+
+inline UINT64
+UMF_MESSAGE_CLASS::ExtractUINT(
+    int nbytes)
+{
+    if (nbytes > sizeof(UINT64))
+    {
+        cerr << "umf: ExtractUINT can take 8 bytes maximum" << endl;
+        allocator->CallbackExit(1);
+    }
+
+    // it's too risky to do a direct typecast here
+    CheckExtractSanity(nbytes);
+    UINT64 retval = 0;
+    memcpy((unsigned char*)&retval, &message[readIndex], nbytes);
+    readIndex += nbytes;
+    return retval;
+}
+

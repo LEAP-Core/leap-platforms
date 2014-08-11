@@ -54,9 +54,8 @@ UMF_ALLOCATOR_CLASS::UMF_ALLOCATOR_CLASS()
     {
         // Zero out message to make valgrind happy
         UMF_MESSAGE m = (UMF_MESSAGE) memset(malloc(sizeof(UMF_MESSAGE_CLASS)), 0, sizeof(UMF_MESSAGE_CLASS));
-	//void* buf =  malloc(sizeof(UMF_MESSAGE));
-	//UMF_MESSAGE m = ::new(buf) UMF_MESSAGE_CLASS();
 
+        m->setAllocator(this);
         memset(m, 0, sizeof(UMF_MESSAGE_CLASS));
         freeList.Push(m);
     }

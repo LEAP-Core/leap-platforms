@@ -50,6 +50,7 @@
 #include "asim/freelist.h"
 
 #include "asim/provides/umf.h"
+#include "asim/provides/umf.h"
 #include "platforms-module.h"
 
 using namespace std;
@@ -72,11 +73,13 @@ typedef UINT128 UMF_CHUNK;
 #define UMF_METHOD_ID_MASK     UMF_BIT_MASK(UMF_METHOD_ID_BITS)
 #define UMF_MSG_LENGTH_MASK    UMF_BIT_MASK(UMF_MSG_LENGTH_BITS)
 
+// Forward declare allocator
+class UMF_ALLOCATOR_CLASS;
+
 // ================ UMF Message ================
 
 typedef class UMF_MESSAGE_CLASS* UMF_MESSAGE;
-class UMF_MESSAGE_CLASS: public PLATFORMS_MODULE_CLASS,
-                         public ASIM_FREE_LIST_ELEMENT_CLASS<UMF_MESSAGE_CLASS>
+class UMF_MESSAGE_CLASS: public ASIM_FREE_LIST_ELEMENT_CLASS<UMF_MESSAGE_CLASS>
 {
   private:   
     // For now we use fixed sized message buffers to simplify allocation.
@@ -86,6 +89,7 @@ class UMF_MESSAGE_CLASS: public PLATFORMS_MODULE_CLASS,
 
     // links
     UMF_MESSAGE next;
+    UMF_ALLOCATOR_CLASS *allocator;
     
   // Allows us to overload decoding of headers
   protected:
@@ -98,13 +102,17 @@ class UMF_MESSAGE_CLASS: public PLATFORMS_MODULE_CLASS,
     UMF_CHUNK phyPvt;
     UMF_CHUNK header;
     
+
+    // Make friends with the allocator 
+    friend class UMF_ALLOCATOR_CLASS;
+
+    void setAllocator(UMF_ALLOCATOR_CLASS *allocatorNew) { allocator = allocatorNew; }
+
   public:
     // constructor and destructor
     UMF_MESSAGE_CLASS();
     ~UMF_MESSAGE_CLASS();
     
-    void Init(PLATFORMS_MODULE p);
-
     // clear
     void Clear();
     
@@ -276,24 +284,6 @@ UMF_MESSAGE_CLASS::ExtractUINT64()
     return retval;
 }
 
-inline UINT64
-UMF_MESSAGE_CLASS::ExtractUINT(
-    int nbytes)
-{
-    if (nbytes > sizeof(UINT64))
-    {
-        cerr << "umf: ExtractUINT can take 8 bytes maximum" << endl;
-        CallbackExit(1);
-    }
-
-    // it's too risky to do a direct typecast here
-    CheckExtractSanity(nbytes);
-    UINT64 retval = 0;
-    memcpy((unsigned char*)&retval, &message[readIndex], nbytes);
-    readIndex += nbytes;
-    return retval;
-}
-
 inline UMF_CHUNK
 UMF_MESSAGE_CLASS::ExtractChunk()
 {
@@ -311,6 +301,11 @@ UMF_MESSAGE_CLASS::ExtractChunk()
 inline void
 UMF_MESSAGE_CLASS::ExtractChunks(int nchunks, UMF_CHUNK dst[])
 {
+    if(nchunks * sizeof(UMF_CHUNK) + readIndex < length)
+    {
+        this->Print(cerr);
+    }
+
     ASSERTX(nchunks * sizeof(UMF_CHUNK) + readIndex < length);
     const UMF_CHUNK* src = (UMF_CHUNK *)(&message[readIndex]);
 
@@ -388,20 +383,6 @@ UMF_MESSAGE_CLASS::AppendUINT64(
 
     *(UINT64*)&message[writeIndex] = data;
     writeIndex += sizeof(data);
-}
-
-inline void
-UMF_MESSAGE_CLASS::AppendUINT(
-    UINT64 data,
-    int nbytes)
-{
-    if (nbytes > 8)
-    {
-        cerr << "umf: AppendUINT can take 8 bytes maximum" << endl;
-        CallbackExit(1);
-    }
-
-    AppendBytes(nbytes, (unsigned char*) &data);
 }
 
 inline void

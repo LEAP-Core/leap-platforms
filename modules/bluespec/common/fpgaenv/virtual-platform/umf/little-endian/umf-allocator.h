@@ -88,8 +88,9 @@ UMF_ALLOCATOR_CLASS::New()
     UMF_MESSAGE m = freeList.Pop();
     if (m == NULL)
     {
-        m = (UMF_MESSAGE) malloc(sizeof(UMF_MESSAGE_CLASS));
+        m = (UMF_MESSAGE)  memset(malloc(sizeof(UMF_MESSAGE_CLASS)), 0, sizeof(UMF_MESSAGE_CLASS));
         VERIFYX(m != NULL);
+        m->setAllocator(this);
     }
 
     return m;
