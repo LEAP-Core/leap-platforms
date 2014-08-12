@@ -36,6 +36,10 @@ case "$bus_id" in
     pci_enable="/sys/devices/pci0000:00/0000:00:03.0/rescan"
     pci_disable="/sys/devices/pci0000:00/0000:00:03.0/${bus_id}/remove"
     ;;
+  "0000:07:00.0")
+    pci_enable="/sys/devices/pci0000:00/0000:00:07.0/rescan"
+    pci_disable="/sys/devices/pci0000:00/0000:00:07.0/${bus_id}/remove"
+    ;;
   "0000:83:00.0")
     pci_enable="/sys/devices/pci0000:80/0000:80:03.0/rescan"
     pci_disable="/sys/devices/pci0000:80/0000:80:03.0/${bus_id}/remove"
@@ -66,11 +70,12 @@ case "$arg_command" in
     sleep 1
 
     echo "Programming device: ${arg_driver}"
-    ;;
 
-  activate)
+    ;;
+  deactivate) 
+
     ##
-    ## Activate the FPGA following programming.  Turn on the PCIe bus and load
+    ## load into the system following programming.  Turn on the PCIe bus and load
     ## the kernel driver.
     ##
 
@@ -117,25 +122,22 @@ case "$arg_command" in
     # copying /sys/bus/.../config to /usr/share/leap/state.
     cp /usr/share/leap/state/${bus_id}_config /sys/bus/pci/devices/${bus_id}/config
 
+
+    sleep 2
+
+    # reactivate the driver by calling some ioctls on it.                       
+    /usr/local/bin/bluenoc-ioctl ${arg_driver} "DEACTIVATE"
+
     # Give user access to the device
-    echo "Activating device: VC707 ${arg_devid} ${arg_driver}"
+    echo "loaded device: VC707 ${arg_devid} ${arg_driver}"
     ;;
 
-  deactivate)
-    ##
-    ## The FPGA remains reserved, but not on the PCIe bus.
-    ##
+  activate)
 
-    # No need to rmmod the BlueNoC driver.  It will handle the device
-    # disappearing and reappering correctly.
-    if [ -f ${pci_disable} ]; then
-        echo "Disabling PCIe device..."
-        echo 1 > $pci_disable
-    fi
+    sleep 2
 
-    # Let the bus settle
-    sleep 1
-
+    /usr/local/bin/bluenoc-ioctl ${arg_driver} "REACTIVATE"
+    echo "Activating device: VC707 ${arg_devid} ${arg_driver}"
     ;;
 
 esac
