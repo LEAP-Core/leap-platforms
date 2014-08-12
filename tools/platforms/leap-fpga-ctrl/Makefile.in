@@ -490,7 +490,7 @@ install:
 	mkdir -p $(DESTDIR)$(datarootdir)/leap/drivers
 	mkdir -p $(DESTDIR)$(datarootdir)/leap/scripts
 	mkdir -p $(DESTDIR)$(datarootdir)/leap/state
-	install --owner=root --group=root --mode=554 scripts/VC707 $(DESTDIR)$(datarootdir)/leap/scripts
+	install --owner=root --group=root --mode=554 scripts/*.example $(DESTDIR)$(datarootdir)/leap/scripts
 	mkdir -p $(DESTDIR)$(sysconfdir)/leap
 	install --owner=root --group=root --mode=444 etc/config-sample $(DESTDIR)$(sysconfdir)/leap
 	mkdir -p $(DESTDIR)$(sysconfdir)/init.d
