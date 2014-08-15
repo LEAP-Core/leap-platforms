@@ -70,8 +70,8 @@ typedef AURORA_DRIVER#(AURORA_INTERFACE_WIDTH#(InterfaceWords, InterfaceWidth)) 
 typedef Vector#(`NUM_AURORA_IFCS, AURORA_COMPLEX_DRIVER) AURORA_COMPLEX_DRIVERS;
 
 interface AURORA_COMPLEX_WIRES;
-    interface Vector#(`NUM_AURORA_IFCS, Put#(Bit#(1))) hpc_clk_p;
-    interface Vector#(`NUM_AURORA_IFCS, Put#(Bit#(1))) hpc_clk_n;
+    interface Vector#(TDiv#(`NUM_AURORA_IFCS,2), Put#(Bit#(1))) hpc_clk_p;
+    interface Vector#(TDiv#(`NUM_AURORA_IFCS,2), Put#(Bit#(1))) hpc_clk_n;
     interface Vector#(`NUM_AURORA_IFCS,AURORA_WIRES) wires;
 endinterface
 
@@ -98,32 +98,21 @@ module mkAuroraDevice#(Clock rawClock, Reset rawReset)
     Vector#(`NUM_AURORA_IFCS,AURORA_COMPLEX_DRIVER) ifcDrivers = newVector();
     Vector#(`NUM_AURORA_IFCS,AURORA_WIRES)                                                   ifcWires = newVector();
     Vector#(`NUM_AURORA_IFCS,AuroraGTXClockSpec)                                             ifcClocks = newVector();
-    Vector#(`NUM_AURORA_IFCS,CLOCK_FROM_PUT)                                                 ifcClkN = newVector();
-    Vector#(`NUM_AURORA_IFCS,CLOCK_FROM_PUT)                                                 ifcClkP = newVector();
-    Vector#(`NUM_AURORA_IFCS,Clock)                                                          ifcClkInst = newVector();
-    Vector#(`NUM_AURORA_IFCS,Put#(Bit#(1)))                                                  ifcClkWireN = newVector();
-    Vector#(`NUM_AURORA_IFCS,Put#(Bit#(1)))                                                  ifcClkWireP = newVector();
+    Vector#(TDiv#(`NUM_AURORA_IFCS,2),CLOCK_FROM_PUT)                                          ifcClkN = newVector();
+    Vector#(TDiv#(`NUM_AURORA_IFCS,2),CLOCK_FROM_PUT)                                          ifcClkP = newVector();
+    Vector#(TDiv#(`NUM_AURORA_IFCS,2),Clock)                                                   ifcClkInst = newVector();
+    Vector#(TDiv#(`NUM_AURORA_IFCS,2),Put#(Bit#(1)))                                           ifcClkWireN = newVector();
+    Vector#(TDiv#(`NUM_AURORA_IFCS,2),Put#(Bit#(1)))                                           ifcClkWireP = newVector();
 
     // HPC Clock
 
     // Now we can instantiate the aurora devices enblock
-    for(Integer i = 0; i < `NUM_AURORA_IFCS; i = i + 1)
+    for(Integer i = 0; i < valueof(TDiv#(`NUM_AURORA_IFCS,2)); i = i + 1)
     begin
         CLOCK_FROM_PUT hpcClockN <- mkClockFromPut(clocked_by rawClock);
         CLOCK_FROM_PUT hpcClockP <- mkClockFromPut(clocked_by rawClock);
  
         let hpcClock <- mkClockIBUFDS_GTE2(defaultValue, True, hpcClockP.clock, hpcClockN.clock);
-
-        // We scrub these values from coregen. HPC clock is 156.25 MHz.
-        ifcClocks[i] = AuroraGTXClockSpec{pll_divsel45_fb: 4, clk25_divider: 7, clock: hpcClock, use_chipscope: 0};
-
-        // Instantiate the driver and flowcontrol
-        AURORA_SINGLE_DEVICE_UG#(InterfaceWidth) ug_device <-
-            mkAURORA_SINGLE_UG(ifcClocks[i], rawClock, modelOrRawReset);
-
-        NumTypeParam#(InterfaceWords) interfaceWidth = ?;
-        let auroraFlowcontrol <- mkAURORA_FLOWCONTROL(ug_device, interfaceWidth);
-        let auroraWires <- mkAuroraIOBUF(auroraFlowcontrol.wires, clocked_by rawClock, reset_by rawReset);
 
         // Place IBUF on clock lines.
         Wire#(Bit#(1)) hpcN <- mkIBUF(defaultValue, clocked_by rawClock, reset_by rawReset);
@@ -137,8 +126,6 @@ module mkAuroraDevice#(Clock rawClock, Reset rawReset)
             hpcClockP.clock_wire.put(hpcP);
         endrule
  
-        ifcDrivers[i] = auroraFlowcontrol.driver;
-        ifcWires[i]   = auroraWires;
         ifcClkN[i] = hpcClockN;
         ifcClkP[i] = hpcClockP;
         ifcClkInst[i] = hpcClock;
@@ -153,6 +140,25 @@ module mkAuroraDevice#(Clock rawClock, Reset rawReset)
                                  hpcN <= clk;
                              endmethod
                          endinterface;
+    end
+
+    for(Integer i = 0; i < `NUM_AURORA_IFCS; i = i + 1)
+    begin
+        // We scrub these values from coregen. HPC clocks are 156.25 MHz for VC707.
+        // Note that we share clocks, with two clocks/aurora device instance
+        // Manual says a clock can drive up to three quads, but let's not push it.
+        ifcClocks[i] = AuroraGTXClockSpec{pll_divsel45_fb: 4, clk25_divider: 7, clock: ifcClkInst[i/2], use_chipscope: 0};
+
+        // Instantiate the driver and flowcontrol
+        AURORA_SINGLE_DEVICE_UG#(InterfaceWidth) ug_device <-
+            mkAURORA_SINGLE_UG(ifcClocks[i/2], rawClock, modelOrRawReset);
+
+        NumTypeParam#(InterfaceWords) interfaceWidth = ?;
+        let auroraFlowcontrol <- mkAURORA_FLOWCONTROL(ug_device, interfaceWidth);
+        let auroraWires <- mkAuroraIOBUF(auroraFlowcontrol.wires, clocked_by rawClock, reset_by rawReset);
+
+        ifcDrivers[i] = auroraFlowcontrol.driver;
+        ifcWires[i]   = auroraWires;
     end
 
 

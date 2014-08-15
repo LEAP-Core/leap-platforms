@@ -126,7 +126,9 @@ case "$arg_command" in
     sleep 2
 
     # reactivate the driver by calling some ioctls on it.                       
-    /usr/local/bin/bluenoc-ioctl ${arg_driver} "DEACTIVATE"
+    /usr/local/bin/bluenoc-ioctl ${arg_driver} "deactivate"
+
+    sleep 2
 
     # Give user access to the device
     echo "loaded device: VC707 ${arg_devid} ${arg_driver}"
@@ -136,7 +138,10 @@ case "$arg_command" in
 
     sleep 2
 
-    /usr/local/bin/bluenoc-ioctl ${arg_driver} "REACTIVATE"
+    /usr/local/bin/bluenoc-ioctl ${arg_driver} "activate"
+
+    sleep 2
+
     echo "Activating device: VC707 ${arg_devid} ${arg_driver}"
     ;;
 
