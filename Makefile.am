@@ -80,7 +80,7 @@ install-package:
 install-xupv5-dkms:
 #
 	mkdir -p $(DESTDIR)$(datarootdir)/leap/scripts
-	install --owner=root --group=root --mode=554 tools/platforms/leap-fpga-ctrl/scripts/XUPV5 $(DESTDIR)$(datarootdir)/leap/scripts
+	install --owner=root --group=root --mode=554 tools/platforms/leap-fpga-ctrl/scripts/XUPV5.example $(DESTDIR)$(datarootdir)/leap/scripts
 #
 	@rm -rf  $(DESTDIR)/usr/src/bsemu-$(RELEASE)
 	$(mkinstalldirs)  $(DESTDIR)/usr/src/bsemu-$(RELEASE)
