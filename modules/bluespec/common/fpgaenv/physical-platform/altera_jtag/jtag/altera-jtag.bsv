@@ -68,7 +68,6 @@ endinterface
 interface TOP_LEVEL_WIRES;
 
    // wires from devices
-   (* prefix = "" *)
    interface CLOCKS_WIRES                       clocksWires;
    interface LEDS_WIRES#(`NUMBER_LEDS)          ledsWires;
    interface JTAG_WIRES                         jtagWires;   
@@ -105,15 +104,21 @@ module mkPhysicalPlatform
       
     // Finally, instantiate all other physical devices
     
-    LEDS_DEVICE#(`NUMBER_LEDS)         leds_device       <- mkLEDsDevice(clocked_by clk, reset_by rst);
+    LEDS_DEVICE#(`NUMBER_LEDS)         leds_device       <- mkLEDsDevice(clocked_by clocks_device.driver.rawClock, reset_by clocks_device.driver.rawReset);
 
     //This must be clocked by the raw  clock 
-    JTAG_DEVICE jtag_device <- mkJtagDevice(?,
-                                            clocks_device.driver.rawClock, 
+    JTAG_DEVICE jtag_device <- mkJtagDevice(clocks_device.driver.rawClock, 
                                             clocks_device.driver.rawReset, 
                                             clocked_by clk, 
                                             reset_by   rst);    
     
+
+    Reg#(Bit#(TAdd#(`NUMBER_LEDS,26))) counter <- mkReg(0, clocked_by clocks_device.driver.rawClock, reset_by clocks_device.driver.rawReset);
+
+    rule tickCount;
+        counter <= counter + 1;
+        leds_device.driver.setLEDs(truncateLSB(counter));
+    endrule
 
 
 

@@ -29,15 +29,37 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include "asim/provides/physical_platform.h"
+// This code is intended to provide thin wrappers around the I/O
+// primitive required for the different vendors. 
 
-PHYSICAL_DEVICES_CLASS::PHYSICAL_DEVICES_CLASS(
-    PLATFORMS_MODULE p) :
-        PLATFORMS_MODULE_CLASS(p),
-	jtagPipeDevice(this)
-{
-}
 
-PHYSICAL_DEVICES_CLASS::~PHYSICAL_DEVICES_CLASS()
-{
-}
+import AlteraCells::*;
+
+
+module mkDifferentialClock#(Clock clk_p, Clock clk_n)(Clock);
+    let _m <- mkAlteraClockDiffIn(clk_p, clk_n);
+    return _m;
+endmodule
+
+
+module mkInputBuffer (Wire#(Bit#(n)));
+    Wire#(Bit#(n)) _m <- mkWire();
+    return _m;
+endmodule 
+
+module mkInputClockBuffer (Wire#(Bit#(n)));
+    Wire#(Bit#(n)) _m <- mkWire();
+    return _m;
+endmodule 
+
+module mkClockBuffer (Clock);
+    let clock <- exposeCurrentClock();
+    return clock;
+endmodule
+
+module mkResetBuffer (Reset);
+    let reset <- exposeCurrentReset();
+    return reset;
+endmodule 
+
+

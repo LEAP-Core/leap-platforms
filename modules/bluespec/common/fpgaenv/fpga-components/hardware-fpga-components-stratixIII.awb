@@ -1,5 +1,5 @@
-%name Hardware FPGA Components for ArriaII
-%desc Hardware FPGA Components for ArriaII
+%name Hardware FPGA Components for StratixIII
+%desc Hardware FPGA Components for StratixIII
 
 %provides fpga_components
 
@@ -20,7 +20,7 @@
 %private Bram.v
 %private lutram.v
 %private shiftreg.v
-%private user-clock-altera-arriaII.v
+%private user-clock-altera-stratixIII.v
 
 %sources -t BSV -v PUBLIC  differential-clock-import.bsv
 

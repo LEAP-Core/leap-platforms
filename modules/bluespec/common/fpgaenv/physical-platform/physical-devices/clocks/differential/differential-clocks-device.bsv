@@ -32,7 +32,6 @@
 // Differential Clocks Device
 
 import Clocks::*;
-import XilinxCells::*;
 import GetPut::*;
 import DefaultValue::*;
 
@@ -65,6 +64,11 @@ interface CLOCKS_WIRES;
     interface Put#(Bit#(1)) clk_n;
 
     interface Put#(Bit#(1)) rst;
+
+    // the following makes bluespec happy
+    // during flows in which we do object code 
+    // linking. 
+    interface CLOCKS_DRIVER outputClocks;
     
 endinterface
 
@@ -103,7 +107,7 @@ module mkClocksDevice
     CLOCK_FROM_PUT incomingClockN <- mkClockFromPut;
     CLOCK_FROM_PUT incomingClockP <- mkClockFromPut;
 
-    Clock rawClock <- mkClockIBUFDS(defaultValue, incomingClockP.clock, incomingClockN.clock);
+    Clock rawClock <- mkDifferentialClock(incomingClockP.clock, incomingClockN.clock);
 
     // Construct reset.  The incoming reset wire must be "crossed"
     // to the incomingSysClkBuf clock domain from the rawClock domain.  Like
@@ -113,7 +117,7 @@ module mkClocksDevice
     RESET_FROM_PUT incomingReset <- mkResetFromPut(rawClock,
                                                    clocked_by rawClock);
 
-    Wire#(Bit#(1)) buffRst <- mkIBUF(defaultValue, clocked_by rawClock, reset_by incomingReset.reset);
+    Wire#(Bit#(1)) buffRst <- mkInputBuffer(clocked_by rawClock, reset_by incomingReset.reset);
  
     rule transferRst;
         incomingReset.reset_wire.put(buffRst);
@@ -164,18 +168,18 @@ module mkClocksDevice
     Reset finalReset = softReset;
     
     // bind the driver interfaces
-    
-    interface CLOCKS_DRIVER driver;
+    CLOCKS_DRIVER driverBinding =  interface CLOCKS_DRIVER;
         
-        interface clock = finalClock;
-        interface reset = finalReset;
+                                       interface clock = finalClock;
+                                       interface reset = finalReset;
             
-        interface rawClock = rawClock;
-        interface rawReset = rawReset;
+                                       interface rawClock = rawClock;
+                                       interface rawReset = rawReset;
                 
-    endinterface
+                                   endinterface;
     
     // bind the wires
+    interface driver = driverBinding;
     
     interface CLOCKS_WIRES wires;
        
@@ -188,6 +192,7 @@ module mkClocksDevice
             endmethod
         endinterface
 
+        interface outputClocks = driverBinding;
     endinterface
     
     // soft reset trigger

@@ -50,7 +50,7 @@ typedef enum
  WritePoll 
 } JtagAvalonRequest deriving (Bits, Eq);
 
-interface JTAG_DRIVER;
+interface JTAG_PHYSICAL_DRIVER;
    method Action send(JTAGWord word);
    method ActionValue#(JTAGWord) receive();
 endinterface
@@ -59,12 +59,12 @@ interface JTAG_WIRES;
    method Bit#(1) dummy_wire;
 endinterface
 
-interface JTAG_DEVICE;
-   interface JTAG_DRIVER driver;
+interface JTAG_PHYSICAL_DEVICE;
+   interface JTAG_PHYSICAL_DRIVER driver;
    interface JTAG_WIRES  wires;
 endinterface  
 
-module mkAvalonJtagDriver#(Clock rawClock, Reset rawReset) (JTAG_DEVICE);
+module mkAvalonJtagDriver#(Clock rawClock, Reset rawReset) (JTAG_PHYSICAL_DEVICE);
    
    Clock sysClock <- exposeCurrentClock();
    Reset sysReset <- exposeCurrentReset();
@@ -132,7 +132,7 @@ module mkAvalonJtagDriver#(Clock rawClock, Reset rawReset) (JTAG_DEVICE);
          end
    endrule
    
-   interface JTAG_DRIVER driver;
+   interface JTAG_PHYSICAL_DRIVER driver;
       method Action send(JTAGWord word);
          inQ.enq(word);
       endmethod
@@ -151,11 +151,4 @@ module mkAvalonJtagDriver#(Clock rawClock, Reset rawReset) (JTAG_DEVICE);
       
 endmodule
 
-module mkJtagDevice#(SOFT_RESET_TRIGGER reset, Clock rawClock, Reset rawReset) (JTAG_DEVICE);
-   
-   let jtagDriver <- mkAvalonJtagDriver(rawClock, rawReset);
-   
-   interface driver = jtagDriver.driver;
-   interface wires  = jtagDriver.wires;
-   
-endmodule
+

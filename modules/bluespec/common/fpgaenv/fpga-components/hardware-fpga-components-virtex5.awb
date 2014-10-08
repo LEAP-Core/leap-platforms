@@ -10,7 +10,6 @@
 %public alu-support.bsv
 %public user-clock.bsv user-clock-pll-virtex5.bsv user-clock-pll-common.bsv
 %public user-clock-xilinx.bsv
-%public clock-buffers.bsv
 %public floating-point-import.bsv
 %public floating-point-accel.bsv
 %public shiftreg.bsv
@@ -21,7 +20,6 @@
 %private user-clock-xilinx-virtex5.v
 %private user-clock-pll-virtex5.v
 %private user-clock-pll-common.v
-%private clock-buffers.v
 %private bscan-virtex5.v
 
 %private fp_add.v
@@ -37,6 +35,8 @@
 
 %sources -t BSV -v PUBLIC  clock-import.bsv
 %sources -t VERILOG -v PRIVATE clock_import.v
+
+%sources -t BSV -v PUBLIC  io-components-xilinx.bsv
 
 %private fp_add.ngc
 %private fp_mul.ngc

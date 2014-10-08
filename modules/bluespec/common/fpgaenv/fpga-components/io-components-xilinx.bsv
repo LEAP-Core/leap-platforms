@@ -29,15 +29,39 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include "asim/provides/physical_platform.h"
+// This code is intended to provide thin wrappers around the I/O
+// primitive required for the different vendors. 
 
-PHYSICAL_DEVICES_CLASS::PHYSICAL_DEVICES_CLASS(
-    PLATFORMS_MODULE p) :
-        PLATFORMS_MODULE_CLASS(p),
-	jtagPipeDevice(this)
-{
-}
 
-PHYSICAL_DEVICES_CLASS::~PHYSICAL_DEVICES_CLASS()
-{
-}
+import XilinxCells::*;
+
+
+module mkDifferentialClock#(Clock clk_p, Clock clk_n)(Clock);
+    let _m <- mkClockIBUFDS(defaultValue, clk_p, clk_n);
+    return _m;
+endmodule
+
+module mkInputBuffer (Wire#(Bit#(n)));
+    Wire#(Bit#(n)) _m <- mkIBUF(defaultValue);
+    return _m;
+endmodule 
+
+module mkInputClockBuffer (Wire#(Bit#(n)));
+    Wire#(Bit#(n)) _m <- mkIBUFG(defaultValue);
+    return _m;
+endmodule 
+
+module mkClockBuffer (Clock);
+    let clock <- exposeCurrentClock();
+    let bufferedClock <- mkClockBUFG(clocked_by clock);
+    return bufferedClock;
+endmodule 
+
+module mkResetBuffer (Reset);
+    let reset <- exposeCurrentReset();
+    let bufferedReset <- mkResetIBUF(defaultValue, reset_by reset);
+    return bufferedReset;
+endmodule 
+
+
+

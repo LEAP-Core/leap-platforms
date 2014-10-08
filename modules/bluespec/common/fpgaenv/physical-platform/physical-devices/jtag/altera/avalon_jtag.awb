@@ -8,8 +8,17 @@
 %desc Altera JTAG
 %provides jtag_device
 
+%requires avalon
+%requires register_mapper
+%requires fifo_utils
+%requires c_bus_utils
+%requires debug_utils
+%requires vector_utils
+
+
 %attribute altera
 
+%sources -t BSV -v PUBLIC jtag-li.bsv
 %sources -t BSV -v PUBLIC AvalonJtag.bsv
 %sources -t BSV -v PUBLIC AvalonMasterDriver.bsv
 %sources -t VERILOG -v PRIVATE avalon_jtag_black_box.v

@@ -1,5 +1,5 @@
-set_location_assignment PIN_T33 -to CLK
-set_location_assignment PIN_U31 -to RST_N
+set_location_assignment PIN_T33 -to clocksWires_CLK
+set_location_assignment PIN_U31 -to clocksWires_RST_N
 set_location_assignment PIN_AD1  -to ledsWires_LED[0]
 set_location_assignment PIN_AC1  -to ledsWires_LED[1]
 set_location_assignment PIN_AC2  -to ledsWires_LED[2]

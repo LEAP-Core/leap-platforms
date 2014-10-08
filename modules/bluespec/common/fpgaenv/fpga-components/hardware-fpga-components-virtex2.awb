@@ -12,6 +12,8 @@
 %public user-clock-xilinx.bsv
 %public shiftreg.bsv
 
+%sources -t BSV -v PUBLIC  io-components-xilinx.bsv
+
 %sources -t BSV -v PUBLIC  clock-import.bsv
 %sources -t VERILOG -v PRIVATE clock_import.v
 

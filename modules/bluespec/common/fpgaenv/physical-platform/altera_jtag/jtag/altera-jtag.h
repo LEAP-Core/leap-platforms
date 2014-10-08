@@ -33,18 +33,30 @@
 #define __PHYSICAL_PLATFORM__
 
 #include "platforms-module.h"
-
+#include "awb/provides/physical_channel.h"
+#include "awb/provides/physical_platform_utils.h"
+#include "awb/provides/physical_platform_defs.h"
+#include "awb/provides/jtag_device.h"
 
 typedef class PHYSICAL_DEVICES_CLASS* PHYSICAL_DEVICES;
 class PHYSICAL_DEVICES_CLASS: public PLATFORMS_MODULE_CLASS
 {
   private:
 
+    JTAG_PHYSICAL_CHANNEL_CLASS jtagPipeDevice;
+
   public:
 
     // constructor-destructor
     PHYSICAL_DEVICES_CLASS(PLATFORMS_MODULE);
     ~PHYSICAL_DEVICES_CLASS();
+
+    // accessors to individual devices
+    PHYSICAL_CHANNEL GetLegacyPhysicalChannel() 
+    { 
+        jtagPipeDevice.RegisterLogicalDeviceName(FPGA_PLATFORM_NAME);
+        return &jtagPipeDevice;
+    }
 
 };
 

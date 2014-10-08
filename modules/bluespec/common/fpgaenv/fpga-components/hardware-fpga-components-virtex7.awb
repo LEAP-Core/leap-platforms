@@ -6,14 +6,12 @@
 %public bram.bsv bram-multi-read.bsv
 %public lutram.bsv
 %public user-clock.bsv user-clock-pll-virtex7.bsv user-clock-pll-common.bsv
-%public clock-buffers.bsv
 %public shiftreg.bsv
 
 %private Bram.v
 %private lutram.v
 %private user-clock-xilinx-virtex7.v
 %private user-clock-pll-common.v
-%private clock-buffers.v
 %private bscan-virtex5.v
 %private shiftreg.v
 
@@ -27,6 +25,7 @@
 %sources -t VERILOG -v PRIVATE clock_import.v
 
 %sources -t BSV -v PUBLIC  differential-clock-import.bsv
+%sources -t BSV -v PUBLIC  io-components-xilinx.bsv
 
 %sources -t BSV -v PUBLIC  reset-import.bsv
 %sources -t VERILOG -v PRIVATE reset_import.v

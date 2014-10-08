@@ -1,4 +1,3 @@
-import XilinxCells::*;
 import Clocks::*;
 import DefaultValue::*;
 
@@ -26,10 +25,10 @@ module mkPrimitiveDifferentialClock (PRIMITIVE_DIFFERENTIAL_CLOCKS_DEVICE);
     CLOCK_IMPORTER sysClockP <- mkClockImporter();
      
     // Buffer clocks and reset before they are used
-    Clock sysClkBuf <- mkClockIBUFDS(defaultValue, sysClockP.clock, sysClockN.clock);
+    Clock sysClkBuf <- mkDifferentialClock(sysClockP.clock, sysClockN.clock);
 
     // And now a bufg 
-    Clock sysClkBufG <- mkClockBUFG(clocked_by sysClkBuf);
+    Clock sysClkBufG <- mkClockBuffer(clocked_by sysClkBuf);
 
     RESET_IMPORTER resetIn <- mkResetImporter(clocked_by sysClkBuf);  
 
