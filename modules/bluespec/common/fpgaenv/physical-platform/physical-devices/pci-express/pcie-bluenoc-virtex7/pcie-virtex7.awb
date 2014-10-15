@@ -5,6 +5,8 @@
 
 %sources -t BSV -v PUBLIC pcie-virtex7.bsv
 %sources -t UCF -v PRIVATE pcie-virtex7.ucf
+%sources -t AREA_CONSTRAINT -v PRIVATE pcie-virtex7.agrp
+
 
 ## Side effects of pcie-virtex7.bsv compilation
 %generated -t VERILOG mkBNoCBridgeSynth.v

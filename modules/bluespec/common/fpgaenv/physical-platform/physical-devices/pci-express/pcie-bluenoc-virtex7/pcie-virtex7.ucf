@@ -6,14 +6,14 @@
 # PIN ASSIGNMENTS
 ######################################################################################################
 
-NET  "pcieWires_leds[7]"              LOC = AU39 | IOSTANDARD = LVCMOS18 ;
-NET  "pcieWires_leds[6]"              LOC = AP42 | IOSTANDARD = LVCMOS18 ;
-NET  "pcieWires_leds[5]"              LOC = AP41 | IOSTANDARD = LVCMOS18 ;
-NET  "pcieWires_leds[4]"              LOC = AR35 | IOSTANDARD = LVCMOS18 ;
-NET  "pcieWires_leds[3]"              LOC = AT37 | IOSTANDARD = LVCMOS18 ;
-NET  "pcieWires_leds[2]"              LOC = AR37 | IOSTANDARD = LVCMOS18 ;
-NET  "pcieWires_leds[1]"              LOC = AN39 | IOSTANDARD = LVCMOS18 ;
-NET  "pcieWires_leds[0]"              LOC = AM39 | IOSTANDARD = LVCMOS18 ;
+#NET  "pcieWires_leds[7]"              LOC = AU39 | IOSTANDARD = LVCMOS18 ;
+#NET  "pcieWires_leds[6]"              LOC = AP42 | IOSTANDARD = LVCMOS18 ;
+#NET  "pcieWires_leds[5]"              LOC = AP41 | IOSTANDARD = LVCMOS18 ;
+#NET  "pcieWires_leds[4]"              LOC = AR35 | IOSTANDARD = LVCMOS18 ;
+#NET  "pcieWires_leds[3]"              LOC = AT37 | IOSTANDARD = LVCMOS18 ;
+#NET  "pcieWires_leds[2]"              LOC = AR37 | IOSTANDARD = LVCMOS18 ;
+#NET  "pcieWires_leds[1]"              LOC = AN39 | IOSTANDARD = LVCMOS18 ;
+#NET  "pcieWires_leds[0]"              LOC = AM39 | IOSTANDARD = LVCMOS18 ;
 
 NET  "pcieWires_rst_put"              LOC = AV35 | IOSTANDARD = LVCMOS18 | PULLUP | NODELAY | TIG ;
 NET  "pcieWires_clk_p_put"            LOC = AB8 | IOSTANDARD = LVDS ;
