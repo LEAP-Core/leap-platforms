@@ -54,7 +54,7 @@ import Clocks::*;
 interface PHYSICAL_DRIVERS;
     interface CLOCKS_DRIVER                        clocksDriver;
     interface PCIE_DRIVER                          pcieDriver;
-    interface Vector#(FPGA_DDR_BANKS, DDR_DRIVER)  ddrDriver;
+    interface DDR_DRIVER                           ddrDriver;
     interface AURORA_COMPLEX_DRIVERS               auroraDriver;
 endinterface
 

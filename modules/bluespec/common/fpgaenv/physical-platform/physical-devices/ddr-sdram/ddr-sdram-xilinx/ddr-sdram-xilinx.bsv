@@ -87,7 +87,7 @@ typedef Bit#(FPGA_DDR_ADDRESS_SZ) FPGA_DDR_ADDRESS;
 
 
 //
-// DDR_DRIVER
+// DDR_BANK_DRIVER
 //
 // The driver interface could be expressed as a simple BRAM style interface
 // with write, readReq and readResp.  It is not.  Instead, the driver interface
@@ -95,7 +95,7 @@ typedef Bit#(FPGA_DDR_ADDRESS_SZ) FPGA_DDR_ADDRESS;
 // sized objects.  For some designs this will make the logic smaller without
 // a performance penalty.
 //
-interface DDR_DRIVER;
+interface DDR_BANK_DRIVER;
     // Read request/response pair.  NOTE: every read request generates
     // FPGA_DDR_BURST_LENGTH responses.  If the address is not aligned to
     // the full response the DRAM controller rotates the response so the
@@ -125,14 +125,14 @@ endinterface
 
 
 //
-// DDR_DRIVER_SYNTH
+// DDR_BANK_DRIVER_SYNTH
 //
 // Same interface as above.  However, debug signals are explicitly exported as set of 
 // boolean methods, which enables us to put Bluespec-style synthesis boundaries on 
 // the bank code.  
 //
 
-interface DDR_DRIVER_SYNTH;
+interface DDR_BANK_DRIVER_SYNTH;
     // Read request/response pair.  NOTE: every read request generates
     // FPGA_DDR_BURST_LENGTH responses.  If the address is not aligned to
     // the full response the DRAM controller rotates the response so the
@@ -185,7 +185,8 @@ endinterface
 
 
 
-typedef Vector#(FPGA_DDR_BANKS, DDR_BANK_WIRES) DDR_WIRES;
+typedef Vector#(FPGA_DDR_BANKS, DDR_BANK_WIRES)  DDR_WIRES;
+typedef Vector#(FPGA_DDR_BANKS, DDR_BANK_DRIVER) DDR_DRIVER;
 
 
 //
@@ -197,8 +198,8 @@ typedef Vector#(FPGA_DDR_BANKS, DDR_BANK_WIRES) DDR_WIRES;
 //     elsewhere in the design.
 //
 interface DDR_DEVICE;
-    interface Vector#(FPGA_DDR_BANKS, DDR_DRIVER) driver;
-    interface DDR_WIRES wires;
+    interface DDR_DRIVER driver;
+    interface DDR_WIRES  wires;
 endinterface
 
 
@@ -208,8 +209,8 @@ endinterface
 //     debug signals have been wrapped.
 //
 interface DDR_BANK;
-    interface DDR_DRIVER driver;
-    interface DDR_BANK_WIRES wires;
+    interface DDR_BANK_DRIVER driver;
+    interface DDR_BANK_WIRES  wires;
 endinterface
 
 //
@@ -217,8 +218,8 @@ endinterface
 //     A bank is one driver and corresponding wires.
 //
 interface DDR_BANK_SYNTH;
-    interface DDR_DRIVER_SYNTH driver;
-    interface DDR_BANK_WIRES   wires;
+    interface DDR_BANK_DRIVER_SYNTH driver;
+    interface DDR_BANK_WIRES        wires;
 endinterface
 
 
@@ -232,7 +233,7 @@ module [CONNECTED_MODULE] mkDDRDevice#(Clock rawClock, Reset rawReset)
     Vector#(FPGA_DDR_BANKS, DDR_BANK) b <-
         replicateM(mkDDRBank(rawClock, rawReset));
 
-    function DDR_DRIVER getDriver(DDR_BANK bank) = bank.driver;
+    function DDR_BANK_DRIVER getDriver(DDR_BANK bank) = bank.driver;
     function DDR_BANK_WIRES getWires(DDR_BANK bank) = bank.wires;
 
     interface driver = map(getDriver, b);
@@ -301,7 +302,7 @@ module [CONNECTED_MODULE] mkDDRBank#(Clock rawClock, Reset rawReset)
 
     let dbgNode <- mkDebugScanNode("Local Memory (ddr-sdram-xilinx.bsv)", dbg_list);
 
-    interface DDR_DRIVER driver;
+    interface DDR_BANK_DRIVER driver;
         method readReq = ddrSynth.driver.readReq;
         method readRsp = ddrSynth.driver.readRsp;
         method writeReq = ddrSynth.driver.writeReq;
@@ -649,7 +650,7 @@ module mkDDRBankSynth#(Clock rawClock, Reset rawReset)
 `endif
 
 
-    interface DDR_DRIVER_SYNTH driver;
+    interface DDR_BANK_DRIVER_SYNTH driver;
 
 /*
 RAM status:0
