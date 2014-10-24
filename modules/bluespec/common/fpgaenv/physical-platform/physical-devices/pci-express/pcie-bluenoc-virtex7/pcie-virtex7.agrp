@@ -1,29 +1,9 @@
-#These are the slice dimension
-#dimension FPGA 221,349;
 
-#These are the lut dimension
-dimension FPGA 625,987;
+areagroup pcie_ep = None;
+location  pcie_ep 190,103;
+dimension pcie_ep 61,76;
+resource pcie_ep LUT = 12000;
+pcie_ep in fpga0_platform;
 
-areagroup fpga0_platform = "m_sys_sys_vp_m_mod";
 
-#location platform_platform 560, 600;
-#dimension platform_platform 100,420;
-
-location  fpga0_platform 519,523;
-dimension fpga0_platform 230,311;
-
-#location fpga0_platform 452, 250;
-#location common_services   452, 100;
-#location traffic_light_function     462, 50;
-
-# For now, let's just bind the whole platform block around the pcie. 
-
-#location 
-
-# Define subarea groups for handling pcie 
-#areagroup pcie_ep = "m_sys_sys_vp_m_mod/llpi_phys_plat_pcie_pcie_dev/*";
-#areagroup pcie_bridge = "m_sys_sys_vp_m_mod/llpi_phys_plat_pcie_pcie_dev/bridge/*";
-
-#pcie_ep in ;
-#pcie_brige in ;
 

@@ -7,6 +7,8 @@
 
 %sources -t UCF -v PRIVATE ddr3-sdram.ucf
 
+%sources -t AREA_CONSTRAINT -v PRIVATE ddr3-sdram.agrp
+
 %sources -t VERILOG -v PRIVATE ddr3_v1_7.v
 %sources -t VERILOG -v PRIVATE ddr3_wrapper.v
 %sources -t VERILOG -v PRIVATE mig_7series_v1_7_arb_mux.v
