@@ -77,7 +77,7 @@ typedef Bit#(FPGA_DDR_ADDRESS_SZ) FPGA_DDR_ADDRESS;
 
 
 //
-// DDR_DRIVER
+// DDR_BANK_DRIVER
 //
 // The driver interface could be expressed as a simple BRAM style interface
 // with write, readReq and readResp.  It is not.  Instead, the driver interface
@@ -85,7 +85,7 @@ typedef Bit#(FPGA_DDR_ADDRESS_SZ) FPGA_DDR_ADDRESS;
 // sized objects.  For some designs this will make the logic smaller without
 // a performance penalty.
 //
-interface DDR_DRIVER;
+interface DDR_BANK_DRIVER;
     // Read request/response pair.  NOTE: every read request generates
     // FPGA_DDR_BURST_LENGTH responses.  If the address is not aligned to
     // the full response the DRAM controller rotates the response so the
@@ -121,13 +121,14 @@ endinterface
 interface DDR_WIRES;
 endinterface
 
+typedef Vector#(FPGA_DDR_BANKS, DDR_BANK_DRIVER) DDR_DRIVER;
 
 //
 // DDR_DEVICE --
 //     By convention a device is both a driver and a wires interface.
 //
 interface DDR_DEVICE;
-    interface Vector#(FPGA_DDR_BANKS, DDR_DRIVER) driver;
+    interface DDR_DRIVER driver;
     interface DDR_WIRES  wires;
 endinterface
 
@@ -151,7 +152,7 @@ module mkDDRDevice#(Clock rawClock, Reset rawReset)
     // interface:
     (DDR_DEVICE);
 
-    Vector#(FPGA_DDR_BANKS, DDR_DRIVER) banks <- replicateM(mkDDRBank);
+    Vector#(FPGA_DDR_BANKS, DDR_BANK_DRIVER) banks <- replicateM(mkDDRBank);
 
     interface driver = banks;
 
@@ -169,7 +170,7 @@ endmodule
 //
 module mkDDRBank
     // Interface:
-    (DDR_DRIVER)
+    (DDR_BANK_DRIVER)
     provisos (Alias#(t_BURST_IDX, Bit#(TLog#(TAdd#(FPGA_DDR_BURST_LENGTH, 1)))),
               // Index of a word within a beat aligned address
               Alias#(t_WORD_IDX, Bit#(TLog#(FPGA_DDR_WORDS_PER_BEAT))),
