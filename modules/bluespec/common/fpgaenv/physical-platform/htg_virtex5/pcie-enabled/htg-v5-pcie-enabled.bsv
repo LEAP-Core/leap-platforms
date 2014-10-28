@@ -61,7 +61,7 @@ interface PHYSICAL_DRIVERS;
     interface LEDS_DRIVER#(`NUMBER_LEDS)           ledsDriver;
     interface SWITCHES_DRIVER#(`NUMBER_SWITCHES)   switchesDriver;
     interface PCI_EXPRESS_DRIVER                   pciExpressDriver;
-    interface Vector#(FPGA_DDR_BANKS, DDR_DRIVER)  ddrDriver;
+    interface DDR_DRIVER                           ddrDriver;
         
 endinterface
 
