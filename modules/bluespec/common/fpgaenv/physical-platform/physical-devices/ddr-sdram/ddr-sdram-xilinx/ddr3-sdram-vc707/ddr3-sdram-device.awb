@@ -6,6 +6,7 @@
 %sources -t BSV -v PUBLIC ddr3-sdram-verilog-import.bsv
 
 %sources -t UCF -v PRIVATE ddr3-sdram.ucf
+%sources -t VIVADO_TCL_DEFINITION -v PRIVATE ddr3-sdram.xdc
 
 %sources -t AREA_CONSTRAINT -v PRIVATE ddr3-sdram.agrp
 
