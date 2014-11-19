@@ -57,11 +57,19 @@ module mkClockBuffer (Clock);
     return bufferedClock;
 endmodule 
 
-module mkResetBuffer (Reset);
+module mkInputResetBuffer (Reset);
     let reset <- exposeCurrentReset();
     let bufferedReset <- mkResetIBUF(defaultValue, reset_by reset);
     return bufferedReset;
 endmodule 
+
+module mkResetBuffer (Reset);
+    let reset <- exposeCurrentReset();
+    let bufferedReset <- mkResetBUFG(reset_by reset);
+    return bufferedReset;
+endmodule 
+
+
 
 
 

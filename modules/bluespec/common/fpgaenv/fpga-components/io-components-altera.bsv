@@ -57,6 +57,12 @@ module mkClockBuffer (Clock);
     return clock;
 endmodule
 
+module mkInputResetBuffer (Reset);
+    let reset <- exposeCurrentReset();
+    return reset;
+endmodule 
+
+
 module mkResetBuffer (Reset);
     let reset <- exposeCurrentReset();
     return reset;
