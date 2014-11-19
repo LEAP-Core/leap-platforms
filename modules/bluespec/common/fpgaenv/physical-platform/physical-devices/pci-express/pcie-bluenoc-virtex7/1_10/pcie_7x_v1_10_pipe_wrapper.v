@@ -397,7 +397,8 @@ module pcie_7x_v1_10_pipe_wrapper #
     wire        [PCIE_LANE-1:0]     user_rxbufreset;
     wire        [PCIE_LANE-1:0]     user_resetovrd_done;
     wire        [PCIE_LANE-1:0]     user_active_lane;
-    wire        [PCIE_LANE-1:0]     user_resetdone /* synthesis syn_keep=1 */;
+    // 14.7/Vivado optimize this away, yet xilinx supplies a tig on it. 
+(* DONT_TOUCH = "TRUE", KEEP = "TRUE" *)    wire        [PCIE_LANE-1:0]     user_resetdone /* synthesis syn_keep=1 */;
     wire        [PCIE_LANE-1:0]     user_rxcdrlock;
     wire        [PCIE_LANE-1:0]     user_rx_converge; 
     
