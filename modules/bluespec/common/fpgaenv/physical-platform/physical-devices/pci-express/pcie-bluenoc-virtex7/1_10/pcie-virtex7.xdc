@@ -61,7 +61,7 @@ set_property PULLUP     true        [get_ports { pcieWires_rst_put }]
 # Please refer to the Virtex-7 GT Transceiver User Guide
 # (UG) for guidelines regarding clock resource selection.
 #
-set_property LOC IBUFDS_GTE2_X1Y5  [get_cells -hier -filter { NAME =~ *pcie_pcieSysClkBuf }]
+set_property LOC IBUFDS_GTE2_X1Y5  [get_cells -hier -filter { NAME =~ m_sys_sys_vp_m_mod/llpi_phys_plat_pcie_pcie_pcieSysClkBuf }]
 
 set_property LOC MMCME2_ADV_X1Y2 [get_cells -hier -filter { NAME =~ */ext_clk.pipe_clock_i/mmcm_i }]
 set_property LOC MMCME2_ADV_X1Y1 [get_cells -hier -filter { NAME =~ *clkgen_pll }]

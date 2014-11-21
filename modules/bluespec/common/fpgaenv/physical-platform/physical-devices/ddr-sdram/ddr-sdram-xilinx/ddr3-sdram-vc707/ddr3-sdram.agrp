@@ -2,4 +2,5 @@ areagroup ddr3 = None;
 location  ddr3 154,308;
 dimension ddr3 39,81;
 resource ddr3 LUT = 8700;
+resource ddr3 SLICE = 2480;
 ddr3 in fpga0_platform;
