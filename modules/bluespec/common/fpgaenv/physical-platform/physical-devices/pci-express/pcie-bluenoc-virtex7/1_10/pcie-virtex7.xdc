@@ -137,6 +137,7 @@ startgroup
 create_pblock pblock_pcie0
 resize_pblock pblock_pcie0 -add {SLICE_X166Y51:SLICE_X221Y149 DSP48_X16Y22:DSP48_X19Y59 RAMB18_X11Y22:RAMB18_X14Y59 RAMB36_X11Y11:RAMB36_X14Y29}
 add_cells_to_pblock pblock_pcie0 [get_cells -hier -filter {NAME =~ m_sys_sys_vp_m_mod/llpi_phys_plat_pcie_pcie_dev/*}]
+add_cells_to_pblock pblock_pcie0 [get_cells -hier -filter {NAME =~ m_sys_sys_vp_m_mod/llpi_phys_plat_pcie_pcie_extPorts*}]
 #add_cells_to_pblock pblock_pcie0 [get_cells [list *_outFifo*]]
 #add_cells_to_pblock pblock_pcie0 [get_cells [list *_inFifo*]]
 #add_cells_to_pblock pblock_pcie0 [get_cells [list *_fifoTxData_*]]

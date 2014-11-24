@@ -14,7 +14,8 @@
 
 %private ddr-sdram-xilinx.ucf
 
-%sources -t VIVADO_TCL_ALGEBRA -v PRIVATE ddr-sdram-xilinx.xdc
+%sources -t VIVADO_TCL_DEFINITION  -v PRIVATE ddr-sdram-xilinx-defs.xdc
+%sources -t VIVADO_TCL_ALGEBRA     -v PRIVATE ddr-sdram-xilinx-alg.xdc
 
 %param DRAM_MAX_OUTSTANDING_READS  64 "Maximum in-flight read requests"
 %param --global DRAM_DEBUG         0 "Non-zero enables debugging methods"
