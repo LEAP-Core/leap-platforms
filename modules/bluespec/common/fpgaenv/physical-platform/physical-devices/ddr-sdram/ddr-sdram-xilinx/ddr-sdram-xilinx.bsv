@@ -527,7 +527,7 @@ module mkDDRBankSynth#(Clock rawClock, Reset rawReset)
     // file become invalid and ngdbuild complains.
 
     Reg#(Bit#(1)) initPhase <- mkReg(0);
-    if(`USE_INITIALIZATION_PATCH > 1)
+    if(`USE_INITIALIZATION_PATCH > 0)
     begin
         Reg#(Bit#(TLog#(TAdd#(FPGA_DDR_BURST_LENGTH, 1)))) initBurstIdx <- mkReg(0);
 
