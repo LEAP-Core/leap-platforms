@@ -133,20 +133,26 @@ set_property LOC RAMB36_X13Y18 [get_cells -hier -filter { NAME =~ */pcie_7x_v1_1
 ######################################################################################################
 # AREA GROUPS
 ######################################################################################################
-startgroup
-create_pblock pblock_pcie0
-resize_pblock pblock_pcie0 -add {SLICE_X166Y51:SLICE_X221Y149 DSP48_X16Y22:DSP48_X19Y59 RAMB18_X11Y22:RAMB18_X14Y59 RAMB36_X11Y11:RAMB36_X14Y29}
-add_cells_to_pblock pblock_pcie0 [get_cells -hier -filter {NAME =~ m_sys_sys_vp_m_mod/llpi_phys_plat_pcie_pcie_dev/*}]
-add_cells_to_pblock pblock_pcie0 [get_cells -hier -filter {NAME =~ m_sys_sys_vp_m_mod/llpi_phys_plat_pcie_pcie_extPorts*}]
-#add_cells_to_pblock pblock_pcie0 [get_cells [list *_outFifo*]]
-#add_cells_to_pblock pblock_pcie0 [get_cells [list *_inFifo*]]
-#add_cells_to_pblock pblock_pcie0 [get_cells [list *_fifoTxData_*]]
-#add_cells_to_pblock pblock_pcie0 [get_cells [list *_fifoRxData_*]]
-#add_cells_to_pblock pblock_pcie0 [get_cells */pbb*]
-#add_cells_to_pblock pblock_pcie0 [get_cells [list *fS1OutPort*]]
-#add_cells_to_pblock pblock_pcie0 [get_cells [list *fS1MsgOut*]]
-#add_cells_to_pblock pblock_pcie0 [get_cells [list *fS2MsgOut*]]
-endgroup
+
+# Synplify and Vivado produce differently sized area groups 
+
+if {[getAWBParams {"synthesis_tool" "PLATFORM_BUILDER"}] == "functools.partial(buildSynplifyEDF, resourceCollector = RESOURCE_COLLECTOR)"} {
+    startgroup
+    create_pblock pblock_pcie0
+    resize_pblock pblock_pcie0 -add {SLICE_X174Y51:SLICE_X221Y149 DSP48_X16Y22:DSP48_X19Y59 RAMB18_X11Y22:RAMB18_X14Y59 RAMB36_X11Y11:RAMB36_X14Y29}
+    add_cells_to_pblock pblock_pcie0 [get_cells -hier -filter {NAME =~ m_sys_sys_vp_m_mod/llpi_phys_plat_pcie_pcie_dev/*}]
+    add_cells_to_pblock pblock_pcie0 [get_cells -hier -filter {NAME =~ m_sys_sys_vp_m_mod/llpi_phys_plat_pcie_pcie_extPorts*}]
+    endgroup   
+} else {
+    startgroup
+    create_pblock pblock_pcie0
+    resize_pblock pblock_pcie0 -add {SLICE_X166Y51:SLICE_X221Y149 DSP48_X16Y22:DSP48_X19Y59 RAMB18_X11Y22:RAMB18_X14Y59 RAMB36_X11Y11:RAMB36_X14Y29}
+    add_cells_to_pblock pblock_pcie0 [get_cells -hier -filter {NAME =~ m_sys_sys_vp_m_mod/llpi_phys_plat_pcie_pcie_dev/*}]
+    add_cells_to_pblock pblock_pcie0 [get_cells -hier -filter {NAME =~ m_sys_sys_vp_m_mod/llpi_phys_plat_pcie_pcie_extPorts*}]
+    endgroup   
+}
+
+
 
 
 ######################################################################################################
@@ -181,7 +187,7 @@ set_false_path -through [get_nets -hier -filter { NAME =~ */pcie_7x_v1_10_i/gt_t
 set_false_path -through [get_nets -hier -filter { NAME =~ */pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_lane[6].pipe_rate.pipe_rate_i/*}]
 set_false_path -through [get_nets -hier -filter { NAME =~ */pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_lane[7].pipe_rate.pipe_rate_i/*}]
 
-set_false_path -through [get_cells -hier -filter { NAME =~ */pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_reset.pipe_reset_i/cpllreset_reg*}]
+set_false_path -through [get_cells -hier -filter { NAME =~ */pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_reset.pipe_reset_i/cpllreset*}]
 
 set_false_path -through [get_nets -hier -filter { NAME =~ */ext_clk.pipe_clock_i/pclk_sel*}]
 
