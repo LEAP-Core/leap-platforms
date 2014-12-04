@@ -1,2 +1,28 @@
 #These are the slice dimension
 dimension FPGA 221,349;
+
+areagroup big_no_connect = None;
+location  big_no_connect 86,124;
+dimension big_no_connect 12,100;
+attribute big_no_connect "EMPTYBOX" = 1;
+
+# There are some locations on the chip where slices are absent. We'll enumerate them here. 
+areagroup pcie_no_connect1 = None;
+location  pcie_no_connect1 11,74;
+dimension pcie_no_connect1 7,24;
+attribute pcie_no_connect1 "EMPTYBOX" = 1;
+
+areagroup pcie_no_connect2 = None;
+location  pcie_no_connect2 11,149;
+dimension pcie_no_connect2 7,24;
+attribute pcie_no_connect2 "EMPTYBOX" = 1;
+
+areagroup pcie_no_connect3 = None;
+location  pcie_no_connect3 211,149;
+dimension pcie_no_connect3 7,24;
+attribute pcie_no_connect3 "EMPTYBOX" = 1;
+
+areagroup pcie_no_connect4 = None;
+location  pcie_no_connect4 211,74;
+dimension pcie_no_connect4 7,24;
+attribute pcie_no_connect4 "EMPTYBOX" = 1;

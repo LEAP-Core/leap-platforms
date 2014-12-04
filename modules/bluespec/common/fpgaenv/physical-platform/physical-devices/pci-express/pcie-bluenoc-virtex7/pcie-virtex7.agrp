@@ -4,6 +4,8 @@ location  pcie_ep 190,103;
 dimension pcie_ep 61,76;
 resource pcie_ep LUT = 12000;
 pcie_ep in fpga0_platform;
+attribute pcie_ep "EMPTYBOX" = 1;
+
 
 
 
