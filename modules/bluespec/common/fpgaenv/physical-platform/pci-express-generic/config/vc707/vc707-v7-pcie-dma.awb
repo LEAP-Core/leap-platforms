@@ -4,6 +4,8 @@
 %provides physical_platform_config
 
 %sources -t UCF -v PRIVATE vc707-v7-pcie-dma.ucf
+%sources -t VIVADO_TCL_DEFINITION -v PRIVATE vc707-v7-pcie-dma.xdc
+%sources -t VIVADO_TCL_SYNTHESIS  -v PRIVATE vc707-v7-pcie-dma-synthesis.xdc
 %sources -t AREA_CONSTRAINT -v PRIVATE vc707-v7-pcie-dma.agrp
 %sources -t XST -v PRIVATE vc707-v7-pcie-dma.xst
 %sources -t SDF -v PRIVATE vc707-v7-pcie-dma.sdf

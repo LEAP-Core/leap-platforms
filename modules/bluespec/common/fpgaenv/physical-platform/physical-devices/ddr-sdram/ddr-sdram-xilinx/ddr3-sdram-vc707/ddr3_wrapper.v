@@ -80,6 +80,12 @@ module ddr3_wrapper #
    // System reset
    input                                        sys_rst   
    );
+
+   // Sysclk appears to need a bufg -- Maybe have this in a generate block?
+
+   BUFG sys_clk_buf
+     (.O   (sys_clk_i_buf),
+      .I   (sys_clk_i));
    
    ddr3_v1_7 #
      (
@@ -130,7 +136,7 @@ module ddr3_wrapper #
        .app_wdf_mask                   (app_wdf_mask),
              
       // System Clock Ports
-       .sys_clk_i                      (sys_clk_i),
+       .sys_clk_i                      (sys_clk_i_buf),
       
        .sys_rst                        (sys_rst)
       );

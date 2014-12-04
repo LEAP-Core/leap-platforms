@@ -1,5 +1,5 @@
-%name Virtex-7 PCIE Device (BlueNoC)
-%desc Virtex-7 PCIE Device (BlueNoC)
+%name Virtex-7 PCIE Device v1.07 (BlueNoC)
+%desc Virtex-7 PCIE Device v.107 (BlueNoC)
 
 %provides pcie_bluenoc_device
 

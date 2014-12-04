@@ -11,4 +11,4 @@ import BlueNoC::*;
 `include "awb/provides/pcie_device.bsh"
 `include "awb/provides/clocks_device.bsh"
 `include "awb/provides/ddr_sdram_device.bsh"
-`include "ddr_sdram_xilinx_driver.bsh"
+

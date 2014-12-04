@@ -1,0 +1,51 @@
+%name Virtex-7 PCIE Device v1.10 (BlueNoC)
+%desc Virtex-7 PCIE Device v1.10 (BlueNoC)
+
+%provides pcie_bluenoc_device
+
+%sources -t BSV -v PUBLIC pcie-virtex7.bsv
+%sources -t UCF -v PRIVATE pcie-virtex7.ucf
+%sources -t VIVADO_TCL_DEFINITION -v PRIVATE pcie-virtex7.xdc
+%sources -t VIVADO_TCL_SYNTHESIS  -v PRIVATE pcie-virtex7-synthesis.xdc
+%sources -t AREA_CONSTRAINT -v PRIVATE pcie-virtex7.agrp
+
+
+## Side effects of pcie-virtex7.bsv compilation
+%generated -t VERILOG mkBNoCBridgeSynth.v
+%generated -t VERILOG mkPCIEBlueNoCDevice.v
+
+%sources -t VERILOG -v PRIVATE pcie_7x_v1_10.v
+%sources -t VERILOG -v PRIVATE pcie_7x_v1_10_axi_basic_rx.v
+%sources -t VERILOG -v PRIVATE pcie_7x_v1_10_axi_basic_rx_null_gen.v
+%sources -t VERILOG -v PRIVATE pcie_7x_v1_10_axi_basic_rx_pipeline.v
+%sources -t VERILOG -v PRIVATE pcie_7x_v1_10_axi_basic_top.v
+%sources -t VERILOG -v PRIVATE pcie_7x_v1_10_axi_basic_tx.v
+%sources -t VERILOG -v PRIVATE pcie_7x_v1_10_axi_basic_tx_pipeline.v
+%sources -t VERILOG -v PRIVATE pcie_7x_v1_10_axi_basic_tx_thrtl_ctl.v
+%sources -t VERILOG -v PRIVATE pcie_7x_v1_10_gt_rx_valid_filter_7x.v
+%sources -t VERILOG -v PRIVATE pcie_7x_v1_10_gt_top.v
+%sources -t VERILOG -v PRIVATE pcie_7x_v1_10_gt_wrapper.v
+%sources -t VERILOG -v PRIVATE pcie_7x_v1_10_gtp_pipe_rate.v
+%sources -t VERILOG -v PRIVATE pcie_7x_v1_10_gtp_pipe_reset.v
+%sources -t VERILOG -v PRIVATE pcie_7x_v1_10_pcie_7x.v
+%sources -t VERILOG -v PRIVATE pcie_7x_v1_10_pcie_bram_7x.v
+%sources -t VERILOG -v PRIVATE pcie_7x_v1_10_pcie_bram_top_7x.v
+%sources -t VERILOG -v PRIVATE pcie_7x_v1_10_pcie_brams_7x.v
+%sources -t VERILOG -v PRIVATE pcie_7x_v1_10_pcie_pipe_lane.v
+%sources -t VERILOG -v PRIVATE pcie_7x_v1_10_pcie_pipe_misc.v
+%sources -t VERILOG -v PRIVATE pcie_7x_v1_10_pcie_pipe_pipeline.v
+%sources -t VERILOG -v PRIVATE pcie_7x_v1_10_pcie_top.v
+%sources -t VERILOG -v PRIVATE pcie_7x_v1_10_pipe_clock.v
+%sources -t VERILOG -v PRIVATE pcie_7x_v1_10_pipe_drp.v
+%sources -t VERILOG -v PRIVATE pcie_7x_v1_10_pipe_eq.v
+%sources -t VERILOG -v PRIVATE pcie_7x_v1_10_pipe_rate.v
+%sources -t VERILOG -v PRIVATE pcie_7x_v1_10_pipe_reset.v
+%sources -t VERILOG -v PRIVATE pcie_7x_v1_10_pipe_sync.v
+%sources -t VERILOG -v PRIVATE pcie_7x_v1_10_pipe_user.v
+%sources -t VERILOG -v PRIVATE pcie_7x_v1_10_pipe_wrapper.v
+%sources -t VERILOG -v PRIVATE pcie_7x_v1_10_qpll_drp.v
+%sources -t VERILOG -v PRIVATE pcie_7x_v1_10_qpll_reset.v
+%sources -t VERILOG -v PRIVATE pcie_7x_v1_10_qpll_wrapper.v
+%sources -t VERILOG -v PRIVATE pcie_7x_v1_10_rxeq_scan.v
+
+%sources -t VERILOG -v PRIVATE xilinx_v7_pcie_wrapper.v

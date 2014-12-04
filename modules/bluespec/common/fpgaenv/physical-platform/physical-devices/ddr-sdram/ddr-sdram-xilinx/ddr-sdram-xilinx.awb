@@ -14,7 +14,11 @@
 
 %private ddr-sdram-xilinx.ucf
 
-%param DRAM_MAX_OUTSTANDING_READS  64 "Maximum in-flight read requests"
-%param --global DRAM_DEBUG         0 "Non-zero enables debugging methods"
+%sources -t VIVADO_TCL_DEFINITION  -v PRIVATE ddr-sdram-xilinx-defs.xdc
+%sources -t VIVADO_TCL_ALGEBRA     -v PRIVATE ddr-sdram-xilinx-alg.xdc
 
-%param DEBUG_DDR3                  0 "Enable DDR3 Debugging"
+%param DRAM_MAX_OUTSTANDING_READS  64 "Maximum in-flight read requests"
+%param USE_INITIALIZATION_PATCH    1  "Use Initialization patch.  Helps with XST flows"
+%param --global DRAM_DEBUG         0  "Non-zero enables debugging methods"
+
+%param DEBUG_DDR3                  0  "Enable DDR3 Debugging"

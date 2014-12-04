@@ -520,91 +520,101 @@ module mkDDRBankSynth#(Clock rawClock, Reset rawReset)
         dramReady_Model <= dramReady.crossed();
     endrule
 
-    Reg#(Bit#(1)) initPhase <- mkReg(0);
-    Reg#(Bit#(TLog#(TAdd#(FPGA_DDR_BURST_LENGTH, 1)))) initBurstIdx <- mkReg(0);
-
-    // UGLY HACK
+    // UGLY HACK, now disabled by parameter.
     // Initialization rules: write and read some junk into the DRAM so that
     // the Sync FIFOs don't get optimized away by the synthesis tools. If the
     // Sync FIFOs get optimized away, then the TIG constraints in the UCF
     // file become invalid and ngdbuild complains.
-    rule initPhase0 ((state == STATE_init) && (initPhase == 0) && dramReady_Model);
-        if (initBurstIdx == 0)
-        begin
-            // First: read from address 0
-            syncRequestQ.enq(tagged DRAM_READ 0);
-        end
-        else
-        begin
-            // Copy read to a write back to the memory
-            let data = syncReadDataQ.first();
-            syncReadDataQ.deq();
 
-            syncWriteDataQ.enq(tuple2(data, 0));
+    Reg#(Bit#(1)) initPhase <- mkReg(0);
+    if(`USE_INITIALIZATION_PATCH > 0)
+    begin
+        Reg#(Bit#(TLog#(TAdd#(FPGA_DDR_BURST_LENGTH, 1)))) initBurstIdx <- mkReg(0);
 
-            // Request a write (once)
-            if (initBurstIdx == 1)
+        rule initPhase0 ((state == STATE_init) && (initPhase == 0) && dramReady_Model);
+            if (initBurstIdx == 0)
             begin
-                syncRequestQ.enq(tagged DRAM_WRITE 0);
+                // First: read from address 0
+                syncRequestQ.enq(tagged DRAM_READ 0);
             end
-        end
-
-        if (initBurstIdx != fromInteger(valueOf(FPGA_DDR_BURST_LENGTH)))
-        begin
-            initBurstIdx <= initBurstIdx + 1;
-        end
-        else
-        begin
-            initBurstIdx <= 0;
-            initPhase <= 1;
-        end
-    endrule
-
-    //
-    // initPhase1 --
-    //     Write a constant pattern to initialize memory.
-    //
-    Reg#(FPGA_DDR_ADDRESS) initAddr <- mkReg(0);
-
-    rule initPhase1 ((state == STATE_init) && (initPhase == 1));
-        // Data to write
-        Vector#(FPGA_DDR_BYTES_PER_BEAT, Bit#(8)) init_data = replicate('haa);
-
-        if (initBurstIdx == 0)
-        begin
-            // First stage write.  Write the control message and the first
-            // half of the data.
-            syncRequestQ.enq(tagged DRAM_WRITE initAddr);
-            syncWriteDataQ.enq(tuple2(pack(init_data), 0));
-        end
-        else
-        begin
-            // Write the rest of the data.
-            syncWriteDataQ.enq(tuple2(pack(init_data), 0));
-        end
-
-        // Done with this burst?
-        if (initBurstIdx == fromInteger(valueOf(TSub#(FPGA_DDR_BURST_LENGTH, 1))))
-        begin
-            initBurstIdx <= 0;
-
-            // Point to next dual-edge data address
-            let next_addr = initAddr +
-                            fromInteger(valueOf(TMul#(FPGA_DDR_BURST_LENGTH,
-                                                      FPGA_DDR_WORDS_PER_BEAT)));
-            initAddr <= next_addr;
-
-            if (next_addr == 0)
+            else
             begin
-                state <= STATE_ready;
-            end
-        end
-        else
-        begin
-            initBurstIdx <= initBurstIdx + 1;
-        end
-    endrule
+                // Copy read to a write back to the memory
+                let data = syncReadDataQ.first();
+                syncReadDataQ.deq();
 
+                syncWriteDataQ.enq(tuple2(data, 0));
+
+                // Request a write (once)
+                if (initBurstIdx == 1)
+                begin
+                    syncRequestQ.enq(tagged DRAM_WRITE 0);
+                end
+            end
+
+            if (initBurstIdx != fromInteger(valueOf(FPGA_DDR_BURST_LENGTH)))
+            begin
+                initBurstIdx <= initBurstIdx + 1;
+            end
+            else
+            begin
+                initBurstIdx <= 0;
+                initPhase <= 1;
+            end
+        endrule
+
+        //
+        // initPhase1 --
+        //     Write a constant pattern to initialize memory.
+        //
+        Reg#(FPGA_DDR_ADDRESS) initAddr <- mkReg(0);
+
+        rule initPhase1 ((state == STATE_init) && (initPhase == 1));
+            // Data to write
+            Vector#(FPGA_DDR_BYTES_PER_BEAT, Bit#(8)) init_data = replicate('haa);
+
+            if (initBurstIdx == 0)
+            begin
+                // First stage write.  Write the control message and the first
+                // half of the data.
+                syncRequestQ.enq(tagged DRAM_WRITE initAddr);
+                syncWriteDataQ.enq(tuple2(pack(init_data), 0));
+            end
+            else
+            begin
+                // Write the rest of the data.
+                syncWriteDataQ.enq(tuple2(pack(init_data), 0));
+            end
+
+            // Done with this burst?
+            if (initBurstIdx == fromInteger(valueOf(TSub#(FPGA_DDR_BURST_LENGTH, 1))))
+            begin
+                initBurstIdx <= 0;
+
+                // Point to next dual-edge data address
+                let next_addr = initAddr +
+                                fromInteger(valueOf(TMul#(FPGA_DDR_BURST_LENGTH,
+                                                          FPGA_DDR_WORDS_PER_BEAT)));
+                initAddr <= next_addr;
+
+                if (next_addr == 0)
+                begin
+                    state <= STATE_ready;
+                end
+            end
+            else
+            begin
+                initBurstIdx <= initBurstIdx + 1;
+            end
+        endrule
+    end
+    else
+    begin
+        rule initPhase0 ((state == STATE_init) && dramReady_Model);
+            state <= STATE_ready;
+             initPhase <= 1;
+        endrule
+    end        
 
     // ====================================================================
     //
