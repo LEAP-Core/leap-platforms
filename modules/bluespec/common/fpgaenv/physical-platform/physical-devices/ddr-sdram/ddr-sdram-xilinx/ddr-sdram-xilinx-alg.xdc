@@ -17,6 +17,7 @@ puts "Plat is $plat"
 if {[getAWBParams {"synthesis_tool" "PLATFORM_BUILDER"}] == "functools.partial(buildSynplifyEDF, resourceCollector = RESOURCE_COLLECTOR)"} {
     puts "Using Synplify constraints"
     annotateClockCrossing [get_cells "m_sys_sys_vp_m_mod/llpi_phys_plat_sdram_b_ddrSynth/dramReady"] [get_cells "m_sys_sys_vp_m_mod/llpi_phys_plat_sdram_b_ddrSynth/dramReady_Model*"]
+    annotateClockCrossing [get_cells "m_sys_sys_vp_m_mod/llpi_phys_plat_sdram_b_ddrSynth/dramReady_Model*"] [get_cells "m_sys_sys_vp_m_mod/llpi_phys_plat_sdram_b_ddrSynth/modelResetInRaw/reset_hold*"]
     annotateClockCrossing [get_cells "m_sys_sys_vp_m_mod/llpi_phys_plat_sdram_b_ddrSynth/dramReady_replica*"] [get_cells "m_sys_sys_vp_m_mod/llpi_phys_plat_sdram_b_ddrSynth/dramReady_Model*"]
 } else {
     puts "Using Non-synplify constraints"
