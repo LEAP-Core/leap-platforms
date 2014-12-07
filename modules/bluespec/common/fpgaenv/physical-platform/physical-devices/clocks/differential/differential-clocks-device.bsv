@@ -164,8 +164,18 @@ module mkClocksDevice
                                                      clocked_by userClock,
                                                      reset_by   userReset);
     
+    // throw a few extra synchronizers
+
+    Reset currentReset = softReset;
+
+    for(Integer i = 0; i < 4; i = i + 1) 
+      begin
+          Reset previousReset = currentReset;
+          currentReset <- mkAsyncReset(16, previousReset, userClock);
+      end 
+
     Clock finalClock = userClock;
-    Reset finalReset = softReset;
+    Reset finalReset = currentReset;
     
     // bind the driver interfaces
     CLOCKS_DRIVER driverBinding =  interface CLOCKS_DRIVER;
