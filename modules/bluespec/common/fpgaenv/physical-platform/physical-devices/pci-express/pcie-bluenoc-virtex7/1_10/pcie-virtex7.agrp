@@ -1,9 +1,9 @@
 
 areagroup pcie_ep = None;
-location  pcie_ep 190,103;
-dimension pcie_ep 61,76;
+location  pcie_ep 197,100;
+dimension pcie_ep 47,98;
 resource pcie_ep LUT = 12000;
-resource ddr3 SLICE = 4506;
+resource pcie_ep SLICE = 4506;
 pcie_ep in fpga0_platform;
 
 
