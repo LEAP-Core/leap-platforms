@@ -2,8 +2,8 @@
 areagroup pcie_ep = None;
 location  pcie_ep 166,51;
 dimension pcie_ep 55,98;
-resource pcie_ep LUT = 12000;
-resource pcie_ep SLICE = 4506;
+resource pcie_ep LUT = 10242;
+resource pcie_ep SLICE = 2506;
 pcie_ep in fpga0_platform;
 
 
