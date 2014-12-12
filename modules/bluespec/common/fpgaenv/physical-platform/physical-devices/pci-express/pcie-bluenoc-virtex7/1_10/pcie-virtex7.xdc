@@ -139,7 +139,7 @@ set_property LOC RAMB36_X13Y18 [get_cells -hier -filter { NAME =~ */pcie_7x_v1_1
 if {[getAWBParams {"synthesis_tool" "PLATFORM_BUILDER"}] == "functools.partial(buildSynplifyEDF, resourceCollector = RESOURCE_COLLECTOR)"} {
     startgroup
     create_pblock pblock_pcie0
-    resize_pblock pblock_pcie0 -add {SLICE_X174Y51:SLICE_X221Y149 DSP48_X16Y22:DSP48_X19Y59 RAMB18_X11Y22:RAMB18_X14Y59 RAMB36_X11Y11:RAMB36_X14Y29}
+    resize_pblock pblock_pcie0 -add {SLICE_X183Y51:SLICE_X221Y149 DSP48_X16Y22:DSP48_X19Y59 RAMB18_X11Y22:RAMB18_X14Y59 RAMB36_X11Y11:RAMB36_X14Y29}
     add_cells_to_pblock pblock_pcie0 [get_cells -hier -filter {NAME =~ m_sys_sys_vp_m_mod/llpi_phys_plat_pcie_pcie_dev/*}]
     add_cells_to_pblock pblock_pcie0 [get_cells -hier -filter {NAME =~ m_sys_sys_vp_m_mod/llpi_phys_plat_pcie_pcie_extPorts*}]
     endgroup   

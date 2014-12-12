@@ -822,30 +822,20 @@ set_multicycle_path -to   [get_cells -hier -filter {NAME =~ *temp_mon_enabled.u_
 ##  VC707 additions
 ###########################################################################
 
-startgroup
-create_pblock pblock_ddr3
-resize_pblock pblock_ddr3 -add {SLICE_X134Y267:SLICE_X173Y349}
-add_cells_to_pblock pblock_ddr3 [get_cells -hier -filter {NAME =~ m_sys_sys_vp_m_mod/llpi_phys_plat_sdram_b_ddrSynth/*}]
-endgroup
+if {[getAWBParams {"synthesis_tool" "PLATFORM_BUILDER"}] == "functools.partial(buildSynplifyEDF, resourceCollector = RESOURCE_COLLECTOR)"} {
 
+    startgroup
+    create_pblock pblock_ddr3
+    resize_pblock pblock_ddr3 -add {SLICE_X143Y267:SLICE_X173Y349}
+    add_cells_to_pblock pblock_ddr3 [get_cells -hier -filter {NAME =~ m_sys_sys_vp_m_mod/llpi_phys_plat_sdram_b_ddrSynth/*}]
+    endgroup
 
-#INST    "*/u_ddr3_v1_7/*"               AREA_GROUP = "AG_ddr3";
-#AREA_GROUP "AG_ddr3"                    RANGE = SLICE_X134Y267:SLICE_X173Y349;
-#AREA_GROUP "AG_ddr3"                    GROUP = CLOSED;
+} else {
 
-# This code is fairly specific to the VC707, since it assumes knowledge of the physical clocking. The clock information is not
-# necessary. However, Vivado seems to require it.  
-#create_clock -name board_clk -period 5.000 [get_ports clocksWires_clk_p_put]
-
-##
-## LEAP TIGs
-##
-## Device specific timing required by the generic Xilinx DDR SDRAM parent
-## device wrapper.
-##
-
-#TIMESPEC TS_model_clk_to_ram_clk=FROM TG_model_clk TO TG_ram_clk 5ns DATAPATHONLY;
-#TIMESPEC TS_ram_clk_to_model_clk=FROM TG_ram_clk TO TG_model_clk 5ns DATAPATHONLY;
-
-#set_max_delay -from {get_clocks -include_generated_clocks board_clk} -to [get_clocks noc_clk] 5.000 -datapath_only
-#set_max_delay -from [get_clocks noc_clk] -to {get_clocks -include_generated_clocks board_clk} 5.000 -datapath_only
+    startgroup
+    create_pblock pblock_ddr3
+    resize_pblock pblock_ddr3 -add {SLICE_X134Y267:SLICE_X173Y349}
+    add_cells_to_pblock pblock_ddr3 [get_cells -hier -filter {NAME =~ m_sys_sys_vp_m_mod/llpi_phys_plat_sdram_b_ddrSynth/*}]
+    endgroup
+        
+}
