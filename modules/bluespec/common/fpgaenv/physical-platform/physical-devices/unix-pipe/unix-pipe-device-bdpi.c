@@ -155,7 +155,8 @@ void pipe_init(unsigned char usePipes, char * platformID)
     {
         if (errno != EEXIST)
         {
-            fprintf(stderr, "Comm directory creation failed, bailing\n");
+            fprintf(stderr, "Comm directory %s creation failed with %d, bailing\n", commDirectory, errno);
+            perror("Error was: ");
             fflush(stderr);
             exit(1);
         }
