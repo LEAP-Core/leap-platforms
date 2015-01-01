@@ -101,24 +101,75 @@ module mkUserClock_Same
 endmodule
 
 // bluesim as well as verilog
+
+(*synthesize*)
 module mkUserClock_DivideByTwo
     // Interface:
-        (UserClock);
-    let clk <- mkUserClock_Divider(2);
-    return clk;
+        (ClockDividerIfc);
+
+    let divider <- mkClockDivider(2);
+ 
+    return divider;
 
 endmodule
+
+(*synthesize*)
+module mkUserClock_DivideByThree
+    // Interface:
+        (ClockDividerIfc);
+
+    let divider <- mkClockDivider(3);
+ 
+    return divider;
+
+endmodule
+
+(*synthesize*)
+module mkUserClock_DivideByFour
+    // Interface:
+        (ClockDividerIfc);
+
+    let divider <- mkClockDivider(4);
+
+    return divider;
+
+endmodule
+
 
 // bluesim as well as verilog
 module mkUserClock_Divider#(Integer divisor)
     // Interface:
         (UserClock);
 
-    let divider <- mkClockDivider(divisor);
-    let usr_reset <- mkAsyncResetFromCR(0, divider.slowClock);
+    let usr_clk <- exposeCurrentClock();
+    let usr_rst <- exposeCurrentReset();
 
-    interface clk = divider.slowClock;
-    interface rst = usr_reset;
+    if(divisor == 2) 
+    begin
+        let divider <- mkUserClock_DivideByTwo();
+        usr_clk =  divider.slowClock;
+        usr_rst <- mkAsyncResetFromCR(0, divider.slowClock);
+    end
+
+    if(divisor == 3) 
+    begin
+        let divider <- mkUserClock_DivideByThree();
+        usr_clk =  divider.slowClock;
+        usr_rst <- mkAsyncResetFromCR(0, divider.slowClock);
+    end
+
+    if(divisor == 4) 
+    begin
+        let divider <- mkUserClock_DivideByFour();
+        usr_clk =  divider.slowClock;
+        usr_rst <- mkAsyncResetFromCR(0, divider.slowClock);
+    end
+
+    if(divisor > 4) 
+        errorM("Clock divider larger than four not currently supported");
+
+    interface clk = usr_clk;
+    interface rst = usr_rst;
 
 endmodule
 

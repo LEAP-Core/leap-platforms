@@ -15,6 +15,10 @@
 %private bscan-virtex5.v
 %private shiftreg.v
 
+%generated -t VERILOG mkUserClock_DivideByThree.v
+%generated -t VERILOG mkUserClock_DivideByTwo.v
+%generated -t VERILOG mkUserClock_DivideByFour.v
+
 %sources -t BSV -v PUBLIC  ila-virtex7.bsv
 %sources -t BSV -v PUBLIC  icon.bsv
 %private v7_ila.v
