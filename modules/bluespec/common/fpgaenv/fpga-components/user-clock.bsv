@@ -74,6 +74,11 @@ interface UserClock;
     interface Reset rst;
 endinterface
 
+interface UserClockDivider;
+    interface ClockDividerIfc clk;
+    interface Reset rst;
+endinterface
+
 
 //
 // USER_CLOCK_VEC --
@@ -139,36 +144,52 @@ endmodule
 // bluesim as well as verilog
 module mkUserClock_Divider#(Integer divisor)
     // Interface:
-        (UserClock);
+        (UserClockDivider);
 
-    let usr_clk <- exposeCurrentClock();
+    let fast_clk <- exposeCurrentClock();
+    let slow_clk <- exposeCurrentClock();
+    let clock_ready = True;
     let usr_rst <- exposeCurrentReset();
 
     if(divisor == 2) 
     begin
         let divider <- mkUserClock_DivideByTwo();
-        usr_clk =  divider.slowClock;
+        slow_clk = divider.slowClock;
+        clock_ready = divider.clockReady; 
         usr_rst <- mkAsyncResetFromCR(0, divider.slowClock);
     end
 
     if(divisor == 3) 
     begin
         let divider <- mkUserClock_DivideByThree();
-        usr_clk =  divider.slowClock;
+        slow_clk = divider.slowClock;
+        clock_ready = divider.clockReady; 
         usr_rst <- mkAsyncResetFromCR(0, divider.slowClock);
     end
 
     if(divisor == 4) 
     begin
         let divider <- mkUserClock_DivideByFour();
-        usr_clk =  divider.slowClock;
+        slow_clk = divider.slowClock;
+        clock_ready = divider.clockReady; 
         usr_rst <- mkAsyncResetFromCR(0, divider.slowClock);
     end
 
     if(divisor > 4) 
         errorM("Clock divider larger than four not currently supported");
 
-    interface clk = usr_clk;
+    // bind the driver interfaces
+    ClockDividerIfc clkBinding = interface ClockDividerIfc;
+
+                                     interface fastClock  = fast_clk;
+                                     interface slowClock  = slow_clk;
+                                     interface clockReady = clock_ready;    
+
+                                 endinterface;
+
+    // bind the wires
+    interface clk = clkBinding;
+
     interface rst = usr_rst;
 
 endmodule
