@@ -39,6 +39,7 @@ import SpecialFIFOs::*;
 import Vector::*;
 import RegFile::*;
 import DReg::*;
+import AlignedFIFOs::*;
 
 `include "awb/provides/librl_bsv_base.bsh"
 
@@ -318,6 +319,91 @@ endmodule
 
 
 //
+// mkBRAMClockDivider --
+//     The actual guarded BRAM. Uses the classic "turn a synchronous RAM into a
+//     buffered RAM" Bluespec technique.
+//
+module mkBRAMClockDivider
+    // interface:
+        (BRAM#(t_ADDR, t_DATA))
+    provisos
+        (Bits#(t_ADDR, t_ADDR_SZ),
+         Bits#(t_DATA, t_DATA_SZ));
+
+    let baseClock <- exposeCurrentClock();
+    let baseReset <- exposeCurrentReset();
+
+    let bramClock <- mkUserClock_Divider(2);
+
+    // For now, we just wrap the underlying BRAM. 
+    BRAM#(t_ADDR, t_DATA) ram <- mkBRAM(clocked_by bramClock.clk.slowClock, reset_by bramClock.rst);
+
+    let readQueueStore <- mkRegStore(baseClock, bramClock.clk.slowClock);
+    AlignedFIFO#(t_ADDR) readQueue <- mkAlignedFIFO(baseClock, baseReset, bramClock.clk.slowClock, bramClock.rst, readQueueStore, bramClock.clk.clockReady, True);
+
+    let writeQueueStore <- mkRegStore(baseClock, bramClock.clk.slowClock);
+    AlignedFIFO#(Tuple2#(t_ADDR, t_DATA)) writeQueue <- mkAlignedFIFO(baseClock, baseReset, bramClock.clk.slowClock, bramClock.rst, writeQueueStore, bramClock.clk.clockReady, True);
+
+    let responseQueueStore <- mkRegStore(bramClock.clk.slowClock, baseClock);
+    AlignedFIFO#(t_DATA) responseQueue <- mkAlignedFIFO(bramClock.clk.slowClock, bramClock.rst, baseClock, baseReset, responseQueueStore, True, bramClock.clk.clockReady);
+
+    //
+    // Data transfer rules -- these move data between the aligned
+    // fifos and the underlying BRAM. 
+    //
+    
+    rule moveReadReq;
+        readQueue.deq();
+        ram.readReq(readQueue.first);
+    endrule
+
+    rule moveWriteReq;
+        writeQueue.deq();
+        ram.write(tpl_1(writeQueue.first), tpl_2(writeQueue.first));
+    endrule
+
+    rule moveReadResp;
+        let data <- ram.readRsp();
+        responseQueue.enq(data);
+    endrule
+
+    // readReq
+    
+    // When:   Any time that sufficient buffering is available.
+    // Effect: Make the request and reserve the buffering spot.
+
+    method Action readReq(t_ADDR a);
+        readQueue.enq(a);
+    endmethod
+
+    // readRsp
+    
+    // When:   Any time there's something in the response buffer.
+    // Effect: Deq the buffering and record the new space available.
+
+    method ActionValue#(t_DATA) readRsp();
+        responseQueue.deq;
+        return responseQueue.first;
+    endmethod
+   
+    method t_DATA peek()   = responseQueue.first();
+    method Bool notEmpty() = responseQueue.dNotEmpty();
+    method Bool notFull()  = readQueue.sNotFull();
+
+    // write
+    
+    // When:   Any time.
+    // Effect: Just update the RAM.
+
+    method Action write(t_ADDR a, t_DATA d);
+        writeQueue.enq(tuple2(a,d));
+    endmethod
+
+    method Bool writeNotFull() = writeQueue.sNotFull();
+endmodule
+
+
+//
 // mkBRAMInitializedWith --
 //     Makes a BRAM and initializes it using an FSM.  The RAM cannot be accessed
 //     until the FSM is done.   Uses an ADDR->VAL function to determine the
@@ -351,6 +437,25 @@ module mkBRAMInitialized#(t_DATA initVal)
 
     // The primitive RAM.
     BRAM#(t_ADDR, t_DATA) mem <- mkBRAM();
+    
+    BRAM#(t_ADDR, t_DATA) m <- mkMemInitialized(mem, initVal);
+    return m;
+endmodule
+
+
+//
+// mkBRAMInitializedClockDivider --
+//     Initialize with a constant value, but uses the clock divider BRAM constructor.
+//
+module mkBRAMInitializedClockDivider#(t_DATA initVal)
+    // interface:
+        (BRAM#(t_ADDR, t_DATA))
+    provisos
+        (Bits#(t_ADDR, addr_SZ),
+         Bits#(t_DATA, data_SZ));
+
+    // The primitive RAM.
+    BRAM#(t_ADDR, t_DATA) mem <- mkBRAMClockDivider();
     
     BRAM#(t_ADDR, t_DATA) m <- mkMemInitialized(mem, initVal);
     return m;
