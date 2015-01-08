@@ -11,6 +11,10 @@
 %public user-clock.bsv user-clock-pll.bsv user-clock-sim.bsv
 %public shiftreg-sim.bsv
 
+%generated -t BA mkUserClock_DivideByThree.ba
+%generated -t BA mkUserClock_DivideByTwo.ba
+%generated -t BA mkUserClock_DivideByFour.ba
+
 %param MAGIC_SIMULATION_CLOCK_FACTOR 10000 "Used to determine periods for ratioed clocks - making it larger may increase clock resolution"
 %param SYNTH 0  "Synthesize it to FPGAs"
 
