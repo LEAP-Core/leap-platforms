@@ -31,6 +31,7 @@
 
 // Differential Clocks Device
 
+import Vector::*;
 import Clocks::*;
 import GetPut::*;
 import DefaultValue::*;
@@ -46,6 +47,8 @@ interface CLOCKS_DRIVER;
     
     interface Clock clock;        
     interface Reset reset;
+
+    interface Vector#(2,Reset) deviceResets;
     
     interface Clock rawClock;
     interface Reset rawReset;
@@ -166,26 +169,30 @@ module mkClocksDevice
     
     // throw a few extra synchronizers
 
-    Reset currentReset = softReset;
+    Vector#(3,Reset) previousReset = replicate(softReset);
+    Vector#(3, UnoptimizedReset) currentReset = newVector();
 
-    for(Integer i = 0; i < 4; i = i + 1) 
+    for(Integer i = 0; i < 2; i = i + 1) 
       begin
-          Reset previousReset = currentReset;
-          currentReset <- mkAsyncReset(16, previousReset, userClock);
+          currentReset <- zipWithM(mkUnoptimizableAsyncReset, previousReset, replicate(userClock));
+          previousReset = map(extractReset, currentReset);
       end 
 
+    // nested interface rather than a basic Reset.
+    Vector#(3, Reset) finalResets = previousReset;
+
     Clock finalClock = userClock;
-    Reset finalReset = currentReset;
     
     // bind the driver interfaces
     CLOCKS_DRIVER driverBinding =  interface CLOCKS_DRIVER;
         
                                        interface clock = finalClock;
-                                       interface reset = finalReset;
+                                       interface reset = head(finalResets);
+
+                                       interface deviceResets = tail(finalResets);
             
                                        interface rawClock = rawClock;
-                                       interface rawReset = rawReset;
-                
+                                       interface rawReset = rawReset;                                                      
                                    endinterface;
     
     // bind the wires

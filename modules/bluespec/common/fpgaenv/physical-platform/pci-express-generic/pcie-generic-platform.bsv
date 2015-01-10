@@ -105,7 +105,7 @@ module [CONNECTED_MODULE] mkPhysicalPlatform
     DDR_DEVICE sdram <- mkDDRDevice(clocks.driver.rawClock,
                                     clocks.driver.rawReset, 
                                     clocked_by clk,
-                                    reset_by rst);
+                                    reset_by clocks.driver.deviceResets[0]);
 
     // Next, create the physical device that can trigger a soft reset. Pass along the
     // interface to the trigger module that the clocks device has given us.
@@ -113,7 +113,7 @@ module [CONNECTED_MODULE] mkPhysicalPlatform
     PCIE_DEVICE pcie <- mkPCIEDevice(clocks.driver.rawClock,
                                      clocks.driver.rawReset,
                                      clocked_by clk,
-                                     reset_by rst);
+                                     reset_by clocks.driver.deviceResets[1]);
 
     //
     // Pass reset from PCIe to the model.  The host holds reset long enough that

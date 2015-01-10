@@ -24,7 +24,7 @@
 
 %sources -t BSV -v PUBLIC  differential-clock-import.bsv
 
-%sources -t BSV -v PUBLIC  reset-import.bsv
+%sources -t BSV -v PUBLIC  reset.bsv
 %sources -t VERILOG -v PRIVATE reset_import.v
 
 %param SYNTH 1            "Synthesize it to FPGAs"

@@ -19,6 +19,8 @@
 %generated -t VERILOG mkUserClock_DivideByTwo.v
 %generated -t VERILOG mkUserClock_DivideByFour.v
 
+%generated -t VERILOG mkUnoptimizableAsyncReset.v
+
 %sources -t BSV -v PUBLIC  ila-virtex7.bsv
 %sources -t BSV -v PUBLIC  icon.bsv
 %private v7_ila.v
@@ -31,7 +33,7 @@
 %sources -t BSV -v PUBLIC  differential-clock-import.bsv
 %sources -t BSV -v PUBLIC  io-components-xilinx.bsv
 
-%sources -t BSV -v PUBLIC  reset-import.bsv
+%sources -t BSV -v PUBLIC  reset.bsv
 %sources -t VERILOG -v PRIVATE reset_import.v
 
 %sources -t XCF -v PRIVATE xilinx-components.xcf
