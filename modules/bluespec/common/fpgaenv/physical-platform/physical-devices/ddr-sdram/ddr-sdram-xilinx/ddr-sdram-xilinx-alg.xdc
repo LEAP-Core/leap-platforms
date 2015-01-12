@@ -12,8 +12,6 @@
 
 set plat [getAWBParams {"synthesis_tool" "PLATFORM_BUILDER"}]
 
-puts "Plat is $plat"
-
 if {[getAWBParams {"synthesis_tool" "PLATFORM_BUILDER"}] == "functools.partial(buildSynplifyEDF, resourceCollector = RESOURCE_COLLECTOR)"} {
     puts "Using Synplify constraints"
     annotateClockCrossing [get_cells "m_sys_sys_vp_m_mod/llpi_phys_plat_sdram_b_ddrSynth/dramReady"] [get_cells "m_sys_sys_vp_m_mod/llpi_phys_plat_sdram_b_ddrSynth/dramReady_Model*"]
@@ -28,4 +26,6 @@ annotateSyncFIFO "m_sys_sys_vp_m_mod/llpi_phys_plat_sdram_b_ddrSynth/syncRequest
 annotateSyncFIFO "m_sys_sys_vp_m_mod/llpi_phys_plat_sdram_b_ddrSynth/syncWriteDataQ"
 annotateSyncFIFO "m_sys_sys_vp_m_mod/llpi_phys_plat_sdram_b_ddrSynth/syncReadDataQ"
 
+
+annotateClockCrossing $XILINX_DDR_RESET_SYNCHRONIZER_MODEL $XILINX_DDR_RESET_SYNCHRONIZER_DRIVER
 
