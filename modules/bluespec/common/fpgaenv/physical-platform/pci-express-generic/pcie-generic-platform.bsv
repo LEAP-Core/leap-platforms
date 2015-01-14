@@ -32,6 +32,7 @@
 import FIFO::*;
 import Vector::*;
 import Clocks::*;
+import DefaultValue::*;
 
 //
 // Standard physical platform for PCIe boards with on-board DDR storage
@@ -40,8 +41,11 @@ import Clocks::*;
 `include "awb/provides/pcie_device.bsh"
 `include "awb/provides/clocks_device.bsh"
 `include "awb/provides/ddr_sdram_device.bsh"
-`include "awb/provides/physical_platform_utils.bsh"
+`include "awb/provides/ddr_sdram_definitions.bsh"
 `include "awb/provides/aurora_device.bsh"
+
+`include "awb/provides/physical_platform_utils.bsh"
+`include "awb/provides/fpga_components.bsh"
 `include "awb/provides/soft_connections.bsh"
 
 
@@ -102,8 +106,13 @@ module [CONNECTED_MODULE] mkPhysicalPlatform
 
     // There is a strong assumption that the clock for this module is the 200MHz
     // differential clock.
-    DDR_DEVICE sdram <- mkDDRDevice(clocks.driver.rawClock,
-                                    clocks.driver.rawReset, 
+    let ddrConfig = defaultValue;
+    ddrConfig.internalClock = clocks.driver.rawClock;
+    ddrConfig.internalReset = clocks.driver.rawReset;
+   
+    // Set the ddr clock source by parameter. 
+ 
+    DDR_DEVICE sdram <- mkDDRDevice(ddrConfig,
                                     clocked_by clk,
                                     reset_by clocks.driver.deviceResets[0]);
 

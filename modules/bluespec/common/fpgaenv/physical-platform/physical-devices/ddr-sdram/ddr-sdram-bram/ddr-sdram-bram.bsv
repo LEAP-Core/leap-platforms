@@ -37,6 +37,7 @@ import List::*;
 
 `include "awb/provides/librl_bsv_base.bsh"
 `include "awb/provides/ddr_sdram_device.bsh"
+`include "awb/provides/ddr_sdram_definitions.bsh"
 `include "awb/provides/fpga_components.bsh"
 `include "awb/provides/physical_platform_utils.bsh"
 
@@ -148,7 +149,7 @@ FPGA_DDR_REQUEST
 //
 // mkDDRDevice
 //
-module mkDDRDevice#(Clock rawClock, Reset rawReset)
+module mkDDRDevice#(DDRControllerConfigure ddrConfig)
     // interface:
     (DDR_DEVICE);
 

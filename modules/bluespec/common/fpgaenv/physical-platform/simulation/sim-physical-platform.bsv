@@ -33,6 +33,7 @@
 
 import Clocks::*;
 import Vector::*;
+import DefaultValue::*;
 
 `include "awb/provides/soft_connections.bsh"
 `include "awb/provides/soft_services.bsh"
@@ -42,6 +43,7 @@ import Vector::*;
 `include "awb/provides/clocks_device.bsh"
 `include "awb/provides/unix_pipe_device.bsh"
 `include "awb/provides/ddr_sdram_device.bsh"
+`include "awb/provides/ddr_sdram_definitions.bsh"
 `include "awb/provides/physical_platform_utils.bsh"
 
 // PHYSICAL_DRIVERS
@@ -105,7 +107,11 @@ module [CONNECTED_MODULE] mkPhysicalPlatform
     // The simulation platform emulates DDR using BRAM.  Having a DRAM-like
     // interface makes it easier to test clients of memory in simulation
     // instead of debugging on hardware.
-    DDR_DEVICE ram <- mkDDRDevice(clk, rst, clocked_by clk, reset_by rst);
+    let ddrConfig = defaultValue;
+    ddrConfig.internalClock = clk;
+    ddrConfig.internalReset = rst;
+   
+    DDR_DEVICE ram <- mkDDRDevice(ddrConfig, clocked_by clk, reset_by rst);
 
     // Next, create the physical device that can trigger a soft reset. Pass along the
     // interface to the trigger module that the clocks device has given us.

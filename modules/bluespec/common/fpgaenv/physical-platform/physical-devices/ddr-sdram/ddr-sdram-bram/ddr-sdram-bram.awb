@@ -2,6 +2,8 @@
 %desc DDR SDRAM Emulator in BRAM
 
 %provides ddr_sdram_device
+%requires ddr_sdram_definitions
+
 
 %notes README
 

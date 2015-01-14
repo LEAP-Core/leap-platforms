@@ -41,13 +41,16 @@ import FIFOF::*;
 import Vector::*;
 import List::*;
 import RWire::*;
-
+import GetPut::*;
+import DefaultValue::*;
 
 `include "awb/provides/librl_bsv_base.bsh"
 `include "awb/provides/ddr_sdram_device.bsh"
+`include "awb/provides/ddr_sdram_definitions.bsh"
 `include "awb/provides/ddr_sdram_xilinx_driver.bsh"
 `include "awb/provides/soft_connections.bsh"
 `include "awb/provides/debug_scan_service.bsh"
+`include "awb/provides/fpga_components.bsh"
 
 
 //
@@ -184,8 +187,16 @@ interface DDR_BANK_DRIVER_SYNTH;
 endinterface
 
 
+interface DDR_WIRES;
 
-typedef Vector#(FPGA_DDR_BANKS, DDR_BANK_WIRES)  DDR_WIRES;
+    interface Put#(Bit#(1)) clk_p;
+    interface Put#(Bit#(1)) clk_n;
+    interface Put#(Bit#(1)) clk_single;
+
+    interface Vector#(FPGA_DDR_BANKS, DDR_BANK_WIRES)  bank_wires;
+
+endinterface
+
 typedef Vector#(FPGA_DDR_BANKS, DDR_BANK_DRIVER) DDR_DRIVER;
 
 
@@ -226,18 +237,50 @@ endinterface
 //
 // mkDDRDevice
 //
-module [CONNECTED_MODULE] mkDDRDevice#(Clock rawClock, Reset rawReset)
+module [CONNECTED_MODULE] mkDDRDevice#(DDRControllerConfigure ddrConfig)
     // interface:
     (DDR_DEVICE);
 
+    // Figure out device clocking 
+    let ddrClock = ddrConfig.internalClock;
+    let ddrReset = ddrConfig.internalReset; 
+
+    CLOCK_FROM_PUT incomingClockN <- mkClockFromPut;
+    CLOCK_FROM_PUT incomingClockP <- mkClockFromPut;
+
+    CLOCK_FROM_PUT incomingClockSingle <- mkClockFromPut;
+
+
+    if(ddrConfig.clockArchitecture == CLOCK_EXTERNAL_DIFFERENTIAL)
+    begin
+        Clock ddrClock <- mkDifferentialClock(incomingClockP.clock, incomingClockN.clock);        
+        // Clean the incoming reset.
+        Reset ddrReset <- mkAsyncReset(4, ddrReset, ddrClock);
+    end
+
+    if(ddrConfig.clockArchitecture == CLOCK_INTERNAL_UNBUFFERED)
+    begin
+        ddrClock <- mkClockBuffer(clocked_by ddrClock);
+    end
+    
     Vector#(FPGA_DDR_BANKS, DDR_BANK) b <-
-        replicateM(mkDDRBank(rawClock, rawReset));
+        replicateM(mkDDRBank(ddrClock, ddrReset));
 
     function DDR_BANK_DRIVER getDriver(DDR_BANK bank) = bank.driver;
     function DDR_BANK_WIRES getWires(DDR_BANK bank) = bank.wires;
 
     interface driver = map(getDriver, b);
-    interface wires = map(getWires, b);
+
+    interface DDR_WIRES wires;
+
+        interface clk_p      = incomingClockP.clock_wire;
+        interface clk_n      = incomingClockN.clock_wire;
+        interface clk_single = incomingClockSingle.clock_wire;
+
+        interface bank_wires = map(getWires, b);
+
+    endinterface
+
 endmodule
     
 

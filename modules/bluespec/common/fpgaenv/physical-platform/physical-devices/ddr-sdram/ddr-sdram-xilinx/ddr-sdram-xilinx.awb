@@ -3,6 +3,7 @@
 
 %provides ddr_sdram_device
 %requires ddr_sdram_xilinx_driver
+%requires ddr_sdram_definitions
 
 %notes README
 
@@ -18,7 +19,8 @@
 %sources -t VIVADO_TCL_ALGEBRA     -v PRIVATE ddr-sdram-xilinx-alg.xdc
 
 %param DRAM_MAX_OUTSTANDING_READS  64 "Maximum in-flight read requests"
-%param USE_INITIALIZATION_PATCH    1  "Use Initialization patch.  Helps with XST flows"
+%param USE_INITIALIZATION_PATCH    1  "Use Initialization patch.  Helps with ISE flows"
+
 %param --global DRAM_DEBUG         0  "Non-zero enables debugging methods"
 
 %param DEBUG_DDR3                  0  "Enable DDR3 Debugging"

@@ -36,6 +36,16 @@
 import Clocks::*;
 import Vector::*;
 
+typedef enum
+{
+    CLOCK_INTERNAL_UNBUFFERED,    // Controller will instantiate an additional buffer on the clock
+    CLOCK_INTERNAL_BUFFERED,      // Controller will use the clock directly
+    CLOCK_EXTERNAL_SINGLE_ENDED,  // Controller will instantiate incoming single ended clock buffer
+    CLOCK_EXTERNAL_DIFFERENTIAL   // Controller will instantiate incoming differential clock buffer
+}
+CLOCK_DESCRIPTOR
+    deriving (Bits, Eq);
+
 function Integer gcd(Integer a, Integer b);
     // Sanity check args
     Integer result = 0;

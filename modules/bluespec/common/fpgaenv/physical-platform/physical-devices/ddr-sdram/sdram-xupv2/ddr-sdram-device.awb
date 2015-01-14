@@ -2,6 +2,7 @@
 %desc XUPv2 DDR SDRAM Physical Device
 
 %provides ddr_sdram_device
+%requires ddr_sdram_definitions
 
 %sources -t BSV       -v PUBLIC ddr-sdram-device.bsv
 %sources -t BSV       -v PUBLIC ddr-sdram-verilog-import.bsv

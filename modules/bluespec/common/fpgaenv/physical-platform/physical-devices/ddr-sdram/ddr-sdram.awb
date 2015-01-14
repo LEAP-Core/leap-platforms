@@ -1,0 +1,10 @@
+%name DDR SDRAM Common Definitions
+%desc DDR SDRAM Common Definitions
+
+%provides ddr_sdram_definitions
+
+%notes README
+
+%public ddr-sdram.bsv
+
+
