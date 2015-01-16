@@ -15,5 +15,5 @@
 %sources -t CPP -v PRIVATE pcie-generic-platform.cpp
 %sources -t H   -v PUBLIC  pcie-generic-platform.h
 
-%param DRAM_CLOCK_MECHANISM  "Buffered"  "DDR Clock Source:  Buffered - use whatever the clock device uses; Differential - use an incoming differential clock"
+%param DRAM_CLOCK_MECHANISM  "InternalUnbuffered"  "DDR Clock Source:  Buffered - use whatever the clock device uses; Differential - use an incoming differential clock"
 

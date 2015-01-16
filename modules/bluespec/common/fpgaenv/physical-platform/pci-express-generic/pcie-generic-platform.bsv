@@ -109,7 +109,13 @@ module [CONNECTED_MODULE] mkPhysicalPlatform
     let ddrConfig = defaultValue;
     ddrConfig.internalClock = clocks.driver.rawClock;
     ddrConfig.internalReset = clocks.driver.rawReset;
-   
+    
+    case (`DRAM_CLOCK_MECHANISM) matches
+        "InternalUnbuffered":   ddrConfig.clockArchitecture = CLOCK_INTERNAL_UNBUFFERED;   
+        "ExternalDifferential": ddrConfig.clockArchitecture = CLOCK_EXTERNAL_DIFFERENTIAL;   
+        default:                ddrConfig.clockArchitecture = CLOCK_INTERNAL_BUFFERED;   
+    endcase
+
     // Set the ddr clock source by parameter. 
  
     DDR_DEVICE sdram <- mkDDRDevice(ddrConfig,

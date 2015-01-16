@@ -783,6 +783,16 @@ set_property LOC OLOGIC_X1Y307 [get_cells -hier -filter {NAME =~ */ddr_phy_4lane
 set_property LOC PLLE2_ADV_X1Y6 [get_cells -hier -filter {NAME =~ m_sys_sys_vp_m_mod/llpi_phys_plat_sdram_b_ddrSynth/dramCtrl*/*/u_ddr3_infrastructure/plle2_i}]
 set_property LOC MMCME2_ADV_X1Y6 [get_cells -hier -filter {NAME =~ m_sys_sys_vp_m_mod/llpi_phys_plat_sdram_b_ddrSynth/dramCtrl*/*/u_ddr3_infrastructure/mmcm_i}]
 
+
+if {[getAWBParams {"physical_platform" "DRAM_CLOCK_MECHANISM"}] == "ExternalDifferential"} {
+
+    set_property LOC E19  [get_ports { ddrWires_clk_p_put }]
+    set_property LOC E18  [get_ports { ddrWires_clk_n_put }]
+    set_property IOSTANDARD DIFF_SSTL15 [get_ports { ddrWires_clk_p_put ddrWires_clk_n_put }]
+    create_clock -name ddrWires_clk_p_put -period 5.000 [get_ports ddrWires_clk_p_put]
+        
+}
+
 if {[llength [get_cells -hier -filter {NAME =~ */mc0/mc_read_idle_r_reg}]]} {
     set_multicycle_path -from [get_cells -hier -filter {NAME =~ */mc0/mc_read_idle_r_reg}] \
                         -to   [get_cells -hier -filter {NAME =~ */input_[?].iserdes_dq_.iserdesdq}] \

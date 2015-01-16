@@ -253,13 +253,16 @@ module [CONNECTED_MODULE] mkDDRDevice#(DDRControllerConfigure ddrConfig)
 
     if(ddrConfig.clockArchitecture == CLOCK_EXTERNAL_DIFFERENTIAL)
     begin
-        Clock ddrClock <- mkDifferentialClock(incomingClockP.clock, incomingClockN.clock);        
+        messageM("DDR: CLOCK_EXTERNAL_DIFFERENTIAL");
+        Clock ddrClockIncoming <- mkDifferentialClock(incomingClockP.clock, incomingClockN.clock);        
         // Clean the incoming reset.
-        Reset ddrReset <- mkAsyncReset(4, ddrReset, ddrClock);
+        ddrClock <- mkClockBuffer(clocked_by ddrClockIncoming);
+        ddrReset <- mkAsyncReset(4, ddrReset, ddrClock);
     end
 
     if(ddrConfig.clockArchitecture == CLOCK_INTERNAL_UNBUFFERED)
     begin
+        messageM("DDR: CLOCK_INTERNAL_UNBUFFERED");
         ddrClock <- mkClockBuffer(clocked_by ddrClock);
     end
     
