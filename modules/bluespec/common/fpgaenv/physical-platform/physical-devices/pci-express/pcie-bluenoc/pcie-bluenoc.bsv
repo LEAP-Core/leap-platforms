@@ -65,19 +65,7 @@ interface PCIE_WIRES;
 
     interface PCIE_EXP#(PCIE_LANES) pcie_exp;
 
-    // Needed to shut bluespec up.
-    interface Clock clockOut;
-    interface Reset resetOut;
-    interface Clock rawClockOut;
-    interface Reset rawResetOut;
-    interface Clock devClockOut;
-    interface Reset devResetOut;
-    interface Clock clockSysOut;
-    interface Reset resetSysOut;
-
 endinterface
-
-
 
 // PCIE_DEVICE_IFC--
 //
@@ -87,7 +75,6 @@ interface PCIE_LOW_LEVEL_DEVICE;
     interface PCIE_LOW_LEVEL_DRIVER driver;
     interface PCIE_WIRES  wires;
 endinterface
-
 
 //
 // mkPCIEDevice --
@@ -122,10 +109,10 @@ module mkPCIELowLevelDevice#(Clock rawClock, Reset rawReset)
     // solely to keep the compiler from complaining about the module
     // being clocked by a clock not exposed at the top.
     RESET_FROM_PUT pcieReset <- mkResetFromPut(pcieSysClkBuf,
-                                               clocked_by pcieSysClkBuf);
+                                               clocked_by rawClock);
 
-    Wire#(Bit#(1)) buffRst <- mkIBUF(defaultValue, clocked_by pcieSysClkBuf, reset_by pcieReset.reset);
- 
+    Wire#(Bit#(1)) buffRst <- mkIBUF(defaultValue, clocked_by rawClock, reset_by rawReset);
+
     rule transferRst;
         pcieReset.reset_wire.put(buffRst);
     endrule
@@ -214,14 +201,6 @@ module mkPCIELowLevelDevice#(Clock rawClock, Reset rawReset)
             method txn = pcieBury.txn_wire;
         endinterface
 
-        interface rawClockOut = rawClock;
-        interface rawResetOut = rawReset;
-        interface clockOut = clock;
-        interface resetOut = reset;
-        interface clockSysOut = pcieSysClkBuf;
-        interface resetSysOut = pcieReset.reset;
-        interface devClockOut = dev.driver.clock;
-        interface devResetOut = dev.driver.reset;
     endinterface
 
 endmodule
