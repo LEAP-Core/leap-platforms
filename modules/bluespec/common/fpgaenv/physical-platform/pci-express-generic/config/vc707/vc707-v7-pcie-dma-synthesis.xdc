@@ -1,5 +1,7 @@
 
-create_clock -name device_topLevelWires_clocksWires_clk_p_put -period 5.000 [get_ports device_topLevelWires_clocksWires_clk_p_put]
+create_clock -period 5.000 -name device_topLevelWires_clocksWires_clk_p_put [get_ports clocksWires_clk_p_put]
+
+
 
 
 
