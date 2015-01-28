@@ -41,6 +41,7 @@ import Clocks::*;
 typedef Empty DDR_WIRES;
 typedef Empty DDR_DRIVER;
 
+`include "awb/provides/ddr_sdram_definitions.bsh"
 
 //
 // DDR_DEVICE --
@@ -59,7 +60,7 @@ endinterface
 //
 // mkDDRDevice
 //
-module mkDDRDevice#(Clock rawClock, Reset rawReset)
+module mkDDRDevice#(DDRControllerConfigure ddrConfig)
     // interface:
     (DDR_DEVICE);
 
