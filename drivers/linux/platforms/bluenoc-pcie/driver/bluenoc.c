@@ -34,6 +34,36 @@
 #define USE_CHAINED_SGLIST_API        (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
 #define USE_EXPLICIT_PCI_TABLE_TYPE   (LINUX_VERSION_CODE <  KERNEL_VERSION(2,6,25))
 #define DEVICE_CREATE_HAS_DRVDATA_ARG (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,27))
+#define USE_DEVINIT_DEVEXIT_ATTRS     (LINUX_VERSION_CODE <  KERNEL_VERSION(3,8,0))
+#define USE_PCI_DIS_LINK_STATE        (LINUX_VERSION_CODE >  KERNEL_VERSION(2,6,32))
+
+#if USE_PCI_DIS_LINK_STATE
+#include <linux/pci-aspm.h>    /* disable_link_state */
+#endif
+
+/*
+ * portability across 32-bit and 64-bit architectures
+ */
+#ifndef readq
+static inline __u64 readq(const volatile void __iomem *addr)
+{
+  const volatile u32 __iomem *p = addr;
+  u32 low, high;
+
+  low = readl(p);
+  high = readl(p + 1);
+
+  return low + ((u64)high << 32);
+}
+#endif
+
+#ifndef writeq
+static inline void writeq(__u64 val, volatile void __iomem *addr)
+{
+  writel(val, addr);
+  writel(val >> 32, addr + 4);
+}
+#endif
 
 /*
  * driver module data for the kernel
@@ -42,6 +72,7 @@
 MODULE_AUTHOR ("Bluespec, Inc.");
 MODULE_DESCRIPTION ("PCIe device driver for Bluespec FPGA interconnect");
 MODULE_LICENSE ("Dual BSD/GPL");
+MODULE_VERSION ("2014.07.A");
 
 /*
  * driver configuration
@@ -51,7 +82,7 @@ MODULE_LICENSE ("Dual BSD/GPL");
 #define DEV_NAME "bluenoc"
 
 /* version string for the driver */
-#define DEV_VERSION "1.0"
+#define DEV_VERSION "1.2"
 
 /* Bluespec's standard vendor ID */
 #define BLUESPEC_VENDOR_ID 0x1be7
@@ -126,8 +157,13 @@ static tBoard* board_list = NULL;
 
 /* forward declarations of driver routines */
 
+#if USE_DEVINIT_DEVEXIT_ATTRS
 static int __devinit bluenoc_probe(struct pci_dev* dev, const struct pci_device_id* id);
 static void __devexit bluenoc_remove(struct pci_dev* dev);
+#else
+static int bluenoc_probe(struct pci_dev* dev, const struct pci_device_id* id);
+static void bluenoc_remove(struct pci_dev* dev);
+#endif
 
 static int bluenoc_open(struct inode* inode, struct file* filp);
 static int bluenoc_release(struct inode* inode, struct file* filp);
@@ -409,7 +445,11 @@ static struct pci_driver bluenoc_driver = {
   .name     = DEV_NAME,
   .id_table = bluenoc_id_table,
   .probe    = bluenoc_probe,
+#if USE_DEVINIT_DEVEXIT_ATTRS
   .remove   = __devexit_p(bluenoc_remove)
+#else
+  .remove   = bluenoc_remove
+#endif
 };
 
 /* utility routine to clear the status register and DMA status fields
@@ -515,7 +555,11 @@ module_exit(bluenoc_exit);
 
 /* driver PCI operations */
 
+#if USE_DEVINIT_DEVEXIT_ATTRS
 static int __devinit bluenoc_probe(struct pci_dev* dev, const struct pci_device_id* id)
+#else
+static int bluenoc_probe(struct pci_dev* dev, const struct pci_device_id* id)
+#endif
 {
   int err = 0;
   tBoard* this_board = NULL;
@@ -528,6 +572,11 @@ static int __devinit bluenoc_probe(struct pci_dev* dev, const struct pci_device_
     err = -EINVAL;
     goto exit_bluenoc_probe;
   }
+
+  /* disable ASPM */
+  #if USE_PCI_DIS_LINK_STATE
+  pci_disable_link_state(dev, PCIE_LINK_STATE_L0S | PCIE_LINK_STATE_L1 | PCIE_LINK_STATE_CLKPM);
+  #endif
 
   /* allocate a structure for this board */
   this_board = (tBoard*) kmalloc(sizeof(tBoard),GFP_KERNEL);
@@ -589,7 +638,11 @@ static int __devinit bluenoc_probe(struct pci_dev* dev, const struct pci_device_
   return err;
 }
 
+#if USE_DEVINIT_DEVEXIT_ATTRS
 static void __devexit bluenoc_remove(struct pci_dev* dev)
+#else
+static void bluenoc_remove(struct pci_dev* dev)
+#endif
 {
   tBoard* this_board = NULL;
   tBoard* prev_board = NULL;
@@ -935,7 +988,10 @@ static ssize_t bluenoc_read(struct file* filp, char __user* buf, size_t count, l
   }
 
   /* begin critical section here */
-  mutex_lock(&(this_board->read_mutex));
+  if (mutex_trylock(&(this_board->read_mutex)) == 0) {
+    err = -EBUSY;
+    goto unmap_sg_list;
+  }
 
   /* program the device to perform DMA */
   clear_dma_status(this_board,START_READ);
@@ -972,6 +1028,7 @@ static ssize_t bluenoc_read(struct file* filp, char __user* buf, size_t count, l
       result = wait_event_interruptible(this_board->intr_wq,!this_board->read_queue_full);
       if (result != 0) {
         err = -ERESTARTSYS;
+        mutex_unlock(&(this_board->read_mutex));
         goto unmap_sg_list;
       }
       if (this_board->read_flushed) {
@@ -1275,7 +1332,10 @@ static ssize_t bluenoc_write(struct file* filp, const char __user* buf, size_t c
   }
 
   /* begin critical section here */
-  mutex_lock(&(this_board->write_mutex));
+  if (mutex_trylock(&(this_board->write_mutex)) == 0) {
+    err = -EBUSY;
+    goto unmap_sg_list;
+  }
 
   /* program the device to perform DMA */
   clear_dma_status(this_board,START_WRITE);
@@ -1313,6 +1373,7 @@ static ssize_t bluenoc_write(struct file* filp, const char __user* buf, size_t c
       result = wait_event_interruptible(this_board->intr_wq,!this_board->write_queue_full);
       if (result != 0) {
         err = -ERESTARTSYS;
+        mutex_unlock(&(this_board->write_mutex));
         goto unmap_sg_list;
       }
       slots_free = 16 - this_board->write_buffers_level;
@@ -1464,6 +1525,8 @@ static long bluenoc_ioctl(struct file* filp, unsigned int cmd, unsigned long arg
       info.timestamp      = this_board->timestamp;
       info.bytes_per_beat = this_board->bytes_per_beat;
       info.content_id     = this_board->content_id;
+      info.subvendor_id   = this_board->pci_dev->subsystem_vendor;
+      info.subdevice_id   = this_board->pci_dev->subsystem_device;
       err = copy_to_user((void __user *)arg, &info, sizeof(tBoardInfo));
       if (err != 0)
         return -EFAULT;
@@ -1596,6 +1659,56 @@ static long bluenoc_ioctl(struct file* filp, unsigned int cmd, unsigned long arg
           }
         }
       }
+      return 0;
+    }
+    case BNOC_GET_STATUS:
+    {
+      unsigned long status = ioread32(this_board->bar0io + 128);
+      err = __put_user(status, (unsigned long __user *)arg);
+      if (err != 0)
+	return -EFAULT;
+      return 0;
+    }
+    case BNOC_CLK_RD_WORD:
+    {
+      unsigned long data = ioread32(this_board->bar0io + 384);
+      err = __put_user(data, (unsigned long __user *)arg);
+      if (err != 0)
+	return -EFAULT;
+      return 0;
+    }
+    case BNOC_CLK_GET_STATUS:
+    {
+      unsigned long status = ioread32(this_board->bar0io + 388);
+      err = __put_user(status, (unsigned long __user *)arg);
+      if (err != 0)
+	return -EFAULT;
+      return 0;
+    }
+    case BNOC_CLK_CLR_WORD:
+    {
+      unsigned long data;
+      err = __get_user(data, (unsigned long __user *)arg);
+      if (err != 0)
+	return -EFAULT;
+      iowrite32(data, this_board->bar0io + 384);
+      return 0;
+    }
+    case BNOC_CLK_SEND_CTRL:
+    {
+      unsigned long data;
+      err = __get_user(data, (unsigned long __user *)arg);
+      if (err != 0)
+	return -EFAULT;
+      iowrite32(data, this_board->bar0io + 392);
+      return 0;
+    }
+    case BNOC_CAPABILITIES:
+    {
+      unsigned long data = ioread32(this_board->bar0io + 40);
+      err = __put_user(data, (unsigned long __user *)arg);
+      if (err != 0)
+	return -EFAULT;
       return 0;
     }
     default:

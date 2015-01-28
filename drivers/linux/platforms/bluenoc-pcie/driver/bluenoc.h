@@ -21,6 +21,8 @@ typedef struct {
   unsigned int       timestamp;
   unsigned int       bytes_per_beat;
   unsigned long long content_id;
+  unsigned int       subvendor_id;
+  unsigned int       subdevice_id;
 } tBoardInfo;
 
 typedef unsigned int tDebugLevel;
@@ -40,8 +42,14 @@ const tDebugLevel DEBUG_PROFILE = (1 << 31);
 #define BNOC_REACTIVATE      _IO(BNOC_IOC_MAGIC,3)
 #define BNOC_GET_DEBUG_LEVEL _IOR(BNOC_IOC_MAGIC,4,tDebugLevel*)
 #define BNOC_SET_DEBUG_LEVEL _IOW(BNOC_IOC_MAGIC,5,tDebugLevel*)
+#define BNOC_GET_STATUS      _IOR(BNOC_IOC_MAGIC,6,unsigned long*)
+#define BNOC_CLK_RD_WORD     _IOR(BNOC_IOC_MAGIC,7,unsigned long*)
+#define BNOC_CLK_GET_STATUS  _IOR(BNOC_IOC_MAGIC,8,unsigned long*)
+#define BNOC_CLK_CLR_WORD    _IOW(BNOC_IOC_MAGIC,9,unsigned long*)
+#define BNOC_CLK_SEND_CTRL   _IOW(BNOC_IOC_MAGIC,10,unsigned long*)
+#define BNOC_CAPABILITIES    _IOR(BNOC_IOC_MAGIC,11,unsigned long*)
 
 /* maximum valid IOCTL number */
-#define BNOC_IOC_MAXNR 5
+#define BNOC_IOC_MAXNR 11
 
 #endif /* __BLUENOC_H__ */
