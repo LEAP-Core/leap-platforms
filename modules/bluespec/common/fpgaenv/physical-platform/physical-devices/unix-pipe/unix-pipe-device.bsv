@@ -37,8 +37,8 @@ import Vector::*;
 `include "awb/provides/soft_services_lib.bsh"
 `include "awb/provides/soft_services_deps.bsh"
 
-`include "umf.bsh"
-`include "physical_platform_utils.bsh"
+`include "awb/provides/umf.bsh"
+`include "awb/provides/physical_platform_utils.bsh"
 
 `define PIPE_NULL       1
 `define POLL_INTERVAL   0
