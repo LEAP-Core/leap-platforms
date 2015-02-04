@@ -425,7 +425,7 @@ module mkBRAMMultiBank
     Vector#(t_BANK_NUM, BRAM#(t_BANK_ADDR, t_DATA)) brams <- replicateM(mkBRAMBuffered());
     FIFOF#(t_BANK_IDX) reqInfoQ <- mkSizedFIFOF(valueOf(BRAM_REQ_BUFFER_DEPTH));
     FIFOF#(t_ADDR) incomingReadReqQ <- mkBypassFIFOF();
-    FIFOF#(t_DATA) responseQ <- mkFIFOF();
+    FIFOF#(t_DATA) responseQ <- mkBypassFIFOF();
     
     function Tuple2#(t_BANK_IDX, t_BANK_ADDR) calBankAddr (t_ADDR addr);
         return unpack(resize(pack(addr)));
