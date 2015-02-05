@@ -29,7 +29,6 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-
 //
 // Wrap the Bluespec-default Virtex-7 DDR3 driver with a LEAP standard DDR
 // interface.
@@ -53,6 +52,19 @@ import DefaultValue::*;
 //
 typedef DDR3_Pins_V7 DDR_BANK_WIRES;
 
+// The smallest addressable word:
+typedef `DRAM_WORD_WIDTH FPGA_DDR_WORD_SZ;
+typedef Bit#(FPGA_DDR_WORD_SZ) FPGA_DDR_WORD;
+
+typedef `DRAM_BEAT_WIDTH FPGA_DDR_DUALEDGE_BEAT_SZ;
+typedef Bit#(FPGA_DDR_DUALEDGE_BEAT_SZ) FPGA_DDR_DUALEDGE_BEAT;
+
+typedef TDiv#(FPGA_DDR_DUALEDGE_BEAT_SZ, FPGA_DDR_WORD_SZ) FPGA_DDR_WORDS_PER_BEAT;
+typedef TDiv#(FPGA_DDR_DUALEDGE_BEAT_SZ, 8) FPGA_DDR_BYTES_PER_BEAT;
+typedef TDiv#(FPGA_DDR_WORD_SZ, 8) FPGA_DDR_BYTES_PER_WORD;
+
+typedef Bit#(FPGA_DDR_BYTES_PER_WORD) FPGA_DDR_WORD_MASK;
+typedef Bit#(FPGA_DDR_BYTES_PER_BEAT) FPGA_DDR_DUALEDGE_BEAT_MASK;
 
 interface XILINX_DRAM_CONTROLLER;
     
@@ -62,22 +74,22 @@ interface XILINX_DRAM_CONTROLLER;
     interface Reset controller_reset;
      
     // application interface
-    method    Bool              init_done;
-    method    Action            enqueue_address(DDR3Command command, Bit#(28) address);
-    method    Action            enqueue_data(Bit#(256) data, Bit#(32) mask, Bool endBurst);
-    method    Bit#(256)         dequeue_data;
+    method    Bool                    init_done;
+    method    Action                  enqueue_address(DDR3Command command, Bit#(28) address);
+    method    Action                  enqueue_data(FPGA_DDR_DUALEDGE_BEAT data, FPGA_DDR_DUALEDGE_BEAT_MASK mask, Bool endBurst);
+    method    FPGA_DDR_DUALEDGE_BEAT  dequeue_data;
 
     // Debug info
-    method    Bit#(1)           cmd_rdy;
-    method    Bit#(1)           enq_rdy;
-    method    Bit#(1)           deq_rdy;
+    method    Bit#(1)                 cmd_rdy;
+    method    Bit#(1)                 enq_rdy;
+    method    Bit#(1)                 deq_rdy;
        
-    method    Bool              dbg_wrlvl_start;
-    method    Bool              dbg_wrlvl_done;
-    method    Bool              dbg_wrlvl_err;
-    method    Bit#(2)           dbg_rdlvl_start;
-    method    Bit#(2)           dbg_rdlvl_done;
-    method    Bit#(2)           dbg_rdlvl_err;
+    method    Bool                    dbg_wrlvl_start;
+    method    Bool                    dbg_wrlvl_done;
+    method    Bool                    dbg_wrlvl_err;
+    method    Bit#(2)                 dbg_rdlvl_start;
+    method    Bit#(2)                 dbg_rdlvl_done;
+    method    Bit#(2)                 dbg_rdlvl_err;
 
 endinterface
 
@@ -87,6 +99,10 @@ endinterface
 // configuration.
 //
 module checkDDRControllerConfig#(DDRControllerConfigure ddrConfig) ();
+    if (ddrConfig.clockArchitecture != CLOCK_EXTERNAL_DIFFERENTIAL)
+    begin
+        error("VC707 DDR3 controller requires differential clock.");
+    end
 endmodule
 
 
@@ -112,8 +128,8 @@ module mkXilinxDRAMController#(Clock clk200,
 
     Wire#(DDR3Command) wAppCmd     <- mkDWire(WRITE, clocked_by user_clock, reset_by user_reset_n);
     Wire#(Bit#(28))    wAppAddr    <- mkDWire(0, clocked_by user_clock, reset_by user_reset_n);
-    Wire#(Bit#(32))    wAppWdfMask <- mkDWire(0, clocked_by user_clock, reset_by user_reset_n);
-    Wire#(Bit#(256))   wAppWdfData <- mkDWire(0, clocked_by user_clock, reset_by user_reset_n);
+    Wire#(FPGA_DDR_DUALEDGE_BEAT_MASK)    wAppWdfMask <- mkDWire(0, clocked_by user_clock, reset_by user_reset_n);
+    Wire#(FPGA_DDR_DUALEDGE_BEAT)   wAppWdfData <- mkDWire(0, clocked_by user_clock, reset_by user_reset_n);
 
     (* fire_when_enabled, no_implicit_conditions *)
     rule drive_enables;
@@ -148,7 +164,7 @@ module mkXilinxDRAMController#(Clock clk200,
         wAppAddr <= address;
     endmethod
 
-    method Action enqueue_data(Bit#(256) data, Bit#(32) mask, Bool endBurst) if (ddr3ctrl.user.app_wdf_rdy);
+    method Action enqueue_data(FPGA_DDR_DUALEDGE_BEAT data, FPGA_DDR_DUALEDGE_BEAT_MASK mask, Bool endBurst) if (ddr3ctrl.user.app_wdf_rdy);
         // Signal that write data is being sent
         pwAppWdfWren.send();
         wAppWdfData <= data;
@@ -156,7 +172,7 @@ module mkXilinxDRAMController#(Clock clk200,
         if (endBurst) pwAppWdfEnd.send();
     endmethod
 
-    method Bit#(256) dequeue_data() if (ddr3ctrl.user.app_rd_data_valid);
+    method FPGA_DDR_DUALEDGE_BEAT dequeue_data() if (ddr3ctrl.user.app_rd_data_valid);
         return ddr3ctrl.user.app_rd_data;
     endmethod
 
@@ -293,11 +309,11 @@ interface VDDR3_User_V7;
    method    Action            app_addr(Bit#(28) i);
    method    Action            app_cmd(DDR3Command i);
    method    Action            app_en(Bool i);
-   method    Action            app_wdf_data(Bit#(256) i);
+   method    Action            app_wdf_data(FPGA_DDR_DUALEDGE_BEAT i);
    method    Action            app_wdf_end(Bool i);
-   method    Action            app_wdf_mask(Bit#(32) i);
+   method    Action            app_wdf_mask(FPGA_DDR_DUALEDGE_BEAT_MASK i);
    method    Action            app_wdf_wren(Bool i);
-   method    Bit#(256)         app_rd_data;
+   method    FPGA_DDR_DUALEDGE_BEAT         app_rd_data;
    method    Bool              app_rd_data_end;
    method    Bool              app_rd_data_valid;
    method    Bool              app_rdy;

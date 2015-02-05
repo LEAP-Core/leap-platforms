@@ -41,6 +41,14 @@ module mkDifferentialClock#(Clock clk_p, Clock clk_n)(Clock);
     return _m;
 endmodule
 
+module mkDifferentialClockG#(IBUFGDSParams params, Clock clk_p, Clock clk_n)
+    // Interface:
+    (Clock);
+
+    let _m <- mkClockIBUFGDS(params, clk_p, clk_n);
+    return _m;
+endmodule
+
 module mkInputBuffer (Wire#(Bit#(n)));
     Wire#(Bit#(n)) _m <- mkIBUF(defaultValue);
     return _m;

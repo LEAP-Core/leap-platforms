@@ -42,6 +42,7 @@ import Vector::*;
 import List::*;
 import RWire::*;
 import GetPut::*;
+import XilinxCells::*;
 import DefaultValue::*;
 
 `include "awb/provides/librl_bsv_base.bsh"
@@ -118,8 +119,6 @@ interface DDR_BANK_DRIVER;
 `ifndef DRAM_DEBUG_Z
     // Methods enabled only for debugging the controller:
 
-    // Get status.  Should never block.
-    method Bit#(64) statusCheck();
     // Set the maximum number of outstanding reads permitted.  Useful for
     // calibrating sync buffer sizes.
     method Action setMaxReads(Bit#(TLog#(TAdd#(`DRAM_MAX_OUTSTANDING_READS, 1))) maxReads);
@@ -130,9 +129,9 @@ endinterface
 //
 // DDR_BANK_DRIVER_SYNTH
 //
-// Same interface as above.  However, debug signals are explicitly exported as set of 
-// boolean methods, which enables us to put Bluespec-style synthesis boundaries on 
-// the bank code.  
+// Same interface as above.  However, debug signals are explicitly exported as set of
+// boolean methods, which enables us to put Bluespec-style synthesis boundaries on
+// the bank code.
 //
 
 interface DDR_BANK_DRIVER_SYNTH;
@@ -178,8 +177,6 @@ interface DDR_BANK_DRIVER_SYNTH;
 `ifndef DRAM_DEBUG_Z
     // Methods enabled only for debugging the controller:
 
-    // Get status.  Should never block.
-    method Bit#(64) statusCheck();
     // Set the maximum number of outstanding reads permitted.  Useful for
     // calibrating sync buffer sizes.
     method Action setMaxReads(Bit#(TLog#(TAdd#(`DRAM_MAX_OUTSTANDING_READS, 1))) maxReads);
@@ -216,7 +213,7 @@ endinterface
 
 //
 // DDR_BANK --
-//     A bank is one driver and corresponding wires, but in this case 
+//     A bank is one driver and corresponding wires, but in this case
 //     debug signals have been wrapped.
 //
 interface DDR_BANK;
@@ -241,31 +238,45 @@ module [CONNECTED_MODULE] mkDDRDevice#(DDRControllerConfigure ddrConfig)
     // interface:
     (DDR_DEVICE);
 
-    // Figure out device clocking 
+    // Figure out device clocking
     let ddrClock = ddrConfig.internalClock;
-    let ddrReset = ddrConfig.internalReset; 
+    let ddrReset = ddrConfig.internalReset;
 
     CLOCK_FROM_PUT incomingClockN <- mkClockFromPut;
     CLOCK_FROM_PUT incomingClockP <- mkClockFromPut;
 
     CLOCK_FROM_PUT incomingClockSingle <- mkClockFromPut;
 
+    checkDDRControllerConfig(ddrConfig);
 
-    if(ddrConfig.clockArchitecture == CLOCK_EXTERNAL_DIFFERENTIAL)
+    if (ddrConfig.clockArchitecture == CLOCK_EXTERNAL_DIFFERENTIAL)
     begin
         messageM("DDR: CLOCK_EXTERNAL_DIFFERENTIAL");
-        Clock ddrClockIncoming <- mkDifferentialClock(incomingClockP.clock, incomingClockN.clock);        
+
+        // Parameters of the clock are based on the way a differential
+        // sys_clk_p/sys_clk_n is consumed in the Virtex 7 DDR3 controller.
+        IBUFGDSParams params = defaultValue;
+        params.diff_term = "TRUE";
+        params.ibuf_low_pwr = "FALSE";
+
+        Clock ddrClockDiff <- mkDifferentialClockG(params,
+                                                   incomingClockP.clock,
+                                                   incomingClockN.clock);
+
+        // BUFG allows the clock to travel from the incoming pins to
+        // the memory controller.
+        ddrClock <- mkClockBuffer(clocked_by ddrClockDiff);
+
         // Clean the incoming reset.
-        ddrClock <- mkClockBuffer(clocked_by ddrClockIncoming);
         ddrReset <- mkAsyncReset(4, ddrReset, ddrClock);
     end
 
-    if(ddrConfig.clockArchitecture == CLOCK_INTERNAL_UNBUFFERED)
+    if (ddrConfig.clockArchitecture == CLOCK_INTERNAL_UNBUFFERED)
     begin
         messageM("DDR: CLOCK_INTERNAL_UNBUFFERED");
         ddrClock <- mkClockBuffer(clocked_by ddrClock);
     end
-    
+
     Vector#(FPGA_DDR_BANKS, DDR_BANK) b <-
         replicateM(mkDDRBank(ddrClock, ddrReset));
 
@@ -285,7 +296,7 @@ module [CONNECTED_MODULE] mkDDRDevice#(DDRControllerConfigure ddrConfig)
     endinterface
 
 endmodule
-    
+
 
 
 //
@@ -311,14 +322,14 @@ FPGA_DDR_STATE
 
 
 //
-// Debug DDR interface, exported to upper levels. 
+// Debug DDR interface, exported to upper levels.
 //
 module [CONNECTED_MODULE] mkDDRBank#(Clock rawClock, Reset rawReset)
     // interface:
     (DDR_BANK);
 
     DDR_BANK_SYNTH ddrSynth <- mkDDRBankSynth(rawClock, rawReset);
-  
+
     //
     // Debug scan state
     //
@@ -355,25 +366,22 @@ module [CONNECTED_MODULE] mkDDRBank#(Clock rawClock, Reset rawReset)
         method writeData = ddrSynth.driver.writeData;
 
 `ifndef DRAM_DEBUG_Z
-
-        method statusCheck = ddrSynth.driver.statusCheck;
         method setMaxReads = ddrSynth.driver.setMaxReads;
-
 `endif
-    endinterface       
-    
+    endinterface
+
     interface wires = ddrSynth.wires;
 
 endmodule
 
 //
-// Bluespec synthesizable ddr interface. 
+// Bluespec synthesizable ddr interface.
 //
-(* synthesize *) 
+(* synthesize *)
 module mkDDRBankSynth#(Clock rawClock, Reset rawReset)
     // interface:
     (DDR_BANK_SYNTH);
-    
+
     Clock modelClock <- exposeCurrentClock();
     Reset modelReset <- exposeCurrentReset();
 
@@ -386,7 +394,7 @@ module mkDDRBankSynth#(Clock rawClock, Reset rawReset)
     //
     XILINX_DRAM_CONTROLLER dramCtrl <-
         mkXilinxDRAMController(rawClock, modelOrRawReset);
-    
+
     // Clock the glue logic with the Controller's clock
     Clock controllerClock = dramCtrl.controller_clock;
     Reset controllerReset = dramCtrl.controller_reset;
@@ -418,7 +426,7 @@ module mkDDRBankSynth#(Clock rawClock, Reset rawReset)
     // Write data queue
     SyncFIFOIfc#(Tuple2#(FPGA_DDR_DUALEDGE_BEAT, FPGA_DDR_DUALEDGE_BEAT_MASK))
         syncWriteDataQ <- mkSyncFIFO(16, modelClock, modelReset, controllerClock);
-    
+
     // Debug signals
 `ifndef DEBUG_DDR3_Z
     ReadOnly#(Bool) dbg_wrlvl_start <- mkNullCrossingWire(modelClock, dramCtrl.dbg_wrlvl_start(), clocked_by controllerClock, reset_by controllerReset);
@@ -440,9 +448,9 @@ module mkDDRBankSynth#(Clock rawClock, Reset rawReset)
     //
     // ===== Rules =====
     //
-    
+
     // Rules for synchronizing from Controller to Model
-    
+
     // Push incoming data into read buffer. This rule *MUST* fire if the explicit
     // conditions are true, else we will lose data.
     (* fire_when_enabled *)
@@ -450,105 +458,135 @@ module mkDDRBankSynth#(Clock rawClock, Reset rawReset)
         syncReadDataQ.enq(dramCtrl.dequeue_data());
     endrule
 
-    
-    // 
+
+    //
     // Rules for synchronizing from Model to Controller
     //
-    
+
     rule processReadRequest (dramReady &&&
                              syncRequestQ.first() matches tagged DRAM_READ .address);
         syncRequestQ.deq();
         dramCtrl.enqueue_address(READ, zeroExtend(address));
     endrule
 
-    
+
     //
-    // Writes come in as two data messages and a control message.  They
+    // Writes come in as a control message and beats of data.  They
     // must be forwarded with precise timing to the DRAM.  Timing of reading
     // directly from the sync FIFO seems to be unreliable.  The code here
     // avoids timing problems by copying an entire write request into
     // registers within the DRAM clock domain before forwarding a request.
     //
 
-    Vector#(FPGA_DDR_BURST_LENGTH, Reg#(FPGA_DDR_DUALEDGE_BEAT)) writeValue <-
+    if (valueOf(FPGA_DDR_BURST_LENGTH) == 1)
+    begin
+        //
+        // Generate different code when the burst length is 1.  The code
+        // that supports multiple beats would work, but has a bubble since
+        // command and data are processed on separate cycles.
+        //
+
+        rule processWriteRequest (dramReady &&&
+                                  syncRequestQ.first() matches tagged DRAM_WRITE .address);
+            syncRequestQ.deq();
+
+            match {.data, .mask} = syncWriteDataQ.first();
+            syncWriteDataQ.deq();
+
+            // address + command
+            dramCtrl.enqueue_address(WRITE, zeroExtend(address));
+
+            // Data + mask
+            dramCtrl.enqueue_data(data, mask, True);
+        endrule
+    end
+    else
+    begin
+        //
+        // This path handles multi-beat writes.
+        //
+
+        Vector#(FPGA_DDR_BURST_LENGTH, Reg#(FPGA_DDR_DUALEDGE_BEAT)) writeValue <-
         replicateM(mkRegU(clocked_by controllerClock, reset_by controllerReset));
 
-    Vector#(FPGA_DDR_BURST_LENGTH, Reg#(FPGA_DDR_DUALEDGE_BEAT_MASK)) writeValueMask <-
+        Vector#(FPGA_DDR_BURST_LENGTH, Reg#(FPGA_DDR_DUALEDGE_BEAT_MASK)) writeValueMask <-
         replicateM(mkRegU(clocked_by controllerClock, reset_by controllerReset));
 
-    Reg#(Bit#(TLog#(TAdd#(1, FPGA_DDR_BURST_LENGTH)))) writeBurstIdx <-
+        Reg#(Bit#(TLog#(TAdd#(1, FPGA_DDR_BURST_LENGTH)))) writeBurstIdx <-
         mkReg(0, clocked_by controllerClock, reset_by controllerReset);
 
-    Reg#(Bit#(TLog#(TAdd#(1, FPGA_DDR_BURST_LENGTH)))) writeEmitIdx <-
+        Reg#(Bit#(TLog#(TAdd#(1, FPGA_DDR_BURST_LENGTH)))) writeEmitIdx <-
         mkReg(0, clocked_by controllerClock, reset_by controllerReset);
 
-    //
-    // copyWriteData --
-    //     Copy incoming write data from the sync FIFO to local registers.
-    //
-    rule copyWriteData (writeBurstIdx != fromInteger(valueOf(FPGA_DDR_BURST_LENGTH)));
-        match {.data, .mask} = syncWriteDataQ.first();
-        syncWriteDataQ.deq();        
+        //
+        // copyWriteData --
+        //     Copy incoming write data from the sync FIFO to local registers.
+        //
+        rule copyWriteData (writeBurstIdx != fromInteger(valueOf(FPGA_DDR_BURST_LENGTH)));
+            match {.data, .mask} = syncWriteDataQ.first();
+            syncWriteDataQ.deq();
 
-        writeValue[writeBurstIdx] <= data;
-        writeValueMask[writeBurstIdx] <= mask;
-        
-        writeBurstIdx <= writeBurstIdx + 1;
-    endrule
+            writeValue[writeBurstIdx] <= data;
+            writeValueMask[writeBurstIdx] <= mask;
 
-    //
-    // processWriteRequest0 --
-    //     Stage 0 of write request.  Send control message and first half of data
-    //     to the memory controller.
-    //
-    rule processWriteRequest0 (dramReady &&&
-                               (writeBurstIdx == fromInteger(valueOf(FPGA_DDR_BURST_LENGTH))) &&&
-                               (writeEmitIdx == 0) &&&
-                               syncRequestQ.first() matches tagged DRAM_WRITE .address);
+            writeBurstIdx <= writeBurstIdx + 1;
+        endrule
 
-        syncRequestQ.deq();
+        //
+        // processWriteRequest0 --
+        //     Stage 0 of write request.  Send control message and first beat of data
+        //     to the memory controller.
+        //
+        rule processWriteRequest0 (dramReady &&&
+                                   (writeBurstIdx == fromInteger(valueOf(FPGA_DDR_BURST_LENGTH))) &&&
+                                   (writeEmitIdx == 0) &&&
+                                   syncRequestQ.first() matches tagged DRAM_WRITE .address);
 
-        // address + command
-        dramCtrl.enqueue_address(WRITE, zeroExtend(address));
-        
-        // Data + mask
-        dramCtrl.enqueue_data(writeValue[0], writeValueMask[0], False);
-                    
-        // Write the rest of the beats
-        if (valueOf(FPGA_DDR_BURST_LENGTH) != 1)
-        begin
-            writeEmitIdx <= 1;
-        end
+            syncRequestQ.deq();
 
-        // Allow new incoming data.  It is safe to allow incoming data at the
-        // same time as the current write is emitted since write beats must
-        // go out in consecutive cycles.
-        writeBurstIdx <= 0;
-    endrule
-    
-    //
-    // processWriteRequest 1--
-    //   Stage two of write request.  Forward remainder of data to the memory.
-    //   This rule *MUST* fire in the cycles immediately after the previous rule.
-    //
-    (* fire_when_enabled *)
-    rule processWriteRequest1 (writeEmitIdx != 0);
-        // data + mask
-        dramCtrl.enqueue_data(writeValue[writeEmitIdx],
-                              writeValueMask[writeEmitIdx],
-                              True);
-        
-        if (writeEmitIdx == fromInteger(valueOf(TSub#(FPGA_DDR_BURST_LENGTH, 1))))
-        begin
-            // Done
-            writeEmitIdx <= 0;
-        end
-        else
-        begin
-            writeEmitIdx <= writeEmitIdx + 1;
-        end
-    endrule    
+            // address + command
+            dramCtrl.enqueue_address(WRITE, zeroExtend(address));
 
+            // Data + mask
+            dramCtrl.enqueue_data(writeValue[0],
+                                  writeValueMask[0],
+                                  valueOf(FPGA_DDR_BURST_LENGTH) == 1);
+
+            // Write the rest of the beats
+            if (valueOf(FPGA_DDR_BURST_LENGTH) != 1)
+            begin
+                writeEmitIdx <= 1;
+            end
+
+            // Allow new incoming data.  It is safe to allow incoming data at the
+            // same time as the current write is emitted since write beats must
+            // go out in consecutive cycles.
+            writeBurstIdx <= 0;
+        endrule
+
+        //
+        // processWriteRequest 1--
+        //   Stage two of write request.  Forward remainder of data to the memory.
+        //   This rule *MUST* fire in the cycles immediately after the previous rule.
+        //
+        (* fire_when_enabled *)
+        rule processWriteRequest1 (writeEmitIdx != 0);
+            // data + mask
+            dramCtrl.enqueue_data(writeValue[writeEmitIdx],
+                                  writeValueMask[writeEmitIdx],
+                                  True);
+
+            if (writeEmitIdx == fromInteger(valueOf(TSub#(FPGA_DDR_BURST_LENGTH, 1))))
+            begin
+                // Done
+                writeEmitIdx <= 0;
+            end
+            else
+            begin
+                writeEmitIdx <= writeEmitIdx + 1;
+            end
+        endrule
+    end
 
     // ====================================================================
     //
@@ -573,7 +611,7 @@ module mkDDRBankSynth#(Clock rawClock, Reset rawReset)
     // file become invalid and ngdbuild complains.
 
     Reg#(Bit#(1)) initPhase <- mkReg(0);
-    if(`USE_INITIALIZATION_PATCH > 0)
+    if (`USE_INITIALIZATION_PATCH > 0)
     begin
         Reg#(Bit#(TLog#(TAdd#(FPGA_DDR_BURST_LENGTH, 1)))) initBurstIdx <- mkReg(0);
 
@@ -660,7 +698,7 @@ module mkDDRBankSynth#(Clock rawClock, Reset rawReset)
             state <= STATE_ready;
              initPhase <= 1;
         endrule
-    end        
+    end
 
     // ====================================================================
     //
@@ -676,27 +714,13 @@ module mkDDRBankSynth#(Clock rawClock, Reset rawReset)
     //
 
     MERGE_FIFOF#(2, FPGA_DDR_REQUEST) mergeReqQ <- mkMergeFIFOF();
-    
+
     rule forwardIncomingReq (state == STATE_ready);
         let r = mergeReqQ.first();
         mergeReqQ.deq();
 
         syncRequestQ.enq(r);
     endrule
-
-    Reg#(Bit#(64)) statusReg <- mkRegU;
-
-`ifndef DRAM_DEBUG_Z
-    (* fire_when_enabled, no_implicit_conditions *)
-    rule assignStatus;
-        // Attempting to read deqRdy, enqRdy, or cmdRdy appears to cause hangs or incorrect values in the memory.
-        // This doesn't make much sense, given that they are output signals.  Something else may be wrong.  For
-        // now we simply won't read them.
-        statusReg <= zeroExtend({pack(syncWriteDataQ.notFull()),1'b0,1'b0,resetAsserted,1'b0,pack(syncReadDataQ.notEmpty()),1'b0,1'b0,pack(mergeReqQ.notEmpty()),
-                                 3'b0, // Replaces "deqRdy,enqRdy,cmdRdy" that were causing hangs
-                                 pack(dramReady_Model)});
-    endrule
-`endif
 
 
 `ifndef DRAM_DEBUG_Z
@@ -708,36 +732,7 @@ module mkDDRBankSynth#(Clock rawClock, Reset rawReset)
 
     interface DDR_BANK_DRIVER_SYNTH driver;
 
-/*
-RAM status:0
-    [prim_device.ram1.enqueue_address_RDY()]: 0
-    [prim_device.ram1.enqueue_data_RDY()]: 0
-    [prim_device.ram1.dequeue_data_RDY()]: 0
-    [mergeReqQ.notEmpty()]: 0
-    [mergeReqQ.ports[0].notFull()]: 0
-    [mergeReqQ.ports[1].notFull()]: 0
-    [syncReadDataQ.notEmpty()]: 0
-    [syncReadDataQ.notFull()]: 0
-    [unused]: 0
-    [unused]: 0
-    [syncRequestQ.notEmpty()]: 0
-    [syncRequestQ.notFull()]: 0
-    [syncWriteDataQ.notEmpty()]: 0
-    [syncWriteDataQ.notFull()]: 0
-    [writePending]: 0
-    [readPending]: 0
-    [nInflightReads.value() == 0]: 0
-    [readBurstCnt == 0]: 0
-    [writeBurstIdx == 0]: 0
-    [state]: 0 
-*/
-
 `ifndef DRAM_DEBUG_Z
-
-        method Bit#(64) statusCheck();
-            return statusReg;
-        endmethod
-
         //
         // setMaxReads --
         //     Set a maximum number of outstanding reads that may be lower than
@@ -779,7 +774,7 @@ RAM status:0
         method Action writeReq(FPGA_DDR_ADDRESS addr) if (state == STATE_ready);
             mergeReqQ.ports[1].enq(tagged DRAM_WRITE addr);
         endmethod
-        
+
         method Action writeData(FPGA_DDR_DUALEDGE_BEAT data, FPGA_DDR_DUALEDGE_BEAT_MASK mask) if (state == STATE_ready);
             syncWriteDataQ.enq(tuple2(data, mask));
         endmethod
@@ -808,7 +803,7 @@ RAM status:0
         method Bool debug_rdlvl_err_1 = unpack(dbg_rdlvl_err[1]);
 
 `endif
-        
+
     endinterface
 
 

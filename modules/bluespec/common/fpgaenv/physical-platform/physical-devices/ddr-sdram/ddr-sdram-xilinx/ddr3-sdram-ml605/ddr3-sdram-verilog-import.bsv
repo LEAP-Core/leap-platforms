@@ -1,3 +1,7 @@
+`include "awb/provides/librl_bsv_base.bsh"
+`include "awb/provides/ddr_sdram_definitions.bsh"
+`include "awb/provides/fpga_components.bsh"
+
 typedef enum {
 	      WRITE = 0,
 	      READ  = 1,
@@ -87,6 +91,14 @@ interface XILINX_DRAM_CONTROLLER;
     method    Bit#(1)           deq_rdy;
        
 endinterface
+
+
+//
+// Function gives the controller a chance to approve the platform's
+// configuration.
+//
+module checkDDRControllerConfig#(DDRControllerConfigure ddrConfig) ();
+endmodule
 
 
 import "BVI" ddr3_wrapper =
