@@ -1249,8 +1249,10 @@ module mig_7series_v2_3_ddr_mc_phy_wrapper #
           IOBUFDS_DIFF_OUT_DCIEN #
             (
              .IBUF_LOW_PWR (IBUF_LOW_PWR),
+             // synthesis translate_off
 	     .DQS_BIAS     ("TRUE"),
 	     .SIM_DEVICE   ("7SERIES"),
+             // synthesis translate_on
              .USE_IBUFDISABLE ("FALSE")
              )
             u_iobuf_dqs
