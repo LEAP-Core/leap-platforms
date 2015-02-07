@@ -41,7 +41,7 @@ import Real::*;
 // If you have a better speed grade, you might try something different.
 //
 // *** These are MMCM parameters taken from UG472 (MMCM Attributes) and
-// *** DS182 (MMCM Switching Characteristics).  In spite of the module
+// *** DS183 (MMCM Switching Characteristics).  In spite of the module
 // *** interface names saying PLL, we use MMCM's on Virtex 7.
 //
 Real fINmin  = 10;
@@ -68,7 +68,7 @@ module mkUserClock_Ratio#(Integer inFreq,
     (UserClock);
 
     let clk <- mkUserClock_PLL(inFreq,
-                               inFreq*clockMultiplier/clockDivider);
+                               inFreq * clockMultiplier / clockDivider);
 
     return clk;
 endmodule

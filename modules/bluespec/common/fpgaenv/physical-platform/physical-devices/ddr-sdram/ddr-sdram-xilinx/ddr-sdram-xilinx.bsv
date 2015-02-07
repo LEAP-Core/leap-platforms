@@ -253,15 +253,8 @@ module [CONNECTED_MODULE] mkDDRDevice#(DDRControllerConfigure ddrConfig)
     begin
         messageM("DDR: CLOCK_EXTERNAL_DIFFERENTIAL");
 
-        // Parameters of the clock are based on the way a differential
-        // sys_clk_p/sys_clk_n is consumed in the Virtex 7 DDR3 controller.
-        IBUFGDSParams params = defaultValue;
-        params.diff_term = "TRUE";
-        params.ibuf_low_pwr = "FALSE";
-
-        Clock ddrClockDiff <- mkDifferentialClockG(params,
-                                                   incomingClockP.clock,
-                                                   incomingClockN.clock);
+        Clock ddrClockDiff <- mkDifferentialClock(incomingClockP.clock,
+                                                  incomingClockN.clock);
 
         // BUFG allows the clock to travel from the incoming pins to
         // the memory controller.
