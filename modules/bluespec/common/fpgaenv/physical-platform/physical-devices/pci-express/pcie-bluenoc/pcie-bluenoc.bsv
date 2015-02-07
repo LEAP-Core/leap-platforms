@@ -77,9 +77,10 @@ interface PCIE_LOW_LEVEL_DEVICE;
 endinterface
 
 //
-// mkPCIEDevice --
+// mkPCIELowLevelDevice --
 //   Wrap the PCIe core device in a generic interface.
 //
+(* synthesize *)
 module mkPCIELowLevelDevice#(Clock rawClock, Reset rawReset)
     // Interface:
     (PCIE_LOW_LEVEL_DEVICE);

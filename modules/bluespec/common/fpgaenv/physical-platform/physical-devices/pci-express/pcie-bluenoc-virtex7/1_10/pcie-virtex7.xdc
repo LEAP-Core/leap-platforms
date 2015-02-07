@@ -61,7 +61,7 @@ set_property PULLUP     true        [get_ports { pcieWires_rst_put }]
 # Please refer to the Virtex-7 GT Transceiver User Guide
 # (UG) for guidelines regarding clock resource selection.
 #
-set_property LOC IBUFDS_GTE2_X1Y5  [get_cells -hier -filter { NAME =~ m_sys_sys_vp_m_mod/llpi_phys_plat_pcie_pcie_pcieSysClkBuf }]
+set_property LOC IBUFDS_GTE2_X1Y5  [get_cells -hier -filter { NAME =~ *_pcieLLDev/pcieSysClkBuf }]
 
 set_property LOC MMCME2_ADV_X1Y2 [get_cells -hier -filter { NAME =~ */ext_clk.pipe_clock_i/mmcm_i }]
 set_property LOC MMCME2_ADV_X1Y1 [get_cells -hier -filter { NAME =~ *clkgen_pll }]
@@ -101,7 +101,7 @@ set_property LOC PCIE_X1Y0 [get_cells -hierarchical -regexp {.*pcie_7x_i/pcie_bl
 # BlockRAM placement
 #                                          
 
-#m_sys_sys_vp_m_mod/llpi_phys_plat_pcie_pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_bram_top/pcie_brams_rx/brams[0].ram/use_tdp.ramb36/genblk5_0.bram36_tdp_bl.bram36_tdp_bl
+#*_pcieLLDev/dev/ep_pcie_ep/pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_bram_top/pcie_brams_rx/brams[0].ram/use_tdp.ramb36/genblk5_0.bram36_tdp_bl.bram36_tdp_bl
 #set_property LOC RAMB36_X14Y25 [get_cells -hier { *pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_bram_top/pcie_brams_rx/brams[3].ram/use_tdp.ramb36/bram36_tdp_bl.bram36_tdp_bl }]
 #set_property LOC RAMB36_X13Y26 [get_cells -hier { *pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_bram_top/pcie_brams_rx/brams[2].ram/use_tdp.ramb36/bram36_tdp_bl.bram36_tdp_bl}] 
 #set_property LOC RAMB36_X13Y25 [get_cells { *pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_bram_top/pcie_brams_rx/brams[1].ram/use_tdp.ramb36/bram36_tdp_bl.bram36_tdp_bl}] 
@@ -140,15 +140,15 @@ if {[getAWBParams {"synthesis_tool" "PLATFORM_BUILDER"}] == "functools.partial(b
     startgroup
     create_pblock pblock_pcie0
     resize_pblock pblock_pcie0 -add {SLICE_X183Y51:SLICE_X221Y149 DSP48_X16Y22:DSP48_X19Y59 RAMB18_X11Y22:RAMB18_X14Y59 RAMB36_X11Y11:RAMB36_X14Y29}
-    add_cells_to_pblock pblock_pcie0 [get_cells -hier -filter {NAME =~ m_sys_sys_vp_m_mod/llpi_phys_plat_pcie_pcie_dev/*}]
-    add_cells_to_pblock pblock_pcie0 [get_cells -hier -filter {NAME =~ m_sys_sys_vp_m_mod/llpi_phys_plat_pcie_pcie_extPorts*}]
+    add_cells_to_pblock pblock_pcie0 [get_cells -hier -filter {NAME =~ *_pcieLLDev/dev/*}]
+    add_cells_to_pblock pblock_pcie0 [get_cells -hier -filter {NAME =~ *_pcieLLDev/extPorts*}]
     endgroup   
 } else {
     startgroup
     create_pblock pblock_pcie0
     resize_pblock pblock_pcie0 -add {SLICE_X166Y51:SLICE_X221Y149 DSP48_X16Y22:DSP48_X19Y59 RAMB18_X11Y22:RAMB18_X14Y59 RAMB36_X11Y11:RAMB36_X14Y29}
-    add_cells_to_pblock pblock_pcie0 [get_cells -hier -filter {NAME =~ m_sys_sys_vp_m_mod/llpi_phys_plat_pcie_pcie_dev/*}]
-    add_cells_to_pblock pblock_pcie0 [get_cells -hier -filter {NAME =~ m_sys_sys_vp_m_mod/llpi_phys_plat_pcie_pcie_extPorts*}]
+    add_cells_to_pblock pblock_pcie0 [get_cells -hier -filter {NAME =~ *_pcieLLDev/dev/*}]
+    add_cells_to_pblock pblock_pcie0 [get_cells -hier -filter {NAME =~ *_pcieLLDev/extPorts*}]
     endgroup   
 }
 

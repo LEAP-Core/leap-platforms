@@ -21,10 +21,12 @@
 %public pcie-bury.bsv
 %private pcie-bury.v
 
+## Side effects of pcie-bluenoc.bsv compilation
+%generated -t VERILOG mkPCIELowLevelDevice.v
+
 %param DO_SOFT_RESET 1 "Do Bluenoc soft reset on start"
 
 %param --dynamic BLUENOC_TIMEOUT_CYCLES 20  "Cycles to wait before flushing FPGA->host buffer (max 2K)."
 
 %param BLUENOC_HISTORY_INDEX_BITS  0  "For debugging: maintain log of transmitted beats."
 %param BLUENOC_CHIPSCOPE_DEBUG  0  "For debugging: insert chipscope into hardware."
-
