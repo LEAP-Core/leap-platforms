@@ -6,5 +6,5 @@ resource pcie_ep LUT = 10242;
 resource pcie_ep SLICE = 2506;
 pcie_ep in fpga0_platform;
 attribute pcie_ep "IGNORE_PARENT_CHILD" = 1;
-
+attribute pcie_ep "PARENT_INSTANCE" = "mkPCIEBlueNoCDevice";
 
