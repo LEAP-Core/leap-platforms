@@ -49,33 +49,33 @@ CLOCK_DESCRIPTOR
 function Integer gcd(Integer a, Integer b);
     // Sanity check args
     Integer result = 0;
-    if(a < 0 || b < 0)
+    if (a < 0 || b < 0)
     begin
         let err = error("Illegal arguments to GCD");
     end 
-    else if(b == 0)
+    else if (b == 0)
     begin 
         result = a;
     end
-    else if(a == 0)
+    else if (a == 0)
     begin
         result = b;
     end  
-    else if(a > b)
+    else if (a > b)
     begin
-        result = gcd(b,a-b);
+        result = gcd(b, a - b);
     end
     else
     begin
-        result = gcd(a,b-a);
+        result = gcd(a, b - a);
     end
 
-  return result;
+    return result;
 endfunction
 
 
 function Integer lcm(Integer a, Integer b);
-  return (a*b)/gcd(a,b);
+    return (a * b) / gcd(a, b);
 endfunction
 
 
@@ -105,14 +105,13 @@ endinterface
 // bluesim as well as verilog
 module mkUserClock_Same
     // Interface:
-        (UserClock);
+    (UserClock);
 
     let clock <- exposeCurrentClock;
     let reset <- exposeCurrentReset;
 
     interface Clock clk = clock;
     interface Reset rst = reset;
-
 endmodule
 
 // bluesim as well as verilog
@@ -120,12 +119,10 @@ endmodule
 (*synthesize*)
 module mkUserClock_DivideByTwo
     // Interface:
-        (ClockDividerIfc);
+    (ClockDividerIfc);
 
     let divider <- mkClockDivider(2);
- 
     return divider;
-
 endmodule
 
 (*synthesize*)
@@ -134,27 +131,24 @@ module mkUserClock_DivideByThree
         (ClockDividerIfc);
 
     let divider <- mkClockDivider(3);
- 
     return divider;
-
 endmodule
+
 
 (*synthesize*)
 module mkUserClock_DivideByFour
     // Interface:
-        (ClockDividerIfc);
+    (ClockDividerIfc);
 
     let divider <- mkClockDivider(4);
-
     return divider;
-
 endmodule
 
 
 // bluesim as well as verilog
 module mkUserClock_Divider#(Integer divisor)
     // Interface:
-        (UserClockDivider);
+    (UserClockDivider);
 
     let fast_clk <- exposeCurrentClock();
     let slow_clk <- exposeCurrentClock();
@@ -201,17 +195,17 @@ module mkUserClock_Divider#(Integer divisor)
     interface clk = clkBinding;
 
     interface rst = usr_rst;
-
 endmodule
+
 
 module mkUserClockFromFrequency#(Integer inFreq,
                                  Integer outFreq)
     // Interface:
-        (UserClock);
-   let lcmValue = lcm(inFreq,outFreq);
+    (UserClock);
 
-  let m <- mkUserClock(inFreq, lcmValue/inFreq, lcmValue/outFreq);
-  return m;
+    let lcmValue = lcm(inFreq, outFreq);
+    let m <- mkUserClock(inFreq, lcmValue/inFreq, lcmValue/outFreq);
+    return m;
 endmodule
 
 
@@ -223,19 +217,15 @@ endmodule
 //   Picks the best source given a few standard ratios.
 //
 module mkUserClock#(Integer inFreq, Integer clockMultiplier, Integer clockDivider)
-        (UserClock);
+    // Interface:
+    (UserClock);
 
     UserClock clk = ?;
 
     // let's deal with relative primes...
-    let mult = clockMultiplier/gcd(clockMultiplier,clockDivider); 
-    let div  = clockDivider/gcd(clockMultiplier,clockDivider); 
+    let mult = clockMultiplier / gcd(clockMultiplier,clockDivider); 
+    let div  = clockDivider / gcd(clockMultiplier,clockDivider); 
 
     clk <- mkUserClock_Ratio(inFreq, mult, div);
     return clk;
-
 endmodule
-
-
-
-

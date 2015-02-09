@@ -37,7 +37,9 @@ import List::*;
 import RWire::*;
 
 
-`include "asim/provides/librl_bsv_base.bsh"
+`include "awb/provides/librl_bsv_base.bsh"
+`include "awb/provides/ddr_sdram_definitions.bsh"
+`include "awb/provides/fpga_components.bsh"
 
 
 //

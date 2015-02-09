@@ -1,0 +1,46 @@
+All files beginning with "mig_" are straight out of the memory interface generator
+in Vivado 2014.4 with the following settings:
+
+FPGA Family:            Virtex-7
+FPGA Part:              xc7vx485t-ffg1761
+Speed Grade:            -2
+Design Entry:           Verilog
+
+Component Name:         mig_7series_0
+Number of controllers:  1
+AXI4 Interface:         No
+
+Controller type:        DDR3 SDRAM
+
+Clock period:           1250 ps (800 MHz)
+Memory type:            SODIMMs
+Memory part:            MT8JTF12864HZ-1G6
+Data Mask:              Enabled
+Ordering:               Normal
+
+Input clock period:     5000 ps (200 MHz)
+Read burst type:        Sequential
+Output driver:          RZQ/7 (High)
+Controller chip select: Enable
+RTT (nominal):          RZQ/6
+Memory address map:     BANK ROW COLUMN
+
+System clock:           No buffer.  (We build a differential clock in
+                        the Bluespec code and pass it in. The pin assignments
+                        we use for the Bluespec-constructed clock are the
+                        pins that are assigned when differential is picked
+                        here.)
+Reference clock:        Use system clock
+System reset polarity:  Active low
+Debug signals:          Off
+Interval Vref:          Off
+IO power reduction:     On
+XADC instantiation:     Enabled
+
+DCI cascade:            Off
+
+Pin/Bank selection mode: Fixed pin out
+
+Bank selection for controller 0:  Read XDC/UCF (e.g. use example_top.xdc from
+                                  VC707 DDR3 example design.)
+Status signals:         Ignore (defined later)

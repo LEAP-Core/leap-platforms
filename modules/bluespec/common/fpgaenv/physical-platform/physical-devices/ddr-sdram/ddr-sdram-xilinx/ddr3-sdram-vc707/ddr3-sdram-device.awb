@@ -1,5 +1,5 @@
-%name VC707 DDR3 SDRAM
-%desc VC707 DDR3 SDRAM
+%name VC707 DDR3 SDRAM (v1.7)
+%desc VC707 DDR3 SDRAM (v1.7)
 
 %provides ddr_sdram_xilinx_driver
 

@@ -67,16 +67,16 @@ TIMESPEC TS_pci_sys_clk = PERIOD TG_pci_sys_clk 100 MHz HIGH 50%;
 ## Clocks generated inside the PCIe driver
 ##
 
-NET  "*pcie_dev/ep_pcie_ep/ext_clk.pipe_clock_i/clk_125mhz" TNM_NET = TG_pci_clk_125;
+NET  "*_pcieLLDev/dev/ep_pcie_ep/ext_clk.pipe_clock_i/clk_125mhz" TNM_NET = TG_pci_clk_125;
 TIMESPEC TS_pci_clk_125 = PERIOD TG_pci_clk_125 TS_pci_sys_clk*1.25 HIGH 50 % PRIORITY 1;
 
-NET  "*pcie_dev/ep_pcie_ep/ext_clk.pipe_clock_i/clk_250mhz" TNM_NET = TG_pci_clk_250;
+NET  "*_pcieLLDev/dev/ep_pcie_ep/ext_clk.pipe_clock_i/clk_250mhz" TNM_NET = TG_pci_clk_250;
 TIMESPEC TS_pci_clk_250 = PERIOD TG_pci_clk_250 TS_pci_sys_clk*2.5 HIGH 50 % PRIORITY 2;
 
-NET  "*pcie_dev/ep_pcie_ep/ext_clk.pipe_clock_i/userclk1" TNM_NET = TG_pci_clk_user1;
+NET  "*_pcieLLDev/dev/ep_pcie_ep/ext_clk.pipe_clock_i/userclk1" TNM_NET = TG_pci_clk_user1;
 TIMESPEC "TS_pci_clk_user1" = PERIOD "TG_pci_clk_user1" TS_pci_sys_clk*2.5 HIGH 50 %;
 
-NET  "*pcie_dev/ep_pcie_ep/ext_clk.pipe_clock_i/userclk2" TNM_NET = TG_pci_clk_user2;
+NET  "*_pcieLLDev/dev/ep_pcie_ep/ext_clk.pipe_clock_i/userclk2" TNM_NET = TG_pci_clk_user2;
 TIMESPEC "TS_pci_clk_user2" = PERIOD "TG_pci_clk_user2" TS_pci_sys_clk*2.5 HIGH 50 %;
 
 ##
@@ -84,43 +84,43 @@ TIMESPEC "TS_pci_clk_user2" = PERIOD "TG_pci_clk_user2" TS_pci_sys_clk*2.5 HIGH 
 ## PCIe driver from the 250 MHz clock.
 ##
 
-NET  "*pcie_dev/ep_clkgen_pll_CLKOUT0" TNM_NET = TG_noc_clk_125;
+NET  "*_pcieLLDev/dev/ep_clkgen_pll_CLKOUT0" TNM_NET = TG_noc_clk_125;
 TIMESPEC TS_noc_clk_125 = PERIOD TG_noc_clk_125 TS_pci_clk_user2 /2 HIGH 50;
 
 
 
-#NET "*pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_lane[*].pipe_rate.pipe_rate_i/*" TNM_NET = FFS "MC_PIPE";
+#NET "*_pcieLLDev/dev/ep_pcie_ep/pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_lane[*].pipe_rate.pipe_rate_i/*" TNM_NET = FFS "MC_PIPE";
 #TIMESPEC "TS_pipe_rate" = FROM "MC_PIPE" TS_pci_clk_user1*0.5;
 
-INST "*pcie_dev/ep_pcie_ep/ext_clk.pipe_clock_i/mmcm_i"  LOC = MMCME2_ADV_X0Y2;
+INST "*_pcieLLDev/dev/ep_pcie_ep/ext_clk.pipe_clock_i/mmcm_i"  LOC = MMCME2_ADV_X0Y2;
 
-PIN "*pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_block_i.PLPHYLNKUPN" TIG;
-PIN "*pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_block_i.PLRECEIVEDHOTRST" TIG;
+PIN "*_pcieLLDev/dev/ep_pcie_ep/pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_block_i.PLPHYLNKUPN" TIG;
+PIN "*_pcieLLDev/dev/ep_pcie_ep/pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_block_i.PLRECEIVEDHOTRST" TIG;
 
-NET "*pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_lane[0].pipe_rate.pipe_rate_i/*" TNM_NET = FFS "MC_PIPE";
-NET "*pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_lane[1].pipe_rate.pipe_rate_i/*" TNM_NET = FFS "MC_PIPE";
-NET "*pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_lane[2].pipe_rate.pipe_rate_i/*" TNM_NET = FFS "MC_PIPE";
-NET "*pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_lane[3].pipe_rate.pipe_rate_i/*" TNM_NET = FFS "MC_PIPE";
-NET "*pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_lane[4].pipe_rate.pipe_rate_i/*" TNM_NET = FFS "MC_PIPE";
-NET "*pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_lane[5].pipe_rate.pipe_rate_i/*" TNM_NET = FFS "MC_PIPE";
-NET "*pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_lane[6].pipe_rate.pipe_rate_i/*" TNM_NET = FFS "MC_PIPE";
-NET "*pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_lane[7].pipe_rate.pipe_rate_i/*" TNM_NET = FFS "MC_PIPE";
+NET "*_pcieLLDev/dev/ep_pcie_ep/pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_lane[0].pipe_rate.pipe_rate_i/*" TNM_NET = FFS "MC_PIPE";
+NET "*_pcieLLDev/dev/ep_pcie_ep/pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_lane[1].pipe_rate.pipe_rate_i/*" TNM_NET = FFS "MC_PIPE";
+NET "*_pcieLLDev/dev/ep_pcie_ep/pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_lane[2].pipe_rate.pipe_rate_i/*" TNM_NET = FFS "MC_PIPE";
+NET "*_pcieLLDev/dev/ep_pcie_ep/pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_lane[3].pipe_rate.pipe_rate_i/*" TNM_NET = FFS "MC_PIPE";
+NET "*_pcieLLDev/dev/ep_pcie_ep/pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_lane[4].pipe_rate.pipe_rate_i/*" TNM_NET = FFS "MC_PIPE";
+NET "*_pcieLLDev/dev/ep_pcie_ep/pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_lane[5].pipe_rate.pipe_rate_i/*" TNM_NET = FFS "MC_PIPE";
+NET "*_pcieLLDev/dev/ep_pcie_ep/pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_lane[6].pipe_rate.pipe_rate_i/*" TNM_NET = FFS "MC_PIPE";
+NET "*_pcieLLDev/dev/ep_pcie_ep/pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_lane[7].pipe_rate.pipe_rate_i/*" TNM_NET = FFS "MC_PIPE";
 
 TIMESPEC "TS_PIPE_RATE" = FROM "MC_PIPE" TS_CLK_USERCLK*0.5;
 
-PIN "*pcie_dev/ep_pcie_ep/ext_clk.pipe_clock_i/mmcm_i.RST" TIG ;
-NET "*pcie_dev/ep_pcie_ep/ext_clk.pipe_clock_i/pclk_sel" TIG;
+PIN "*_pcieLLDev/dev/ep_pcie_ep/ext_clk.pipe_clock_i/mmcm_i.RST" TIG ;
+NET "*_pcieLLDev/dev/ep_pcie_ep/ext_clk.pipe_clock_i/pclk_sel" TIG;
 
-NET "*pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/user_resetdone*" TIG;                          
-NET "*pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/sys_rst_n_int" TIG;
-#NET "*pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_reset.pipe_reset_i/cpllreset" TIG;
+NET "*_pcieLLDev/dev/ep_pcie_ep/pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/user_resetdone*" TIG;                          
+NET "*_pcieLLDev/dev/ep_pcie_ep/pcie_7x_v1_10_i/sys_rst_n_int" TIG;
+#NET "*_pcieLLDev/dev/ep_pcie_ep/pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_reset.pipe_reset_i/cpllreset" TIG;
 #NET "pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_reset.pipe_reset_i/cpllreset" TIG;
 
-INST "m_sys_sys_vp_m_mod/llpi_phys_plat_pcie_pcie_dev/fifoRxData_elem*"       TNM=TG_pci_clk_125;
-INST "m_sys_sys_vp_m_mod/llpi_phys_plat_pcie_pcie_dev/fifoRxData_block*"      TNM=TG_pci_clk_250;
+INST "*_pcieLLDev/dev/fifoRxData_elem*"       TNM=TG_pci_clk_125;
+INST "*_pcieLLDev/dev/fifoRxData_block*"      TNM=TG_pci_clk_250;
 
-INST "m_sys_sys_vp_m_mod/llpi_phys_plat_pcie_pcie_dev/fifoTxData_*elem*"      TNM=TG_pci_clk_250;
-INST "m_sys_sys_vp_m_mod/llpi_phys_plat_pcie_pcie_dev/fifoTxData_*block*"     TNM=TG_pci_clk_125;
+INST "*_pcieLLDev/dev/fifoTxData_*elem*"      TNM=TG_pci_clk_250;
+INST "*_pcieLLDev/dev/fifoTxData_*block*"     TNM=TG_pci_clk_125;
 
 TIMESPEC TS_pci_clk_125_to_250=FROM TG_pci_clk_125 TO TG_pci_clk_250 4ns DATAPATHONLY;
 TIMESPEC TS_pci_clk_250_to_125=FROM TG_pci_clk_250 TO TG_pci_clk_125 4ns DATAPATHONLY;
@@ -137,13 +137,13 @@ TIMESPEC TS_pci_clk_user2_to_noc=FROM TG_pci_clk_user2 TO TG_noc_clk_125 4ns DAT
 ######################################################################################################
 
 # PCIe block placement
-INST "*pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_block_i"  LOC = PCIE_X1Y0;
+INST "*_pcieLLDev/dev/ep_pcie_ep/pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_block_i"  LOC = PCIE_X1Y0;
 
 # PCIe raw clock buffer
-INST "*pcie_pcieSysClkBuf"                              LOC = IBUFDS_GTE2_X1Y5;
+INST "*_pcieLLDev/pcieSysClkBuf"                              LOC = IBUFDS_GTE2_X1Y5;
 
 # MMCM placment
-#INST "*pcie_dev/ep_pcie_ep/ext_clk.pipe_clock_i/mmcm_i" LOC = MMCME2_ADV_X1Y2;
+#INST "*_pcieLLDev/dev/ep_pcie_ep/ext_clk.pipe_clock_i/mmcm_i" LOC = MMCME2_ADV_X1Y2;
 
 #
 # Transceiver instance placement.  This constraint selects the
@@ -153,47 +153,47 @@ INST "*pcie_pcieSysClkBuf"                              LOC = IBUFDS_GTE2_X1Y5;
 #
 
 # PCIe Lane 0
-INST "*pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_lane[0].gt_wrapper_i/gtx_channel.gtxe2_channel_i" LOC = GTXE2_CHANNEL_X1Y11;
+INST "*_pcieLLDev/dev/ep_pcie_ep/pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_lane[0].gt_wrapper_i/gtx_channel.gtxe2_channel_i" LOC = GTXE2_CHANNEL_X1Y11;
 # PCIe Lane 1
-INST "*pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_lane[1].gt_wrapper_i/gtx_channel.gtxe2_channel_i" LOC = GTXE2_CHANNEL_X1Y10;
+INST "*_pcieLLDev/dev/ep_pcie_ep/pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_lane[1].gt_wrapper_i/gtx_channel.gtxe2_channel_i" LOC = GTXE2_CHANNEL_X1Y10;
 # PCIe Lane 2
-INST "*pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_lane[2].gt_wrapper_i/gtx_channel.gtxe2_channel_i" LOC = GTXE2_CHANNEL_X1Y9;
+INST "*_pcieLLDev/dev/ep_pcie_ep/pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_lane[2].gt_wrapper_i/gtx_channel.gtxe2_channel_i" LOC = GTXE2_CHANNEL_X1Y9;
 # PCIe Lane 3
-INST "*pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_lane[3].gt_wrapper_i/gtx_channel.gtxe2_channel_i" LOC = GTXE2_CHANNEL_X1Y8;
+INST "*_pcieLLDev/dev/ep_pcie_ep/pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_lane[3].gt_wrapper_i/gtx_channel.gtxe2_channel_i" LOC = GTXE2_CHANNEL_X1Y8;
 # PCIe Lane 4
-INST "*pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_lane[4].gt_wrapper_i/gtx_channel.gtxe2_channel_i" LOC = GTXE2_CHANNEL_X1Y7;
+INST "*_pcieLLDev/dev/ep_pcie_ep/pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_lane[4].gt_wrapper_i/gtx_channel.gtxe2_channel_i" LOC = GTXE2_CHANNEL_X1Y7;
 # PCIe Lane 5
-INST "*pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_lane[5].gt_wrapper_i/gtx_channel.gtxe2_channel_i" LOC = GTXE2_CHANNEL_X1Y6;
+INST "*_pcieLLDev/dev/ep_pcie_ep/pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_lane[5].gt_wrapper_i/gtx_channel.gtxe2_channel_i" LOC = GTXE2_CHANNEL_X1Y6;
 # PCIe Lane 6
-INST "*pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_lane[6].gt_wrapper_i/gtx_channel.gtxe2_channel_i" LOC = GTXE2_CHANNEL_X1Y5;
+INST "*_pcieLLDev/dev/ep_pcie_ep/pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_lane[6].gt_wrapper_i/gtx_channel.gtxe2_channel_i" LOC = GTXE2_CHANNEL_X1Y5;
 # PCIe Lane 7
-INST "*pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_lane[7].gt_wrapper_i/gtx_channel.gtxe2_channel_i" LOC = GTXE2_CHANNEL_X1Y4;
+INST "*_pcieLLDev/dev/ep_pcie_ep/pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_lane[7].gt_wrapper_i/gtx_channel.gtxe2_channel_i" LOC = GTXE2_CHANNEL_X1Y4;
 
 #
 # BlockRAM placement
 #
-INST "*pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_bram_top/pcie_brams_rx/brams[3].ram/use_tdp.ramb36/bram36_tdp_bl.bram36_tdp_bl" LOC = RAMB36_X14Y25 ;
-INST "*pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_bram_top/pcie_brams_rx/brams[2].ram/use_tdp.ramb36/bram36_tdp_bl.bram36_tdp_bl" LOC = RAMB36_X13Y26 ;
-INST "*pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_bram_top/pcie_brams_rx/brams[1].ram/use_tdp.ramb36/bram36_tdp_bl.bram36_tdp_bl" LOC = RAMB36_X13Y25 ;
-INST "*pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_bram_top/pcie_brams_rx/brams[0].ram/use_tdp.ramb36/bram36_tdp_bl.bram36_tdp_bl" LOC = RAMB36_X13Y24 ;
-INST "*pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_bram_top/pcie_brams_tx/brams[0].ram/use_tdp.ramb36/bram36_tdp_bl.bram36_tdp_bl" LOC = RAMB36_X13Y23 ;
-INST "*pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_bram_top/pcie_brams_tx/brams[1].ram/use_tdp.ramb36/bram36_tdp_bl.bram36_tdp_bl" LOC = RAMB36_X13Y22 ;
-INST "*pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_bram_top/pcie_brams_tx/brams[2].ram/use_tdp.ramb36/bram36_tdp_bl.bram36_tdp_bl" LOC = RAMB36_X13Y21 ;
-INST "*pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_bram_top/pcie_brams_tx/brams[3].ram/use_tdp.ramb36/bram36_tdp_bl.bram36_tdp_bl" LOC = RAMB36_X13Y20 ;
+INST "*_pcieLLDev/dev/ep_pcie_ep/pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_bram_top/pcie_brams_rx/brams[3].ram/use_tdp.ramb36/bram36_tdp_bl.bram36_tdp_bl" LOC = RAMB36_X14Y25 ;
+INST "*_pcieLLDev/dev/ep_pcie_ep/pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_bram_top/pcie_brams_rx/brams[2].ram/use_tdp.ramb36/bram36_tdp_bl.bram36_tdp_bl" LOC = RAMB36_X13Y26 ;
+INST "*_pcieLLDev/dev/ep_pcie_ep/pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_bram_top/pcie_brams_rx/brams[1].ram/use_tdp.ramb36/bram36_tdp_bl.bram36_tdp_bl" LOC = RAMB36_X13Y25 ;
+INST "*_pcieLLDev/dev/ep_pcie_ep/pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_bram_top/pcie_brams_rx/brams[0].ram/use_tdp.ramb36/bram36_tdp_bl.bram36_tdp_bl" LOC = RAMB36_X13Y24 ;
+INST "*_pcieLLDev/dev/ep_pcie_ep/pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_bram_top/pcie_brams_tx/brams[0].ram/use_tdp.ramb36/bram36_tdp_bl.bram36_tdp_bl" LOC = RAMB36_X13Y23 ;
+INST "*_pcieLLDev/dev/ep_pcie_ep/pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_bram_top/pcie_brams_tx/brams[1].ram/use_tdp.ramb36/bram36_tdp_bl.bram36_tdp_bl" LOC = RAMB36_X13Y22 ;
+INST "*_pcieLLDev/dev/ep_pcie_ep/pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_bram_top/pcie_brams_tx/brams[2].ram/use_tdp.ramb36/bram36_tdp_bl.bram36_tdp_bl" LOC = RAMB36_X13Y21 ;
+INST "*_pcieLLDev/dev/ep_pcie_ep/pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_bram_top/pcie_brams_tx/brams[3].ram/use_tdp.ramb36/bram36_tdp_bl.bram36_tdp_bl" LOC = RAMB36_X13Y20 ;
 
 
 ######################################################################################################
 # AREA ASSIGNMENTS
 ######################################################################################################
 
-INST "m_sys_sys_vp_m_mod/llpi_phys_plat_pcie_pcie_dev/*"        AREA_GROUP = "AG_pcie_ep";
-INST "m_sys_sys_vp_m_mod/llpi_phys_plat_pcie_pcie_pcieSysClk*"  AREA_GROUP = "AG_pcie_ep";
-AREA_GROUP "AG_pcie_ep"                   RANGE=SLICE_X204Y65:SLICE_X221Y141;
-AREA_GROUP "AG_pcie_ep"                   GROUP = CLOSED;
+INST "*_pcieLLDev/dev/*"        AREA_GROUP = "AG_pcie_ep";
+INST "*_pcieLLDev/pcieSysClk*"  AREA_GROUP = "AG_pcie_ep";
+AREA_GROUP "AG_pcie_ep"         RANGE=SLICE_X204Y65:SLICE_X221Y141;
+AREA_GROUP "AG_pcie_ep"         GROUP = CLOSED;
 
-INST "m_sys_sys_vp_m_mod/llpi_phys_plat_pcie_pcie_dev/bridge/*" AREA_GROUP = "AG_pcie_bridge";
-INST "m_sys_sys_vp_m_mod/llpi_phys_plat_pcie_pcie_extPorts*"    AREA_GROUP = "AG_pcie_bridge";
-AREA_GROUP "AG_pcie_bridge"               RANGE=SLICE_X160Y71:SLICE_X203Y141;
-AREA_GROUP "AG_pcie_bridge"               RANGE=RAMB36_X12Y17:RAMB36_X12Y22;
-AREA_GROUP "AG_pcie_bridge"               GROUP = CLOSED;
+INST "*_pcieLLDev/dev/bridge/*" AREA_GROUP = "AG_pcie_bridge";
+INST "*_pcieLLDev/extPorts*"    AREA_GROUP = "AG_pcie_bridge";
+AREA_GROUP "AG_pcie_bridge"     RANGE=SLICE_X160Y71:SLICE_X203Y141;
+AREA_GROUP "AG_pcie_bridge"     RANGE=RAMB36_X12Y17:RAMB36_X12Y22;
+AREA_GROUP "AG_pcie_bridge"     GROUP = CLOSED;
 

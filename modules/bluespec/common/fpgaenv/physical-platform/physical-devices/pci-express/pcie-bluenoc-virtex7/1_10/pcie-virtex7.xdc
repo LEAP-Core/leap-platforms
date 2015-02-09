@@ -61,7 +61,7 @@ if {$IS_TOP_BUILD} {
     # Please refer to the Virtex-7 GT Transceiver User Guide
     # (UG) for guidelines regarding clock resource selection.
     #
-    set_property LOC IBUFDS_GTE2_X1Y5  [get_cells -hier -filter { NAME =~ m_sys_sys_vp_m_mod/llpi_phys_plat_pcie_pcie_pcieSysClkBuf }]
+    set_property LOC IBUFDS_GTE2_X1Y5  [get_cells -hier -filter { NAME =~ *_pcieLLDev/pcieSysClkBuf }]
 
     set_property LOC MMCME2_ADV_X1Y2 [get_cells -hier -filter { NAME =~ */ext_clk.pipe_clock_i/mmcm_i }]
     set_property LOC MMCME2_ADV_X1Y1 [get_cells -hier -filter { NAME =~ *clkgen_pll }]
@@ -101,7 +101,7 @@ if {$IS_TOP_BUILD} {
     # BlockRAM placement
     #                                          
 
-    #m_sys_sys_vp_m_mod/llpi_phys_plat_pcie_pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_bram_top/pcie_brams_rx/brams[0].ram/use_tdp.ramb36/genblk5_0.bram36_tdp_bl.bram36_tdp_bl
+    #*_pcieLLDev/dev/ep_pcie_ep/pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_bram_top/pcie_brams_rx/brams[0].ram/use_tdp.ramb36/genblk5_0.bram36_tdp_bl.bram36_tdp_bl
     #set_property LOC RAMB36_X14Y25 [get_cells -hier { *pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_bram_top/pcie_brams_rx/brams[3].ram/use_tdp.ramb36/bram36_tdp_bl.bram36_tdp_bl }]
     #set_property LOC RAMB36_X13Y26 [get_cells -hier { *pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_bram_top/pcie_brams_rx/brams[2].ram/use_tdp.ramb36/bram36_tdp_bl.bram36_tdp_bl}] 
     #set_property LOC RAMB36_X13Y25 [get_cells { *pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_bram_top/pcie_brams_rx/brams[1].ram/use_tdp.ramb36/bram36_tdp_bl.bram36_tdp_bl}] 
@@ -136,21 +136,15 @@ if {$IS_TOP_BUILD} {
 
     # Synplify and Vivado produce differently sized area groups 
 
+    startgroup
+    create_pblock pblock_pcie0
     if {[getAWBParams {"synthesis_tool" "PLATFORM_BUILDER"}] == "functools.partial(buildSynplifyEDF, resourceCollector = RESOURCE_COLLECTOR)"} {
-        startgroup
-        create_pblock pblock_pcie0
         resize_pblock pblock_pcie0 -add {SLICE_X183Y51:SLICE_X221Y149 DSP48_X16Y22:DSP48_X19Y59 RAMB18_X11Y22:RAMB18_X14Y59 RAMB36_X11Y11:RAMB36_X14Y29}
-        add_cells_to_pblock pblock_pcie0 [get_cells -hier -filter {NAME =~ m_sys_sys_vp_m_mod/llpi_phys_plat_pcie_pcie_dev/*}]
-        add_cells_to_pblock pblock_pcie0 [get_cells -hier -filter {NAME =~ m_sys_sys_vp_m_mod/llpi_phys_plat_pcie_pcie_extPorts*}]
-        endgroup   
     } else {
-        startgroup
-        create_pblock pblock_pcie0
         resize_pblock pblock_pcie0 -add {SLICE_X166Y51:SLICE_X221Y149 DSP48_X16Y22:DSP48_X19Y59 RAMB18_X11Y22:RAMB18_X14Y59 RAMB36_X11Y11:RAMB36_X14Y29}
-        add_cells_to_pblock pblock_pcie0 [get_cells -hier -filter {NAME =~ m_sys_sys_vp_m_mod/llpi_phys_plat_pcie_pcie_dev/*}]
-        add_cells_to_pblock pblock_pcie0 [get_cells -hier -filter {NAME =~ m_sys_sys_vp_m_mod/llpi_phys_plat_pcie_pcie_extPorts*}]
-        endgroup   
     }
+    add_cells_to_pblock pblock_pcie0 [get_cells -hier -filter {NAME =~ *_pcieLLDev/*}]
+    endgroup   
 
 
 
@@ -168,7 +162,6 @@ if {$IS_TOP_BUILD} {
     # This code is fairly specific to the VC707, since it assumes knowledge of the physical clocking. The clock information is not
     # necessary. However, Vivado seems to require it.  
     create_clock -name board_clk -period 5.000 [get_ports clocksWires_clk_p_put]
-
 
 
     # False Paths
@@ -204,4 +197,3 @@ if {$IS_TOP_BUILD} {
     set_max_delay -from [get_clocks userclk2] -to [get_clocks noc_clk] 8.000 -datapath_only
     set_max_delay -from [get_clocks noc_clk] -to [get_clocks userclk2] 8.000 -datapath_only
 }
-        

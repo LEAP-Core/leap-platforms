@@ -84,8 +84,8 @@ module mkPCIEDevice#(Clock rawClock, Reset rawReset)
     // Interface
     (PCIE_DEVICE);
    
-    PCIE_LOW_LEVEL_DEVICE pcie <- mkPCIELowLevelDevice(rawClock,
-                                                       rawReset);
+    PCIE_LOW_LEVEL_DEVICE pcieLLDev <- mkPCIELowLevelDevice(rawClock,
+                                                            rawReset);
 
     //
     // The channel is written with the following assumptions:
@@ -103,7 +103,7 @@ module mkPCIEDevice#(Clock rawClock, Reset rawReset)
     // Maximum UMF payload chunks that fit in a BlueNoC packet
     Integer maxChunksPerPacket = (256 / valueOf(PCIE_BYTES_PER_BEAT)) - 1;
 
-    let pcieDriver = pcie.driver;
+    let pcieDriver = pcieLLDev.driver;
     let pcieClk = pcieDriver.clock;
     let pcieRst = pcieDriver.reset;
     let pcieNOC = pcieDriver.noc;
@@ -578,6 +578,6 @@ module mkPCIEDevice#(Clock rawClock, Reset rawReset)
         
     endinterface
         
-    interface wires = pcie.wires;
+    interface wires = pcieLLDev.wires;
 
 endmodule
