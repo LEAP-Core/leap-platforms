@@ -94,6 +94,17 @@ MODULE_VERSION ("2014.07.A");
 #define NUM_BOARDS 16
 #define UNASSIGNED 0
 
+/* Bluespec's magic number */
+#define EXPECTED_MAGIC (    (unsigned long long)'B'        \
+                         | ((unsigned long long)'l' << 8)  \
+                         | ((unsigned long long)'u' << 16) \
+                         | ((unsigned long long)'e' << 24) \
+                         | ((unsigned long long)'s' << 32) \
+                         | ((unsigned long long)'p' << 40) \
+                         | ((unsigned long long)'e' << 48) \
+                         | ((unsigned long long)'c' << 56))
+
+
 /*
  * Per-device data
  */
@@ -115,6 +126,7 @@ typedef struct tBoard {
   unsigned int       timestamp;
   unsigned int       bytes_per_beat;
   unsigned long long content_id;
+  unsigned long long magic_num;
   /* wait queue used for interrupt notifications */
   unsigned int uses_msix;
   unsigned int irq_num;
@@ -298,17 +310,9 @@ static int activate(tBoard* this_board)
                                 this_board->activation_level = BARS_MAPPED;
                               } /* fall through */
     case BARS_MAPPED:         { /* check the magic number in BAR 0 */
-                                unsigned long long magic_num = readq(this_board->bar0io);
-                                unsigned long long expected_magic = 'B'
-                                             | ((unsigned long long)'l' << 8)
-                                             | ((unsigned long long)'u' << 16)
-                                             | ((unsigned long long)'e' << 24)
-                                             | ((unsigned long long)'s' << 32)
-                                             | ((unsigned long long)'p' << 40)
-                                             | ((unsigned long long)'e' << 48)
-                                             | ((unsigned long long)'c' << 56);
-                                if (magic_num != expected_magic) {
-                                  printk(KERN_ERR "%s: magic number %llx does not match expected %llx\n", DEV_NAME, magic_num, expected_magic);
+                                this_board->magic_num = readq(this_board->bar0io);
+                                if (this_board->magic_num != EXPECTED_MAGIC) {
+                                  printk(KERN_ERR "%s: magic number %llx does not match expected %llx\n", DEV_NAME, this_board->magic_num, EXPECTED_MAGIC);
                                   deactivate(this_board);
                                   return -EINVAL;
                                 }
@@ -1454,6 +1458,11 @@ static unsigned int bluenoc_poll(struct file* filp, poll_table* wait)
 
   /* access the tBoard structure for this file */
   this_board = (tBoard*) filp->private_data;
+
+  if (this_board->magic_num != EXPECTED_MAGIC) {
+    printk(KERN_ERR "%s_%d: poll magic number %llx does not match expected %llx\n", DEV_NAME, this_board->board_number, this_board->magic_num, EXPECTED_MAGIC);
+    return POLLERR;
+  }
 
   if (this_board->debug_level & DEBUG_CALLS)
     printk(KERN_INFO "%s_%d: poll function called\n", DEV_NAME, this_board->board_number);
