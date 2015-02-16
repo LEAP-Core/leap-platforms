@@ -38,6 +38,7 @@
 import Clocks::*;
 import FIFO::*;
 import FIFOF::*;
+import SpecialFIFOs::*;
 import Vector::*;
 import List::*;
 import RWire::*;
@@ -52,6 +53,21 @@ import DefaultValue::*;
 `include "awb/provides/soft_connections.bsh"
 `include "awb/provides/debug_scan_service.bsh"
 `include "awb/provides/fpga_components.bsh"
+
+
+//
+// DDR_BANK_DRIVER
+//
+// Communication with the driver is through soft connections.  A single
+// command channel requests either reads or writes.  Write data arrives
+// on a separate channel.
+//
+// Read and write data may be split across cycles as multiple beats,
+// depending on the internal frequency of the DRAM controller and the
+// width of the physical interface to the memory.  Namely, a single
+// read request may result in multiple response messages and a single
+// write request may require multiple beats of data.
+//
 
 
 //
@@ -91,96 +107,9 @@ typedef Bit#(FPGA_DDR_ADDRESS_SZ) FPGA_DDR_ADDRESS;
 
 
 //
-// DDR_BANK_DRIVER
-//
-// The driver interface could be expressed as a simple BRAM style interface
-// with write, readReq and readResp.  It is not.  Instead, the driver interface
-// corresponds to the DDR controller interface, passing dual-edge data
-// sized objects.  For some designs this will make the logic smaller without
-// a performance penalty.
+// The DDR_BANK_DRIVER is empty.  All I/O is through soft connections.
 //
 interface DDR_BANK_DRIVER;
-    // Read request/response pair.  NOTE: every read request generates
-    // FPGA_DDR_BURST_LENGTH responses.  If the address is not aligned to
-    // the full response the DRAM controller rotates the response so the
-    // requested address is returned in the low bits of the first response.
-    method Action readReq(FPGA_DDR_ADDRESS addr);
-    method ActionValue#(FPGA_DDR_DUALEDGE_BEAT) readRsp();
-
-    // Write requests and data are separate since the data will ultimately
-    // be streamed to the DDR controller.
-    method Action writeReq(FPGA_DDR_ADDRESS addr);
-
-    // Write data corresponding to a write request.  Call writeData
-    // FPGA_DDR_BURST_LENGTH times for every write request.  The order of
-    // writeReq() and writeData() calls are not important.
-    method Action writeData(FPGA_DDR_DUALEDGE_BEAT data, FPGA_DDR_DUALEDGE_BEAT_MASK mask);
-
-`ifndef DRAM_DEBUG_Z
-    // Methods enabled only for debugging the controller:
-
-    // Set the maximum number of outstanding reads permitted.  Useful for
-    // calibrating sync buffer sizes.
-    method Action setMaxReads(Bit#(TLog#(TAdd#(`DRAM_MAX_OUTSTANDING_READS, 1))) maxReads);
-`endif
-endinterface
-
-
-//
-// DDR_BANK_DRIVER_SYNTH
-//
-// Same interface as above.  However, debug signals are explicitly exported as set of
-// boolean methods, which enables us to put Bluespec-style synthesis boundaries on
-// the bank code.
-//
-
-interface DDR_BANK_DRIVER_SYNTH;
-    // Read request/response pair.  NOTE: every read request generates
-    // FPGA_DDR_BURST_LENGTH responses.  If the address is not aligned to
-    // the full response the DRAM controller rotates the response so the
-    // requested address is returned in the low bits of the first response.
-    method Action readReq(FPGA_DDR_ADDRESS addr);
-    method ActionValue#(FPGA_DDR_DUALEDGE_BEAT) readRsp();
-
-    // Write requests and data are separate since the data will ultimately
-    // be streamed to the DDR controller.
-    method Action writeReq(FPGA_DDR_ADDRESS addr);
-
-    // Write data corresponding to a write request.  Call writeData
-    // FPGA_DDR_BURST_LENGTH times for every write request.  The order of
-    // writeReq() and writeData() calls are not important.
-    method Action writeData(FPGA_DDR_DUALEDGE_BEAT data, FPGA_DDR_DUALEDGE_BEAT_MASK mask);
-
-    method Bool stateReady();
-    method Bool init();
-    method Bool mergeReqQ_notEmpty();
-    method Bool mergeReqQ_notFull();
-    method Bool syncRequestQ_notFull();
-    method Bool syncWriteDataQ_notFull();
-    method Bool syncReadDataQ_notEmpty();
-
-`ifndef DEBUG_DDR3_Z
-
-    method Bool debug_wrlvl_start();
-    method Bool debug_wrlvl_done();
-    method Bool debug_wrlvl_err();
-
-    method Bool debug_rdlvl_start_0();
-    method Bool debug_rdlvl_start_1();
-    method Bool debug_rdlvl_done_0();
-    method Bool debug_rdlvl_done_1();
-    method Bool debug_rdlvl_err_0();
-    method Bool debug_rdlvl_err_1();
-
-`endif
-
-`ifndef DRAM_DEBUG_Z
-    // Methods enabled only for debugging the controller:
-
-    // Set the maximum number of outstanding reads permitted.  Useful for
-    // calibrating sync buffer sizes.
-    method Action setMaxReads(Bit#(TLog#(TAdd#(`DRAM_MAX_OUTSTANDING_READS, 1))) maxReads);
-`endif
 endinterface
 
 
@@ -271,7 +200,7 @@ module [CONNECTED_MODULE] mkDDRDevice#(DDRControllerConfigure ddrConfig)
     end
 
     Vector#(FPGA_DDR_BANKS, DDR_BANK) b <-
-        replicateM(mkDDRBank(ddrClock, ddrReset));
+        genWithM(mkDDRBank(ddrClock, ddrReset));
 
     function DDR_BANK_DRIVER getDriver(DDR_BANK bank) = bank.driver;
     function DDR_BANK_WIRES getWires(DDR_BANK bank) = bank.wires;
@@ -279,15 +208,12 @@ module [CONNECTED_MODULE] mkDDRDevice#(DDRControllerConfigure ddrConfig)
     interface driver = map(getDriver, b);
 
     interface DDR_WIRES wires;
-
         interface clk_p      = incomingClockP.clock_wire;
         interface clk_n      = incomingClockN.clock_wire;
         interface clk_single = incomingClockSingle.clock_wire;
 
         interface bank_wires = map(getWires, b);
-
     endinterface
-
 endmodule
 
 
@@ -317,11 +243,69 @@ FPGA_DDR_STATE
 //
 // Debug DDR interface, exported to upper levels.
 //
-module [CONNECTED_MODULE] mkDDRBank#(Clock rawClock, Reset rawReset)
+module [CONNECTED_MODULE] mkDDRBank#(Clock rawClock,
+                                     Reset rawReset,
+                                     Integer bankIdx)
     // interface:
     (DDR_BANK);
 
     DDR_BANK_SYNTH ddrSynth <- mkDDRBankSynth(rawClock, rawReset);
+
+    //
+    // Incoming requests
+    //
+    String ddrName = "DRAM_Bank" + integerToString(bankIdx) + "_";
+
+    CONNECTION_RECV#(FPGA_DDR_REQUEST) commandConnection <-
+        mkConnectionRecvOptional(ddrName + "command");
+
+    // Use an unbuffered connection since the source of the message is already
+    // a FIFO.  This saves a cycle.
+    CONNECTION_SEND_PARAM send_param = defaultValue;
+    send_param.nBufferSlots = 0;
+    send_param.optional = True;
+    CONNECTION_SEND#(FPGA_DDR_DUALEDGE_BEAT) readRspConnection <-
+        mkConnectionSendWithParam(ddrName + "readResponse", send_param);
+
+    CONNECTION_RECV#(Tuple2#(FPGA_DDR_DUALEDGE_BEAT, FPGA_DDR_DUALEDGE_BEAT_MASK))
+        writeDataConnection <- mkConnectionRecvOptional(ddrName + "writeData");
+
+    rule fwdCommand (True);
+        let c = commandConnection.receive();
+        commandConnection.deq();
+
+        ddrSynth.driver.command(c);
+    endrule
+
+    rule fwdWriteData (True);
+        let d = writeDataConnection.receive();
+        writeDataConnection.deq();
+
+        ddrSynth.driver.writeData(d);
+    endrule
+
+    rule fwdReadData (True);
+        let d <- ddrSynth.driver.readRsp();
+        readRspConnection.send(d);
+    endrule
+
+`ifndef DRAM_DEBUG_Z
+    //
+    // setMaxReads --
+    //     Set a maximum number of outstanding reads that may be lower than
+    //     the available buffer size.  Useful for building one time and
+    //     finding the optimal buffer size.
+    //
+    CONNECTION_RECV#(Bit#(TLog#(TAdd#(`DRAM_MAX_OUTSTANDING_READS, 1))))
+        maxReadsConnection <- mkConnectionRecvOptional(ddrName + "setMaxReads");
+
+    rule setMaxReads (True);
+        let m = maxReadsConnection.receive();
+        maxReadsConnection.deq();
+
+        ddrSynth.driver.setMaxReads(m);
+    endrule
+`endif
 
     //
     // Debug scan state
@@ -330,8 +314,7 @@ module [CONNECTED_MODULE] mkDDRBank#(Clock rawClock, Reset rawReset)
 
     dbg_list <- addDebugScanField(dbg_list,"Xilinx DDR SDRAM ready", ddrSynth.driver.stateReady);
     dbg_list <- addDebugScanField(dbg_list,"Xilinx DDR SDRAM initPhase", ddrSynth.driver.init);
-    dbg_list <- addDebugScanField(dbg_list,"Xilinx DDR SDRAM mergeReqQ not empty", ddrSynth.driver.mergeReqQ_notEmpty);
-    dbg_list <- addDebugScanField(dbg_list,"Xilinx DDR SDRAM mergeReqQ not full", ddrSynth.driver.mergeReqQ_notFull);
+    dbg_list <- addDebugScanField(dbg_list,"Xilinx DDR SDRAM commandQ not full", ddrSynth.driver.commandQ_notFull);
     dbg_list <- addDebugScanField(dbg_list,"Xilinx DDR SDRAM syncRequestQ not full", ddrSynth.driver.syncRequestQ_notFull);
     dbg_list <- addDebugScanField(dbg_list,"Xilinx DDR SDRAM syncWriteDataQ not full", ddrSynth.driver.syncWriteDataQ_notFull);
     dbg_list <- addDebugScanField(dbg_list,"Xilinx DDR SDRAM syncReadDataQ not empty", ddrSynth.driver.syncReadDataQ_notEmpty);
@@ -349,27 +332,67 @@ module [CONNECTED_MODULE] mkDDRBank#(Clock rawClock, Reset rawReset)
     dbg_list <- addDebugScanField(dbg_list,"Xilinx DDR SDRAM dbg_rdlvl_err[1] ",  ddrSynth.driver.debug_rdlvl_err_1);
 `endif
 
-
     let dbgNode <- mkDebugScanNode("Local Memory (ddr-sdram-xilinx.bsv)", dbg_list);
 
-    interface DDR_BANK_DRIVER driver;
-        method readReq = ddrSynth.driver.readReq;
-        method readRsp = ddrSynth.driver.readRsp;
-        method writeReq = ddrSynth.driver.writeReq;
-        method writeData = ddrSynth.driver.writeData;
 
-`ifndef DRAM_DEBUG_Z
-        method setMaxReads = ddrSynth.driver.setMaxReads;
-`endif
+    interface DDR_BANK_DRIVER driver;
     endinterface
 
     interface wires = ddrSynth.wires;
-
 endmodule
+
 
 //
 // Bluespec synthesizable ddr interface.
 //
+
+//
+// DDR_BANK_DRIVER_SYNTH
+//
+//   In order to wrap the DDR driver in a Bluespec/Verilog synthesis boundary
+//   we provide an interface that serves as the shim between soft connections
+//   and the driver.
+//
+//   This interface is internal to this file.
+//
+interface DDR_BANK_DRIVER_SYNTH;
+    method Action command(FPGA_DDR_REQUEST cmd);
+    method Action writeData(Tuple2#(FPGA_DDR_DUALEDGE_BEAT, FPGA_DDR_DUALEDGE_BEAT_MASK) data);
+
+    method ActionValue#(FPGA_DDR_DUALEDGE_BEAT) readRsp();
+
+    // Debug scan methods
+    method Bool stateReady();
+    method Bool init();
+    method Bool commandQ_notFull();
+    method Bool syncRequestQ_notFull();
+    method Bool syncWriteDataQ_notFull();
+    method Bool syncReadDataQ_notEmpty();
+
+`ifndef DEBUG_DDR3_Z
+
+    method Bool debug_wrlvl_start();
+    method Bool debug_wrlvl_done();
+    method Bool debug_wrlvl_err();
+
+    method Bool debug_rdlvl_start_0();
+    method Bool debug_rdlvl_start_1();
+    method Bool debug_rdlvl_done_0();
+    method Bool debug_rdlvl_done_1();
+    method Bool debug_rdlvl_err_0();
+    method Bool debug_rdlvl_err_1();
+
+`endif
+
+`ifndef DRAM_DEBUG_Z
+    // Methods enabled only for debugging the controller:
+
+    // Set the maximum number of outstanding reads permitted.  Useful for
+    // calibrating sync buffer sizes.
+    method Action setMaxReads(Bit#(TLog#(TAdd#(`DRAM_MAX_OUTSTANDING_READS, 1))) maxReads);
+`endif
+endinterface
+
 (* synthesize *)
 module mkDDRBankSynth#(Clock rawClock, Reset rawReset)
     // interface:
@@ -689,31 +712,9 @@ module mkDDRBankSynth#(Clock rawClock, Reset rawReset)
     begin
         rule initPhase0 ((state == STATE_init) && dramReady_Model);
             state <= STATE_ready;
-             initPhase <= 1;
+            initPhase <= 1;
         endrule
     end
-
-    // ====================================================================
-    //
-    // Incoming read and write synchronization
-    //
-    // ====================================================================
-
-    //
-    // The sync fifos for the clock crossing are very temperamental.
-    // These FIFOs both merge incoming read and write requests temporally
-    // and isolate the synchronization from logic calling the read and
-    // write methods in the interface.
-    //
-
-    MERGE_FIFOF#(2, FPGA_DDR_REQUEST) mergeReqQ <- mkMergeFIFOF();
-
-    rule forwardIncomingReq (state == STATE_ready);
-        let r = mergeReqQ.first();
-        mergeReqQ.deq();
-
-        syncRequestQ.enq(r);
-    endrule
 
 
 `ifndef DRAM_DEBUG_Z
@@ -722,28 +723,41 @@ module mkDDRBankSynth#(Clock rawClock, Reset rawReset)
         mkReg(`DRAM_MAX_OUTSTANDING_READS);
 `endif
 
+    FIFOF#(FPGA_DDR_REQUEST) commandQ <- mkBypassFIFOF();
+
+    //
+    // doReadReq --
+    //   Forward incoming read requests to the controller as long as there is
+    //   space in the response buffer to consume the result.  (The controler is
+    //   not latency insensitive.)
+    //
+    rule doReadReq (state == STATE_ready &&&
+                    commandQ.first matches tagged DRAM_READ .addr &&&
+`ifndef DRAM_DEBUG_Z
+                    nInflightReads.value() < calibrateMaxReads &&&
+`endif
+                    nInflightReads.value() < `DRAM_MAX_OUTSTANDING_READS);
+
+        commandQ.deq();
+
+        syncRequestQ.enq(tagged DRAM_READ addr);
+        nInflightReads.up();
+    endrule
+
+    //
+    // doWriteReq --
+    //   Forward incoming write requests to the controller.
+    //
+    rule doWriteReq (state == STATE_ready &&&
+                     commandQ.first matches tagged DRAM_WRITE .addr);
+        commandQ.deq();
+        syncRequestQ.enq(tagged DRAM_WRITE addr);
+    endrule
+
 
     interface DDR_BANK_DRIVER_SYNTH driver;
-
-`ifndef DRAM_DEBUG_Z
-        //
-        // setMaxReads --
-        //     Set a maximum number of outstanding reads that may be lower than
-        //     the available buffer size.  Useful for building one time and
-        //     finding the optimal buffer size.
-        //
-        method Action setMaxReads(Bit#(TLog#(TAdd#(`DRAM_MAX_OUTSTANDING_READS, 1))) maxReads);
-            calibrateMaxReads <= maxReads;
-        endmethod
-`endif
-
-        method Action readReq(FPGA_DDR_ADDRESS addr) if ((state == STATE_ready) &&
-`ifndef DRAM_DEBUG_Z
-                                                         (nInflightReads.value() < calibrateMaxReads) &&
-`endif
-                                                         (nInflightReads.value() < `DRAM_MAX_OUTSTANDING_READS));
-            mergeReqQ.ports[0].enq(tagged DRAM_READ addr);
-            nInflightReads.up();
+        method Action command(FPGA_DDR_REQUEST cmd);
+            commandQ.enq(cmd);
         endmethod
 
         method ActionValue#(FPGA_DDR_DUALEDGE_BEAT) readRsp() if (state == STATE_ready);
@@ -764,26 +778,19 @@ module mkDDRBankSynth#(Clock rawClock, Reset rawReset)
         endmethod
 
 
-        method Action writeReq(FPGA_DDR_ADDRESS addr) if (state == STATE_ready);
-            mergeReqQ.ports[1].enq(tagged DRAM_WRITE addr);
-        endmethod
-
-        method Action writeData(FPGA_DDR_DUALEDGE_BEAT data, FPGA_DDR_DUALEDGE_BEAT_MASK mask) if (state == STATE_ready);
-            syncWriteDataQ.enq(tuple2(data, mask));
+        method Action writeData(Tuple2#(FPGA_DDR_DUALEDGE_BEAT, FPGA_DDR_DUALEDGE_BEAT_MASK) data) if (state == STATE_ready);
+            syncWriteDataQ.enq(data);
         endmethod
 
         // Debug state for debug scan.
-
         method Bool stateReady = (state == STATE_ready);
         method Bool init = unpack(initPhase);
-        method Bool mergeReqQ_notEmpty = mergeReqQ.notEmpty;
-        method Bool mergeReqQ_notFull = mergeReqQ.ports[0].notFull;
+        method Bool commandQ_notFull = commandQ.notFull;
         method Bool syncRequestQ_notFull = syncRequestQ.notFull;
         method Bool syncWriteDataQ_notFull = syncWriteDataQ.notFull;
         method Bool syncReadDataQ_notEmpty = syncReadDataQ.notEmpty;
 
 `ifndef DEBUG_DDR3_Z
-
         method Bool debug_wrlvl_start = dbg_wrlvl_start;
         method Bool debug_wrlvl_done = dbg_wrlvl_done;
         method Bool debug_wrlvl_err = dbg_wrlvl_err;
@@ -794,13 +801,21 @@ module mkDDRBankSynth#(Clock rawClock, Reset rawReset)
         method Bool debug_rdlvl_done_1 = unpack(dbg_rdlvl_done[1]);
         method Bool debug_rdlvl_err_0 = unpack(dbg_rdlvl_err[0]);
         method Bool debug_rdlvl_err_1 = unpack(dbg_rdlvl_err[1]);
-
 `endif
 
+`ifndef DRAM_DEBUG_Z
+        //
+        // setMaxReads --
+        //     Set a maximum number of outstanding reads that may be lower than
+        //     the available buffer size.  Useful for building one time and
+        //     finding the optimal buffer size.
+        //
+        method Action setMaxReads(Bit#(TLog#(TAdd#(`DRAM_MAX_OUTSTANDING_READS, 1))) maxReads);
+            calibrateMaxReads <= maxReads;
+        endmethod
+`endif
     endinterface
-
 
     // The wires are not domain-crossed because no one should ever look at them.
     interface wires = dramCtrl.wires;
-
 endmodule

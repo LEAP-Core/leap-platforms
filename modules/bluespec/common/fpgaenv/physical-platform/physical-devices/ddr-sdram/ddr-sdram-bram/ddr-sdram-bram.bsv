@@ -33,6 +33,9 @@ import FIFO::*;
 import FIFOF::*;
 import Vector::*;
 import List::*;
+import GetPut::*;
+import Connectable::*;
+import DefaultValue::*;
 
 
 `include "awb/provides/librl_bsv_base.bsh"
@@ -40,6 +43,22 @@ import List::*;
 `include "awb/provides/ddr_sdram_definitions.bsh"
 `include "awb/provides/fpga_components.bsh"
 `include "awb/provides/physical_platform_utils.bsh"
+`include "awb/provides/soft_connections.bsh"
+
+//
+// DDR_BANK_DRIVER
+//
+// Communication with the driver is through soft connections.  A single
+// command channel requests either reads or writes.  Write data arrives
+// on a separate channel.
+//
+// Read and write data may be split across cycles as multiple beats,
+// depending on the internal frequency of the DRAM controller and the
+// width of the physical interface to the memory.  Namely, a single
+// read request may result in multiple response messages and a single
+// write request may require multiple beats of data.
+//
+
 
 //
 // Data sizes are fixed by the VHDL DRAM controller and the hardware and are
@@ -78,41 +97,9 @@ typedef Bit#(FPGA_DDR_ADDRESS_SZ) FPGA_DDR_ADDRESS;
 
 
 //
-// DDR_BANK_DRIVER
-//
-// The driver interface could be expressed as a simple BRAM style interface
-// with write, readReq and readResp.  It is not.  Instead, the driver interface
-// corresponds to the DDR controller interface, passing dual-edge data
-// sized objects.  For some designs this will make the logic smaller without
-// a performance penalty.
+// The DDR_BANK_DRIVER is empty.  All I/O is through soft connections.
 //
 interface DDR_BANK_DRIVER;
-    // Read request/response pair.  NOTE: every read request generates
-    // FPGA_DDR_BURST_LENGTH responses.  If the address is not aligned to
-    // the full response the DRAM controller rotates the response so the
-    // requested address is returned in the low bits of the first response.
-    method Action readReq(FPGA_DDR_ADDRESS addr);
-    method ActionValue#(FPGA_DDR_DUALEDGE_BEAT) readRsp();
-
-    // Write requests and data are separate since the data will ultimately
-    // be streamed to the DDR controller.
-    method Action writeReq(FPGA_DDR_ADDRESS addr);
-
-    // Write data corresponding to a write request.  Call writeData
-    // FPGA_DDR_BURST_LENGTH times for every write request.  The order of
-    // writeReq() and writeData() calls are not important.
-    method Action writeData(FPGA_DDR_DUALEDGE_BEAT data, FPGA_DDR_DUALEDGE_BEAT_MASK mask);
-
-
-`ifndef DRAM_DEBUG_Z
-    // Methods enabled only for debugging the controller:
-
-    // Get status.  Should never block.
-    method Bit#(64) statusCheck();
-    // Set the maximum number of outstanding reads permitted.  Useful for
-    // calibrating sync buffer sizes.
-    method Action setMaxReads(Bit#(TLog#(TAdd#(`DRAM_MAX_OUTSTANDING_READS, 1))) maxReads);
-`endif
 endinterface
 
 
@@ -149,11 +136,11 @@ FPGA_DDR_REQUEST
 //
 // mkDDRDevice
 //
-module mkDDRDevice#(DDRControllerConfigure ddrConfig)
+module [CONNECTED_MODULE] mkDDRDevice#(DDRControllerConfigure ddrConfig)
     // interface:
     (DDR_DEVICE);
 
-    Vector#(FPGA_DDR_BANKS, DDR_BANK_DRIVER) banks <- replicateM(mkDDRBank);
+    Vector#(FPGA_DDR_BANKS, DDR_BANK_DRIVER) banks <- genWithM(mkDDRBank);
 
     interface driver = banks;
 
@@ -169,7 +156,7 @@ endmodule
 //   accurate.  It seeks to emulate some of the behavior and timing of
 //   a real DDR memory.
 //
-module mkDDRBank
+module [CONNECTED_MODULE] mkDDRBank#(Integer bankIdx)
     // Interface:
     (DDR_BANK_DRIVER)
     provisos (Alias#(t_BURST_IDX, Bit#(TLog#(TAdd#(FPGA_DDR_BURST_LENGTH, 1)))),
@@ -193,11 +180,26 @@ module mkDDRBank
 
     t_BURST_IDX burst_idx_last = fromInteger(valueOf(TSub#(FPGA_DDR_BURST_LENGTH, 1)));
 
+    //
     // Incoming requests
-    MERGE_FIFOF#(2, FPGA_DDR_REQUEST) mergeReqQ <- mkMergeFIFOF();
-    FIFOF#(Tuple2#(FPGA_DDR_DUALEDGE_BEAT, FPGA_DDR_DUALEDGE_BEAT_MASK)) writeDataQ <-
-        mkFIFOF();
-    
+    //
+    String ddrName = "DRAM_Bank" + integerToString(bankIdx) + "_";
+
+    CONNECTION_RECV#(FPGA_DDR_REQUEST) commandConnection <-
+        mkConnectionRecvOptional(ddrName + "command");
+
+    // Use an unbuffered connection since the source of the message is already
+    // a FIFO.  This saves a cycle.
+    CONNECTION_SEND_PARAM send_param = defaultValue;
+    send_param.nBufferSlots = 0;
+    send_param.optional = True;
+    CONNECTION_SEND#(FPGA_DDR_DUALEDGE_BEAT) readRspConnection <-
+        mkConnectionSendWithParam(ddrName + "readResponse", send_param);
+
+    CONNECTION_RECV#(Tuple2#(FPGA_DDR_DUALEDGE_BEAT, FPGA_DDR_DUALEDGE_BEAT_MASK))
+        writeDataConnection <- mkConnectionRecvOptional(ddrName + "writeData");
+
+
     // Keep track of the number of reads in flight
     COUNTER#(TLog#(TAdd#(`DRAM_MAX_OUTSTANDING_READS, 1))) nInflightReads <- mkLCounter(0);
 
@@ -224,9 +226,9 @@ module mkDDRBank
 
     Reg#(t_BURST_IDX) writeBurstCnt <- mkReg(0);
 
-    rule doWrite (mergeReqQ.first() matches tagged DRAM_WRITE .addr);
-        match {.data, .mask} = writeDataQ.first();
-        writeDataQ.deq();
+    rule doWrite (commandConnection.receive() matches tagged DRAM_WRITE .addr);
+        match {.data, .mask} = writeDataConnection.receive();
+        writeDataConnection.deq();
 
         let beat_addr = beatAddr(addr) + zeroExtend(writeBurstCnt);
         let word_idx = wordIdx(addr);
@@ -250,7 +252,7 @@ module mkDDRBank
         begin
             // Done with this request
             writeBurstCnt <= 0;
-            mergeReqQ.deq();
+            commandConnection.deq();
         end
         else
         begin
@@ -268,12 +270,35 @@ module mkDDRBank
     endrule
 
 
+`ifndef DRAM_DEBUG_Z
+    // Useful for calibrating the optimal size of DRAM_MAX_OUTSTANDING_READS
+    Reg#(Bit#(TLog#(TAdd#(`DRAM_MAX_OUTSTANDING_READS, 1)))) calibrateMaxReads <-
+        mkReg(`DRAM_MAX_OUTSTANDING_READS);
+
+    //
+    // setMaxReads --
+    //     Set a maximum number of outstanding reads that may be lower than
+    //     the available buffer size.  Useful for building one time and
+    //     finding the optimal buffer size.
+    //
+    CONNECTION_RECV#(Bit#(TLog#(TAdd#(`DRAM_MAX_OUTSTANDING_READS, 1))))
+        maxReadsConnection <- mkConnectionRecvOptional(ddrName + "setMaxReads");
+
+    rule setMaxReads (True);
+        let m = maxReadsConnection.receive();
+        maxReadsConnection.deq();
+
+        calibrateMaxReads <= m;
+    endrule
+`endif
+
+
     Reg#(t_BURST_IDX) readBurstCnt <- mkReg(0);
     FIFO#(Tuple2#(t_WORD_IDX, Bool)) inflightReadQ <- mkFIFO();
 
 
     //
-    // readRespQ is the FIFO between BRAM reads and the response.  Under normal
+    // readRespBuf is the FIFO between BRAM reads and the response.  Under normal
     // circumstances it is a standard FIFO with one cycle latency and enough
     // buffering to hold all responses allowed to be in flight.  When
     // DRAM_READ_LATENCY is non-zero it is a delay FIFO, forcing clients to
@@ -289,7 +314,13 @@ module mkDDRBank
          mkDelayFIFOF(extraLatency));
 
 
-    rule doReadReq (mergeReqQ.first() matches tagged DRAM_READ .addr);
+    rule doReadReq (commandConnection.receive() matches tagged DRAM_READ .addr &&&
+`ifndef DRAM_DEBUG_Z
+                    nInflightReads.value() < calibrateMaxReads &&&
+`endif
+                    nInflightReads.value() < `DRAM_MAX_OUTSTANDING_READS
+                   );
+
         let beat_addr = beatAddr(addr) + zeroExtend(readBurstCnt);
         let word_idx = wordIdx(addr);
         
@@ -305,7 +336,8 @@ module mkDDRBank
         begin
             // Done with this request
             readBurstCnt <= 0;
-            mergeReqQ.deq();
+            nInflightReads.up();
+            commandConnection.deq();
         end
         else
         begin
@@ -341,58 +373,15 @@ module mkDDRBank
     endrule
 
 
-`ifndef DRAM_DEBUG_Z
-    // Useful for calibrating the optimal size of DRAM_MAX_OUTSTANDING_READS
-    Reg#(Bit#(TLog#(TAdd#(`DRAM_MAX_OUTSTANDING_READS, 1)))) calibrateMaxReads <-
-        mkReg(`DRAM_MAX_OUTSTANDING_READS);
-`endif
-
-`ifndef DRAM_DEBUG_Z
-
-    // statusCheck unimplemented...
-    method Bit#(64) statusCheck();
-        return 0;
-    endmethod
-
-    //
-    // setMaxReads --
-    //     Set a maximum number of outstanding reads that may be lower than
-    //     the available buffer size.  Useful for building one time and
-    //     finding the optimal buffer size.
-    //
-    method Action setMaxReads(Bit#(TLog#(TAdd#(`DRAM_MAX_OUTSTANDING_READS, 1))) maxReads);
-        calibrateMaxReads <= maxReads;
-    endmethod
-`endif
-
-    method Action readReq(FPGA_DDR_ADDRESS addr) if (
-`ifndef DRAM_DEBUG_Z
-                                                     (nInflightReads.value() < calibrateMaxReads) &&
-`endif
-                                                     (nInflightReads.value() < `DRAM_MAX_OUTSTANDING_READS));
-        mergeReqQ.ports[0].enq(tagged DRAM_READ addr);
-        nInflightReads.up();
-    endmethod
-
-    method ActionValue#(FPGA_DDR_DUALEDGE_BEAT) readRsp();
+    rule readRsp (True);
         match {.data, .is_last_in_burst} = readRespQ.first();
         readRespQ.deq();
+
+        readRspConnection.send(data);
 
         if (is_last_in_burst)
         begin
             nInflightReads.down();
         end
-
-        return data;
-    endmethod
-
-
-    method Action writeReq(FPGA_DDR_ADDRESS addr);
-        mergeReqQ.ports[1].enq(tagged DRAM_WRITE addr);
-    endmethod
-
-    method Action writeData(FPGA_DDR_DUALEDGE_BEAT data, FPGA_DDR_DUALEDGE_BEAT_MASK mask);
-        writeDataQ.enq(tuple2(data, mask));
-    endmethod
-
+    endrule
 endmodule
