@@ -19,7 +19,6 @@ proc ddrControllerPARConstraints {} {
 
     if {$IS_TOP_BUILD} {
         set pathPrefix "m_sys_sys_vp_m_mod/llpi_phys_plat_sdram_b_ddrSynth/"
-
         if {[getAWBParams {"synthesis_tool" "PLATFORM_BUILDER"}] == "functools.partial(buildSynplifyEDF, resourceCollector = RESOURCE_COLLECTOR)"} {
             annotateClockCrossing [get_cells "${pathPrefix}dramReady"] [get_cells "${pathPrefix}dramReady_Model*"]
             annotateClockCrossing [get_cells "${pathPrefix}dramReady_Model*"] [get_cells "${pathPrefix}modelResetInRaw/reset_hold*"]
@@ -36,7 +35,7 @@ proc ddrControllerPARConstraints {} {
 
 }
 
-executePARConstraints ddrControllerPARConstraints
+executePARConstraints ddrControllerPARConstraints ddr3
 
 if {$IS_TOP_BUILD} {
     annotateClockCrossing $XILINX_DDR_RESET_SYNCHRONIZER_MODEL $XILINX_DDR_RESET_SYNCHRONIZER_DRIVER       

@@ -1,10 +1,12 @@
-
 areagroup pcie_ep = None;
 location  pcie_ep 166,51;
 dimension pcie_ep 55,98;
-resource pcie_ep LUT = 10242;
-resource pcie_ep SLICE = 2506;
+#resource pcie_ep LUT = 10242;
+#resource pcie_ep SLICE = 2506;
 pcie_ep in fpga0_platform;
 attribute pcie_ep "IGNORE_PARENT_CHILD" = 1;
-attribute pcie_ep "PARENT_INSTANCE" = "mkPCIEBlueNoCDevice";
-
+attribute pcie_ep "PARENT_INSTANCE" = "llpi_phys_plat_pcie_pcieLLDev_deviceClocked";
+attribute pcie_ep "SYNTH_BOUNDARY" = 1;
+attribute pcie_ep "NO_PLACE" = 0;
+attribute pcie_ep "NO_ROUTE" = 0;
+attribute pcie_ep "MODULE_NAME" = "mkPCIELowLevelDeviceClocked" ;

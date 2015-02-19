@@ -2,9 +2,9 @@
 # PIN ASSIGNMENTS
 ######################################################################################################
 if {$IS_TOP_BUILD} {
-    #set_property LOC AD8  [get_ports { CLK_pci_sys_clk_p }]
-    #set_property LOC AD7  [get_ports { CLK_pci_sys_clk_n }]
-    set_property LOC AV35  [get_ports { pcieWires_rst_put }]
+    set_property LOC AD8  [get_ports { pcieWires_clk_p_put }]
+    set_property LOC AD7  [get_ports { pcieWires_clk_n_put }]
+
 
     set_property LOC Y4   [get_ports { pcieWires_pcie_exp_rxp_i[0] }]
     set_property LOC AA6  [get_ports { pcieWires_pcie_exp_rxp_i[1] }]
@@ -42,10 +42,16 @@ if {$IS_TOP_BUILD} {
     set_property LOC AJ1  [get_ports { pcieWires_pcie_exp_txn[6] }]
     set_property LOC AK3  [get_ports { pcieWires_pcie_exp_txn[7] }]
 
-    #set_property IOSTANDARD DIFF_SSTL15 [get_ports { CLK_sys_clk_* }]
-    set_property IOSTANDARD LVCMOS15    [get_ports { pcieWires_rst_put }]
-    set_property PULLUP     true        [get_ports { pcieWires_rst_put }]
 
+    set_property LOC IBUFDS_GTE2_X1Y5  [get_cells -hier -filter { NAME =~ *_pcieLLDev_pcieSysClkBuf }]
+}
+
+proc pcieConstraints { } {
+
+    puts "Executing PCIE constraints"
+
+    global IS_AREA_GROUP_BUILD
+    global IS_TOP_BUILD
 
     ######################################################################################################
     # CELL LOCATIONS
@@ -61,11 +67,13 @@ if {$IS_TOP_BUILD} {
     # Please refer to the Virtex-7 GT Transceiver User Guide
     # (UG) for guidelines regarding clock resource selection.
     #
-    set_property LOC IBUFDS_GTE2_X1Y5  [get_cells -hier -filter { NAME =~ *_pcieLLDev/pcieSysClkBuf }]
 
     set_property LOC MMCME2_ADV_X1Y2 [get_cells -hier -filter { NAME =~ */ext_clk.pipe_clock_i/mmcm_i }]
     set_property LOC MMCME2_ADV_X1Y1 [get_cells -hier -filter { NAME =~ *clkgen_pll }]
+    #set_property LOC BUFGCTRL_X0Y1   [get_cells -hier -filter { NAME =~ *ep_clkgen_clkout0buffer }]
     #set_property LOC MMCME2_ADV_X1Y5 [get_cells -hier -filter { NAME =~ *clk_gen_pll }]
+
+    #set_property DONT_TOUCH true [get_cells -hierarchical -filter { PRIMITIVE_TYPE == IO.ibuf.IBUF } ]
 
     #
     # Transceiver instance placement.  This constraint selects the
@@ -101,22 +109,6 @@ if {$IS_TOP_BUILD} {
     # BlockRAM placement
     #                                          
 
-    #*_pcieLLDev/dev/ep_pcie_ep/pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_bram_top/pcie_brams_rx/brams[0].ram/use_tdp.ramb36/genblk5_0.bram36_tdp_bl.bram36_tdp_bl
-    #set_property LOC RAMB36_X14Y25 [get_cells -hier { *pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_bram_top/pcie_brams_rx/brams[3].ram/use_tdp.ramb36/bram36_tdp_bl.bram36_tdp_bl }]
-    #set_property LOC RAMB36_X13Y26 [get_cells -hier { *pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_bram_top/pcie_brams_rx/brams[2].ram/use_tdp.ramb36/bram36_tdp_bl.bram36_tdp_bl}] 
-    #set_property LOC RAMB36_X13Y25 [get_cells { *pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_bram_top/pcie_brams_rx/brams[1].ram/use_tdp.ramb36/bram36_tdp_bl.bram36_tdp_bl}] 
-    #set_property LOC RAMB36_X13Y24 [get_cells { *pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_bram_top/pcie_brams_rx/brams[0].ram/use_tdp.ramb36/bram36_tdp_bl.bram36_tdp_bl}] 
-    #set_property LOC RAMB36_X13Y23 [get_cells {*pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_bram_top/pcie_brams_tx/brams[0].ram/use_tdp.ramb36/bram36_tdp_bl.bram36_tdp_bl }] 
-    #set_property LOC RAMB36_X13Y22 [get_cells {*pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_bram_top/pcie_brams_tx/brams[1].ram/use_tdp.ramb36/bram36_tdp_bl.bram36_tdp_bl }]
-    #set_property LOC RAMB36_X13Y21 [get_cells { *pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_bram_top/pcie_brams_tx/brams[2].ram/use_tdp.ramb36/bram36_tdp_bl.bram36_tdp_bl}] 
-    #set_property LOC RAMB36_X13Y20 [get_cells { pcie_dev/ep_pcie_ep/pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_bram_top/pcie_brams_tx/brams[3].ram/use_tdp.ramb36/bram36_tdp_bl.bram36_tdp_bl}] 
-
-
-
-    #set_property LOC RAMB36_X14Y25 [get_cells -hier {*/pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_bram_top/pcie_brams_rx/brams[7].ram/use_tdp.ramb36/genblk*.bram36_tdp_bl.bram36_tdp_bl}]
-    #set_property LOC RAMB36_X14Y26 [get_cells -hier {*/pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_bram_top/pcie_brams_rx/brams[6].ram/use_tdp.ramb36/genblk*.bram36_tdp_bl.bram36_tdp_bl}]
-    #set_property LOC RAMB36_X13Y27 [get_cells -hier {*/pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_bram_top/pcie_brams_rx/brams[5].ram/use_tdp.ramb36/genblk*.bram36_tdp_bl.bram36_tdp_bl}]
-    #set_property LOC RAMB36_X13Y26 [get_cells -hier {*/pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_bram_top/pcie_brams_rx/brams[4].ram/use_tdp.ramb36/genblk*.bram36_tdp_bl.bram36_tdp_bl}]
     set_property LOC RAMB36_X13Y25 [get_cells -hier -filter { NAME =~ */pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_bram_top/pcie_brams_rx/brams[3].ram/use_tdp.ramb36/genblk*.bram36_tdp_bl.bram36_tdp_bl}]
     set_property LOC RAMB36_X13Y24 [get_cells -hier -filter { NAME =~ */pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_bram_top/pcie_brams_rx/brams[2].ram/use_tdp.ramb36/genblk*.bram36_tdp_bl.bram36_tdp_bl}]
     set_property LOC RAMB36_X13Y23 [get_cells -hier -filter { NAME =~ */pcie_7x_v1_10_i/pcie_top_i/pcie_7x_i/pcie_bram_top/pcie_brams_rx/brams[1].ram/use_tdp.ramb36/genblk*.bram36_tdp_bl.bram36_tdp_bl}]
@@ -135,17 +127,17 @@ if {$IS_TOP_BUILD} {
     ######################################################################################################
 
     # Synplify and Vivado produce differently sized area groups 
-
-    startgroup
-    create_pblock pblock_pcie0
-    if {[getAWBParams {"synthesis_tool" "PLATFORM_BUILDER"}] == "functools.partial(buildSynplifyEDF, resourceCollector = RESOURCE_COLLECTOR)"} {
-        resize_pblock pblock_pcie0 -add {SLICE_X183Y51:SLICE_X221Y149 DSP48_X16Y22:DSP48_X19Y59 RAMB18_X11Y22:RAMB18_X14Y59 RAMB36_X11Y11:RAMB36_X14Y29}
-    } else {
-        resize_pblock pblock_pcie0 -add {SLICE_X166Y51:SLICE_X221Y149 DSP48_X16Y22:DSP48_X19Y59 RAMB18_X11Y22:RAMB18_X14Y59 RAMB36_X11Y11:RAMB36_X14Y29}
-    }
-    add_cells_to_pblock pblock_pcie0 [get_cells -hier -filter {NAME =~ *_pcieLLDev/*}]
-    endgroup   
-
+    if {[getAWBParams {"area_group_tool" "AREA_GROUPS_PAR_DEVICE_AG"}] != "1"} {
+        startgroup
+        create_pblock pblock_pcie0
+        if {[getAWBParams {"synthesis_tool" "PLATFORM_BUILDER"}] == "functools.partial(buildSynplifyEDF, resourceCollector = RESOURCE_COLLECTOR)"} {
+            resize_pblock pblock_pcie0 -add {SLICE_X183Y51:SLICE_X221Y149 DSP48_X16Y22:DSP48_X19Y59 RAMB18_X11Y22:RAMB18_X14Y59 RAMB36_X11Y11:RAMB36_X14Y29}
+        } else {
+            resize_pblock pblock_pcie0 -add {SLICE_X166Y51:SLICE_X221Y149 DSP48_X16Y22:DSP48_X19Y59 RAMB18_X11Y22:RAMB18_X14Y59 RAMB36_X11Y11:RAMB36_X14Y29}
+        }
+        add_cells_to_pblock pblock_pcie0 [get_cells -hier -filter {NAME =~ *_pcieLLDev_deviceClocked/*}]
+        endgroup   
+    }        
 
 
 
@@ -154,18 +146,44 @@ if {$IS_TOP_BUILD} {
     ######################################################################################################
 
     # clocks
-    create_clock -name pci_refclk -period 10 [get_nets -hier -filter {NAME =~ pcieWires_clk_n_put}]
+    if {$IS_TOP_BUILD} {
+        create_clock -name pci_refclk -period 10 [get_nets -hier -filter {NAME =~ pcieWires_clk_n_put}]
+    } else {
+         create_clock -name pci_refclk -period 10 [get_ports  CLK_pcieClock]
+         #set_property LOC AD8  [get_ports { wires_clk_p_put }]
+         #set_property LOC AD7  [get_ports { wires_clk_n_put }]
+    }
+     
     create_clock -name txoutclk -period 10 [get_pins -hier -filter { NAME =~ *pipe_lane[0].gt_wrapper_i/gtx_channel.gtxe2_channel_i/TXOUTCLK }]
 
     create_clock -name noc_clk -period 8 [get_pins -hier -filter { NAME =~ *clkgen_pll/CLKOUT0 }]
 
     # This code is fairly specific to the VC707, since it assumes knowledge of the physical clocking. The clock information is not
     # necessary. However, Vivado seems to require it.  
-    create_clock -name board_clk -period 5.000 [get_ports clocksWires_clk_p_put]
 
+    if {$IS_TOP_BUILD} {
+        create_clock -name board_clk -period 5.000 [get_ports clocksWires_clk_p_put]
+    } else {
+        create_clock -name board_clk -period 5.000 [get_ports CLK_rawClock]
+    }
+  
+    if {$IS_TOP_BUILD} {
+        set_property LOC IBUFDS_GTE2_X1Y5  [get_cells -hier -filter { NAME =~ *_pcieLLDev_pcieSysClkBuf }]
+    } else {
+        set_property -quiet HD.CLK_SRC IBUFDS_GTE2_X1Y5 [get_ports CLK_pcieClock]
+        set_property -quiet HD.CLK_SRC IBUFDS_GTE2_X1Y5 [get_ports CLK_rawClock]
+        set_property LOC MMCME2_ADV_X1Y1 [get_cells -hier -filter { NAME =~ */ep_clkgen_pll}]
+        set_property LOC BUFGCTRL_X0Y7   [get_cells -hier -filter { NAME =~ */ep_clkgen_pll_clkfbbuf }]
+    }
 
     # False Paths
-    set_false_path -from [get_ports { pcieWires_rst_put }]
+    if {$IS_TOP_BUILD} {
+        set_false_path -from [get_ports { pcieWires_rst_put }]
+        set_property LOC AV35  [get_ports { pcieWires_rst_put }]       
+        set_property IOSTANDARD LVCMOS15    [get_ports { pcieWires_rst_put }]
+        set_property PULLUP     true        [get_ports { pcieWires_rst_put }]
+    }
+
     set_false_path -through [get_pins -hierarchical {*pcie_block_i/PLPHYLNKUPN*}]
     set_false_path -through [get_pins -hierarchical {*pcie_block_i/PLRECEIVEDHOTRST*}]
 
@@ -197,3 +215,6 @@ if {$IS_TOP_BUILD} {
     set_max_delay -from [get_clocks userclk2] -to [get_clocks noc_clk] 8.000 -datapath_only
     set_max_delay -from [get_clocks noc_clk] -to [get_clocks userclk2] 8.000 -datapath_only
 }
+
+
+executePARConstraints  pcieConstraints pcie_ep
