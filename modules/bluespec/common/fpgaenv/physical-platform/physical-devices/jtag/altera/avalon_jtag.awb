@@ -9,11 +9,6 @@
 %provides jtag_device
 
 %requires avalon
-%requires register_mapper
-%requires fifo_utils
-%requires c_bus_utils
-%requires debug_utils
-%requires vector_utils
 
 
 %attribute altera
