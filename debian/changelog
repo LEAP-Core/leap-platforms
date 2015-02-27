@@ -1,3 +1,9 @@
+leap-platforms (15.02~gitbb711c1edc41b3cfaa315b86e2b25764d9c8ab6c+trusty) trusty; urgency=medium
+
+  * Updated AWB metadata
+
+ -- Kermin E Fleming <kfleming@leap.csail.mit.edu>  Fri, 27 Feb 2015 14:10:01 -0500
+
 leap-platforms (15.02~git1d551daeb3b8687bebac93420586ac192e613c30+trusty) trusty; urgency=low
 
 	* Move to version 15.02
