@@ -346,11 +346,19 @@ module mkBRAMClockDivider
 
     let responseQueueStore <- mkRegStore(bramClock.clk.slowClock, baseClock);
     AlignedFIFO#(t_DATA) responseQueue <- mkAlignedFIFO(bramClock.clk.slowClock, bramClock.rst, baseClock, baseReset, responseQueueStore, True, bramClock.clk.clockReady);
+    
+    // Bypass FIFO used to put readQueue.enq inside a rule (instead of a method)
+    FIFOF#(t_ADDR) readReqQ <- mkBypassFIFOF(clocked_by baseClock, reset_by baseReset);
 
     //
     // Data transfer rules -- these move data between the aligned
     // fifos and the underlying BRAM. 
     //
+    rule deqReadReqQ;
+        let addr = readReqQ.first();
+        readReqQ.deq();
+        readQueue.enq(addr);
+    endrule
     
     rule moveReadReq;
         readQueue.deq();
@@ -373,7 +381,7 @@ module mkBRAMClockDivider
     // Effect: Make the request and reserve the buffering spot.
 
     method Action readReq(t_ADDR a);
-        readQueue.enq(a);
+        readReqQ.enq(a);
     endmethod
 
     // readRsp

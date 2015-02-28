@@ -1,19 +1,19 @@
 Source: leap-platforms
 Section: devel
 Priority: optional
-Maintainer: Joel Emer <emer@csail.mit.edu>
+Maintainer: Kermin Fleming <kermin.fleming@gmail.com>
 Build-Depends: debhelper (>= 7), dkms, autotools-dev
 Standards-Version: 3.7.2
 
 Package: leap-platforms
 Architecture: all
-Depends: leap-platforms-14.08
-Recommends: leap-platforms-13.06
+Depends: leap-platforms-15.02
+Recommends: leap-platforms-14.08
 Description: Dependency package for Leap platforms environment
  Dependency package for the Leap platforms environment
 Section: devel
 
-Package: leap-platforms-14.08
+Package: leap-platforms-15.02
 Architecture: any
 Depends: leap-platforms-bin, ${misc:Depends}
 Description: Sharable package for the Leap platforms

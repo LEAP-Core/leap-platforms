@@ -5,7 +5,7 @@ import FIFOF::*;
 import GetPut::*;
 
 `include "asim/provides/avalon.bsh"
-`include "asim/provides/register_mapper.bsh"
+`include "asim/provides/librl_bsv_base.bsh" 
 `include "physical_platform_utils.bsh"
 
 typedef Bit#(8) JTAGWord;

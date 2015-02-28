@@ -102,7 +102,7 @@ void * UNIX_PIPE_DEVICE_CLASS::openWriteThread(void *argv) {
 
     if (objectHandle->ParentWrite() < 0)
     {
-       printf("Failed trying to open %s\n", writeFile.c_str());
+       printf("Failed trying to open %s.  Are you using a network share? If so, set environment variable LEAP_EXECUTION_DIRECTORY to a non-network location.\n", writeFile.c_str());
 
        perror("output pipe WriterThread");
        exit(1);

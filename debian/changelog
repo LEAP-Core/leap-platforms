@@ -1,7 +1,5 @@
-leap-platforms (14.08~git1407160382r519266c1139927e9f1d084eea150dd0f84f51836+precise) precise; urgency=low
+leap-platforms (15.02~git1d551daeb3b8687bebac93420586ac192e613c30+trusty) trusty; urgency=low
 
-  [ Joel Emer ]
+	* Move to version 15.02
 
-  * Move to version v14.08
-
- -- Joel Emer <emer@csail.mit.edu>  Tue, 05 Aug 2014 15:36:25 -0400
+ -- Kermin E Fleming <kfleming@leap.csail.mit.edu>  Mon, 23 Feb 2015 18:50:30 -0500
