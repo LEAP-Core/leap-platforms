@@ -67,13 +67,24 @@ interface PCIE_WIRES;
 
 endinterface
 
-// PCIE_DEVICE_IFC--
+//
+// PCIE_LOW_LEVEL_DEVICE--
 //
 //   By convention a Device is a driver and a wires.
 //
 interface PCIE_LOW_LEVEL_DEVICE;
     interface PCIE_LOW_LEVEL_DRIVER driver;
     interface PCIE_WIRES  wires;
+endinterface
+
+//
+// PCIE_LOW_LEVEL_DEVICE_NO_CLOCK--
+//
+//   Same as above, but without full wire package. 
+//
+interface PCIE_LOW_LEVEL_DEVICE_NO_CLOCK;
+    interface PCIE_LOW_LEVEL_DRIVER driver;
+    interface PCIE_EXP#(PCIE_LANES)  pcie_exp;
 endinterface
 
 module mkPCIELowLevelDevice#(Clock rawClock, Reset rawReset)
@@ -158,7 +169,7 @@ module mkPCIELowLevelDevice#(Clock rawClock, Reset rawReset)
 
         method leds = ?; // dev.leds();
 
-        interface pcie_exp = deviceClocked.wires.pcie_exp;
+        interface pcie_exp = deviceClocked.pcie_exp;
     endinterface
 
     interface driver = deviceClocked.driver;
@@ -172,7 +183,7 @@ endmodule
 (* synthesize *)
 module mkPCIELowLevelDeviceClocked#(Clock rawClock, Reset rawReset, Clock pcieClock, Reset pcieReset)
     // Interface:
-    (PCIE_LOW_LEVEL_DEVICE);
+    (PCIE_LOW_LEVEL_DEVICE_NO_CLOCK);
 
     //  Needed so that Bluespec doesn't complain about missing top-level clocks.
     Clock clock <- exposeCurrentClock;
@@ -220,20 +231,11 @@ module mkPCIELowLevelDeviceClocked#(Clock rawClock, Reset rawReset, Clock pcieCl
         interface Reset reset = dev.driver.reset;
     endinterface
 
-    interface PCIE_WIRES wires;
-        interface clk_p = ?;
-        interface clk_n = ?;
-        interface Put rst = ?;
-
-        method leds = ?; // dev.leds();
-
-        interface PCIE_EXP pcie_exp;
-            method rxp = pcieBury.rxp_wire;
-            method rxn = pcieBury.rxn_wire;
-            method txp = pcieBury.txp_wire;
-            method txn = pcieBury.txn_wire;
-        endinterface
-
+    interface PCIE_EXP pcie_exp;
+        method rxp = pcieBury.rxp_wire;
+        method rxn = pcieBury.rxn_wire;
+        method txp = pcieBury.txp_wire;
+        method txn = pcieBury.txn_wire;
     endinterface
 
 endmodule
