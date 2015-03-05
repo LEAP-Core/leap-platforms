@@ -10,6 +10,8 @@
 %sources -t H   -v PUBLIC   physical-channel.h
 %sources -t CPP -v PRIVATE  physical-channel.cpp
 
+%scons %library FPGAProperties.py
+
 %param --dynamic FPGA_DEV_PATH  ""  "FPGA device(s) allocated (comma separated)"
 
 ##

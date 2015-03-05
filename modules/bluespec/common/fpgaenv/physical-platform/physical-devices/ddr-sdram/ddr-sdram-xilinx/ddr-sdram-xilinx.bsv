@@ -254,7 +254,8 @@ module [CONNECTED_MODULE] mkDDRBank#(Clock rawClock,
     //
     // Incoming requests
     //
-    String ddrName = "DRAM_Bank" + integerToString(bankIdx) + "_";
+    String platformName <- getSynthesisBoundaryPlatform();
+    String ddrName = "DRAM_Bank" + integerToString(bankIdx) + "_" + platformName + "_";
 
     CONNECTION_RECV#(FPGA_DDR_REQUEST) commandConnection <-
         mkConnectionRecvOptional(ddrName + "command");

@@ -10,8 +10,6 @@
 %sources -t XST -v PRIVATE vc707-v7-pcie-dma.xst
 %sources -t SDF -v PRIVATE vc707-v7-pcie-dma.sdf
 
-%scons %library vc707_v7_pcie_dma_board_config.py
-
 %param --global MAKE_ALL_TARGET   "bit"        "Target of 'make all'.  Most likely bit, exe or vexe."
 
 %param --global FPGA_PLATFORM      "VC707"               "FPGA Platform"

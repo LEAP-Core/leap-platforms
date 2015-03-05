@@ -1,7 +1,14 @@
 areagroup ddr3 = None;
 location  ddr3 134,257;
 dimension ddr3 39,92;
-resource ddr3 LUT = 7001;
-resource ddr3 SLICE = 1750;
+#resource ddr3 LUT = 7001;
+#resource ddr3 SLICE = 1750;
 ddr3 in fpga0_platform;
+attribute ddr3 "PARENT_INSTANCE" = "llpi_phys_plat_sdram_b_ddrSynth" ;
+attribute ddr3 "SYNTH_BOUNDARY" = 1;
+attribute ddr3 "MODULE_NAME" = "mkDDRBankSynth" ;
+#attribute ddr3 "NO_PLACE" = 0;
+#attribute ddr3 "NO_ROUTE" = 0;
+
+
 

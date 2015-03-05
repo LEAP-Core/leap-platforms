@@ -22,7 +22,7 @@
 %private pcie-bury.v
 
 ## Side effects of pcie-bluenoc.bsv compilation
-%generated -t VERILOG mkPCIELowLevelDevice.v
+%generated -t VERILOG mkPCIELowLevelDeviceClocked.v
 
 %param DO_SOFT_RESET 1 "Do Bluenoc soft reset on start"
 
@@ -30,3 +30,4 @@
 
 %param BLUENOC_HISTORY_INDEX_BITS  0  "For debugging: maintain log of transmitted beats."
 %param BLUENOC_CHIPSCOPE_DEBUG  0  "For debugging: insert chipscope into hardware."
+%param BLUENOC_INSERT_IBUF      0  "Insert IBuf on various clock signals."
