@@ -1,14 +1,6 @@
 
 set MODEL_CLK_BUFG "BUFGCTRL_X0Y15"
 
-##
-## Function to find clock pins.
-##
-proc bindClockPin {clock_pin clock_wire} {
-    set_property VCCAUX_IO DONTCARE $clock_wire
-    #set_property IOSTANDARD DIFF_SSTL15 $clock_wire
-    set_property PACKAGE_PIN $clock_pin $clock_wire
-}
 
 ##
 ## Create the model clock source and check that the crystal frequency
@@ -50,25 +42,10 @@ if {$IS_TOP_BUILD} {
 
         createModelClock 6.400
 
-        ## DDR clock
-        ##   Parameters taken from memory interface generator when asking for a
-        ##   differential clock.
-
-        # PadFunction: IO_L12P_T1_MRCC_38
-        bindClockPin E19 [get_ports {ddrWires_clk_p_put}]
-
-        # PadFunction: IO_L12N_T1_MRCC_38
-        bindClockPin E18 [get_ports {ddrWires_clk_n_put}]
-
-        create_clock -name ddrWires_clk_p_put -period 5 [get_ports ddrWires_clk_p_put]
-
         # Bind user clock bufg.  This is necessary for area group builds.
-        puts "Top bufg is $MODEL_CLK_BUFG" 
-
         set_property LOC MMCME2_ADV_X0Y1 [get_cells -hier -filter {NAME =~ */llpi_phys_plat_clocks_userClockPackage_m_clk_clk_clks/x/mmcm_adv_inst}]
         set_property LOC $MODEL_CLK_BUFG [get_cells -hier -filter {NAME =~ */llpi_phys_plat_clocks_userClockPackage_m_clk_clk_clks/x/clkout0_buf}]
         set_property LOC BUFGCTRL_X0Y14 [get_cells -hier -filter {NAME =~ */llpi_phys_plat_clocks_userClockPackage_m_clk_clk_clks/x/clkf_buf}]
-
 
     }        
 

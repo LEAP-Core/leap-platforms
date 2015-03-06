@@ -174,6 +174,12 @@ proc pcieConstraints { } {
         set_property -quiet HD.CLK_SRC IBUFDS_GTE2_X1Y5 [get_ports CLK_rawClock]
         set_property LOC MMCME2_ADV_X1Y1 [get_cells -hier -filter { NAME =~ */ep_clkgen_pll}]
         set_property LOC BUFGCTRL_X0Y7   [get_cells -hier -filter { NAME =~ */ep_clkgen_pll_clkfbbuf }]
+        set_property LOC BUFGCTRL_X0Y9   [get_cells -hier -filter { NAME =~ */ep_clkgen_clkout0buffer }]
+        set_property LOC BUFGCTRL_X0Y2   [get_cells -hier -filter { NAME =~ */ep_pcie_ep/ext_clk.pipe_clock_i/userclk2_i1.usrclk2_i1 }]
+        set_property LOC BUFGCTRL_X0Y8   [get_cells -hier -filter { NAME =~ */ep_pcie_ep/ext_clk.pipe_clock_i/userclk1_i1.usrclk1_i1 }]
+        set_property LOC BUFGCTRL_X0Y3   [get_cells -hier -filter { NAME =~ */ep_pcie_ep/ext_clk.pipe_clock_i/dclk_i_bufg.dclk_i }]
+        set_property LOC BUFGCTRL_X0Y6   [get_cells -hier -filter { NAME =~ */ep_clkgen_pll_clkfbbuf }]
+        set_property LOC BUFGCTRL_X0Y0   [get_cells -hier -filter { NAME =~ */ep_clkgen_clkout0buffer }]
     }
 
     # False Paths

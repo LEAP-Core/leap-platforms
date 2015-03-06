@@ -7,6 +7,6 @@ pcie_ep in fpga0_platform;
 attribute pcie_ep "IGNORE_PARENT_CHILD" = 1;
 attribute pcie_ep "PARENT_INSTANCE" = "llpi_phys_plat_pcie_pcieLLDev_deviceClocked";
 attribute pcie_ep "SYNTH_BOUNDARY" = 1;
-attribute pcie_ep "NO_PLACE" = 0;
-attribute pcie_ep "NO_ROUTE" = 0;
+#attribute pcie_ep "NO_PLACE" = 1;
+#attribute pcie_ep "NO_ROUTE" = 1;
 attribute pcie_ep "MODULE_NAME" = "mkPCIELowLevelDeviceClocked" ;

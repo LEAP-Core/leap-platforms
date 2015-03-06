@@ -723,18 +723,43 @@ if {$IS_TOP_BUILD} {
 
 proc ddr3PARConstraints { } {
  
-    puts "Executing DDR3 Par Constraints" 
-
     set pathPrefix ""
 
     global IS_AREA_GROUP_BUILD
     global IS_TOP_BUILD
 
+    set DDR3_CLK_BUFG "BUFGCTRL_X0Y17"
+
+
     if {$IS_TOP_BUILD} {
         set pathPrefix "m_sys_sys_vp_m_mod/llpi_phys_plat_sdram_b_ddrSynth/"
         annotateDDRWires "ddrWires_bank_wires_0"
+
+        if {[getAWBParams {"physical_platform" "DRAM_CLOCK_MECHANISM"}] == "ExternalDifferential"} {
+            ## DDR clock
+            ##   Parameters taken from memory interface generator when asking for a
+            ##   differential clock.
+
+            # PadFunction: IO_L12P_T1_MRCC_38
+            bindClockPin E19 [get_ports {ddrWires_clk_p_put}]
+
+            # PadFunction: IO_L12N_T1_MRCC_38
+            bindClockPin E18 [get_ports {ddrWires_clk_n_put}]
+
+            create_clock -name ddrWires_clk_p_put -period 5 [get_ports ddrWires_clk_p_put]
+            set_property LOC $DDR3_CLK_BUFG [get_cells -hier -filter {NAME =~ */llpi_phys_plat_sdram_ddrClock_bufferedClock}]
+        }
+
     } else {
         annotateDDRWires "wires"
+
+        if {[getAWBParams {"physical_platform" "DRAM_CLOCK_MECHANISM"}] == "ExternalDifferential"} {
+            set_property -quiet HD.CLK_SRC $DDR3_CLK_BUFG [get_ports CLK_rawClock]
+            create_clock -name CLK_rawClock -period 5 [get_ports CLK_rawClock]
+        } else {
+            puts "Warning, we should be assigning a clock source for the DDR"
+            #set_property -quiet HD.CLK_SRC $DDR3_CLK_BUFG [get_ports CLK_rawClock]
+        }
     }
 
 
@@ -804,7 +829,10 @@ proc ddr3PARConstraints { } {
 
     set_property LOC PLLE2_ADV_X1Y5 [get_cells -hier -filter {NAME =~ */u_ddr3_infrastructure/plle2_i}]
     set_property LOC MMCME2_ADV_X1Y5 [get_cells -hier -filter {NAME =~ */u_ddr3_infrastructure/gen_mmcm.mmcm_i}]
+    set_property LOC MMCME2_ADV_X0Y3 [get_cells -hier -filter {NAME =~ */u_ddr3_v2_3/u_iodelay_ctrl/clk_ref_mmcm_gen.mmcm_i}]
     set_property LOC BUFGCTRL_X0Y5   [get_cells -hier -filter {NAME =~ */u_ddr3_v2_3/u_iodelay_ctrl/clk_ref_300_400_en.clk_ref_400.u_bufg_clk_ref_400}]
+    set_property LOC BUFGCTRL_X0Y16   [get_cells -hier -filter {NAME =~ */u_ddr3_v2_3/u_ddr3_infrastructure/u_bufg_clkdiv0}]
+    set_property LOC BUFGCTRL_X0Y18   [get_cells -hier -filter {NAME =~ */u_ddr3_v2_3/u_ddr3_infrastructure/gen_mmcm.u_bufg_mmcm_ps_clk}]
 
     set_multicycle_path -from [get_cells -hier -filter {NAME =~ */mc0/mc_read_idle_r*}] \
                         -to   [get_cells -hier -filter {NAME =~ */input_[?].iserdes_dq_.iserdesdq}] \
