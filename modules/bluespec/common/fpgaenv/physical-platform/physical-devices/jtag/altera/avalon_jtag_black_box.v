@@ -27,6 +27,8 @@
 // altera message_level Level1 
 // altera message_off 10034 10035 10036 10037 10230 10240 10030 
 
+`ifndef QUARTUS_COMPILATION
+
 module avalon_jtag (
                      // 1) global signals:
                       clk_0,
@@ -56,4 +58,4 @@ module avalon_jtag (
 
 endmodule
 
-
+`endif

@@ -16,7 +16,7 @@ module mkUserClock_Ratio (
 `ifndef ALTERA_RESERVED_QIS
 // synopsys translate_off
 `endif
-	tri0	  areset;
+//	tri0	  areset;
 `ifndef ALTERA_RESERVED_QIS
 // synopsys translate_on
 `endif
