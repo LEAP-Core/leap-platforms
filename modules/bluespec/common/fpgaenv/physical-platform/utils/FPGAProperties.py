@@ -49,8 +49,8 @@ def numPlatformLIChannelBufs(areaConstraints):
     """
     freq = model.moduleList.getAWBParam('clocks_device', 'MODEL_CLOCK_FREQ')
 
-    if (freq >= 160):
-        return 2
     if (freq >= 130):
+        return 2
+    if (freq >= 90):
         return 1
     return 0
