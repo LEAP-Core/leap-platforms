@@ -41,6 +41,5 @@ set_option -write_apr_constraint 1
 #implementation attributes
 
 set_option -vlog_std v2001
-set_option -dup 0
 set_option -project_relative_includes 1
 set_option -enable64bit 1
