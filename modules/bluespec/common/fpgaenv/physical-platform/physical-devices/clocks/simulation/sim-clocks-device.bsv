@@ -41,13 +41,16 @@ import Clocks::*;
 //
 
 interface CLOCKS_DRIVER;
-    
     interface Clock clock;        
     interface Reset reset;
     
+    // This is the reset to pass into mkResetFanout().  Any reset derived
+    // from mkResetFanout(baseReset) will complete in the same cycle as
+    // the above reset signal.
+    interface Reset baseReset;
+
     interface Clock rawClock;
     interface Reset rawReset;
-        
 endinterface
 
 //
@@ -124,13 +127,14 @@ module mkClocksDevice
     // bind the driver interfaces
     
     interface CLOCKS_DRIVER driver;
-        
         interface clock = finalClock;
         interface reset = finalReset;
             
+        // Simulation doesn't need fan-out.
+        interface baseReset = finalReset;
+
         interface rawClock = rawClock;
         interface rawReset = rawReset;
-            
     endinterface
     
     // bind the wires
@@ -143,4 +147,18 @@ module mkClocksDevice
     
     interface softResetTrigger = trigger;
             
+endmodule
+
+
+//
+// mkResetFanout --
+//   Fan out reset from a base reset signal, always exiting reset in the same
+//   cycle.
+//
+module mkResetFanout#(Reset baseReset)
+    // Interface:
+    (Reset);
+
+    // Simulation doesn't need fan-out.
+    return baseReset;
 endmodule

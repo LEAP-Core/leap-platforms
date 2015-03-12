@@ -41,13 +41,16 @@ import Clocks::*;
 //
 
 interface CLOCKS_DRIVER;
-    
     interface Clock clock;        
     interface Reset reset;
     
+    // This is the reset to pass into mkResetFanout().  Any reset derived
+    // from mkResetFanout(baseReset) will complete in the same cycle as
+    // the above reset signal.
+    interface Reset baseReset;
+
     interface Clock rawClock;
     interface Reset rawReset;
-        
 endinterface
 
 //
@@ -73,11 +76,9 @@ endinterface
 //
 
 interface CLOCKS_DEVICE;
-
     interface CLOCKS_DRIVER      driver;
     interface CLOCKS_WIRES       wires;
     interface SOFT_RESET_TRIGGER softResetTrigger;
-        
 endinterface
 
 //
@@ -137,26 +138,38 @@ module mkClocksDevice
     // bind the driver interfaces
     
     interface CLOCKS_DRIVER driver;
-        
         interface clock = finalClock;
         interface reset = finalReset;
             
+        // Fan-out not yet implemented in this clock
+        interface baseReset = finalReset;
+
         interface rawClock = rawClock;
         interface rawReset = rawReset;
-                
     endinterface
     
     // bind the wires
     
     interface CLOCKS_WIRES wires;
-        
         method clock_wire   = crystalClocks.clock_wire;
         method reset_n_wire = crystalClocks.reset_n_wire;
-            
     endinterface
     
     // soft reset trigger
     
     interface softResetTrigger = trigger;
-            
+endmodule
+
+
+//
+// mkResetFanout --
+//   Fan out reset from a base reset signal, always exiting reset in the same
+//   cycle.
+//
+module mkResetFanout#(Reset baseReset)
+    // Interface:
+    (Reset);
+
+    // Fan-out not yet implemented in this clock
+    return baseReset;
 endmodule

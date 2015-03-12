@@ -44,15 +44,16 @@ import DefaultValue::*;
 //
 
 interface CLOCKS_DRIVER;
-    
     interface Clock clock;        
     interface Reset reset;
-
-    interface Vector#(2,Reset) deviceResets;
     
+    // This is the reset to pass into mkResetFanout().  Any reset derived
+    // from mkResetFanout(baseReset) will complete in the same cycle as
+    // the above reset signal.
+    interface Reset baseReset;
+
     interface Clock rawClock;
     interface Reset rawReset;
-        
 endinterface
 
 //
@@ -61,9 +62,7 @@ endinterface
 //
 
 interface CLOCKS_WIRES;
-
     interface Put#(Bit#(1)) clk_p;
-
     interface Put#(Bit#(1)) clk_n;
 
     interface Put#(Bit#(1)) rst;
@@ -72,7 +71,6 @@ interface CLOCKS_WIRES;
     // during flows in which we do object code 
     // linking. 
     interface CLOCKS_DRIVER outputClocks;
-    
 endinterface
 
 //
@@ -83,11 +81,9 @@ endinterface
 //
 
 interface CLOCKS_DEVICE;
-
     interface CLOCKS_DRIVER      driver;
     interface CLOCKS_WIRES       wires;
     interface SOFT_RESET_TRIGGER softResetTrigger;
-        
 endinterface
 
 //
@@ -167,30 +163,17 @@ module mkClocksDevice
                                                      clocked_by userClock,
                                                      reset_by   userReset);
     
-    // throw a few extra synchronizers
-
-    Vector#(3,Reset) previousReset = replicate(softReset);
-    Vector#(3, UnoptimizedReset) currentReset = newVector();
-
-    for(Integer i = 0; i < 2; i = i + 1) 
-      begin
-          currentReset <- zipWithM(mkUnoptimizableAsyncReset, previousReset, replicate(userClock));
-          previousReset = map(extractReset, currentReset);
-      end 
-
-    // nested interface rather than a basic Reset.
-    Vector#(3, Reset) finalResets = previousReset;
-
-    Clock finalClock = userClock;
+    // Return one reset, mustly used by legacy code that doesn't use
+    // the reset fan-out interface.
+    let finalReset <- mkResetFanout(softReset, clocked_by userClock);
     
     // bind the driver interfaces
     CLOCKS_DRIVER driverBinding =  interface CLOCKS_DRIVER;
-        
-                                       interface clock = finalClock;
-                                       interface reset = head(finalResets);
-
-                                       interface deviceResets = tail(finalResets);
+                                       interface clock = userClock;
+                                       interface reset = finalReset;
             
+                                       interface baseReset = softReset;
+
                                        interface rawClock = rawClock;
                                        interface rawReset = rawReset;                                                      
                                    endinterface;
@@ -199,7 +182,6 @@ module mkClocksDevice
     interface driver = driverBinding;
     
     interface CLOCKS_WIRES wires;
-       
         interface clk_n   = incomingClockN.clock_wire;
         interface clk_p   = incomingClockP.clock_wire;
 
@@ -215,5 +197,34 @@ module mkClocksDevice
     // soft reset trigger
     
     interface softResetTrigger = trigger;
-            
+endmodule
+
+
+//
+// mkResetFanout --
+//   Fan out reset from a base reset signal, always exiting reset in the same
+//   cycle.
+//
+module mkResetFanout#(Reset baseReset)
+    // Interface:
+    (Reset);
+
+    let clk <- exposeCurrentClock();
+
+    if (clk == noClock)
+    begin
+        error("Attempt to fan-out reset with no clock!");
+    end
+
+    //
+    // Build a chain so it can propagate across the FPGA.
+    //
+    Reset rst = baseReset;
+
+    for (Integer i = 0; i < 4; i = i + 1) 
+    begin
+        rst <- mkAsyncReset(1, rst, clk);
+    end 
+
+    return rst;
 endmodule

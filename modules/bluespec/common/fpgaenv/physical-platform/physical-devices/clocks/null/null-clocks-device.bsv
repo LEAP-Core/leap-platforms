@@ -38,12 +38,28 @@ import Clocks::*;
 //
 
 interface CLOCKS_DRIVER;
-    
     interface Clock clock;        
     interface Reset reset;
     
+    // This is the reset to pass into mkResetFanout().  Any reset derived
+    // from mkResetFanout(baseReset) will complete in the same cycle as
+    // the above reset signal.
+    interface Reset baseReset;
+
     interface Clock rawClock;
     interface Reset rawReset;
-        
 endinterface
 
+
+//
+// mkResetFanout --
+//   Fan out reset from a base reset signal, always exiting reset in the same
+//   cycle.
+//
+module mkResetFanout#(Reset baseReset)
+    // Interface:
+    (Reset);
+
+    // Fan-out not yet implemented in this clock
+    return baseReset;
+endmodule

@@ -117,18 +117,18 @@ module [CONNECTED_MODULE] mkPhysicalPlatform
     endcase
 
     // Set the ddr clock source by parameter. 
- 
+    let sdramRst <- mkResetFanout(clocks.driver.baseReset, clocked_by clk);
     DDR_DEVICE sdram <- mkDDRDevice(ddrConfig,
                                     clocked_by clk,
-                                    reset_by clocks.driver.deviceResets[0]);
+                                    reset_by sdramRst);
 
     // Next, create the physical device that can trigger a soft reset. Pass along the
     // interface to the trigger module that the clocks device has given us.
-
+    let pcieRst <- mkResetFanout(clocks.driver.baseReset, clocked_by clk);
     PCIE_DEVICE pcie <- mkPCIEDevice(clocks.driver.rawClock,
                                      clocks.driver.rawReset,
                                      clocked_by clk,
-                                     reset_by clocks.driver.deviceResets[1]);
+                                     reset_by pcieRst);
 
     //
     // Pass reset from PCIe to the model.  The host holds reset long enough that

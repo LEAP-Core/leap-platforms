@@ -32,25 +32,6 @@
 import Clocks::*;
 import GetPut::*;
 
-interface UnoptimizedReset;
-    interface Reset resetIfc;
-endinterface 
-
-// Hack around bluespec compiler bug which forces us to use an
-// nested interface rather than a basic Reset.
-function Reset extractReset(UnoptimizedReset unopt);
-    return unopt.resetIfc;
-endfunction
-
-(*synthesize*)
-module mkUnoptimizableAsyncReset#(Reset previousReset, Clock userClock) (UnoptimizedReset);
-
-    Reset asyncReset <- mkAsyncReset(4, previousReset, userClock);
- 
-    interface resetIfc = asyncReset;
-
-endmodule
-
 
 //
 // Two methods of importing reset.  Both accomplish the same thing, but

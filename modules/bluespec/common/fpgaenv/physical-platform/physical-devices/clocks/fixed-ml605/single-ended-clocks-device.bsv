@@ -41,13 +41,16 @@ import Clocks::*;
 //
 
 interface CLOCKS_DRIVER;
-    
     interface Clock clock;        
     interface Reset reset;
     
+    // This is the reset to pass into mkResetFanout().  Any reset derived
+    // from mkResetFanout(baseReset) will complete in the same cycle as
+    // the above reset signal.
+    interface Reset baseReset;
+    
     interface Clock rawClock;
     interface Reset rawReset;
-        
 endinterface
 
 //
@@ -73,11 +76,8 @@ endinterface
 //
 
 interface CLOCKS_DEVICE;
-
     interface CLOCKS_DRIVER      driver;
     interface CLOCKS_WIRES       wires;
-//    interface SOFT_RESET_TRIGGER softResetTrigger;
-        
 endinterface
 
 //
@@ -109,55 +109,40 @@ module mkClocksDevice
     Clock userClock = userClockPackage.clk;
     Reset userReset = userClockPackage.rst;
 
-    //
-    // STAGE 3: soft reset
-    //
-    
-    // Next, we'll create a new soft reset interface. We'll instantiate it with the
-    // startInRst flag set to true, which will cause it to automatically trigger when
-    // the hard reset is triggered.
-		
-/*    
-    MakeResetIfc soft_reset_wrapper <- mkReset(10, True, userClock,
-                                               clocked_by userClock,
-                                               reset_by   userReset);
-    
-    Reset softReset = soft_reset_wrapper.new_rst;
-
-    // Now, we create a special trigger module that has the logic for triggering the
-    // soft reset when a request arrives from the physical device. The trigger module
-    // needs to be reset by the HARD reset.
-    SOFT_RESET_TRIGGER trigger <- mkSoftResetTrigger(soft_reset_wrapper,
-                                                     clocked_by userClock,
-                                                     reset_by   userReset);
-  */  
     Clock finalClock = userClock;
     Reset finalReset = userReset;
-    //Reset finalReset = softReset;
     
     // bind the driver interfaces
     
     interface CLOCKS_DRIVER driver;
-        
         interface clock = finalClock;
         interface reset = finalReset;
             
+        // Fan-out not yet implemented in this clock
+        interface baseReset = finalReset;
+            
         interface rawClock = rawClock;
         interface rawReset = rawReset;
-                
     endinterface
     
     // bind the wires
     
     interface CLOCKS_WIRES wires;
-        
         method clock_wire   = crystalClocks.clock_wire;
         method reset_n_wire = crystalClocks.reset_n_wire;
-            
     endinterface
-    
-    // soft reset trigger
-    
-//    interface softResetTrigger = trigger;
-            
+endmodule
+
+
+//
+// mkResetFanout --
+//   Fan out reset from a base reset signal, always exiting reset in the same
+//   cycle.
+//
+module mkResetFanout#(Reset baseReset)
+    // Interface:
+    (Reset);
+
+    // Fan-out not yet implemented in this clock
+    return baseReset;
 endmodule
