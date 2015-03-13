@@ -19,7 +19,7 @@
 %generated -t VERILOG mkUserClock_DivideByTwo.v
 %generated -t VERILOG mkUserClock_DivideByFour.v
 
-%generated -t VERILOG mkUnoptimizableAsyncReset.v
+%generated -t VERILOG mkAsyncResetStage.v
 
 %sources -t BSV -v PUBLIC  ila-virtex6.bsv
 %sources -t BSV -v PUBLIC  icon.bsv

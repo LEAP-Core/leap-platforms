@@ -211,11 +211,6 @@ module mkResetFanout#(Reset baseReset)
 
     let clk <- exposeCurrentClock();
 
-    if (clk == noClock)
-    begin
-        error("Attempt to fan-out reset with no clock!");
-    end
-
     //
     // Build a chain so it can propagate across the FPGA.
     //
@@ -223,7 +218,10 @@ module mkResetFanout#(Reset baseReset)
 
     for (Integer i = 0; i < 4; i = i + 1) 
     begin
-        rst <- mkAsyncReset(1, rst, clk);
+        // mkAsyncResetStage wraps mkAsyncReset in a Bluespec synthesis boundary,
+        // giving us a well-known name in the generated Verilog.
+        let _next_rst <- mkAsyncResetStage(rst, clk, reset_by baseReset);
+        rst = extractAsyncResetStage(_next_rst);
     end 
 
     return rst;

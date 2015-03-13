@@ -12,6 +12,12 @@
 %public user-clock-altera.bsv
 %public shiftreg.bsv
 
+%generated -t VERILOG mkUserClock_DivideByThree.v
+%generated -t VERILOG mkUserClock_DivideByTwo.v
+%generated -t VERILOG mkUserClock_DivideByFour.v
+
+%generated -t VERILOG mkAsyncResetStage.v
+
 %sources -t BSV -v PUBLIC  io-components-altera.bsv
 
 %sources -t BSV -v PUBLIC  clock-import.bsv

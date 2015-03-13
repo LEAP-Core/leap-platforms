@@ -34,6 +34,36 @@ import GetPut::*;
 
 
 //
+// mkAsyncResetStage is a wrapper around mkAsyncReset that exists only to
+// force Bluespec to emit a consistent name for a reset stage.  This allows
+// tagging and manipulation of the object during synthesis.
+//
+
+interface RESET_STAGE_IFC;
+    interface Reset reset;
+endinterface 
+
+function Reset extractAsyncResetStage(RESET_STAGE_IFC stage);
+    return stage.reset;
+endfunction
+
+
+(*synthesize*)
+module mkAsyncResetStage#(Reset previousReset, Clock clk)
+    // Interface:
+    (RESET_STAGE_IFC);
+
+    if (clk == noClock)
+    begin
+        error("Attempt to fan-out reset with no clock!");
+    end
+
+    Reset asyncResetStage <- mkAsyncReset(1, previousReset, clk);
+    interface reset = asyncResetStage;
+endmodule
+
+
+//
 // Two methods of importing reset.  Both accomplish the same thing, but
 // use different interfaces.  The "put" version is newer and has the
 // advantage of being always enabled, which eliminates the exposed

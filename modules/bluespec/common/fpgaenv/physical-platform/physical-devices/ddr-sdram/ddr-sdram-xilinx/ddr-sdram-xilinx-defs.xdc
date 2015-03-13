@@ -10,5 +10,5 @@ if {$IS_TOP_BUILD} {
 set     XILINX_DDR_RESET_SYNCHRONIZER_MODEL [get_cells -hier -filter "NAME =~ ${ddrControllerPathPrefix}modelResetInRaw/*"]
 lappend XILINX_DDR_RESET_SYNCHRONIZER_MODEL [get_cells -hier -filter "NAME =~ ${ddrControllerPathPrefix}sync*Q/*"]
 
-set XILINX_DDR_RESET_SYNCHRONIZER_DRIVER [get_cells -hier -filter "NAME =~ *llpi_phys_plat_sdramRst*/reset_hold*"]
-lappend XILINX_DDR_RESET_SYNCHRONIZER_DRIVER [get_cells -hier -filter "NAME =~ *llpi_phys_plat_clocks_finalReset*/reset_hold*"]
+set XILINX_DDR_RESET_SYNCHRONIZER_DRIVER [get_cells -hier -filter "NAME =~ *llpi_phys_plat_sdramRst*/asyncResetStage/reset_hold*"]
+lappend XILINX_DDR_RESET_SYNCHRONIZER_DRIVER [get_cells -hier -filter "NAME =~ *llpi_phys_plat_clocks_finalReset*/asyncResetStage/reset_hold*"]
