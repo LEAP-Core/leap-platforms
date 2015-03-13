@@ -5,8 +5,11 @@
 
 %sources -t BSV -v PUBLIC pcie-virtex7.bsv
 %sources -t UCF -v PRIVATE pcie-virtex7.ucf
+
 %sources -t VIVADO_TCL_DEFINITION -v PRIVATE pcie-virtex7.xdc
 %sources -t VIVADO_TCL_SYNTHESIS  -v PRIVATE pcie-virtex7-synthesis.xdc
+%sources -t VIVADO_TCL_ALGEBRA    -v PRIVATE pcie-virtex7-alg.xdc
+
 %sources -t AREA_CONSTRAINT -v PRIVATE pcie-virtex7.agrp
 
 

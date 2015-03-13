@@ -212,14 +212,7 @@ proc pcieConstraints { } {
     set_case_analysis 0 [get_pins -hier -filter { NAME =~ */ext_clk.pipe_clock_i/pclk_i1_bufgctrl.pclk_i1/S1}]
 
     set_clock_groups -name async_sysclk_coreclk -asynchronous -group [get_clocks -include_generated_clocks board_clk] -group [get_clocks -include_generated_clocks pci_refclk]
-
-    set_clock_groups -name async_nocclk_coreclk -asynchronous -group { noc_clk } -group [ get_clocks -include_generated_clocks board_clk ]
-
-    set_max_delay -from [get_clocks -include_generated_clocks board_clk] -to [get_clocks noc_clk] 8.000 -datapath_only
-    set_max_delay -from [get_clocks noc_clk] -to [get_clocks -include_generated_clocks board_clk] 8.000 -datapath_only
-
-    set_max_delay -from [get_clocks userclk2] -to [get_clocks noc_clk] 8.000 -datapath_only
-    set_max_delay -from [get_clocks noc_clk] -to [get_clocks userclk2] 8.000 -datapath_only
+    set_clock_groups -name async_nocclk_coreclk -asynchronous -group [get_clocks -include_generated_clocks board_clk] -group { noc_clk }
 }
 
 
