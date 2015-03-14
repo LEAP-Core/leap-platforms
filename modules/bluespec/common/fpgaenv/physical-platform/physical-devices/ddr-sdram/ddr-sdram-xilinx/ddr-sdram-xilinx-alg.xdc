@@ -28,11 +28,6 @@ proc ddrControllerPARConstraints {} {
         }
         
     }
-
-    annotateSyncFIFO "${pathPrefix}syncRequestQ"
-    annotateSyncFIFO "${pathPrefix}syncWriteDataQ"
-    annotateSyncFIFO "${pathPrefix}syncReadDataQ"
-
 }
 
 executePARConstraints ddrControllerPARConstraints ddr3
