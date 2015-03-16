@@ -58,7 +58,7 @@ module mkAsyncResetStage#(Reset previousReset, Clock clk)
         error("Attempt to fan-out reset with no clock!");
     end
 
-    Reset asyncResetStage <- mkAsyncReset(1, previousReset, clk);
+    Reset asyncResetStage <- mkAsyncReset(3, previousReset, clk);
     interface reset = asyncResetStage;
 endmodule
 

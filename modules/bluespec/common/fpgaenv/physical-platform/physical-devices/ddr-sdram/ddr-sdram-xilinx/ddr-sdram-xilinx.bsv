@@ -406,11 +406,15 @@ module mkDDRBankSynth#(Clock rawClock, Reset rawReset)
     Reset modelOrRawReset <- mkResetEither(modelResetInRaw, rawReset,
                                            clocked_by rawClock);
 
+    // One final reset register to hold the merged resets as close to the
+    // memory controller as possible.
+    let ddrReset <- mkAsyncResetStage(modelOrRawReset, rawClock);
+
     //
     // Instantiate the Xilinx Memory Controller
     //
     XILINX_DRAM_CONTROLLER dramCtrl <-
-        mkXilinxDRAMController(rawClock, modelOrRawReset);
+        mkXilinxDRAMController(rawClock, ddrReset.reset);
 
     // Clock the glue logic with the Controller's clock
     Clock controllerClock = dramCtrl.controller_clock;
