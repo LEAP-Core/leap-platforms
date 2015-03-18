@@ -338,14 +338,26 @@ module mkBRAMClockDivider
     // For now, we just wrap the underlying BRAM. 
     BRAM#(t_ADDR, t_DATA) ram <- mkBRAM(clocked_by bramClock.clk.slowClock, reset_by bramClock.rst);
 
-    let readQueueStore <- mkRegStore(baseClock, bramClock.clk.slowClock);
-    AlignedFIFO#(t_ADDR) readQueue <- mkAlignedFIFO(baseClock, baseReset, bramClock.clk.slowClock, bramClock.rst, readQueueStore, bramClock.clk.clockReady, True);
+    Store#(UInt#(1), t_ADDR, 0) readQueueStore <-
+        mkRegVectorStore(baseClock, bramClock.clk.slowClock);
+    AlignedFIFO#(t_ADDR) readQueue <-
+        mkAlignedFIFO(baseClock, baseReset,
+                      bramClock.clk.slowClock, bramClock.rst,
+                      readQueueStore, bramClock.clk.clockReady, True);
 
-    let writeQueueStore <- mkRegStore(baseClock, bramClock.clk.slowClock);
-    AlignedFIFO#(Tuple2#(t_ADDR, t_DATA)) writeQueue <- mkAlignedFIFO(baseClock, baseReset, bramClock.clk.slowClock, bramClock.rst, writeQueueStore, bramClock.clk.clockReady, True);
+    Store#(UInt#(1), Tuple2#(t_ADDR, t_DATA), 0) writeQueueStore <-
+        mkRegVectorStore(baseClock, bramClock.clk.slowClock);
+    AlignedFIFO#(Tuple2#(t_ADDR, t_DATA)) writeQueue <-
+        mkAlignedFIFO(baseClock, baseReset,
+                      bramClock.clk.slowClock, bramClock.rst,
+                      writeQueueStore, bramClock.clk.clockReady, True);
 
-    let responseQueueStore <- mkRegStore(bramClock.clk.slowClock, baseClock);
-    AlignedFIFO#(t_DATA) responseQueue <- mkAlignedFIFO(bramClock.clk.slowClock, bramClock.rst, baseClock, baseReset, responseQueueStore, True, bramClock.clk.clockReady);
+    Store#(UInt#(1), t_DATA, 0) responseQueueStore <-
+        mkRegVectorStore(bramClock.clk.slowClock, baseClock);
+    AlignedFIFO#(t_DATA) responseQueue <-
+        mkAlignedFIFO(bramClock.clk.slowClock, bramClock.rst,
+                      baseClock, baseReset,
+                      responseQueueStore, True, bramClock.clk.clockReady);
     
     // Bypass FIFO used to put readQueue.enq inside a rule (instead of a method)
     FIFOF#(t_ADDR) readReqQ <- mkBypassFIFOF(clocked_by baseClock, reset_by baseReset);
