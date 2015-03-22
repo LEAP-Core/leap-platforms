@@ -190,25 +190,30 @@ proc pcieConstraints { } {
         set_property PULLUP     true        [get_ports { pcieWires_rst_put }]
     }
 
-    set_false_path -through [get_pins -hierarchical {*pcie_block_i/PLPHYLNKUPN*}]
-    set_false_path -through [get_pins -hierarchical {*pcie_block_i/PLRECEIVEDHOTRST*}]
+    set_false_path -through [get_pins -hierarchical { *pcie_block_i/PLPHYLNKUPN* }]
+    set_false_path -through [get_pins -hierarchical { *pcie_block_i/PLRECEIVEDHOTRST* }]
+
+    #------------------------------------------------------------------------------
+    # Asynchronous Paths
+    #------------------------------------------------------------------------------
+    set_false_path -through [get_pins -hierarchical -filter { NAME =~ */ep_pcie_ep/*/RXELECIDLE }]
+    set_false_path -through [get_pins -hierarchical -filter { NAME =~ */ep_pcie_ep/*/TXPHINITDONE }]
+    set_false_path -through [get_pins -hierarchical -filter { NAME =~ */ep_pcie_ep/*/TXPHALIGNDONE }]
+    set_false_path -through [get_pins -hierarchical -filter { NAME =~ */ep_pcie_ep/*/TXDLYSRESETDONE }]
+    set_false_path -through [get_pins -hierarchical -filter { NAME =~ */ep_pcie_ep/*/RXDLYSRESETDONE }]
+    set_false_path -through [get_pins -hierarchical -filter { NAME =~ */ep_pcie_ep/*/RXPHALIGNDONE }]
+    set_false_path -through [get_pins -hierarchical -filter { NAME =~ */ep_pcie_ep/*/RXCDRLOCK }]
+    set_false_path -through [get_pins -hierarchical -filter { NAME =~ */ep_pcie_ep/*/CFGMSGRECEIVEDPMETO }]
+    set_false_path -through [get_pins -hierarchical -filter { NAME =~ */ep_pcie_ep/*/CPLLLOCK }]
+    set_false_path -through [get_pins -hierarchical -filter { NAME =~ */ep_pcie_ep/*/QPLLLOCK }]
 
     # This constraint is generating a critical warning. 
-    set_false_path -through [get_nets -hier -filter { NAME =~ */pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/user_resetdone*}]
-    set_false_path -through [get_nets -hier -filter { NAME =~ */pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_lane[0].pipe_rate.pipe_rate_i/*}]
-    set_false_path -through [get_nets -hier -filter { NAME =~ */pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_lane[1].pipe_rate.pipe_rate_i/*}]
-    set_false_path -through [get_nets -hier -filter { NAME =~ */pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_lane[2].pipe_rate.pipe_rate_i/*}]
-    set_false_path -through [get_nets -hier -filter { NAME =~ */pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_lane[3].pipe_rate.pipe_rate_i/*}]
-    set_false_path -through [get_nets -hier -filter { NAME =~ */pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_lane[4].pipe_rate.pipe_rate_i/*}]
-    set_false_path -through [get_nets -hier -filter { NAME =~ */pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_lane[5].pipe_rate.pipe_rate_i/*}]
-    set_false_path -through [get_nets -hier -filter { NAME =~ */pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_lane[6].pipe_rate.pipe_rate_i/*}]
-    set_false_path -through [get_nets -hier -filter { NAME =~ */pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_lane[7].pipe_rate.pipe_rate_i/*}]
+    #set_false_path -through [get_nets -hier -filter { NAME =~ */pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/user_resetdone*}]
+    #set_false_path -through [get_cells -hier -filter { NAME =~ */pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_reset.pipe_reset_i/cpllreset*}]
 
-    set_false_path -through [get_cells -hier -filter { NAME =~ */pcie_7x_v1_10_i/gt_top_i/pipe_wrapper_i/pipe_reset.pipe_reset_i/cpllreset*}]
+    #set_false_path -through [get_nets -hier -filter { NAME =~ */ext_clk.pipe_clock_i/pclk_sel*}]
 
-    set_false_path -through [get_nets -hier -filter { NAME =~ */ext_clk.pipe_clock_i/pclk_sel*}]
-
-    set_case_analysis 1 [get_pins  -hier -filter { NAME =~ */ext_clk.pipe_clock_i/pclk_i1_bufgctrl.pclk_i1/S0}]
+    set_case_analysis 1 [get_pins -hier -filter { NAME =~ */ext_clk.pipe_clock_i/pclk_i1_bufgctrl.pclk_i1/S0}]
     set_case_analysis 0 [get_pins -hier -filter { NAME =~ */ext_clk.pipe_clock_i/pclk_i1_bufgctrl.pclk_i1/S1}]
 
     set_clock_groups -name async_sysclk_coreclk -asynchronous -group [get_clocks -include_generated_clocks board_clk] -group [get_clocks -include_generated_clocks pci_refclk]

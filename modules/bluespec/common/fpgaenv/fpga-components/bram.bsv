@@ -40,6 +40,9 @@ import Vector::*;
 import RegFile::*;
 import DReg::*;
 import AlignedFIFOs::*;
+import Connectable::*;
+import GetPut::*;
+
 
 `include "awb/provides/librl_bsv_base.bsh"
 
@@ -319,15 +322,15 @@ endmodule
 
 
 //
-// mkBRAMClockDivider --
-//     The actual guarded BRAM. Uses the classic "turn a synchronous RAM into a
-//     buffered RAM" Bluespec technique.
+// mkBRAMClockDividerM --
+//     Wrap BRAM in a clock divided interface and run it at half speed.
 //
-module mkBRAMClockDivider
+module [m] mkBRAMClockDividerM#(function m#(BRAM#(t_ADDR, t_DATA)) ramImpl)
     // interface:
         (BRAM#(t_ADDR, t_DATA))
     provisos
-        (Bits#(t_ADDR, t_ADDR_SZ),
+        (IsModule#(m, a__),
+         Bits#(t_ADDR, t_ADDR_SZ),
          Bits#(t_DATA, t_DATA_SZ));
 
     let baseClock <- exposeCurrentClock();
@@ -336,7 +339,7 @@ module mkBRAMClockDivider
     let bramClock <- mkUserClock_Divider(2);
 
     // For now, we just wrap the underlying BRAM. 
-    BRAM#(t_ADDR, t_DATA) ram <- mkBRAM(clocked_by bramClock.clk.slowClock, reset_by bramClock.rst);
+    BRAM#(t_ADDR, t_DATA) ram <- ramImpl(clocked_by bramClock.clk.slowClock, reset_by bramClock.rst);
 
     Store#(UInt#(1), t_ADDR, 0) readQueueStore <-
         mkRegVectorStore(baseClock, bramClock.clk.slowClock);
@@ -358,19 +361,10 @@ module mkBRAMClockDivider
         mkAlignedFIFO(bramClock.clk.slowClock, bramClock.rst,
                       baseClock, baseReset,
                       responseQueueStore, True, bramClock.clk.clockReady);
-    
-    // Bypass FIFO used to put readQueue.enq inside a rule (instead of a method)
-    FIFOF#(t_ADDR) readReqQ <- mkBypassFIFOF(clocked_by baseClock, reset_by baseReset);
 
-    //
-    // Data transfer rules -- these move data between the aligned
-    // fifos and the underlying BRAM. 
-    //
-    rule deqReadReqQ;
-        let addr = readReqQ.first();
-        readReqQ.deq();
-        readQueue.enq(addr);
-    endrule
+    // Bypass FIFO used to put readQueue.enq inside a rule (instead of a method)
+    FIFOF#(t_ADDR) readReqQ <- mkBypassFIFOF();
+    mkConnection(toGet(readReqQ), toPut(readQueue));
     
     rule moveReadReq;
         readQueue.deq();
@@ -408,7 +402,7 @@ module mkBRAMClockDivider
    
     method t_DATA peek()   = responseQueue.first();
     method Bool notEmpty() = responseQueue.dNotEmpty();
-    method Bool notFull()  = readQueue.sNotFull();
+    method Bool notFull()  = readReqQ.notFull();
 
     // write
     
@@ -416,80 +410,28 @@ module mkBRAMClockDivider
     // Effect: Just update the RAM.
 
     method Action write(t_ADDR a, t_DATA d);
-        writeQueue.enq(tuple2(a,d));
+        writeQueue.enq(tuple2(a, d));
     endmethod
 
     method Bool writeNotFull() = writeQueue.sNotFull();
 endmodule
 
-typedef   4 BRAM_BANK_NUM;
-typedef  32 BRAM_REQ_BUFFER_DEPTH;
 
 //
-// mkBRAMMultiBank --
-//     Divide a single large BRAM into multiple BRAM banks and add additional buffers. 
-// This implementation is used to relax the timing pressure of building a large BRAM. 
+// mkBRAMClockDivider --
+//     Wrapper for monadic version.
 //
-module mkBRAMMultiBank
+module mkBRAMClockDivider
     // interface:
         (BRAM#(t_ADDR, t_DATA))
     provisos
         (Bits#(t_ADDR, t_ADDR_SZ),
-         Bits#(t_DATA, t_DATA_SZ),
-         NumAlias#(TMin#(t_ADDR_SZ, TLog#(BRAM_BANK_NUM)), t_BANK_IDX_SZ),
-         NumAlias#(TExp#(t_BANK_IDX_SZ), t_BANK_NUM),
-         Alias#(Bit#(t_BANK_IDX_SZ), t_BANK_IDX), 
-         NumAlias#(TMax#(1, TSub#(t_ADDR_SZ, t_BANK_IDX_SZ)), t_BANK_ADDR_SZ),
-         Alias#(Bit#(t_BANK_ADDR_SZ), t_BANK_ADDR));
+         Bits#(t_DATA, t_DATA_SZ));
 
-    Vector#(t_BANK_NUM, BRAM#(t_BANK_ADDR, t_DATA)) brams <- replicateM(mkBRAMBuffered());
-    FIFOF#(t_BANK_IDX) reqInfoQ <- mkSizedFIFOF(valueOf(BRAM_REQ_BUFFER_DEPTH));
-    FIFOF#(t_ADDR) incomingReadReqQ <- mkBypassFIFOF();
-    FIFOF#(t_DATA) responseQ <- mkBypassFIFOF();
-    
-    function Tuple2#(t_BANK_IDX, t_BANK_ADDR) calBankAddr (t_ADDR addr);
-        return unpack(resize(pack(addr)));
-    endfunction
-
-    rule fwdReadReq(True);
-       let addr = incomingReadReqQ.first();
-       incomingReadReqQ.deq();
-       match {.bank_idx, .bank_addr} = calBankAddr(addr);
-       brams[bank_idx].readReq(bank_addr);
-       reqInfoQ.enq(bank_idx);
-    endrule
-
-    rule recvResp (True);
-       let idx = reqInfoQ.first();
-       reqInfoQ.deq();
-       let r <- brams[idx].readRsp();
-       responseQ.enq(r);
-    endrule
-
-    method Action readReq(t_ADDR addr);
-        incomingReadReqQ.enq(addr);
-    endmethod
-
-    method ActionValue#(t_DATA) readRsp();
-        let r = responseQ.first();
-        responseQ.deq();
-        return r;
-    endmethod
-
-    method t_DATA peek();
-        return responseQ.first();
-    endmethod
-
-    method Bool notEmpty() = responseQ.notEmpty();
-    method Bool notFull() = incomingReadReqQ.notFull();
-
-    method Action write(t_ADDR addr, t_DATA val);
-        match {.bank_idx, .bank_addr} = calBankAddr(addr);
-        brams[bank_idx].write(bank_addr, val);
-    endmethod
-    method Bool writeNotFull() = True;
-
+    let _m <- mkBRAMClockDividerM(mkBRAM);
+    return _m;
 endmodule
+
 
 //
 // mkBRAMBuffered --
@@ -590,6 +532,25 @@ endmodule
 
 
 //
+// mkBRAMInitializedBuffered --
+//     Initialize with a buffered BRAM with a constant value.
+//
+module mkBRAMInitializedBuffered#(t_DATA initVal)
+    // interface:
+        (BRAM#(t_ADDR, t_DATA))
+    provisos
+        (Bits#(t_ADDR, addr_SZ),
+         Bits#(t_DATA, data_SZ));
+
+    // The primitive RAM.
+    BRAM#(t_ADDR, t_DATA) mem <- mkBRAMBuffered();
+    
+    BRAM#(t_ADDR, t_DATA) m <- mkMemInitialized(mem, initVal);
+    return m;
+endmodule
+
+
+//
 // mkBRAMInitializedClockDivider --
 //     Initialize with a constant value, but uses the clock divider BRAM constructor.
 //
@@ -606,20 +567,3 @@ module mkBRAMInitializedClockDivider#(t_DATA initVal)
     BRAM#(t_ADDR, t_DATA) m <- mkMemInitialized(mem, initVal);
     return m;
 endmodule
-
-//
-// mkBRAMInitializedMultiBank --
-//     Initialize a multi-banked BRAM with a constant value.
-//
-module mkBRAMInitializedMultiBank#(t_DATA initVal)
-    // interface:
-        (BRAM#(t_ADDR, t_DATA))
-    provisos
-        (Bits#(t_ADDR, addr_SZ),
-         Bits#(t_DATA, data_SZ));
-
-    BRAM#(t_ADDR, t_DATA) mem <- mkBRAMMultiBank();
-    BRAM#(t_ADDR, t_DATA) m <- mkMemInitialized(mem, initVal);
-    return m;
-endmodule
-
