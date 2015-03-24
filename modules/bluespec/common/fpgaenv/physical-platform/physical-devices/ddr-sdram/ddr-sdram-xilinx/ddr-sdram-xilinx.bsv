@@ -402,7 +402,7 @@ module mkDDRBankSynth#(Clock rawClock, Reset rawReset)
     Clock modelClock <- exposeCurrentClock();
     Reset modelReset <- exposeCurrentReset();
 
-    Reset modelResetInRaw <- mkAsyncReset(4, modelReset, rawClock);
+    Reset modelResetInRaw <- mkAsyncReset(64, modelReset, rawClock);
     Reset modelOrRawReset <- mkResetEither(modelResetInRaw, rawReset,
                                            clocked_by rawClock);
 
