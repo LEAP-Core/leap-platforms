@@ -71,16 +71,16 @@ endinterface
 
 
 //
-// mkBRAMUnguardedNonZero --
+// mkBRAMUnguardedNonZeroSized --
 //     Wrapper for the Verilog module that actually turns into a block RAM.
 //
-import "BVI" Bram = module mkBRAMUnguardedNonZero
+import "BVI" Bram = module mkBRAMUnguardedNonZeroSized#(Integer bram_SZ)
     // interface:
-    (BRAM_INTERNAL_IFC#(Bit#(addr_SZ), Bit#(data_SZ)));
+    (BRAM_INTERNAL_IFC#(Bit#(t_ADDR_SZ), Bit#(t_DATA_SZ)));
 
-    parameter addrSize = valueOf(addr_SZ);
-    parameter dataSize = valueOf(data_SZ);
-    parameter numRows = valueOf(TExp#(addr_SZ));
+    parameter addrSize = valueOf(t_ADDR_SZ);
+    parameter dataSize = valueOf(t_DATA_SZ);
+    parameter numRows = bram_SZ;
 
     default_reset rst (RST_N);
     default_clock clk (CLK);
@@ -98,6 +98,21 @@ import "BVI" Bram = module mkBRAMUnguardedNonZero
 endmodule
 
 
+
+//
+// mkBRAMUnguardedNonZero --
+//     Wrapper for the Verilog module that actually turns into a block RAM.
+//
+module mkBRAMUnguardedNonZero
+    // interface:
+    (BRAM_INTERNAL_IFC#(Bit#(t_ADDR_SZ), Bit#(t_DATA_SZ)));
+
+    let m <- mkBRAMUnguardedNonZeroSized(valueOf(TExp#(t_ADDR_SZ)));
+    return m;
+
+endmodule
+
+
 //
 // mkBRAMUnguardedZero --
 //     Special case used when address or data-width is zero.
@@ -105,18 +120,18 @@ endmodule
 //
 module mkBRAMUnguardedZero
     // interface:
-    (BRAM_INTERNAL_IFC#(Bit#(addr_SZ), Bit#(data_SZ)));
+    (BRAM_INTERNAL_IFC#(Bit#(t_ADDR_SZ), Bit#(t_DATA_SZ)));
 
-    method Action readReq(Bit#(addr_SZ) a);
+    method Action readReq(Bit#(t_ADDR_SZ) a);
         noAction;
     endmethod
 
-    method ActionValue#(Bit#(data_SZ)) readRsp();
+    method ActionValue#(Bit#(t__SZ)) readRsp();
         noAction;
         return ?;
     endmethod
 
-    method Action write(Bit#(addr_SZ) a, Bit#(data_SZ) v);
+    method Action write(Bit#(t_ADDR_SZ) a, Bit#(t_DATA_SZ) v);
         noAction;
     endmethod
 
@@ -129,23 +144,74 @@ endmodule
 //
 module mkBRAMUnguardedSim
     // interface:
-    (BRAM_INTERNAL_IFC#(Bit#(addr_SZ), Bit#(data_SZ)));
+    (BRAM_INTERNAL_IFC#(Bit#(t_ADDR_SZ), Bit#(t_DATA_SZ)));
 
-    RegFile#(Bit#(addr_SZ), Bit#(data_SZ))       ram <- mkRegFileWCF(minBound, maxBound);
-    Reg#(Bit#(data_SZ))                      outputR <- mkRegU();
+    RegFile#(Bit#(t_ADDR_SZ), Bit#(t_DATA_SZ))       ram <- mkRegFileWCF(minBound, maxBound);
+    Reg#(Bit#(t_DATA_SZ))                      outputR <- mkRegU();
 
-    method Action readReq(Bit#(addr_SZ) a);
+    method Action readReq(Bit#(t_ADDR_SZ) a);
         outputR <= ram.sub(a);
     endmethod
 
-    method ActionValue#(Bit#(data_SZ)) readRsp();
+    method ActionValue#(Bit#(t_DATA_SZ)) readRsp();
         return outputR;
     endmethod
 
-    method Action write(Bit#(addr_SZ) a, Bit#(data_SZ) d);
+    method Action write(Bit#(t_ADDR_SZ) a, Bit#(t_DATA_SZ) d);
         ram.upd(a, d);
     endmethod
 
+endmodule
+
+//
+// mkBRAMUnguardedSized --
+//     Instantiate the appropriate BRAM based on parameters.  Unlike the other BRAM versions, 
+//     this BRAM does not necessarily fill the full address space.  Instead, we instantiate a 
+//     set of small BRAMs which fill the same function. 
+//
+module mkBRAMUnguardedSized#(Integer bram_size)
+    // interface:
+        (BRAM#(t_ADDR, t_DATA))
+    provisos
+        (Bits#(t_ADDR, t_ADDR_SZ),
+         Bits#(t_DATA, t_DATA_SZ));
+
+
+    `ifndef SYNTH_Z
+    let mem <- (valueOf(t_ADDR_SZ) == 0 || valueOf(t_DATA_SZ) == 0)? mkBRAMUnguardedZero(): mkBRAMUnguardedNonZeroSized(bram_size);
+    `else
+    let mem <- mkBRAMUnguardedSim();
+    `endif
+
+    method Action readReq(t_ADDR addr);
+        mem.readReq(pack(addr));
+
+        Bit#(TAdd#(1,t_ADDR_SZ)) addrExtended = zeroExtend(pack(addr)); 
+        if(addrExtended > fromInteger(bram_size))
+        begin
+            $display("Warning: Read beyond end of BRAM with size %d: %d", bram_size, addr);
+        end
+    endmethod
+
+    method ActionValue#(t_DATA) readRsp();
+        let m <- mem.readRsp();
+        return unpack(m);
+    endmethod
+
+    method t_DATA peek() = ?;     // Don't use this method
+    method Bool notEmpty() = ?;   // Don't use this method
+    method Bool notFull() = True;
+
+    method Action write(t_ADDR addr, t_DATA val);
+        mem.write(pack(addr), pack(val));
+
+        Bit#(TAdd#(1,t_ADDR_SZ)) addrExtended = zeroExtend(pack(addr)); 
+        if(addrExtended > fromInteger(bram_size))
+        begin
+            $display("Warning: Write beyond end of BRAM with size %d: %d", bram_size, addr);
+        end
+    endmethod
+    method Bool writeNotFull() = True;
 endmodule
 
 
@@ -160,26 +226,10 @@ module mkBRAMUnguarded
         (Bits#(t_ADDR, t_ADDR_SZ),
          Bits#(t_DATA, t_DATA_SZ));
 
-    `ifndef SYNTH_Z
-    let mem <- (valueOf(t_ADDR_SZ) == 0 || valueOf(t_DATA_SZ) == 0)? mkBRAMUnguardedZero(): mkBRAMUnguardedNonZero();
-    `else
-    let mem <- mkBRAMUnguardedSim();
-    `endif
-
-    method Action readReq(t_ADDR addr) = mem.readReq(pack(addr));
-
-    method ActionValue#(t_DATA) readRsp();
-        let m <- mem.readRsp();
-        return unpack(m);
-    endmethod
-
-    method t_DATA peek() = ?;     // Don't use this method
-    method Bool notEmpty() = ?;   // Don't use this method
-    method Bool notFull() = True;
-
-    method Action write(t_ADDR addr, t_DATA val) = mem.write(pack(addr), pack(val));
-    method Bool writeNotFull() = True;
+    let m <- mkBRAMUnguardedSized(valueOf(TExp#(t_ADDR_SZ)));
+    return m;
 endmodule
+
 
 //
 // mkBypassBRAMUnguarded --
@@ -239,11 +289,11 @@ endmodule
 
 
 //
-// mkBRAM --
+// mkBRAMSized --
 //     The actual guarded BRAM. Uses the classic "turn a synchronous RAM into a
 //     buffered RAM" Bluespec technique.
 //
-module mkBRAM
+module mkBRAMSized#(Integer bram_size)
     // interface:
         (BRAM#(t_ADDR, t_DATA))
     provisos
@@ -251,7 +301,7 @@ module mkBRAM
          Bits#(t_DATA, t_DATA_SZ));
 
     // The primitive RAM.
-    BRAM#(t_ADDR, t_DATA) ram <- mkBRAMUnguarded();
+    BRAM#(t_ADDR, t_DATA) ram <- mkBRAMUnguardedSized(bram_size);
 
     // Buffer the responses so nothing is dropped.
     FIFOF#(t_DATA) buffer <- mkSizedBypassFIFOF(2);
@@ -320,6 +370,21 @@ module mkBRAM
     method Bool writeNotFull() = True;
 endmodule
 
+//
+// mkBRAM --
+//     The actual guarded BRAM. Uses the classic "turn a synchronous RAM into a
+//     buffered RAM" Bluespec technique.
+//
+module mkBRAM
+    // interface:
+        (BRAM#(t_ADDR, t_DATA))
+    provisos
+        (Bits#(t_ADDR, t_ADDR_SZ),
+         Bits#(t_DATA, t_DATA_SZ));
+
+    let m <- mkBRAMSized(valueOf(TExp#(t_ADDR_SZ)));
+    return m;
+endmodule
 
 //
 // mkBRAMClockDividerM --
@@ -432,20 +497,35 @@ module mkBRAMClockDivider
     return _m;
 endmodule
 
-
 //
-// mkBRAMBuffered --
-//     A wrapper of the guarded BRAM with buffers (FIFOs) for requests 
-// and responses. 
+// mkBRAMSizedClockDivider --
+//     Wrapper for monadic version.
 //
-module mkBRAMBuffered
+module mkBRAMSizedClockDivider#(Integer bram_size)
     // interface:
         (BRAM#(t_ADDR, t_DATA))
     provisos
         (Bits#(t_ADDR, t_ADDR_SZ),
          Bits#(t_DATA, t_DATA_SZ));
 
-    BRAM#(t_ADDR, t_DATA) bram <- mkBRAM();
+    let _m <- mkBRAMClockDividerM(mkBRAMSized(bram_size));
+    return _m;
+endmodule
+
+
+//
+// mkBRAMSizedBuffered --
+//     A wrapper of the guarded BRAM with buffers (FIFOs) for requests 
+// and responses. 
+//
+module mkBRAMSizedBuffered#(Integer bram_size)
+    // interface:
+        (BRAM#(t_ADDR, t_DATA))
+    provisos
+        (Bits#(t_ADDR, t_ADDR_SZ),
+         Bits#(t_DATA, t_DATA_SZ));
+
+    BRAM#(t_ADDR, t_DATA) bram <- mkBRAMSized(bram_size);
     FIFOF#(t_ADDR) incomingReadReqQ <- mkFIFOF();
     FIFOF#(Tuple2#(t_ADDR, t_DATA)) incomingWriteReqQ <- mkFIFOF();
     FIFOF#(t_DATA) responseQ <- mkFIFOF();
@@ -492,6 +572,24 @@ module mkBRAMBuffered
 endmodule
 
 //
+// mkBRAMBuffered --
+//     A wrapper of the guarded BRAM with buffers (FIFOs) for requests 
+// and responses. 
+//
+module mkBRAMBuffered
+    // interface:
+        (BRAM#(t_ADDR, t_DATA))
+    provisos
+        (Bits#(t_ADDR, t_ADDR_SZ),
+         Bits#(t_DATA, t_DATA_SZ));
+
+    let m <- mkBRAMSizedBuffered(valueOf(TExp#(t_ADDR_SZ)));
+    return m;
+
+endmodule
+
+
+//
 // mkBRAMInitializedWith --
 //     Makes a BRAM and initializes it using an FSM.  The RAM cannot be accessed
 //     until the FSM is done.   Uses an ADDR->VAL function to determine the
@@ -501,8 +599,8 @@ module mkBRAMInitializedWith#(function t_DATA init(t_ADDR x))
     // interface:
         (BRAM#(t_ADDR, t_DATA))
     provisos
-        (Bits#(t_ADDR, addr_SZ),
-         Bits#(t_DATA, data_SZ));
+        (Bits#(t_ADDR, t_ADDR_SZ),
+         Bits#(t_DATA, t_DATA_SZ));
 
     // The primitive RAM.
     BRAM#(t_ADDR, t_DATA) mem <- mkBRAM();
@@ -520,8 +618,8 @@ module mkBRAMInitialized#(t_DATA initVal)
     // interface:
         (BRAM#(t_ADDR, t_DATA))
     provisos
-        (Bits#(t_ADDR, addr_SZ),
-         Bits#(t_DATA, data_SZ));
+        (Bits#(t_ADDR, t_ADDR_SZ),
+         Bits#(t_DATA, t_DATA_SZ));
 
     // The primitive RAM.
     BRAM#(t_ADDR, t_DATA) mem <- mkBRAM();
@@ -539,8 +637,8 @@ module mkBRAMInitializedBuffered#(t_DATA initVal)
     // interface:
         (BRAM#(t_ADDR, t_DATA))
     provisos
-        (Bits#(t_ADDR, addr_SZ),
-         Bits#(t_DATA, data_SZ));
+        (Bits#(t_ADDR, t_ADDR_SZ),
+         Bits#(t_DATA, t_DATA_SZ));
 
     // The primitive RAM.
     BRAM#(t_ADDR, t_DATA) mem <- mkBRAMBuffered();
@@ -558,8 +656,8 @@ module mkBRAMInitializedClockDivider#(t_DATA initVal)
     // interface:
         (BRAM#(t_ADDR, t_DATA))
     provisos
-        (Bits#(t_ADDR, addr_SZ),
-         Bits#(t_DATA, data_SZ));
+        (Bits#(t_ADDR, t_ADDR_SZ),
+         Bits#(t_DATA, t_DATA_SZ));
 
     // The primitive RAM.
     BRAM#(t_ADDR, t_DATA) mem <- mkBRAMClockDivider();
@@ -567,3 +665,160 @@ module mkBRAMInitializedClockDivider#(t_DATA initVal)
     BRAM#(t_ADDR, t_DATA) m <- mkMemInitialized(mem, initVal);
     return m;
 endmodule
+
+
+//
+// mkBRAMSizedLog2 --
+//     Creates a non-power of two memory.  This memory is most useful in hacking around AR 61995.  
+//     This wrapper creates a full ram if the memory size is too large, and calls a recursive RAM 
+//     generator if the memory size is too small.
+//
+module mkBRAMSizedLog2#(Integer mem_size)
+    // interface:
+        (MEMORY_IFC#(t_ADDR, t_DATA))
+    provisos
+        (
+         Bits#(t_ADDR, t_ADDR_SZ),
+         Bits#(t_DATA, t_DATA_SZ)         
+        );
+
+    MEMORY_IFC#(t_ADDR, t_DATA) m;
+
+    // convert size to a slighly larger bit representation.
+
+    // If the size is larger than the address space, 
+    if(mem_size > valueof(TExp#(t_ADDR_SZ))) 
+    begin
+        m <- mkBRAM();
+    end  
+    else
+    begin
+        Bit#(TAdd#(t_ADDR_SZ,1)) mem_size_extended = fromInteger(mem_size);
+        Bit#(t_ADDR_SZ) mem_size_base = truncate(mem_size_extended); 
+        MEMORY_IFC#(Vector#(t_ADDR_SZ, Bit#(1)), t_DATA) mem <- mkBRAMSizedLog2Helper(unpack(mem_size_base));
+
+        m = interface MEMORY_IFC;
+            method Action readReq(t_ADDR addr);
+                mem.readReq(unpack(pack(addr)));
+            endmethod
+
+            method readRsp = mem.readRsp;
+
+            method peek = mem.peek;    
+            method notEmpty = mem.notEmpty;
+            method notFull = mem.notFull();
+
+            method Action write(t_ADDR addr, t_DATA val);
+                mem.write(unpack(pack(addr)), val);
+            endmethod
+
+            method writeNotFull = mem.writeNotFull;
+        endinterface;              
+
+    end
+
+    return m;
+endmodule
+
+
+//
+// mkBRAMSizedLog2Helper --
+//     Does the heavy lifting of creating a non-power of two memory. If the mem_size is 1, we 
+//     create a half size BRAM and pair it with a half-sized memory created by a recursive call, which 
+//     constructs the remainder of the address space. If mem_size is 0, this part of the address space 
+//     is empty, and we do not create a half-sized BRAM. We terminate if the remainder of the address 
+//     space is empty, or if the address space is so small that we can capture it in a single BRAM.      
+//
+module mkBRAMSizedLog2Helper#(Vector#(t_ADDR_SZ,Bit#(1)) mem_size)
+    // interface:
+        (MEMORY_IFC#(Vector#(t_ADDR_SZ,Bit#(1)), t_DATA))
+    provisos
+        (Bits#(t_DATA, t_DATA_SZ));
+
+    MEMORY_IFC#(Vector#(t_ADDR_SZ,Bit#(1)), t_DATA) m;
+
+    // If there's no more address space left, we don't require more memory.
+    if(pack(mem_size) == 0) 
+    begin  
+        m = ?;
+    end 
+    // If we have a small address space, just build the memory.
+    else if(valueof(t_ADDR_SZ) < 10) 
+    begin  
+        m <- mkBRAM();
+    end
+    // In this case, we have a local memory. 
+    else if(reverse(mem_size)[0] == 1'b1)
+    begin
+        // this is a half size memory, where we will send the lower half of the address space.
+        MEMORY_IFC#(Vector#(TSub#(t_ADDR_SZ,1),Bit#(1)), t_DATA) memBottomHalf  <- mkBRAM();
+        MEMORY_IFC#(Vector#(TSub#(t_ADDR_SZ,1),Bit#(1)), t_DATA) memTopHalf <- mkBRAMSizedLog2Helper(take(mem_size));
+
+        FIFOF#(Bit#(1)) oneRemoteZeroLocal <- mkFIFOF();
+
+        m = interface MEMORY_IFC;
+            method Action readReq(Vector#(t_ADDR_SZ,Bit#(1)) addr);
+                memBottomHalf.readReq(take(addr));
+                memTopHalf.readReq(take(addr));
+                oneRemoteZeroLocal.enq(reverse(addr)[0]);
+            endmethod
+
+            method ActionValue#(t_DATA) readRsp();
+                let memBottomHalfResp <- memBottomHalf.readRsp();
+                let memTopHalfResp <- memTopHalf.readRsp();
+                oneRemoteZeroLocal.deq();
+                let result = memBottomHalfResp;
+                if(oneRemoteZeroLocal.first() == 1)
+                begin
+                    result = memTopHalfResp;
+                end
+                return result;
+            endmethod
+
+            method t_DATA peek() = (oneRemoteZeroLocal.first() == 0) ? memBottomHalf.peek() : memTopHalf.peek();    
+            method Bool notEmpty() = oneRemoteZeroLocal.notEmpty();   
+            method Bool notFull() = oneRemoteZeroLocal.notFull();
+
+            method Action write(Vector#(t_ADDR_SZ,Bit#(1)) addr, t_DATA val);
+                if(reverse(addr)[0] == 1'b0)
+                begin
+                    memBottomHalf.write(take(addr), val);
+                end
+                else
+                begin 
+                    memTopHalf.write(take(addr), val);
+                end
+            endmethod
+
+            method Bool writeNotFull() = memBottomHalf.writeNotFull && memTopHalf.writeNotFull;
+        endinterface;        
+        
+    end
+    else
+    begin
+        MEMORY_IFC#(Vector#(TSub#(t_ADDR_SZ,1),Bit#(1)), t_DATA) memBottomHalf <- mkBRAMSizedLog2Helper(take(mem_size));
+        
+        m = interface MEMORY_IFC;
+            method Action readReq(Vector#(t_ADDR_SZ,Bit#(1)) addr);
+                memBottomHalf.readReq(take(addr));
+            endmethod
+
+            method readRsp = memBottomHalf.readRsp;
+
+            method peek = memBottomHalf.peek;   
+            method notEmpty = memBottomHalf.notEmpty;  
+            method notFull = memBottomHalf.notFull();
+
+            method Action write(Vector#(t_ADDR_SZ,Bit#(1)) addr, t_DATA val);
+                memBottomHalf.write(take(addr), val);
+            endmethod
+
+            method writeNotFull = memBottomHalf.writeNotFull;
+        endinterface;              
+    end
+
+    return m;
+endmodule
+
+
+
