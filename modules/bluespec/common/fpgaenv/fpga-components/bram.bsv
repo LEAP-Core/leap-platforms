@@ -57,7 +57,6 @@ import GetPut::*;
 
 typedef MEMORY_IFC#(t_ADDR, t_DATA) BRAM#(type t_ADDR, type t_DATA);
 
-
 //
 // Internal, HW level BRAM interface.  This level has the minimum needed
 // to read/write data.
@@ -287,21 +286,21 @@ module mkBypassBRAMUnguarded
 endmodule
 
 
-
 //
-// mkBRAMSized --
+// mkBRAMSizedM --
 //     The actual guarded BRAM. Uses the classic "turn a synchronous RAM into a
-//     buffered RAM" Bluespec technique.
+//     buffered RAM" Bluespec technique.  Takes a constructor arguement.
 //
-module mkBRAMSized#(Integer bram_size)
+module [m] mkBRAMSizedM#(Integer bram_size, function m#(BRAM#(t_ADDR, t_DATA)) ramImpl(Integer ramImpl_size))
     // interface:
         (BRAM#(t_ADDR, t_DATA))
     provisos
-        (Bits#(t_ADDR, t_ADDR_SZ),
+        (IsModule#(m, a__),
+         Bits#(t_ADDR, t_ADDR_SZ),
          Bits#(t_DATA, t_DATA_SZ));
 
     // The primitive RAM.
-    BRAM#(t_ADDR, t_DATA) ram <- mkBRAMUnguardedSized(bram_size);
+    BRAM#(t_ADDR, t_DATA) ram <- ramImpl(bram_size);
 
     // Buffer the responses so nothing is dropped.
     FIFOF#(t_DATA) buffer <- mkSizedBypassFIFOF(2);
@@ -370,6 +369,24 @@ module mkBRAMSized#(Integer bram_size)
     method Bool writeNotFull() = True;
 endmodule
 
+
+//
+// mkBRAMSized --
+//     The actual guarded BRAM. Uses the classic "turn a synchronous RAM into a
+//     buffered RAM" Bluespec technique.
+//
+module mkBRAMSized#(Integer bram_size)
+    // interface:
+        (BRAM#(t_ADDR, t_DATA))
+    provisos
+        (Bits#(t_ADDR, t_ADDR_SZ),
+         Bits#(t_DATA, t_DATA_SZ));
+
+    let m <- mkBRAMSizedM(bram_size, mkBRAMUnguardedSized);
+
+    return m;
+endmodule
+
 //
 // mkBRAM --
 //     The actual guarded BRAM. Uses the classic "turn a synchronous RAM into a
@@ -383,6 +400,43 @@ module mkBRAM
          Bits#(t_DATA, t_DATA_SZ));
 
     let m <- mkBRAMSized(valueOf(TExp#(t_ADDR_SZ)));
+    return m;
+endmodule
+
+
+//
+// mkRamImpl --
+//    Helper for making a fully elaborated RAM constructor look like one that takes an
+//    argument.  Necessary for making constructor types match.
+//
+module [m] mkRamImpl#(function m#(BRAM#(t_ADDR, t_DATA)) ramImpl, Integer bram_size)
+    // interface:
+        (BRAM#(t_ADDR, t_DATA))
+    provisos
+        (IsModule#(m, a__),
+         Bits#(t_ADDR, t_ADDR_SZ),
+         Bits#(t_DATA, t_DATA_SZ)); 
+
+    let m <- ramImpl();
+    return m;
+endmodule
+
+//
+// mkBRAMM --
+//     The actual guarded BRAM. Uses the classic "turn a synchronous RAM into a
+//     buffered RAM" Bluespec technique.  Takes a mondaic constructor for 
+//     underlying ram implementation.
+//
+module [m] mkBRAMM#(function m#(BRAM#(t_ADDR, t_DATA)) ramImpl)
+    // interface:
+        (BRAM#(t_ADDR, t_DATA))
+    provisos
+        (
+         IsModule#(m, a__),
+         Bits#(t_ADDR, t_ADDR_SZ),
+         Bits#(t_DATA, t_DATA_SZ));
+
+    let m <- mkBRAMSizedM(valueOf(TExp#(t_ADDR_SZ)), mkRamImpl(ramImpl));
     return m;
 endmodule
 
@@ -694,8 +748,8 @@ module mkBRAMSizedLog2#(Integer mem_size)
     else
     begin
         Bit#(TAdd#(t_ADDR_SZ,1)) mem_size_extended = fromInteger(mem_size);
-        Bit#(t_ADDR_SZ) mem_size_base = truncate(mem_size_extended); 
-        MEMORY_IFC#(Vector#(t_ADDR_SZ, Bit#(1)), t_DATA) mem <- mkBRAMSizedLog2Helper(unpack(mem_size_base));
+        Bit#(t_ADDR_SZ) mem_size_base = truncate(mem_size_extended);         
+        let mem <- mkBRAMM(mkBRAMSizedLog2Helper(unpack(mem_size_base)));
 
         m = interface MEMORY_IFC;
             method Action readReq(t_ADDR addr);
@@ -745,13 +799,13 @@ module mkBRAMSizedLog2Helper#(Vector#(t_ADDR_SZ,Bit#(1)) mem_size)
     // If we have a small address space, just build the memory.
     else if(valueof(t_ADDR_SZ) < 10) 
     begin  
-        m <- mkBRAM();
+        m <- mkBRAMUnguarded();
     end
     // In this case, we have a local memory. 
     else if(reverse(mem_size)[0] == 1'b1)
     begin
         // this is a half size memory, where we will send the lower half of the address space.
-        MEMORY_IFC#(Vector#(TSub#(t_ADDR_SZ,1),Bit#(1)), t_DATA) memBottomHalf  <- mkBRAM();
+        MEMORY_IFC#(Vector#(TSub#(t_ADDR_SZ,1),Bit#(1)), t_DATA) memBottomHalf  <- mkBRAMUnguarded();
         MEMORY_IFC#(Vector#(TSub#(t_ADDR_SZ,1),Bit#(1)), t_DATA) memTopHalf <- mkBRAMSizedLog2Helper(take(mem_size));
 
         FIFOF#(Bit#(1)) oneRemoteZeroLocal <- mkFIFOF();
