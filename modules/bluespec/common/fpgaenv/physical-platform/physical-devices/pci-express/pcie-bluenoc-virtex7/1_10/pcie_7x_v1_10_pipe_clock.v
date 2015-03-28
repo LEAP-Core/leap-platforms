@@ -145,7 +145,7 @@ module pcie_7x_v1_10_pipe_clock #
     wire                        userclk1;
     wire                        userclk2;
     wire                        oobclk;
-    reg                         pclk_sel = 1'd0;
+(* DONT_TOUCH = "TRUE" *)     reg                         pclk_sel = 1'd0;
 
     //---------- Output Registers --------------------------
     wire                        pclk_1;

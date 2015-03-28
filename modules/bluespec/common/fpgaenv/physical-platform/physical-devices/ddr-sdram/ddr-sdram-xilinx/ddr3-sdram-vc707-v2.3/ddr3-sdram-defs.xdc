@@ -747,7 +747,9 @@ proc ddr3PARConstraints { } {
             bindClockPin E18 [get_ports {ddrWires_clk_n_put}]
 
             create_clock -name ddrWires_clk_p_put -period 5 [get_ports ddrWires_clk_p_put]
-            set_property LOC $DDR3_CLK_BUFG [get_cells -hier -filter {NAME =~ */llpi_phys_plat_sdram_ddrClock_bufferedClock}]
+
+            # Lock down the clock's BUFG.
+            set_property LOC $DDR3_CLK_BUFG [get_cells -hier -filter {NAME =~ */llpi_phys_plat_sdram_ddrClock* && REF_NAME =~ BUFG}]
         }
 
     } else {

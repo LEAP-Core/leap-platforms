@@ -54,17 +54,10 @@ import DefaultValue::*;
 //   ties them to pins.
 //
 interface PCIE_WIRES;
-
     interface Put#(Bit#(1)) clk_p;
-
     interface Put#(Bit#(1)) clk_n;
-
     interface Put#(Bit#(1)) rst;
-
-    method Bit#(8) leds();
-
     interface PCIE_EXP#(PCIE_LANES) pcie_exp;
-
 endinterface
 
 //
@@ -166,8 +159,6 @@ module mkPCIELowLevelDevice#(Clock rawClock, Reset rawReset)
               buffRst <= rst;
            endmethod
         endinterface
-
-        method leds = ?; // dev.leds();
 
         interface pcie_exp = deviceClocked.pcie_exp;
     endinterface

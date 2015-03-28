@@ -72,10 +72,10 @@ module mkPCIEBlueNoCDevice#(Clock pcieSysClkBuf, Reset pcieSysRst)
 
     // Instantiate a PCIE endpoint
     PCIEParams pcie_params = defaultValue();
-    PCIExpressV7#(PCIE_LANES) ep <-
-        mkPCIExpressEndpointV7(pcie_params,
-                               clocked_by pcieSysClkBuf,
-                               reset_by pcieSysRst);
+    PCIExpressNoClkV7#(PCIE_LANES) ep <-
+        mkPCIExpressEndpointNoClkV7(pcie_params,
+                                    clocked_by pcieSysClkBuf,
+                                    reset_by pcieSysRst);
 
     // Extract the clocks and resets from the endpoint.
     Clock epClock250  = ep.trn.clk;

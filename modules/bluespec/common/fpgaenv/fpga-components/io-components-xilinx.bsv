@@ -37,13 +37,11 @@ import XilinxCells::*;
 
 
 module mkDifferentialClock#(Clock clk_p, Clock clk_n)(Clock);
-    // Parameters of the clock are based on the way a differential
-    // sys_clk_p/sys_clk_n is consumed in the Virtex 7 DDR3 controller.
-    IBUFGDSParams params = defaultValue;
-    params.diff_term = "TRUE";
-    params.ibuf_low_pwr = "FALSE";
+    let _d <- mkClockIBUFDS(defaultValue, clk_p, clk_n);
 
-    let _m <- mkClockIBUFGDS(params, clk_p, clk_n);
+    // Pass clock through a BUFG after IBUFDS.  See:
+    //   http://forums.xilinx.com/t5/Virtex-Family-FPGAs/Virtex-6-Differential-Clocks-and-Inputs/td-p/205703
+    let _m <- mkClockBUFG(clocked_by _d);
     return _m;
 endmodule
 

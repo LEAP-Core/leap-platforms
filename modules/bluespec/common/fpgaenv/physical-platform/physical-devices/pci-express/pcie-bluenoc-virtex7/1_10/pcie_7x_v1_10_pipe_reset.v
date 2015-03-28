@@ -142,10 +142,10 @@ module pcie_7x_v1_10_pipe_reset #
     //---------- Output Register ---------------------------
 (* KEEP = "TRUE" *)    reg                             cpllreset         =  1'd0; /* synthesis syn_keep=1 */
     reg                             cpllpd            =  1'd0;
-(* ASYNC_REG = "TRUE", SHIFT_EXTRACT = "NO" *)    reg                             rxusrclk_rst_reg1 =  1'd0;
-(* ASYNC_REG = "TRUE", SHIFT_EXTRACT = "NO" *)    reg                             rxusrclk_rst_reg2 =  1'd0;
-(* ASYNC_REG = "TRUE", SHIFT_EXTRACT = "NO" *)    reg                             dclk_rst_reg1     =  1'd0;
-(* ASYNC_REG = "TRUE", SHIFT_EXTRACT = "NO" *)    reg                             dclk_rst_reg2     =  1'd0;
+    reg                             rxusrclk_rst_reg1 =  1'd0;
+    reg                             rxusrclk_rst_reg2 =  1'd0;
+    reg                             dclk_rst_reg1     =  1'd0;
+    reg                             dclk_rst_reg2     =  1'd0;
     reg                             gtreset           =  1'd0;
     reg                             userrdy           =  1'd0;
     reg         [4:0]               fsm               =  5'h2;
