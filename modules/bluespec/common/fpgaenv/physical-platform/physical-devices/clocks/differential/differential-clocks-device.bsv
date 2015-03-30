@@ -109,22 +109,15 @@ module mkClocksDevice
     Clock rawClock <- mkDifferentialClock(incomingClockP.clock, incomingClockN.clock);
 
     // Construct reset.  The incoming reset wire must be "crossed"
-    // to the incomingSysClkBuf clock domain from the rawClock domain.  Like
-    // the clock crossing above, this crossing is fictitious and exists
-    // solely to keep the compiler from complaining about the module
-    // being clocked by a clock not exposed at the top.
+    // to the rawClock domain.  Like the clock crossing above, this
+    // crossing is fictitious and exists solely to keep the compiler
+    // from complaining about the module being clocked by a clock not
+    // exposed at the top.
     RESET_FROM_PUT incomingReset <- mkResetFromPut(rawClock,
                                                    clocked_by rawClock);
-
-    Wire#(Bit#(1)) buffRst <- mkInputBuffer(clocked_by rawClock, reset_by incomingReset.reset);
- 
-    rule transferRst;
-        incomingReset.reset_wire.put(buffRst);
-    endrule
-        
     Reset rawReset = incomingReset.reset;
-    
-    if(`RESET_ACTIVE_HIGH > 0)
+
+    if (`RESET_ACTIVE_HIGH > 0)
     begin     
         rawReset <- mkResetInverter(rawReset, clocked_by rawClock);
     end
@@ -185,11 +178,7 @@ module mkClocksDevice
         interface clk_n   = incomingClockN.clock_wire;
         interface clk_p   = incomingClockP.clock_wire;
 
-        interface Put rst;
-            method Action put(Bit#(1) rst);
-                buffRst <= rst;
-            endmethod
-        endinterface
+        interface Put rst = incomingReset.reset_wire;
 
         interface outputClocks = driverBinding;
     endinterface

@@ -7,7 +7,6 @@
 
 %sources -t VIVADO_TCL_SYNTHESIS  -v PRIVATE ddr3-sdram-synthesis.xdc
 %sources -t VIVADO_TCL_DEFINITION -v PRIVATE ddr3-sdram-defs.xdc
-%sources -t VIVADO_TCL_ALGEBRA    -v PRIVATE ddr3-sdram-alg.xdc
 
 %sources -t AREA_CONSTRAINT -v PRIVATE ddr3-sdram.agrp
 

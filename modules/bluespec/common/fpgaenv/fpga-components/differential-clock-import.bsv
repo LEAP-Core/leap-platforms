@@ -27,16 +27,13 @@ module mkPrimitiveDifferentialClock (PRIMITIVE_DIFFERENTIAL_CLOCKS_DEVICE);
     // Buffer clocks and reset before they are used
     Clock sysClkBuf <- mkDifferentialClock(sysClockP.clock, sysClockN.clock);
 
-    // And now a bufg 
-    Clock sysClkBufG <- mkClockBuffer(clocked_by sysClkBuf);
-
     RESET_IMPORTER resetIn <- mkResetImporter(clocked_by sysClkBuf);  
 
     method clock_n_wire = sysClockN.clock_wire;
     method clock_p_wire = sysClockP.clock_wire;
     method reset_n_wire = resetIn.reset_wire;
 
-    interface clock = sysClkBufG;
+    interface clock = sysClkBuf;
     interface reset = resetIn.reset;
 
 endmodule

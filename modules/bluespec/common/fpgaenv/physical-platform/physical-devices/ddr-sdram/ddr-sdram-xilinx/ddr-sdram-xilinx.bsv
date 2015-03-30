@@ -182,15 +182,8 @@ module [CONNECTED_MODULE] mkDDRDevice#(DDRControllerConfigure ddrConfig)
     begin
         messageM("DDR: CLOCK_EXTERNAL_DIFFERENTIAL");
 
-        Clock ddrClockDiff <- mkDifferentialClock(incomingClockP.clock,
-                                                  incomingClockN.clock);
-
-        // BUFG allows the clock to travel from the incoming pins to
-        // the memory controller.
-        ddrClock <- mkClockBuffer(clocked_by ddrClockDiff);
-
-        // Clean the incoming reset.
-        ddrReset <- mkAsyncReset(4, ddrReset, ddrClock);
+        ddrClock <- mkDifferentialClock(incomingClockP.clock,
+                                        incomingClockN.clock);
     end
 
     if (ddrConfig.clockArchitecture == CLOCK_INTERNAL_UNBUFFERED)
@@ -198,6 +191,10 @@ module [CONNECTED_MODULE] mkDDRDevice#(DDRControllerConfigure ddrConfig)
         messageM("DDR: CLOCK_INTERNAL_UNBUFFERED");
         ddrClock <- mkClockBuffer(clocked_by ddrClock);
     end
+
+    // Hold the incoming reset for a while.  This is also a convenient place
+    // to ignore setup/hold times on the incoming reset.
+    ddrReset <- mkAsyncReset(16, ddrReset, ddrClock);
 
     Vector#(FPGA_DDR_BANKS, DDR_BANK) b <-
         genWithM(mkDDRBank(ddrClock, ddrReset));
@@ -243,13 +240,13 @@ FPGA_DDR_STATE
 //
 // Debug DDR interface, exported to upper levels.
 //
-module [CONNECTED_MODULE] mkDDRBank#(Clock rawClock,
-                                     Reset rawReset,
+module [CONNECTED_MODULE] mkDDRBank#(Clock ddrClock,
+                                     Reset ddrReset,
                                      Integer bankIdx)
     // interface:
     (DDR_BANK);
 
-    DDR_BANK_SYNTH ddrSynth <- mkDDRBankSynth(rawClock, rawReset);
+    DDR_BANK_SYNTH ddrSynth <- mkDDRBankSynth(ddrClock, ddrReset);
 
     //
     // Incoming requests
@@ -395,26 +392,32 @@ interface DDR_BANK_DRIVER_SYNTH;
 endinterface
 
 (* synthesize *)
-module mkDDRBankSynth#(Clock rawClock, Reset rawReset)
+module mkDDRBankSynth#(Clock ddrClock, Reset ddrResetIn)
     // interface:
-    (DDR_BANK_SYNTH);
+    (DDR_BANK_SYNTH)
+    provisos (NumAlias#(n_RETRY_TIMEOUT, TMul#(200000000, 2))); // 200 MHz -> 2 sec.
 
     Clock modelClock <- exposeCurrentClock();
     Reset modelReset <- exposeCurrentReset();
 
-    Reset modelResetInRaw <- mkAsyncReset(64, modelReset, rawClock);
-    Reset modelOrRawReset <- mkResetEither(modelResetInRaw, rawReset,
-                                           clocked_by rawClock);
-
-    // One final reset register to hold the merged resets as close to the
-    // memory controller as possible.
-    let ddrReset <- mkAsyncResetStage(modelOrRawReset, rawClock);
+    //
+    // Some DRAM controllers fail to initialize sometimes and need a kick
+    // A timer here will trigger reset repeatedly until the controller
+    // becomes available.
+    //
+    MakeResetIfc initRetryReset <- mkResetSync(4, False, ddrClock,
+                                               clocked_by ddrClock,
+                                               reset_by ddrResetIn);
+    Reset ddrResetEither <- mkResetEither(ddrResetIn, initRetryReset.new_rst,
+                                          clocked_by ddrClock);
+    Reset ddrReset <- mkAsyncReset(8, ddrResetEither, ddrClock,
+                                   clocked_by ddrClock,
+                                   reset_by ddrResetIn);
 
     //
     // Instantiate the Xilinx Memory Controller
     //
-    XILINX_DRAM_CONTROLLER dramCtrl <-
-        mkXilinxDRAMController(rawClock, ddrReset.reset);
+    XILINX_DRAM_CONTROLLER dramCtrl <- mkXilinxDRAMController(ddrClock, ddrReset);
 
     // Clock the glue logic with the Controller's clock
     Clock controllerClock = dramCtrl.controller_clock;
@@ -427,6 +430,11 @@ module mkDDRBankSynth#(Clock rawClock, Reset rawReset)
         mkNullCrossingReg(modelClock, False,
                           clocked_by controllerClock, reset_by controllerReset);
     Reg#(Bool) dramReady_Model <- mkReg(False);
+
+    CrossingReg#(Bool) dramReadyDDR <-
+        mkNullCrossingReg(ddrClock, False,
+                          clocked_by controllerClock, reset_by controllerReset);
+    Reg#(Bool) dramReady_ddrClock <- mkReg(False, clocked_by ddrClock, reset_by ddrResetIn);
 
     //
     // Synchronizers from Controller to Model
@@ -469,6 +477,28 @@ module mkDDRBankSynth#(Clock rawClock, Reset rawReset)
     //
     // ===== Rules =====
     //
+
+    //
+    // DDR controller sometimes fails to initialize.  Resetting and trying again
+    // every couple of seconds seems to work.
+    //
+    Reg#(UInt#(TLog#(n_RETRY_TIMEOUT))) retryCounter <-
+        mkReg(0, clocked_by ddrClock, reset_by ddrResetIn);
+
+    (* fire_when_enabled, no_implicit_conditions *)
+    rule checkForInit(True);
+        // Check the msb of a longer number instead of checking all bits
+        UInt#(TAdd#(1, TLog#(n_RETRY_TIMEOUT))) cnt = zeroExtend(retryCounter);
+        cnt = cnt + 1;
+        retryCounter <= truncate(cnt);
+
+        if ((msb(cnt) == 1) && ! dramReady_ddrClock)
+        begin
+            // Failed to initialize.  Try again.
+            initRetryReset.assertReset();
+        end
+    endrule
+
 
     // Rules for synchronizing from Controller to Model
 
@@ -615,14 +645,48 @@ module mkDDRBankSynth#(Clock rawClock, Reset rawReset)
     //
     // ====================================================================
 
+    Reg#(UInt#(10)) readyDelay <-
+        mkReg(0, clocked_by controllerClock, reset_by controllerReset);
+
     (* fire_when_enabled, no_implicit_conditions *)
     rule dramReadyInit (True);
-        dramReady <= dramCtrl.init_done();
+        // init_done must be stable for 1K cycles before we believe memory
+        // is actually ready.  We have seen bouncing in the past during init.
+        UInt#(11) cnt = zeroExtend(readyDelay);
+        cnt = cnt + 1;
+
+        if (! dramCtrl.init_done())
+        begin
+            // Not ready.  Hold delay counter at 0.
+            dramReady <= False;
+            readyDelay <= 0;
+        end
+        else
+        begin
+            // Ready.  Let the counter run.
+            readyDelay <= truncate(cnt);
+
+            // Has it been 1K cycles?
+            if (msb(cnt) == 1)
+            begin
+                dramReady <= True;
+            end
+        end
     endrule
 
     (* fire_when_enabled, no_implicit_conditions *)
     rule dramReadyToModel (True);
         dramReady_Model <= dramReady.crossed();
+    endrule
+
+    (* fire_when_enabled, no_implicit_conditions *)
+    rule dramReadyDDRInit (True);
+        dramReadyDDR <= dramCtrl.init_done();
+    endrule
+
+    (* fire_when_enabled, no_implicit_conditions *)
+    rule dramReadyToDDRClock (True);
+        dramReady_ddrClock <= dramReadyDDR.crossed();
     endrule
 
     // UGLY HACK, now disabled by parameter.
