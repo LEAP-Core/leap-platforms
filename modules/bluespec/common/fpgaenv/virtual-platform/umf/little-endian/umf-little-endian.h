@@ -301,12 +301,8 @@ UMF_MESSAGE_CLASS::ExtractChunk()
 inline void
 UMF_MESSAGE_CLASS::ExtractChunks(int nchunks, UMF_CHUNK dst[])
 {
-    if(nchunks * sizeof(UMF_CHUNK) + readIndex < length)
-    {
-        this->Print(cerr);
-    }
+    VERIFYX(nchunks * sizeof(UMF_CHUNK) + readIndex == length);
 
-    ASSERTX(nchunks * sizeof(UMF_CHUNK) + readIndex < length);
     const UMF_CHUNK* src = (UMF_CHUNK *)(&message[readIndex]);
 
     readIndex += nchunks * sizeof(UMF_CHUNK);

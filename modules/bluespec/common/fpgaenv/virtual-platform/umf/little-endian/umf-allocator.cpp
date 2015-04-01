@@ -56,6 +56,7 @@ UMF_ALLOCATOR_CLASS::UMF_ALLOCATOR_CLASS()
         UMF_MESSAGE m = (UMF_MESSAGE) memset(malloc(sizeof(UMF_MESSAGE_CLASS)), 0, sizeof(UMF_MESSAGE_CLASS));
 
         m->setAllocator(this);
+        m->SetFreeListNext(NULL);
         memset(m, 0, sizeof(UMF_MESSAGE_CLASS));
         freeList.Push(m);
     }
