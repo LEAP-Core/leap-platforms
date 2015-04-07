@@ -301,7 +301,9 @@ UMF_MESSAGE_CLASS::ExtractChunk()
 inline void
 UMF_MESSAGE_CLASS::ExtractChunks(int nchunks, UMF_CHUNK dst[])
 {
-    VERIFYX(nchunks * sizeof(UMF_CHUNK) + readIndex == length);
+    // Round length up to a multiple of chunks
+    UINT32 len = (length + sizeof(UMF_CHUNK) - 1) & ~(sizeof(UMF_CHUNK) - 1);
+    VERIFYX(nchunks * sizeof(UMF_CHUNK) + readIndex == len);
 
     const UMF_CHUNK* src = (UMF_CHUNK *)(&message[readIndex]);
 
