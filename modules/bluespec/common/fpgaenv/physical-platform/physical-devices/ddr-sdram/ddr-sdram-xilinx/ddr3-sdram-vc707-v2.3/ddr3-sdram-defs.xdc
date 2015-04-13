@@ -742,9 +742,11 @@ proc ddr3PARConstraints { } {
 
             # PadFunction: IO_L12P_T1_MRCC_38
             bindClockPin E19 [get_ports {ddrWires_clk_p_put}]
+            set_property IOSTANDARD LVDS [get_ports {ddrWires_clk_p_put}]
 
             # PadFunction: IO_L12N_T1_MRCC_38
             bindClockPin E18 [get_ports {ddrWires_clk_n_put}]
+            set_property IOSTANDARD LVDS [get_ports {ddrWires_clk_n_put}]
 
             create_clock -name ddrWires_clk_p_put -period 5 [get_ports ddrWires_clk_p_put]
 

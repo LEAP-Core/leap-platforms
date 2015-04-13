@@ -170,6 +170,19 @@ module mkResetFanout#(Reset baseReset)
     // Interface:
     (Reset);
 
-    // Fan-out not yet implemented in this clock
-    return baseReset;
+    let clk <- exposeCurrentClock();
+
+    //
+    // Build a chain so it can propagate across the FPGA.  The chain is
+    // synchronous since the clock is unchanged and all resets must arrive
+    // at the same time.
+    //
+    Reset rst = baseReset;
+
+    for (Integer i = 0; i < 4; i = i + 1) 
+    begin
+        rst <- mkSyncReset(3, rst, clk, reset_by baseReset);
+    end 
+
+    return rst;
 endmodule

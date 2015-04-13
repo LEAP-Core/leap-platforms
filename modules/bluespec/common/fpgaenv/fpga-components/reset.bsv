@@ -32,6 +32,26 @@
 import Clocks::*;
 import GetPut::*;
 
+//
+// mkAsyncResetSynth creates an asynchronous reset in a synthesis boundary
+// so that it is easily found during synthesis.  LEAP automatically tags
+// the input to the reset as a false path to avoid timing errors.
+//
+
+module mkAsyncResetSynth#(Integer stages, Reset rst, Clock clk)
+    // Interface:
+    (Reset);
+
+    let _rst <- mkAsyncResetStage(rst, clk);
+
+    // Chain with a synchronous reset.  The asynchronous stages will be marked
+    // during synthesis to ignore timing.  This synchronous stage guarantees
+    // the timing from the output to consumers is managed.
+    _rst <- mkSyncReset(stages, extractAsyncResetStage(_rst), clk);
+
+    return _rst;
+endmodule
+
 
 //
 // mkAsyncResetStage is a wrapper around mkAsyncReset that exists only to
@@ -58,7 +78,7 @@ module mkAsyncResetStage#(Reset previousReset, Clock clk)
         error("Attempt to fan-out reset with no clock!");
     end
 
-    Reset asyncResetStage <- mkAsyncReset(3, previousReset, clk);
+    Reset asyncResetStage <- mkAsyncReset(4, previousReset, clk);
     interface reset = asyncResetStage;
 endmodule
 

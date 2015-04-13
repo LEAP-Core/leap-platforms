@@ -194,7 +194,7 @@ module [CONNECTED_MODULE] mkDDRDevice#(DDRControllerConfigure ddrConfig)
 
     // Hold the incoming reset for a while.  This is also a convenient place
     // to ignore setup/hold times on the incoming reset.
-    ddrReset <- mkAsyncReset(16, ddrReset, ddrClock);
+    ddrReset <- mkAsyncResetSynth(8, ddrReset, ddrClock);
 
     Vector#(FPGA_DDR_BANKS, DDR_BANK) b <-
         genWithM(mkDDRBank(ddrClock, ddrReset));
@@ -410,9 +410,17 @@ module mkDDRBankSynth#(Clock ddrClock, Reset ddrResetIn)
                                                reset_by ddrResetIn);
     Reset ddrResetEither <- mkResetEither(ddrResetIn, initRetryReset.new_rst,
                                           clocked_by ddrClock);
-    Reset ddrReset <- mkAsyncReset(8, ddrResetEither, ddrClock,
-                                   clocked_by ddrClock,
-                                   reset_by ddrResetIn);
+
+    // Add model reset to the mix
+    Reset modelResetInDDR <- mkAsyncResetSynth(16, modelReset, ddrClock);
+    Reset ddrResetAll <- mkResetEither(ddrResetEither, modelResetInDDR,
+                                       clocked_by ddrClock);
+
+    // Add a final buffer, still in ddrClock, so all resets fan out from a
+    // single location.
+    Reset ddrReset <- mkSyncReset(8, ddrResetAll, ddrClock,
+                                  clocked_by ddrClock,
+                                  reset_by ddrResetIn);
 
     //
     // Instantiate the Xilinx Memory Controller
