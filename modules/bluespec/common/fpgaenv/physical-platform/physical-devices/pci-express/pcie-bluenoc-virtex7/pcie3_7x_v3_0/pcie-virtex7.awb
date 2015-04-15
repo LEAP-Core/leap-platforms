@@ -1,0 +1,44 @@
+%name Virtex-7 PCIe v3 Device v3.0 (BlueNoC)
+%desc Virtex-7 PCIe v3 Device v3.0 (BlueNoC)
+
+%provides pcie_bluenoc_device
+
+%sources -t BSV -v PUBLIC pcie-virtex7.bsv
+
+## Side effects of pcie-virtex7.bsv compilation
+%generated -t VERILOG mkBNoCBridgeSynth.v
+%generated -t VERILOG mkPCIEBlueNoCDevice.v
+
+%sources -t VERILOG -v PRIVATE pcie3_7x_v3_0.v
+%sources -t VERILOG -v PRIVATE pcie3_7x_v3_0_gt_common.v
+%sources -t VERILOG -v PRIVATE pcie3_7x_v3_0_gt_top.v
+%sources -t VERILOG -v PRIVATE pcie3_7x_v3_0_gt_wrapper.v
+%sources -t VERILOG -v PRIVATE pcie3_7x_v3_0_pcie_3_0_7vx.v
+%sources -t VERILOG -v PRIVATE pcie3_7x_v3_0_pcie_7vx.v
+%sources -t VERILOG -v PRIVATE pcie3_7x_v3_0_pcie_bram_7vx.v
+%sources -t VERILOG -v PRIVATE pcie3_7x_v3_0_pcie_bram_7vx_16k.v
+%sources -t VERILOG -v PRIVATE pcie3_7x_v3_0_pcie_bram_7vx_8k.v
+%sources -t VERILOG -v PRIVATE pcie3_7x_v3_0_pcie_bram_7vx_cpl.v
+%sources -t VERILOG -v PRIVATE pcie3_7x_v3_0_pcie_bram_7vx_rep.v
+%sources -t VERILOG -v PRIVATE pcie3_7x_v3_0_pcie_bram_7vx_rep_8k.v
+%sources -t VERILOG -v PRIVATE pcie3_7x_v3_0_pcie_bram_7vx_req.v
+%sources -t VERILOG -v PRIVATE pcie3_7x_v3_0_pcie_force_adapt.v
+%sources -t VERILOG -v PRIVATE pcie3_7x_v3_0_pcie_init_ctrl_7vx.v
+%sources -t VERILOG -v PRIVATE pcie3_7x_v3_0_pcie_pipe_lane.v
+%sources -t VERILOG -v PRIVATE pcie3_7x_v3_0_pcie_pipe_misc.v
+%sources -t VERILOG -v PRIVATE pcie3_7x_v3_0_pcie_pipe_pipeline.v
+%sources -t VERILOG -v PRIVATE pcie3_7x_v3_0_pcie_tlp_tph_tbl_7vx.v
+%sources -t VERILOG -v PRIVATE pcie3_7x_v3_0_pcie_top.v
+%sources -t VERILOG -v PRIVATE pcie3_7x_v3_0_pipe_clock.v
+%sources -t VERILOG -v PRIVATE pcie3_7x_v3_0_pipe_drp.v
+%sources -t VERILOG -v PRIVATE pcie3_7x_v3_0_pipe_eq.v
+%sources -t VERILOG -v PRIVATE pcie3_7x_v3_0_pipe_rate.v
+%sources -t VERILOG -v PRIVATE pcie3_7x_v3_0_pipe_reset.v
+%sources -t VERILOG -v PRIVATE pcie3_7x_v3_0_pipe_sync.v
+%sources -t VERILOG -v PRIVATE pcie3_7x_v3_0_pipe_user.v
+%sources -t VERILOG -v PRIVATE pcie3_7x_v3_0_pipe_wrapper.v
+%sources -t VERILOG -v PRIVATE pcie3_7x_v3_0_qpll_drp.v
+%sources -t VERILOG -v PRIVATE pcie3_7x_v3_0_qpll_reset.v
+%sources -t VERILOG -v PRIVATE pcie3_7x_v3_0_qpll_wrapper.v
+%sources -t VERILOG -v PRIVATE pcie3_7x_v3_0_rxeq_scan.v
+%sources -t VERILOG -v PRIVATE xilinx_v7_pcie3_wrapper.v

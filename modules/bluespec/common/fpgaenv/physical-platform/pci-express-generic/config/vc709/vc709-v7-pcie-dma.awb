@@ -1,0 +1,18 @@
+%name VC709 Virtex-7 Platform with PCIe
+%desc VC709 Virtex-7 Platform with PCIe
+
+%provides physical_platform_config
+
+%sources -t VIVADO_TCL_DEFINITION -v PRIVATE vc709-v7-pcie-dma.xdc
+
+%param --global MAKE_ALL_TARGET   "bit"        "Target of 'make all'.  Most likely bit, exe or vexe."
+
+%param --global FPGA_PLATFORM      "VC709"               "FPGA Platform"
+%param FPGA_PART_XILINX   "xc7vx690t-ffg1761-2" "FPGA Part ID"
+%param FPGA_POSITION      1                     "FPGA Position (in Xilinx iMPACT)"
+%param MAP_OPTIONS        ""                    "Extra Xilinx Map Options"
+%param FPGA_TECHNOLOGY    "Virtex7"             "FPGA Technology (Synplify)"
+%param FPGA_PART_SYNPLIFY "XC7VX690T"           "FPGA Part (Synplify)"
+%param FPGA_SPEED         "-2"                  "FPGA Speed Grade (Synplify)"
+%param FPGA_PACKAGE       "FFG1761"             "FPGA Package (Synplify)"
+%param SYNTHESIS_TOOL     "xst"                 "Synthesis tool, xst or synplify_pro supported"
