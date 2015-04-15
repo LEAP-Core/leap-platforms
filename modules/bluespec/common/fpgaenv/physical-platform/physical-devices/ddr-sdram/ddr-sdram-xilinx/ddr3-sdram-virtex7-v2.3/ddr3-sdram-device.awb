@@ -1,18 +1,17 @@
-%name VC707 DDR3 SDRAM (v2.3)
-%desc VC707 DDR3 SDRAM (v2.3)
+%name Virtex-7 DDR3 SDRAM (v2.3)
+%desc Virtex-7 DDR3 SDRAM (v2.3)
 
 %provides ddr_sdram_xilinx_driver
+%requires ddr_sdram_xilinx_v23_config
 
 %sources -t BSV -v PUBLIC ddr3-sdram-verilog-import.bsv
+%sources -t BSH -v PUBLIC ddr3-config-import.bsh
+%sources -t H   -v PUBLIC ddr3-config-import.h
 
 %sources -t VIVADO_TCL_SYNTHESIS  -v PRIVATE ddr3-sdram-synthesis.xdc
-%sources -t VIVADO_TCL_DEFINITION -v PRIVATE ddr3-sdram-defs.xdc
-
-%sources -t AREA_CONSTRAINT -v PRIVATE ddr3-sdram.agrp
 
 %sources -t VERILOG -v PRIVATE ddr3_wrapper.v
 
-%sources -t VERILOG -v PRIVATE mig_7series_0_mig.v
 %sources -t VERILOG -v PRIVATE mig_7series_v2_3_arb_mux.v
 %sources -t VERILOG -v PRIVATE mig_7series_v2_3_arb_row_col.v
 %sources -t VERILOG -v PRIVATE mig_7series_v2_3_arb_select.v
@@ -75,10 +74,3 @@
 %sources -t VERILOG -v PRIVATE mig_7series_v2_3_ddr_phy_ocd_mux.v
 %sources -t VERILOG -v PRIVATE mig_7series_v2_3_ddr_phy_ocd_po_cntlr.v
 %sources -t VERILOG -v PRIVATE mig_7series_v2_3_ddr_phy_ocd_samp.v
-
-%param DRAM_MIN_BURST       1     "Minimum burst size"
-%param DRAM_BEAT_WIDTH      512   "Bit width of one beat in a burst"
-%param DRAM_WORD_WIDTH      64    "Addressable object size"
-%param DRAM_ADDR_BITS       27    "Address bits per bank"
-%param DRAM_NUM_BANKS       1     "DDR banks"
-%param DRAM_VERSION_STRING  "2_3" "Magic DDR Version String"

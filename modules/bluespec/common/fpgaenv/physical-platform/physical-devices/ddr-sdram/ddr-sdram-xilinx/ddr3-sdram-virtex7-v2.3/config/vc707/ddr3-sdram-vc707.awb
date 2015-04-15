@@ -1,0 +1,15 @@
+%name VC707 DDR3 SDRAM Configuration
+%desc VC707 DDR3 SDRAM Configuration
+
+%provides ddr_sdram_xilinx_v23_config
+
+%sources -t VIVADO_TCL_DEFINITION -v PRIVATE ddr3-sdram-defs.xdc
+%sources -t AREA_CONSTRAINT -v PRIVATE ddr3-sdram.agrp
+%sources -t VERILOG -v PRIVATE mig_7series_0_mig.v
+
+%param DRAM_MIN_BURST       1     "Minimum burst size"
+%param DRAM_BEAT_WIDTH      512   "Bit width of one beat in a burst"
+%param DRAM_WORD_WIDTH      64    "Addressable object size"
+%param DRAM_ADDR_BITS       27    "Address bits per bank"
+%param DRAM_NUM_BANKS       1     "DDR banks"
+%param DRAM_VERSION_STRING  "2_3" "Magic DDR Version String"
