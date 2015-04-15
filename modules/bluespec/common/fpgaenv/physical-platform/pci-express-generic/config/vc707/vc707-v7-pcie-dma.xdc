@@ -298,30 +298,26 @@ if {$IS_TOP_BUILD} {
     deleteDummyTopLevelWires
         
     if {[getAWBParams {"physical_platform" "DRAM_CLOCK_MECHANISM"}] == "ExternalDifferential"} {
-        ## System clock
+        ## System clock.  The main E19/E18 clock will be used by DRAM privately.
         bindClockPin AK34 [get_ports {clocksWires_clk_p_put}]
-        set_property IOSTANDARD LVDS [get_ports {clocksWires_clk_p_put}]
         bindClockPin AL34 [get_ports {clocksWires_clk_n_put}]
-        set_property IOSTANDARD LVDS [get_ports {clocksWires_clk_n_put}]
 
         createModelClock 6.400
-
-        # Bind user clock bufg.  This is necessary for area group builds.
-        set_property LOC MMCME2_ADV_X0Y1 [get_cells -hier -filter {NAME =~ */llpi_phys_plat_clocks_userClockPackage_m_clk_clk_clks/x/mmcm_adv_inst}]
-        set_property LOC $MODEL_CLK_BUFG [get_cells -hier -filter {NAME =~ */llpi_phys_plat_clocks_userClockPackage_m_clk_clk_clks/x/clkout0_buf}]
-        set_property LOC BUFGCTRL_X0Y14 [get_cells -hier -filter {NAME =~ */llpi_phys_plat_clocks_userClockPackage_m_clk_clk_clks/x/clkf_buf}]
-    }        
-
-    if {[getAWBParams {"physical_platform" "DRAM_CLOCK_MECHANISM"}] == "InternalUnbuffered"} {
+    } else {
+        ## System clock from main 200MHz clock.
         bindClockPin E19 [get_ports {clocksWires_clk_p_put}]
-        set_property IOSTANDARD LVDS [get_ports {clocksWires_clk_p_put}]
         bindClockPin E18 [get_ports {clocksWires_clk_n_put}]
-        set_property IOSTANDARD LVDS [get_ports {clocksWires_clk_n_put}]
 
         createModelClock 5
-
-        # If we ever use this in lim builds, we'll need to loc down bufg/mmcm as above.
     } 
+
+    set_property IOSTANDARD LVDS [get_ports {clocksWires_clk_p_put}]
+    set_property IOSTANDARD LVDS [get_ports {clocksWires_clk_n_put}]
+
+    # Bind user clock bufg.  This is necessary for area group builds.
+    set_property LOC MMCME2_ADV_X0Y1 [get_cells -hier -filter {NAME =~ */llpi_phys_plat_clocks_userClockPackage_m_clk_clk_clks/x/mmcm_adv_inst}]
+    set_property LOC $MODEL_CLK_BUFG [get_cells -hier -filter {NAME =~ */llpi_phys_plat_clocks_userClockPackage_m_clk_clk_clks/x/clkout0_buf}]
+    set_property LOC BUFGCTRL_X0Y14 [get_cells -hier -filter {NAME =~ */llpi_phys_plat_clocks_userClockPackage_m_clk_clk_clks/x/clkf_buf}]
 }
 
 

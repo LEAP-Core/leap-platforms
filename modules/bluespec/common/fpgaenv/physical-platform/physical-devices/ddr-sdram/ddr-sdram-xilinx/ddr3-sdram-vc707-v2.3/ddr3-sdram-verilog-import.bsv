@@ -99,10 +99,6 @@ endinterface
 // configuration.
 //
 module checkDDRControllerConfig#(DDRControllerConfigure ddrConfig) ();
-    if (ddrConfig.clockArchitecture != CLOCK_EXTERNAL_DIFFERENTIAL)
-    begin
-        error("VC707 DDR3 controller requires differential clock.");
-    end
 endmodule
 
 
