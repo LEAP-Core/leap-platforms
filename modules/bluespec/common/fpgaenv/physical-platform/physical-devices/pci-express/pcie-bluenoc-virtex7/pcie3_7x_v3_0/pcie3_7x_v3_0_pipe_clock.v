@@ -150,8 +150,8 @@ output                          CLK_PCLK_SLAVE,
     wire                        userclk1;
     wire                        userclk2;
     wire                        oobclk;
-    reg                         pclk_sel = 1'd0;
-    reg                         pclk_sel_slave = 1'd0;
+(* DONT_TOUCH = "TRUE" *)    reg                         pclk_sel = 1'd0;
+(* DONT_TOUCH = "TRUE" *)    reg                         pclk_sel_slave = 1'd0;
 
     //---------- Output Registers --------------------------
     wire                        pclk_1;
