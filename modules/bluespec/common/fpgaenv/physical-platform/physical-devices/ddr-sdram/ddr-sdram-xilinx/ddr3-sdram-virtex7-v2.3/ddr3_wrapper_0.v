@@ -24,20 +24,28 @@
 
 // This is a wrapper around the ddr3 module generated from coregen.  
 
-module ddr3_wrapper #
+module ddr3_wrapper_0 #
   (
-   parameter SIM_BYPASS_INIT_CAL    = "OFF",
-   parameter SIMULATION             = "FALSE"
+   parameter SIM_BYPASS_INIT_CAL   = "OFF",
+   parameter SIMULATION            = "FALSE",
+   parameter DQ_WIDTH              = 64,
+   parameter DQS_WIDTH             = 8,
+   parameter ROW_WIDTH             = 16,
+   parameter BANK_WIDTH            = 3,
+   parameter DM_WIDTH              = 8,
+   parameter ADDR_WIDTH            = 30,
+   parameter nCK_PER_CLK           = 4,
+   parameter PAYLOAD_WIDTH         = 64
    )
   (
    // Inouts
-   inout [63:0]                                 ddr3_dq,
-   inout [7:0]                                  ddr3_dqs_n,
-   inout [7:0]                                  ddr3_dqs_p,
+   inout [DQ_WIDTH-1:0]                         ddr3_dq,
+   inout [DQS_WIDTH-1:0]                        ddr3_dqs_n,
+   inout [DQS_WIDTH-1:0]                        ddr3_dqs_p,
 
    // Outputs
-   output [13:0]                                ddr3_addr,
-   output [2:0]                                 ddr3_ba,
+   output [ROW_WIDTH-1:0]                       ddr3_addr,
+   output [BANK_WIDTH-1:0]                      ddr3_ba,
    output                                       ddr3_ras_n,
    output                                       ddr3_cas_n,
    output                                       ddr3_we_n,
@@ -46,7 +54,7 @@ module ddr3_wrapper #
    output                                       ddr3_ck_n,
    output                                       ddr3_cke,
    output                                       ddr3_cs_n,
-   output [7:0]                                 ddr3_dm,
+   output [DM_WIDTH-1:0]                        ddr3_dm,
    output                                       ddr3_odt,
 
    // Inputs
@@ -54,14 +62,14 @@ module ddr3_wrapper #
    input                                        sys_clk_i,
    
    // user interface signals
-   input [27:0]                                 app_addr,
+   input [ADDR_WIDTH-1:0]                       app_addr,
    input [2:0]                                  app_cmd,
    input                                        app_en,
-   input [511:0]                                app_wdf_data,
+   input [(nCK_PER_CLK*2*PAYLOAD_WIDTH)-1:0]    app_wdf_data,
    input                                        app_wdf_end,
-   input [63:0]                                 app_wdf_mask,
+   input [((nCK_PER_CLK*2*PAYLOAD_WIDTH)/8)-1:0]  app_wdf_mask,
    input                                        app_wdf_wren,
-   output [511:0]                               app_rd_data,
+   output [(nCK_PER_CLK*2*PAYLOAD_WIDTH)-1:0]   app_rd_data,
    output                                       app_rd_data_end,
    output                                       app_rd_data_valid,
    output                                       app_rdy,

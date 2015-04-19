@@ -10,7 +10,8 @@
 
 %sources -t VIVADO_TCL_SYNTHESIS  -v PRIVATE ddr3-sdram-synthesis.xdc
 
-%sources -t VERILOG -v PRIVATE ddr3_wrapper.v
+%sources -t VERILOG -v PRIVATE ddr3_wrapper_0.v
+%sources -t VERILOG -v PRIVATE ddr3_wrapper_1.v
 
 %sources -t VERILOG -v PRIVATE mig_7series_v2_3_arb_mux.v
 %sources -t VERILOG -v PRIVATE mig_7series_v2_3_arb_row_col.v

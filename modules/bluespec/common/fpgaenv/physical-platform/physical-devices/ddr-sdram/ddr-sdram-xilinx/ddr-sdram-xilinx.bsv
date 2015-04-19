@@ -119,7 +119,7 @@ interface DDR_WIRES;
     interface Put#(Bit#(1)) clk_n;
     interface Put#(Bit#(1)) clk_single;
 
-    interface Vector#(FPGA_DDR_BANKS, DDR_BANK_WIRES)  bank_wires;
+    interface Vector#(FPGA_DDR_BANKS, DDR_BANK_WIRES) bank_wires;
 
 endinterface
 
@@ -196,6 +196,7 @@ module [CONNECTED_MODULE] mkDDRDevice#(DDRControllerConfigure ddrConfig)
     // to ignore setup/hold times on the incoming reset.
     ddrReset <- mkAsyncResetSynth(8, ddrReset, ddrClock);
 
+    // Instantiate all banks.
     Vector#(FPGA_DDR_BANKS, DDR_BANK) b <-
         genWithM(mkDDRBank(ddrClock, ddrReset));
 
@@ -246,7 +247,16 @@ module [CONNECTED_MODULE] mkDDRBank#(Clock ddrClock,
     // interface:
     (DDR_BANK);
 
-    DDR_BANK_SYNTH ddrSynth <- mkDDRBankSynth(ddrClock, ddrReset);
+    //
+    // Each bank is a synthesis boundary and so must have unique top level
+    // modules.
+    //
+    DDR_BANK_SYNTH ddrSynth = ?;
+    case (bankIdx)
+        0: ddrSynth <- buryEmptyIfcM(mkDDRBankSynth0(ddrClock, ddrReset));
+        1: ddrSynth <- buryEmptyIfcM(mkDDRBankSynth1(ddrClock, ddrReset));
+        default: error("Undefined bank index");
+    endcase
 
     //
     // Incoming requests
@@ -391,11 +401,114 @@ interface DDR_BANK_DRIVER_SYNTH;
 `endif
 endinterface
 
+
+//
+// Since we can't pass arguments in to synthesis boundaries there must be
+// a unique wrapper for each bank controller.
+//
+// To make matters worse, we don't know how many bank controllers there are,
+// but we are obligated to generate all the Verilog modules described in the
+// AWB configuration.  We also can't do value comparisons on preprocessor
+// variables.  Furthermore, the DDR_BANK_SYNTH interface contains Inout
+// methods and so can't have a NULL (?) instance.  The DDR_BANK_SYNTH_OR_EMPTY
+// typeclass lets us work around all these limitations.
+//
+typeclass DDR_BANK_SYNTH_OR_EMPTY#(numeric type n, type t_IFC)
+    dependencies (n determines t_IFC);
+
+    module maybeMkDDRBankCtrl#(Clock ddrClock, Reset ddrReset, Bit#(n) param)
+        // Interface:
+        (t_IFC);
+endtypeclass
+
+//
+// The non-specific instance of DDR_BANK_SYNTH_OR_EMPTY generates a real
+// controller.
+//
+instance DDR_BANK_SYNTH_OR_EMPTY#(n, DDR_BANK_SYNTH);
+    module maybeMkDDRBankCtrl#(Clock ddrClock, Reset ddrReset, Bit#(n) param)
+        // Interface:
+        (DDR_BANK_SYNTH);
+
+        let _ctrl <- mkDDRBankCtrl(ddrClock, ddrReset, valueOf(n));
+        return _ctrl;
+    endmodule
+endinstance
+
+//
+// Specific instances turn off controller generation.  A loop to generate
+// these would be nice, but syntactically illegal.  Instead we define
+// a set of possible dummy controllers.  We know that all controllers
+// numbered FPGA_DDR_BANKS and higher are empty.
+//
+instance DDR_BANK_SYNTH_OR_EMPTY#(FPGA_DDR_BANKS, Empty);
+    module maybeMkDDRBankCtrl#(Clock ddrClock, Reset ddrReset,
+                               Bit#(FPGA_DDR_BANKS) param)
+        // Interface:
+        (Empty);
+    endmodule
+endinstance
+
+instance DDR_BANK_SYNTH_OR_EMPTY#(TAdd#(FPGA_DDR_BANKS, 1), Empty);
+    module maybeMkDDRBankCtrl#(Clock ddrClock, Reset ddrReset,
+                               Bit#(TAdd#(FPGA_DDR_BANKS, 1)) param)
+        // Interface:
+        (Empty);
+    endmodule
+endinstance
+
+
+// Bank 0 is treated specially.  When there is only one bank in the system
+// the controller is allocated with an anonymous variable.  This is mostly
+// to maintain compatibility with existing UCF/XDC files.
 (* synthesize *)
-module mkDDRBankSynth#(Clock ddrClock, Reset ddrResetIn)
+module mkDDRBankSynth0#(Clock ddrClock, Reset ddrReset)
+    // interface:
+    (DDR_BANK_SYNTH);
+
+    DDR_BANK_SYNTH b0 = ?;
+    DDR_BANK_SYNTH _b0 = ?;
+
+    Bool one_bank = (valueOf(FPGA_DDR_BANKS) == 1);
+    if (one_bank)
+    begin
+        // Single bank.  Hide "b0".
+        _b0 <- mkDDRBankCtrl(ddrClock, ddrReset, 0);
+    end
+    else
+    begin
+        // Multiple banks.  Expose "b0".
+        b0 <- mkDDRBankCtrl(ddrClock, ddrReset, 0);
+    end
+
+    return (one_bank ? _b0 : b0);
+endmodule
+
+
+//
+// All banks other than 0 may or may not be true controllers, depending on
+// the value of FPGA_DDR_BANKS.
+//
+
+(* synthesize *)
+module mkDDRBankSynth1#(Clock ddrClock, Reset ddrReset)
+    // interface:
+    (t_IFC)
+    provisos (DDR_BANK_SYNTH_OR_EMPTY#(1, t_IFC));
+
+    Bit#(1) param = ?;
+    let b1 <- maybeMkDDRBankCtrl(ddrClock, ddrReset, param);
+    return b1;
+endmodule
+
+
+//
+// Finally, the real bank controller code...
+//
+module mkDDRBankCtrl#(Clock ddrClock, Reset ddrResetIn, Integer bankIdx)
     // interface:
     (DDR_BANK_SYNTH)
-    provisos (NumAlias#(n_RETRY_TIMEOUT, TMul#(200000000, 2))); // 200 MHz -> 2 sec.
+    provisos (NumAlias#(n_RETRY_TIMEOUT, TMul#(200000000, 8))); // 200 MHz -> 8 sec.
 
     Clock modelClock <- exposeCurrentClock();
     Reset modelReset <- exposeCurrentReset();
@@ -425,7 +538,8 @@ module mkDDRBankSynth#(Clock ddrClock, Reset ddrResetIn)
     //
     // Instantiate the Xilinx Memory Controller
     //
-    XILINX_DRAM_CONTROLLER dramCtrl <- mkXilinxDRAMController(ddrClock, ddrReset);
+    XILINX_DRAM_CONTROLLER dramCtrl <-
+        mkXilinxDRAMController(ddrClock, ddrReset, bankIdx);
 
     // Clock the glue logic with the Controller's clock
     Clock controllerClock = dramCtrl.controller_clock;

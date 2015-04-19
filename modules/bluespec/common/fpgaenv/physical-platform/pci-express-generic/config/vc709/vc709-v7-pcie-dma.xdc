@@ -259,14 +259,16 @@ if {$IS_TOP_BUILD} {
 
     deleteDummyTopLevelWires
         
-    if {[getAWBParams {"physical_platform" "DRAM_CLOCK_MECHANISM"}] == "InternalUnbuffered"} {
+    if {[getAWBParams {"physical_platform" "DRAM_CLOCK_MECHANISM"}] == "InternalBuffered"} {
         bindClockPin H19 [get_ports {clocksWires_clk_p_put}]
         set_property IOSTANDARD DIFF_SSTL15 [get_ports {clocksWires_clk_p_put}]
         bindClockPin G18 [get_ports {clocksWires_clk_n_put}]
         set_property IOSTANDARD DIFF_SSTL15 [get_ports {clocksWires_clk_n_put}]
 
         createModelClock 5
-    } 
+    } else {
+        error "Unsupported clock type!"
+    }        
 
     # Bind user clock bufg.  This is necessary for area group builds.
     # Fix me -- location not yet known for VC709

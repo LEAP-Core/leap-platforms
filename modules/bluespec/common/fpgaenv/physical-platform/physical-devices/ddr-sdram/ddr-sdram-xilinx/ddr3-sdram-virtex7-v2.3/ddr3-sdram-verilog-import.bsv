@@ -66,6 +66,11 @@ typedef TDiv#(FPGA_DDR_WORD_SZ, 8) FPGA_DDR_BYTES_PER_WORD;
 typedef Bit#(FPGA_DDR_BYTES_PER_WORD) FPGA_DDR_WORD_MASK;
 typedef Bit#(FPGA_DDR_BYTES_PER_BEAT) FPGA_DDR_DUALEDGE_BEAT_MASK;
 
+// Controller address width.
+typedef `DRAM_DRIVER_IFC_ADDR_WIDTH XILINX_DRAM_ADDR_SZ;
+typedef Bit#(XILINX_DRAM_ADDR_SZ) XILINX_DRAM_ADDR;
+
+
 interface XILINX_DRAM_CONTROLLER;
     
     interface DDR_BANK_WIRES wires;
@@ -75,7 +80,7 @@ interface XILINX_DRAM_CONTROLLER;
      
     // application interface
     method    Bool                    init_done;
-    method    Action                  enqueue_address(DDR3Command command, Bit#(28) address);
+    method    Action                  enqueue_address(DDR3Command command, XILINX_DRAM_ADDR address);
     method    Action                  enqueue_data(FPGA_DDR_DUALEDGE_BEAT data, FPGA_DDR_DUALEDGE_BEAT_MASK mask, Bool endBurst);
     method    FPGA_DDR_DUALEDGE_BEAT  dequeue_data;
 
@@ -103,16 +108,23 @@ endmodule
 
 
 module mkXilinxDRAMController#(Clock clk200,
-                               Reset rst200)
-
+                               Reset rst200,
+                               Integer bankIdx)
     // Interface:
     (XILINX_DRAM_CONTROLLER);
 
     // Instantiate the Bluespec-standard DDR3 controller
     DDR3_Configure_V7 cfg = defaultValue();
-    let ddr3ctrl <- vMkVirtex7DDR3Controller(cfg,
-                                             clocked_by clk200,
-                                             reset_by rst200);
+    VDDR3_Controller_V7 ddr3ctrl = ?;
+    case (bankIdx)
+        0: ddr3ctrl <- vMkVirtex7DDR3Controller0(cfg,
+                                                 clocked_by clk200,
+                                                 reset_by rst200);
+        1: ddr3ctrl <- vMkVirtex7DDR3Controller1(cfg,
+                                                 clocked_by clk200,
+                                                 reset_by rst200);
+        default: error("Undefined bank index");
+    endcase
 
     Clock user_clock    = ddr3ctrl.user.clock;
     Reset user_reset0_n <- mkResetInverter(ddr3ctrl.user.reset);
@@ -122,10 +134,10 @@ module mkXilinxDRAMController#(Clock clk200,
     PulseWire pwAppWdfWren <- mkPulseWire(clocked_by user_clock, reset_by user_reset_n);
     PulseWire pwAppWdfEnd  <- mkPulseWire(clocked_by user_clock, reset_by user_reset_n);
 
-    Wire#(DDR3Command) wAppCmd     <- mkDWire(WRITE, clocked_by user_clock, reset_by user_reset_n);
-    Wire#(Bit#(28))    wAppAddr    <- mkDWire(0, clocked_by user_clock, reset_by user_reset_n);
-    Wire#(FPGA_DDR_DUALEDGE_BEAT_MASK)    wAppWdfMask <- mkDWire(0, clocked_by user_clock, reset_by user_reset_n);
-    Wire#(FPGA_DDR_DUALEDGE_BEAT)   wAppWdfData <- mkDWire(0, clocked_by user_clock, reset_by user_reset_n);
+    Wire#(DDR3Command) wAppCmd       <- mkDWire(WRITE, clocked_by user_clock, reset_by user_reset_n);
+    Wire#(XILINX_DRAM_ADDR) wAppAddr <- mkDWire(0, clocked_by user_clock, reset_by user_reset_n);
+    Wire#(FPGA_DDR_DUALEDGE_BEAT_MASK) wAppWdfMask <- mkDWire(0, clocked_by user_clock, reset_by user_reset_n);
+    Wire#(FPGA_DDR_DUALEDGE_BEAT)      wAppWdfData <- mkDWire(0, clocked_by user_clock, reset_by user_reset_n);
 
     (* fire_when_enabled, no_implicit_conditions *)
     rule drive_enables;
@@ -153,7 +165,7 @@ module mkXilinxDRAMController#(Clock clk200,
      
     method Bool init_done() = ddr3ctrl.user.init_done();
 
-    method Action enqueue_address(DDR3Command command, Bit#(28) address) if (ddr3ctrl.user.app_rdy);
+    method Action enqueue_address(DDR3Command command, XILINX_DRAM_ADDR address) if (ddr3ctrl.user.app_rdy);
         // Signal that command is being sent
         pwAppEn.send();
         wAppCmd <= command;
@@ -200,9 +212,9 @@ endmodule
 /// Types
 ////////////////////////////////////////////////////////////////////////////////
 typedef struct {
-   Bit#(64)    byteen;
-   Bit#(28)    address;
-   Bit#(512)   data;
+   Bit#(64)         byteen;
+   XILINX_DRAM_ADDR address;
+   Bit#(512)        data;
 } DDR3Request deriving (Bits, Eq);
 
 typedef struct {
@@ -250,35 +262,35 @@ endinstance
 ////////////////////////////////////////////////////////////////////////////////
 (* always_enabled, always_ready *)
 interface DDR3_Pins_V7;
-   (* prefix = "", result = "CLK_P" *)
+   (* prefix = "", result = "ck_p" *)
    method    Bit#(1)           clk_p;
-   (* prefix = "", result = "CLK_N" *)
+   (* prefix = "", result = "ck_n" *)
    method    Bit#(1)           clk_n;
-   (* prefix = "", result = "A" *)
-   method    Bit#(14)          a;
-   (* prefix = "", result = "BA" *)
+   (* prefix = "", result = "addr" *)
+   method    Bit#(`DRAM_DRIVER_IFC_ROW_WIDTH)  a;
+   (* prefix = "", result = "ba" *)
    method    Bit#(3)           ba;
-   (* prefix = "", result = "RAS_N" *)
+   (* prefix = "", result = "ras_n" *)
    method    Bit#(1)           ras_n;
-   (* prefix = "", result = "CAS_N" *)
+   (* prefix = "", result = "cas_n" *)
    method    Bit#(1)           cas_n;
-   (* prefix = "", result = "WE_N" *)
+   (* prefix = "", result = "we_n" *)
    method    Bit#(1)           we_n;
-   (* prefix = "", result = "RESET_N" *)
+   (* prefix = "", result = "reset_n" *)
    method    Bit#(1)           reset_n;
-   (* prefix = "", result = "CS_N" *)
+   (* prefix = "", result = "cs_n" *)
    method    Bit#(1)           cs_n;
-   (* prefix = "", result = "ODT" *)
+   (* prefix = "", result = "odt" *)
    method    Bit#(1)           odt;
-   (* prefix = "", result = "CKE" *)
+   (* prefix = "", result = "cke" *)
    method    Bit#(1)           cke;
-   (* prefix = "", result = "DM" *)
+   (* prefix = "", result = "dm" *)
    method    Bit#(8)           dm;
-   (* prefix = "DQ" *)
+   (* prefix = "dq" *)
    interface Inout#(Bit#(64))  dq;
-   (* prefix = "DQS_P" *)
+   (* prefix = "dqs_p" *)
    interface Inout#(Bit#(8))   dqs_p;
-   (* prefix = "DQS_N" *)
+   (* prefix = "dqs_n" *)
    interface Inout#(Bit#(8))   dqs_n;
 endinterface   
 
@@ -286,7 +298,7 @@ interface DDR3_User_V7;
    interface Clock             	     clock;
    interface Reset             	     reset_n;
    method    Bool              	     init_done;
-   method    Action                  request(Bit#(28) addr, Bit#(64) mask, Bit#(512) data);
+   method    Action                  request(XILINX_DRAM_ADDR addr, Bit#(64) mask, Bit#(512) data);
    method    ActionValue#(Bit#(512)) read_data;
 endinterface
 
@@ -302,7 +314,7 @@ interface VDDR3_User_V7;
    interface Clock             clock;
    interface Reset             reset;
    method    Bool              init_done;
-   method    Action            app_addr(Bit#(28) i);
+   method    Action            app_addr(XILINX_DRAM_ADDR i);
    method    Action            app_cmd(DDR3Command i);
    method    Action            app_en(Bool i);
    method    Action            app_wdf_data(FPGA_DDR_DUALEDGE_BEAT i);
@@ -330,13 +342,87 @@ endinterface
 ///
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-import "BVI" ddr3_wrapper =
-module vMkVirtex7DDR3Controller#(DDR3_Configure_V7 cfg)(VDDR3_Controller_V7);
+
+import "BVI" ddr3_wrapper_0 =
+module vMkVirtex7DDR3Controller0#(DDR3_Configure_V7 cfg) (VDDR3_Controller_V7);
    default_clock clk(sys_clk_i);
    default_reset rst(sys_rst);
    
    parameter SIM_BYPASS_INIT_CAL = (cfg.fast_train_sim_only) ? "FAST" : "OFF";
    parameter SIMULATION          = (cfg.fast_train_sim_only) ? "TRUE" : "FALSE";
+   parameter ADDR_WIDTH          = `DRAM_DRIVER_IFC_ADDR_WIDTH;
+   parameter ROW_WIDTH           = `DRAM_DRIVER_IFC_ROW_WIDTH;
+   
+   interface DDR3_Pins_V7 ddr3;
+      ifc_inout   dq(ddr3_dq)          clocked_by(no_clock)  reset_by(no_reset);
+      ifc_inout   dqs_p(ddr3_dqs_p)    clocked_by(no_clock)  reset_by(no_reset);
+      ifc_inout   dqs_n(ddr3_dqs_n)    clocked_by(no_clock)  reset_by(no_reset);
+      method      ddr3_ck_p    clk_p   clocked_by(no_clock)  reset_by(no_reset);
+      method      ddr3_ck_n    clk_n   clocked_by(no_clock)  reset_by(no_reset);
+      method      ddr3_cke     cke     clocked_by(no_clock)  reset_by(no_reset);
+      method      ddr3_cs_n    cs_n    clocked_by(no_clock)  reset_by(no_reset);
+      method      ddr3_ras_n   ras_n   clocked_by(no_clock)  reset_by(no_reset);
+      method      ddr3_cas_n   cas_n   clocked_by(no_clock)  reset_by(no_reset);
+      method      ddr3_we_n    we_n    clocked_by(no_clock)  reset_by(no_reset);
+      method      ddr3_reset_n reset_n clocked_by(no_clock)  reset_by(no_reset);
+      method      ddr3_dm      dm      clocked_by(no_clock)  reset_by(no_reset);
+      method      ddr3_ba      ba      clocked_by(no_clock)  reset_by(no_reset);
+      method      ddr3_addr    a       clocked_by(no_clock)  reset_by(no_reset);
+      method      ddr3_odt     odt     clocked_by(no_clock)  reset_by(no_reset);
+   endinterface
+   
+   interface VDDR3_User_V7 user;
+      output_clock    clock(ui_clk);
+      output_reset    reset(ui_clk_sync_rst);
+      method init_calib_complete      init_done    clocked_by(no_clock) reset_by(no_reset);
+      method          		      app_addr(app_addr) enable((*inhigh*)en0) clocked_by(user_clock) reset_by(no_reset);
+      method                          app_cmd(app_cmd)   enable((*inhigh*)en00) clocked_by(user_clock) reset_by(no_reset);
+      method          		      app_en(app_en)     enable((*inhigh*)en1) clocked_by(user_clock) reset_by(no_reset);
+      method          		      app_wdf_data(app_wdf_data) enable((*inhigh*)en2) clocked_by(user_clock) reset_by(no_reset);
+      method          		      app_wdf_end(app_wdf_end)   enable((*inhigh*)en3) clocked_by(user_clock) reset_by(no_reset);
+      method          		      app_wdf_mask(app_wdf_mask) enable((*inhigh*)en4) clocked_by(user_clock) reset_by(no_reset);
+      method          		      app_wdf_wren(app_wdf_wren) enable((*inhigh*)en5) clocked_by(user_clock) reset_by(no_reset);
+      method app_rd_data              app_rd_data clocked_by(user_clock) reset_by(no_reset);
+      method app_rd_data_end          app_rd_data_end clocked_by(user_clock) reset_by(no_reset);
+      method app_rd_data_valid        app_rd_data_valid clocked_by(user_clock) reset_by(no_reset);
+      method app_rdy                  app_rdy clocked_by(user_clock) reset_by(no_reset);
+      method app_wdf_rdy              app_wdf_rdy clocked_by(user_clock) reset_by(no_reset);
+   endinterface
+   
+   schedule
+   (
+    ddr3_clk_p, ddr3_clk_n, ddr3_cke, ddr3_cs_n, ddr3_ras_n, ddr3_cas_n, ddr3_we_n, 
+    ddr3_reset_n, ddr3_dm, ddr3_ba, ddr3_a, ddr3_odt, user_init_done
+    )
+   CF
+   (
+    ddr3_clk_p, ddr3_clk_n, ddr3_cke, ddr3_cs_n, ddr3_ras_n, ddr3_cas_n, ddr3_we_n, 
+    ddr3_reset_n, ddr3_dm, ddr3_ba, ddr3_a, ddr3_odt, user_init_done
+    );
+   
+   schedule 
+   (
+    user_app_addr, user_app_en, user_app_wdf_data, user_app_wdf_end, user_app_wdf_mask, user_app_wdf_wren, user_app_rd_data, 
+    user_app_rd_data_end, user_app_rd_data_valid, user_app_rdy, user_app_wdf_rdy, user_app_cmd
+    )
+   CF
+   (
+    user_app_addr, user_app_en, user_app_wdf_data, user_app_wdf_end, user_app_wdf_mask, user_app_wdf_wren, user_app_rd_data, 
+    user_app_rd_data_end, user_app_rd_data_valid, user_app_rdy, user_app_wdf_rdy, user_app_cmd
+    );
+
+endmodule
+
+
+import "BVI" ddr3_wrapper_1 =
+module vMkVirtex7DDR3Controller1#(DDR3_Configure_V7 cfg) (VDDR3_Controller_V7);
+   default_clock clk(sys_clk_i);
+   default_reset rst(sys_rst);
+   
+   parameter SIM_BYPASS_INIT_CAL = (cfg.fast_train_sim_only) ? "FAST" : "OFF";
+   parameter SIMULATION          = (cfg.fast_train_sim_only) ? "TRUE" : "FALSE";
+   parameter ADDR_WIDTH          = `DRAM_DRIVER_IFC_ADDR_WIDTH;
+   parameter ROW_WIDTH           = `DRAM_DRIVER_IFC_ROW_WIDTH;
    
    interface DDR3_Pins_V7 ddr3;
       ifc_inout   dq(ddr3_dq)          clocked_by(no_clock)  reset_by(no_reset);
