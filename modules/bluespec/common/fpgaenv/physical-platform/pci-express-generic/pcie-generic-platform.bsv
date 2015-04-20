@@ -109,6 +109,7 @@ module [CONNECTED_MODULE] mkPhysicalPlatform
     let ddrConfig = defaultValue;
     ddrConfig.internalClock = clocks.driver.rawClock;
     ddrConfig.internalReset = clocks.driver.rawReset;
+    ddrConfig.modelResetNeedsFanout = True;
     
     case (`DRAM_CLOCK_MECHANISM) matches
         "InternalUnbuffered":   ddrConfig.clockArchitecture = CLOCK_INTERNAL_UNBUFFERED;   
@@ -117,10 +118,9 @@ module [CONNECTED_MODULE] mkPhysicalPlatform
     endcase
 
     // Set the ddr clock source by parameter. 
-    let sdramRst <- mkResetFanout(clocks.driver.baseReset, clocked_by clk);
     DDR_DEVICE sdram <- mkDDRDevice(ddrConfig,
                                     clocked_by clk,
-                                    reset_by sdramRst);
+                                    reset_by clocks.driver.baseReset);
 
     // Next, create the physical device that can trigger a soft reset. Pass along the
     // interface to the trigger module that the clocks device has given us.

@@ -41,16 +41,24 @@ import DefaultValue::*;
 
 
 typedef struct {
-  CLOCK_DESCRIPTOR       clockArchitecture;
-  Clock                  internalClock;
-  Reset                  internalReset;
-} DDRControllerConfigure;
+    CLOCK_DESCRIPTOR       clockArchitecture;
+    Clock                  internalClock;
+    Reset                  internalReset;
+
+    // When false, the incoming model reset timing matches the rest of the
+    // design.  When true, the controller should add a fanout stage to model
+    // reset.  Leaving insertion to the controller allows multi-bank memories
+    // to built multiple fanout paths.
+    Bool                   modelResetNeedsFanout;
+}
+DDRControllerConfigure;
 
 instance DefaultValue#(DDRControllerConfigure);
-   defaultValue = DDRControllerConfigure {
-      clockArchitecture:    CLOCK_INTERNAL_UNBUFFERED,
-      internalClock:        ?,
-      internalReset:        ? 
-   };
+    defaultValue = DDRControllerConfigure {
+        clockArchitecture:     CLOCK_INTERNAL_UNBUFFERED,
+        internalClock:         ?,
+        internalReset:         ?,
+        modelResetNeedsFanout: False
+        };
 endinstance
 

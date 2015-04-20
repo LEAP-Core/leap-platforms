@@ -47,6 +47,7 @@ import XilinxCells::*;
 import DefaultValue::*;
 
 `include "awb/provides/librl_bsv_base.bsh"
+`include "awb/provides/clocks_device.bsh"
 `include "awb/provides/ddr_sdram_device.bsh"
 `include "awb/provides/ddr_sdram_definitions.bsh"
 `include "awb/provides/ddr_sdram_xilinx_driver.bsh"
@@ -105,25 +106,20 @@ typedef Bit#(FPGA_DDR_BYTES_PER_BEAT) FPGA_DDR_DUALEDGE_BEAT_MASK;
 typedef `DRAM_ADDR_BITS FPGA_DDR_ADDRESS_SZ;
 typedef Bit#(FPGA_DDR_ADDRESS_SZ) FPGA_DDR_ADDRESS;
 
-
 //
-// The DDR_BANK_DRIVER is empty.  All I/O is through soft connections.
+// The driver communicates with soft connections, so the driver interface
+// is empty.
 //
-interface DDR_BANK_DRIVER;
+interface DDR_DRIVER;
 endinterface
 
-
 interface DDR_WIRES;
-
     interface Put#(Bit#(1)) clk_p;
     interface Put#(Bit#(1)) clk_n;
     interface Put#(Bit#(1)) clk_single;
 
     interface Vector#(FPGA_DDR_BANKS, DDR_BANK_WIRES) bank_wires;
-
 endinterface
-
-typedef Vector#(FPGA_DDR_BANKS, DDR_BANK_DRIVER) DDR_DRIVER;
 
 
 //
@@ -139,6 +135,15 @@ interface DDR_DEVICE;
     interface DDR_WIRES  wires;
 endinterface
 
+
+//
+// The DDR_BANK_DRIVER contains methods used only here in the driver.
+// All I/O to other parts of the design is through soft connections.
+//
+interface DDR_BANK_DRIVER;
+    method Action   device_temp_i(Bit#(12) temp);
+    method Bit#(12) device_temp_o;
+endinterface
 
 //
 // DDR_BANK --
@@ -198,12 +203,31 @@ module [CONNECTED_MODULE] mkDDRDevice#(DDRControllerConfigure ddrConfig)
 
     // Instantiate all banks.
     Vector#(FPGA_DDR_BANKS, DDR_BANK) b <-
-        genWithM(mkDDRBank(ddrClock, ddrReset));
+        genWithM(mkDDRBankWithReset(ddrClock, ddrReset, ddrConfig.modelResetNeedsFanout));
 
-    function DDR_BANK_DRIVER getDriver(DDR_BANK bank) = bank.driver;
+    // In a multi-bank system, bank 0 may provide some state needed by other
+    // banks.  Connect them here.
+    
+    // Temperature monitoring:
+    (* fire_when_enabled, no_implicit_conditions *)
+    rule connectTempMon (True);
+        // Bank 0 ignores the incoming temperature.  Write something
+        // to keep Bluespec happy.
+        b[0].driver.device_temp_i(?);
+
+        // Forward temperature from bank 0 to all other banks
+        let temp = b[0].driver.device_temp_o();
+        for (Integer i = 1; i < valueOf(FPGA_DDR_BANKS); i = i + 1)
+        begin
+            b[i].driver.device_temp_i(temp);
+        end
+    endrule
+
+
     function DDR_BANK_WIRES getWires(DDR_BANK bank) = bank.wires;
 
-    interface driver = map(getDriver, b);
+    interface DDR_DRIVER driver;
+    endinterface
 
     interface DDR_WIRES wires;
         interface clk_p      = incomingClockP.clock_wire;
@@ -212,6 +236,36 @@ module [CONNECTED_MODULE] mkDDRDevice#(DDRControllerConfigure ddrConfig)
 
         interface bank_wires = map(getWires, b);
     endinterface
+endmodule
+
+
+//
+// mkDDRBankWithReset --
+//   Simple wrapper to build a DDR bank and, perhaps, add a reset fanout stage.
+//
+module [CONNECTED_MODULE] mkDDRBankWithReset#(Clock ddrClock,
+                                              Reset ddrReset,
+                                              Bool modelResetNeedsFanout,
+                                              Integer bankIdx)
+    // Interface:
+    (DDR_BANK);
+
+    Clock modelClock <- exposeCurrentClock();
+    Reset modelReset <- exposeCurrentReset();
+
+    // Does model reset need fanout?  Delaying fanout to this point
+    // allows the controller to add unique fanout paths for each bank
+    // in order to relax timing while still coming out of reset
+    // simultaneously.
+    Reset rst = modelReset;
+    if (modelResetNeedsFanout)
+    begin
+        rst <- mkResetFanout(modelReset, clocked_by modelClock);
+    end
+
+    let _b <- mkDDRBank(ddrClock, ddrReset, bankIdx,
+                        clocked_by modelClock, reset_by rst);
+    return _b;
 endmodule
 
 
@@ -344,6 +398,8 @@ module [CONNECTED_MODULE] mkDDRBank#(Clock ddrClock,
 
 
     interface DDR_BANK_DRIVER driver;
+        method Action device_temp_i(Bit#(12) temp) = ddrSynth.driver.device_temp_i(temp);
+        method Bit#(12) device_temp_o = ddrSynth.driver.device_temp_o;
     endinterface
 
     interface wires = ddrSynth.wires;
@@ -368,6 +424,9 @@ interface DDR_BANK_DRIVER_SYNTH;
     method Action writeData(Tuple2#(FPGA_DDR_DUALEDGE_BEAT, FPGA_DDR_DUALEDGE_BEAT_MASK) data);
 
     method ActionValue#(FPGA_DDR_DUALEDGE_BEAT) readRsp();
+
+    method Action   device_temp_i(Bit#(12) temp);
+    method Bit#(12) device_temp_o;
 
     // Debug scan methods
     method Bool stateReady();
@@ -968,10 +1027,14 @@ module mkDDRBankCtrl#(Clock ddrClock, Reset ddrResetIn, Integer bankIdx)
             return d;
         endmethod
 
-
         method Action writeData(Tuple2#(FPGA_DDR_DUALEDGE_BEAT, FPGA_DDR_DUALEDGE_BEAT_MASK) data) if (state == STATE_ready);
             syncWriteDataQ.enq(data);
         endmethod
+
+
+        method Action   device_temp_i(Bit#(12) temp) = dramCtrl.device_temp_i(temp);
+        method Bit#(12) device_temp_o = dramCtrl.device_temp_o;
+
 
         // Debug state for debug scan.
         method Bool stateReady = (state == STATE_ready);

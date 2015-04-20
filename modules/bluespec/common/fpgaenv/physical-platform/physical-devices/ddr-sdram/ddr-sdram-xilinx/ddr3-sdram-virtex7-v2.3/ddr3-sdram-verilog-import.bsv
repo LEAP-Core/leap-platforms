@@ -84,6 +84,11 @@ interface XILINX_DRAM_CONTROLLER;
     method    Action                  enqueue_data(FPGA_DDR_DUALEDGE_BEAT data, FPGA_DDR_DUALEDGE_BEAT_MASK mask, Bool endBurst);
     method    FPGA_DDR_DUALEDGE_BEAT  dequeue_data;
 
+    // Temperature monitoring.  In multi-bank controllers these may be needed
+    // to pass temperature data from controller 0 to all others.
+    method    Action                  device_temp_i(Bit#(12) temp);
+    method    Bit#(12)                device_temp_o;
+
     // Debug info
     method    Bit#(1)                 cmd_rdy;
     method    Bit#(1)                 enq_rdy;
@@ -153,7 +158,6 @@ module mkXilinxDRAMController#(Clock clk200,
         ddr3ctrl.user.app_wdf_data(wAppWdfData);
         ddr3ctrl.user.app_wdf_mask(wAppWdfMask);
     endrule
-   
 
     // Exposed top-level wires
     interface DDR_BANK_WIRES wires = ddr3ctrl.ddr3;
@@ -183,6 +187,10 @@ module mkXilinxDRAMController#(Clock clk200,
     method FPGA_DDR_DUALEDGE_BEAT dequeue_data() if (ddr3ctrl.user.app_rd_data_valid);
         return ddr3ctrl.user.app_rd_data;
     endmethod
+
+
+    method Action device_temp_i(Bit#(12) temp) = ddr3ctrl.user.device_temp_i(temp);
+    method Bit#(12) device_temp_o = ddr3ctrl.user.device_temp_o();
 
 
     //
@@ -326,6 +334,9 @@ interface VDDR3_User_V7;
    method    Bool              app_rd_data_valid;
    method    Bool              app_rdy;
    method    Bool              app_wdf_rdy;
+
+   method    Action            device_temp_i(Bit#(12) i);
+   method    Bit#(12)          device_temp_o;
 endinterface
 
 interface VDDR3_Controller_V7;
@@ -387,28 +398,35 @@ module vMkVirtex7DDR3Controller0#(DDR3_Configure_V7 cfg) (VDDR3_Controller_V7);
       method app_rd_data_valid        app_rd_data_valid clocked_by(user_clock) reset_by(no_reset);
       method app_rdy                  app_rdy clocked_by(user_clock) reset_by(no_reset);
       method app_wdf_rdy              app_wdf_rdy clocked_by(user_clock) reset_by(no_reset);
+
+      method                          device_temp_i(device_temp_i) enable((*inhigh*)en_temp) clocked_by(default_clock) reset_by(no_reset);
+      method device_temp_o            device_temp_o clocked_by(no_clock) reset_by(no_reset);
    endinterface
    
    schedule
    (
     ddr3_clk_p, ddr3_clk_n, ddr3_cke, ddr3_cs_n, ddr3_ras_n, ddr3_cas_n, ddr3_we_n, 
-    ddr3_reset_n, ddr3_dm, ddr3_ba, ddr3_a, ddr3_odt, user_init_done
+    ddr3_reset_n, ddr3_dm, ddr3_ba, ddr3_a, ddr3_odt, user_init_done,
+    user_device_temp_o
     )
    CF
    (
     ddr3_clk_p, ddr3_clk_n, ddr3_cke, ddr3_cs_n, ddr3_ras_n, ddr3_cas_n, ddr3_we_n, 
-    ddr3_reset_n, ddr3_dm, ddr3_ba, ddr3_a, ddr3_odt, user_init_done
+    ddr3_reset_n, ddr3_dm, ddr3_ba, ddr3_a, ddr3_odt, user_init_done,
+    user_device_temp_o
     );
    
    schedule 
    (
     user_app_addr, user_app_en, user_app_wdf_data, user_app_wdf_end, user_app_wdf_mask, user_app_wdf_wren, user_app_rd_data, 
-    user_app_rd_data_end, user_app_rd_data_valid, user_app_rdy, user_app_wdf_rdy, user_app_cmd
+    user_app_rd_data_end, user_app_rd_data_valid, user_app_rdy, user_app_wdf_rdy, user_app_cmd,
+    user_device_temp_i, user_device_temp_o
     )
    CF
    (
     user_app_addr, user_app_en, user_app_wdf_data, user_app_wdf_end, user_app_wdf_mask, user_app_wdf_wren, user_app_rd_data, 
-    user_app_rd_data_end, user_app_rd_data_valid, user_app_rdy, user_app_wdf_rdy, user_app_cmd
+    user_app_rd_data_end, user_app_rd_data_valid, user_app_rdy, user_app_wdf_rdy, user_app_cmd,
+    user_device_temp_i, user_device_temp_o
     );
 
 endmodule
@@ -458,28 +476,35 @@ module vMkVirtex7DDR3Controller1#(DDR3_Configure_V7 cfg) (VDDR3_Controller_V7);
       method app_rd_data_valid        app_rd_data_valid clocked_by(user_clock) reset_by(no_reset);
       method app_rdy                  app_rdy clocked_by(user_clock) reset_by(no_reset);
       method app_wdf_rdy              app_wdf_rdy clocked_by(user_clock) reset_by(no_reset);
+
+      method                          device_temp_i(device_temp_i) enable((*inhigh*)en_temp) clocked_by(default_clock) reset_by(no_reset);
+      method device_temp_o            device_temp_o clocked_by(no_clock) reset_by(no_reset);
    endinterface
    
    schedule
    (
     ddr3_clk_p, ddr3_clk_n, ddr3_cke, ddr3_cs_n, ddr3_ras_n, ddr3_cas_n, ddr3_we_n, 
-    ddr3_reset_n, ddr3_dm, ddr3_ba, ddr3_a, ddr3_odt, user_init_done
+    ddr3_reset_n, ddr3_dm, ddr3_ba, ddr3_a, ddr3_odt, user_init_done,
+    user_device_temp_o
     )
    CF
    (
     ddr3_clk_p, ddr3_clk_n, ddr3_cke, ddr3_cs_n, ddr3_ras_n, ddr3_cas_n, ddr3_we_n, 
-    ddr3_reset_n, ddr3_dm, ddr3_ba, ddr3_a, ddr3_odt, user_init_done
+    ddr3_reset_n, ddr3_dm, ddr3_ba, ddr3_a, ddr3_odt, user_init_done,
+    user_device_temp_o
     );
    
    schedule 
    (
     user_app_addr, user_app_en, user_app_wdf_data, user_app_wdf_end, user_app_wdf_mask, user_app_wdf_wren, user_app_rd_data, 
-    user_app_rd_data_end, user_app_rd_data_valid, user_app_rdy, user_app_wdf_rdy, user_app_cmd
+    user_app_rd_data_end, user_app_rd_data_valid, user_app_rdy, user_app_wdf_rdy, user_app_cmd,
+    user_device_temp_i, user_device_temp_o
     )
    CF
    (
     user_app_addr, user_app_en, user_app_wdf_data, user_app_wdf_end, user_app_wdf_mask, user_app_wdf_wren, user_app_rd_data, 
-    user_app_rd_data_end, user_app_rd_data_valid, user_app_rdy, user_app_wdf_rdy, user_app_cmd
+    user_app_rd_data_end, user_app_rd_data_valid, user_app_rdy, user_app_wdf_rdy, user_app_cmd,
+    user_device_temp_i, user_device_temp_o
     );
 
 endmodule

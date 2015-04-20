@@ -412,11 +412,11 @@ module mig_7series_1_mig #
    parameter FINE_PER_BIT          = "ON",
    parameter CENTER_COMP_MODE      = "ON",
    parameter PI_VAL_ADJ            = "ON",
-   parameter IODELAY_GRP0          = "MIG_7SERIES_0_IODELAY_MIG0",
+   parameter IODELAY_GRP0          = "MIG_7SERIES_1_IODELAY_MIG0",
                                      // It is associated to a set of IODELAYs with
                                      // an IDELAYCTRL that have same IODELAY CONTROLLER
                                      // clock frequency (200MHz).
-   parameter IODELAY_GRP1          = "MIG_7SERIES_0_IODELAY_MIG1",
+   parameter IODELAY_GRP1          = "MIG_7SERIES_1_IODELAY_MIG1",
                                      // It is associated to a set of IODELAYs with
                                      // an IDELAYCTRL that have same IODELAY CONTROLLER
                                      // clock frequency (300MHz/400MHz).
@@ -473,7 +473,7 @@ module mig_7series_1_mig #
    //***************************************************************************
    // Temparature monitor parameter
    //***************************************************************************
-   parameter TEMP_MON_CONTROL      = "INTERNAL",
+   parameter TEMP_MON_CONTROL      = "EXTERNAL",
                                      // # = "INTERNAL", "EXTERNAL"
       
    parameter RST_ACT_LOW           = 1
@@ -526,7 +526,9 @@ module mig_7series_1_mig #
    output                                       ui_clk,
    output                                       ui_clk_sync_rst,
    output                                       init_calib_complete,
-      
+
+   input [11:0]                                 device_temp_i,
+   output [11:0]                                device_temp_o,
 
    // System reset - Default polarity of sys_rst pin is Active Low.
    // System reset polarity will change based on the option 
@@ -604,7 +606,6 @@ module mig_7series_1_mig #
   wire                              clk_ref_n;
   wire                              clk_ref_i;
   wire [11:0]                       device_temp;
-  wire [11:0]                       device_temp_i;
 
   // Debug port signals
   wire                              dbg_idel_down_all;
@@ -765,6 +766,9 @@ module mig_7series_1_mig #
       assign device_temp = 'b0;
 
     end
+
+    assign device_temp_o = device_temp;
+
   endgenerate
          
   mig_7series_v2_3_infrastructure #

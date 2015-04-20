@@ -526,7 +526,9 @@ module mig_7series_0_mig #
    output                                       ui_clk,
    output                                       ui_clk_sync_rst,
    output                                       init_calib_complete,
-      
+
+   input [11:0]                                 device_temp_i,
+   output [11:0]                                device_temp_o,
 
    // System reset - Default polarity of sys_rst pin is Active Low.
    // System reset polarity will change based on the option 
@@ -604,7 +606,6 @@ module mig_7series_0_mig #
   wire                              clk_ref_n;
   wire                              clk_ref_i;
   wire [11:0]                       device_temp;
-  wire [11:0]                       device_temp_i;
 
   // Debug port signals
   wire                              dbg_idel_down_all;
@@ -765,6 +766,9 @@ module mig_7series_0_mig #
       assign device_temp = 'b0;
 
     end
+
+    assign device_temp_o = device_temp;
+
   endgenerate
          
   mig_7series_v2_3_infrastructure #

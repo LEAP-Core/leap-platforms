@@ -13,7 +13,7 @@
 %param DRAM_BEAT_WIDTH      512   "Bit width of one beat in a burst"
 %param DRAM_WORD_WIDTH      64    "Addressable object size"
 %param DRAM_ADDR_BITS       29    "Address bits per bank"
-%param DRAM_NUM_BANKS       1     "DDR banks"
+%param DRAM_NUM_BANKS       2     "DDR banks"
 %param DRAM_VERSION_STRING  "2_3" "Magic DDR Version String"
 
 ##
@@ -24,3 +24,11 @@
 ##
 %param DRAM_DRIVER_IFC_ADDR_WIDTH       30      "Address bits in Xilinx driver interface"
 %param DRAM_DRIVER_IFC_ROW_WIDTH        16      "Row address bits in Xilinx driver interface"
+
+##
+## Multi-bank controllers may need to share a temperature monitor.  The
+## existence of the DRAM_SHARE_TEMP_MON parameter causes the driver to
+## connect bank 0's monitor to all other banks.  The value of the parameter
+## is irrelevant.
+##
+%param DRAM_SHARE_TEMP_MON               1      "DRAM temperature monitor is shared"

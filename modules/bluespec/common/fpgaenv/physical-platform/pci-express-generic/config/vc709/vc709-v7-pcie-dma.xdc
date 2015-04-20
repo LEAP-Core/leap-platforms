@@ -275,6 +275,16 @@ if {$IS_TOP_BUILD} {
     #set_property LOC MMCME2_ADV_X0Y1 [get_cells -hier -filter {NAME =~ */llpi_phys_plat_clocks_userClockPackage_m_clk_clk_clks/x/mmcm_adv_inst}]
     #set_property LOC $MODEL_CLK_BUFG [get_cells -hier -filter {NAME =~ */llpi_phys_plat_clocks_userClockPackage_m_clk_clk_clks/x/clkout0_buf}]
     #set_property LOC BUFGCTRL_X0Y14 [get_cells -hier -filter {NAME =~ */llpi_phys_plat_clocks_userClockPackage_m_clk_clk_clks/x/clkf_buf}]
+
+    ##
+    ## Put the main reset in the center of the chip.
+    ##
+    # Find all registers in the primary reset chain.
+    set main_reset [get_cells -hier -filter {NAME =~ */llpi_phys_plat_pcieRst_rst_?/reset_hold_reg[*]}]
+    # Sort them and get the terminal register
+    set main_reset_last [lrange [lsort -decreasing ${main_reset}] 0 0]
+    # Put it in the middle
+    set_property LOC SLICE_X111Y249 ${main_reset_last}
 }
 
 

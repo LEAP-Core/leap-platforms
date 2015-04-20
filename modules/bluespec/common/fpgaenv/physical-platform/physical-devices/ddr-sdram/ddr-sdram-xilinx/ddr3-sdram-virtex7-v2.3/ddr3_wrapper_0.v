@@ -22,6 +22,8 @@
 // $Revision$
 // $Date$
 
+`include "awb/provides/ddr_sdram_xilinx_v23_config_params.bsh"
+
 // This is a wrapper around the ddr3 module generated from coregen.  
 
 module ddr3_wrapper_0 #
@@ -85,9 +87,19 @@ module ddr3_wrapper_0 #
    
    output                                       init_calib_complete,
 
+   // Multi-bank designs may need to share temperature monitors.  We always
+   // describe the monitor input/output wires but connect them below only
+   // when they are available in the driver.
+   input [11:0]                                 device_temp_i,
+   output [11:0]                                device_temp_o,
+
    // System reset
    input                                        sys_rst   
    );
+
+`ifndef DRAM_SHARE_TEMP_MON
+   assign device_temp_o = 'b0;
+`endif
 
    mig_7series_0_mig #
      (
@@ -135,12 +147,17 @@ module ddr3_wrapper_0 #
        .app_zq_ack                     (),
        .ui_clk                         (ui_clk),
        .ui_clk_sync_rst                (ui_clk_sync_rst),
-      
+
        .app_wdf_mask                   (app_wdf_mask),
-             
+
+`ifdef DRAM_SHARE_TEMP_MON
+       .device_temp_i                  (device_temp_i),
+       .device_temp_o                  (device_temp_o),
+`endif
+
       // System Clock Ports
        .sys_clk_i                      (sys_clk_i),
-      
+
        .sys_rst                        (sys_rst)
       );
 

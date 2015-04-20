@@ -1,5 +1,5 @@
 areagroup ddr3_0 = None;
-location  ddr3_0 132,394;
+location  ddr3_0 132,344;
 dimension ddr3_0 37,105;
 ddr3_0 in fpga0_platform;
 attribute ddr3_0 "PARENT_INSTANCE" = "llpi_phys_plat_sdram_b_ddrSynth" ;
@@ -7,7 +7,7 @@ attribute ddr3_0 "SYNTH_BOUNDARY" = 1;
 attribute ddr3_0 "MODULE_NAME" = "mkDDRBankSynth0" ;
 
 areagroup ddr3_1 = None;
-location  ddr3_1 132,0;
+location  ddr3_1 132,50;
 dimension ddr3_1 37,105;
 ddr3_1 in fpga0_platform;
 attribute ddr3_1 "PARENT_INSTANCE" = "llpi_phys_plat_sdram_b_ddrSynth_1" ;

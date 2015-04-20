@@ -1632,15 +1632,15 @@ proc ddr3PARConstraints { } {
     if {[getAWBParams {"area_group_tool" "AREA_GROUPS_PAR_DEVICE_AG"}] != "1"} {
         startgroup
         create_pblock pblock_ddr3_0
-        resize_pblock pblock_ddr3_0 -add {SLICE_X132Y394:SLICE_X169Y499}
+        resize_pblock pblock_ddr3_0 -add {SLICE_X132Y344:SLICE_X169Y449}
         add_cells_to_pblock pblock_ddr3_0 [get_cells -hier -filter {NAME =~ m_sys_sys_vp_m_mod/llpi_phys_plat_sdram_b_ddrSynth/*}]
         endgroup
 
         if {[getAWBParams {"ddr_sdram_xilinx_v23_config" "DRAM_NUM_BANKS"}] > 1} {
             startgroup
             create_pblock pblock_ddr3_1
-            resize_pblock pblock_ddr3_1 -add {SLICE_X132Y0:SLICE_X169Y105}
-            add_cells_to_pblock pblock_ddr3_1 [get_cells -hier -filter {NAME =~ m_sys_sys_vp_m_mod/llpi_phys_plat_sdram_b_ddrSynth_1/*}]
+            resize_pblock pblock_ddr3_1 -add {SLICE_X132Y50:SLICE_X169Y155}
+            add_cells_to_pblock pblock_ddr3_1 [get_cells -hier -filter {NAME =~ m_sys_sys_vp_m_mod/llpi_phys_plat_sdram_b_1_ddrSynth/*}]
             endgroup
         }
     }
