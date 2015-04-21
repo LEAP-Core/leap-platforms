@@ -41,13 +41,21 @@ def numBuffersForDistance(distance, freq):
     return 0
 
 
-def numPlatformLIChannelBufs(areaConstraints):
+def numPlatformLIChannelBufs(areaConstraints = None,
+                             rootModuleName = None,
+                             channelName = None):
     """The platform is currently composed of multiple area groups and the
     compiler has no way of knowing in which platform area group a channel
     terminates.  We use a heuristic for deciding when to insert buffers
     to handle wire delay.
     """
     freq = model.moduleList.getAWBParam('clocks_device', 'MODEL_CLOCK_FREQ')
+
+    ## For now we are only interested in connections to the platform.  We
+    ## should have a way to identify the platform.  Currently, look for
+    ## "platform" in the name.
+    if (rootModuleName.lower().count('platform') == 0):
+        return 0
 
     if (freq >= 130):
         return 2

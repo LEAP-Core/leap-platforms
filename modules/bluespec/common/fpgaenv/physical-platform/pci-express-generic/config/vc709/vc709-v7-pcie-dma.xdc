@@ -280,7 +280,7 @@ if {$IS_TOP_BUILD} {
     ## Put the main reset in the center of the chip.
     ##
     # Find all registers in the primary reset chain.
-    set main_reset [get_cells -hier -filter {NAME =~ */llpi_phys_plat_pcieRst_rst_?/reset_hold_reg[*]}]
+    set main_reset [get_cells -hier -filter {NAME =~ */llpi_phys_plat_clocks_finalReset_rst/reset_hold_reg[*]}]
     # Sort them and get the terminal register
     set main_reset_last [lrange [lsort -decreasing ${main_reset}] 0 0]
     # Put it in the middle
