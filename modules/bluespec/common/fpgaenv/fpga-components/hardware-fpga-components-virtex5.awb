@@ -33,6 +33,9 @@
 %private fp_cvt_i_to_s.v
 %private fp_cvt_d_to_i.v
 
+%sources -t BSV -v PUBLIC  crossing-reg.bsv
+%sources -t VERILOG -v PRIVATE leap_crossing_reg.v
+
 %sources -t BSV -v PUBLIC  clock-import.bsv
 %sources -t VERILOG -v PRIVATE clock_import.v
 
