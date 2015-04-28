@@ -3,7 +3,7 @@
 %desc Generic Altera JTAG
 
 %provides physical_platform	
-%requires clocks_device led_device jtag_device physical_platform_utils altera_jtag_physical_mapping
+%requires clocks_device led_device jtag_device physical_platform_utils physical_platform_config
 
 %sources -t BSV -v PUBLIC  altera-jtag.bsv
 %sources -t BSH -v PUBLIC  altera-jtag.bsh

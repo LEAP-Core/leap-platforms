@@ -12,6 +12,9 @@
 %public user-clock-altera.bsv
 %public shiftreg.bsv
 
+%sources -t BSV -v PUBLIC  crossing-reg.bsv
+%sources -t VERILOG -v PRIVATE leap_crossing_reg.v
+
 %generated -t VERILOG mkUserClock_DivideByThree.v
 %generated -t VERILOG mkUserClock_DivideByTwo.v
 %generated -t VERILOG mkUserClock_DivideByFour.v

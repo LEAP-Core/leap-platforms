@@ -12,6 +12,9 @@
 %public user-clock-xilinx.bsv
 %public shiftreg.bsv
 
+%sources -t BSV -v PUBLIC  crossing-reg.bsv
+%sources -t VERILOG -v PRIVATE leap_crossing_reg.v
+
 %sources -t BSV -v PUBLIC  io-components-xilinx.bsv
 
 %sources -t BSV -v PUBLIC  clock-import.bsv

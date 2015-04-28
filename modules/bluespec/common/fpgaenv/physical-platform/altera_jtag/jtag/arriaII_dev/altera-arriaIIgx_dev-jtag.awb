@@ -2,7 +2,7 @@
 %name ArriaII Dev Board JTAG Mapping
 %desc ArriaII Dev Board JTAG Mapping
 
-%provides altera_jtag_physical_mapping	
+%provides physical_platform_config 
 
 %sources -t QSF -v PUBLIC  altera-arriaIIgx_dev-jtag.qsf
 %sources -t QSF -v PUBLIC  altera-arriaIIgx_dev-jtag-pins.qsf
@@ -11,6 +11,8 @@
 %sources -t SDC -v PUBLIC jtag.sdc
 
 %param --global MAKE_ALL_TARGET "bit"       "Target of 'make all'.  Most likely bit, exe or vexe."
+
+%param --global FPGA_PLATFORM      "ARRIAII"            "FPGA Platform"
 
 %param FPGA_PART_ALTERA   "???"             "FPGA Part ID (XST)"
 %param FPGA_TECHNOLOGY    "ARRIAII-GX"      "FPGA Technology (Synplify)"

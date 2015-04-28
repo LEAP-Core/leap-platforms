@@ -15,6 +15,9 @@
 %private bscan-virtex5.v
 %private shiftreg.v
 
+%sources -t BSV -v PUBLIC  crossing-reg.bsv
+%sources -t VERILOG -v PRIVATE leap_crossing_reg.v
+
 %generated -t VERILOG mkUserClock_DivideByThree.v
 %generated -t VERILOG mkUserClock_DivideByTwo.v
 %generated -t VERILOG mkUserClock_DivideByFour.v
