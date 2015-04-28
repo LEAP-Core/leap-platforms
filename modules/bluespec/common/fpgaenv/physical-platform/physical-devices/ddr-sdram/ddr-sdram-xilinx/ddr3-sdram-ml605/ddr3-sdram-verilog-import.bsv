@@ -78,6 +78,11 @@ interface XILINX_DRAM_CONTROLLER;
     method    Action            enqueue_data(Bit#(256) data, Bit#(32) mask, Bool endBurst);
     method    Bit#(256)         dequeue_data;
 
+    // Temperature monitoring.  In multi-bank controllers these may be needed
+    // to pass temperature data from controller 0 to all others.
+    method    Action            device_temp_i(Bit#(12) temp);
+    method    Bit#(12)          device_temp_o;
+
     // Debug info
     method    Bool              dbg_wrlvl_start;
     method    Bool              dbg_wrlvl_done;
@@ -103,7 +108,8 @@ endmodule
 
 import "BVI" ddr3_wrapper =
 module mkXilinxDRAMController#(Clock bsv_clk200,
-                               Reset bsv_rst200)
+                               Reset bsv_rst200,
+                               Integer bankIdx)
 
     // interface:
         (XILINX_DRAM_CONTROLLER);
@@ -157,10 +163,12 @@ module mkXilinxDRAMController#(Clock bsv_clk200,
     method app_wdf_ready        enq_rdy clocked_by (controller_clock) reset_by (controller_reset);
     method app_rd_ready         deq_rdy clocked_by (controller_clock) reset_by (controller_reset);
 
+    method                      device_temp_i(device_temp_i) enable((*inhigh*)en_temp) clocked_by(bsv_clk200) reset_by(no_reset);
+    method device_temp_o        device_temp_o clocked_by(no_clock) reset_by(no_reset);
 
    
-    schedule (wires.ddr_ck_p, wires.ddr_ck_n, wires.ddr_addr, wires.ddr_ba, wires.ddr_ras_n, wires.ddr_cas_n, wires.ddr_we_n, wires.ddr_cs_n, wires.ddr_odt, wires.ddr_cke, wires.ddr_dm, wires.ddr_reset_n) CF
-             (wires.ddr_ck_p, wires.ddr_ck_n, wires.ddr_addr, wires.ddr_ba, wires.ddr_ras_n, wires.ddr_cas_n, wires.ddr_we_n, wires.ddr_cs_n, wires.ddr_odt, wires.ddr_cke, wires.ddr_dm, wires.ddr_reset_n);
+    schedule (wires.ddr_ck_p, wires.ddr_ck_n, wires.ddr_addr, wires.ddr_ba, wires.ddr_ras_n, wires.ddr_cas_n, wires.ddr_we_n, wires.ddr_cs_n, wires.ddr_odt, wires.ddr_cke, wires.ddr_dm, wires.ddr_reset_n, device_temp_o) CF
+             (wires.ddr_ck_p, wires.ddr_ck_n, wires.ddr_addr, wires.ddr_ba, wires.ddr_ras_n, wires.ddr_cas_n, wires.ddr_we_n, wires.ddr_cs_n, wires.ddr_odt, wires.ddr_cke, wires.ddr_dm, wires.ddr_reset_n, device_temp_o);
    
     schedule (init_done,
               dbg_wrlvl_done, dbg_wrlvl_err, dbg_wrlvl_start, 
@@ -182,5 +190,6 @@ module mkXilinxDRAMController#(Clock bsv_clk200,
     schedule (enqueue_data)    SBR  (enqueue_data);
     schedule (dequeue_data)    SBR  (dequeue_data);
     schedule (dequeue_data)    CF (enqueue_address, enqueue_data);
+    schedule (device_temp_i)   C  (device_temp_i);
 
 endmodule
