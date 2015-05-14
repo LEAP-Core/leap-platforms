@@ -8,7 +8,7 @@
 
 %sources -t BSV -v PUBLIC aurora-device-vc707-quad.bsv
 %sources -t BSH -v PUBLIC aurora-device-vc707.bsh
-%sources -t UCF -v PUBLIC vc707_sma_aurora_quad.ucf
+%sources -t UCF -v PUBLIC vc707-aurora-sma-quad.ucf
 
 %generated -t VERILOG mkAuroraDevice.v
 %generated -t BA  mkAuroraDevice.ba

@@ -8,10 +8,11 @@
 
 %sources -t BSV -v PUBLIC aurora-device-vc707.bsv
 %sources -t BSH -v PUBLIC aurora-device-vc707.bsh
-%sources -t UCF -v PUBLIC vc707_sma_aurora.ucf
+%sources -t VIVADO_TCL_DEFINITION -v PRIVATE vc707-aurora.xdc
+%sources -t UCF -v PRIVATE vc707-aurora-sma.ucf
 
 %generated -t VERILOG mkAuroraDevice.v
 %generated -t BA  mkAuroraDevice.ba
 
-%param NUM_AURORA_IFCS   2   "Number of Aurora Interfaces"
+%param NUM_AURORA_IFCS   1   "Number of Aurora Interfaces"
 %param AURORA_IFC_WORDS  3   "Width of the model-side Aurora interface (0 for automatic based on relative frequencies.)"
