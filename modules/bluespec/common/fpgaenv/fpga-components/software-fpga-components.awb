@@ -10,6 +10,7 @@
 %public alu-support.bsv
 %public user-clock.bsv user-clock-pll.bsv user-clock-sim.bsv
 %public shiftreg-sim.bsv
+%public crossing-reg-sim.bsv
 
 %generated -t BA mkUserClock_DivideByThree.ba
 %generated -t BA mkUserClock_DivideByTwo.ba

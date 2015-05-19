@@ -247,7 +247,7 @@ proc deleteDummyTopLevelWires {} {
 
 
 if {$IS_TOP_BUILD} {
-    set_property BITSTREAM.GENERAL.COMPRESS FALSE [current_design]
+    set_property BITSTREAM.GENERAL.COMPRESS TRUE [current_design]
     set_property CFGBVS GND [current_design]
     set_property CONFIG_VOLTAGE 1.8 [current_design]
     set_property BITSTREAM.CONFIG.UNUSEDPIN Pulldown [current_design]

@@ -36,6 +36,9 @@
 %sources -t BSV -v PUBLIC  reset.bsv
 %sources -t VERILOG -v PRIVATE reset_import.v
 
+%sources -t BSV -v PUBLIC  crossing-reg.bsv
+%sources -t VERILOG -v PRIVATE leap_crossing_reg.v
+
 %sources -t XCF -v PRIVATE xilinx-components.xcf
 %sources -t SDC -v PRIVATE xilinx-components.sdc
 

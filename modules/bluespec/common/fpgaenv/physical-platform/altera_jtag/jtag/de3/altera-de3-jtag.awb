@@ -2,7 +2,7 @@
 %name DE3 Dev Board JTAG Mapping
 %desc DE3 Dev Board JTAG Mapping
 
-%provides altera_jtag_physical_mapping	
+%provides physical_platform_config	
 
 %sources -t QSF -v PUBLIC  altera-de3-jtag.qsf
 %sources -t QSF -v PUBLIC  altera-de3-jtag-pins.qsf
@@ -11,6 +11,8 @@
 %sources -t SDC -v PUBLIC jtag.sdc
 
 %param --global MAKE_ALL_TARGET "bit"       "Target of 'make all'.  Most likely bit, exe or vexe."
+
+%param --global FPGA_PLATFORM      "DE3"               "FPGA Platform"
 
 %param FPGA_PART_ALTERA   "???"             "FPGA Part ID (XST)"
 %param FPGA_TECHNOLOGY    "STRATIXIII"      "FPGA Technology (Synplify)"

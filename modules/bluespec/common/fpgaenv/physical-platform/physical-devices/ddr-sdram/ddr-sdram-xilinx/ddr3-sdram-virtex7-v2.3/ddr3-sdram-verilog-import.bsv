@@ -399,7 +399,7 @@ module vMkVirtex7DDR3Controller0#(DDR3_Configure_V7 cfg) (VDDR3_Controller_V7);
       method app_rdy                  app_rdy clocked_by(user_clock) reset_by(no_reset);
       method app_wdf_rdy              app_wdf_rdy clocked_by(user_clock) reset_by(no_reset);
 
-      method                          device_temp_i(device_temp_i) enable((*inhigh*)en_temp) clocked_by(default_clock) reset_by(no_reset);
+      method                          device_temp_i(device_temp_i) enable((*inhigh*)en_temp) clocked_by(clk) reset_by(no_reset);
       method device_temp_o            device_temp_o clocked_by(no_clock) reset_by(no_reset);
    endinterface
    
@@ -477,7 +477,7 @@ module vMkVirtex7DDR3Controller1#(DDR3_Configure_V7 cfg) (VDDR3_Controller_V7);
       method app_rdy                  app_rdy clocked_by(user_clock) reset_by(no_reset);
       method app_wdf_rdy              app_wdf_rdy clocked_by(user_clock) reset_by(no_reset);
 
-      method                          device_temp_i(device_temp_i) enable((*inhigh*)en_temp) clocked_by(default_clock) reset_by(no_reset);
+      method                          device_temp_i(device_temp_i) enable((*inhigh*)en_temp) clocked_by(clk) reset_by(no_reset);
       method device_temp_o            device_temp_o clocked_by(no_clock) reset_by(no_reset);
    endinterface
    

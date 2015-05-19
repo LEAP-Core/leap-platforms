@@ -6,10 +6,8 @@ module shiftreg (CLK, RST_N, writeData, writeEnable, readData);
    input CLK;
    input RST_N;
    input writeData;   
-//   input [WIDTH - 1] writeData;
    input writeEnable;
    output readData;
-//   output [WIDTH - 1] readData;
 
    reg [LENGTH - 1:0] tmp;
 

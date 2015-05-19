@@ -69,6 +69,12 @@ module ddr3_wrapper #
    output                app_rd_ready,
    output [255:0]        app_rd_data,
 
+   // Multi-bank designs may need to share temperature monitors.  We always
+   // describe the monitor input/output wires but connect them below only
+   // when they are available in the driver.
+   input [11:0]          device_temp_i,
+   output [11:0]         device_temp_o,
+
    // Debug info
    output                dbg_wrlvl_start,
    output                dbg_wrlvl_done,
@@ -77,6 +83,8 @@ module ddr3_wrapper #
    output [1:0]          dbg_rdlvl_done,
    output [1:0]          dbg_rdlvl_err
    );
+
+   assign                device_temp_o = 'b0;
 
    wire                  app_rdy;
    wire 		 app_wdf_rdy;
