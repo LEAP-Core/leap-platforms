@@ -57,15 +57,12 @@ endinterface
 // CLOCKS_WIRES: wires to be sent to the top level, where
 //               the UCF file ties them to pins.
 //
-
 interface CLOCKS_WIRES;
-    
-    (* prefix = "", enable = "CLK" *)
+    (* prefix = "", enable = `SINGLE_ENDED_CLOCKS_CLK *)
     method Action clock_wire();
 
-    (* prefix = "", enable = "RST_N" *)
+    (* prefix = "", enable = `SINGLE_ENDED_CLOCKS_RST_N *)
     method Action reset_n_wire();
-     
 endinterface
 
 //
