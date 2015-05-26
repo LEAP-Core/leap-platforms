@@ -212,14 +212,6 @@ module mkUserClockFromFrequency#(Integer inFreq,
     begin
         m <- mkUserClock_Same();
     end
-    else if ((ratio <= 4) && (ratio * outFreq == inFreq))
-    begin
-        let d <- mkUserClock_Divider(ratio);
-        m = interface UserClock
-                interface clk = d.clk.slowClock;
-                interface rst = d.rst;
-            endinterface;
-    end
     else
     begin
         let lcmValue = lcm(inFreq, outFreq);
