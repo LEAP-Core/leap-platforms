@@ -169,10 +169,6 @@ void
 UMF_MESSAGE_CLASS::Print(
     ostream &out)
 {
-    if(UMF_DEBUG)
-    {
-        return;
-    }
 
     out << "channelID: " << channelID << endl;
     out << "serviceID: " << serviceID << endl;

@@ -14,7 +14,6 @@
 
 %param UMF_CHUNK_BYTES      4       "Bytes in UMF Chunk"
 %param UMF_MAX_MSG_BYTES    1024    "Maximum message length"
-%param UMF_DEBUG   0    "Enable UMF Debug"
 
 %param UMF_PHY_CHANNEL_RESERVED_BITS   6    "Bits reserved for use by the physical channel"
 %param UMF_CHANNEL_ID_BITS             4    "Bits in UMF ChannelID"
