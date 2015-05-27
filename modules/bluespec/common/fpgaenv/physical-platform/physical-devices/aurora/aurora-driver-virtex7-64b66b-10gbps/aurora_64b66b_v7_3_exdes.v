@@ -271,7 +271,7 @@ module aurora_64b66b_v7_3_exdes  #
 
     assign GTXQ0_left_i = GTX_CLK; 
     assign cc_do_i = do_cc_i;
-    // wjun
+
     assign RESET = ~RESET_N;
     assign GT_RESET_IN = ~RESET_N;
     assign USER_CLK = user_clk_i;
@@ -424,7 +424,6 @@ module aurora_64b66b_v7_3_exdes  #
    );
 
 
-    // wjun
     assign tx_d_i = TX_DATA_OUT;
     assign RX_DATA_IN = RX_DATA_IN_delay;
     assign rx_rdy = rx_rdy_delay;
@@ -455,17 +454,25 @@ begin : chipscope1
 reg [63:0] sync_reg;
 wire [63:0] sync_in_i;
 
+    reg tick_user_clock;
+    reg tick_init_clock;
 
     reg  [31:0] rx_count_next;
     reg  [31:0] tx_count_next;
     reg  [31:0] error_count_next;
+
+    always @(posedge INIT_CLK)
+    begin
+        tick_init_clock <= ~tick_init_clock;  
+    end
 
     always @(posedge USER_CLK)
     begin
 	rx_count_next = RX_COUNT;
         tx_count_next = TX_COUNT;
         error_count_next = ERROR_COUNT;
- 
+        tick_user_clock <= ~tick_user_clock;  
+
 	if(system_reset_i)
 	begin
              rx_count_next = 0;
@@ -510,8 +517,10 @@ assign tx_lock_i_i = tx_lock_i;
         assign  sync_in_i[31:16]        =  rx_d_i[48:63];
         assign  sync_in_i[32]           =  RESET;  
         assign  sync_in_i[33]           =  system_reset_i;  
-        assign  sync_in_i[34]           =  FLITCOUNT[0];  
-        assign  sync_in_i[35]           =  FLITCOUNT[1];  
+//        assign  sync_in_i[34]           =  FLITCOUNT[0];  
+//        assign  sync_in_i[35]           =  FLITCOUNT[1];  
+        assign  sync_in_i[34]           =  tick_user_clock;  
+        assign  sync_in_i[35]           =  tick_init_clock;  
         assign  sync_in_i[36]           =  UNDERFLOW;  
         assign  sync_in_i[37]           =  rx_rdy;
         assign  sync_in_i[38]           =  tx_en;
@@ -521,9 +530,9 @@ assign tx_lock_i_i = tx_lock_i;
         assign  sync_in_i[42]           =  tx_lock_i_i;
         assign  sync_in_i[43]           =  pll_not_locked_i;
         assign  sync_in_i[44]           =  lane_up_i_i;
-        assign  sync_in_i[45]           =  channel_up_i;
-        
+        assign  sync_in_i[45]           =  channel_up_i;        
         assign  sync_in_i[47]           =  do_cc_i;
+
         assign  sync_in_i[55:48]        =  RXCREDIT;
         assign  sync_in_i[63:56]        =  TXCREDIT;
    

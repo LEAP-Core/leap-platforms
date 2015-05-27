@@ -73,8 +73,8 @@ proc auroraConstraints { } {
     # FMC SATA base clock is 156.25MHz
     create_clock -period 6.4  [get_ports { auroraWires_hpc_clk_n_put }]
     set user_clk1 [create_clock -period 6.4  [get_nets -hier -filter { NAME =~ *aurora_device/ug_device_1/user_clk_i }]]
-    create_clock -period 6.4  [get_nets -hier -filter { NAME =~ *aurora_device/ug_device_1/sync_clk_i }]
-    create_clock -period 6.4  [get_nets -hier -filter { NAME =~ *aurora_device/ug_device_1/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/rxrecclk_to_pll_i }]
+    create_clock -period 3.2  [get_nets -hier -filter { NAME =~ *aurora_device/ug_device_1/sync_clk_i }]
+    create_clock -period 3.2  [get_nets -hier -filter { NAME =~ *aurora_device/ug_device_1/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/rxrecclk_to_pll_i }]
     create_clock -period 3.2  [get_pins -hier -filter { NAME =~ *aurora_device/ug_device_1/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/aurora_64b66b_v7_3_multi_gt_i/AURORA_64B66B_V7_3_GTX_INST/gtxe2_i/TXOUTCLK }]
     create_clock -period 3.2  [get_pins -hier -filter { NAME =~ *aurora_device/ug_device_1/aurora_64b66b_v7_3_block_i/aurora_64b66b_v7_3_wrapper_i/aurora_64b66b_v7_3_multi_gt_i/AURORA_64B66B_V7_3_GTX_INST/gtxe2_i/RXOUTCLK }]
 

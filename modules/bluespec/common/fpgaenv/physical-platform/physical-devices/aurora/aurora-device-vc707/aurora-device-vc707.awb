@@ -14,5 +14,5 @@
 %generated -t VERILOG mkAuroraDevice.v
 %generated -t BA  mkAuroraDevice.ba
 
-%param NUM_AURORA_IFCS   1   "Number of Aurora Interfaces"
+%param NUM_AURORA_IFCS   2   "Number of Aurora Interfaces"
 %param AURORA_IFC_WORDS  3   "Width of the model-side Aurora interface (0 for automatic based on relative frequencies.)"
