@@ -1,0 +1,50 @@
+%name Virtex-7 GTH Aurora Device, Single Lane, 64b/66b, 64-bit, 10 gbps 
+%desc Virtex-7 GTH Aurora Device, Single Lane, 64b/66b, 64-bit, 10 gbps 
+
+%provides aurora_driver
+
+%sources -t BSV -v PUBLIC aurora-ug.bsv
+
+%sources -t VERILOG -v PRIVATE aurora_64b66b_1.v
+%sources -t VERILOG -v PRIVATE aurora_64b66b_1_64b66b_descrambler.v
+%sources -t VERILOG -v PRIVATE aurora_64b66b_1_64b66b_scrambler.v
+%sources -t VERILOG -v PRIVATE aurora_64b66b_1_aurora_lane.v
+%sources -t VERILOG -v PRIVATE aurora_64b66b_1_axi_to_ll.v
+%sources -t VERILOG -v PRIVATE aurora_64b66b_1_block_sync_sm.v
+%sources -t VERILOG -v PRIVATE aurora_64b66b_1_cbcc_gtx_6466.v
+%sources -t VERILOG -v PRIVATE aurora_64b66b_1_cdc_sync.v
+%sources -t VERILOG -v PRIVATE aurora_64b66b_1_ch_bond_code_gen.v
+%sources -t VERILOG -v PRIVATE aurora_64b66b_1_channel_err_detect.v
+%sources -t VERILOG -v PRIVATE aurora_64b66b_1_channel_init_sm.v
+%sources -t VERILOG -v PRIVATE aurora_64b66b_1_clock_module.v
+%sources -t VERILOG -v PRIVATE aurora_64b66b_1_common_logic_cbcc.v
+%sources -t VERILOG -v PRIVATE aurora_64b66b_1_common_reset_cbcc.v
+%sources -t VERILOG -v PRIVATE aurora_64b66b_1_core.v
+%sources -t VERILOG -v PRIVATE aurora_64b66b_1_err_detect.v
+%sources -t VERILOG -v PRIVATE aurora_64b66b_1_global_logic.v
+%sources -t VERILOG -v PRIVATE aurora_64b66b_1_gt_common_wrapper.v
+%sources -t VERILOG -v PRIVATE aurora_64b66b_1_lane_init_sm.v
+%sources -t VERILOG -v PRIVATE aurora_64b66b_1_ll_to_axi.v
+%sources -t VERILOG -v PRIVATE aurora_64b66b_1_reset_logic.v
+%sources -t VERILOG -v PRIVATE aurora_64b66b_1_rx_startup_fsm.v
+%sources -t VERILOG -v PRIVATE aurora_64b66b_1_rx_stream.v
+%sources -t VERILOG -v PRIVATE aurora_64b66b_1_rx_stream_datapath.v
+%sources -t VERILOG -v PRIVATE aurora_64b66b_1_support.v
+%sources -t VERILOG -v PRIVATE aurora_64b66b_1_support_reset_logic.v
+%sources -t VERILOG -v PRIVATE aurora_64b66b_1_sym_dec.v
+%sources -t VERILOG -v PRIVATE aurora_64b66b_1_sym_gen.v
+%sources -t VERILOG -v PRIVATE aurora_64b66b_1_tx_startup_fsm.v
+%sources -t VERILOG -v PRIVATE aurora_64b66b_1_tx_stream.v
+%sources -t VERILOG -v PRIVATE aurora_64b66b_1_tx_stream_control_sm.v
+%sources -t VERILOG -v PRIVATE aurora_64b66b_1_tx_stream_datapath.v
+%sources -t VERILOG -v PRIVATE aurora_64b66b_1_width_conversion.v
+%sources -t VERILOG -v PRIVATE aurora_64b66b_1_gtx.v
+%sources -t VERILOG -v PRIVATE aurora_64b66b_1_multi_wrapper.v
+%sources -t VERILOG -v PRIVATE aurora_64b66b_1_wrapper.v
+%sources -t VERILOG -v PRIVATE aurora_64b66b_1_exdes.v
+%sources -t VERILOG -v PRIVATE aurora_64b66b_1_standard_cc_module.v
+
+
+%param AURORA_INTERFACE_WIDTH            128   "Aurora Interface Width"
+%param AURORA_INTERFACE_TIMING_PARAMETER 16    "Timing parameter used to size various counters"
+%param AURORA_INTERFACE_FREQ             156   "Aurora Interface Frequency"
