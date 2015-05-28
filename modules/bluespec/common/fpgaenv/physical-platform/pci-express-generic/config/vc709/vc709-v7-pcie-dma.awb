@@ -4,6 +4,7 @@
 %provides physical_platform_config
 
 %sources -t VIVADO_TCL_DEFINITION -v PRIVATE vc709-v7-pcie-dma.xdc
+%sources -t AREA_CONSTRAINT       -v PRIVATE vc709-v7-pcie-dma.agrp
 
 %param --global MAKE_ALL_TARGET   "bit"        "Target of 'make all'.  Most likely bit, exe or vexe."
 

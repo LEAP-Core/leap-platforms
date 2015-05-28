@@ -1,0 +1,40 @@
+#These are the slice dimension
+dimension FPGA 221,499;
+
+areagroup pcie_ep = None;
+location  pcie_ep 156,200;
+dimension pcie_ep 65,100;
+#resource pcie_ep LUT = 10242;
+#resource pcie_ep SLICE = 2506;
+pcie_ep in fpga0_platform;
+attribute pcie_ep "IGNORE_PARENT_CHILD" = 1;
+attribute pcie_ep "PARENT_INSTANCE" = "llpi_phys_plat_pcie_pcieLLDev_deviceClocked";
+attribute pcie_ep "SYNTH_BOUNDARY" = 1;
+#attribute pcie_ep "NO_PLACE" = 1;
+#attribute pcie_ep "NO_ROUTE" = 1;
+attribute pcie_ep "MODULE_NAME" = "mkPCIELowLevelDeviceClocked" ;
+
+
+# There are some locations on the chip where slices are absent. We'll enumerate them here. 
+areagroup big_no_connect = None;
+location  big_no_connect 78,200;
+dimension big_no_connect 13,100;
+attribute big_no_connect "EMPTYBOX" = 1;
+
+areagroup pcie_no_connect1 = None;
+location  pcie_no_connect1 196,75;
+dimension pcie_no_connect1 9,50;
+attribute pcie_no_connect1 "EMPTYBOX" = 1;
+
+areagroup pcie_no_connect2 = None;
+location  pcie_no_connect2 196,225;
+dimension pcie_no_connect2 9,50;
+attribute pcie_no_connect2 "EMPTYBOX" = 1;
+
+areagroup pcie_no_connect3 = None;
+location  pcie_no_connect3 196,375;
+dimension pcie_no_connect3 9,50;
+attribute pcie_no_connect3 "EMPTYBOX" = 1;
+
+#attribute fpga0_platform "EXCLUSIONS" = "m_sys_sys_vp_m_mod/llpi_phys_plat_clocks_soft_reset_wrapper/rstSync";
+
