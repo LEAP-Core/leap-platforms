@@ -8,7 +8,8 @@
 
 %sources -t BSV -v PUBLIC aurora-device-vc707.bsv
 %sources -t BSH -v PUBLIC aurora-device-vc707.bsh
-%sources -t UCF -v PUBLIC vc707_sma_aurora.ucf
+%sources -t VIVADO_TCL_DEFINITION -v PRIVATE vc707-aurora.xdc
+%sources -t UCF -v PRIVATE vc707-aurora-sma.ucf
 
 %generated -t VERILOG mkAuroraDevice.v
 %generated -t BA  mkAuroraDevice.ba

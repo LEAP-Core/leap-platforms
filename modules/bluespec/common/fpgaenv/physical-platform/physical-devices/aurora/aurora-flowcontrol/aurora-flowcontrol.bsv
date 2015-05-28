@@ -49,18 +49,8 @@ import Vector::*;
 `include "awb/provides/librl_bsv_base.bsh"
 `include "awb/provides/librl_bsv_storage.bsh"
 `include "awb/provides/aurora_driver.bsh"
-
-interface AURORA_WIRES;
-	method Action rxp_in(Bit#(1) i);
-	method Action rxn_in(Bit#(1) i);
-	method Bit#(1) txp_out();
-	method Bit#(1) txn_out();
-        interface Reset aurora_rst;
-	interface Clock aurora_clk;
-        interface Reset model_rst;
-	interface Clock model_clk;
-endinterface
-
+`include "awb/provides/aurora_common.bsh"
+`include "awb/provides/aurora_driver_params.bsh"
 
 
 // guarded interface
@@ -395,10 +385,6 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ug_device, NumTypeP
 	method rxn_in = ug_device.rxn_in;
 	method txp_out = ug_device.txp_out;
 	method txn_out = ug_device.txn_out;
-	interface Clock model_clk = clk;
-        interface Reset model_rst = rst;
-	interface Clock aurora_clk = ug_device.aurora_clk;
-        interface Reset aurora_rst = ug_device.aurora_rst;
     endinterface
    
     interface AURORA_DRIVER driver;

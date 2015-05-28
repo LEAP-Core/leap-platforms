@@ -1,5 +1,5 @@
-%name VC707 Aurora Device, Single Lane, 64b/66b, 64-bit, 10 gbps 
-%desc VC707 Aurora Device, Single Lane, 64b/65b, 64-bit, 10 gbps 
+%name Virtex-7 Aurora Device, Single Lane, 64b/66b, 64-bit, 10 gbps 
+%desc Virtex-7 Aurora Device, Single Lane, 64b/66b, 64-bit, 10 gbps 
 
 %provides aurora_driver
 

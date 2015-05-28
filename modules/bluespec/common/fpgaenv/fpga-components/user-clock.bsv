@@ -155,7 +155,7 @@ module mkUserClock_Divider#(Integer divisor)
     let clock_ready = True;
     let usr_rst <- exposeCurrentReset();
 
-    if(divisor == 2) 
+    if (divisor == 2) 
     begin
         let divider <- mkUserClock_DivideByTwo();
         slow_clk = divider.slowClock;
@@ -163,7 +163,7 @@ module mkUserClock_Divider#(Integer divisor)
         usr_rst <- mkAsyncResetFromCR(0, divider.slowClock);
     end
 
-    if(divisor == 3) 
+    if (divisor == 3) 
     begin
         let divider <- mkUserClock_DivideByThree();
         slow_clk = divider.slowClock;
@@ -171,7 +171,7 @@ module mkUserClock_Divider#(Integer divisor)
         usr_rst <- mkAsyncResetFromCR(0, divider.slowClock);
     end
 
-    if(divisor == 4) 
+    if (divisor == 4) 
     begin
         let divider <- mkUserClock_DivideByFour();
         slow_clk = divider.slowClock;
@@ -179,7 +179,7 @@ module mkUserClock_Divider#(Integer divisor)
         usr_rst <- mkAsyncResetFromCR(0, divider.slowClock);
     end
 
-    if(divisor > 4) 
+    if (divisor > 4) 
         errorM("Clock divider larger than four not currently supported");
 
     // bind the driver interfaces
@@ -203,8 +203,21 @@ module mkUserClockFromFrequency#(Integer inFreq,
     // Interface:
     (UserClock);
 
-    let lcmValue = lcm(inFreq, outFreq);
-    let m <- mkUserClock(inFreq, lcmValue/inFreq, lcmValue/outFreq);
+    UserClock m;
+
+    Integer ratio = inFreq / outFreq;
+
+    // Check some simple cases.
+    if (inFreq == outFreq)
+    begin
+        m <- mkUserClock_Same();
+    end
+    else
+    begin
+        let lcmValue = lcm(inFreq, outFreq);
+        m <- mkUserClock(inFreq, lcmValue/inFreq, lcmValue/outFreq);
+    end
+
     return m;
 endmodule
 

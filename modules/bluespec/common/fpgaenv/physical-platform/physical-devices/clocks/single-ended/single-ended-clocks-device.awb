@@ -6,10 +6,13 @@
 
 %sources -t BSV -v PUBLIC  single-ended-clocks-import.bsv
 %sources -t BSV -v PUBLIC  single-ended-clocks-device.bsv
-%sources -t VERILOG -v PRIVATE single-ended-clocks-device.v
+%sources -t VERILOG -v PRIVATE single_ended_clocks_device.v
 
 %param --global MODEL_CLOCK_FREQ 75  "Desired model clock frequency (integer)."
 
 %param CRYSTAL_CLOCK_FREQ 50 "Input (Crystal) Clock Frequency"
 
 %param --global RESET_ACTIVE_HIGH      0   "Reset active level polarity: 0 - negative, 1 - positive."
+
+%param --global SINGLE_ENDED_CLOCKS_CLK   "CLK"    "Name of the exposed top-level raw clock wire"
+%param --global SINGLE_ENDED_CLOCKS_RST_N "RST_N"  "Name of the exposed top-level raw reset wire"
