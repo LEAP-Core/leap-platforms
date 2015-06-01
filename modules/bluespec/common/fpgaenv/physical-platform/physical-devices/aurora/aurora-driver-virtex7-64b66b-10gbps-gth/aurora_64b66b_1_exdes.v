@@ -209,6 +209,15 @@ module aurora_64b66b_v7_3_exdes  #
     wire      [0:127]     rx_tdata_i;  
     wire                 rx_tvalid_i;
 
+    //TX Interface
+    wire      [0:127]    tx_d_i;
+    wire                 tx_src_rdy_n_i;        
+    wire                 tx_dst_rdy_n_i;        
+
+    //RX Interface
+    wire      [0:127]     rx_d_i; 
+    wire                 rx_src_rdy_n_i;        
+
     //Error Detection Interface
     wire                 hard_err_i;
     wire                 soft_err_i;
@@ -389,14 +398,14 @@ module aurora_64b66b_v7_3_exdes  #
     // this is non shared mode, the clock, GT common are part of example design.
     aurora_64b66b_1_support aurora_64b66b_1_block_i
     (
-    // AXI Streaming master/slave interfaces
-         .s_axi_tx_tdata(s_axi_tx_tdata_i), 
-         .s_axi_tx_tvalid(s_axi_tx_tvalid_i),
-         .s_axi_tx_tready(s_axi_tx_tready_i), 
 
-         .m_axi_rx_tdata(m_axi_rx_tdata_i), 
-         .m_axi_rx_tvalid(m_axi_rx_tvalid_i), 
-
+        // Stream TX Interface
+        .TX_D(tx_d_i),
+        .TX_SRC_RDY_N(tx_src_rdy_n_i),
+        .TX_DST_RDY_N(tx_dst_rdy_n_i),
+        // Stream RX Interface
+        .RX_D(rx_d_i),
+        .RX_SRC_RDY_N(rx_src_rdy_n_i),
 
 
     // GT Serial I/O
@@ -464,38 +473,28 @@ module aurora_64b66b_v7_3_exdes  #
      );
 
 
-    //RX Interface
-    wire      [0:127]    m_axi_rx_tdata_i; 
-    wire                 m_axi_rx_tvalid_i; 
-
-    // TX Interface
-    wire      [0:127]    s_axi_tx_tdata_i; 
-    wire                 s_axi_tx_tvalid_i;
-    wire                 s_axi_tx_tready_i;
-
-    assign s_axi_tx_tdata_i = TX_DATA_OUT;
-    assign RX_DATA_IN =  m_axi_rx_tdata_i;
-    assign rx_rdy = rx_data_valid_c && !rx_reset_c;
+    assign tx_d_i = TX_DATA_OUT;
+    assign RX_DATA_IN = RX_DATA_IN_delay;
+    assign rx_rdy = rx_rdy_delay;
    
-    assign s_axi_tx_tvalid_i = (tx_en);
-    assign tx_rdy = s_axi_tx_tready_i;
+    assign tx_src_rdy_n_i = !(tx_en);
+    assign tx_rdy = (!tx_dst_rdy_n_i);
     wire   rx_reset_c;
     wire   rx_data_valid_c;
     assign rx_reset_c = system_reset_i || !channel_up_i;
-    assign  rx_data_valid_c    =  m_axi_rx_tvalid_i;
+    assign  rx_data_valid_c    =   !rx_src_rdy_n_i;
 
-//    reg [127:0] RX_DATA_IN_delay;
-//    reg        rx_rdy_delay;
+    reg [127:0] RX_DATA_IN_delay;
+    reg        rx_rdy_delay;
 
     // Pipeline rx_rdy to improve pipeline performance
     // we get away without having defaults due to the high
-    // level properties of the driver (it waits for do_CC before data may be received)
-//    always@(posedge user_clk_i)
-//    begin
-//        rx_rdy_delay <= rx_data_valid_c && !rx_reset_c;
-//        RX_DATA_IN_delay <= m_axi_rx_tdata_i;
-//    end
-
+    // level properties of the driver (it waits for man do_CC before data may be received)
+    always@(posedge user_clk_i)
+    begin
+        rx_rdy_delay <= rx_data_valid_c && !rx_reset_c;
+        RX_DATA_IN_delay <= rx_d_i;
+    end
 
 generate
 if (USE_CHIPSCOPE==1)
@@ -569,8 +568,8 @@ assign lane_up_i_i = &lane_up_i;
 
     wire [35:0] icon_to_vio_i;
     // Shared VIO Inputs
-        assign  sync_in_i[15:0]         =  s_axi_tx_tdata_i[48:63];
-        assign  sync_in_i[31:16]        =  m_axi_rx_tdata_i[48:63];
+        assign  sync_in_i[15:0]         =  tx_d_i[48:63];
+        assign  sync_in_i[31:16]        =  rx_d_i[48:63];
         assign  sync_in_i[32]           =  pma_init_assertion;  
         assign  sync_in_i[33]           =  system_reset_i;  
 //        assign  sync_in_i[34]           =  FLITCOUNT[0];  

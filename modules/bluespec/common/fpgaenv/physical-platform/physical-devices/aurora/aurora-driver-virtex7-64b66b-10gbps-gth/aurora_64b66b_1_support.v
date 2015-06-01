@@ -66,15 +66,16 @@
 (* DowngradeIPIdentifiedWarnings="yes" *)
  module aurora_64b66b_1_support 
   (
-     // TX AXI Interface 
-       input  [0:127]    s_axi_tx_tdata, 
-       input             s_axi_tx_tvalid,
-       output            s_axi_tx_tready, 
-     // RX AXI Interface 
-       output [0:127]    m_axi_rx_tdata, 
-       output            m_axi_rx_tvalid, 
+     // LEAP Edit 
+ 
+    // TX Stream Interface
+    input   [0:127]    TX_D,
+    input              TX_SRC_RDY_N,
+    output             TX_DST_RDY_N,
 
-
+    // RX Stream Interface
+    output  [0:127]    RX_D,
+    output             RX_SRC_RDY_N,
  
  
      // GTX Serial I/O
@@ -299,19 +300,12 @@ aurora_64b66b_1_gt_common_wrapper gt_common_support
 //----- Instance of _xci -----[
 aurora_64b66b_1 aurora_64b66b_1_i
      (
-        // TX AXI4-S Interface
-         .s_axi_tx_tdata(s_axi_tx_tdata),
-         .s_axi_tx_tvalid(s_axi_tx_tvalid),
-         .s_axi_tx_tready(s_axi_tx_tready),
+         .TX_D(TX_D),
+         .TX_SRC_RDY_N(TX_SRC_RDY_N),
+         .TX_DST_RDY_N(TX_DST_RDY_N),
 
- 
-        // RX AXI4-S Interface
-         .m_axi_rx_tdata(m_axi_rx_tdata),
-         .m_axi_rx_tvalid(m_axi_rx_tvalid),
-  
-       
-
- 
+         .RX_D(RX_D),
+         .RX_SRC_RDY_N(RX_SRC_RDY_N),
  
          // GTX Serial I/O
          .rxp(rxp),

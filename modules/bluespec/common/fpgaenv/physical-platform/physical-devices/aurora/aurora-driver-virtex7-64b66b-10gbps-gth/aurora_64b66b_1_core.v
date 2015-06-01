@@ -88,17 +88,16 @@
       //pragma translate_on
  )
  (
-     // AXI TX Interface
-     s_axi_tx_tdata,
-     s_axi_tx_tvalid,
-     s_axi_tx_tready,
+     // LEAP Edit 
  
-     // AXI RX Interface
-     m_axi_rx_tdata,
-     m_axi_rx_tvalid,
- 
- 
- 
+     // TX Stream Interface
+     TX_D,
+     TX_SRC_RDY_N,
+     TX_DST_RDY_N,
+
+     // RX Stream Interface
+     RX_D,
+     RX_SRC_RDY_N, 
  
  
 
@@ -177,16 +176,15 @@
 
  //***********************************Port Declarations*******************************
 
-     // TX AXI Interface
-       input  [0:127]    s_axi_tx_tdata; 
-       input             s_axi_tx_tvalid;
-       output            s_axi_tx_tready;
 
-     // RX AXI Interface
-       output [0:127]    m_axi_rx_tdata; 
-       output             m_axi_rx_tvalid;
+    // TX Stream Interface
+    input   [0:127]    TX_D;
+    input              TX_SRC_RDY_N;
+    output             TX_DST_RDY_N;
 
-
+    // RX Stream Interface
+    output  [0:127]    RX_D;
+    output             RX_SRC_RDY_N;
 
 
 
@@ -696,70 +694,16 @@ aurora_64b66b_1_GLOBAL_LOGIC #
      //_____________________________ TX AXI SHIM _______________________________
      // Converts input AXI4-Stream signals to LocalLink
 
-aurora_64b66b_1_AXI_TO_LL #
-     (
-        .DATA_WIDTH(128),
-        .STRB_WIDTH(16),
-        .USE_4_NFC (0),
-        .REM_WIDTH (4)
-     )
-
-     axi_to_ll_data_i
-     (
-      .AXI4_S_IP_TX_TVALID(s_axi_tx_tvalid),
-      .AXI4_S_IP_TX_TREADY(s_axi_tx_tready),
-      .AXI4_S_IP_TX_TDATA(s_axi_tx_tdata),
-      .AXI4_S_IP_TX_TKEEP(),
-      .AXI4_S_IP_TX_TLAST(),
-
-      .LL_OP_DATA(tx_d_i),
-      .LL_OP_SOF_N(),
-      .LL_OP_EOF_N() ,
-      .LL_OP_REM() ,
-      .LL_OP_SRC_RDY_N(tx_src_rdy_n_i),
-      .LL_IP_DST_RDY_N(tx_dst_rdy_n_i),
-
-      // System Interface
-      .USER_CLK(user_clk),
-      .CHANNEL_UP(channel_up_tx_if)
-     );
 
 
 
-
- //_____________________________ RX AXI SHIM _______________________________
-
-aurora_64b66b_1_LL_TO_AXI #
-     (
-        .DATA_WIDTH(128),
-        .STRB_WIDTH(16),
-        .REM_WIDTH (4)
-     )
-
-     ll_to_axi_data_i
-     (
-      .LL_IP_DATA(rx_d_i),
-      .LL_IP_SOF_N(),
-      .LL_IP_EOF_N(),
-      
-      .LL_IP_REM(),
-      .LL_IP_SRC_RDY_N(rx_src_rdy_n_i),
-      .LL_OP_DST_RDY_N(),
-
-      .AXI4_S_OP_TVALID(m_axi_rx_tvalid),
-      .AXI4_S_OP_TDATA(m_axi_rx_tdata),
-      .AXI4_S_OP_TKEEP(),
-      .AXI4_S_OP_TLAST(),
-      .AXI4_S_IP_TREADY(1'b0)
-
-     );
-
+  
     // TX STREAM
 aurora_64b66b_1_TX_STREAM tx_stream_i
     (
-         .TX_D(tx_d_i),
-         .TX_SRC_RDY_N(tx_src_rdy_n_i),
-         .TX_DST_RDY_N(tx_dst_rdy_n_i),
+         .TX_D(TX_D),
+         .TX_SRC_RDY_N(TX_SRC_RDY_N),
+         .TX_DST_RDY_N(TX_DST_RDY_N),
          .TX_PE_DATA(tx_pe_data_i),
          .TX_PE_DATA_V(tx_pe_data_v_i),
 
@@ -780,8 +724,8 @@ aurora_64b66b_1_TX_STREAM tx_stream_i
     // RX STREAM
 aurora_64b66b_1_RX_STREAM rx_stream_i
     (
-         .RX_D(rx_d_i),
-         .RX_SRC_RDY_N(rx_src_rdy_n_i),
+         .RX_D(RX_D),
+         .RX_SRC_RDY_N(RX_SRC_RDY_N),
          .RX_PE_DATA(rx_pe_data_i),
          .RX_PE_DATA_V(rx_pe_data_v_i),
 
