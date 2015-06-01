@@ -473,6 +473,8 @@ module aurora_64b66b_v7_3_exdes  #
      );
 
 
+    // Control logic for interface xilinx local link to Bluespec. 
+
     assign tx_d_i = TX_DATA_OUT;
     assign RX_DATA_IN = RX_DATA_IN_delay;
     assign rx_rdy = rx_rdy_delay;
@@ -495,6 +497,9 @@ module aurora_64b66b_v7_3_exdes  #
         rx_rdy_delay <= rx_data_valid_c && !rx_reset_c;
         RX_DATA_IN_delay <= rx_d_i;
     end
+
+
+// Chipscope debug
 
 generate
 if (USE_CHIPSCOPE==1)
