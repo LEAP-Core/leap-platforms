@@ -151,7 +151,19 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ugDevice,
     let controllerRst = ugDevice.aurora_rst;
     let isAuroraInRst <- isResetAsserted(clocked_by controllerClk, reset_by controllerRst);
 
-    Reg#(Bit#(3)) ccCycles  <- mkReg(maxBound, clocked_by(controllerClk), reset_by(controllerRst));
+    // Older versions of the aurora drivers handle clock compensation externally. However, 
+    // version 10.0 and later handle clock compensation internally.  Thus, the logic of 
+    // waiting for clock compensation is not necessary for these newer drivers.
+    Reg#(Bit#(3)) ccCycles;
+    if(`REQUIRE_CC > 0) 
+    begin
+        ccCycles  <- mkReg(maxBound, clocked_by(controllerClk), reset_by(controllerRst));
+    end
+    else 
+    begin
+        ccCycles  <- mkReg(0, clocked_by(controllerClk), reset_by(controllerRst));
+    end
+
     Reg#(Bool)    frameErrorRX <-  mkReg(True, clocked_by(controllerClk), reset_by(controllerRst));
 
     CrossingReg#(Bit#(16)) dataDrops <- mkNullCrossingReg(clk, 0, clocked_by controllerClk, reset_by controllerRst);
@@ -232,14 +244,16 @@ module mkAURORA_FLOWCONTROL#(AURORA_SINGLE_DEVICE_UG#(width) ugDevice,
 
     // Clock compensation occurs periodically in the phy.  We need to
     // allow it to occur at least once before we attempt to send data.
-    rule tickCC(ccCycles > 0 && ugDevice.cc  && unpack(ugDevice.channel_up));
-        ccCycles <= ccCycles - 1;
-        if (`AURORA_RELIABLE_DEBUG > 0)
-        begin
-            $display("Ticking CC  %d", ccCycles);
-        end
-    endrule
-
+    if(`REQUIRE_CC > 0) 
+    begin
+        rule tickCC(ccCycles > 0 && ugDevice.cc  && unpack(ugDevice.channel_up));
+            ccCycles <= ccCycles - 1;
+            if (`AURORA_RELIABLE_DEBUG > 0)
+            begin
+                $display("Ticking CC  %d", ccCycles);
+            end
+        endrule
+    end
 
     rule crossDomain;
         marshaller.enq(serdesTxfifo.first);

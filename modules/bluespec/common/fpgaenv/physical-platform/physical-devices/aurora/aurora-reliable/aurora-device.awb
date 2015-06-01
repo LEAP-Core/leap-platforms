@@ -8,3 +8,5 @@
 %sources -t BSV -v PUBLIC aurora-reliable.bsv
 
 %param AURORA_RELIABLE_DEBUG 0 "Enable Aurora Debug"
+%param REQUIRE_CC 1 "Do we require clock compensation to complete before attempting to send messages. Needed for aurora devices prior to 10.0"
+
