@@ -81,7 +81,7 @@
     parameter BACKWARD_COMP_MODE3 = 0,
     parameter CH_BOND_MAX_SKEW  = 2'b10,
     parameter CH_BOND_MODE      = 2'b11,
-    parameter ENABLE_HOTPLUG    =  1
+    parameter ENABLE_HOTPLUG    =  1  // Its highly recommended NOT to change this parameter for predictable operation of the link
  )
  (
 
@@ -191,10 +191,10 @@
 
  //********************** External Register Declarations ****************
      reg     [4:0]     CHBONDO;
-(* KEEP = "TRUE" *)  reg  START_CB_WRITES_OUT = 1'b0;
-(* KEEP = "TRUE" *)  reg FIRST_CB_BITERR_CB_RESET_OUT = 1'b0;
-(* KEEP = "TRUE" *)  reg FINAL_GATER_FOR_FIFO_DIN = 1'b0;
-(* KEEP = "TRUE" *)  reg ANY_VLD_BTF_FLAG = 1'b0;
+     reg  START_CB_WRITES_OUT = 1'b0;
+     reg FIRST_CB_BITERR_CB_RESET_OUT = 1'b0;
+     reg FINAL_GATER_FOR_FIFO_DIN = 1'b0;
+     reg ANY_VLD_BTF_FLAG = 1'b0;
 
  //********************** Internal Register Declarations ****************
 
@@ -209,7 +209,7 @@
      reg                CC_detect_pulse_r;
      reg    [3:0]       cc_state_count_r;
      reg                CC_detect_dlyd1;
-(* KEEP = "TRUE" *)     reg                CB_detect_dlyd1;
+     reg                CB_detect_dlyd1;
      reg                CB_detect_dlyd0p5;
      reg                CB_detect_dlyd1p0;
      reg                cc_datavalid_mask_r;
@@ -225,17 +225,17 @@
      (* shift_extract = "{no}" *) reg                valid_btf_detect;
      reg   [4:0]        valid_btf_detect_extend_r =  5'd0;
      reg                valid_btf_detect_extend_r2;
-(* KEEP = "TRUE" *)     reg any_vld_btf_fifo_din_detect_dlyd = 1'b1;
-(* KEEP = "TRUE"*)      reg  rd_err_q;
-(* KEEP = "TRUE"*)      reg  rd_err_pre;
+     reg any_vld_btf_fifo_din_detect_dlyd = 1'b1;
+     reg  rd_err_q;
+     reg  rd_err_pre;
  (*shift_extract = "{no}" *)    reg  wr_err_rd_clk_sync;
      wire              wr_err_rd_clk_pre;
-(* KEEP = "TRUE"*)     reg                new_underflow_flag_c;
+      reg                new_underflow_flag_c;
      reg                underflow_flag_r1;
      reg                underflow_flag_r2;
      reg                underflow_flag_r3;
-(* KEEP = "TRUE" *) (* shift_extract = "{no}" *) reg  master_do_rd_en_q;
-(* KEEP = "TRUE" *)  reg cb_fifo_din_detect_q = 1'b0;
+     (* shift_extract = "{no}" *) reg  master_do_rd_en_q;
+     reg cb_fifo_din_detect_q = 1'b0;
      reg                start_cb_writes_mastr = 1'b0;
      reg                start_cb_writes_stg1 = 1'b0;
      reg                start_cb_writes_stg2 = 1'b0;
@@ -244,14 +244,14 @@
      reg                start_cb_writes_stg5 = 1'b0;
      reg                start_cb_writes_stg6 = 1'b0;
      reg                start_cb_writes_stg7 = 1'b0;
-(* KEEP = "TRUE" *) reg mod_do_wr_en         = 1'b0;
-(* KEEP = "TRUE" *) (* shift_extract = "{no}" *) reg [39:0]  wdth_conv_1stage = 40'd0;
-(* KEEP = "TRUE" *) (* shift_extract = "{no}" *) reg [39:0]  wdth_conv_2stage = 40'd0;
-(* KEEP = "TRUE" *) (* shift_extract = "{no}" *) reg [39:0]  wdth_conv_3stage = 40'd0;
-(* KEEP = "TRUE" *) reg [1:0]  wdth_conv_count = 2'd0;
+     reg mod_do_wr_en         = 1'b0;
+     (* shift_extract = "{no}" *) reg [39:0]  wdth_conv_1stage = 40'd0;
+     (* shift_extract = "{no}" *) reg [39:0]  wdth_conv_2stage = 40'd0;
+     (* shift_extract = "{no}" *) reg [39:0]  wdth_conv_3stage = 40'd0;
+     reg [1:0]  wdth_conv_count = 2'd0;
      reg first_cb_to_write_to_fifo_dlyd = 1'b0;
      reg  [4:0] wr_monitor_flag ;
-(* KEEP = "TRUE" *)  reg  new_do_wr_en = 1'b0;
+     reg  new_do_wr_en = 1'b0;
      reg CB_flag_flopped;
 
 
@@ -266,14 +266,14 @@
      wire               i_am_master;
      wire               buffer_too_empty_c;
      wire               buffer_too_full_c;
-(* KEEP = "TRUE" *) wire               CB_detect;
-(* KEEP = "TRUE" *) wire               CB_detect0;
+     wire               CB_detect;
+     wire               CB_detect0;
      wire               CC_detect;
      wire    [34:0]     raw_data_c;
      wire    [39:0]     fifo_din_i;
-(* KEEP = "TRUE"*)     wire               rd_err_c;
-(* KEEP = "TRUE"*)     wire               wr_err_c;
-(* KEEP = "TRUE"*)     wire    [71:0]     fifo_dout_i;
+     wire               rd_err_c;
+     wire               wr_err_c;
+     wire    [71:0]     fifo_dout_i;
      wire               rxchanisaligned_i;
      wire   [1:0]       ch_bond_c;
      wire   [1:0]       ch_bond_m;
@@ -294,8 +294,8 @@
      wire               rxdatavalid_lookahead_rdfifo;
      wire               rd_en_datavalid;
      wire               CB_enb_stop;
-(* KEEP = "TRUE"*)      wire               CB_flag_direct;
-(* KEEP = "TRUE"*)      wire               CB_flag_dlyd1;
+     wire               CB_flag_direct;
+     wire               CB_flag_dlyd1;
      wire               CC_enb_stop;
      wire               CC_flag_direct;
      wire               CC_flag_dlyd1;
@@ -307,7 +307,7 @@
      wire               cb_fifo_din_detect;
 
      wire               valid_btf_detect_sync3;
-(* KEEP = "TRUE"*)  wire [71:0]  new_fifo_din_i;
+     wire [71:0]  new_fifo_din_i;
      wire [79:0]        en32_fifo_din_i;
      wire               bit80_prsnt;
      wire               first_cb_to_write_to_fifo;
@@ -477,10 +477,12 @@ generate
      assign valid_btf_detect_c   =  ((GTX_RX_HEADER_IN == 2'b10) &&
                                     (GTX_RX_DATA_IN[31:16] == CC_CHARACTER)
                                      && GTX_RX_DATAVALID_IN);
+                                     
 endgenerate
 
      always @(posedge USER_CLK)
           valid_btf_detect  <= `DLY valid_btf_detect_c;
+                                     
 
 
    //Extend the valid_btf_detect pulse for 4 clock cycles
@@ -1028,12 +1030,10 @@ end
 
    always @(posedge USER_CLK)
    begin
-       if(CBCC_FIFO_RESET_WR_CLK)
-           new_do_wr_en <= `DLY 1'b0;
-         else if(wait_for_wr_en_wr4 != 2'h3)
-           new_do_wr_en <= `DLY 1'b0;
-       else
-           new_do_wr_en <= `DLY bit80_prsnt;
+     if(CBCC_FIFO_RESET_WR_CLK || (wait_for_wr_en_wr4 != 2'h3))
+       new_do_wr_en <= `DLY 1'b0;
+     else
+       new_do_wr_en <= `DLY bit80_prsnt;
    end
 
    assign en32_fifo_din_i = {wdth_conv_3stage,wdth_conv_2stage};
@@ -1294,7 +1294,7 @@ aurora_64b66b_1_CH_BOND_SLAVE  #(
      input rxdatavalid;
      input rxdatavalid_lookahead;
 
-(* KEEP = "TRUE"*)     output [1:0]ch_bond_m;
+     output [1:0]ch_bond_m;
      output hold_rd_ptr;
      output rxchanisaligned;
 
@@ -1304,7 +1304,7 @@ aurora_64b66b_1_CH_BOND_SLAVE  #(
      reg [2:0]count_maxskew_load;
      reg [2:0]cb_rxdatavalid_cnt;
 
-(* KEEP = "TRUE"*)     wire CB_enb_stop_dlyd5;
+     wire CB_enb_stop_dlyd5;
 
      // Assign read pointer control based on channel bond mode and enchansync and channel bond detect
      assign i_am_master= CHAN_BOND_MODE[0];
@@ -1452,12 +1452,12 @@ aurora_64b66b_1_CH_BOND_SLAVE  #(
      reg  rxchanisaligned;
      reg  hold_rd_ptr;
 
-(* KEEP = "TRUE"*)     wire master_cb_detect;
-(* KEEP = "TRUE"*)     wire master_cb_stagger;
-(* KEEP = "TRUE"*)     wire master_cb_av;
-(* KEEP = "TRUE"*)     wire CB_enb_stop_dlyd5;
-(* KEEP = "TRUE"*)     wire enb_load_stagger;
-(* KEEP = "TRUE"*)     wire master_ack_wait;
+     wire master_cb_detect;
+     wire master_cb_stagger;
+     wire master_cb_av;
+     wire CB_enb_stop_dlyd5;
+     wire enb_load_stagger;
+     wire master_ack_wait;
 
      reg  master_stop_prev_cb_r;
      reg  master_stop_next_cb_r;

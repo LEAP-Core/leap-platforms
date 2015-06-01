@@ -43,6 +43,7 @@
 %sources -t VERILOG -v PRIVATE aurora_64b66b_1_wrapper.v
 %sources -t VERILOG -v PRIVATE aurora_64b66b_1_exdes.v
 %sources -t VERILOG -v PRIVATE aurora_64b66b_1_standard_cc_module.v
+%sources -t VERILOG -v PRIVATE aurora_64b66b_1_cdc_sync_exdes.v
 
 
 %param AURORA_INTERFACE_WIDTH            128   "Aurora Interface Width"

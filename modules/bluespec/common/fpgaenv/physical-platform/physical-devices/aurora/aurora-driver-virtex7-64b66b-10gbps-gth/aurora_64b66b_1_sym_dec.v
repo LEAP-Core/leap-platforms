@@ -161,30 +161,42 @@
        reg                 rxdatavalid_r; 
        reg      [0:2]      remote_rdy_cntr = 3'h0;         
        reg                 remote_ready_det; 
-       reg      [4:0]      rx_na_idles_cntr = 4'h0;         
+       reg      [4:0]      rx_na_idles_cntr = 5'h0;         
 
- 
+       reg                 RX_HEADER_1_REG;      // bit 1 of sync header. 
+       reg                 RX_HEADER_0_REG;     // bit 0 of sync header. 
+       reg      [63:0]     RX_DATA_REG;         // Data to MGT for transmission to channel partner. 
+       reg                 RXDATAVALID_IN_REG;   // Data valid wrt Gearbox pause 
  //**************************External Wire Declarations****************************
  
        wire     [0:1]      sync_header_c;   
  
- //*********************************Main Body of Code**********************************
  
+ //*********************************Main Body of Code**********************************
+     always @(posedge USER_CLK)
+     begin
+       RX_HEADER_1_REG    <= RX_HEADER_1;    
+       RX_HEADER_0_REG    <= RX_HEADER_0;    
+       RX_DATA_REG        <= RX_DATA;        
+       RXDATAVALID_IN_REG <= RXDATAVALID_IN; 
+     end
+ 
+
      always @(posedge USER_CLK)
      begin
          if(RESET)
            rxdatavalid_r   <=  `DLY  1'b0;
          else
-           rxdatavalid_r   <=  `DLY  RXDATAVALID_IN;
+           rxdatavalid_r   <=  `DLY  RXDATAVALID_IN_REG;
      end
  
      // All decodes are pipelined to keep the number of logic levels to a minimum.
-     assign   sync_header_c  =  {RX_HEADER_1,RX_HEADER_0};
+     assign   sync_header_c  =  {RX_HEADER_1_REG,RX_HEADER_0_REG};
  
      always @(posedge USER_CLK)
        if(RESET)
          sync_header_r  <=  `DLY  2'h0;
-       else if(RXDATAVALID_IN)
+       else if(RXDATAVALID_IN_REG)
          sync_header_r  <=  `DLY  sync_header_c;
  
  
@@ -192,7 +204,7 @@
      always @(posedge USER_CLK)
        if(RESET)
                RX_PE_DATA_V   <= `DLY  2'b0;
-       else if(sync_header_c  ==2'b01  & RXDATAVALID_IN)
+       else if(sync_header_c  ==2'b01  & RXDATAVALID_IN_REG)
                RX_PE_DATA_V   <= `DLY  2'b1;
        else
                RX_PE_DATA_V   <= `DLY  2'b0;
@@ -202,37 +214,37 @@
        if(RESET)
          RX_NA_IDLE     <= `DLY   1'b0;
        else
-         RX_NA_IDLE     <= `DLY   ((sync_header_c == 2'b10) & (RX_DATA[63:48] == NA_IDLE_BTF) & RXDATAVALID_IN);  
+         RX_NA_IDLE     <= `DLY   ((sync_header_c == 2'b10) & (RX_DATA_REG[63:48] == NA_IDLE_BTF) & RXDATAVALID_IN_REG);  
  
-     //For Idle Decoding, RXDATAVALID_IN is not considered because it is invalid data is anyway going to  be ignored
+     //For Idle Decoding, RXDATAVALID_IN_REG is not considered because it is invalid data is anyway going to  be ignored
      always @(posedge USER_CLK)
        if(RESET)
          RX_IDLE        <= `DLY   1'b0;
        else
-         RX_IDLE        <=  `DLY  ((sync_header_c == 2'b10) & (RX_DATA[63:48] == IDLE_BTF));
+         RX_IDLE        <=  `DLY  ((sync_header_c == 2'b10) & (RX_DATA_REG[63:48] == IDLE_BTF));
  
      always @(posedge USER_CLK)
        if(RESET)
          RX_CC          <= `DLY   1'b0;
        else
-         RX_CC          <= `DLY   ((sync_header_c == 2'b10) & (RX_DATA[63:48] == CC_BTF_SA0) & RXDATAVALID_IN) | ((sync_header_c == 2'b10) & (RX_DATA[63:48] == CC_BTF_SA1) & RXDATAVALID_IN);  
+         RX_CC          <= `DLY   ((sync_header_c == 2'b10) & (RX_DATA_REG[63:48] == CC_BTF_SA0) & RXDATAVALID_IN_REG) | ((sync_header_c == 2'b10) & (RX_DATA_REG[63:48] == CC_BTF_SA1) & RXDATAVALID_IN_REG);  
  
      always @(posedge USER_CLK)
        if(RESET)
          RX_CB          <= `DLY   1'b0;
        else
-         RX_CB          <= `DLY   ((sync_header_c == 2'b10) & (RX_DATA[63:48] == CHANNEL_BOND_BTF) & RXDATAVALID_IN);  
+         RX_CB          <= `DLY   ((sync_header_c == 2'b10) & (RX_DATA_REG[63:48] == CHANNEL_BOND_BTF) & RXDATAVALID_IN_REG);  
  
      always @(posedge USER_CLK)
        if(RESET)
          ILLEGAL_BTF  <= `DLY   1'b0;
        else
-         ILLEGAL_BTF  <= LANE_UP & (sync_header_c==2'b10)& RXDATAVALID_IN & 
-                         !((RX_DATA[63:48] == NA_IDLE_BTF) || 
-                         (RX_DATA[63:48] == IDLE_BTF) || 
-                         (RX_DATA[63:48] == CHANNEL_BOND_BTF) || 
-                         (RX_DATA[63:48] == CC_BTF_SA0) || 
-                         (RX_DATA[63:48] == CC_BTF_SA1) 
+         ILLEGAL_BTF  <= LANE_UP & (sync_header_c==2'b10)& RXDATAVALID_IN_REG & 
+                         !((RX_DATA_REG[63:48] == NA_IDLE_BTF) || 
+                         (RX_DATA_REG[63:48] == IDLE_BTF) || 
+                         (RX_DATA_REG[63:48] == CHANNEL_BOND_BTF) || 
+                         (RX_DATA_REG[63:48] == CC_BTF_SA0) || 
+                         (RX_DATA_REG[63:48] == CC_BTF_SA1) 
                          );
  
  
@@ -240,8 +252,8 @@
        if(RESET)
          remote_ready_det  <= `DLY   1'b0;
        else
-        remote_ready_det <= `DLY LANE_UP & (sync_header_c == 2'b10) & (RXDATAVALID_IN) & 
-                             (RX_DATA[63:48] == IDLE_BTF); 
+        remote_ready_det <= `DLY LANE_UP & (sync_header_c == 2'b10) & (RXDATAVALID_IN_REG) & 
+                             (RX_DATA_REG[63:48] == IDLE_BTF); 
 
     always @ (posedge USER_CLK)
     begin
@@ -270,8 +282,8 @@
      begin
        if(RESET)
          RX_PE_DATA  <= `DLY   64'h0;
-       else if((sync_header_c == 2'b01) & RXDATAVALID_IN)
-         RX_PE_DATA     <=  `DLY {RX_DATA[7:0], RX_DATA[15:8], RX_DATA[23:16], RX_DATA[31:24], RX_DATA[39:32], RX_DATA[47:40],RX_DATA[55:48],RX_DATA[63:56]};
+       else if((sync_header_c == 2'b01) & RXDATAVALID_IN_REG)
+         RX_PE_DATA     <=  `DLY {RX_DATA_REG[7:0], RX_DATA_REG[15:8], RX_DATA_REG[23:16], RX_DATA_REG[31:24], RX_DATA_REG[39:32], RX_DATA_REG[47:40],RX_DATA_REG[55:48],RX_DATA_REG[63:56]};
      end
  
     

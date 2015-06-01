@@ -51,11 +51,6 @@
  // THIS COPYRIGHT NOTICE AND DISCLAIMER MUST BE RETAINED AS
  // PART OF THIS FILE AT ALL TIMES.
 
-// LEAP Modification:
-// 
-// Removed clock buffering from this module.  LEAP buffers the clocks externally.
-//
-
  //
  ///////////////////////////////////////////////////////////////////////////////
  //
@@ -126,7 +121,6 @@
      assign  clk_not_locked_i    = !CLK_LOCKED;
 
      assign MMCM_NOT_LOCKED           = !locked_i;
-     assign INIT_CLK_O = INIT_CLK;
 
    MMCME2_ADV
    #(.BANDWIDTH            ("OPTIMIZED"),
@@ -218,7 +212,7 @@
          .O(USER_CLK)
      );
 
-
+     assign INIT_CLK_O = INIT_CLK;
 // 7 series MMCM module ends here
 
 endmodule

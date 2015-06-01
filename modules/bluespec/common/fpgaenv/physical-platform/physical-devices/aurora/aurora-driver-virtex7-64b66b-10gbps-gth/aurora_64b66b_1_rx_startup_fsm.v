@@ -735,20 +735,11 @@ aurora_64b66b_1_rst_sync #
             else if(time_out_1us == 1'b1)  
                rx_fsm_reset_done_int <= `DLY  1'b1;
 
-             if(time_out_adapt)
-            begin
-               if((GT_TYPE == "GTX" || GT_TYPE == "GTH") && EQ_MODE == "DFE")
-               begin
-                  RXDFEAGCHOLD  <= `DLY 1'b1;
-                  RXDFELFHOLD   <= `DLY 1'b1;
-               end
-               else if(GT_TYPE == "GTH" && EQ_MODE == "LPM")
-               begin
-                  RXLPMHFHOLD   <= `DLY 1'b1;
-                  RXLPMLFHOLD   <= `DLY 1'b1;
-               end
-            end
-             
+                  RXDFEAGCHOLD  <= `DLY 1'b0;
+                  RXDFELFHOLD   <= `DLY 1'b0;
+                  RXLPMHFHOLD   <= `DLY 1'b0;
+                  RXLPMLFHOLD   <= `DLY 1'b0;
+            
 
            end
 

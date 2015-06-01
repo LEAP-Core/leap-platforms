@@ -59,7 +59,7 @@
  
  `timescale 1ns / 1ps
 
-   (* core_generation_info = "aurora_64b66b_1,aurora_64b66b_v9_3,{c_aurora_lanes=2,c_column_used=right,c_gt_clock_1=GTHQ9,c_gt_clock_2=None,c_gt_loc_1=X,c_gt_loc_10=X,c_gt_loc_11=X,c_gt_loc_12=X,c_gt_loc_13=X,c_gt_loc_14=X,c_gt_loc_15=X,c_gt_loc_16=X,c_gt_loc_17=X,c_gt_loc_18=X,c_gt_loc_19=X,c_gt_loc_2=X,c_gt_loc_20=X,c_gt_loc_21=X,c_gt_loc_22=X,c_gt_loc_23=X,c_gt_loc_24=X,c_gt_loc_25=X,c_gt_loc_26=X,c_gt_loc_27=X,c_gt_loc_28=X,c_gt_loc_29=X,c_gt_loc_3=X,c_gt_loc_30=X,c_gt_loc_31=X,c_gt_loc_32=X,c_gt_loc_33=X,c_gt_loc_34=X,c_gt_loc_35=X,c_gt_loc_36=X,c_gt_loc_37=2,c_gt_loc_38=X,c_gt_loc_39=1,c_gt_loc_4=X,c_gt_loc_40=X,c_gt_loc_41=X,c_gt_loc_42=X,c_gt_loc_43=X,c_gt_loc_44=X,c_gt_loc_45=X,c_gt_loc_46=X,c_gt_loc_47=X,c_gt_loc_48=X,c_gt_loc_5=X,c_gt_loc_6=X,c_gt_loc_7=X,c_gt_loc_8=X,c_gt_loc_9=X,c_lane_width=4,c_line_rate=10.0,c_gt_type=v7gth,c_qpll=true,c_nfc=false,c_nfc_mode=IMM,c_refclk_frequency=156.25,c_simplex=false,c_simplex_mode=TX,c_stream=true,c_ufc=false,c_user_k=false,flow_mode=None,interface_mode=Streaming,dataflow_config=Duplex}" *) 
+   (* core_generation_info = "aurora_64b66b_1,aurora_64b66b_v10_0,{c_aurora_lanes=2,c_column_used=right,c_gt_clock_1=GTHQ9,c_gt_clock_2=None,c_gt_loc_1=X,c_gt_loc_10=X,c_gt_loc_11=X,c_gt_loc_12=X,c_gt_loc_13=X,c_gt_loc_14=X,c_gt_loc_15=X,c_gt_loc_16=X,c_gt_loc_17=X,c_gt_loc_18=X,c_gt_loc_19=X,c_gt_loc_2=X,c_gt_loc_20=X,c_gt_loc_21=X,c_gt_loc_22=X,c_gt_loc_23=X,c_gt_loc_24=X,c_gt_loc_25=X,c_gt_loc_26=X,c_gt_loc_27=X,c_gt_loc_28=X,c_gt_loc_29=X,c_gt_loc_3=X,c_gt_loc_30=X,c_gt_loc_31=X,c_gt_loc_32=X,c_gt_loc_33=X,c_gt_loc_34=X,c_gt_loc_35=X,c_gt_loc_36=X,c_gt_loc_37=2,c_gt_loc_38=X,c_gt_loc_39=1,c_gt_loc_4=X,c_gt_loc_40=X,c_gt_loc_41=X,c_gt_loc_42=X,c_gt_loc_43=X,c_gt_loc_44=X,c_gt_loc_45=X,c_gt_loc_46=X,c_gt_loc_47=X,c_gt_loc_48=X,c_gt_loc_5=X,c_gt_loc_6=X,c_gt_loc_7=X,c_gt_loc_8=X,c_gt_loc_9=X,c_lane_width=4,c_line_rate=10.0,c_gt_type=v7gth,c_qpll=true,c_nfc=false,c_nfc_mode=IMM,c_refclk_frequency=156.25,c_simplex=false,c_simplex_mode=TX,c_stream=true,c_ufc=false,c_user_k=false,flow_mode=None,interface_mode=Streaming,dataflow_config=Duplex}" *) 
 (* DowngradeIPIdentifiedWarnings="yes" *) 
  module aurora_64b66b_1_MULTI_GT #
  (
@@ -154,6 +154,7 @@
     input  [6:0]    GT0_TXSEQUENCE_IN,
     //--------------- Transmit Ports - TX Polarity Control Ports ---------------
     input           GT0_txpolarity_in,
+    input           gt0_txinhibit_in,
     input           gt0_txpmareset_in,
     input           gt0_txpcsreset_in,
     input           gt0_rxpcsreset_in,
@@ -251,6 +252,7 @@
     input  [6:0]    GT1_TXSEQUENCE_IN,
     //--------------- Transmit Ports - TX Polarity Control Ports ---------------
     input           GT1_txpolarity_in,
+    input           gt1_txinhibit_in,
     input           gt1_txpmareset_in,
     input           gt1_txpcsreset_in,
     input           gt1_rxpcsreset_in,
@@ -388,6 +390,7 @@ aurora_64b66b_1_gt_inst
         .gt_rxprbscntreset_in       (gt0_rxprbscntreset_in),
         .gt_dmonitorout_out         (gt0_dmonitorout_out    ),
         .gt_txbufstatus_out         (gt0_txbufstatus_out    ),
+        .txinhibit_in               (gt0_txinhibit_in),
         //--------------- Transmit Ports - TX Polarity Control Ports ---------------
         .txpolarity_in              (GT0_txpolarity_in)
 
@@ -499,6 +502,7 @@ aurora_64b66b_1_gt_inst_lane1
         .gt_rxprbscntreset_in       (gt1_rxprbscntreset_in),
         .gt_dmonitorout_out         (gt1_dmonitorout_out    ),
         .gt_txbufstatus_out         (gt1_txbufstatus_out    ),
+        .txinhibit_in               (gt1_txinhibit_in),
         //--------------- Transmit Ports - TX Polarity Control Ports ---------------
         .txpolarity_in              (GT1_txpolarity_in)
 

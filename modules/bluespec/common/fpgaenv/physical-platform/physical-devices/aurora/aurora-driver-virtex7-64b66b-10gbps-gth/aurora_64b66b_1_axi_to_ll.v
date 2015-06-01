@@ -59,7 +59,7 @@
  
  `timescale 1 ns/1 ps
 
-   (* core_generation_info = "aurora_64b66b_1,aurora_64b66b_v9_3,{c_aurora_lanes=2,c_column_used=right,c_gt_clock_1=GTHQ9,c_gt_clock_2=None,c_gt_loc_1=X,c_gt_loc_10=X,c_gt_loc_11=X,c_gt_loc_12=X,c_gt_loc_13=X,c_gt_loc_14=X,c_gt_loc_15=X,c_gt_loc_16=X,c_gt_loc_17=X,c_gt_loc_18=X,c_gt_loc_19=X,c_gt_loc_2=X,c_gt_loc_20=X,c_gt_loc_21=X,c_gt_loc_22=X,c_gt_loc_23=X,c_gt_loc_24=X,c_gt_loc_25=X,c_gt_loc_26=X,c_gt_loc_27=X,c_gt_loc_28=X,c_gt_loc_29=X,c_gt_loc_3=X,c_gt_loc_30=X,c_gt_loc_31=X,c_gt_loc_32=X,c_gt_loc_33=X,c_gt_loc_34=X,c_gt_loc_35=X,c_gt_loc_36=X,c_gt_loc_37=2,c_gt_loc_38=X,c_gt_loc_39=1,c_gt_loc_4=X,c_gt_loc_40=X,c_gt_loc_41=X,c_gt_loc_42=X,c_gt_loc_43=X,c_gt_loc_44=X,c_gt_loc_45=X,c_gt_loc_46=X,c_gt_loc_47=X,c_gt_loc_48=X,c_gt_loc_5=X,c_gt_loc_6=X,c_gt_loc_7=X,c_gt_loc_8=X,c_gt_loc_9=X,c_lane_width=4,c_line_rate=10.0,c_gt_type=v7gth,c_qpll=true,c_nfc=false,c_nfc_mode=IMM,c_refclk_frequency=156.25,c_simplex=false,c_simplex_mode=TX,c_stream=true,c_ufc=false,c_user_k=false,flow_mode=None,interface_mode=Streaming,dataflow_config=Duplex}" *) 
+   (* core_generation_info = "aurora_64b66b_1,aurora_64b66b_v10_0,{c_aurora_lanes=2,c_column_used=right,c_gt_clock_1=GTHQ9,c_gt_clock_2=None,c_gt_loc_1=X,c_gt_loc_10=X,c_gt_loc_11=X,c_gt_loc_12=X,c_gt_loc_13=X,c_gt_loc_14=X,c_gt_loc_15=X,c_gt_loc_16=X,c_gt_loc_17=X,c_gt_loc_18=X,c_gt_loc_19=X,c_gt_loc_2=X,c_gt_loc_20=X,c_gt_loc_21=X,c_gt_loc_22=X,c_gt_loc_23=X,c_gt_loc_24=X,c_gt_loc_25=X,c_gt_loc_26=X,c_gt_loc_27=X,c_gt_loc_28=X,c_gt_loc_29=X,c_gt_loc_3=X,c_gt_loc_30=X,c_gt_loc_31=X,c_gt_loc_32=X,c_gt_loc_33=X,c_gt_loc_34=X,c_gt_loc_35=X,c_gt_loc_36=X,c_gt_loc_37=2,c_gt_loc_38=X,c_gt_loc_39=1,c_gt_loc_4=X,c_gt_loc_40=X,c_gt_loc_41=X,c_gt_loc_42=X,c_gt_loc_43=X,c_gt_loc_44=X,c_gt_loc_45=X,c_gt_loc_46=X,c_gt_loc_47=X,c_gt_loc_48=X,c_gt_loc_5=X,c_gt_loc_6=X,c_gt_loc_7=X,c_gt_loc_8=X,c_gt_loc_9=X,c_lane_width=4,c_line_rate=10.0,c_gt_type=v7gth,c_qpll=true,c_nfc=false,c_nfc_mode=IMM,c_refclk_frequency=156.25,c_simplex=false,c_simplex_mode=TX,c_stream=true,c_ufc=false,c_user_k=false,flow_mode=None,interface_mode=Streaming,dataflow_config=Duplex}" *) 
 (* DowngradeIPIdentifiedWarnings="yes" *)
  module aurora_64b66b_1_AXI_TO_LL #
  (
@@ -116,7 +116,9 @@
      input                          USER_CLK;
      input                          CHANNEL_UP;
   
- 
+     reg [0:(REM_WIDTH-1)]    LL_OP_REM;
+     reg [(STRB_WIDTH-1):0] i;
+     reg found_rem = 1'b0;
      reg                            new_pkt_r;
  
      wire                           new_pkt;
@@ -141,7 +143,17 @@
 generate
 if(USE_4_NFC==0)
 begin
-    assign LL_OP_REM = (AXI4_S_IP_TX_TKEEP_i == ({STRB_WIDTH{1'b1}})) ? ({REM_WIDTH{1'b0}}) : (AXI4_S_IP_TX_TKEEP_i[0] + AXI4_S_IP_TX_TKEEP_i[1] + AXI4_S_IP_TX_TKEEP_i[2] + AXI4_S_IP_TX_TKEEP_i[3] + AXI4_S_IP_TX_TKEEP_i[4] + AXI4_S_IP_TX_TKEEP_i[5] + AXI4_S_IP_TX_TKEEP_i[6] + AXI4_S_IP_TX_TKEEP_i[7] + AXI4_S_IP_TX_TKEEP_i[8] + AXI4_S_IP_TX_TKEEP_i[9] + AXI4_S_IP_TX_TKEEP_i[10] + AXI4_S_IP_TX_TKEEP_i[11] + AXI4_S_IP_TX_TKEEP_i[12] + AXI4_S_IP_TX_TKEEP_i[13] + AXI4_S_IP_TX_TKEEP_i[14] + AXI4_S_IP_TX_TKEEP_i[15]);
+  always @ (found_rem or AXI4_S_IP_TX_TKEEP_i)
+  begin
+    found_rem = 1'b0;
+    LL_OP_REM = {(STRB_WIDTH-1){1'b0}};
+    for (i = 0; i < STRB_WIDTH; i = i + 1) begin
+      if ((AXI4_S_IP_TX_TKEEP_i[i] == 1'b0) && (found_rem == 1'b0)) begin
+         LL_OP_REM = i;
+         found_rem = 1'b1;
+      end
+    end
+  end
 end 
 endgenerate
 

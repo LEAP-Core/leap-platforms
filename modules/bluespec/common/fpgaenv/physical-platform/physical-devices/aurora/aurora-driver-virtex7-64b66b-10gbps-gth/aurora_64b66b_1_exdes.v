@@ -67,250 +67,280 @@
  `timescale 1 ns / 10 ps
 
 
-   (* core_generation_info = "aurora_64b66b_1,aurora_64b66b_v10_0,{c_aurora_lanes=2,c_column_used=right,c_gt_clock_1=GTHQ9,c_gt_clock_2=None,c_gt_loc_1=X,c_gt_loc_10=X,c_gt_loc_11=X,c_gt_loc_12=X,c_gt_loc_13=X,c_gt_loc_14=X,c_gt_loc_15=X,c_gt_loc_16=X,c_gt_loc_17=X,c_gt_loc_18=X,c_gt_loc_19=X,c_gt_loc_2=X,c_gt_loc_20=X,c_gt_loc_21=X,c_gt_loc_22=X,c_gt_loc_23=X,c_gt_loc_24=X,c_gt_loc_25=X,c_gt_loc_26=X,c_gt_loc_27=X,c_gt_loc_28=X,c_gt_loc_29=X,c_gt_loc_3=X,c_gt_loc_30=X,c_gt_loc_31=X,c_gt_loc_32=X,c_gt_loc_33=X,c_gt_loc_34=X,c_gt_loc_35=X,c_gt_loc_36=X,c_gt_loc_37=2,c_gt_loc_38=X,c_gt_loc_39=1,c_gt_loc_4=X,c_gt_loc_40=X,c_gt_loc_41=X,c_gt_loc_42=X,c_gt_loc_43=X,c_gt_loc_44=X,c_gt_loc_45=X,c_gt_loc_46=X,c_gt_loc_47=X,c_gt_loc_48=X,c_gt_loc_5=X,c_gt_loc_6=X,c_gt_loc_7=X,c_gt_loc_8=X,c_gt_loc_9=X,c_lane_width=4,c_line_rate=10.0,c_gt_type=v7gth,c_qpll=true,c_nfc=false,c_nfc_mode=IMM,c_refclk_frequency=156.25,c_simplex=false,c_simplex_mode=TX,c_stream=true,c_ufc=false,c_user_k=false,flow_mode=None,interface_mode=Streaming,dataflow_config=Duplex}" *)
-(* DowngradeIPIdentifiedWarnings="yes" *)
- module aurora_64b66b_1_exdes  #
- (
-     parameter   USE_CORE_TRAFFIC     =   1,
-     parameter   EXAMPLE_SIMULATION =   0
-      //pragma translate_off
-        | 1
-      //pragma translate_on
-      ,
-      parameter   USE_LABTOOLS       =   0
- )
- (
-     RESET,
+`timescale 1 ns / 10 ps
+(* keep_hierarchy="true" *)
+module aurora_64b66b_v7_3_exdes  #
+(
+     parameter   WIDTH                = 128,
+     parameter   USE_CHIPSCOPE        = 0,
+     parameter   SIM_GTXRESET_SPEEDUP=   "TRUE"      // Set to 1 to speed up sim reset
+     
+     
+)
+(
+    RX_DATA_IN,
+    rx_en,
+    rx_rdy,
 
-     // Error Detection Interface
-     HARD_ERR,
-     SOFT_ERR,
-     DATA_ERR_COUNT,
-     // Status
-     LANE_UP,
-     CHANNEL_UP,
+    TX_DATA_OUT,
+    tx_en,
+    tx_rdy,
+    RESET_N,
+    // XXXX WARNINGING!
+    // I need to deal with this signal, because I am pretty sure that the driver layer requires it to toggle once. 
+    cc_do_i,
 
-     // System Interface
-     INIT_CLK_P,
-     INIT_CLK_N,
-     PMA_INIT,
+    HARD_ERR,
+    SOFT_ERR,
+    ERR_COUNT,
 
-     //70MHz DRP clk for Virtex-6 GTH
-     DRP_CLK_IN,
-     // GTX Reference Clock Interface
-     GTHQ9_P,
-     GTHQ9_N,
+    LANE_UP,
+    CHANNEL_UP,
 
 
+    GTX_CLK,
 
-     // GTX Serial I/O
-     RXP,
-     RXN,
-     TXP,
-     TXN
+    INIT_CLK,
 
- );
- `define DLY #1
+    USER_CLK,
+    USER_RST,
+    USER_RST_N,
 
+    // GT I/O
+    RXP,
+    RXN,
+    TXP,
+    TXN,
 
- //***********************************Port Declarations*******************************
+    // Dummy signals 
+    rx_n_en,
+    rx_p_en,
+ 
+    // Debug
+    RX_COUNT,
+    TX_COUNT,
+    ERROR_COUNT,
+    UNDERFLOW,
+    FLITCOUNT,
+    RXCREDIT,
+    TXCREDIT
 
-       input               RESET;
-
-     // Error Detection Interface
-       output            HARD_ERR;
-       output            SOFT_ERR;
-       output [0:7]      DATA_ERR_COUNT;
-
-     // Status
-       output  [0:1]      LANE_UP;
-       output             CHANNEL_UP;
-
-       input              PMA_INIT;
-       input              INIT_CLK_P;
-       input              INIT_CLK_N;
-       input              DRP_CLK_IN;
-
-     // GTX Reference Clock Interface
-       input              GTHQ9_P;
-       input              GTHQ9_N;
-
-     // GTX Serial I/O
-       input   [0:1]      RXP;
-       input   [0:1]      RXN;
-
-       output  [0:1]      TXP;
-       output  [0:1]      TXN;
+);
 
 
- //************************External Register Declarations*****************************
+//***********************************Port Declarations*******************************
 
-     //Error reporting signals
-       reg                  HARD_ERR;
-       reg                  SOFT_ERR;
+    // User I/O
+
+    output [0:127] RX_DATA_IN;
+    input rx_en;
+    output rx_rdy;
+
+    input [0:127] TX_DATA_OUT;
+    input tx_en;
+    output tx_rdy;
+
+    input              RESET_N;
+    input              INIT_CLK;
+
+    output             HARD_ERR;
+    output             SOFT_ERR;
+    output  [0:7]      ERR_COUNT;
+
+
+    output  [0:1]      LANE_UP;
+    output             CHANNEL_UP;
+    output cc_do_i;
+    // Clocks
+    input              GTX_CLK;
+
+    output             USER_CLK;
+    output             USER_RST_N;
+    output             USER_RST;
+
+    // GT Serial I/O
+    input   [0:1]      RXP;
+    input   [0:1]      RXN;
+    output  [0:1]      TXP;
+    output  [0:1]      TXN;
+
+    // Dummy Bluespec Signals
+    input rx_p_en;
+    input rx_n_en;
+
+    // Debug
+    input UNDERFLOW;
+    input [1:0] FLITCOUNT;
+    input [7:0] RXCREDIT;
+    input [7:0] TXCREDIT;   
+
+    output [31:0]       RX_COUNT;   
+    output [31:0] 	TX_COUNT;   
+    output [31:0] 	ERROR_COUNT;
+
+
+    //************************External Register Declarations*****************************
+
+    //Error reporting signals
+    reg                  HARD_ERR;
+    reg                  SOFT_ERR;
 (* KEEP = "TRUE" *)       reg       [0:7]      DATA_ERR_COUNT;
+    reg     [31:0]     RX_COUNT;
+    reg     [31:0]     TX_COUNT;
+    reg     [31:0]     ERROR_COUNT;
 
-     //Global signals
-       reg       [0:1]      LANE_UP;
-       reg                  CHANNEL_UP;
+
+    //Global signals
+    reg       [0:1]      LANE_UP;
+    reg                  CHANNEL_UP;
 
  //********************************Wire Declarations**********************************
 
-     wire    [280:0]          tied_to_ground_vec_i;
-     wire            INIT_CLK_IN;
+    wire    [280:0]          tied_to_ground_vec_i;
+    wire            INIT_CLK_IN;
 
-     //Dut1
-     //TX Interface
-(* mark_debug = "true" *)       wire      [0:127]    tx_tdata_i; 
-(* mark_debug = "true" *)       wire                 tx_tvalid_i;
-(* mark_debug = "true" *)       wire                 tx_tready_i;
+    //Dut1
+    //TX Interface
+    wire      [0:127]    tx_tdata_i; 
+    wire                 tx_tvalid_i;
+    wire                 tx_tready_i;
 
-     //RX Interface
-(* mark_debug = "true" *)       wire      [0:127]     rx_tdata_i;  
-(* mark_debug = "true" *)       wire                 rx_tvalid_i;
+    //RX Interface
+    wire      [0:127]     rx_tdata_i;  
+    wire                 rx_tvalid_i;
 
+    //Error Detection Interface
+    wire                 hard_err_i;
+    wire                 soft_err_i;
 
+    //Status
+    wire                 channel_up_i;
+    wire      [0:1]      lane_up_i;
 
+    
+    //System Interface
+    wire                 reset_i ;
+    wire                 gt_rxcdrovrden_i ;
+    wire                 powerdown_i ;
+    wire      [2:0]      loopback_i ;
+    wire                 gt_pll_lock_i ;
+    wire                 fsm_resetdone_i ;
+    wire                 tx_out_clk_i ;
 
-
-     //TX Interface
-       wire      [0:127]    tx_d_i;
-       wire                 tx_src_rdy_n_i;
-       wire                 tx_dst_rdy_n_i;
-
-     //RX Interface
-       wire      [0:127]     rx_d_i;
-       wire                 rx_src_rdy_n_i;
-
-
-
-
-     //Error Detection Interface
-(* mark_debug = "true" *)       wire                 hard_err_i;
-(* mark_debug = "true" *)       wire                 soft_err_i;
-
-     //Status
-(* mark_debug = "true" *)       wire                 channel_up_i;
-(* mark_debug = "true" *)       wire      [0:1]      lane_up_i;
+    // Error signals from the frame checker
+    wire      [0:7]       data_err_count_o;
+    wire                  data_err_init_clk_i;
 
 
-     //System Interface
-       wire                 reset_i ;
-       wire                 gt_rxcdrovrden_i ;
-       wire                 powerdown_i ;
-       wire      [2:0]      loopback_i ;
-       wire                 gt_pll_lock_i ;
-       wire                 fsm_resetdone_i ;
-       wire                 tx_out_clk_i ;
-
-     // Error signals from the frame checker
-(* KEEP = "TRUE" *) (* mark_debug = "true" *)       wire      [0:7]       data_err_count_o;
-     wire                  data_err_init_clk_i;
-
-
-     // clock
-       (* KEEP = "TRUE" *) wire               user_clk_i;
-       (* KEEP = "TRUE" *) wire               sync_clk_i;
-       (* KEEP = "TRUE" *) wire               INIT_CLK_i  /* synthesis syn_keep = 1 */;
-
-     wire               drp_clk_i = INIT_CLK_i;
-     wire    [8:0] drpaddr_in_i;
-     wire    [15:0]     drpdi_in_i;
-       wire    [15:0]     drpdo_out_i;
-       wire               drprdy_out_i;
-       wire               drpen_in_i;
-       wire               drpwe_in_i;
-     wire    [8:0] drpaddr_in_lane1_i;
-     wire    [15:0]     drpdi_in_lane1_i;
-       wire    [15:0]     drpdo_out_lane1_i;
-       wire               drprdy_out_lane1_i;
-       wire               drpen_in_lane1_i;
-       wire               drpwe_in_lane1_i;
-       wire    [7:0]      qpll_drpaddr_in_i;
-       wire    [15:0]     qpll_drpdi_in_i;
-       wire    [15:0]     qpll_drpdo_out_i;
-       wire               qpll_drprdy_out_i;
-       wire               qpll_drpen_in_i;
-       wire               qpll_drpwe_in_i;
-       wire               link_reset_i;
-       wire               sysreset_from_vio_i;
-       wire               gtreset_from_vio_i;
-       wire               rx_cdrovrden_i;
-       wire               gt_reset_i;
-       wire               gt_reset_i_tmp;
-       wire               gt_reset_i_tmp2;
-       wire               sysreset_from_vio_r3;
-       wire               sysreset_from_vio_r3_initclkdomain;
-       wire               gtreset_from_vio_r3;
-       wire               tied_to_ground_i;
-       wire               tied_to_vcc_i;
-       wire               gt_reset_i_eff;
-       wire               system_reset_i;
-       wire                          pll_not_locked_i;
- 
-reg  pma_init_from_fsm = 0;
-reg pma_init_from_fsm_r1 = 0;
-reg lane_up_vio_usrclk_r1 = 0;
-reg data_err_count_o_r1  = 0;
-
-     wire reset2FrameGenCheck;
+    // clocks 
+    (* DONT_TOUCH = "TRUE" *) wire               user_clk_i;
+    (* DONT_TOUCH = "TRUE" *) wire               sync_clk_i;
+    (* DONT_TOUCH = "TRUE" *) wire               INIT_CLK_i  /* synthesis syn_keep = 1 */;
+    
+    wire               drp_clk_i = INIT_CLK_i;
+    wire    [8:0] drpaddr_in_i;
+    wire    [15:0]     drpdi_in_i;
+    wire    [15:0]     drpdo_out_i;
+    wire               drprdy_out_i;
+    wire               drpen_in_i;
+    wire               drpwe_in_i;
+    wire    [8:0] drpaddr_in_lane1_i;
+    wire    [15:0]     drpdi_in_lane1_i;
+    wire    [15:0]     drpdo_out_lane1_i;
+    wire               drprdy_out_lane1_i;
+    wire               drpen_in_lane1_i;
+    wire               drpwe_in_lane1_i;
+    wire    [7:0]      qpll_drpaddr_in_i;
+    wire    [15:0]     qpll_drpdi_in_i;
+    wire    [15:0]     qpll_drpdo_out_i;
+    wire               qpll_drprdy_out_i;
+    wire               qpll_drpen_in_i;
+    wire               qpll_drpwe_in_i;
+    wire               link_reset_i;
+    wire               sysreset_from_vio_i;
+    wire               gtreset_from_vio_i;
+    wire               rx_cdrovrden_i;
+    wire               gt_reset_i;
+    wire               gt_reset_i_tmp;
+    wire               gt_reset_i_tmp2;
+    wire               sysreset_from_vio_r3;
+    wire               sysreset_from_vio_r3_initclkdomain;
+    wire               gtreset_from_vio_r3;
+    wire               tied_to_ground_i;
+    wire               tied_to_vcc_i;
+    wire               gt_reset_i_eff;
+    wire               system_reset_i;
+    wire               pll_not_locked_i;
+    
+    reg  pma_init_from_fsm = 0;
+    reg pma_init_from_fsm_r1 = 0;
+    reg lane_up_vio_usrclk_r1 = 0;
+    reg data_err_count_o_r1  = 0;
 
 
- //*********************************Main Body of Code**********************************
-     assign reset2FrameGenCheck = reset_i | !channel_up_i;
+    assign GTXQ0_left_i = GTX_CLK; 
+    assign cc_do_i = 0;
+
+    assign PMA_INIT = 1'b0;//~RESET_N;
+
+    assign RESET = ~RESET_N;
+    assign USER_CLK = user_clk_i;
+    assign USER_RST_N = (!system_reset_i);
+    assign USER_RST = (!system_reset_i);
+   
+    assign INIT_CLK_i = INIT_CLK;
 
 
+    //--- Instance of GT differential buffer ---------//
 
-//--- Instance of GT differential buffer ---------//
+    //____________________________Register User I/O___________________________________
 
-     //____________________________Register User I/O___________________________________
+    // Register User Outputs from core.
+    always @(posedge user_clk_i)
+    begin
+        HARD_ERR         <=  hard_err_i;
+        SOFT_ERR         <=  soft_err_i;
+        LANE_UP          <=  lane_up_i;
+        CHANNEL_UP       <=  channel_up_i;
+        DATA_ERR_COUNT   <=  data_err_count_o;
+    end
 
-     // Register User Outputs from core.
-     always @(posedge user_clk_i)
-     begin
-         HARD_ERR         <=  hard_err_i;
-         SOFT_ERR         <=  soft_err_i;
-         LANE_UP          <=  lane_up_i;
-         CHANNEL_UP       <=  channel_up_i;
-         DATA_ERR_COUNT   <=  data_err_count_o;
-     end
+    //____________________________Register User I/O___________________________________
 
-     //____________________________Register User I/O___________________________________
-
-     // System Interface
-     assign  power_down_i      =   1'b0;
-     assign tied_to_ground_i   =   1'b0;
-     assign tied_to_ground_vec_i = 281'd0;
-     assign tied_to_vcc_i      =   1'b1;
+    // System Interface
+    assign  power_down_i      =   1'b0;
+    assign tied_to_ground_i   =   1'b0;
+    assign tied_to_ground_vec_i = 281'd0;
+    assign tied_to_vcc_i      =   1'b1;
     // Native DRP Interface
-     assign  drpaddr_in_i                     =  'h0;
-     assign  drpdi_in_i                       =  16'h0;
-     assign  drpwe_in_i     =  1'b0;
-     assign  drpen_in_i     =  1'b0;
-     assign  drpaddr_in_lane1_i                     =  'h0;
-     assign  drpdi_in_lane1_i                       =  16'h0;
-     assign  drpwe_in_lane1_i     =  1'b0;
-     assign  drpen_in_lane1_i     =  1'b0;
+    assign  drpaddr_in_i                     =  'h0;
+    assign  drpdi_in_i                       =  16'h0;
+    assign  drpwe_in_i     =  1'b0;
+    assign  drpen_in_i     =  1'b0;
+    assign  drpaddr_in_lane1_i                     =  'h0;
+    assign  drpdi_in_lane1_i                       =  16'h0;
+    assign  drpwe_in_lane1_i     =  1'b0;
+    assign  drpen_in_lane1_i     =  1'b0;
 
 
-     assign  qpll_drpaddr_in_i   =  8'h0;
-     assign  qpll_drpdi_in_i     =  16'h0;
-     assign  qpll_drpen_in_i    =  1'b0;
-     assign  qpll_drpwe_in_i    =  1'b0;
+    assign  qpll_drpaddr_in_i   =  8'h0;
+    assign  qpll_drpdi_in_i     =  16'h0;
+    assign  qpll_drpen_in_i    =  1'b0;
+    assign  qpll_drpwe_in_i    =  1'b0;
+
+    
+
+    reg [127:0]        pma_init_stage = 128'h0;
+    (* mark_debug = "TRUE" *) (* KEEP = "TRUE" *) reg [23:0]         pma_init_pulse_width_cnt;
+    reg pma_init_assertion = 1'b0;
+    reg pma_init_assertion_r;
+    reg gt_reset_i_delayed_r1;
+    (* mark_debug = "TRUE" *)  reg gt_reset_i_delayed_r2;
+    wire gt_reset_i_delayed;
 
 
 
-   reg [127:0]        pma_init_stage = 128'h0;
-   (* mark_debug = "TRUE" *) (* KEEP = "TRUE" *) reg [23:0]         pma_init_pulse_width_cnt;
-   reg pma_init_assertion = 1'b0;
- reg pma_init_assertion_r;
-   reg gt_reset_i_delayed_r1;
-   (* mark_debug = "TRUE" *)  reg gt_reset_i_delayed_r2;
-   wire gt_reset_i_delayed;
-
-
-
-     generate
+    generate
         always @(posedge INIT_CLK_i)
         begin
             pma_init_stage[127:0] <= {pma_init_stage[126:0], gt_reset_i_tmp};
@@ -334,59 +364,42 @@ reg data_err_count_o_r1  = 0;
 
 
 
-    if(EXAMPLE_SIMULATION)
-    assign gt_reset_i_eff = gt_reset_i_delayed;
-    else
-    assign gt_reset_i_eff = pma_init_assertion ? 1'b1 : gt_reset_i_delayed;
+        assign gt_reset_i_eff = pma_init_assertion ? 1'b1 : gt_reset_i_delayed;
 
+        assign  gt_reset_i_tmp = PMA_INIT;
+        assign  reset_i  =   RESET | gt_reset_i_tmp2;
+        assign  gt_reset_i = gt_reset_i_eff;
+        assign  gt_rxcdrovrden_i  =  1'b0;
+        assign  loopback_i  =  3'b000;
 
-     if(USE_LABTOOLS)
-     begin:chip_reset
-     assign  gt_reset_i_tmp = PMA_INIT | gtreset_from_vio_r3 | pma_init_from_fsm_r1;
-     assign  reset_i  =  RESET | sysreset_from_vio_r3;
-     assign  gt_reset_i = gt_reset_i_eff;
-     assign  gt_rxcdrovrden_i  =  rx_cdrovrden_i;
-     end
-     else
-     begin:no_chip_reset
-     assign  gt_reset_i_tmp = PMA_INIT;
-     assign  reset_i  =   RESET | gt_reset_i_tmp2;
-     assign  gt_reset_i = gt_reset_i_eff;
-     assign  gt_rxcdrovrden_i  =  1'b0;
-     assign  loopback_i  =  3'b000;
-     end
+         
+        aurora_64b66b_1_rst_sync_exdes   u_rst_sync_gtrsttmpi
+        (
+           .prmry_in     (gt_reset_i_tmp),
+           .scndry_aclk  (user_clk_i),
+           .scndry_out   (gt_reset_i_tmp2)
+        ); 
 
-     if(!USE_LABTOOLS)
-     begin
-aurora_64b66b_1_rst_sync_exdes   u_rst_sync_gtrsttmpi
-     (
-       .prmry_in     (gt_reset_i_tmp),
-       .scndry_aclk  (user_clk_i),
-       .scndry_out   (gt_reset_i_tmp2)
-      );
-     end
-
-     endgenerate
-
-     //___________________________Module Instantiations_________________________________
-
-// this is non shared mode, the clock, GT common are part of example design.
-    aurora_64b66b_1_support
-aurora_64b66b_1_block_i
-     (
-        // TX AXI4-S Interface
-         .s_axi_tx_tdata(tx_tdata_i),
-         .s_axi_tx_tvalid(tx_tvalid_i),
-         .s_axi_tx_tready(tx_tready_i),
-
-
-        // RX AXI4-S Interface
-         .m_axi_rx_tdata(rx_tdata_i),
-         .m_axi_rx_tvalid(rx_tvalid_i),
+    endgenerate
 
 
 
-        // GT Serial I/O
+    //___________________________Module Instantiations_________________________________
+
+    // this is non shared mode, the clock, GT common are part of example design.
+    aurora_64b66b_1_support aurora_64b66b_1_block_i
+    (
+    // AXI Streaming master/slave interfaces
+         .s_axi_tx_tdata(s_axi_tx_tdata_i), 
+         .s_axi_tx_tvalid(s_axi_tx_tvalid_i),
+         .s_axi_tx_tready(s_axi_tx_tready_i), 
+
+         .m_axi_rx_tdata(m_axi_rx_tdata_i), 
+         .m_axi_rx_tvalid(m_axi_rx_tvalid_i), 
+
+
+
+    // GT Serial I/O
          .rxp(RXP),
          .rxn(RXN),
 
@@ -394,19 +407,18 @@ aurora_64b66b_1_block_i
          .txn(TXN),
 
 
-        //GT Reference Clock Interface
-        .gt_refclk1_p (GTHQ9_P),
-        .gt_refclk1_n (GTHQ9_N),
+    //GT Reference Clock Interface
+         .refclk1_in (GTXQ0_left_i),
 
-        // Error Detection Interface
+    // Error Detection Interface
          .hard_err              (hard_err_i),
          .soft_err              (soft_err_i),
 
-        // Status
+    // Status
          .channel_up            (channel_up_i),
          .lane_up               (lane_up_i),
 
-        // System Interface
+    // System Interface
          .init_clk_out          (INIT_CLK_i),
          .user_clk_out          (user_clk_i),
 
@@ -440,8 +452,7 @@ aurora_64b66b_1_block_i
          .qpll_drprdy_out    (qpll_drprdy_out_i),
          .qpll_drpen_in      (qpll_drpen_in_i),
          .qpll_drpwe_in      (qpll_drpwe_in_i),
-         .init_clk_p                            (INIT_CLK_P),
-         .init_clk_n                            (INIT_CLK_N),
+         .init_clk                            (INIT_CLK),
          .link_reset_out                        (link_reset_i),
          .mmcm_not_locked_out                   (pll_not_locked_i),
 
@@ -452,109 +463,173 @@ aurora_64b66b_1_block_i
          .tx_out_clk                               (tx_out_clk_i)
      );
 
+
+    //RX Interface
+    wire      [0:127]    m_axi_rx_tdata_i; 
+    wire                 m_axi_rx_tvalid_i; 
+
+    // TX Interface
+    wire      [0:127]    s_axi_tx_tdata_i; 
+    wire                 s_axi_tx_tvalid_i;
+    wire                 s_axi_tx_tready_i;
+
+    assign s_axi_tx_tdata_i = TX_DATA_OUT;
+    assign RX_DATA_IN =  m_axi_rx_tdata_i;
+    assign rx_rdy = rx_data_valid_c && !rx_reset_c;
+   
+    assign s_axi_tx_tvalid_i = (tx_en);
+    assign tx_rdy = s_axi_tx_tready_i;
+    wire   rx_reset_c;
+    wire   rx_data_valid_c;
+    assign rx_reset_c = system_reset_i || !channel_up_i;
+    assign  rx_data_valid_c    =  m_axi_rx_tvalid_i;
+
+//    reg [127:0] RX_DATA_IN_delay;
+//    reg        rx_rdy_delay;
+
+    // Pipeline rx_rdy to improve pipeline performance
+    // we get away without having defaults due to the high
+    // level properties of the driver (it waits for do_CC before data may be received)
+//    always@(posedge user_clk_i)
+//    begin
+//        rx_rdy_delay <= rx_data_valid_c && !rx_reset_c;
+//        RX_DATA_IN_delay <= m_axi_rx_tdata_i;
+//    end
+
+
 generate
- if (USE_CORE_TRAFFIC==1)
- begin : core_traffic
+if (USE_CHIPSCOPE==1)
+begin : chipscope1
+   
+reg [63:0] sync_reg;
+wire [63:0] sync_in_i;
 
-     //_____________________________ TX AXI SHIM _______________________________
-aurora_64b66b_1_EXAMPLE_LL_TO_AXI #
-     (
-        .DATA_WIDTH(128),
-        .STRB_WIDTH(16),
-        .USE_4_NFC (0),
-        .REM_WIDTH (4)
-     )
+    reg tick_user_clock;
+    reg tick_init_clock;
+    reg tick_sync_clock;
 
-     frame_gen_ll_to_axi_data_i
-     (
-      // LocalLink input Interface
-      .LL_IP_DATA(tx_d_i),
-      .LL_IP_SOF_N(),
-      .LL_IP_EOF_N(),
-      .LL_IP_REM(),
-      .LL_IP_SRC_RDY_N(tx_src_rdy_n_i),
-      .LL_OP_DST_RDY_N(tx_dst_rdy_n_i),
+    reg  [31:0] rx_count_next;
+    reg  [31:0] tx_count_next;
+    reg  [31:0] error_count_next;
 
-      // AXI4-S output signals
-      .AXI4_S_OP_TVALID(tx_tvalid_i),
-      .AXI4_S_OP_TDATA(tx_tdata_i),
-      .AXI4_S_OP_TKEEP(),
-      .AXI4_S_OP_TLAST(),
-      .AXI4_S_IP_TREADY(tx_tready_i)
-     );
+    always @(posedge INIT_CLK_i)
+    begin
+        tick_init_clock <= ~tick_init_clock;  
+    end
+
+    always @(posedge sync_clk_i)
+    begin
+        tick_sync_clock <= ~tick_sync_clock;  
+    end
+
+    always @(posedge USER_CLK)
+    begin
+	rx_count_next = RX_COUNT;
+        tx_count_next = TX_COUNT;
+        error_count_next = ERROR_COUNT;
+        tick_user_clock <= ~tick_user_clock;  
+
+	if(system_reset_i)
+	begin
+             rx_count_next = 0;
+	     tx_count_next = 0;
+             error_count_next = 0;
+	end
+	else
+	begin
+            if(soft_err_i) 
+            begin
+               error_count_next = ERROR_COUNT + 1;	       
+            end	
+     
+            if(tx_en && tx_rdy)
+	    begin
+                tx_count_next = TX_COUNT + 1; 
+	    end
+	   
+	    if(rx_rdy)
+	    begin
+                rx_count_next = RX_COUNT + 1; 
+	    end
+	end // else: !if(system_reset_i)
+       
+	RX_COUNT <= rx_count_next;
+	TX_COUNT <= tx_count_next;
+        ERROR_COUNT <= error_count_next;
+
+    end
 
 
+always@(posedge user_clk_i)
+begin
+   sync_reg <= sync_in_i;
+end   
 
+assign lane_up_i_i = &lane_up_i;
 
+    wire [35:0] icon_to_vio_i;
+    // Shared VIO Inputs
+        assign  sync_in_i[15:0]         =  s_axi_tx_tdata_i[48:63];
+        assign  sync_in_i[31:16]        =  m_axi_rx_tdata_i[48:63];
+        assign  sync_in_i[32]           =  pma_init_assertion;  
+        assign  sync_in_i[33]           =  system_reset_i;  
+//        assign  sync_in_i[34]           =  FLITCOUNT[0];  
+//        assign  sync_in_i[35]           =  FLITCOUNT[1];  
+        assign  sync_in_i[34]           =  gt_reset_i;  
+        assign  sync_in_i[35]           =  reset_i;  
+        assign  sync_in_i[36]           =  rx_reset_c;  
+        assign  sync_in_i[37]           =  rx_rdy;
+        assign  sync_in_i[38]           =  tick_user_clock;
+        assign  sync_in_i[39]           =  tx_rdy;
+        assign  sync_in_i[40]           =  soft_err_i;
+        assign  sync_in_i[41]           =  hard_err_i;
+        assign  sync_in_i[42]           =  tick_sync_clock;
+        assign  sync_in_i[43]           =  pll_not_locked_i;
+        assign  sync_in_i[44]           =  lane_up_i_i;
+        assign  sync_in_i[45]           =  channel_up_i;        
+        assign  sync_in_i[47]           =  tick_init_clock;
 
-    // Frame Generator to provide with input to TX_Stream
-aurora_64b66b_1_FRAME_GEN frame_gen_i
+        assign  sync_in_i[55:48]        =  RXCREDIT;
+        assign  sync_in_i[63:56]        =  TXCREDIT;
+   
+   
+   v7_ila ILA_inst
+           (
+	          .CONTROL(icon_to_vio_i), // INOUT BUS [35:0]
+	          .CLK(user_clk_i), // IN
+	          .TRIG0(sync_reg[7:0]), // IN BUS [7:0]
+	          .TRIG1(sync_reg[15:8]), // IN BUS [7:0]
+	          .TRIG2(sync_reg[23:16]), // IN BUS [7:0]
+	          .TRIG3(sync_reg[31:24]), // IN BUS [7:0]
+	          .TRIG4(sync_reg[39:32]), // IN BUS [7:0]
+	          .TRIG5(sync_reg[47:40]),
+   	          .TRIG6(sync_reg[55:48]),
+   	          .TRIG7(sync_reg[63:56]));
+
+  //-----------------------------------------------------------------
+  //  ICON core instance
+  //-----------------------------------------------------------------
+  v7_icon i_icon
+  
     (
-         .TX_D(tx_d_i),
-         .TX_SRC_RDY_N(tx_src_rdy_n_i),
-         .TX_DST_RDY_N(tx_dst_rdy_n_i),
-
-
-
-
-         .CHANNEL_UP(channel_up_i),
-         .USER_CLK(user_clk_i),
-         .RESET(reset2FrameGenCheck)
+      .CONTROL0(icon_to_vio_i)
     );
+  
+                                                                                                                                                                       
+end //end USE_CHIPSCOPE=1 generate section
+else
+begin : no_chipscope1
+                                                                                                                                                                       
+    // Shared VIO Inputs
+        assign  sync_in_i         =  128'h0;
 
-     //_____________________________ RX AXI SHIM _______________________________
-aurora_64b66b_1_EXAMPLE_AXI_TO_LL #
-     (
-        .DATA_WIDTH(128),
-        .STRB_WIDTH(16),
-        .ISUFC(0),
-        .REM_WIDTH (4)
-     )
-     frame_chk_axi_to_ll_data_i
-     (
-      // AXI4-S input signals
-      .AXI4_S_IP_TX_TVALID(rx_tvalid_i),
-      .AXI4_S_IP_TX_TREADY(),
-      .AXI4_S_IP_TX_TDATA(rx_tdata_i),
-      .AXI4_S_IP_TX_TKEEP(),
-      .AXI4_S_IP_TX_TLAST(),
+end
 
-      // LocalLink output Interface
-      .LL_OP_DATA(rx_d_i),
-      .LL_OP_SOF_N(),
-      .LL_OP_EOF_N() ,
-      .LL_OP_REM() ,
-      .LL_OP_SRC_RDY_N(rx_src_rdy_n_i),
-      .LL_IP_DST_RDY_N(1'b0),
-
-      // System Interface
-      .USER_CLK(user_clk_i),
-      .RESET(reset2FrameGenCheck),
-      .CHANNEL_UP(channel_up_i)
-      );
+endgenerate //End generate for USE_CHIPSCOPE
 
 
-
-    // Frame Checker to check output from RX_Stream
-aurora_64b66b_1_FRAME_CHECK frame_check_i
-    (
-         .RX_D(rx_d_i),
-         .RX_SRC_RDY_N(rx_src_rdy_n_i),
-         .DATA_ERR_COUNT(data_err_count_o),
+endmodule
 
 
-
-         .CHANNEL_UP(channel_up_i),
-         .USER_CLK(user_clk_i),
-         .RESET(reset2FrameGenCheck)
-    );
- end //end USE_CORE_TRAFFIC=1 block
- else
- begin: no_traffic
-     //define traffic generation modules here
- end //end USE_CORE_TRAFFIC=0 block
-
-endgenerate //End generate for USE_CORE_TRAFFIC
  
-//------------------------------------------------------------------------------
- endmodule
+

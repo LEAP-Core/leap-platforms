@@ -67,13 +67,21 @@
 
  `timescale 1 ns / 10 ps
 
-   (* core_generation_info = "aurora_64b66b_1,aurora_64b66b_v9_3,{c_aurora_lanes=2,c_column_used=right,c_gt_clock_1=GTHQ9,c_gt_clock_2=None,c_gt_loc_1=X,c_gt_loc_10=X,c_gt_loc_11=X,c_gt_loc_12=X,c_gt_loc_13=X,c_gt_loc_14=X,c_gt_loc_15=X,c_gt_loc_16=X,c_gt_loc_17=X,c_gt_loc_18=X,c_gt_loc_19=X,c_gt_loc_2=X,c_gt_loc_20=X,c_gt_loc_21=X,c_gt_loc_22=X,c_gt_loc_23=X,c_gt_loc_24=X,c_gt_loc_25=X,c_gt_loc_26=X,c_gt_loc_27=X,c_gt_loc_28=X,c_gt_loc_29=X,c_gt_loc_3=X,c_gt_loc_30=X,c_gt_loc_31=X,c_gt_loc_32=X,c_gt_loc_33=X,c_gt_loc_34=X,c_gt_loc_35=X,c_gt_loc_36=X,c_gt_loc_37=2,c_gt_loc_38=X,c_gt_loc_39=1,c_gt_loc_4=X,c_gt_loc_40=X,c_gt_loc_41=X,c_gt_loc_42=X,c_gt_loc_43=X,c_gt_loc_44=X,c_gt_loc_45=X,c_gt_loc_46=X,c_gt_loc_47=X,c_gt_loc_48=X,c_gt_loc_5=X,c_gt_loc_6=X,c_gt_loc_7=X,c_gt_loc_8=X,c_gt_loc_9=X,c_lane_width=4,c_line_rate=10.0,c_gt_type=v7gth,c_qpll=true,c_nfc=false,c_nfc_mode=IMM,c_refclk_frequency=156.25,c_simplex=false,c_simplex_mode=TX,c_stream=true,c_ufc=false,c_user_k=false,flow_mode=None,interface_mode=Streaming,dataflow_config=Duplex}" *)
+   (* core_generation_info = "aurora_64b66b_1,aurora_64b66b_v10_0,{c_aurora_lanes=2,c_column_used=right,c_gt_clock_1=GTHQ9,c_gt_clock_2=None,c_gt_loc_1=X,c_gt_loc_10=X,c_gt_loc_11=X,c_gt_loc_12=X,c_gt_loc_13=X,c_gt_loc_14=X,c_gt_loc_15=X,c_gt_loc_16=X,c_gt_loc_17=X,c_gt_loc_18=X,c_gt_loc_19=X,c_gt_loc_2=X,c_gt_loc_20=X,c_gt_loc_21=X,c_gt_loc_22=X,c_gt_loc_23=X,c_gt_loc_24=X,c_gt_loc_25=X,c_gt_loc_26=X,c_gt_loc_27=X,c_gt_loc_28=X,c_gt_loc_29=X,c_gt_loc_3=X,c_gt_loc_30=X,c_gt_loc_31=X,c_gt_loc_32=X,c_gt_loc_33=X,c_gt_loc_34=X,c_gt_loc_35=X,c_gt_loc_36=X,c_gt_loc_37=2,c_gt_loc_38=X,c_gt_loc_39=1,c_gt_loc_4=X,c_gt_loc_40=X,c_gt_loc_41=X,c_gt_loc_42=X,c_gt_loc_43=X,c_gt_loc_44=X,c_gt_loc_45=X,c_gt_loc_46=X,c_gt_loc_47=X,c_gt_loc_48=X,c_gt_loc_5=X,c_gt_loc_6=X,c_gt_loc_7=X,c_gt_loc_8=X,c_gt_loc_9=X,c_lane_width=4,c_line_rate=10.0,c_gt_type=v7gth,c_qpll=true,c_nfc=false,c_nfc_mode=IMM,c_refclk_frequency=156.25,c_simplex=false,c_simplex_mode=TX,c_stream=true,c_ufc=false,c_user_k=false,flow_mode=None,interface_mode=Streaming,dataflow_config=Duplex}" *)
 (* DowngradeIPIdentifiedWarnings="yes" *)
  module aurora_64b66b_1_core #
  (
 
       parameter     STABLE_CLOCK_PERIOD = 5,            //Period of the stable clock driving this state-machine, unit is [ns]
       parameter   SIM_GTXRESET_SPEEDUP=   "TRUE",      // Set to 1 to speed up sim reset
+ 
+      parameter CC_FREQ_FACTOR = 5'd24, // Its highly RECOMMENDED that this value be NOT changed.
+                                        // Changing it to a value greater than 24 may result in soft errors.  
+                                        // User may reduce to a value lower than 24 if channel needs to be 
+                                        // established in noisy environment
+                                        // Min value is 4.  
+                                        // The current GAP in between two consecutive DO_CC posedge events is 4992 user_clk cycles.
+ 
      parameter   EXAMPLE_SIMULATION =   0      
       //pragma translate_off
         | 1
@@ -84,7 +92,6 @@
      s_axi_tx_tdata,
      s_axi_tx_tvalid,
      s_axi_tx_tready,
-     do_cc,
  
      // AXI RX Interface
      m_axi_rx_tdata,
@@ -115,13 +122,11 @@
      mmcm_not_locked,
      user_clk,
      sync_clk,
-     reset,
      sysreset_to_core,
      gt_rxcdrovrden_in,
      power_down,
      loopback,
      pma_init,
-     rst_drp_strt,
 //---{
 
 // I am in AURORA TOP file in 7 series port instance
@@ -143,6 +148,8 @@
        drprdy_out,
        drpen_in,
        drpwe_in,
+       drpaddr_in_lane1,
+       drpdi_in_lane1,
        drpdo_out_lane1,
        drprdy_out_lane1,
        drpen_in_lane1,
@@ -174,7 +181,6 @@
        input  [0:127]    s_axi_tx_tdata; 
        input             s_axi_tx_tvalid;
        output            s_axi_tx_tready;
-       input             do_cc;
 
      // RX AXI Interface
        output [0:127]    m_axi_rx_tdata; 
@@ -206,13 +212,11 @@
        input               mmcm_not_locked;
        input               user_clk;
        input               sync_clk;
-       input               reset;
        input               sysreset_to_core;
        input               gt_rxcdrovrden_in;
        input               power_down;
        input    [2:0]      loopback;
        input               pma_init;
-       input               rst_drp_strt;
        output              sys_reset_out;
 //---{
 
@@ -226,14 +230,16 @@
 //---}
        input    drp_clk_in;
     //---------------------- GT DRP Ports ----------------------
-       input   [8:0]   drpaddr_in;
-       input   [15:0]  drpdi_in;
        output  [15:0]  drpdo_out;
        output          drprdy_out;
+       input   [8:0]   drpaddr_in;
+       input   [15:0]  drpdi_in;
        input           drpen_in;
        input           drpwe_in;
        output  [15:0]  drpdo_out_lane1;
        output          drprdy_out_lane1;
+       input   [8:0]   drpaddr_in_lane1;
+       input   [15:0]  drpdi_in_lane1;
        input           drpen_in_lane1;
        input           drpwe_in_lane1;
 
@@ -250,10 +256,6 @@
  //*********************************Wire Declarations**********************************
 
        wire                drp_clk;
-       wire                reset_neg_pma_init;
-       reg                 rst_drp=1'b1;
-       reg                 pma_init_r;
-
        wire    [0:127]    tx_d_i2;
        wire               tx_src_rdy_n_i2;
        wire               tx_dst_rdy_n_i2;
@@ -352,15 +354,19 @@
        wire               drpwe_in_lane1_i;
 
 
+       wire               do_cc_i;
        wire               link_reset_i;
+       wire               reset;
 
        reg                soft_err;
-
+       wire               sysreset_to_core_sync;
+       wire               pma_init_sync;
  //*********************************Main Body of Code**********************************
+     assign reset = sys_reset_out;
 
      // Connect top level logic
-     assign          channel_up  =   channel_up_rx_if;
-     assign          txclk_locked_c = !mmcm_not_locked ;
+     assign channel_up  =   channel_up_rx_if;
+     assign txclk_locked_c = !mmcm_not_locked ;
 
      always @(posedge user_clk)
        if(reset)
@@ -370,19 +376,38 @@
 
 
      // Connect the TXOUTCLK of lane 0 to TX_OUT_CLK
+ 
        assign  tx_out_clk  =   raw_tx_out_clk_i [0];
-
-
+ 
        assign  gt_pll_lock =   gt_pll_lock_i [0];
        assign  rxdatavalid_to_lanes_i = |rxdatavalid_i;
 
 
+    aurora_64b66b_1_rst_sync #
+    (
+        .c_mtbf_stages (5)
+    )reset_pb_sync
+    (
+        .prmry_in     (sysreset_to_core),
+        .scndry_aclk  (user_clk),
+        .scndry_out   (sysreset_to_core_sync)
+    );
+
+    aurora_64b66b_1_rst_sync #
+    (
+        .c_mtbf_stages (5)
+    )gt_reset_sync
+    (
+        .prmry_in     (pma_init),
+        .scndry_aclk  (init_clk),
+        .scndry_out   (pma_init_sync)
+    );
 
     wire fsm_resetdone;
     // RESET_LOGIC instance
     aurora_64b66b_1_RESET_LOGIC core_reset_logic_i
     (
-        .RESET                  (sysreset_to_core),
+        .RESET                  (sysreset_to_core_sync),
         .USER_CLK               (user_clk),
         .INIT_CLK               (init_clk),
         .FSM_RESETDONE          (fsm_resetdone),
@@ -580,7 +605,7 @@ aurora_64b66b_1_wrapper_i
            .PLLLKDET_OUT_LANE1         (gt_pll_lock_i [1]),
            //-----------
            // System Interface
-           .GTXRESET_IN                            (pma_init),
+           .GTXRESET_IN                            (pma_init_sync),
            //-----------
            .CHAN_BOND_RESET                        (chan_bond_reset_i),
            .LOOPBACK_IN                            (loopback),
@@ -615,8 +640,8 @@ aurora_64b66b_1_wrapper_i
            .DRPRDY_OUT(drprdy_out),
            .DRPEN_IN(drpen_in),
            .DRPWE_IN(drpwe_in),
-           .DRPADDR_IN_LANE1(drpaddr_in),
-	   .DRPDI_IN_LANE1(drpdi_in),
+           .DRPADDR_IN_LANE1(drpaddr_in_lane1),
+	   .DRPDI_IN_LANE1(drpdi_in_lane1),
            .DRPDO_OUT_LANE1(drpdo_out_lane1),
            .DRPRDY_OUT_LANE1(drprdy_out_lane1),
            .DRPEN_IN_LANE1(drpen_in_lane1),
@@ -746,7 +771,7 @@ aurora_64b66b_1_TX_STREAM tx_stream_i
 
 
          .CHANNEL_UP(channel_up_tx_if),
-         .DO_CC(do_cc),
+         .DO_CC(do_cc_i),
          .GEN_CC(gen_cc_i),
          .USER_CLK(user_clk),
          .TXDATAVALID_IN(txdatavalid_i)
@@ -774,20 +799,18 @@ aurora_64b66b_1_RX_STREAM rx_stream_i
     );
 
 
-  
-          assign drp_clk = drp_clk_in;
+      assign rst_drp = pma_init_sync;  
 
-    always @(posedge init_clk)
-    begin
-        if (rst_drp_strt)
-            rst_drp   <= `DLY 1'b1;
-        else if (reset_neg_pma_init)
-            rst_drp   <= `DLY 1'b0;
-    end
-
-    always @(posedge init_clk)
-        pma_init_r    <= `DLY pma_init;
-
-    assign reset_neg_pma_init = (!pma_init) & pma_init_r;
+    // Standard CC Module
+aurora_64b66b_1_STANDARD_CC_MODULE #
+(
+    .CC_FREQ_FACTOR (CC_FREQ_FACTOR)
+)
+ standard_cc_module_i
+    (
+         .DO_CC         (do_cc_i),
+         .USER_CLK      (user_clk),
+         .CHANNEL_UP    (channel_up_rx_if)
+    );
 
  endmodule
