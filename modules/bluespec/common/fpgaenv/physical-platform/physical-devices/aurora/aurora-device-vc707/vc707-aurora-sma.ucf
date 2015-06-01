@@ -112,9 +112,9 @@ TIMESPEC "TS_TIG4" = FROM "INIT_CLK" TO "USER_CLK_HPC4" TIG;
 
 
 # Schematic of VC707.
-#  |------|CX4  20-23 GBTCLK1 pA10/nA9 |-----|CX4  12-15 GBTCLK1 pT8/nT7 |----|
-#  |       SMA  24-25 GBTCLK0 pE10/nE9        SMA  16-17 GBTCLK0 pK8/nK7      |
-#  |       SATA 26-27 GBTCLK0                 SATA 18-19 GBTCLK0              |
+#  |------|CX4  20-23 GBTCLK0 pA10/nA9 |-----|CX4  12-15 GBTCLK0 pK8/nK7 |----|
+#  |       SMA  24-25 GBTCLK1 pE10/nE9        SMA  16-17 GBTCLK1 pT8/nT7      |
+#  |       SATA 26-27                         SATA 18-19                      |
 #  |ETH    FMC1/HPC1                          FMC2/HPC2                       |
 #  |                                                                          |
 #  |                                                                          |
