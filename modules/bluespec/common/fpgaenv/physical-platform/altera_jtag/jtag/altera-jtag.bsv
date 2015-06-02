@@ -32,7 +32,8 @@
 import FIFO::*;
 import Clocks::*;
 
-// The Physical Platform for the XUP Virtex 2 with serial.
+// Physical Platform for Altera devices.  
+// Makes use of JTAG to create a universal platform for these devices. 
 
 `include "led_device.bsh"
 `include "clocks_device.bsh"

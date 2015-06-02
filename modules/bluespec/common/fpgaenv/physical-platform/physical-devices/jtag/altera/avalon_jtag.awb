@@ -22,6 +22,8 @@
 %sources -t ALTERA_VERILOG -v PRIVATE mkAvalonWrapperInstance_0.v
 %sources -t ALTERA_VERILOG -v PRIVATE mkAvalonWrapperInstance.v
 
+%sources -t SDC_ALGEBRA -v PUBLIC jtag_driver.sdc
+
 %param JTAG_BASE_ADDR 0 "Base address of the memory mapped jtag"
 
 %AWB_END
