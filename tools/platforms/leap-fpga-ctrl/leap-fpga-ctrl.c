@@ -938,6 +938,16 @@ int main(int argc, char *argv[])
         opt = getopt_long(argc, argv, "", long_options, &opt_idx);
         if (-1 == opt) break;
 
+
+        // If debug enabled, dump some useful information.                                                                                                             
+        if (opt_debug) 
+        {
+            fprintf(stderr, "config file is: %s\n", CFG_FILE);
+            fprintf(stderr, "config dir is: %s\n", CONFIG_DIR);
+            fprintf(stderr, "result dir : %s\n", RES_DIR);
+            fprintf(stderr, "programming lock is: %s\n", PROG_LOCK_FILE);
+        }
+
         switch (opt)
         {
           case 0:
