@@ -129,17 +129,17 @@ module mkClocksDevice
                                                      clocked_by userClock,
                                                      reset_by   userReset);
     
-    Clock finalClock = userClock;
-    Reset finalReset = softReset;
+    // Return one reset, mustly used by legacy code that doesn't use
+    // the reset fan-out interface.
+    let finalReset <- mkResetFanout(softReset, clocked_by userClock);
     
     // bind the driver interfaces
-    
     interface CLOCKS_DRIVER driver;
-        interface clock = finalClock;
+        interface clock = userClock;
         interface reset = finalReset;
             
         // Fan-out not yet implemented in this clock
-        interface baseReset = finalReset;
+        interface baseReset = softReset;
 
         interface rawClock = rawClock;
         interface rawReset = rawReset;
