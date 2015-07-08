@@ -457,6 +457,14 @@ module [m] mkBRAMClockDividerM#(function m#(BRAM#(t_ADDR, t_DATA)) ramImpl)
 
     let bramClock <- mkUserClock_Divider(2);
 
+    
+    Reg#(Bit#(3)) readyCounter <- mkReg(maxBound);
+    
+    rule tickCounter;
+        readyCounter <= readyCounter - 1;
+    endrule
+
+
     // For now, we just wrap the underlying BRAM. 
     BRAM#(t_ADDR, t_DATA) ram <- ramImpl(clocked_by bramClock.clk.slowClock, reset_by bramClock.rst);
 
@@ -505,7 +513,7 @@ module [m] mkBRAMClockDividerM#(function m#(BRAM#(t_ADDR, t_DATA)) ramImpl)
     // When:   Any time that sufficient buffering is available.
     // Effect: Make the request and reserve the buffering spot.
 
-    method Action readReq(t_ADDR a);
+    method Action readReq(t_ADDR a) if(readyCounter == 0);
         readReqQ.enq(a);
     endmethod
 
@@ -514,7 +522,7 @@ module [m] mkBRAMClockDividerM#(function m#(BRAM#(t_ADDR, t_DATA)) ramImpl)
     // When:   Any time there's something in the response buffer.
     // Effect: Deq the buffering and record the new space available.
 
-    method ActionValue#(t_DATA) readRsp();
+    method ActionValue#(t_DATA) readRsp() if(readyCounter == 0);
         responseQueue.deq;
         return responseQueue.first;
     endmethod
@@ -528,7 +536,7 @@ module [m] mkBRAMClockDividerM#(function m#(BRAM#(t_ADDR, t_DATA)) ramImpl)
     // When:   Any time.
     // Effect: Just update the RAM.
 
-    method Action write(t_ADDR a, t_DATA d);
+    method Action write(t_ADDR a, t_DATA d) if(readyCounter == 0);
         writeQueue.enq(tuple2(a, d));
     endmethod
 
@@ -684,6 +692,25 @@ endmodule
 
 
 //
+// mkBRAMInitializedSized --
+//     Initialize a sized BRAM with a constant value.
+//
+module mkBRAMInitializedSized#(t_DATA initVal, Integer bramSize)
+    // interface:
+        (BRAM#(t_ADDR, t_DATA))
+    provisos
+        (Bits#(t_ADDR, t_ADDR_SZ),
+         Bits#(t_DATA, t_DATA_SZ));
+
+    // The primitive RAM.
+    BRAM#(t_ADDR, t_DATA) mem <- mkBRAMSized(bramSize);
+    
+    BRAM#(t_ADDR, t_DATA) m <- mkMemInitialized(mem, initVal);
+    return m;
+endmodule
+
+
+//
 // mkBRAMInitializedBuffered --
 //     Initialize with a buffered BRAM with a constant value.
 //
@@ -696,6 +723,24 @@ module mkBRAMInitializedBuffered#(t_DATA initVal)
 
     // The primitive RAM.
     BRAM#(t_ADDR, t_DATA) mem <- mkBRAMBuffered();
+    
+    BRAM#(t_ADDR, t_DATA) m <- mkMemInitialized(mem, initVal);
+    return m;
+endmodule
+
+//
+// mkBRAMInitializedSizedBuffered --
+//     Initialize with a sized, buffered BRAM with a constant value.
+//
+module mkBRAMInitializedSizedBuffered#(t_DATA initVal, Integer bramSize)
+    // interface:
+        (BRAM#(t_ADDR, t_DATA))
+    provisos
+        (Bits#(t_ADDR, t_ADDR_SZ),
+         Bits#(t_DATA, t_DATA_SZ));
+
+    // The primitive RAM.
+    BRAM#(t_ADDR, t_DATA) mem <- mkBRAMSizedBuffered(bramSize);
     
     BRAM#(t_ADDR, t_DATA) m <- mkMemInitialized(mem, initVal);
     return m;
@@ -720,6 +765,24 @@ module mkBRAMInitializedClockDivider#(t_DATA initVal)
     return m;
 endmodule
 
+
+//
+// mkBRAMInitializedSizedClockDivider --
+//     Initialize with a constant value, but uses the sized, clock divider BRAM constructor.
+//
+module mkBRAMInitializedSizedClockDivider#(t_DATA initVal, Integer bramSize)
+    // interface:
+        (BRAM#(t_ADDR, t_DATA))
+    provisos
+        (Bits#(t_ADDR, t_ADDR_SZ),
+         Bits#(t_DATA, t_DATA_SZ));
+
+    // The primitive RAM.
+    BRAM#(t_ADDR, t_DATA) mem <- mkBRAMSizedClockDivider(bramSize);
+    
+    BRAM#(t_ADDR, t_DATA) m <- mkMemInitialized(mem, initVal);
+    return m;
+endmodule
 
 //
 // mkBRAMSizedLog2 --
