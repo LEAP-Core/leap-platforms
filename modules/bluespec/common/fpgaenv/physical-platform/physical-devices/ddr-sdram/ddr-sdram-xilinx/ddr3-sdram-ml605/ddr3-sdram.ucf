@@ -336,7 +336,7 @@ INST "*/u_ddr3/u_infrastructure/u_mmcm_adv"      LOC = "MMCM_ADV_X0Y8"; #Banks 1
 ###########################################################################
 
 INST    "*/u_ddr3/*"                                    AREA_GROUP = "AG_ddr3";
-AREA_GROUP "AG_ddr3"                                    RANGE = SLICE_X58Y132:SLICE_X97Y196;
+AREA_GROUP "AG_ddr3"                                    RANGE = SLICE_X48Y130:SLICE_X97Y196;
 AREA_GROUP "AG_ddr3"                                    GROUP = CLOSED;
 
 INST "*/u_ddr3/u_memc_ui_top/*/rst_delayed_*"  TIG;
