@@ -1,0 +1,6 @@
+set_location_assignment PIN_AF14 -to clocksWires_CLK
+set_location_assignment PIN_AA14 -to clocksWires_RST_N
+set_location_assignment PIN_V16  -to ledsWires_LED[0]
+set_location_assignment PIN_W16  -to ledsWires_LED[1]
+set_location_assignment PIN_V17  -to ledsWires_LED[2]
+set_location_assignment PIN_V18  -to ledsWires_LED[3]
