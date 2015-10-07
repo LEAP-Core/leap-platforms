@@ -13,11 +13,11 @@
 %param --global FPGA_PLATFORM      "DE2"               "FPGA Platform"
 
 %param FPGA_PART_ALTERA   "???"             "FPGA Part ID (XST)"
-%param FPGA_TECHNOLOGY    "CYCLONEII"      "FPGA Technology (Synplify)"
-%param FPGA_PART_SYNPLIFY "EP2C70"      "FPGA Part (Synplify)"
+%param FPGA_TECHNOLOGY    "CYCLONEII"       "FPGA Technology (Synplify)"
+%param FPGA_PART_SYNPLIFY "EP2C70"          "FPGA Part (Synplify)"
 %param FPGA_SPEED         "-6"              "FPGA Speed Grade (Synplify)"
-%param FPGA_PACKAGE       "FC896"            "FPGA Package (Synplify)"
-%param FPGA_POSITION      3                 "FPGA Position (in Xilinx iMPACT)"
+%param FPGA_PACKAGE       "FC896"           "FPGA Package (Synplify)"
+%param FPGA_POSITION      1                 "FPGA Position (in Xilinx iMPACT)"
 %param MAP_OPTIONS        ""                "Extra Map Options"
 
 

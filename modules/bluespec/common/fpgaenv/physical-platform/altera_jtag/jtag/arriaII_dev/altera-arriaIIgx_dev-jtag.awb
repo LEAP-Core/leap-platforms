@@ -19,7 +19,7 @@
 %param FPGA_PART_SYNPLIFY "EP2AGX125E"      "FPGA Part (Synplify)"
 %param FPGA_SPEED         "-4"              "FPGA Speed Grade (Synplify)"
 %param FPGA_PACKAGE       "FC35"            "FPGA Package (Synplify)"
-%param FPGA_POSITION      3                 "FPGA Position (in Xilinx iMPACT)"
+%param FPGA_POSITION      1                 "FPGA Position (in Xilinx iMPACT)"
 %param MAP_OPTIONS        ""                "Extra Map Options"
 
 
