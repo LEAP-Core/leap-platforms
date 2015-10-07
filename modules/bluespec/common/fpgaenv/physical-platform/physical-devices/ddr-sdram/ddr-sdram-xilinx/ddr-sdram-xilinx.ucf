@@ -11,6 +11,8 @@
 ##                            * * * * * * * * * *
 ## m_llpi_phys_plat_sdram_b_0_ddrSynth/dramCtrl_ddr3ctrl
 INST "m_sys_sys_vp_m_mod/llpi_phys_plat_sdram_b_ddrSynth/dramReady"                    TNM=TG_ram_clk;
+INST "m_sys_sys_vp_m_mod/llpi_phys_plat_sdram_b_ddrSynth/dramReadyDDR"                 TNM=TG_model_clk;
+INST "m_sys_sys_vp_m_mod/llpi_phys_plat_sdram_b_ddrSynth/dramReady_ddrClock"           TNM=TG_ram_clk;
 INST "m_sys_sys_vp_m_mod/llpi_phys_plat_sdram_b_ddrSynth/dramReady_Model"              TNM=TG_model_clk;
 #INST "*_clocks_*/*/reset_hold_*"                TNM=TG_model_clk;
 
