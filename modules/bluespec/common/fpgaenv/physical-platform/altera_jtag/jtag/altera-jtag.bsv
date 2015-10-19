@@ -31,6 +31,7 @@
 
 import FIFO::*;
 import Clocks::*;
+import DefaultValue::*;
 
 // Physical Platform for Altera devices.  
 // Makes use of JTAG to create a universal platform for these devices. 
@@ -38,7 +39,12 @@ import Clocks::*;
 `include "led_device.bsh"
 `include "clocks_device.bsh"
 `include "jtag_device.bsh"
+`include "ddr_sdram_device.bsh"
+`include "ddr_sdram_definitions.bsh"
 `include "physical_platform_utils.bsh"
+
+`include "awb/provides/fpga_components.bsh"
+`include "awb/provides/soft_connections.bsh"
 
 // 4 switches and leds, no buttons
 
@@ -55,6 +61,7 @@ interface PHYSICAL_DRIVERS;
     
     interface CLOCKS_DRIVER                      clocksDriver;
     interface LEDS_DRIVER#(`NUMBER_LEDS)         ledsDriver;
+    interface DDR_DRIVER                         ddrDriver;
     interface JTAG_DRIVER                        jtagDriver;
         
 endinterface
@@ -71,7 +78,8 @@ interface TOP_LEVEL_WIRES;
    // wires from devices
    interface CLOCKS_WIRES                       clocksWires;
    interface LEDS_WIRES#(`NUMBER_LEDS)          ledsWires;
-   interface JTAG_WIRES                         jtagWires;   
+   interface JTAG_WIRES                         jtagWires;
+   interface DDR_WIRES                          ddrWires;
 
 endinterface
 
@@ -90,7 +98,7 @@ endinterface
 
 // This is a convenient way for the outside world to instantiate all the devices
 // and an aggregation of all the wires.
-module mkPhysicalPlatform
+module [CONNECTED_MODULE] mkPhysicalPlatform
        //interface: 
                     (PHYSICAL_PLATFORM);
     
@@ -106,6 +114,22 @@ module mkPhysicalPlatform
     // Finally, instantiate all other physical devices
     
     LEDS_DEVICE#(`NUMBER_LEDS)         leds_device       <- mkLEDsDevice(clocked_by clocks_device.driver.rawClock, reset_by clocks_device.driver.rawReset);
+
+
+    // There is a strong assumption that the clock for this module is the 200MHz
+    // differential clock.
+    let ddrConfig = defaultValue;
+    ddrConfig.internalClock = clk;
+    ddrConfig.internalReset = rst;
+    ddrConfig.modelResetNeedsFanout = True;
+    ddrConfig.useTemperatureMonitor = False;
+    ddrConfig.clockArchitecture = CLOCK_INTERNAL_BUFFERED;   
+
+    // Set the ddr clock source by parameter. 
+    DDR_DEVICE sdram_device <- mkDDRDevice(ddrConfig,
+                                           clocked_by clk,
+                                           reset_by rst);
+
 
     //This must be clocked by the raw  clock 
     JTAG_DEVICE jtag_device <- mkJtagDevice(clocks_device.driver.rawClock, 
@@ -129,6 +153,7 @@ module mkPhysicalPlatform
     
         interface clocksDriver   = clocks_device.driver;
         interface ledsDriver     = leds_device.driver;
+        interface ddrDriver      = sdram_device.driver;
         interface jtagDriver     = jtag_device.driver;
 
     endinterface
@@ -139,6 +164,7 @@ module mkPhysicalPlatform
 
        interface clocksWires      = clocks_device.wires;
        interface ledsWires        = leds_device.wires;
+       interface ddrWires         = sdram_device.wires;
        interface jtagWires        = jtag_device.wires;   
 
     endinterface
