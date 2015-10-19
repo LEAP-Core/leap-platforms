@@ -158,6 +158,18 @@ class UMF_MESSAGE_CLASS: public ASIM_FREE_LIST_ELEMENT_CLASS<UMF_MESSAGE_CLASS>
     void               AppendChunk(UMF_CHUNK chunk);
     void               AppendChunks(int nchunks, UMF_CHUNK chunks[]);
     
+    // Expose the append point as a raw pointer.  This breaks the layer
+    // between a client or channel implementation and the marshalling
+    // layer but can be much more efficient when a channel implemenation
+    // understands the UMF layout since an entire buffer can be copied
+    // at once.
+    //
+    // AppendRawPtr returns a pointer to the location where data should
+    // be written.
+    void*              AppendGetRawPtr();
+    // Move the write index following completion of a raw append.
+    void               AppendUpdateRawPtr(int nbytes);
+
     // demarshallers
     void               StartExtract();
     bool               CanExtract(int nbytes = 1) const;
@@ -172,6 +184,10 @@ class UMF_MESSAGE_CLASS: public ASIM_FREE_LIST_ELEMENT_CLASS<UMF_MESSAGE_CLASS>
     UMF_CHUNK          ExtractChunk();
     void               ExtractChunks(int nchunks, UMF_CHUNK dst[]);
     int                ExtractAllChunks(UMF_CHUNK dst[]);    
+
+    // Analog of the raw append interface above.
+    void*              ExtractGetRawPtr();
+    void               ExtractUpdateRawPtr(int nbytes);
 
     // other
     void               Print(ostream &out);
@@ -317,6 +333,41 @@ UMF_MESSAGE_CLASS::ExtractChunks(int nchunks, UMF_CHUNK dst[])
 
 
 //
+// ExtractAllChunks --
+//     Manage a full extraction, returning the number of chunks
+//     extracted.
+//
+inline int
+UMF_MESSAGE_CLASS::ExtractAllChunks(UMF_CHUNK dst[])
+{
+    StartExtract();
+
+    int n_chunks = 0;
+    while (CanExtract())
+    {
+      *dst++ = ExtractChunk();
+      n_chunks += 1;
+    }
+
+    return n_chunks;
+}
+
+inline void*
+UMF_MESSAGE_CLASS::ExtractGetRawPtr()
+{
+    return &message[readIndex];
+}
+
+inline void
+UMF_MESSAGE_CLASS::ExtractUpdateRawPtr(
+    int nbytes)
+{
+    CheckExtractSanity(nbytes);
+    readIndex += nbytes;
+}
+
+
+//
 // marshallers: most of these are trivial for little-endian machines
 //
 
@@ -401,25 +452,19 @@ UMF_MESSAGE_CLASS::AppendChunks(
     AppendBytes(nchunks * sizeof(UMF_CHUNK), (unsigned char*) chunks);
 }
 
-
-//
-// ExtractAllChunks --
-//     Manage a full extraction, returning the number of chunks
-//     extracted.
-//
-inline int
-UMF_MESSAGE_CLASS::ExtractAllChunks(UMF_CHUNK dst[])
+inline void*
+UMF_MESSAGE_CLASS::AppendGetRawPtr()
 {
-    StartExtract();
+    return &message[writeIndex];
+}
 
-    int n_chunks = 0;
-    while (CanExtract())
-    {
-      *dst++ = ExtractChunk();
-      n_chunks += 1;
-    }
+inline void
+UMF_MESSAGE_CLASS::AppendUpdateRawPtr(
+    int nbytes)
+{
+    ASSERT((writeIndex + nbytes) <= length, "umf: message write overflow");
 
-    return n_chunks;
+    writeIndex += nbytes;
 }
 
 #endif
