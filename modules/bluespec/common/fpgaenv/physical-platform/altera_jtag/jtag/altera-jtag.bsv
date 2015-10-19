@@ -122,7 +122,6 @@ module [CONNECTED_MODULE] mkPhysicalPlatform
     ddrConfig.internalClock = clk;
     ddrConfig.internalReset = rst;
     ddrConfig.modelResetNeedsFanout = True;
-    ddrConfig.useTemperatureMonitor = False;
     ddrConfig.clockArchitecture = CLOCK_INTERNAL_BUFFERED;   
 
     // Set the ddr clock source by parameter. 
