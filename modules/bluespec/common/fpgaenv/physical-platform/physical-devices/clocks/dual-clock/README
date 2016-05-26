@@ -1,0 +1,3 @@
+Some platforms, such as Altera partial reconfiguration don't permit clock
+instantiation inside the application region.  Instead, both a platform interface
+clock and a model clock are passed in.

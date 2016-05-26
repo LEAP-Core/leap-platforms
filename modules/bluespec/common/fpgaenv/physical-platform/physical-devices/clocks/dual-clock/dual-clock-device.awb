@@ -1,0 +1,20 @@
+%name Dual Frequency Provided Clocks Device
+%desc Dual Frequency Provided Clocks Device
+
+%provides clocks_device
+
+%notes README
+
+%sources -t BSV -v PUBLIC  dual-clock-device.bsv
+%sources -t BSV -v PUBLIC  primitive-clock-import.bsv
+%sources -t VERILOG -v PRIVATE primitive_clock_device.v
+
+%param --global MODEL_CLOCK_FREQ 75  "Desired model clock frequency (integer)."
+
+%param CRYSTAL_CLOCK_FREQ 50 "Input (Crystal) Clock Frequency"
+
+%param --global PLAT_IFC_CLOCK_CLK "CLK"        "Name of the exposed top-level platform interface clock wire"
+%param --global PLAT_IFC_CLOCK_RST "RST_N"      "Name of the exposed top-level platform interface reset wire"
+
+%param --global USER_CLOCK_CLK     "USER_CLK"   "Name of the provided top-level user clock wire"
+%param --global USER_CLOCK_RST     "USER_RST_N" "Name of the provided top-level user reset wire"
