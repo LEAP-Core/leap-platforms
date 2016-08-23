@@ -71,7 +71,9 @@
 %private v7_icon.ngc
 %private v7_ila.ngc
 
-%param XILINX_GENERATION 7 "Which NGCs should we pick"
-%param SYNTH 1            "Synthesize it to FPGAs"
-%param BROKEN_REGFILE 1   "0 if RegFile synthesizes correctly.  Nonzero for Xilinx Xst < version 11."
-%param XILINX_FAMILY "virtex7"  "Xilinx parameter describing the fpga architecture"
+%param XILINX_GENERATION             7      "Which NGCs should we pick"
+%param SYNTH                         1      "Synthesize it to FPGAs"
+%param BROKEN_REGFILE                1      "0 if RegFile synthesizes correctly.  Nonzero for Xilinx Xst < version 11."
+%param XILINX_FAMILY              "virtex7" "Xilinx parameter describing the fpga architecture"
+%param --global BRAM_SPLIT_EN        0      "Enable manually splitting non-power-of-two BRAMs"
+

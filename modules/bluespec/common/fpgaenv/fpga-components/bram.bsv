@@ -97,6 +97,106 @@ import "BVI" Bram = module mkBRAMUnguardedNonZeroSized#(Integer bram_SZ)
 endmodule
 
 
+//
+// mkBRAMSplitUnguardedNonZeroSized --
+//     Split the non-power-of-two sized block ram into multiple rams.
+//
+module mkBRAMSplitUnguardedNonZeroSized#(Integer bram_SZ)
+    // interface:
+    (BRAM_INTERNAL_IFC#(Bit#(t_ADDR_SZ), Bit#(t_DATA_SZ)))
+    provisos
+        (NumAlias#(TMax#(4,t_ADDR_SZ), t_ADDRESS_SZ), // to avoid proviso checkings
+         NumAlias#(TExp#(t_ADDR_SZ), n_MAX_ENTRIES));
+    
+    BRAM_INTERNAL_IFC#(Bit#(t_ADDR_SZ), Bit#(t_DATA_SZ)) m = ?;
+        
+    // Bit#(TAdd#(t_ADDR_SZ,1)) mem_size_extended = fromInteger(bram_SZ);
+    // Tuple2#(Bit#(1), Bit#(t_ADDR_SZ)) mem_size_tpl = unpack(mem_size_extended);
+
+    if ((bram_SZ <= 4096) || (bram_SZ > 15 * valueof(n_MAX_ENTRIES) / 16))
+    begin
+        messageM("power-of-two BRAM: size: " + integerToString(bram_SZ));
+        m <- mkBRAMUnguardedNonZeroSized(bram_SZ);
+    end
+    else
+    begin
+        Tuple2#(Bit#(4), Bit#(TSub#(t_ADDRESS_SZ, 4))) bram_size_tpl = unpack(fromInteger(bram_SZ));
+        Bit#(4) mem_size_en  = tpl_1(bram_size_tpl) + zeroExtend(pack(tpl_2(bram_size_tpl) > 0));
+        Vector#(4, Bit#(1)) ram_en  = unpack(mem_size_en);
+        //Vector#(4, Bit#(1)) ram_en  = unpack(tpl_1(mem_size_en) + pack(tpl_2(mem_size_en) > 0));
+       
+        messageM("non-power-of-two BRAM: size: " + integerToString(bram_SZ) + " ram_en_vector: " + bitToString(pack(ram_en)));
+        
+        BRAM_INTERNAL_IFC#(Bit#(TSub#(t_ADDRESS_SZ,1)), Bit#(t_DATA_SZ)) ram0 <- (ram_en[3] == 1)? mkBRAMUnguardedNonZeroSized(valueOf(n_MAX_ENTRIES)/2)  : mkBRAMUnguardedZero;
+        BRAM_INTERNAL_IFC#(Bit#(TSub#(t_ADDRESS_SZ,2)), Bit#(t_DATA_SZ)) ram1 <- (ram_en[2] == 1)? mkBRAMUnguardedNonZeroSized(valueOf(n_MAX_ENTRIES)/4)  : mkBRAMUnguardedZero;
+        BRAM_INTERNAL_IFC#(Bit#(TSub#(t_ADDRESS_SZ,3)), Bit#(t_DATA_SZ)) ram2 <- (ram_en[1] == 1)? mkBRAMUnguardedNonZeroSized(valueOf(n_MAX_ENTRIES)/8)  : mkBRAMUnguardedZero;
+        BRAM_INTERNAL_IFC#(Bit#(TSub#(t_ADDRESS_SZ,4)), Bit#(t_DATA_SZ)) ram3 <- (ram_en[0] == 1)? mkBRAMUnguardedNonZeroSized(valueOf(n_MAX_ENTRIES)/16) : mkBRAMUnguardedZero;
+        
+        FIFOF#(Bit#(2)) ramIdReqQ <- mkFIFOF();
+        
+        m = interface BRAM_INTERNAL_IFC;
+                method Action readReq(Bit#(t_ADDR_SZ) addr);
+                    Tuple2#(Bit#(4), Bit#(TSub#(t_ADDRESS_SZ, 4))) addr_select = unpack(zeroExtendNP(addr));
+                    Vector#(4, Bit#(1)) selections  = unpack(tpl_1(addr_select));
+                    if (selections[3] == 0 && ram_en[3] == 1)
+                    begin
+                        ramIdReqQ.enq(0);
+                        ram0.readReq(truncateNP(addr));
+                    end
+                    else if (selections[2] == 0 && ram_en[2] == 1)
+                    begin
+                        ramIdReqQ.enq(1);
+                        ram1.readReq(truncateNP(addr));
+                    end
+                    else if (selections[1] == 0 && ram_en[1] == 1)
+                    begin
+                        ramIdReqQ.enq(2);
+                        ram2.readReq(truncateNP(addr));
+                    end
+                    else
+                    begin
+                        ramIdReqQ.enq(3);
+                        ram3.readReq(truncateNP(addr));
+                    end
+                endmethod
+                method ActionValue#(Bit#(t_DATA_SZ)) readRsp();
+                    let id = ramIdReqQ.first();
+                    ramIdReqQ.deq();
+                    Bit#(t_DATA_SZ) rsp = ?;
+                    case (id) matches
+                        0: rsp <- ram0.readRsp();
+                        1: rsp <- ram1.readRsp();
+                        2: rsp <- ram2.readRsp();
+                        3: rsp <- ram3.readRsp();
+                    endcase
+                    return rsp;
+                endmethod
+                method Action write(Bit#(t_ADDR_SZ) addr, Bit#(t_DATA_SZ) val);
+                    Tuple2#(Bit#(4), Bit#(TSub#(t_ADDRESS_SZ, 4))) addr_select = unpack(zeroExtendNP(addr));
+                    Vector#(4, Bit#(1)) selections  = unpack(tpl_1(addr_select));
+                    if (selections[3] == 0 && ram_en[3] == 1)
+                    begin
+                        ram0.write(truncateNP(addr), val);
+                    end
+                    else if (selections[2] == 0 && ram_en[2] == 1)
+                    begin
+                        ram1.write(truncateNP(addr), val);
+                    end
+                    else if (selections[1] == 0 && ram_en[1] == 1)
+                    begin
+                        ram2.write(truncateNP(addr), val);
+                    end
+                    else
+                    begin
+                        ram3.write(truncateNP(addr), val);
+                    end
+                endmethod
+            endinterface;              
+    end
+    
+    return m;
+
+endmodule
 
 //
 // mkBRAMUnguardedNonZero --
@@ -176,11 +276,15 @@ module mkBRAMUnguardedSized#(Integer bram_size)
          Bits#(t_DATA, t_DATA_SZ));
 
 
-    `ifndef SYNTH_Z
-    let mem <- (valueOf(t_ADDR_SZ) == 0 || valueOf(t_DATA_SZ) == 0)? mkBRAMUnguardedZero(): mkBRAMUnguardedNonZeroSized(bram_size);
-    `else
+`ifndef SYNTH_Z
+    `ifndef BRAM_SPLIT_EN_Z
+         let mem <- (valueOf(t_ADDR_SZ) == 0 || valueOf(t_DATA_SZ) == 0)? mkBRAMUnguardedZero(): mkBRAMSplitUnguardedNonZeroSized(bram_size);
+     `else    
+         let mem <- (valueOf(t_ADDR_SZ) == 0 || valueOf(t_DATA_SZ) == 0)? mkBRAMUnguardedZero(): mkBRAMUnguardedNonZeroSized(bram_size);
+     `endif
+`else
     let mem <- mkBRAMUnguardedSim();
-    `endif
+`endif
 
     method Action readReq(t_ADDR addr);
         mem.readReq(pack(addr));
