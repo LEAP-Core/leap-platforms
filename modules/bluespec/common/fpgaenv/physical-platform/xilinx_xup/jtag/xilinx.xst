@@ -1,1 +1,12 @@
-../serial/xilinx.xst
+set -xsthdpdir @TMP_FPGA_DIR@/xst_hdp/@APM_NAME@
+
+run
+-ifmt mixed
+-register_balancing yes
+-vlgincdir {@BLUESPECDIR@/Verilog/}
+-ifn config/@APM_NAME@.prj
+-ofn @TMP_FPGA_DIR@/@APM_NAME@
+-ofmt NGC
+-p @FPGA_PART_XILINX@
+-top @APM_NAME@
+-sd {@HW_BUILD_DIR@}

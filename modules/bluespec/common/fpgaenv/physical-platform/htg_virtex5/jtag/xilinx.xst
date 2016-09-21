@@ -1,4 +1,4 @@
-set -xsthdpdir @TMP_XILINX_DIR@/xst_hdp/@APM_NAME@
+set -xsthdpdir @TMP_FPGA_DIR@/xst_hdp/@APM_NAME@
 
 run
 -ifmt mixed
@@ -7,7 +7,7 @@ run
 -reduce_control_sets auto
 -vlgincdir @BLUESPECDIR@/Verilog
 -ifn config/@APM_NAME@.prj
--ofn @TMP_XILINX_DIR@/@APM_NAME@
+-ofn @TMP_FPGA_DIR@/@APM_NAME@
 -ofmt NGC
 -p @FPGA_PART_XILINX@
 -top @APM_NAME@
