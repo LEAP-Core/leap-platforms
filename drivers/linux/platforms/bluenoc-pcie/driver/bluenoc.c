@@ -14,9 +14,11 @@
 #include <linux/ioctl.h>       /* ioctl macros */
 #include <linux/interrupt.h>   /* request_irq, free_irq, etc. */
 #include <linux/delay.h>       /* udelay */
-#include <linux/mm.h>          /* kmalloc, kfree, struct page, etc. */
+#include <linux/mm.h>          /* kmalloc, kfree, struct page, put_page, etc. */
 #include <linux/sched.h>       /* task_struct */
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(4, 6, 0))
 #include <linux/pagemap.h>     /* page_cache_release */
+#endif
 #include <linux/scatterlist.h> /* sg_* operations */
 #include <linux/spinlock.h>    /* spinlock_t, spin_lock_irqsave, etc. */
 #include <linux/mutex.h>       /* mutex_lock, mutex_unlock, etc. */
@@ -877,17 +879,28 @@ static ssize_t bluenoc_read(struct file* filp, char __user* buf, size_t count, l
     goto exit_bluenoc_read;
   }
   down_read(&current->mm->mmap_sem);
-  result = get_user_pages(current, current->mm,
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 6, 0))
+  result = get_user_pages_remote(
+#else
+  result = get_user_pages(
+#endif
+                          current, current->mm,
                           first_page, num_pages,
                           1, 0, /* write to buffer, don't force */
                           pages, NULL);
   up_read(&current->mm->mmap_sem);
   if (result != num_pages) {
-    printk(KERN_ERR "%s_%d: get_user_pages failed\n", DEV_NAME, this_board->board_number);
+    printk(KERN_ERR
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 6, 0))
+           "%s_%d: get_user_pages_remote failed\n",
+#else
+           "%s_%d: get_user_pages failed\n",
+#endif
+           DEV_NAME, this_board->board_number);
     err = (result < 0) ? result : -EINVAL;
     if (result > 0) {
       for (n = 0; n < result; ++n)
-        page_cache_release(pages[n]);
+        put_page(pages[n]);
     }
     goto free_page_pointer_mem;
   }
@@ -1116,7 +1129,7 @@ static ssize_t bluenoc_read(struct file* filp, char __user* buf, size_t count, l
 
  release_locked_pages:
   for (n = 0; n < num_pages; ++n)
-    page_cache_release(pages[n]);
+    put_page(pages[n]);
 
  free_page_pointer_mem:
   kfree(pages);
@@ -1220,17 +1233,28 @@ static ssize_t bluenoc_write(struct file* filp, const char __user* buf, size_t c
     goto exit_bluenoc_write;
   }
   down_read(&current->mm->mmap_sem);
-  result = get_user_pages(current, current->mm,
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 6, 0))
+  result = get_user_pages_remote(
+#else
+  result = get_user_pages(
+#endif
+                          current, current->mm,
                           first_page, num_pages,
                           0, 0, /* read from buffer, don't force */
                           pages, NULL);
   up_read(&current->mm->mmap_sem);
   if (result != num_pages) {
-    printk(KERN_ERR "%s_%d: get_user_pages failed\n", DEV_NAME, this_board->board_number);
+    printk(KERN_ERR
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 6, 0))
+           "%s_%d: get_user_pages_remote failed\n",
+#else
+           "%s_%d: get_user_pages failed\n",
+#endif
+           DEV_NAME, this_board->board_number);
     err = (result < 0) ? result : -EINVAL;
     if (result > 0) {
       for (n = 0; n < result; ++n)
-        page_cache_release(pages[n]);
+        put_page(pages[n]);
     }
     goto free_page_pointer_mem;
   }
@@ -1432,7 +1456,7 @@ static ssize_t bluenoc_write(struct file* filp, const char __user* buf, size_t c
 
  release_locked_pages:
   for (n = 0; n < num_pages; ++n)
-    page_cache_release(pages[n]);
+    put_page(pages[n]);
 
  free_page_pointer_mem:
   kfree(pages);
