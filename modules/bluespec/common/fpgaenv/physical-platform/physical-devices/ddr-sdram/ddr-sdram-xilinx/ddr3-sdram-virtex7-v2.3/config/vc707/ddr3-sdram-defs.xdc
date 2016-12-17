@@ -701,7 +701,7 @@ proc annotateDDRWires { pathPrefix } {
     set_property IOSTANDARD DIFF_SSTL15_T_DCI [get_ports "${pathPrefix}_dqs_n[7]"]
     set_property LOC E28 [get_ports "${pathPrefix}_dqs_n[7]"]
 
-    # PadFunction: IO_L13P_T2_MRCC_38 OA
+    # PadFunction: IO_L13P_T2_MRCC_38
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_ck_p"]
     set_property SLEW FAST [get_ports "${pathPrefix}_ck_p"]
     set_property IOSTANDARD DIFF_SSTL15 [get_ports "${pathPrefix}_ck_p"]
@@ -847,7 +847,7 @@ proc ddr3PARConstraints { } {
                         -hold 5
 
     #set_max_delay -from [get_cells -hier -filter {NAME =~ */u_phase_detector && IS_SEQUENTIAL}] -to [get_cells -hier -filter {NAME =~ *pos_edge_samp*}] 1.250000
-    #set_max_delay -from [get_cells -hier -filter {NAME =~ */u_phase_detector && IS_SEQUENTIAL}] -to [get_cells -hier -filter {NAME =~ *neg_edge_samp*}] 1.250000xb
+    #set_max_delay -from [get_cells -hier -filter {NAME =~ */u_phase_detector && IS_SEQUENTIAL}] -to [get_cells -hier -filter {NAME =~ *neg_edge_samp*}] 1.250000
 
               
     set_false_path -through [get_pins -filter {NAME =~ */DQSFOUND} -of [get_cells -hier -filter {REF_NAME == PHASER_IN_PHY}]]
