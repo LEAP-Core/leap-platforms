@@ -28,743 +28,691 @@
 
 ############## NET - IOSTANDARD ##################
 
-proc annotateDDRWires { pathPrefix } { 
-    # PadFunction: IO_L23N_T3_39 
+proc annotateDDRWires { pathPrefix } {
+
+    # PadFunction: IO_L23N_T3_39
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[0]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[0]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[0]"]
     set_property LOC N14 [get_ports "${pathPrefix}_dq[0]"]
 
-    # PadFunction: IO_L22P_T3_39 
+    # PadFunction: IO_L22P_T3_39
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[1]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[1]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[1]"]
     set_property LOC N13 [get_ports "${pathPrefix}_dq[1]"]
 
-    # PadFunction: IO_L20N_T3_39 
+    # PadFunction: IO_L20N_T3_39
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[2]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[2]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[2]"]
     set_property LOC L14 [get_ports "${pathPrefix}_dq[2]"]
 
-    # PadFunction: IO_L20P_T3_39 
+    # PadFunction: IO_L20P_T3_39
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[3]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[3]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[3]"]
     set_property LOC M14 [get_ports "${pathPrefix}_dq[3]"]
 
-    # PadFunction: IO_L24P_T3_39 
+    # PadFunction: IO_L24P_T3_39
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[4]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[4]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[4]"]
     set_property LOC M12 [get_ports "${pathPrefix}_dq[4]"]
 
-    # PadFunction: IO_L23P_T3_39 
+    # PadFunction: IO_L23P_T3_39
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[5]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[5]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[5]"]
     set_property LOC N15 [get_ports "${pathPrefix}_dq[5]"]
 
-    # PadFunction: IO_L24N_T3_39 
+    # PadFunction: IO_L24N_T3_39
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[6]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[6]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[6]"]
     set_property LOC M11 [get_ports "${pathPrefix}_dq[6]"]
 
-    # PadFunction: IO_L19P_T3_39 
+    # PadFunction: IO_L19P_T3_39
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[7]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[7]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[7]"]
     set_property LOC L12 [get_ports "${pathPrefix}_dq[7]"]
 
-    # PadFunction: IO_L17P_T2_39 
+    # PadFunction: IO_L17P_T2_39
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[8]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[8]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[8]"]
     set_property LOC K14 [get_ports "${pathPrefix}_dq[8]"]
 
-    # PadFunction: IO_L17N_T2_39 
+    # PadFunction: IO_L17N_T2_39
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[9]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[9]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[9]"]
     set_property LOC K13 [get_ports "${pathPrefix}_dq[9]"]
 
-    # PadFunction: IO_L14N_T2_SRCC_39 
+    # PadFunction: IO_L14N_T2_SRCC_39
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[10]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[10]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[10]"]
     set_property LOC H13 [get_ports "${pathPrefix}_dq[10]"]
 
-    # PadFunction: IO_L14P_T2_SRCC_39 
+    # PadFunction: IO_L14P_T2_SRCC_39
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[11]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[11]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[11]"]
     set_property LOC J13 [get_ports "${pathPrefix}_dq[11]"]
 
-    # PadFunction: IO_L18P_T2_39 
+    # PadFunction: IO_L18P_T2_39
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[12]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[12]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[12]"]
     set_property LOC L16 [get_ports "${pathPrefix}_dq[12]"]
 
-    # PadFunction: IO_L18N_T2_39 
+    # PadFunction: IO_L18N_T2_39
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[13]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[13]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[13]"]
     set_property LOC L15 [get_ports "${pathPrefix}_dq[13]"]
 
-    # PadFunction: IO_L13N_T2_MRCC_39 
+    # PadFunction: IO_L13N_T2_MRCC_39
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[14]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[14]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[14]"]
     set_property LOC H14 [get_ports "${pathPrefix}_dq[14]"]
 
-    # PadFunction: IO_L16N_T2_39 
+    # PadFunction: IO_L16N_T2_39
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[15]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[15]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[15]"]
     set_property LOC J15 [get_ports "${pathPrefix}_dq[15]"]
 
-    # PadFunction: IO_L7N_T1_39 
+    # PadFunction: IO_L7N_T1_39
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[16]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[16]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[16]"]
     set_property LOC E15 [get_ports "${pathPrefix}_dq[16]"]
 
-    # PadFunction: IO_L8N_T1_39 
+    # PadFunction: IO_L8N_T1_39
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[17]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[17]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[17]"]
     set_property LOC E13 [get_ports "${pathPrefix}_dq[17]"]
 
-    # PadFunction: IO_L11P_T1_SRCC_39 
+    # PadFunction: IO_L11P_T1_SRCC_39
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[18]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[18]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[18]"]
     set_property LOC F15 [get_ports "${pathPrefix}_dq[18]"]
 
-    # PadFunction: IO_L8P_T1_39 
+    # PadFunction: IO_L8P_T1_39
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[19]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[19]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[19]"]
     set_property LOC E14 [get_ports "${pathPrefix}_dq[19]"]
 
-    # PadFunction: IO_L12N_T1_MRCC_39 
+    # PadFunction: IO_L12N_T1_MRCC_39
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[20]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[20]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[20]"]
     set_property LOC G13 [get_ports "${pathPrefix}_dq[20]"]
 
-    # PadFunction: IO_L10P_T1_39 
+    # PadFunction: IO_L10P_T1_39
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[21]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[21]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[21]"]
     set_property LOC G12 [get_ports "${pathPrefix}_dq[21]"]
 
-    # PadFunction: IO_L11N_T1_SRCC_39 
+    # PadFunction: IO_L11N_T1_SRCC_39
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[22]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[22]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[22]"]
     set_property LOC F14 [get_ports "${pathPrefix}_dq[22]"]
 
-    # PadFunction: IO_L12P_T1_MRCC_39 
+    # PadFunction: IO_L12P_T1_MRCC_39
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[23]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[23]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[23]"]
     set_property LOC G14 [get_ports "${pathPrefix}_dq[23]"]
 
-    # PadFunction: IO_L2P_T0_39 
+    # PadFunction: IO_L2P_T0_39
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[24]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[24]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[24]"]
     set_property LOC B14 [get_ports "${pathPrefix}_dq[24]"]
 
-    # PadFunction: IO_L4N_T0_39 
+    # PadFunction: IO_L4N_T0_39
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[25]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[25]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[25]"]
     set_property LOC C13 [get_ports "${pathPrefix}_dq[25]"]
 
-    # PadFunction: IO_L1N_T0_39 
+    # PadFunction: IO_L1N_T0_39
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[26]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[26]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[26]"]
     set_property LOC B16 [get_ports "${pathPrefix}_dq[26]"]
 
-    # PadFunction: IO_L5N_T0_39 
+    # PadFunction: IO_L5N_T0_39
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[27]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[27]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[27]"]
     set_property LOC D15 [get_ports "${pathPrefix}_dq[27]"]
 
-    # PadFunction: IO_L4P_T0_39 
+    # PadFunction: IO_L4P_T0_39
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[28]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[28]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[28]"]
     set_property LOC D13 [get_ports "${pathPrefix}_dq[28]"]
 
-    # PadFunction: IO_L6P_T0_39 
+    # PadFunction: IO_L6P_T0_39
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[29]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[29]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[29]"]
     set_property LOC E12 [get_ports "${pathPrefix}_dq[29]"]
 
-    # PadFunction: IO_L1P_T0_39 
+    # PadFunction: IO_L1P_T0_39
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[30]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[30]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[30]"]
     set_property LOC C16 [get_ports "${pathPrefix}_dq[30]"]
 
-    # PadFunction: IO_L5P_T0_39 
+    # PadFunction: IO_L5P_T0_39
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[31]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[31]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[31]"]
     set_property LOC D16 [get_ports "${pathPrefix}_dq[31]"]
 
-    # PadFunction: IO_L1P_T0_37 
+    # PadFunction: IO_L1P_T0_37
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[32]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[32]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[32]"]
     set_property LOC A24 [get_ports "${pathPrefix}_dq[32]"]
 
-    # PadFunction: IO_L4N_T0_37 
+    # PadFunction: IO_L4N_T0_37
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[33]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[33]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[33]"]
     set_property LOC B23 [get_ports "${pathPrefix}_dq[33]"]
 
-    # PadFunction: IO_L5N_T0_37 
+    # PadFunction: IO_L5N_T0_37
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[34]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[34]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[34]"]
     set_property LOC B27 [get_ports "${pathPrefix}_dq[34]"]
 
-    # PadFunction: IO_L5P_T0_37 
+    # PadFunction: IO_L5P_T0_37
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[35]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[35]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[35]"]
     set_property LOC B26 [get_ports "${pathPrefix}_dq[35]"]
 
-    # PadFunction: IO_L2N_T0_37 
+    # PadFunction: IO_L2N_T0_37
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[36]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[36]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[36]"]
     set_property LOC A22 [get_ports "${pathPrefix}_dq[36]"]
 
-    # PadFunction: IO_L2P_T0_37 
+    # PadFunction: IO_L2P_T0_37
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[37]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[37]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[37]"]
     set_property LOC B22 [get_ports "${pathPrefix}_dq[37]"]
 
-    # PadFunction: IO_L1N_T0_37 
+    # PadFunction: IO_L1N_T0_37
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[38]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[38]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[38]"]
     set_property LOC A25 [get_ports "${pathPrefix}_dq[38]"]
 
-    # PadFunction: IO_L6P_T0_37 
+    # PadFunction: IO_L6P_T0_37
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[39]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[39]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[39]"]
     set_property LOC C24 [get_ports "${pathPrefix}_dq[39]"]
 
-    # PadFunction: IO_L7N_T1_37 
+    # PadFunction: IO_L7N_T1_37
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[40]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[40]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[40]"]
     set_property LOC E24 [get_ports "${pathPrefix}_dq[40]"]
 
-    # PadFunction: IO_L10N_T1_37 
+    # PadFunction: IO_L10N_T1_37
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[41]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[41]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[41]"]
     set_property LOC D23 [get_ports "${pathPrefix}_dq[41]"]
 
-    # PadFunction: IO_L11N_T1_SRCC_37 
+    # PadFunction: IO_L11N_T1_SRCC_37
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[42]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[42]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[42]"]
     set_property LOC D26 [get_ports "${pathPrefix}_dq[42]"]
 
-    # PadFunction: IO_L12P_T1_MRCC_37 
+    # PadFunction: IO_L12P_T1_MRCC_37
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[43]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[43]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[43]"]
     set_property LOC C25 [get_ports "${pathPrefix}_dq[43]"]
 
-    # PadFunction: IO_L7P_T1_37 
+    # PadFunction: IO_L7P_T1_37
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[44]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[44]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[44]"]
     set_property LOC E23 [get_ports "${pathPrefix}_dq[44]"]
 
-    # PadFunction: IO_L10P_T1_37 
+    # PadFunction: IO_L10P_T1_37
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[45]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[45]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[45]"]
     set_property LOC D22 [get_ports "${pathPrefix}_dq[45]"]
 
-    # PadFunction: IO_L8P_T1_37 
+    # PadFunction: IO_L8P_T1_37
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[46]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[46]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[46]"]
     set_property LOC F22 [get_ports "${pathPrefix}_dq[46]"]
 
-    # PadFunction: IO_L8N_T1_37 
+    # PadFunction: IO_L8N_T1_37
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[47]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[47]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[47]"]
     set_property LOC E22 [get_ports "${pathPrefix}_dq[47]"]
 
-    # PadFunction: IO_L17N_T2_37 
+    # PadFunction: IO_L17N_T2_37
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[48]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[48]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[48]"]
     set_property LOC A30 [get_ports "${pathPrefix}_dq[48]"]
 
-    # PadFunction: IO_L13P_T2_MRCC_37 
+    # PadFunction: IO_L13P_T2_MRCC_37
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[49]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[49]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[49]"]
     set_property LOC D27 [get_ports "${pathPrefix}_dq[49]"]
 
-    # PadFunction: IO_L17P_T2_37 
+    # PadFunction: IO_L17P_T2_37
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[50]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[50]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[50]"]
     set_property LOC A29 [get_ports "${pathPrefix}_dq[50]"]
 
-    # PadFunction: IO_L14P_T2_SRCC_37 
+    # PadFunction: IO_L14P_T2_SRCC_37
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[51]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[51]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[51]"]
     set_property LOC C28 [get_ports "${pathPrefix}_dq[51]"]
 
-    # PadFunction: IO_L13N_T2_MRCC_37 
+    # PadFunction: IO_L13N_T2_MRCC_37
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[52]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[52]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[52]"]
     set_property LOC D28 [get_ports "${pathPrefix}_dq[52]"]
 
-    # PadFunction: IO_L18N_T2_37 
+    # PadFunction: IO_L18N_T2_37
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[53]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[53]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[53]"]
     set_property LOC B31 [get_ports "${pathPrefix}_dq[53]"]
 
-    # PadFunction: IO_L16P_T2_37 
+    # PadFunction: IO_L16P_T2_37
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[54]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[54]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[54]"]
     set_property LOC A31 [get_ports "${pathPrefix}_dq[54]"]
 
-    # PadFunction: IO_L16N_T2_37 
+    # PadFunction: IO_L16N_T2_37
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[55]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[55]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[55]"]
     set_property LOC A32 [get_ports "${pathPrefix}_dq[55]"]
 
-    # PadFunction: IO_L19P_T3_37 
+    # PadFunction: IO_L19P_T3_37
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[56]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[56]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[56]"]
     set_property LOC E30 [get_ports "${pathPrefix}_dq[56]"]
 
-    # PadFunction: IO_L22P_T3_37 
+    # PadFunction: IO_L22P_T3_37
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[57]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[57]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[57]"]
     set_property LOC F29 [get_ports "${pathPrefix}_dq[57]"]
 
-    # PadFunction: IO_L24P_T3_37 
+    # PadFunction: IO_L24P_T3_37
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[58]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[58]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[58]"]
     set_property LOC F30 [get_ports "${pathPrefix}_dq[58]"]
 
-    # PadFunction: IO_L23N_T3_37 
+    # PadFunction: IO_L23N_T3_37
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[59]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[59]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[59]"]
     set_property LOC F27 [get_ports "${pathPrefix}_dq[59]"]
 
-    # PadFunction: IO_L20N_T3_37 
+    # PadFunction: IO_L20N_T3_37
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[60]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[60]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[60]"]
     set_property LOC C30 [get_ports "${pathPrefix}_dq[60]"]
 
-    # PadFunction: IO_L22N_T3_37 
+    # PadFunction: IO_L22N_T3_37
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[61]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[61]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[61]"]
     set_property LOC E29 [get_ports "${pathPrefix}_dq[61]"]
 
-    # PadFunction: IO_L23P_T3_37 
+    # PadFunction: IO_L23P_T3_37
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[62]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[62]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[62]"]
     set_property LOC F26 [get_ports "${pathPrefix}_dq[62]"]
 
-    # PadFunction: IO_L20P_T3_37 
+    # PadFunction: IO_L20P_T3_37
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dq[63]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dq[63]"]
     set_property IOSTANDARD SSTL15_T_DCI [get_ports "${pathPrefix}_dq[63]"]
     set_property LOC D30 [get_ports "${pathPrefix}_dq[63]"]
 
-    # PadFunction: IO_L5N_T0_38 
+    # PadFunction: IO_L5N_T0_38
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_addr[13]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_addr[13]"]
     set_property IOSTANDARD SSTL15 [get_ports "${pathPrefix}_addr[13]"]
     set_property LOC A21 [get_ports "${pathPrefix}_addr[13]"]
 
-    # PadFunction: IO_L2N_T0_38 
+    # PadFunction: IO_L2N_T0_38
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_addr[12]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_addr[12]"]
     set_property IOSTANDARD SSTL15 [get_ports "${pathPrefix}_addr[12]"]
     set_property LOC A15 [get_ports "${pathPrefix}_addr[12]"]
 
-    # PadFunction: IO_L4P_T0_38 
+    # PadFunction: IO_L4P_T0_38
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_addr[11]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_addr[11]"]
     set_property IOSTANDARD SSTL15 [get_ports "${pathPrefix}_addr[11]"]
     set_property LOC B17 [get_ports "${pathPrefix}_addr[11]"]
 
-    # PadFunction: IO_L5P_T0_38 
+    # PadFunction: IO_L5P_T0_38
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_addr[10]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_addr[10]"]
     set_property IOSTANDARD SSTL15 [get_ports "${pathPrefix}_addr[10]"]
     set_property LOC B21 [get_ports "${pathPrefix}_addr[10]"]
 
-    # PadFunction: IO_L1P_T0_38 
+    # PadFunction: IO_L1P_T0_38
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_addr[9]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_addr[9]"]
     set_property IOSTANDARD SSTL15 [get_ports "${pathPrefix}_addr[9]"]
     set_property LOC C19 [get_ports "${pathPrefix}_addr[9]"]
 
-    # PadFunction: IO_L10N_T1_38 
+    # PadFunction: IO_L10N_T1_38
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_addr[8]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_addr[8]"]
     set_property IOSTANDARD SSTL15 [get_ports "${pathPrefix}_addr[8]"]
     set_property LOC D17 [get_ports "${pathPrefix}_addr[8]"]
 
-    # PadFunction: IO_L6P_T0_38 
+    # PadFunction: IO_L6P_T0_38
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_addr[7]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_addr[7]"]
     set_property IOSTANDARD SSTL15 [get_ports "${pathPrefix}_addr[7]"]
     set_property LOC C18 [get_ports "${pathPrefix}_addr[7]"]
 
-    # PadFunction: IO_L7P_T1_38 
+    # PadFunction: IO_L7P_T1_38
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_addr[6]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_addr[6]"]
     set_property IOSTANDARD SSTL15 [get_ports "${pathPrefix}_addr[6]"]
     set_property LOC D20 [get_ports "${pathPrefix}_addr[6]"]
 
-    # PadFunction: IO_L2P_T0_38 
+    # PadFunction: IO_L2P_T0_38
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_addr[5]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_addr[5]"]
     set_property IOSTANDARD SSTL15 [get_ports "${pathPrefix}_addr[5]"]
     set_property LOC A16 [get_ports "${pathPrefix}_addr[5]"]
 
-    # PadFunction: IO_L4N_T0_38 
+    # PadFunction: IO_L4N_T0_38
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_addr[4]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_addr[4]"]
     set_property IOSTANDARD SSTL15 [get_ports "${pathPrefix}_addr[4]"]
     set_property LOC A17 [get_ports "${pathPrefix}_addr[4]"]
 
-    # PadFunction: IO_L3N_T0_DQS_38 
+    # PadFunction: IO_L3N_T0_DQS_38
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_addr[3]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_addr[3]"]
     set_property IOSTANDARD SSTL15 [get_ports "${pathPrefix}_addr[3]"]
     set_property LOC A19 [get_ports "${pathPrefix}_addr[3]"]
 
-    # PadFunction: IO_L7N_T1_38 
+    # PadFunction: IO_L7N_T1_38
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_addr[2]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_addr[2]"]
     set_property IOSTANDARD SSTL15 [get_ports "${pathPrefix}_addr[2]"]
     set_property LOC C20 [get_ports "${pathPrefix}_addr[2]"]
 
-    # PadFunction: IO_L1N_T0_38 
+    # PadFunction: IO_L1N_T0_38
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_addr[1]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_addr[1]"]
     set_property IOSTANDARD SSTL15 [get_ports "${pathPrefix}_addr[1]"]
     set_property LOC B19 [get_ports "${pathPrefix}_addr[1]"]
 
-    # PadFunction: IO_L3P_T0_DQS_38 
+    # PadFunction: IO_L3P_T0_DQS_38
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_addr[0]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_addr[0]"]
     set_property IOSTANDARD SSTL15 [get_ports "${pathPrefix}_addr[0]"]
     set_property LOC A20 [get_ports "${pathPrefix}_addr[0]"]
 
-    # PadFunction: IO_L10P_T1_38 
+    # PadFunction: IO_L10P_T1_38
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_ba[2]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_ba[2]"]
     set_property IOSTANDARD SSTL15 [get_ports "${pathPrefix}_ba[2]"]
     set_property LOC D18 [get_ports "${pathPrefix}_ba[2]"]
 
-    # PadFunction: IO_L9N_T1_DQS_38 
+    # PadFunction: IO_L9N_T1_DQS_38
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_ba[1]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_ba[1]"]
     set_property IOSTANDARD SSTL15 [get_ports "${pathPrefix}_ba[1]"]
     set_property LOC C21 [get_ports "${pathPrefix}_ba[1]"]
 
-    # PadFunction: IO_L9P_T1_DQS_38 
+    # PadFunction: IO_L9P_T1_DQS_38
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_ba[0]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_ba[0]"]
     set_property IOSTANDARD SSTL15 [get_ports "${pathPrefix}_ba[0]"]
     set_property LOC D21 [get_ports "${pathPrefix}_ba[0]"]
 
-    # PadFunction: IO_L15N_T2_DQS_38 
+    # PadFunction: IO_L15N_T2_DQS_38
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_ras_n"]
     set_property SLEW FAST [get_ports "${pathPrefix}_ras_n"]
     set_property IOSTANDARD SSTL15 [get_ports "${pathPrefix}_ras_n"]
     set_property LOC E20 [get_ports "${pathPrefix}_ras_n"]
 
-    # PadFunction: IO_L16P_T2_38 
+    # PadFunction: IO_L16P_T2_38
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_cas_n"]
     set_property SLEW FAST [get_ports "${pathPrefix}_cas_n"]
     set_property IOSTANDARD SSTL15 [get_ports "${pathPrefix}_cas_n"]
     set_property LOC K17 [get_ports "${pathPrefix}_cas_n"]
 
-    # PadFunction: IO_L15P_T2_DQS_38 
+    # PadFunction: IO_L15P_T2_DQS_38
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_we_n"]
     set_property SLEW FAST [get_ports "${pathPrefix}_we_n"]
     set_property IOSTANDARD SSTL15 [get_ports "${pathPrefix}_we_n"]
     set_property LOC F20 [get_ports "${pathPrefix}_we_n"]
 
-    # PadFunction: IO_L14N_T2_SRCC_37 
+    # PadFunction: IO_L14N_T2_SRCC_37
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_reset_n"]
     set_property SLEW FAST [get_ports "${pathPrefix}_reset_n"]
     set_property IOSTANDARD LVCMOS15 [get_ports "${pathPrefix}_reset_n"]
     set_property LOC C29 [get_ports "${pathPrefix}_reset_n"]
 
-    # PadFunction: IO_L14P_T2_SRCC_38 
-    set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_cke"]
-    set_property SLEW FAST [get_ports "${pathPrefix}_cke"]
-    set_property IOSTANDARD SSTL15 [get_ports "${pathPrefix}_cke"]
-    set_property LOC K19 [get_ports "${pathPrefix}_cke"]
+    # PadFunction: IO_L14P_T2_SRCC_38
+    set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_cke[0]"]
+    set_property SLEW FAST [get_ports "${pathPrefix}_cke[0]"]
+    set_property IOSTANDARD SSTL15 [get_ports "${pathPrefix}_cke[0]"]
+    set_property LOC K19 [get_ports "${pathPrefix}_cke[0]"]
 
-    # PadFunction: IO_L17N_T2_38 
-    set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_odt"]
-    set_property SLEW FAST [get_ports "${pathPrefix}_odt"]
-    set_property IOSTANDARD SSTL15 [get_ports "${pathPrefix}_odt"]
-    set_property LOC H20 [get_ports "${pathPrefix}_odt"]
+    # PadFunction: IO_L17N_T2_38
+    set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_odt[0]"]
+    set_property SLEW FAST [get_ports "${pathPrefix}_odt[0]"]
+    set_property IOSTANDARD SSTL15 [get_ports "${pathPrefix}_odt[0]"]
+    set_property LOC H20 [get_ports "${pathPrefix}_odt[0]"]
 
-    # PadFunction: IO_L16N_T2_38 
-    set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_cs_n"]
-    set_property SLEW FAST [get_ports "${pathPrefix}_cs_n"]
-    set_property IOSTANDARD SSTL15 [get_ports "${pathPrefix}_cs_n"]
-    set_property LOC J17 [get_ports "${pathPrefix}_cs_n"]
+    # PadFunction: IO_L16N_T2_38
+    set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_cs_n[0]"]
+    set_property SLEW FAST [get_ports "${pathPrefix}_cs_n[0]"]
+    set_property IOSTANDARD SSTL15 [get_ports "${pathPrefix}_cs_n[0]"]
+    set_property LOC J17 [get_ports "${pathPrefix}_cs_n[0]"]
 
-    # PadFunction: IO_L22N_T3_39 
+    # PadFunction: IO_L22N_T3_39
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dm[0]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dm[0]"]
     set_property IOSTANDARD SSTL15 [get_ports "${pathPrefix}_dm[0]"]
     set_property LOC M13 [get_ports "${pathPrefix}_dm[0]"]
 
-    # PadFunction: IO_L16P_T2_39 
+    # PadFunction: IO_L16P_T2_39
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dm[1]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dm[1]"]
     set_property IOSTANDARD SSTL15 [get_ports "${pathPrefix}_dm[1]"]
     set_property LOC K15 [get_ports "${pathPrefix}_dm[1]"]
 
-    # PadFunction: IO_L10N_T1_39 
+    # PadFunction: IO_L10N_T1_39
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dm[2]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dm[2]"]
     set_property IOSTANDARD SSTL15 [get_ports "${pathPrefix}_dm[2]"]
     set_property LOC F12 [get_ports "${pathPrefix}_dm[2]"]
 
-    # PadFunction: IO_L2N_T0_39 
+    # PadFunction: IO_L2N_T0_39
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dm[3]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dm[3]"]
     set_property IOSTANDARD SSTL15 [get_ports "${pathPrefix}_dm[3]"]
     set_property LOC A14 [get_ports "${pathPrefix}_dm[3]"]
 
-    # PadFunction: IO_L4P_T0_37 
+    # PadFunction: IO_L4P_T0_37
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dm[4]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dm[4]"]
     set_property IOSTANDARD SSTL15 [get_ports "${pathPrefix}_dm[4]"]
     set_property LOC C23 [get_ports "${pathPrefix}_dm[4]"]
 
-    # PadFunction: IO_L11P_T1_SRCC_37 
+    # PadFunction: IO_L11P_T1_SRCC_37
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dm[5]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dm[5]"]
     set_property IOSTANDARD SSTL15 [get_ports "${pathPrefix}_dm[5]"]
     set_property LOC D25 [get_ports "${pathPrefix}_dm[5]"]
 
-    # PadFunction: IO_L18P_T2_37 
+    # PadFunction: IO_L18P_T2_37
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dm[6]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dm[6]"]
     set_property IOSTANDARD SSTL15 [get_ports "${pathPrefix}_dm[6]"]
     set_property LOC C31 [get_ports "${pathPrefix}_dm[6]"]
 
-    # PadFunction: IO_L24N_T3_37 
+    # PadFunction: IO_L24N_T3_37
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dm[7]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dm[7]"]
     set_property IOSTANDARD SSTL15 [get_ports "${pathPrefix}_dm[7]"]
     set_property LOC F31 [get_ports "${pathPrefix}_dm[7]"]
 
-    # PadFunction: IO_L21P_T3_DQS_39 
+    # PadFunction: IO_L21P_T3_DQS_39
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dqs_p[0]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dqs_p[0]"]
     set_property IOSTANDARD DIFF_SSTL15_T_DCI [get_ports "${pathPrefix}_dqs_p[0]"]
     set_property LOC N16 [get_ports "${pathPrefix}_dqs_p[0]"]
 
-    # PadFunction: IO_L21N_T3_DQS_39 
+    # PadFunction: IO_L21N_T3_DQS_39
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dqs_n[0]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dqs_n[0]"]
     set_property IOSTANDARD DIFF_SSTL15_T_DCI [get_ports "${pathPrefix}_dqs_n[0]"]
     set_property LOC M16 [get_ports "${pathPrefix}_dqs_n[0]"]
 
-    # PadFunction: IO_L15P_T2_DQS_39 
+    # PadFunction: IO_L15P_T2_DQS_39
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dqs_p[1]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dqs_p[1]"]
     set_property IOSTANDARD DIFF_SSTL15_T_DCI [get_ports "${pathPrefix}_dqs_p[1]"]
     set_property LOC K12 [get_ports "${pathPrefix}_dqs_p[1]"]
 
-    # PadFunction: IO_L15N_T2_DQS_39 
+    # PadFunction: IO_L15N_T2_DQS_39
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dqs_n[1]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dqs_n[1]"]
     set_property IOSTANDARD DIFF_SSTL15_T_DCI [get_ports "${pathPrefix}_dqs_n[1]"]
     set_property LOC J12 [get_ports "${pathPrefix}_dqs_n[1]"]
 
-    # PadFunction: IO_L9P_T1_DQS_39 
+    # PadFunction: IO_L9P_T1_DQS_39
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dqs_p[2]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dqs_p[2]"]
     set_property IOSTANDARD DIFF_SSTL15_T_DCI [get_ports "${pathPrefix}_dqs_p[2]"]
     set_property LOC H16 [get_ports "${pathPrefix}_dqs_p[2]"]
 
-    # PadFunction: IO_L9N_T1_DQS_39 
+    # PadFunction: IO_L9N_T1_DQS_39
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dqs_n[2]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dqs_n[2]"]
     set_property IOSTANDARD DIFF_SSTL15_T_DCI [get_ports "${pathPrefix}_dqs_n[2]"]
     set_property LOC G16 [get_ports "${pathPrefix}_dqs_n[2]"]
 
-    # PadFunction: IO_L3P_T0_DQS_39 
+    # PadFunction: IO_L3P_T0_DQS_39
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dqs_p[3]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dqs_p[3]"]
     set_property IOSTANDARD DIFF_SSTL15_T_DCI [get_ports "${pathPrefix}_dqs_p[3]"]
     set_property LOC C15 [get_ports "${pathPrefix}_dqs_p[3]"]
 
-    # PadFunction: IO_L3N_T0_DQS_39 
+    # PadFunction: IO_L3N_T0_DQS_39
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dqs_n[3]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dqs_n[3]"]
     set_property IOSTANDARD DIFF_SSTL15_T_DCI [get_ports "${pathPrefix}_dqs_n[3]"]
     set_property LOC C14 [get_ports "${pathPrefix}_dqs_n[3]"]
 
-    # PadFunction: IO_L3P_T0_DQS_37 
+    # PadFunction: IO_L3P_T0_DQS_37
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dqs_p[4]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dqs_p[4]"]
     set_property IOSTANDARD DIFF_SSTL15_T_DCI [get_ports "${pathPrefix}_dqs_p[4]"]
     set_property LOC A26 [get_ports "${pathPrefix}_dqs_p[4]"]
 
-    # PadFunction: IO_L3N_T0_DQS_37 
+    # PadFunction: IO_L3N_T0_DQS_37
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dqs_n[4]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dqs_n[4]"]
     set_property IOSTANDARD DIFF_SSTL15_T_DCI [get_ports "${pathPrefix}_dqs_n[4]"]
     set_property LOC A27 [get_ports "${pathPrefix}_dqs_n[4]"]
 
-    # PadFunction: IO_L9P_T1_DQS_37 
+    # PadFunction: IO_L9P_T1_DQS_37
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dqs_p[5]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dqs_p[5]"]
     set_property IOSTANDARD DIFF_SSTL15_T_DCI [get_ports "${pathPrefix}_dqs_p[5]"]
     set_property LOC F25 [get_ports "${pathPrefix}_dqs_p[5]"]
 
-    # PadFunction: IO_L9N_T1_DQS_37 
+    # PadFunction: IO_L9N_T1_DQS_37
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dqs_n[5]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dqs_n[5]"]
     set_property IOSTANDARD DIFF_SSTL15_T_DCI [get_ports "${pathPrefix}_dqs_n[5]"]
     set_property LOC E25 [get_ports "${pathPrefix}_dqs_n[5]"]
 
-    # PadFunction: IO_L15P_T2_DQS_37 
+    # PadFunction: IO_L15P_T2_DQS_37
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dqs_p[6]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dqs_p[6]"]
     set_property IOSTANDARD DIFF_SSTL15_T_DCI [get_ports "${pathPrefix}_dqs_p[6]"]
     set_property LOC B28 [get_ports "${pathPrefix}_dqs_p[6]"]
 
-    # PadFunction: IO_L15N_T2_DQS_37 
+    # PadFunction: IO_L15N_T2_DQS_37
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dqs_n[6]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dqs_n[6]"]
     set_property IOSTANDARD DIFF_SSTL15_T_DCI [get_ports "${pathPrefix}_dqs_n[6]"]
     set_property LOC B29 [get_ports "${pathPrefix}_dqs_n[6]"]
 
-    # PadFunction: IO_L21P_T3_DQS_37 
+    # PadFunction: IO_L21P_T3_DQS_37
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dqs_p[7]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dqs_p[7]"]
     set_property IOSTANDARD DIFF_SSTL15_T_DCI [get_ports "${pathPrefix}_dqs_p[7]"]
     set_property LOC E27 [get_ports "${pathPrefix}_dqs_p[7]"]
 
-    # PadFunction: IO_L21N_T3_DQS_37 
+    # PadFunction: IO_L21N_T3_DQS_37
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dqs_n[7]"]
     set_property SLEW FAST [get_ports "${pathPrefix}_dqs_n[7]"]
     set_property IOSTANDARD DIFF_SSTL15_T_DCI [get_ports "${pathPrefix}_dqs_n[7]"]
     set_property LOC E28 [get_ports "${pathPrefix}_dqs_n[7]"]
 
-    # PadFunction: IO_L13P_T2_MRCC_38 OA
-    set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_ck_p"]
-    set_property SLEW FAST [get_ports "${pathPrefix}_ck_p"]
-    set_property IOSTANDARD DIFF_SSTL15 [get_ports "${pathPrefix}_ck_p"]
-    set_property LOC H19 [get_ports "${pathPrefix}_ck_p"]
+    # PadFunction: IO_L13P_T2_MRCC_38
+    set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_ck_p[0]"]
+    set_property SLEW FAST [get_ports "${pathPrefix}_ck_p[0]"]
+    set_property IOSTANDARD DIFF_SSTL15 [get_ports "${pathPrefix}_ck_p[0]"]
+    set_property LOC H19 [get_ports "${pathPrefix}_ck_p[0]"]
 
-    # PadFunction: IO_L13N_T2_MRCC_38 
-    set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_ck_n"]
-    set_property SLEW FAST [get_ports "${pathPrefix}_ck_n"]
-    set_property IOSTANDARD DIFF_SSTL15 [get_ports "${pathPrefix}_ck_n"]
-    set_property LOC G18 [get_ports "${pathPrefix}_ck_n"]
-}
-
-if {$IS_TOP_BUILD} {
-
-    annotateDDRWires "ddrWires_bank_wires_0"
-        
-}
-
-
-proc ddr3PARConstraints { } {
- 
-    set pathPrefix ""
-
-    global IS_AREA_GROUP_BUILD
-    global IS_TOP_BUILD
-
-    set DDR3_CLK_BUFG "BUFGCTRL_X0Y17"
-
-
-    if {$IS_TOP_BUILD} {
-        set pathPrefix "m_sys_sys_vp_m_mod/llpi_phys_plat_sdram_b_ddrSynth/"
-        annotateDDRWires "ddrWires_bank_wires_0"
-
-        if {[getAWBParams {"physical_platform" "DRAM_CLOCK_MECHANISM"}] == "ExternalDifferential"} {
-            ## DDR clock
-            ##   Parameters taken from memory interface generator when asking for a
-            ##   differential clock.
-
-            # PadFunction: IO_L12P_T1_MRCC_38
-            bindClockPin E19 [get_ports {ddrWires_clk_p_put}]
-            set_property IOSTANDARD LVDS [get_ports {ddrWires_clk_p_put}]
-
-            # PadFunction: IO_L12N_T1_MRCC_38
-            bindClockPin E18 [get_ports {ddrWires_clk_n_put}]
-            set_property IOSTANDARD LVDS [get_ports {ddrWires_clk_n_put}]
-
-            create_clock -name ddrWires_clk_p_put -period 5 [get_ports ddrWires_clk_p_put]
-
-            # Lock down the clock's BUFG.
-            set_property LOC $DDR3_CLK_BUFG [get_cells -hier -filter {NAME =~ */llpi_phys_plat_sdram_ddrClock* && REF_NAME =~ BUFG}]
-        }
-
-    } else {
-        annotateDDRWires "wires"
-
-        if {[getAWBParams {"physical_platform" "DRAM_CLOCK_MECHANISM"}] == "ExternalDifferential"} {
-            set_property -quiet HD.CLK_SRC $DDR3_CLK_BUFG [get_ports CLK_rawClock]
-            create_clock -name CLK_rawClock -period 5 [get_ports CLK_rawClock]
-        } else {
-            puts "Warning, we should be assigning a clock source for the DDR"
-            #set_property -quiet HD.CLK_SRC $DDR3_CLK_BUFG [get_ports CLK_rawClock]
-        }
-    }
+    # PadFunction: IO_L13N_T2_MRCC_38
+    set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_ck_n[0]"]
+    set_property SLEW FAST [get_ports "${pathPrefix}_ck_n[0]"]
+    set_property IOSTANDARD DIFF_SSTL15 [get_ports "${pathPrefix}_ck_n[0]"]
+    set_property LOC G18 [get_ports "${pathPrefix}_ck_n[0]"]
 
 
     set_property LOC PHASER_OUT_PHY_X1Y19 [get_cells  -hier -filter {NAME =~ */ddr_phy_4lanes_2.u_ddr_phy_4lanes/ddr_byte_lane_D.ddr_byte_lane_D/phaser_out}]
@@ -804,7 +752,6 @@ proc ddr3PARConstraints { } {
     set_property LOC OUT_FIFO_X1Y26 [get_cells  -hier -filter {NAME =~ */ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_C.ddr_byte_lane_C/out_fifo}]
     set_property LOC OUT_FIFO_X1Y25 [get_cells  -hier -filter {NAME =~ */ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_B.ddr_byte_lane_B/out_fifo}]
     set_property LOC OUT_FIFO_X1Y24 [get_cells  -hier -filter {NAME =~ */ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_A.ddr_byte_lane_A/out_fifo}]
-
     set_property LOC IN_FIFO_X1Y19 [get_cells  -hier -filter {NAME =~ */ddr_phy_4lanes_2.u_ddr_phy_4lanes/ddr_byte_lane_D.ddr_byte_lane_D/in_fifo_gen.in_fifo}]
     set_property LOC IN_FIFO_X1Y18 [get_cells  -hier -filter {NAME =~ */ddr_phy_4lanes_2.u_ddr_phy_4lanes/ddr_byte_lane_C.ddr_byte_lane_C/in_fifo_gen.in_fifo}]
     set_property LOC IN_FIFO_X1Y17 [get_cells  -hier -filter {NAME =~ */ddr_phy_4lanes_2.u_ddr_phy_4lanes/ddr_byte_lane_B.ddr_byte_lane_B/in_fifo_gen.in_fifo}]
@@ -813,15 +760,12 @@ proc ddr3PARConstraints { } {
     set_property LOC IN_FIFO_X1Y26 [get_cells  -hier -filter {NAME =~ */ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_C.ddr_byte_lane_C/in_fifo_gen.in_fifo}]
     set_property LOC IN_FIFO_X1Y25 [get_cells  -hier -filter {NAME =~ */ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_B.ddr_byte_lane_B/in_fifo_gen.in_fifo}]
     set_property LOC IN_FIFO_X1Y24 [get_cells  -hier -filter {NAME =~ */ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_A.ddr_byte_lane_A/in_fifo_gen.in_fifo}]
-
     set_property LOC PHY_CONTROL_X1Y4 [get_cells  -hier -filter {NAME =~ */ddr_phy_4lanes_2.u_ddr_phy_4lanes/phy_control_i}]
     set_property LOC PHY_CONTROL_X1Y5 [get_cells  -hier -filter {NAME =~ */ddr_phy_4lanes_1.u_ddr_phy_4lanes/phy_control_i}]
     set_property LOC PHY_CONTROL_X1Y6 [get_cells  -hier -filter {NAME =~ */ddr_phy_4lanes_0.u_ddr_phy_4lanes/phy_control_i}]
-
     set_property LOC PHASER_REF_X1Y4 [get_cells  -hier -filter {NAME =~ */ddr_phy_4lanes_2.u_ddr_phy_4lanes/phaser_ref_i}]
     set_property LOC PHASER_REF_X1Y5 [get_cells  -hier -filter {NAME =~ */ddr_phy_4lanes_1.u_ddr_phy_4lanes/phaser_ref_i}]
     set_property LOC PHASER_REF_X1Y6 [get_cells  -hier -filter {NAME =~ */ddr_phy_4lanes_0.u_ddr_phy_4lanes/phaser_ref_i}]
-
     set_property LOC OLOGIC_X1Y243 [get_cells  -hier -filter {NAME =~ */ddr_phy_4lanes_2.u_ddr_phy_4lanes/ddr_byte_lane_D.ddr_byte_lane_D/ddr_byte_group_io/*slave_ts}]
     set_property LOC OLOGIC_X1Y231 [get_cells  -hier -filter {NAME =~ */ddr_phy_4lanes_2.u_ddr_phy_4lanes/ddr_byte_lane_C.ddr_byte_lane_C/ddr_byte_group_io/*slave_ts}]
     set_property LOC OLOGIC_X1Y219 [get_cells  -hier -filter {NAME =~ */ddr_phy_4lanes_2.u_ddr_phy_4lanes/ddr_byte_lane_B.ddr_byte_lane_B/ddr_byte_group_io/*slave_ts}]
@@ -830,46 +774,67 @@ proc ddr3PARConstraints { } {
     set_property LOC OLOGIC_X1Y331 [get_cells  -hier -filter {NAME =~ */ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_C.ddr_byte_lane_C/ddr_byte_group_io/*slave_ts}]
     set_property LOC OLOGIC_X1Y319 [get_cells  -hier -filter {NAME =~ */ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_B.ddr_byte_lane_B/ddr_byte_group_io/*slave_ts}]
     set_property LOC OLOGIC_X1Y307 [get_cells  -hier -filter {NAME =~ */ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_A.ddr_byte_lane_A/ddr_byte_group_io/*slave_ts}]
-
     set_property LOC PLLE2_ADV_X1Y5 [get_cells -hier -filter {NAME =~ */u_ddr3_infrastructure/plle2_i}]
     set_property LOC MMCME2_ADV_X1Y5 [get_cells -hier -filter {NAME =~ */u_ddr3_infrastructure/gen_mmcm.mmcm_i}]
-    set_property LOC MMCME2_ADV_X0Y3 [get_cells -hier -filter {NAME =~ */u_ddr3_v2_3/u_iodelay_ctrl/clk_ref_mmcm_gen.mmcm_i}]
-    set_property LOC BUFGCTRL_X0Y5   [get_cells -hier -filter {NAME =~ */u_ddr3_v2_3/u_iodelay_ctrl/clk_ref_300_400_en.clk_ref_400.u_bufg_clk_ref_400}]
-    set_property LOC BUFGCTRL_X0Y16   [get_cells -hier -filter {NAME =~ */u_ddr3_v2_3/u_ddr3_infrastructure/u_bufg_clkdiv0}]
-    set_property LOC BUFGCTRL_X0Y18   [get_cells -hier -filter {NAME =~ */u_ddr3_v2_3/u_ddr3_infrastructure/gen_mmcm.u_bufg_mmcm_ps_clk}]
+}
 
-    set_multicycle_path -from [get_cells -hier -filter {NAME =~ */mc0/mc_read_idle_r*}] \
+
+proc ddr3PARConstraints { } {
+
+    set pathPrefix ""
+
+    global IS_AREA_GROUP_BUILD
+    global IS_TOP_BUILD
+
+
+    if {$IS_TOP_BUILD} {
+        annotateDDRWires "ddrWires_bank_wires_0"
+    } else {
+        annotateDDRWires "wires_0"
+    }
+
+    ##
+    ## Timing
+    ##
+
+    set_multicycle_path -from [get_cells -hier -filter {NAME =~ */mc0/mc_read_idle_r_reg}] \
                         -to   [get_cells -hier -filter {NAME =~ */input_[?].iserdes_dq_.iserdesdq}] \
                         -setup 6
-
-    set_multicycle_path -from [get_cells -hier -filter {NAME =~ */mc0/mc_read_idle_r*}] \
+    set_multicycle_path -from [get_cells -hier -filter {NAME =~ */mc0/mc_read_idle_r_reg}] \
                         -to   [get_cells -hier -filter {NAME =~ */input_[?].iserdes_dq_.iserdesdq}] \
                         -hold 5
-
+    #set_multicycle_path -from [get_cells -hier -filter {NAME =~ */mc0/mc_read_idle_r*}] \
+    #                    -to   [get_cells -hier -filter {NAME =~ */input_[?].iserdes_dq_.iserdesdq}] \
+    #                    -setup 6
+    #set_multicycle_path -from [get_cells -hier -filter {NAME =~ */mc0/mc_read_idle_r*}] \
+    #                    -to   [get_cells -hier -filter {NAME =~ */input_[?].iserdes_dq_.iserdesdq}] \
+    #                    -hold 5
     #set_max_delay -from [get_cells -hier -filter {NAME =~ */u_phase_detector && IS_SEQUENTIAL}] -to [get_cells -hier -filter {NAME =~ *pos_edge_samp*}] 1.250000
-    #set_max_delay -from [get_cells -hier -filter {NAME =~ */u_phase_detector && IS_SEQUENTIAL}] -to [get_cells -hier -filter {NAME =~ *neg_edge_samp*}] 1.250000xb
-
-              
+    #set_max_delay -from [get_cells -hier -filter {NAME =~ */u_phase_detector && IS_SEQUENTIAL}] -to [get_cells -hier -filter {NAME =~ *neg_edge_samp*}] 1.250000
     set_false_path -through [get_pins -filter {NAME =~ */DQSFOUND} -of [get_cells -hier -filter {REF_NAME == PHASER_IN_PHY}]]
-
     set_multicycle_path -through [get_pins -filter {NAME =~ */OSERDESRST} -of [get_cells -hier -filter {REF_NAME == PHASER_OUT_PHY}]] -setup 2 -start
     set_multicycle_path -through [get_pins -filter {NAME =~ */OSERDESRST} -of [get_cells -hier -filter {REF_NAME == PHASER_OUT_PHY}]] -hold 1 -start
+    set_max_delay -datapath_only -from [get_cells -hier -filter {NAME =~ *temp_mon_enabled.u_tempmon/* && IS_SEQUENTIAL}] -to [get_cells -hier -filter {NAME =~ *temp_mon_enabled.u_tempmon/device_temp_sync_r1*}] 20
+    set_max_delay -from [get_cells -hier *rstdiv0_sync_r1_reg*] -to [get_pins -filter {NAME =~ */RESET} -of [get_cells -hier -filter {REF_NAME == PHY_CONTROL}]] -datapath_only 5
+    #set_max_delay -datapath_only -from [get_cells -hier -filter {NAME =~ *temp_mon_enabled.u_tempmon/*}] -to [get_cells -hier -filter {NAME =~ *temp_mon_enabled.u_tempmon/device_temp_sync_r1*}] 20
+    #set_max_delay -from [get_cells -hier rstdiv0_sync_r1*] -to [get_pins -filter {NAME =~ */RESET} -of [get_cells -hier -filter {REF_NAME == PHY_CONTROL}]] -datapath_only 5
+    set_max_delay -datapath_only -from [get_cells -hier -filter {NAME =~ *ddr3_infrastructure/rstdiv0_sync_r1_reg*}] -to [get_cells -hier -filter {NAME =~ *temp_mon_enabled.u_tempmon/xadc_supplied_temperature.rst_r1*}] 20
+    #set_max_delay -datapath_only -from [get_cells -hier -filter {NAME =~ *ddr3_infrastructure/rstdiv0_sync_r1*}] -to [get_cells -hier -filter {NAME =~ *temp_mon_enabled.u_tempmon/*rst_r1*}] 20
 
-    set_max_delay -datapath_only -from [get_cells -hier -filter {NAME =~ *temp_mon_enabled.u_tempmon/*}] -to [get_cells -hier -filter {NAME =~ *temp_mon_enabled.u_tempmon/device_temp_sync_r1*}] 20
-    set_max_delay -from [get_cells -hier rstdiv0_sync_r1*] -to [get_pins -filter {NAME =~ */RESET} -of [get_cells -hier -filter {REF_NAME == PHY_CONTROL}]] -datapath_only 5
-              
-    set_max_delay -datapath_only -from [get_cells -hier -filter {NAME =~ *ddr3_infrastructure/rstdiv0_sync_r1*}] -to [get_cells -hier -filter {NAME =~ *temp_mon_enabled.u_tempmon/*rst_r1*}] 20
+    ##
+    ## Clocks
+    ##
 
-    # Declare clocks for area group builds. 
+    # Declare clocks for area group builds.
     if {$IS_AREA_GROUP_BUILD} {
         create_clock -name ddrWires_rawClock  -period 5.000 [get_ports CLK_rawClock]
     }
 
 
+    ###########################################################################
+    ##  Area constraints
+    ###########################################################################
 
-    ###########################################################################
-    ##  VC707 additions
-    ###########################################################################
     if {[getAWBParams {"area_group_tool" "AREA_GROUPS_PAR_DEVICE_AG"}] != "1"} {
         if {[getAWBParams {"synthesis_tool" "PLATFORM_BUILDER"}] == "functools.partial(buildSynplifyEDF, resourceCollector = RESOURCE_COLLECTOR)"} {
 
@@ -886,7 +851,7 @@ proc ddr3PARConstraints { } {
             resize_pblock pblock_ddr3 -add {SLICE_X134Y257:SLICE_X173Y349}
             add_cells_to_pblock pblock_ddr3 [get_cells -hier -filter {NAME =~ m_sys_sys_vp_m_mod/llpi_phys_plat_sdram_b_ddrSynth/*}]
             endgroup
-       }                     
+       }
     }
 }
 
