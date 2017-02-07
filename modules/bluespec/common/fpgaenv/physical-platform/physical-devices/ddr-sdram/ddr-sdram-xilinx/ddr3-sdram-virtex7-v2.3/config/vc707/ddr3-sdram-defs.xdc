@@ -541,22 +541,22 @@ proc annotateDDRWires { pathPrefix } {
     set_property LOC C29 [get_ports "${pathPrefix}_reset_n"]
 
     # PadFunction: IO_L14P_T2_SRCC_38
-    set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_cke[0]"]
-    set_property SLEW FAST [get_ports "${pathPrefix}_cke[0]"]
-    set_property IOSTANDARD SSTL15 [get_ports "${pathPrefix}_cke[0]"]
-    set_property LOC K19 [get_ports "${pathPrefix}_cke[0]"]
+    set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_cke"]
+    set_property SLEW FAST [get_ports "${pathPrefix}_cke"]
+    set_property IOSTANDARD SSTL15 [get_ports "${pathPrefix}_cke"]
+    set_property LOC K19 [get_ports "${pathPrefix}_cke"]
 
     # PadFunction: IO_L17N_T2_38
-    set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_odt[0]"]
-    set_property SLEW FAST [get_ports "${pathPrefix}_odt[0]"]
-    set_property IOSTANDARD SSTL15 [get_ports "${pathPrefix}_odt[0]"]
-    set_property LOC H20 [get_ports "${pathPrefix}_odt[0]"]
+    set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_odt"]
+    set_property SLEW FAST [get_ports "${pathPrefix}_odt"]
+    set_property IOSTANDARD SSTL15 [get_ports "${pathPrefix}_odt"]
+    set_property LOC H20 [get_ports "${pathPrefix}_odt"]
 
     # PadFunction: IO_L16N_T2_38
-    set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_cs_n[0]"]
-    set_property SLEW FAST [get_ports "${pathPrefix}_cs_n[0]"]
-    set_property IOSTANDARD SSTL15 [get_ports "${pathPrefix}_cs_n[0]"]
-    set_property LOC J17 [get_ports "${pathPrefix}_cs_n[0]"]
+    set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_cs_n"]
+    set_property SLEW FAST [get_ports "${pathPrefix}_cs_n"]
+    set_property IOSTANDARD SSTL15 [get_ports "${pathPrefix}_cs_n"]
+    set_property LOC J17 [get_ports "${pathPrefix}_cs_n"]
 
     # PadFunction: IO_L22N_T3_39
     set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_dm[0]"]
@@ -703,16 +703,16 @@ proc annotateDDRWires { pathPrefix } {
     set_property LOC E28 [get_ports "${pathPrefix}_dqs_n[7]"]
 
     # PadFunction: IO_L13P_T2_MRCC_38
-    set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_ck_p[0]"]
-    set_property SLEW FAST [get_ports "${pathPrefix}_ck_p[0]"]
-    set_property IOSTANDARD DIFF_SSTL15 [get_ports "${pathPrefix}_ck_p[0]"]
-    set_property LOC H19 [get_ports "${pathPrefix}_ck_p[0]"]
+    set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_ck_p"]
+    set_property SLEW FAST [get_ports "${pathPrefix}_ck_p"]
+    set_property IOSTANDARD DIFF_SSTL15 [get_ports "${pathPrefix}_ck_p"]
+    set_property LOC H19 [get_ports "${pathPrefix}_ck_p"]
 
     # PadFunction: IO_L13N_T2_MRCC_38
-    set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_ck_n[0]"]
-    set_property SLEW FAST [get_ports "${pathPrefix}_ck_n[0]"]
-    set_property IOSTANDARD DIFF_SSTL15 [get_ports "${pathPrefix}_ck_n[0]"]
-    set_property LOC G18 [get_ports "${pathPrefix}_ck_n[0]"]
+    set_property VCCAUX_IO HIGH [get_ports "${pathPrefix}_ck_n"]
+    set_property SLEW FAST [get_ports "${pathPrefix}_ck_n"]
+    set_property IOSTANDARD DIFF_SSTL15 [get_ports "${pathPrefix}_ck_n"]
+    set_property LOC G18 [get_ports "${pathPrefix}_ck_n"]
 
 
     set_property LOC PHASER_OUT_PHY_X1Y19 [get_cells  -hier -filter {NAME =~ */ddr_phy_4lanes_2.u_ddr_phy_4lanes/ddr_byte_lane_D.ddr_byte_lane_D/phaser_out}]
